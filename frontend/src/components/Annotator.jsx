@@ -373,7 +373,7 @@ const Annotator = () => {
         context.strokeRect(rectX, rectY, outerWidth, outerHeight);
   
         // Draw background
-        context.fillStyle = "#f0f0f0"; // Light gray background
+        context.fillStyle = "rgba(252, 252, 243, 0.2)"; // Light gray background
         context.fillRect(rectX, rectY, outerWidth, outerHeight);
   
         // Draw the globe
