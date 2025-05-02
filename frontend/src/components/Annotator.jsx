@@ -3,6 +3,7 @@ import { Stage, Layer, Rect, Line, Text } from "react-konva";
 import { Button, Form } from "react-bootstrap";
 import { PDFDocument } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
+import ArchSymbols from "./ArchSymbolsModal.jsx";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
@@ -91,7 +92,7 @@ const Annotator = () => {
 
   const handleTouchStart = (e) => {
     console.log("Touch started!", e.target.attrs.id);
-    const clickedRectId = e.target.attrs.id; 
+    const clickedRectId = e.target.attrs.id;
 
     const handleTouchEnd = () => {
       const touchDuration = Date.now() - touchStartTime;
@@ -581,7 +582,10 @@ const Annotator = () => {
           *Delete rectangle for large screens: <kbd>Right Click</kbd>
         </p>
         <p className="text-primary fw-bold upload-paragraph">
-          *For saving approved drawing: <kbd>Double Click</kbd>
+          *For saving approved drawing: <kbd>Double Click on the button "Save as PDF"</kbd>
+        </p>
+        <p className="text-primary fw-bold upload-paragraph">
+          *For removing approved drawing/.pdf file: <kbd>Click on the button "Clear"</kbd>
         </p>
         <Form.Control
           className="mt-4"
@@ -590,10 +594,10 @@ const Annotator = () => {
           accept="application/pdf"
         />
       </Form>
-
+<ArchSymbols/>
       <h2 className="mt-4 mb-4">Preview of selected file:</h2>
       {previewUrl && (
-        <div>
+        <div  className="main-content">
           {previewUrl && (
             <div style={{ position: "relative", display: "inline-block" }}>
               <canvas
@@ -726,3 +730,5 @@ const Annotator = () => {
 };
 
 export default Annotator;
+
+

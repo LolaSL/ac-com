@@ -3,13 +3,11 @@ import UsersProductSales from "../components/UsersProductSales.jsx";
 import ServiceProviders from "../components/ServiceProviders.jsx";
 import Notifications from "../components/Notifications.jsx";
 import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx";
-
-
-export default function DashboardPage() {
-
+import { Link } from "react-router";
+function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("Users Product Sales");
-  
-  const renderComponent = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false); // NEW
+  function renderComponent() {
     switch (activeComponent) {
       case "Users Product Sales":
         return <UsersProductSales />;
@@ -20,58 +18,57 @@ export default function DashboardPage() {
       case "Notification":
         return <Notifications />;
       default:
-        return <UsersProductSales />;
+        return <div>Select a component</div>;
     }
-  };
-
+  }
   return (
-
-      <div className="dashboard-container">
-        <div className="sidebar">
-          <h3>Dashboard</h3>
-          <ul>
-            <li>
-              <button
-                className={
-                  activeComponent === "Users Product Sales"
-                    ? "active"
-                    : "btn-outline"
-                }
-                onClick={() => setActiveComponent("Users Product Sales")}
-              >
-                Users Product Sales
-              </button>
-            </li>
-            <li>
-              <button
-                className={activeComponent === "ServiceProviders" ? "active" : ""}
-                onClick={() => setActiveComponent("ServiceProviders")}
-              >
-                Service Providers
-              </button>
-            </li>
-            <li>
-              <button
-                className={
-                  activeComponent === "MessagesServiceProviders" ? "active" : ""
-                }
-                onClick={() => setActiveComponent("MessagesServiceProviders")}
-              >
-                Messages of Service Providers
-              </button>
-            </li>
-            <li>
-              <button
-                className={activeComponent === "Notification" ? "active" : ""}
-                onClick={() => setActiveComponent("Notification")}
-              >
-                Notifications
-              </button>
-            </li>
-          </ul>
-        </div>
-        <div className="main-content">{renderComponent()}</div>
+    <div className="dashboard-container">
+      <div className="sidebar-toggle d-md-none">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="toggle-button"
+        >
+          ☰ Menu
+        </button>
+        {sidebarOpen && (
+          <div className="sidebar-dropdown">{renderSidebarContent()}</div>
+        )}
       </div>
- 
+
+      <div className="sidebar d-none d-md-flex">{renderSidebarContent()}</div>
+
+      <div className="main-content">{renderComponent()}</div>
+    </div>
   );
+
+  function renderSidebarContent() {
+    return (
+      <>
+        <h3 className="mb-4">Dashboard</h3>
+        <ul>
+          {[
+            "Users Product Sales",
+            "ServiceProviders",
+            "MessagesServiceProviders",
+            "Notification",
+          ].map((item) => (
+            <li key={item}>
+              <Link
+                to="#"
+                className={activeComponent === item ? "active" : ""}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveComponent(item);
+                  setSidebarOpen(false);
+                }}
+              >
+                {item.replace(/([A-Z])/g, " $1").trim()}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
 }
+export default Dashboard;
