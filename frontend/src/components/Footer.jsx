@@ -14,8 +14,8 @@ const Footer = () => {
 
   return (
     <>
-      <footer className="container-fluid ">
-        <Row className="bg-secondary text-white p-4">
+      <footer className="container-fluid footer ">
+        <Row className=" text-white p-4">
           <Col className="col-md-6 col-lg-5 col-12 ft-1">
             <div>
               {" "}
@@ -104,8 +104,7 @@ const Footer = () => {
             </p>
             <p className="contact-item">
               <i className="fa-solid fa-envelope"></i>
-              <a href="mailto:info@example.com"> info@example.com</a>,
-              <a href="mailto:contact@example.com"> contact@example.com</a>
+              <a href="mailto:info@example.com"> info@example.com</a>
             </p>
             <p className="contact-item">
               <i className="fa-solid fa-paper-plane"></i> 1234 Street Name
@@ -115,7 +114,7 @@ const Footer = () => {
             </p>
           </Col>
 
-          <div className="last-footer bg-secondary">
+          <div className="last-footer ">
             <p className="text-center">
               &copy; {new Date().getFullYear()} AC Commerce. All rights reserved
             </p>

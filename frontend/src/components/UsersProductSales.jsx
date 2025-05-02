@@ -6,7 +6,6 @@ import { getError } from "../utils.js";
 import LoadingBox from "./LoadingBox.jsx";
 import MessageBox from "./MessageBox.jsx";
 import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 
 
@@ -88,25 +87,26 @@ export default function UsersProductSales() {
   );
 
   const renderCard = (title, value) => (
-    <Col md={4}>
-      <Card className="mb-3">
+
+      <Card className="mb-3 chart-card me-2">
         <Card.Body>
           <Card.Title className="fw-bold">{value || 0}</Card.Title>
           <Card.Text>{title}</Card.Text>
         </Card.Body>
       </Card>
-    </Col>
+
+
   );
 
   const renderChart = (title, data, chartType) => (
-    <div className="my-4">
+    <div className="chart-col my-4">
       <h3 className="text-center">{title}</h3>
       {data.length === 0 ? (
         <MessageBox>No Data Available</MessageBox>
       ) : (
         <Chart
-          width="100%"
-          height="400px"
+          width="90%"
+          height= "auto"
           chartType={chartType}
           loader={<div>Loading Chart...</div>}
           data={data}
@@ -131,7 +131,7 @@ export default function UsersProductSales() {
             {renderCard("Orders", summary?.orders?.[0]?.numOrders)}
             {renderCard("Sales", summary?.orders?.[0]?.totalSales?.toFixed(2))}
           </Row>
-
+          <div className="charts-row">
           {renderChart(
             "Sales Orders",
             [
@@ -141,8 +141,7 @@ export default function UsersProductSales() {
             ],
             "AreaChart"
           )}
-
-          {renderChart(
+ {renderChart(
             "Product Categories",
             [
               ["Category", "Products"],
@@ -150,8 +149,8 @@ export default function UsersProductSales() {
                 []),
             ],
             "PieChart"
-          )}
-          {renderChart(
+          )} 
+           {renderChart(
             "Product Discount",
             [
               ["Category", "Discount"],
@@ -161,9 +160,9 @@ export default function UsersProductSales() {
               ]) || []),
             ],
             "PieChart"
-          )}
+          )} 
 
-          {renderChart(
+         {renderChart(
             "Top Orders by Sales",
             [
               ["Order", "Sales"],
@@ -180,9 +179,9 @@ export default function UsersProductSales() {
               colors: ["#4285F4"],
               legend: { position: "none" },
             }
-          )}
+          )} 
 
-          {renderChart(
+         {renderChart(
             "Orders Status",
             [
               ["Status", "Count"],
@@ -202,8 +201,8 @@ export default function UsersProductSales() {
               ],
             ],
             "PieChart"
-          )}
-          {renderChart(
+          )} 
+        {renderChart(
             "Product Status Distribution",
             [
               ["Status", "Number of Orders"],
@@ -215,8 +214,8 @@ export default function UsersProductSales() {
               }) || []),
             ],
             "PieChart"
-          )}
-
+          )} 
+</div>
           {renderPagination()}
         </>
       )}

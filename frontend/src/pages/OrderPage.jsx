@@ -24,14 +24,16 @@ function printOrder() {
     return;
   }
 
-  const isPaid = document.querySelector(".order-paid");
+  const paidText = orderContainer.innerText.toLowerCase();
+  const isPaid = paidText.includes("paid at");
+
   if (!isPaid) {
     alert("This order cannot be printed because it is not paid.");
     return;
   }
 
+  // Proceed to print
   const clonedOrder = orderContainer.cloneNode(true);
-
   const printWindow = window.open("", "_blank");
   printWindow.document.write(`
     <html>
@@ -44,7 +46,7 @@ function printOrder() {
         </style>
       </head>
       <body>
-        ${clonedOrder.innerHTML}  <!-- Print only the order content -->
+        ${clonedOrder.innerHTML}
       </body>
     </html>
   `);
@@ -366,6 +368,14 @@ export default function OrderPage() {
                       </div>
                     </ListGroup.Item>
                   )}
+                  {order.isPaid ? (
+                    <MessageBox variant="success order-paid">
+                      Paid at {order.paidAt}
+                    </MessageBox>
+                  ) : (
+                    <MessageBox variant="danger">Not Paid</MessageBox>
+                  )}
+
                   {!order.isPaid && (
                     <ListGroup.Item>
                       {isPending ? (

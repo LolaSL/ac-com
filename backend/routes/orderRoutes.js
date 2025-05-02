@@ -31,26 +31,42 @@ orderRouter.get(
 );
 
 
-
 orderRouter.post(
   '/',
   isAuth,
   expressAsyncHandler(async (req, res) => {
 
-    const orderItems = req.body.orderItems.map((item) => {
+    // Check if the orderItems array is empty or missing
+    if (!req.body.orderItems || req.body.orderItems.length === 0) {
+      return res.status(400).send({ message: 'Cart is empty!' });
+    }
 
+    // Process the order items and calculate the discounted prices
+    const orderItems = req.body.orderItems.map((item) => {
       const discountedPrice = item.discountedPrice || (item.discount > 0
         ? item.price * (1 - item.discount / 100)
         : item.price);
       return { ...item, product: item._id, price: discountedPrice };
     });
 
+    // Parse prices from the request body
     const itemsPrice = Number.isNaN(parseFloat(req.body.itemsPrice)) ? 0 : parseFloat(req.body.itemsPrice);
     const shippingPrice = Number.isNaN(parseFloat(req.body.shippingPrice)) ? 10 : parseFloat(req.body.shippingPrice);
     const taxPrice = Number.isNaN(parseFloat(req.body.taxPrice)) ? 0 : parseFloat(req.body.taxPrice);
-    const totalPrice = Number.isNaN(parseFloat(req.body.totalPrice)) ? itemsPrice + shippingPrice + taxPrice : parseFloat(req.body.totalPrice);
+    const totalPrice = Number.isNaN(parseFloat(req.body.totalPrice)) 
+      ? (itemsPrice + shippingPrice + taxPrice)
+      : parseFloat(req.body.totalPrice);
 
+    // Ensure totalPrice is valid
+    if (Number.isNaN(totalPrice)) {
+      return res.status(400).send({ message: 'Calculation error with total price' });
+    }
 
+    // Log the parsed prices for debugging purposes
+    console.log('Order Items:', req.body.orderItems);
+    console.log('Parsed Prices:', { itemsPrice, shippingPrice, taxPrice, totalPrice });
+
+    // Create the new order object
     const newOrder = new Order({
       orderItems,
       shippingAddress: req.body.shippingAddress,
@@ -63,13 +79,13 @@ orderRouter.post(
       user: req.user._id,
     });
 
-    console.log({ itemsPrice, shippingPrice, taxPrice, totalPrice });
-
+    // Save the order to the database
     const order = await newOrder.save();
+
+    // Respond with success
     res.status(201).send({ message: 'New Order Created', order });
   })
 );
-
 
 orderRouter.get(
   '/summary',
