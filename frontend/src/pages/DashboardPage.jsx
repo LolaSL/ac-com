@@ -6,7 +6,7 @@ import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx
 import { Link } from "react-router";
 function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("Users Product Sales");
-  const [sidebarOpen, setSidebarOpen] = useState(false); // NEW
+  const [sidebarOpen, setSidebarOpen] = useState(false); 
   function renderComponent() {
     switch (activeComponent) {
       case "Users Product Sales":

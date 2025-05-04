@@ -12,7 +12,7 @@ const AboutUs = () => {
           }}
         ></div>
         <h3 className="about-paragraph p-2">
-          <strong>AC Commerce</strong> is a cutting-edge platform designed to
+          <strong className="fs-4">AC Commerce</strong> is a cutting-edge platform designed to
           fully automate the planning and design process for air conditioning
           systems — eliminating the need for professional intervention in the
           early stages.
@@ -33,10 +33,10 @@ const AboutUs = () => {
       </article>
       <article className="about mt-4 mb-4">
         <h3 className="about-paragraph mt-4">
-          <strong>
+          <strong className="fs-4 mb-2" >
             Our Measurement Service System process is straightforward:
           </strong>
-          <ul>
+          <ul className="mt-2">
             <li>Upload your architectural plan ( PDF file)</li>
             <li>
               Place created air conditioning unit with relevant comment on the
@@ -61,8 +61,8 @@ const AboutUs = () => {
       </article>
       <article className="about mt-4 mb-4">
         <h3 className="goals-paragraph  mt-2 pb-4">
-          <strong>With AC Commenrce, users can</strong>
-          <ul>
+          <strong className="fs-4 mb-2" >With AC Commenrce, users can: </strong>
+          <ul className="mt-2">
             <li>Generate air conditioning system layouts.</li>
             <li>Share professional-grade visual designs.</li>
             <li>Conduct price comparisons.</li>
@@ -84,8 +84,8 @@ const AboutUs = () => {
       </article>
       <article className="about mt-4 mb-4">
         <h3 className="goals-paragraph  mt-2 pb-4">
-          <strong>Our Target Audience</strong>
-          <ul>
+          <strong className="fs-4 mb-2">Our Target Audience: </strong>
+          <ul className="mt-2">
             <li>Contractors</li>
             <li>Architects</li>
             <li>Air Conditioning Consultants</li>

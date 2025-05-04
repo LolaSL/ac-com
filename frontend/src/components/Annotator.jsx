@@ -283,21 +283,20 @@ const Annotator = () => {
     [comments]
   );
 
-
   const memoizedCallback = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
     if (!context) return;
-  
+
     const drawGlobe = (x, y, radius) => {
       context.beginPath();
       context.arc(x, y, radius, 0, 2 * Math.PI);
-      context.strokeStyle = "#00008B"; // Dark Blue for the globe
+      context.strokeStyle = "#00008B";
       context.lineWidth = 1.5;
       context.stroke();
-  
-      context.strokeStyle = "#808080"; // Gray for lines
+
+      context.strokeStyle = "#808080";
       context.lineWidth = 0.5;
       const numParallels = 2;
       for (let i = 1; i <= numParallels; i++) {
@@ -309,7 +308,7 @@ const Annotator = () => {
         context.arc(x, y, radius + yOffset, 0, 2 * Math.PI);
         context.stroke();
       }
-  
+
       const numMeridians = 4;
       for (let i = 0; i < numMeridians; i++) {
         const angle = (i / numMeridians) * 2 * Math.PI;
@@ -317,10 +316,18 @@ const Annotator = () => {
         context.ellipse(x, y, radius * 0.35, radius * 0.7, angle, 0, Math.PI);
         context.stroke();
         context.beginPath();
-        context.ellipse(x, y, radius * 0.35, radius * 0.7, angle + Math.PI, 0, Math.PI);
+        context.ellipse(
+          x,
+          y,
+          radius * 0.35,
+          radius * 0.7,
+          angle + Math.PI,
+          0,
+          Math.PI
+        );
         context.stroke();
       }
-      // Simplified globe lines
+
       context.beginPath();
       context.arc(x, y, radius * 0.7, 0, 2 * Math.PI);
       context.stroke();
@@ -329,7 +336,7 @@ const Annotator = () => {
       context.lineTo(x + radius * 0.5, y);
       context.stroke();
     };
-  
+
     const renderSignature = () => {
       if (isSaved) {
         const text = "APPROVED";
@@ -338,62 +345,61 @@ const Annotator = () => {
         const fontSize = 17;
         const subFontSize = 13;
         const globeRadius = 20;
-        const globeMarginRight =20;
+        const globeMarginRight = 20;
         const outerLineWidth = 2;
-  
-        context.font = `bold ${fontSize}px Arial`; // Using Arial font
+
+        context.font = `bold ${fontSize}px Arial`;
         const textMetrics = context.measureText(text);
         const textWidth = textMetrics.width;
         const textHeight = fontSize;
-  
+
         context.font = `normal ${subFontSize}px Arial`;
         const subTextMetrics = context.measureText(subText);
         const subTextWidth = subTextMetrics.width;
         const subTextHeight = subFontSize;
-  
+
         const totalTextWidth = Math.max(textWidth, subTextWidth);
-        const totalContentWidth = globeRadius * 2 + globeMarginRight + totalTextWidth;
-        const totalHeight = Math.max(globeRadius * 2, textHeight + subTextHeight);
+        const totalContentWidth =
+          globeRadius * 2 + globeMarginRight + totalTextWidth;
+        const totalHeight = Math.max(
+          globeRadius * 2,
+          textHeight + subTextHeight
+        );
         const outerWidth = totalContentWidth + 2 * padding;
         const outerHeight = totalHeight + 2 * padding;
-  
-        const rectX = context.canvas.width - outerWidth - 40; // Adjusted positioning
-        const rectY = 80; // Adjusted positioning
-  
+
+        const rectX = context.canvas.width - outerWidth - 40;
+        const rectY = 80;
+
         const globeX = rectX + padding + globeRadius;
         const globeY = rectY + padding + globeRadius;
-  
+
         const textX = globeX + globeRadius + globeMarginRight;
         const textY = rectY + padding + textHeight;
         const subTextX = textX;
         const subTextY = textY + subFontSize;
-  
-        // Draw outer rectangle
-        context.strokeStyle = "#00008B"; // Dark Blue
+
+        context.strokeStyle = "#00008B";
         context.lineWidth = outerLineWidth;
         context.strokeRect(rectX, rectY, outerWidth, outerHeight);
-  
-        // Draw background
-        context.fillStyle = "rgba(252, 252, 243, 0.2)"; // Light gray background
+
+        context.fillStyle = "rgba(252, 252, 243, 0.2)";
         context.fillRect(rectX, rectY, outerWidth, outerHeight);
-  
-        // Draw the globe
+
         drawGlobe(globeX, globeY, globeRadius);
-  
-        // Draw the text
-        context.fillStyle = "#00008B"; // Dark Blue
+
+        context.fillStyle = "#00008B";
         context.font = `bold ${fontSize}px Arial`;
         context.fillText(text, textX, textY);
-  
-        // Draw the sub-text
+
         context.fillStyle = "#00008B";
         context.font = `normal ${subFontSize}px Arial`;
-        context.fillText(subText, subTextX, subTextY + 5); // Adjusted subtext position
-  
+        context.fillText(subText, subTextX, subTextY + 5);
+
         context.setLineDash([]);
       }
     };
-  
+
     renderSignature();
   }, [isSaved]);
 
@@ -555,10 +561,11 @@ const Annotator = () => {
 
   return (
     <div>
-      <Form className="btu-calculation-measure">
-        <h1 className="mt-4 mb-4 title-measurement">
-          Measurement Service System
-        </h1>
+      <h1 className="mt-4 mb-4 title-measurement">
+        Measurement Service System
+      </h1>
+      <ArchSymbols />
+      <Form className="btu-calculation-measure mt-4">
         <Form.Label className="mb-4 label-upload fw-bold">
           Upload file sample.
         </Form.Label>
@@ -582,10 +589,12 @@ const Annotator = () => {
           *Delete rectangle for large screens: <kbd>Right Click</kbd>
         </p>
         <p className="text-primary fw-bold upload-paragraph">
-          *For saving approved drawing: <kbd>Double Click on the button "Save as PDF"</kbd>
+          *For saving approved drawing:{" "}
+          <kbd>Double Click on the button "Save as PDF"</kbd>
         </p>
         <p className="text-primary fw-bold upload-paragraph">
-          *For removing approved drawing/.pdf file: <kbd>Click on the button "Clear"</kbd>
+          *For removing approved drawing/.pdf file:{" "}
+          <kbd>Click on the button "Clear"</kbd>
         </p>
         <Form.Control
           className="mt-4"
@@ -594,12 +603,14 @@ const Annotator = () => {
           accept="application/pdf"
         />
       </Form>
-<ArchSymbols/>
       <h2 className="mt-4 mb-4">Preview of selected file:</h2>
       {previewUrl && (
-        <div  className="main-content">
+        <div className="text-center">
           {previewUrl && (
-            <div style={{ position: "relative", display: "inline-block" }}>
+            <div
+              style={{ position: "relative", display: "inline-block" }}
+              className="container-main"
+            >
               <canvas
                 id="my-canvas"
                 ref={canvasRef}
@@ -730,5 +741,3 @@ const Annotator = () => {
 };
 
 export default Annotator;
-
-

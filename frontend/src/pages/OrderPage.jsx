@@ -377,20 +377,29 @@ export default function OrderPage() {
                   )}
 
                   {!order.isPaid && (
-                    <ListGroup.Item>
-                      {isPending ? (
-                        <LoadingBox />
-                      ) : (
-                        <div>
-                          <PayPalButtons
-                            createOrder={createOrder}
-                            onApprove={onApprove}
-                            onError={onError}
-                          ></PayPalButtons>
-                        </div>
-                      )}
-                      {loadingPay && <LoadingBox></LoadingBox>}
-                    </ListGroup.Item>
+                   <ListGroup.Item>
+                   <div className="paypal-section">
+                     {isPending ? (
+                       <div className="loading-box">
+                         <LoadingBox />
+                       </div>
+                     ) : (
+                       <div className="paypal-buttons-container">
+                         <PayPalButtons
+                           createOrder={createOrder}
+                           onApprove={onApprove}
+                           onError={onError}
+                         />
+                       </div>
+                     )}
+                     {loadingPay && (
+                       <div className="loading-box">
+                         <LoadingBox />
+                       </div>
+                     )}
+                   </div>
+                 </ListGroup.Item>
+                 
                   )}
                   {userInfo.isAdmin && order.isPaid && !order.isDelivered && (
                     <ListGroup.Item>
