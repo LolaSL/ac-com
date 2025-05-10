@@ -1433,7 +1433,51 @@ const data = {
       image: "https://holtzople.com/wp-content/uploads/2015/04/how-air-conditioning-systems-work.jpg",
 
     },
-  ]
+  ],
+  annotations: [
+
+      {
+        filename: 'document1.pdf',
+        pdfData: Buffer.from('mock-pdf-data'), // Mock PDF buffer data
+        userId: '60a8b6f68b3c3c6b8d5f4a51', // Example userId (replace with actual userId)
+        pdfId: 'pdf-id-1',
+        annotations: {
+          rectangles: [
+            {
+              id: 'rect-1',
+              x: 50,
+              y: 100,
+              width: 200,
+              height: 150,
+              fill: 'rgba(255, 0, 0, 0.5)', // Red with transparency
+              rotation: 0,
+            },
+          ],
+          comments: [
+            {
+              id: 'comment-1',
+              rectId: 'rect-1',
+              text: 'This is a comment for rectangle 1.',
+              x: 60,
+              y: 120,
+              fill: 'black', // Black text color
+            },
+          ],
+          lines: [
+            {
+              id: 'line-1',
+              rectId: 'rect-1',
+              commentId: 'comment-1',
+              points: [60, 120, 250, 200],
+              stroke: 'blue',
+              strokeWidth: 2,
+            },
+          ],
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+  ],
 }
 
 export default data;

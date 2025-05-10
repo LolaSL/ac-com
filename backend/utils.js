@@ -16,38 +16,40 @@ export const baseUrl = () =>
 
 
 
-export const generateToken = (user) => {
-    return jwt.sign(
-        {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            isAdmin: user.isAdmin,
-        },
-        process.env.JWT_SECRET,
-        {
-            expiresIn: '30d',
-        }
-    );
-};
-
-export const isAuth = (req, res, next) => {
-    const authorization = req.headers.authorization;
-
-    if (authorization && authorization.startsWith('Bearer ')) {
-        const token = authorization.split(' ')[1];
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                return res.status(401).send({ message: 'Invalid token' });
-            }
-            req.user = decoded;
-            next();
-        });
-    } else {
-        return res.status(401).send({ message: 'No token provided' });
-    }
-};
-
+            export const generateToken = (user) => {
+                return jwt.sign(
+                    {
+                        _id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        isAdmin: user.isAdmin,
+                    },
+                    process.env.JWT_SECRET,  // Make sure this is set in your environment variables
+                    {
+                        expiresIn: '30d',  // The token will expire in 30 days
+                    }
+                );
+            };
+            
+            export const isAuth = (req, res, next) => {
+                const authorization = req.headers.authorization;
+            
+                if (authorization && authorization.startsWith('Bearer ')) {
+                    const token = authorization.split(' ')[1];
+                    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+                        if (err) {
+                            console.error('Token verification failed:', err); // Log error for debugging
+                            return res.status(401).send({ message: 'Invalid token' });
+                        }
+                        req.user = decoded;  // Attach user information to the request object
+                        next();  // Proceed to the next middleware or route handler
+                    });
+                } else {
+                    console.error('No token provided');
+                    return res.status(401).send({ message: 'No token provided' });
+                }
+            };
+            
 export const isAdmin = (req, res, next) => {
     if (req.user && req.user.isAdmin) {
         console.log('Admin Access Granted:', req.user);

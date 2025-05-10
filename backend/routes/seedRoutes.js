@@ -10,7 +10,7 @@ import Earnings from '../models/earningModel.js';
 import Blog from '../models/blogModel.js';
 import data from '../data.js';
 import Notification from '../models/notificationModel.js';
-
+import Annotation from '../models/annotationModel.js'; 
 
 
 
@@ -29,7 +29,7 @@ seedRouter.get('/', async (req, res) => {
     await Earnings.deleteMany({});
     await Blog.deleteMany({});
     await Notification.deleteMany({});
-
+    await Annotation.deleteMany({});
 
     const createdServiceProviders = await ServiceProvider.insertMany(data.serviceProviders);
     const serviceProviderIds = createdServiceProviders.map(sp => sp._id.toString());
@@ -61,7 +61,13 @@ seedRouter.get('/', async (req, res) => {
     const createdContacts = await Contact.insertMany(data.contacts);
     const createdBlogs = await Blog.insertMany(data.blogs);
     const createdNotifications = await Notification.insertMany(data.notifications);
+    const annotationsWithIds = data.annotations.map((annotation) => ({
+      ...annotation,
+      // If necessary, populate userId from createdUsers based on your data structure
+      userId: createdUsers[0]._id, // Example: assign the first created user as the userId
+    }));
 
+    const createdAnnotations = await Annotation.insertMany(annotationsWithIds);
 
 
 
@@ -76,7 +82,7 @@ seedRouter.get('/', async (req, res) => {
       createdEarnings,
       createdBlogs,
       createdNotifications,
-
+      createdAnnotations,
     });
   } catch (error) {
     res.status(500).send({ message: 'Error seeding data', error: error.message });

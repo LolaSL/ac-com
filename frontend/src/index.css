@@ -6,8 +6,7 @@ body {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    "Roboto Sans", sans-serif;
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -54,7 +53,7 @@ body {
 .banner-title {
   margin-top: 5rem;
   font-size: 30px;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   text-align: relative;
   color: black;
 }
@@ -62,12 +61,14 @@ body {
 .banner-title,
 .blogs-title,
 .sellers-title,
-.contact-title,
-.title-measurement {
+.contacts-title,
+.title-measurement,
+.about-us {
   position: relative;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: Roboto;
   text-transform: uppercase;
   letter-spacing: 4px;
+  font-weight: 800;
   overflow: hidden;
   background: linear-gradient(
     90deg,
@@ -84,10 +85,11 @@ body {
   );
   background-repeat: no-repeat;
   background-size: 80%;
-  animation: animate 8s linear infinite;
+  animation: animate 10s linear infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: rgba(255, 255, 255, 0);
 }
+
 
 @keyframes animate {
   0% {
@@ -102,7 +104,7 @@ body {
   .banner-title {
     margin-top: 3rem;
     font-size: 26px;
-    font-family: "Roboto Sans", sans-serif;
+    font-family: "Roboto", sans-serif;
     text-align: justify;
     color: black;
   }
@@ -112,7 +114,7 @@ body {
   .banner-title {
     margin-top: 2rem;
     font-size: 23px;
-    font-family: "Roboto Sans", sans-serif;
+    font-family: "Roboto", sans-serif;
     text-align: justify;
     color: black;
   }
@@ -122,7 +124,7 @@ body {
   .banner-title {
     margin-top: 1rem;
     font-size: 17px;
-    font-family: "Roboto Sans", sans-serif;
+    font-family: "Roboto", sans-serif;
     text-align: justify;
     color: black;
   }
@@ -131,7 +133,7 @@ body {
   .banner-title {
     margin-top: 0.6rem;
     font-size: 14px;
-    font-family: "Roboto Sans", sans-serif;
+    font-family: "Roboto", sans-serif;
     text-align: justify;
     color: black;
   }
@@ -152,7 +154,7 @@ body {
 .text {
   text-align: justify;
   text-transform: capitalize;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   color: black;
 }
 
@@ -165,7 +167,7 @@ body {
   line-height: 1.6;
   text-align: justify;
   color: #f2e788;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .btn {
@@ -349,7 +351,7 @@ body {
   font-weight: bold;
   border-radius: 5px;
   width: auto;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   z-index: 10;
 }
 
@@ -400,7 +402,7 @@ body {
 .text {
   text-align: justify;
   text-transform: capitalize;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   color: black;
   padding: 1rem;
 }
@@ -470,7 +472,7 @@ button:hover {
 }
 .navbar-brand h3 {
   font-weight: 700;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   letter-spacing: 2px;
   padding: 0.5rem 0;
   color: white;
@@ -506,7 +508,7 @@ button:hover {
   left: -240px;
   width: 240px;
   heigh: auto;
-  background-color: rgb(34, 62, 89);
+  background-color: rgb(146, 148, 165);
   transition: left 0.3s ease;
   overflow-y: auto;
   z-index: 1050;
@@ -518,7 +520,7 @@ button:hover {
 
 .search,
 h3 {
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 .flex-column {
   display: flex;
@@ -606,11 +608,11 @@ h3 {
 }
 .navbar {
   width: 100%;
-background-color: rgb(34, 62, 89);
+  background-color: rgb(146, 148, 165);
   ;
 }
 .footer {
-  background-color: rgb(34, 62, 89);
+  background-color: rgb(146, 148, 165);
 
 }
 @media (max-width: 480px) {
@@ -847,6 +849,7 @@ button.thumbnail {
 
 .info-item p {
   margin: 0;
+  margin: 0;
   padding: 0;
   text-align: left;
 }
@@ -863,7 +866,7 @@ button.thumbnail {
 
 .responsive-image-contact {
   min-width: 90%;
-  max-width: 600px;
+  max-width: 300px;
   height: auto;
   display: block;
   margin: 0 auto;
@@ -935,7 +938,7 @@ button.thumbnail {
 
 .sellers-title {
   font-size: 50px;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-weight: 900;
   align-items: center;
   text-align: center;
@@ -1097,7 +1100,7 @@ form.d-flex {
 
 .ft-1 h3 {
   font-weight: 700;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   letter-spacing: 2px;
   padding: 0.5rem 0;
   text-shadow: 1px 1px 1px black;
@@ -1146,7 +1149,7 @@ form.d-flex {
 }
 
 .last-footer {
-  background-color: rgb(34, 62, 89);
+  background-color: rgb(146, 148, 165);
   text-align: center;
   padding: 1rem 0;
 }
@@ -1180,7 +1183,7 @@ form.d-flex {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  min-height: 300px;
+  min-height: 330px;
 }
 
 @media (max-width: 992px) {
@@ -1262,7 +1265,7 @@ form.d-flex {
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: rgb(2, 34, 65, 0.7);
+  background-color: rgba(69, 71, 91, 0.5);
   color: white;
   padding: 20px;
   text-align: center;
@@ -1335,7 +1338,7 @@ form.d-flex {
 
 .blogs-title {
   font-size: 50px;
-  font-family: "Roboto Sans", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-weight: 900;
   align-items: center;
   text-align: center;
@@ -1575,7 +1578,7 @@ hr {
   color: #666699;
   font-weight: bold;
   font-size: 24px;
-  font-family: "Roboto Sans", sans-serif;
+font-family: "Roboto", sans-serif;
 }
 .warning {
   color: #cc0099;
@@ -1862,7 +1865,7 @@ iframe {
   transform: translate(-50%, -50%);
   width: 300px;
   padding: 20px;
-  background-color: rgb(2, 34, 65, 0.8);
+  background-color: rgba(12, 13, 15, 0.7);
   text-shadow: 1px 1px 5px white;
   color: white;
   border-radius: 8px;

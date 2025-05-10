@@ -11,8 +11,11 @@ import contactRouter from './routes/contactRoutes.js'
 import serviceProviderRouter from './routes/serviceProviderRoutes.js'
 import blogRouter from './routes/blogRoutes.js'
 import notificationRouter from './routes/notificationRoutes.js';
+import annotationRoutes from './routes/annotationRoutes.js'
 import path from "path";
 import cors from 'cors';
+import bodyParser from 'body-parser';
+
 
 dotenv.config();
 
@@ -25,9 +28,14 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  }));
 
 app.use(express.json());
+
+app.use(bodyParser.json());
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -50,7 +58,7 @@ app.use('/api/contact', contactRouter);
 app.use('/api/service-providers', serviceProviderRouter);
 app.use('/api/blogs', blogRouter);
 app.use('/api/notifications', notificationRouter);
-
+app.use('/api', annotationRoutes);
 
 const __dirname = path.resolve();
 // app.use(express.static(path.join(__dirname, "/frontend/build")));
