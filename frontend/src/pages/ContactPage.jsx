@@ -71,18 +71,15 @@ const ContactPage = () => {
 
   return (
     <Container>
+      <h1 className="contacts-title mt-4 mb-4">Contact Us</h1>
       <div>
         <Image
-          src="/images/contact.jpg"
+          src="/images/contact1.jpg"
           alt="Contact Us"
           className="responsive-image-contact rounded mt-4"
         />
       </div>
       <div className="contact-form">
-        <h1 className="text-center contact-title fw-bold mt-4 mb-4">
-          Contact Us
-        </h1>
-
         {responseMessage && <Alert variant="success">{responseMessage}</Alert>}
         {error && <Alert variant="danger">{error}</Alert>}
         <Form onSubmit={handleSubmit} className="contact-form">

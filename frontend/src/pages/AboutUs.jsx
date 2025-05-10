@@ -3,12 +3,13 @@ import { Container } from "react-bootstrap";
 const AboutUs = () => {
   return (
     <Container className="site-container-about mt-4 p-4">
+      <h1 className="about-us">About Us</h1>
       <article className="about mt-4 mb-4">
         <div
           className="p-5 text-center responsive-image-about rounded mb-3"
           style={{
-            backgroundImage: `url("/images/about-us1.jpg")`,
-            MaxHeight: "100%",
+            backgroundImage: `url("/images/about-us.jpg")`,
+           maxHeight: "100%",
           }}
         ></div>
         <h3 className="about-paragraph p-2">

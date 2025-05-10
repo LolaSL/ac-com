@@ -213,7 +213,7 @@ function App() {
                     </NavDropdown>
                   ) : (
                     <Link className="nav-link" to="/serviceprovider/login">
-                      Service Provider Login
+                      Service Provider
                     </Link>
                   )}
                   {userInfo && userInfo.isAdmin && (
@@ -278,14 +278,14 @@ function App() {
                   <NavDropdown.Item
                     key={category}
                     as={Link}
-                    to={{ pathname: "/search", search: `category=${category}` }} 
+                    to={{ pathname: "/search", search: `category=${category}` }}
                     onClick={() => {
                       setSidebarIsOpen(false);
-                      setIsDropdownOpen(false); 
+                      setIsDropdownOpen(false);
                     }}
-                    className="fw-bold" 
+                    className="fw-bold"
                     style={{
-                      '&:hover': { backgroundColor: 'grey' }, 
+                      "&:hover": { backgroundColor: "grey" },
                     }}
                   >
                     {category}
@@ -573,7 +573,7 @@ function App() {
           </main>
           <Footer />
         </div>
-        </div>
+      </div>
       {/* </div> */}
     </BrowserRouter>
   );
