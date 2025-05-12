@@ -41,7 +41,8 @@ export const baseUrl = () =>
                             console.error('Token verification failed:', err); // Log error for debugging
                             return res.status(401).send({ message: 'Invalid token' });
                         }
-                        req.user = decoded;  // Attach user information to the request object
+                        req.user = { id: decoded._id, ...decoded };
+                        // Attach user information to the request object
                         next();  // Proceed to the next middleware or route handler
                     });
                 } else {

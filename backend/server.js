@@ -29,10 +29,16 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3000', // match your frontend
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'], // <== explicitly allow Authorization
   }));
-
+  
+  app.use((req, res, next) => {
+    console.log('🔍 Incoming headers:', req.headers);
+    next();
+  });
+  
 app.use(express.json());
 
 app.use(bodyParser.json());
@@ -59,6 +65,8 @@ app.use('/api/service-providers', serviceProviderRouter);
 app.use('/api/blogs', blogRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api', annotationRoutes);
+
+  
 
 const __dirname = path.resolve();
 // app.use(express.static(path.join(__dirname, "/frontend/build")));

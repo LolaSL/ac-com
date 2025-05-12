@@ -9,7 +9,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
 
 const Annotator = () => {
   const [iconPositions, setIconPositions] = useState([]);
-  // const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const canvasRef = useRef(null);
   const [file, setFile] = useState(null);
   const stageRef = useRef(null);
@@ -285,125 +285,125 @@ const Annotator = () => {
     [comments]
   );
 
-  // const memoizedCallback = useCallback(() => {
-  //   const canvas = canvasRef.current;
-  //   if (!canvas) return;
-  //   const context = canvas.getContext("2d");
-  //   if (!context) return;
+  const memoizedCallback = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
 
-  //   const drawGlobe = (x, y, radius) => {
-  //     context.beginPath();
-  //     context.arc(x, y, radius, 0, 2 * Math.PI);
-  //     context.strokeStyle = "#00008B";
-  //     context.lineWidth = 1.5;
-  //     context.stroke();
+    const drawGlobe = (x, y, radius) => {
+      context.beginPath();
+      context.arc(x, y, radius, 0, 2 * Math.PI);
+      context.strokeStyle = "#00008B";
+      context.lineWidth = 1.5;
+      context.stroke();
 
-  //     context.strokeStyle = "#808080";
-  //     context.lineWidth = 0.5;
-  //     const numParallels = 2;
-  //     for (let i = 1; i <= numParallels; i++) {
-  //       const yOffset = (i / (numParallels + 1)) * radius * 0.7;
-  //       context.beginPath();
-  //       context.arc(x, y, radius - yOffset, 0, 2 * Math.PI);
-  //       context.stroke();
-  //       context.beginPath();
-  //       context.arc(x, y, radius + yOffset, 0, 2 * Math.PI);
-  //       context.stroke();
-  //     }
+      context.strokeStyle = "#808080";
+      context.lineWidth = 0.5;
+      const numParallels = 2;
+      for (let i = 1; i <= numParallels; i++) {
+        const yOffset = (i / (numParallels + 1)) * radius * 0.7;
+        context.beginPath();
+        context.arc(x, y, radius - yOffset, 0, 2 * Math.PI);
+        context.stroke();
+        context.beginPath();
+        context.arc(x, y, radius + yOffset, 0, 2 * Math.PI);
+        context.stroke();
+      }
 
-  //     const numMeridians = 4;
-  //     for (let i = 0; i < numMeridians; i++) {
-  //       const angle = (i / numMeridians) * 2 * Math.PI;
-  //       context.beginPath();
-  //       context.ellipse(x, y, radius * 0.35, radius * 0.7, angle, 0, Math.PI);
-  //       context.stroke();
-  //       context.beginPath();
-  //       context.ellipse(
-  //         x,
-  //         y,
-  //         radius * 0.35,
-  //         radius * 0.7,
-  //         angle + Math.PI,
-  //         0,
-  //         Math.PI
-  //       );
-  //       context.stroke();
-  //     }
+      const numMeridians = 4;
+      for (let i = 0; i < numMeridians; i++) {
+        const angle = (i / numMeridians) * 2 * Math.PI;
+        context.beginPath();
+        context.ellipse(x, y, radius * 0.35, radius * 0.7, angle, 0, Math.PI);
+        context.stroke();
+        context.beginPath();
+        context.ellipse(
+          x,
+          y,
+          radius * 0.35,
+          radius * 0.7,
+          angle + Math.PI,
+          0,
+          Math.PI
+        );
+        context.stroke();
+      }
 
-  //     context.beginPath();
-  //     context.arc(x, y, radius * 0.7, 0, 2 * Math.PI);
-  //     context.stroke();
-  //     context.beginPath();
-  //     context.moveTo(x - radius * 0.5, y);
-  //     context.lineTo(x + radius * 0.5, y);
-  //     context.stroke();
-  //   };
+      context.beginPath();
+      context.arc(x, y, radius * 0.7, 0, 2 * Math.PI);
+      context.stroke();
+      context.beginPath();
+      context.moveTo(x - radius * 0.5, y);
+      context.lineTo(x + radius * 0.5, y);
+      context.stroke();
+    };
 
-  //   const renderSignature = () => {
-  //     if (isSaved) {
-  //       const text = "APPROVED";
-  //       const subText = "AC-COMMERCE";
-  //       const padding = 12;
-  //       const fontSize = 17;
-  //       const subFontSize = 13;
-  //       const globeRadius = 20;
-  //       const globeMarginRight = 20;
-  //       const outerLineWidth = 2;
+    const renderSignature = () => {
+      if (isSaved) {
+        const text = "APPROVED";
+        const subText = "AC-COMMERCE";
+        const padding = 12;
+        const fontSize = 17;
+        const subFontSize = 13;
+        const globeRadius = 20;
+        const globeMarginRight = 20;
+        const outerLineWidth = 2;
 
-  //       context.font = `bold ${fontSize}px Arial`;
-  //       const textMetrics = context.measureText(text);
-  //       const textWidth = textMetrics.width;
-  //       const textHeight = fontSize;
+        context.font = `bold ${fontSize}px Arial`;
+        const textMetrics = context.measureText(text);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize;
 
-  //       context.font = `normal ${subFontSize}px Arial`;
-  //       const subTextMetrics = context.measureText(subText);
-  //       const subTextWidth = subTextMetrics.width;
-  //       const subTextHeight = subFontSize;
+        context.font = `normal ${subFontSize}px Arial`;
+        const subTextMetrics = context.measureText(subText);
+        const subTextWidth = subTextMetrics.width;
+        const subTextHeight = subFontSize;
 
-  //       const totalTextWidth = Math.max(textWidth, subTextWidth);
-  //       const totalContentWidth =
-  //         globeRadius * 2 + globeMarginRight + totalTextWidth;
-  //       const totalHeight = Math.max(
-  //         globeRadius * 2,
-  //         textHeight + subTextHeight
-  //       );
-  //       const outerWidth = totalContentWidth + 2 * padding;
-  //       const outerHeight = totalHeight + 2 * padding;
+        const totalTextWidth = Math.max(textWidth, subTextWidth);
+        const totalContentWidth =
+          globeRadius * 2 + globeMarginRight + totalTextWidth;
+        const totalHeight = Math.max(
+          globeRadius * 2,
+          textHeight + subTextHeight
+        );
+        const outerWidth = totalContentWidth + 2 * padding;
+        const outerHeight = totalHeight + 2 * padding;
 
-  //       const rectX = context.canvas.width - outerWidth - 40;
-  //       const rectY = 80;
+        const rectX = context.canvas.width - outerWidth - 40;
+        const rectY = 80;
 
-  //       const globeX = rectX + padding + globeRadius;
-  //       const globeY = rectY + padding + globeRadius;
+        const globeX = rectX + padding + globeRadius;
+        const globeY = rectY + padding + globeRadius;
 
-  //       const textX = globeX + globeRadius + globeMarginRight;
-  //       const textY = rectY + padding + textHeight;
-  //       const subTextX = textX;
-  //       const subTextY = textY + subFontSize;
+        const textX = globeX + globeRadius + globeMarginRight;
+        const textY = rectY + padding + textHeight;
+        const subTextX = textX;
+        const subTextY = textY + subFontSize;
 
-  //       context.strokeStyle = "#00008B";
-  //       context.lineWidth = outerLineWidth;
-  //       context.strokeRect(rectX, rectY, outerWidth, outerHeight);
+        context.strokeStyle = "#00008B";
+        context.lineWidth = outerLineWidth;
+        context.strokeRect(rectX, rectY, outerWidth, outerHeight);
 
-  //       context.fillStyle = "rgba(252, 252, 243, 0.2)";
-  //       context.fillRect(rectX, rectY, outerWidth, outerHeight);
+        context.fillStyle = "rgba(252, 252, 243, 0.2)";
+        context.fillRect(rectX, rectY, outerWidth, outerHeight);
 
-  //       drawGlobe(globeX, globeY, globeRadius);
+        drawGlobe(globeX, globeY, globeRadius);
 
-  //       context.fillStyle = "#00008B";
-  //       context.font = `bold ${fontSize}px Arial`;
-  //       context.fillText(text, textX, textY);
+        context.fillStyle = "#00008B";
+        context.font = `bold ${fontSize}px Arial`;
+        context.fillText(text, textX, textY);
 
-  //       context.fillStyle = "#00008B";
-  //       context.font = `normal ${subFontSize}px Arial`;
-  //       context.fillText(subText, subTextX, subTextY + 5);
+        context.fillStyle = "#00008B";
+        context.font = `normal ${subFontSize}px Arial`;
+        context.fillText(subText, subTextX, subTextY + 5);
 
-  //       context.setLineDash([]);
-  //     }
-  //   };
+        context.setLineDash([]);
+      }
+    };
 
-  //   renderSignature();
-  // }, [isSaved]);
+    renderSignature();
+  }, [isSaved]);
 
   const drawRotatedRectangle = useCallback(
     (context, x, y, width, height, angle) => {
@@ -450,13 +450,13 @@ const Annotator = () => {
         );
       });
       renderComments(context);
-      // memoizedCallback(context);
+      memoizedCallback(context);
     },
     [
       drawRotatedRectangle,
       file,
       iconPositions,
-      // memoizedCallback,
+      memoizedCallback,
       renderComments,
       setPdfSize,
     ]
@@ -545,7 +545,7 @@ const saveToBackend = async () => {
       console.log('Data saved to backend:', data);
       alert('PDF and annotations saved successfully!');
     
-      // setIsSaved(true);                  // Prevent re-save
+      setIsSaved(true);                  // Prevent re-save
       setFile(null);                    // Clear file state
       if (fileInputRef.current) {
         fileInputRef.current.value = null; // Clear input element
