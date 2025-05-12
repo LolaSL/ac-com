@@ -59,13 +59,15 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized to access this PDF.' });
     }
 
+    console.log("Sending PDF with ID:", req.params.id); // Debugging log
     res.set('Content-Type', 'application/pdf');
-    res.send(annotation.pdfData);
+    res.send(annotation.pdfData); // Send PDF data
   } catch (error) {
     console.error('Error fetching annotated PDF:', error);
     res.status(500).json({ message: 'Failed to fetch annotated PDF.', error: error.message });
   }
 });
+
 
 // Route to get the annotations for a specific PDF ID (requires authentication and ownership check)
 router.get('/annotations/:id', isAuth, async (req, res) => {

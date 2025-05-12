@@ -2613,3 +2613,10 @@ h2 {
     max-width: 50%;
   }
 }
+.custom-modal-width {
+  max-width: 90% !important; /* Wider than default 'lg' or 'xl' */
+  width:90%;
+}
+#pdf-container {
+  position: relative;
+}
