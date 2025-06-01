@@ -4,17 +4,18 @@ const annotationSchema = new Schema({
   filename: { type: String, required: true },
   pdfData: { type: Buffer, required: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-pdfId: { type: String, required: true }, 
+  pdfId: { type: String, required: true },
 
   annotations: {
     rectangles: [
       {
         id: { type: String, required: true },
-        x: { type: Number, required: true },
-        y: { type: Number, required: true },
-        width: { type: Number, required: true },
-        height: { type: Number, required: true },
+        xPercent: { type: Number, required: true }, // e.g. 0.12
+        yPercent: { type: Number, required: true },
+        widthPercent: { type: Number, required: true },
+        heightPercent: { type: Number, required: true },
         fill: { type: String },
+        stroke: { type: String },
         rotation: { type: Number, default: 0 },
       },
     ],
@@ -23,9 +24,10 @@ pdfId: { type: String, required: true },
         id: { type: String, required: true },
         rectId: { type: String, required: true },
         text: { type: String, required: true },
-        x: { type: Number, required: true },
-        y: { type: Number, required: true },
+        xPercent: { type: Number, required: true },
+        yPercent: { type: Number, required: true },
         fill: { type: String },
+        textColor: { type: String },
       },
     ],
     lines: [
@@ -33,18 +35,18 @@ pdfId: { type: String, required: true },
         id: { type: String, required: true },
         rectId: { type: String, required: true },
         commentId: { type: String, required: true },
-        points: [Number],
+        points: [Number], 
         stroke: { type: String },
         strokeWidth: { type: Number },
       },
     ],
   },
+
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 60 * 60 * 24 * 7 // 7 days in seconds
+    expires: 60 * 60 * 24 * 7, 
   },
-  
   updatedAt: { type: Date, default: Date.now },
 });
 

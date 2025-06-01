@@ -8,8 +8,8 @@ export default function Offers() {
 
   const offers = [
     {
-      title: "Spring Sale!",
-      description: "Spring units on sale!",
+      title: "Season Sale!",
+      description: "Units on sale!",
       imageSrc: "/images/offer1.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",

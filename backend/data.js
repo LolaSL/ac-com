@@ -1434,50 +1434,54 @@ const data = {
 
     },
   ],
-  annotations: [
 
-      {
-        filename: 'document1.pdf',
-        pdfData: Buffer.from('mock-pdf-data'), // Mock PDF buffer data
-        userId: '60a8b6f68b3c3c6b8d5f4a51', // Example userId (replace with actual userId)
-        pdfId: 'pdf-id-1',
-        annotations: {
-          rectangles: [
-            {
-              id: 'rect-1',
-              x: 50,
-              y: 100,
-              width: 200,
-              height: 150,
-              fill: 'rgba(255, 0, 0, 0.5)', // Red with transparency
-              rotation: 0,
-            },
-          ],
-          comments: [
-            {
-              id: 'comment-1',
-              rectId: 'rect-1',
-              text: 'This is a comment for rectangle 1.',
-              x: 60,
-              y: 120,
-              fill: 'black', // Black text color
-            },
-          ],
-          lines: [
-            {
-              id: 'line-1',
-              rectId: 'rect-1',
-              commentId: 'comment-1',
-              points: [60, 120, 250, 200],
-              stroke: 'blue',
-              strokeWidth: 2,
-            },
-          ],
-        },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+annotations: [
+    {
+      filename: 'example.pdf',
+      pdfId: 'demo-pdf-123',
+      annotations: {
+        rectangles: [
+          {
+            id: 'rect-1',
+            x: 100,
+            y: 150,
+            width: 200,
+            height: 100,
+            fill: 'rgba(20, 205, 230, 0.5)',
+            rotation: 0,
+            xPercent: 0.2,
+            yPercent: 0.3,
+            widthPercent: 0.4,
+            heightPercent: 0.2,
+          },
+        ],
+        comments: [
+          {
+            id: 'comment-1',
+            rectId: 'rect-1',
+            text: 'This is a comment',
+            x: 110,
+            y: 160,
+            fill: 'rgba(226, 218, 228, 0.3)',
+            xPercent: 0.22,
+            yPercent: 0.32,
+          },
+        ],
+        lines: [
+          {
+            id: 'line-1',
+            rectId: 'rect-1',
+            commentId: 'comment-1',
+            points: [110, 160, 150, 200],
+            stroke: 'black',
+            strokeWidth: 2,
+          },
+        ],
       },
-  ],
+     
+    },
+  ]
+  
 }
 
 export default data;

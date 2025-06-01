@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Stage, Layer, Rect, Line, Text } from "react-konva";
 import { Button, Form } from "react-bootstrap";
-// import { PDFDocument } from "pdf-lib";
+import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 import ArchSymbols from "./ArchSymbolsModal.jsx";
 
@@ -181,11 +181,11 @@ const Annotator = () => {
         if (isRect || isComment) {
           rect = isRect
             ? {
-                x: draggedNode.x(),
-                y: draggedNode.y(),
-                width: draggedNode.width(),
-                height: draggedNode.height(),
-              }
+              x: draggedNode.x(),
+              y: draggedNode.y(),
+              width: draggedNode.width(),
+              height: draggedNode.height(),
+            }
             : rectangles.find((r) => r.id === line.rectId);
 
           comment = isComment
@@ -209,9 +209,9 @@ const Annotator = () => {
       })
     );
   };
-
   const rotateRectangle = useCallback((rectId) => {
     console.log("rotateRectangle called for:", rectId);
+
     console.trace();
     setRectangles((prevRects) =>
       prevRects.map((rect) =>
@@ -220,6 +220,7 @@ const Annotator = () => {
     );
   }, []);
 
+  
   const renderComments = useCallback(
     (context) => {
       context.font = "bold 17px Arial";
@@ -290,120 +291,7 @@ const Annotator = () => {
     if (!canvas) return;
     const context = canvas.getContext("2d");
     if (!context) return;
-
-    const drawGlobe = (x, y, radius) => {
-      context.beginPath();
-      context.arc(x, y, radius, 0, 2 * Math.PI);
-      context.strokeStyle = "#00008B";
-      context.lineWidth = 1.5;
-      context.stroke();
-
-      context.strokeStyle = "#808080";
-      context.lineWidth = 0.5;
-      const numParallels = 2;
-      for (let i = 1; i <= numParallels; i++) {
-        const yOffset = (i / (numParallels + 1)) * radius * 0.7;
-        context.beginPath();
-        context.arc(x, y, radius - yOffset, 0, 2 * Math.PI);
-        context.stroke();
-        context.beginPath();
-        context.arc(x, y, radius + yOffset, 0, 2 * Math.PI);
-        context.stroke();
-      }
-
-      const numMeridians = 4;
-      for (let i = 0; i < numMeridians; i++) {
-        const angle = (i / numMeridians) * 2 * Math.PI;
-        context.beginPath();
-        context.ellipse(x, y, radius * 0.35, radius * 0.7, angle, 0, Math.PI);
-        context.stroke();
-        context.beginPath();
-        context.ellipse(
-          x,
-          y,
-          radius * 0.35,
-          radius * 0.7,
-          angle + Math.PI,
-          0,
-          Math.PI
-        );
-        context.stroke();
-      }
-
-      context.beginPath();
-      context.arc(x, y, radius * 0.7, 0, 2 * Math.PI);
-      context.stroke();
-      context.beginPath();
-      context.moveTo(x - radius * 0.5, y);
-      context.lineTo(x + radius * 0.5, y);
-      context.stroke();
-    };
-
-    const renderSignature = () => {
-      if (isSaved) {
-        const text = "APPROVED";
-        const subText = "AC-COMMERCE";
-        const padding = 12;
-        const fontSize = 17;
-        const subFontSize = 13;
-        const globeRadius = 20;
-        const globeMarginRight = 20;
-        const outerLineWidth = 2;
-
-        context.font = `bold ${fontSize}px Arial`;
-        const textMetrics = context.measureText(text);
-        const textWidth = textMetrics.width;
-        const textHeight = fontSize;
-
-        context.font = `normal ${subFontSize}px Arial`;
-        const subTextMetrics = context.measureText(subText);
-        const subTextWidth = subTextMetrics.width;
-        const subTextHeight = subFontSize;
-
-        const totalTextWidth = Math.max(textWidth, subTextWidth);
-        const totalContentWidth =
-          globeRadius * 2 + globeMarginRight + totalTextWidth;
-        const totalHeight = Math.max(
-          globeRadius * 2,
-          textHeight + subTextHeight
-        );
-        const outerWidth = totalContentWidth + 2 * padding;
-        const outerHeight = totalHeight + 2 * padding;
-
-        const rectX = context.canvas.width - outerWidth - 40;
-        const rectY = 80;
-
-        const globeX = rectX + padding + globeRadius;
-        const globeY = rectY + padding + globeRadius;
-
-        const textX = globeX + globeRadius + globeMarginRight;
-        const textY = rectY + padding + textHeight;
-        const subTextX = textX;
-        const subTextY = textY + subFontSize;
-
-        context.strokeStyle = "#00008B";
-        context.lineWidth = outerLineWidth;
-        context.strokeRect(rectX, rectY, outerWidth, outerHeight);
-
-        context.fillStyle = "rgba(252, 252, 243, 0.2)";
-        context.fillRect(rectX, rectY, outerWidth, outerHeight);
-
-        drawGlobe(globeX, globeY, globeRadius);
-
-        context.fillStyle = "#00008B";
-        context.font = `bold ${fontSize}px Arial`;
-        context.fillText(text, textX, textY);
-
-        context.fillStyle = "#00008B";
-        context.font = `normal ${subFontSize}px Arial`;
-        context.fillText(subText, subTextX, subTextY + 5);
-
-        context.setLineDash([]);
-      }
-    };
-
-    renderSignature();
-  }, [isSaved]);
+  }, []);
 
   const drawRotatedRectangle = useCallback(
     (context, x, y, width, height, angle) => {
@@ -425,8 +313,11 @@ const Annotator = () => {
       const loadingTask = pdfjsLib.getDocument({ data: pdfData });
       const pdf = await loadingTask.promise;
       const page = await pdf.getPage(1);
-      const viewport = page.getViewport({ scale: 1.5 });
+
+      const scale = 1;
+      const viewport = page.getViewport({ scale });
       setPdfSize({ width: viewport.width, height: viewport.height });
+
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
@@ -437,19 +328,26 @@ const Annotator = () => {
 
       await page.render(renderContext).promise;
 
+      const scaleX = scale; 
+      const scaleY = scale;
+
       iconPositions.forEach((icon) => {
-        const rectWidth = 45;
-        const rectHeight = 11;
+        const scaledX = icon.x * scaleX;
+        const scaledY = icon.y * scaleY;
+        const rectWidth = 45 * scaleX;
+        const rectHeight = 11 * scaleY;
         drawRotatedRectangle(
           context,
-          icon.x,
-          icon.y,
+          scaledX,
+          scaledY,
           rectWidth,
           rectHeight,
           icon.angle
         );
       });
-      renderComments(context);
+
+      renderComments(context, scaleX, scaleY);
+
       memoizedCallback(context);
     },
     [
@@ -506,179 +404,84 @@ const Annotator = () => {
     renderPDFOnCanvas,
   ]);
 
-  const fileInputRef = useRef(); // Add this above
+  const fileInputRef = useRef();
 
-const saveToBackend = async () => {
-  if (!file) {
-    alert('Please select a PDF file to save.');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('pdfFile', file);
-  formData.append('rectangles', JSON.stringify(rectangles));
-  formData.append('comments', JSON.stringify(comments));
-  formData.append('lines', JSON.stringify(lines));
-  formData.append('pdfId', pdfId);
-
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-  const authToken = userInfo?.token;
-
-  if (!authToken) {
-    alert('You must be signed in to save.');
-    return;
-  }
-
-  try {
-    setIsSaving(true); // Disable save button
-
-    const response = await fetch('/api/upload-annotate', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-      },
-      body: formData,
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Data saved to backend:', data);
-      alert('PDF and annotations saved successfully!');
-    
-      setIsSaved(true);                  // Prevent re-save
-      setFile(null);                    // Clear file state
-      if (fileInputRef.current) {
-        fileInputRef.current.value = null; // Clear input element
-      }
-    
-      setPreviewUrl(null);              // ✅ Clear PDF preview
-      setRectangles([]);                // ✅ Clear drawn rectangles
-      setComments([]);                  // ✅ Clear comments
-      setLines([]);                     // ✅ Clear lines
-    
-    } else {
-      const errorData = await response.json();
-      console.error('Error saving data:', errorData);
-      alert(`Failed to save data: ${errorData.message || 'Unknown error'}`);
+  const saveToBackend = async () => {
+    if (!file) {
+      alert("Please select a PDF file to save.");
+      return;
     }
-  } catch (error) {
-    console.error('Network error while saving:', error);
-    alert('Network error occurred while saving.');
-  } finally {
-    setIsSaving(false); // Re-enable if needed
-  }
-};
+  setIsSaved(false);
+    const formData = new FormData();
+    formData.append("pdfFile", file);
+    formData.append("rectangles", JSON.stringify(rectangles));
+    formData.append("comments", JSON.stringify(comments));
+    formData.append("lines", JSON.stringify(lines));
+    formData.append("pdfId", pdfId);
 
-//   const saveToBackend = async () => {
-//   if (!file) {
-//     alert('Please select a PDF file to save.');
-//     return;
-//   }
+    const canvas = document.getElementById("my-canvas"); // Use your actual canvas ID
+    const imageWidth = canvas?.width;
+    const imageHeight = canvas?.height;
 
-//   const formData = new FormData();
-//   formData.append('pdfFile', file);
-//   formData.append('rectangles', JSON.stringify(rectangles));
-//   formData.append('comments', JSON.stringify(comments));
-//   formData.append('lines', JSON.stringify(lines));
-//   formData.append('pdfId', pdfId);
+    formData.append("imageWidth", imageWidth);
+    formData.append("imageHeight", imageHeight);
 
-//   // ✅ Extract token from userInfo in localStorage
-//   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-//   const authToken = userInfo?.token;
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const authToken = userInfo?.token;
 
-//   if (!authToken) {
-//     alert('You must be signed in to save.');
-//     return;
-//   }
+    if (!authToken) {
+      alert("You must be signed in to save.");
+      return;
+    }
 
-//   try {
-//     const response = await fetch('/api/upload-annotate', {
-//       method: 'POST',
-//       headers: {
-//         'Authorization': `Bearer ${authToken}`,
-//       },
-//       body: formData,
-//     });
+    try {
+      setIsSaving(true);
 
-//     if (response.ok) {
-//       const data = await response.json();
-//       console.log('Data saved to backend:', data);
-//       alert('PDF and annotations saved successfully!');
-//       setIsSaved(true);
+      const response = await fetch("/api/upload-annotate", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: formData,
+      });
 
-//       // Optional: Update PDF ID if needed
-//       // if (data.id) setPdfId(data.id);
-//     } else {
-//       const errorData = await response.json();
-//       console.error('Error saving data:', errorData);
-//       alert(`Failed to save data: ${errorData.message || 'Unknown error'}`);
-//     }
-//   } catch (error) {
-//     console.error('Network error while saving:', error);
-//     alert('Network error occurred while saving.');
-//   }
-// };
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Data saved to backend:", data);
+        alert("PDF and annotations saved successfully!");
 
-//   const clearCanvas = () => {
-//     const canvas = canvasRef.current;
-//     if (!canvas) return;
+        setIsSaved(true);
+        setFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = null;
+        }
 
-//     const context = canvas.getContext("2d");
-//     context.clearRect(0, 0, canvas.width, canvas.height);
-
-//     setIconPositions([]);
-//     setPreviewUrl(null);
-//     setIsSaved(false);
-//     setRectangles([]);
-//     setComments([]);
-//     setLines([]); // Clear lines as well
-//     setPdfId("unique-pdf-identifier-" + Date.now()); // Reset pdfId on clear if needed
-//   };
-
-//   const handleSaveButtonClick = () => {
-//     saveToBackend(); // Call the backend save function
-//   };
-
-  // const saveAsPDF = async () => {
-  //   if (file && file.type === "application/pdf") {
-  //     const arrayBuffer = await file.arrayBuffer();
-  //     const pdfDoc = await PDFDocument.load(arrayBuffer);
-  //     const page = pdfDoc.getPages()[0];
-  //     const { width, height } = page.getSize();
-  //     const pdfCanvas = canvasRef.current;
-  //     const stage = stageRef.current;
-
-  //     if (pdfCanvas && stage) {
-  //       const tempCanvas = document.createElement("canvas");
-  //       tempCanvas.width = width;
-  //       tempCanvas.height = height;
-  //       const tempContext = tempCanvas.getContext("2d");
-  //       tempContext.drawImage(pdfCanvas, 0, 0, width, height);
-  //       stage.draw();
-
-  //       const layer = stage.getChildren()[0];
-
-  //       if (layer) {
-  //         tempContext.drawImage(layer.getCanvas()._canvas, 0, 0, width, height);
-  //       }
-
-  //       const imageData = tempCanvas.toDataURL();
-  //       const pngImage = await pdfDoc.embedPng(imageData);
-
-  //       page.drawImage(pngImage, { x: 0, y: 0, width, height });
-
-  //       const pdfBytes = await pdfDoc.save();
-  //       const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  //       const link = document.createElement("a");
-  //       link.href = URL.createObjectURL(blob);
-  //       link.download = "annotated-pdf.pdf";
-  //       link.click();
-  //       setIsSaved(true);
-  //     }
-  //   } else {
-  //     alert("The selected file is not a PDF.");
-  //   }
-  // };
+        setPreviewUrl(null);
+        setRectangles([]);
+        setComments([]);
+        setLines([]);
+      } else {
+        const errorData = await response.json();
+        console.error("Error saving data:", errorData);
+        alert(`Failed to save data: ${errorData.message || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Network error while saving:", error);
+      alert("Network error occurred while saving.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+ useEffect(() => {
+        if (isSaved) {
+            toast.success("Saved successfully!", {
+                duration: 3000, 
+                position: 'bottom-center', 
+            });
+        }
+    }, [isSaved]);
+  
+  
 
   // const clearCanvas = () => {
   //   const canvas = canvasRef.current;
@@ -856,19 +659,14 @@ const saveToBackend = async () => {
               <>
                 <Button
                   variant="secondary"
-                  onClick={saveToBackend} 
-                disabled={isSaving}  // Call the new save function
+                  onClick={saveToBackend}
+                  disabled={ isSaving} 
                   className="mt-2 me-2 rounded mb-3"
                 >
-                  {isSaving ? 'Saving...' : 'Save Annotation'} {/* Updated button text */}
+                  {isSaving ? "Saving..." : "Save Annotation"}{" "}
+            
                 </Button>
-                {/* <Button
-                  variant="secondary"
-                  className="mt-2 rounded mb-3"
-                  onClick={clearCanvas}
-                >
-                  Clear
-                </Button> */}
+            {isSaved && <p style={{ color: "green" }}>Saved successfully!</p>}
               </>
             )}
           </div>

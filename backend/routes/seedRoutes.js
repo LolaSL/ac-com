@@ -63,11 +63,13 @@ seedRouter.get('/', async (req, res) => {
     const createdNotifications = await Notification.insertMany(data.notifications);
     const annotationsWithIds = data.annotations.map((annotation) => ({
       ...annotation,
-      // If necessary, populate userId from createdUsers based on your data structure
-      userId: createdUsers[0]._id, // Example: assign the first created user as the userId
+      userId: createdUsers[0]._id,
+      pdfData: Buffer.from('%PDF-1.4\n% This is dummy binary PDF content\n'),
     }));
-
     const createdAnnotations = await Annotation.insertMany(annotationsWithIds);
+    
+    
+   
 
 
 
