@@ -162,67 +162,72 @@ const MessagesServiceProviders = () => {
         </div>
       )}
       {messages.length > 0 && (
-            <div className="table-responsive">
-        <Table striped bordered hover responsive className="messages">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>
-                <button
-                  type="button"
-                  onClick={() => handleSort("serviceProvider")}
-                >
-                  Provider{" "}
-                  {sortColumn === "serviceProvider" &&
-                    (sortOrder === "asc" ? "↑" : "↓")}
-                </button>
-              </th>
-              <th>
-                <button type="button" onClick={() => handleSort("client")}>
-                  Client{" "}
-                  {sortColumn === "client" && (sortOrder === "asc" ? "↑" : "↓")}
-                </button>
-              </th>
-              <th>Project</th>
-              <th>Message</th>
-              <th>
-                <button type="button" onClick={() => handleSort("date")}>
-                  Date{" "}
-                  {sortColumn === "date" && (sortOrder === "asc" ? "↑" : "↓")}
-                </button>
-              </th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedMessages.map((message, index) => (
-              <tr key={message._id}>
-                <td data-label="ID">{index + 1}</td>
-                <td data-label= "Provider ">{message.serviceProvider?.name}</td>
-                <td data-label="Client ">{message.client}</td>
-                <td data-label="Project">{message.projectName}</td>
-                <td data-label="Message">{message.text}</td>
-                <td data-label="Date">{new Date(message.date).toLocaleDateString()}</td>
-                <td>
-                  <Button
-                    variant="secondary"
-                    className="me-2 mb-1 btn-sm"
-                    onClick={() => editHandler(message._id)}
+        <div className="table-responsive">
+          <Table striped bordered hover responsive className="messages">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>
+                  <button
+                    type="button"
+                    onClick={() => handleSort("serviceProvider")}
                   >
-                    Edit
+                    Provider{" "}
+                    {sortColumn === "serviceProvider" &&
+                      (sortOrder === "asc" ? "↑" : "↓")}
+                  </button>
+                </th>
+                <th>
+                  <button type="button" onClick={() => handleSort("client")}>
+                    Client{" "}
+                    {sortColumn === "client" &&
+                      (sortOrder === "asc" ? "↑" : "↓")}
+                  </button>
+                </th>
+                <th>Project</th>
+                <th>Message</th>
+                <th>
+                  <button type="button" onClick={() => handleSort("date")}>
+                    Date{" "}
+                    {sortColumn === "date" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </button>
+                </th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedMessages.map((message, index) => (
+                <tr key={message._id}>
+                  <td data-label="ID">{index + 1}</td>
+                  <td data-label="Provider ">
+                    {message.serviceProvider?.name}
+                  </td>
+                  <td data-label="Client ">{message.client}</td>
+                  <td data-label="Project">{message.projectName}</td>
+                  <td data-label="Message">{message.text}</td>
+                  <td data-label="Date">
+                    {new Date(message.date).toLocaleDateString()}
+                  </td>
+                  <td>
+                    <Button
+                      variant="secondary"
+                      className="me-2  btn-sm"
+                      onClick={() => editHandler(message._id)}
+                    >
+                      Edit
                     </Button>
                     &nbsp;
                     <Button
-                    variant="danger"
-                    className="me-2 btn-sm"
-                    onClick={() => deleteHandler(message._id)}
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+                      variant="danger"
+                      className="me-2 btn-sm "
+                      onClick={() => deleteHandler(message._id)}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </Table>
         </div>
       )}

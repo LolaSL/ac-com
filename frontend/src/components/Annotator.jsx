@@ -57,9 +57,9 @@ const Annotator = () => {
           id: newRectId,
           x: pointerPosition.x,
           y: pointerPosition.y,
-          width: 50,
-          height: 17,
-          fill: "rgba(20, 205, 230)",
+          width: 48,
+          height: 16,
+          fill: "rgba(20, 205, 230, 0.7)",
           rotation: 0,
         };
         setRectangles((prevRects) => [...prevRects, newRect]);
@@ -328,7 +328,7 @@ const Annotator = () => {
 
       await page.render(renderContext).promise;
 
-      const scaleX = scale; 
+      const scaleX = scale;
       const scaleY = scale;
 
       iconPositions.forEach((icon) => {
@@ -419,7 +419,7 @@ const Annotator = () => {
     formData.append("lines", JSON.stringify(lines));
     formData.append("pdfId", pdfId);
 
-    const canvas = document.getElementById("my-canvas"); // Use your actual canvas ID
+    const canvas = document.getElementById("my-canvas");
     const imageWidth = canvas?.width;
     const imageHeight = canvas?.height;
 
@@ -475,28 +475,12 @@ const Annotator = () => {
  useEffect(() => {
         if (isSaved) {
             toast.success("Saved successfully!", {
-                duration: 3000, 
-                position: 'bottom-center', 
+                duration: 3000,
+                position: 'bottom-center',
             });
         }
     }, [isSaved]);
   
-  
-
-  // const clearCanvas = () => {
-  //   const canvas = canvasRef.current;
-  //   if (!canvas) return;
-
-  //   const context = canvas.getContext("2d");
-  //   context.clearRect(0, 0, canvas.width, canvas.height);
-
-  //   setIconPositions([]);
-  //   setPreviewUrl(null);
-  //   setIsSaved(false);
-  //   setRectangles([]);
-  //   setComments([]);
-  //   setPdfId('');
-  // };
 
   return (
     <div>
@@ -660,13 +644,11 @@ const Annotator = () => {
                 <Button
                   variant="secondary"
                   onClick={saveToBackend}
-                  disabled={ isSaving} 
+                  disabled={ isSaving}
                   className="mt-2 me-2 rounded mb-3"
                 >
                   {isSaving ? "Saving..." : "Save Annotation"}{" "}
-            
                 </Button>
-            {isSaved && <p style={{ color: "green" }}>Saved successfully!</p>}
               </>
             )}
           </div>
@@ -678,3 +660,5 @@ const Annotator = () => {
 };
 
 export default Annotator;
+
+

@@ -4,7 +4,6 @@ import { Store } from "../Store.js";
 import { getError } from "../utils.js";
 import LoadingBox from "./LoadingBox.jsx";
 import MessageBox from "./MessageBox.jsx";
-import Button from "react-bootstrap/Button";
 import { toast } from "react-toastify";
 
 const initialState = {
@@ -33,7 +32,7 @@ const reducer = (state, action) => {
         ),
       };
     case "DELETE_REQUEST":
-      return { ...state, loadingDelete: true, successDelete: false };
+      return { ...state, loadingDelete: true };
     case "DELETE_SUCCESS":
       return {
         ...state,
@@ -61,6 +60,8 @@ export default function Notifications() {
   const { userInfo } = state;
 
   const fetchNotifications = useCallback(async () => {
+    if (!userInfo?.token) return;
+
     dispatch({ type: "FETCH_REQUEST" });
     try {
       const { data } = await axios.get(`/api/notifications`, {
@@ -70,7 +71,7 @@ export default function Notifications() {
     } catch (err) {
       dispatch({ type: "FETCH_FAIL", payload: getError(err) });
     }
-  }, [userInfo.token]);
+  }, [userInfo?.token]);
 
   useEffect(() => {
     fetchNotifications();
@@ -88,6 +89,11 @@ export default function Notifications() {
   };
 
   const deleteHandler = async (notification) => {
+    if (!notification._id) {
+      toast.error("Notification ID missing.");
+      return;
+    }
+
     if (window.confirm("Are you sure to delete?")) {
       try {
         dispatch({ type: "DELETE_REQUEST" });
@@ -95,10 +101,8 @@ export default function Notifications() {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
         toast.success("Notification deleted successfully");
-        fetchNotifications();
         dispatch({ type: "DELETE_SUCCESS", payload: notification._id });
       } catch (err) {
-        console.error("Error deleting notification:", err);
         toast.error(getError(err));
         dispatch({ type: "DELETE_FAIL" });
       }
@@ -112,53 +116,74 @@ export default function Notifications() {
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
-      ) : !Array.isArray(notifications) || notifications.length === 0 ? (
+      ) : notifications.length === 0 ? (
         <MessageBox>No notifications to display.</MessageBox>
       ) : (
-        <ul>
+        <ul style={{ listStyle: "none", padding: 0 }}>
           {notifications.map((notification) => (
             <li
-              className="notification"
-              key={notification._id}
+              key={notification._id || `${notification.title}-${notification.createdAt}`}
               style={{
-                backgroundColor: notification.isRead ? "#e0e0e0" : "#fff",
-                padding: "10px",
-                margin: "5px 0",
+                backgroundColor: notification.isRead ? "#f1f1f1" : "#fff",
+                padding: "16px",
+                marginBottom: "12px",
                 border: "1px solid #ccc",
-                borderRadius: "4px",
+                borderRadius: "8px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
               }}
             >
-              <strong>{notification.title}</strong> - {notification.message} -{" "}
-              {notification.recipientType}
-              {!notification.isRead && (
-                <Button
+              <strong>{notification.title}</strong>
+              <p>{notification.message}</p>
+              <div style={{ fontSize: "0.85rem", color: "#666" }}>
+                Recipient: <em>{notification.recipientType}</em>
+              </div>
+              <div style={{ marginTop: "12px" }}>
+                {!notification.isRead && (
+                  <button
+                    onClick={() => markAsRead(notification._id)}
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#007bff",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      marginRight: "10px",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      transition: "background-color 0.3s",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.target.style.backgroundColor = "#0056b3")
+                    }
+                    onMouseOut={(e) =>
+                      (e.target.style.backgroundColor = "#007bff")
+                    }
+                  >
+                    Mark as Read
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteHandler(notification)}
                   style={{
-                    marginLeft: "10px",
-                    padding: "5px 10px",
-                    cursor: "pointer",
-                    backgroundColor: "#007bff",
+                    padding: "8px 16px",
+                    backgroundColor: "#dc3545",
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
+                    cursor: "pointer",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    transition: "background-color 0.3s",
                   }}
-                  onClick={() => markAsRead(notification._id)}
+                  onMouseOver={(e) =>
+                    (e.target.style.backgroundColor = "#b02a37")
+                  }
+                  onMouseOut={(e) =>
+                    (e.target.style.backgroundColor = "#dc3545")
+                  }
                 >
-                  Mark as Read
-                </Button>
-              )}
-              <Button
-                variant="danger"
-                style={{
-                  marginLeft: "10px",
-                  padding: "5px 10px",
-                  cursor: "pointer",
-                  border: "none",
-                  borderRadius: "4px",
-                }}
-                onClick={() => deleteHandler(notification)}
-              >
-                Delete
-              </Button>
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>

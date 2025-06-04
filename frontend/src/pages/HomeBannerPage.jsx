@@ -33,7 +33,7 @@ const notifications = [
 ];
 
 export default function HomeBannerPage() {
-  const [currentNotificationIndex] = useState(0);
+
   const [notification, setNotification] = useState(null);
   const { state } = useContext(Store);
   const { userInfo, serviceProviderInfo } = state;
@@ -73,39 +73,71 @@ export default function HomeBannerPage() {
     },
   ];
 
-  useEffect(() => {
-    if (notifications.length > 0) {
-      let notificationToShow = null;
+  // useEffect(() => {
+  //   if (notifications.length > 0) {
+  //     let notificationToShow = null;
 
-      if (userInfo) {
-        notificationToShow = notifications.find(
-          (notification) =>
-            notification.recipientType === "user" && !notification.isRead
-        );
-      } else if (serviceProviderInfo) {
-        notificationToShow = notifications.find(
-          (notification) =>
-            notification.recipientType === "serviceProvider" &&
-            !notification.isRead
-        );
-      } else {
-        notificationToShow = notifications.find(
-          (notification) =>
-            notification.recipientType === "" && !notification.isRead
-        );
-      }
+  //     if (userInfo) {
+  //       notificationToShow = notifications.find(
+  //         (notification) =>
+  //           notification.recipientType === "user" && !notification.isRead
+  //       );
+  //     } else if (serviceProviderInfo) {
+  //       notificationToShow = notifications.find(
+  //         (notification) =>
+  //           notification.recipientType === "serviceProvider" &&
+  //           !notification.isRead
+  //       );
+  //     } else {
+  //       notificationToShow = notifications.find(
+  //         (notification) =>
+  //           notification.recipientType === "" && !notification.isRead
+  //       );
+  //     }
 
-      if (notificationToShow) {
-        setNotification(notificationToShow);
+  //     if (notificationToShow) {
+  //       setNotification(notificationToShow);
 
-        const timer = setTimeout(() => {
-          setNotification(null);
-        }, 5000);
+  //       const timer = setTimeout(() => {
+  //         setNotification(null);
+  //       }, 5000);
 
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [userInfo, serviceProviderInfo, currentNotificationIndex]);
+  //       return () => clearTimeout(timer);
+  //     }
+  //   }
+  // }, [userInfo, serviceProviderInfo, currentNotificationIndex]);
+
+useEffect(() => {
+  let notificationToShow = null;
+
+  if (serviceProviderInfo) {
+    // Priority 1: serviceProvider
+    notificationToShow = notifications.find(
+      (n) => n.recipientType === "serviceProvider" && !n.isRead
+    );
+  } else if (userInfo) {
+    // Priority 2: user
+    notificationToShow = notifications.find(
+      (n) => n.recipientType === "user" && !n.isRead
+    );
+  } else {
+    // Priority 3: default/anonymous
+    notificationToShow = notifications.find(
+      (n) => n.recipientType === "" && !n.isRead
+    );
+  }
+
+  if (notificationToShow) {
+    setNotification(notificationToShow);
+
+    const timer = setTimeout(() => {
+      setNotification(null);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }
+}, [userInfo, serviceProviderInfo]);
+
 
   const handleNotificationClick = (buttonText) => {
     if (buttonText === "Get Quote") {

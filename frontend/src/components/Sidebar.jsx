@@ -1,8 +1,7 @@
-
-
 import { useState, useEffect } from "react";
 import { Button, Modal, ListGroup } from "react-bootstrap";
-// import { PDFDocument } from "pdf-lib";
+import { toast } from "react-toastify";
+import jsPDF from "jspdf";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -13,51 +12,78 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-//  const canvasRef = useRef(null);
-//   const [file, setFile] = useState(null);
-//  const stageRef = useRef(null);
-//  const [ setIsSaved] = useState(false); 
+
   useEffect(() => {
     fetchSavedPdfs();
   }, []);
-  
-const fetchSavedPdfs = async () => {
-  try {
-    setError(null);
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const token = userInfo?.token;
 
-    if (!token) {
-      console.warn("User not authenticated, skipping fetch.");
+  const printDrawing = () => {
+    const container = document.querySelector("#pdf-container");
+    const baseCanvas = container.querySelector("canvas");
+    const overlayCanvas = container.querySelector("canvas + canvas");
+
+    if (!baseCanvas || !overlayCanvas) {
+      console.error("Canvas layers missing for export.");
       return;
     }
 
-    const response = await fetch("/api/user-annotations", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const mergedCanvas = document.createElement("canvas");
+    mergedCanvas.width = baseCanvas.width;
+    mergedCanvas.height = baseCanvas.height;
+    const mergedContext = mergedCanvas.getContext("2d");
+
+    mergedContext.drawImage(baseCanvas, 0, 0);
+    mergedContext.drawImage(overlayCanvas, 0, 0);
+
+    const imgData = mergedCanvas.toDataURL("image/png");
+    const orientation =
+      mergedCanvas.width > mergedCanvas.height ? "landscape" : "portrait";
+
+    const pdf = new jsPDF({
+      orientation,
+      unit: "px",
+      format: [mergedCanvas.width, mergedCanvas.height],
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    pdf.addImage(imgData, "PNG", 0, 0, mergedCanvas.width, mergedCanvas.height);
+    pdf.save("annotated.pdf");
+  };
 
-      // Enhance with download/view URLs
-      const enhancedData = data.map((item) => ({
-        ...item,
-        pdfUrl: `/api/annotations/pdf/${item._id}`,
-      }));
+  const fetchSavedPdfs = async () => {
+    try {
+      setError(null);
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      const token = userInfo?.token;
 
-      setSavedPdfs(enhancedData);
-    } else {
-      const errorData = await response.json();
-      setError(errorData.message || "Failed to fetch saved PDFs.");
+      if (!token) {
+        console.warn("User not authenticated, skipping fetch.");
+        return;
+      }
+
+      const response = await fetch("/api/user-annotations", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        const enhancedData = data.map((item) => ({
+          ...item,
+          pdfUrl: `/api/annotations/pdf/${item._id}`,
+        }));
+
+        setSavedPdfs(enhancedData);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to fetch saved PDFs.");
+      }
+    } catch (error) {
+      console.error("Error fetching saved PDFs:", error);
+      setError("Error fetching saved PDFs. Please try again.");
     }
-  } catch (error) {
-    console.error("Error fetching saved PDFs:", error);
-    setError("Error fetching saved PDFs. Please try again.");
-  }
-};
-
+  };
 
   const toggleSidebar = () => {
     if (!isOpen) {
@@ -125,9 +151,7 @@ const fetchSavedPdfs = async () => {
   const handleDeletePdf = async (pdfId, filename) => {
     if (
       !window.confirm(
-        `Are you sure you want to delete "${
-          filename || "this document"
-        }"? This action cannot be undone.`
+        `Are you sure you want to delete "${filename || "this document"}"?`
       )
     ) {
       return;
@@ -144,7 +168,7 @@ const fetchSavedPdfs = async () => {
         return;
       }
 
-      const response = await fetch(`/api/${pdfId}`, {
+      const response = await fetch(`/api/annotations/${pdfId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -152,13 +176,13 @@ const fetchSavedPdfs = async () => {
       });
 
       if (response.ok) {
-        setSuccessMessage("PDF deleted successfully!");
+        toast.success("PDF deleted successfully!");
         setSavedPdfs((prev) => prev.filter((pdf) => pdf._id !== pdfId));
         const container = document.getElementById("pdf-container");
         if (container) container.innerHTML = "";
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Failed to delete PDF.");
+        toast.error(errorData.message || "Failed to delete PDF.");
       }
     } catch (error) {
       setError("Error deleting PDF. Please try again.");
@@ -264,8 +288,8 @@ const fetchSavedPdfs = async () => {
       annotations.comments.forEach((comment) => {
         const x = comment.xPercent * canvasWidth;
         const y = comment.yPercent * canvasHeight;
-        const padding = 4;
-        const fontSize = 14;
+        const padding = 10;
+        const fontSize = 17;
         context.font = `${fontSize}px Arial`;
         const textWidth = context.measureText(comment.text).width;
 
@@ -330,7 +354,7 @@ const fetchSavedPdfs = async () => {
       context.stroke();
     };
 
-    const isSaved = true; 
+    const isSaved = true;
     if (isSaved) {
       const text = "APPROVED";
       const subText = "AC-COMMERCE";
@@ -454,53 +478,6 @@ const fetchSavedPdfs = async () => {
     renderSignature();
   };
 
-
-//   const saveAsPDF = async () => {
-// if (!file || file.type !== "application/pdf") {
-//   alert("The selected file is not a PDF.");
-//   return;
-// }
-//     if (file && file.type === "application/pdf") {
-//       const arrayBuffer = await file.arrayBuffer();
-//       const pdfDoc = await PDFDocument.load(arrayBuffer);
-//       const page = pdfDoc.getPages()[0];
-//       const { width, height } = page.getSize();
-//       const pdfCanvas = canvasRef.current;
-//       const stage = stageRef.current;
-
-//       if (pdfCanvas && stage) {
-//         const tempCanvas = document.createElement("canvas");
-//         tempCanvas.width = width;
-//         tempCanvas.height = height;
-//         const tempContext = tempCanvas.getContext("2d");
-//         tempContext.drawImage(pdfCanvas, 0, 0, width, height);
-//         stage.draw();
-
-//         const layer = stage.getChildren()[0];
-
-//         if (layer) {
-//           tempContext.drawImage(layer.getCanvas()._canvas, 0, 0, width, height);
-//         }
-
-//         const imageData = tempCanvas.toDataURL();
-//         const pngImage = await pdfDoc.embedPng(imageData);
-
-//         page.drawImage(pngImage, { x: 0, y: 0, width, height });
-
-//         const pdfBytes = await pdfDoc.save();
-//         const blob = new Blob([pdfBytes], { type: "application/pdf" });
-//         const link = document.createElement("a");
-//         link.href = URL.createObjectURL(blob);
-//         link.download = "annotated-pdf.pdf";
-//         link.click();
-//         setIsSaved(true);
-//              setFile(null);
-//       }
-
-//     } else {
-//       alert("The selected file is not a PDF.");
-//     }
-//   };
   return (
     <>
       <Button className="sidebar-toggle" onClick={toggleSidebar}>
@@ -535,7 +512,7 @@ const fetchSavedPdfs = async () => {
                 {savedPdfs.map((pdf) => (
                   <ListGroup.Item
                     key={pdf._id}
-                    className="d-flex justify-content-between align-items-center"
+                    className="d-flex justify-content-between align-items-center pdf-drawing"
                   >
                     <Button
                       variant="links"
@@ -547,16 +524,20 @@ const fetchSavedPdfs = async () => {
                       {pdf.filename || "Untitled Document"}
                     </Button>
                     <small className="text-muted">
-            Saved: {new Date(pdf.createdAt).toLocaleString()}
+                      Saved: {new Date(pdf.createdAt).toLocaleString()}
                     </small>
-                    
-                    <Button
-                      variant="danger"
-                      className="p-2 me-2"
-                      onClick={() => handleDeletePdf(pdf._id, pdf.filename)}
-                    >
-                      <i className="fas fa-trash"></i>
-                    </Button>
+                    <div className="d-flex align-items-center">
+                      <Button onClick={printDrawing} className="btn btn-info">
+                        <i className="fas fa-download"></i>
+                      </Button>
+                      <Button
+                        variant="danger"
+                        className="p-2"
+                        onClick={() => handleDeletePdf(pdf._id, pdf.filename)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </Button>
+                    </div>
                   </ListGroup.Item>
                 ))}
               </ListGroup>
@@ -575,9 +556,6 @@ const fetchSavedPdfs = async () => {
           <Button variant="secondary" onClick={toggleSidebar}>
             Close
           </Button>
-          {/* <Button variant="secondary" onClick={saveAsPDF}>
-            Save As PDF
-          </Button> */}
         </Modal.Footer>
       </Modal>
     </>

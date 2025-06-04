@@ -1,8 +1,9 @@
 import express from 'express';
 import multer from 'multer';
-import AnnotationModel from '../models/annotationModel.js'; 
-import { isAuth } from '../utils.js'; 
-
+import AnnotationModel from '../models/annotationModel.js';
+import { isAuth } from '../utils.js';
+import { PDFDocument, rgb, degrees } from 'pdf-lib';
+import fetch from 'node-fetch';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -49,12 +50,12 @@ router.post('/upload-annotate', isAuth, upload.single('pdfFile'), async (req, re
       textColor: comment.textColor,
     }));
 
-  
+
     const percentLines = parsedLines.map(line => ({
       id: line.id,
       rectId: line.rectId,
       commentId: line.commentId,
-      points: line.points.map((p, i) => i % 2 === 0 ? p / width : p / height), // x / width, y / height
+      points: line.points.map((p, i) => i % 2 === 0 ? p / width : p / height), 
       stroke: line.stroke,
       strokeWidth: line.strokeWidth,
     }));
@@ -81,27 +82,77 @@ router.post('/upload-annotate', isAuth, upload.single('pdfFile'), async (req, re
 });
 
 
+
 router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
   try {
     const annotation = await AnnotationModel.findById(req.params.id);
-    if (!annotation) {
+    if (!annotation || !annotation.pdfData) {
       return res.status(404).json({ message: 'Annotated PDF not found.' });
     }
 
- 
-    if (annotation.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Unauthorized to access this PDF.' });
+    // Load the base PDF
+    const pdfDoc = await PDFDocument.load(annotation.pdfData);
+    const pages = pdfDoc.getPages();
+
+    const watermarkText = `AC Design — User: ${req.user.email || 'Unknown User'}`;
+
+    // IF you have an image (canvas export) from the frontend
+    if (annotation.annotatedImageUrl) {
+      const imageBytes = await fetch(annotation.annotatedImageUrl).then(res => res.arrayBuffer());
+      const embeddedImage = await pdfDoc.embedPng(imageBytes); // or embedJpg
+
+      pages.forEach((page) => {
+        const { width, height } = page.getSize();
+
+        // Draw the flattened annotations image over the page
+        page.drawImage(embeddedImage, {
+          x: 0,
+          y: 0,
+          width,
+          height,
+        });
+
+        // Add watermark
+        page.drawText(watermarkText, {
+          x: width / 4,
+          y: height / 2,
+          size: 18,
+          rotate: degrees(-40),
+          opacity: 0.15,
+          color: rgb(0.6, 0.6, 0.6),
+        });
+      });
+    } else {
+      // Fallback: add only watermark
+      pages.forEach((page) => {
+        const { width, height } = page.getSize();
+        page.drawText(watermarkText, {
+          x: width / 4,
+          y: height / 2,
+          size: 18,
+          rotate: degrees(-40),
+          opacity: 0.15,
+          color: rgb(0.6, 0.6, 0.6),
+        });
+      });
     }
 
-    console.log("Sending PDF with ID:", req.params.id); 
-res.set({
-  'Content-Type': 'application/pdf',
-  'Content-Disposition': 'inline', // don't force download
-});
-res.send(annotation.pdfData);
+    const pdfBytes = await pdfDoc.save();
+
+    if (annotation.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized access.' });
+    }
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${annotation.filename || 'annotated.pdf'}"`,
+      'Content-Length': pdfBytes.length,
+    });
+
+    res.send(Buffer.from(pdfBytes));
   } catch (error) {
-    console.error('Error fetching annotated PDF:', error);
-    res.status(500).json({ message: 'Failed to fetch annotated PDF.', error: error.message });
+    console.error('Error generating annotated PDF:', error);
+    res.status(500).json({ message: 'Failed to generate annotated PDF.' });
   }
 });
 
@@ -136,6 +187,11 @@ router.get('/user-annotations', isAuth, async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch user annotations.', error: error.message });
   }
 });
+
+
+
+
+
 
 
 router.delete('/annotations/:id', isAuth, async (req, res) => {
