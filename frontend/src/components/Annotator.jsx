@@ -3,7 +3,8 @@ import { Stage, Layer, Rect, Line, Text } from "react-konva";
 import { Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
-import ArchSymbols from "./ArchSymbolsModal.jsx";
+
+import PdfHelpVideo from "./PdfHelpVideo.jsx";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
@@ -181,11 +182,11 @@ const Annotator = () => {
         if (isRect || isComment) {
           rect = isRect
             ? {
-              x: draggedNode.x(),
-              y: draggedNode.y(),
-              width: draggedNode.width(),
-              height: draggedNode.height(),
-            }
+                x: draggedNode.x(),
+                y: draggedNode.y(),
+                width: draggedNode.width(),
+                height: draggedNode.height(),
+              }
             : rectangles.find((r) => r.id === line.rectId);
 
           comment = isComment
@@ -220,7 +221,6 @@ const Annotator = () => {
     );
   }, []);
 
-  
   const renderComments = useCallback(
     (context) => {
       context.font = "bold 17px Arial";
@@ -411,7 +411,7 @@ const Annotator = () => {
       alert("Please select a PDF file to save.");
       return;
     }
-  setIsSaved(false);
+    setIsSaved(false);
     const formData = new FormData();
     formData.append("pdfFile", file);
     formData.append("rectangles", JSON.stringify(rectangles));
@@ -472,54 +472,70 @@ const Annotator = () => {
       setIsSaving(false);
     }
   };
- useEffect(() => {
-        if (isSaved) {
-            toast.success("Saved successfully!", {
-                duration: 3000,
-                position: 'bottom-center',
-            });
-        }
-    }, [isSaved]);
-  
+  useEffect(() => {
+    if (isSaved) {
+      toast.success("Saved successfully!", {
+        duration: 3000,
+        position: "bottom-center",
+      });
+    }
+  }, [isSaved]);
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    setIconPositions([]);
+    setPreviewUrl(null);
+    setIsSaved(false);
+    setRectangles([]);
+    setComments([]);
+  };
 
   return (
     <div>
       <h1 className="mt-4 mb-4 title-measurement">
         Measurement Service System
       </h1>
-      <ArchSymbols />
+      <PdfHelpVideo />
       <Form className="btu-calculation-measure mt-4">
-        <Form.Label className="mb-4 label-upload fw-bold">
-          Upload file sample.
+        <Form.Label className=" label-upload fw-bold text-secondary fs-5">
         </Form.Label>
-        <p className="text-primary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph">
           *Supported: High Resolution PDFs files (.pdf). Recommended to place
           air conditioner (rectangle) above door in drawing.
         </p>
-        <p className="text-primary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph">
+          * PDFs files (.pdf) should be flat/appartment drawing and without any
+          modifications.
+        </p>
+        <p className="text-secondary fw-bold upload-paragraph">
           *Add rectangle: <kbd>Click On Empty Area</kbd>
         </p>
-        <p className="text-primary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph">
           *Enter to appeared prompt window relevant to air conditioner comment.
         </p>
-        <p className="text-primary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph">
           *Rotate rectangle: <kbd>Click</kbd>
         </p>
-        <p className="text-primary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph">
           *Delete rectangle for small screens: <kbd>Tap And Hold</kbd>
         </p>
-        <p className="text-primary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph">
           *Delete rectangle for large screens: <kbd>Right Click</kbd>
         </p>
-        <p className="text-primary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph">
           *For saving approved drawing:{" "}
-          <kbd>Click on the button "Save Annotations"</kbd>{" "}
-          {/* Updated instruction */}
+          <kbd>Click on the button "Save PDF File"</kbd>{" "}
         </p>
-        <p className="text-primary fw-bold upload-paragraph">
-          *For removing approved drawing/.pdf file:{" "}
-          <kbd>Click on the button "Clear"</kbd>
+        <p className="text-secondary fw-bold upload-paragraph">
+          <span className="me-1"></span>
+          *To remove unnecessary drawing, simply click the <kbd>Clear</kbd>{" "}
+          button.
         </p>
+
         <Form.Control
           className="mt-4"
           type="file"
@@ -644,10 +660,17 @@ const Annotator = () => {
                 <Button
                   variant="secondary"
                   onClick={saveToBackend}
-                  disabled={ isSaving}
+                  disabled={isSaving}
                   className="mt-2 me-2 rounded mb-3"
                 >
-                  {isSaving ? "Saving..." : "Save Annotation"}{" "}
+                  {isSaving ? "Saving..." : "Save PDF File"}{" "}
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="mt-2 rounded mb-3"
+                  onClick={clearCanvas}
+                >
+                  Clear
                 </Button>
               </>
             )}
@@ -660,5 +683,3 @@ const Annotator = () => {
 };
 
 export default Annotator;
-
-

@@ -140,6 +140,65 @@ const data = {
       ],
     },
     {
+      name: "10000 BTU Wall Mounted AC",
+      slug: "10000-btu-wall-mounted-air-conditioner",
+      category: "Wall Mounted AC",
+      image: "/images/p28.jpg",
+      price: 459.99,
+      discount: 20,
+      countInStock: 4,
+      brand: "Fujitsu",
+      rating: 3.8,
+      numReviews: 123,
+      description: "Model ASTG09CMCA is ideal for small rooms. The Cooling Only models are perfect for homes in warmer parts of warm countries so that you can stay cool all year-round; 5 year warranty",
+      features: [
+        'Energy Saving',
+        'Remote Control',
+        "Long-life Ion Deodorisation Filter",
+        "Apple-Catechin Filter",
+        "Fast Cooling",
+        "Dual Sensing",
+        "Anti Corrosion Gold Fin™",
+        "Auto Restart",
+        "Program Timer",
+        "Smart Operation",
+        "Automatic Air Flow Adjustment",
+        "Economy Mode",
+        "Washable Panel"
+      ],
+      mode: [
+        "Cooling Mode",
+        " Drying Mode ",
+        "Fan Mode",
+        "Silent Mode"
+      ],
+      btu: 10000,
+      areaCoverage: 15,
+      energyEfficiency: 10,
+      dimension: {
+        width: 84,
+        height: 26.8,
+        depth: 20.3,
+      },
+      documents: [
+        {
+          url: "https://www.usermanuals.au/fujitsu/lifestyle-astg09cmca/manual",
+          type: "PDF",
+          description: "User Manual for Fujitsu 10000 BTU Wall Mounted AC",
+        },
+        {
+          url: "https://www.usermanuals.au/fujitsu/lifestyle-astg09cmca/manual",
+          type: "PDF",
+          description: "Technical Specifications for Fujitsu 10000 BTU Wall Mounted AC",
+        },
+        {
+          url: "https://www.fujitsu-general.com/datafiles/DIM_DMS0041643001_EN_20180129170039.pdf",
+          type: "Image",
+          description: "Installation Guide Image",
+        },
+      ],
+    },
+    {
       name: "12000 BTU Mini Split AC",
       slug: "12000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
@@ -637,6 +696,45 @@ const data = {
       ],
     },
     {
+      name: "28300 BTU Outdoor Condenser",
+      slug: "28300-outdoor-condensing-unit",
+      category: "Outdoor Condenser",
+      image: "/images/p29.jpg",
+      price: 1626,
+      discount: 5,
+      countInStock: 2,
+      brand: "Fujitsu",
+      rating: 3.8,
+      numReviews: 123,
+      description: "Fujitsu ASTG09CMCA 2.5kW Cooling Only Split System Inverter Air Conditioner. Outdoor unit -condenser. Limits the maximum operation current, and performs operation with the power consumption suppressed. ON-OFF timer can be set to operate once every 24 hours. Corrosion-resistance of the heat exchanger in coastal areas has been improved by blue fin treatment of the outdoor unit heat exchange. Human sensor catches movements of people in a room.",
+      features: "Energy Saving",
+      btu: 28300,
+      areaCoverage: 30,
+      energyEfficiency: 11.3,
+      dimension: {
+        width: 90,
+        height: 83,
+        depth: 33,
+      },
+      documents: [
+        {
+          url: "https://ambienceair.com/wp-content/uploads/2018/07/FUJITSU-ASTG07-12CMCA-WALL-SPLIT-COOLING-ONLY.pdf",
+          type: "PDF",
+          description: "User Manual for 28300 BTU Outdoor Condenser",
+        },
+        {
+          url: "https://www.manualpdf.in/fujitsu/lifestyle-astg09cmca/manual",
+          type: "PDF",
+          description: "Technical Specifications for 28300 BTU Outdoor Condenser",
+        },
+        {
+          url: "https://www.fujitsu-general.com/datafiles/DIM_DMS0037604001_EN_20160902193343.pdf",
+          type: "Image",
+          description: "Installation Guide Image",
+        },
+      ],
+    },
+    {
       name: "36000 BTU Outdoor Condenser",
       slug: "36000-outdoor-condensing-unit",
       category: "Outdoor Condenser",
@@ -936,17 +1034,17 @@ const data = {
       isAdmin: false,
       logo: "/images/samsung-logo.png"
     },
-    // {
-    //   name: 'Lennox',
-    //   brand: "Lennox",
-    //   rating: 2.5,
-    //   info: "Lennox International Inc. is an American provider of climate control products for the heating, ventilation, and air conditioning (HVAC) and refrigeration markets.",
-    //   link: "https://www.youtube.com/embed/PYiNnQwo04w?si=ZWkYIzkpP4VSmVPZ",
-    //   companyLink: "https://www.lennox.com/residential/",
-    //   numReviews: 15,
-    //   isAdmin: false,
-    //   logo: "/images/lennox-logo.png"
-    // },
+    {
+      name: 'Lennox',
+      brand: "Lennox",
+      rating: 2.5,
+      info: "Lennox International Inc. is an American provider of climate control products for the heating, ventilation, and air conditioning (HVAC) and refrigeration markets.",
+      link: "https://www.youtube.com/embed/PYiNnQwo04w?si=ZWkYIzkpP4VSmVPZ",
+      companyLink: "https://www.lennox.com/residential/",
+      numReviews: 15,
+      isAdmin: false,
+      logo: "/images/lennox-logo.png"
+    },
     {
       name: 'Haier',
       brand: "Haier",
@@ -1435,7 +1533,7 @@ const data = {
     },
   ],
 
-annotations: [
+  annotations: [
     {
       filename: 'example.pdf',
       pdfId: 'demo-pdf-123',
@@ -1478,10 +1576,10 @@ annotations: [
           },
         ],
       },
-     
+
     },
   ]
-  
+
 }
 
 export default data;

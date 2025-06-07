@@ -33,7 +33,7 @@ function BtuCalculator() {
   const [showCondenser, setShowCondenser] = useState(false);
   const [error, setError] = useState("");
   const [totalBTU, setTotalBTU] = useState(0);
-  const [optimalProductCount, setOptimalProductCount] = useState(0);
+    const [optimalProductCount, setOptimalProductCount] = useState(0);
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
       PitchedRoof: false,

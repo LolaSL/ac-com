@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
-import jsPDF from "jspdf";
+// import ArchSymbols from "./ArchSymbolsModal.jsx";
+// import { FaFilePdf } from "react-icons/fa";
+// import jsPDF from "jspdf";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -16,38 +18,6 @@ const Sidebar = () => {
   useEffect(() => {
     fetchSavedPdfs();
   }, []);
-
-  const printDrawing = () => {
-    const container = document.querySelector("#pdf-container");
-    const baseCanvas = container.querySelector("canvas");
-    const overlayCanvas = container.querySelector("canvas + canvas");
-
-    if (!baseCanvas || !overlayCanvas) {
-      console.error("Canvas layers missing for export.");
-      return;
-    }
-
-    const mergedCanvas = document.createElement("canvas");
-    mergedCanvas.width = baseCanvas.width;
-    mergedCanvas.height = baseCanvas.height;
-    const mergedContext = mergedCanvas.getContext("2d");
-
-    mergedContext.drawImage(baseCanvas, 0, 0);
-    mergedContext.drawImage(overlayCanvas, 0, 0);
-
-    const imgData = mergedCanvas.toDataURL("image/png");
-    const orientation =
-      mergedCanvas.width > mergedCanvas.height ? "landscape" : "portrait";
-
-    const pdf = new jsPDF({
-      orientation,
-      unit: "px",
-      format: [mergedCanvas.width, mergedCanvas.height],
-    });
-
-    pdf.addImage(imgData, "PNG", 0, 0, mergedCanvas.width, mergedCanvas.height);
-    pdf.save("annotated.pdf");
-  };
 
   const fetchSavedPdfs = async () => {
     try {
@@ -305,177 +275,6 @@ const Sidebar = () => {
         context.fillText(comment.text, x, y);
       });
     }
-
-    const drawGlobe = (x, y, radius) => {
-      context.beginPath();
-      context.arc(x, y, radius, 0, 2 * Math.PI);
-      context.strokeStyle = "#00008B";
-      context.lineWidth = 1.5;
-      context.stroke();
-
-      context.strokeStyle = "#808080";
-      context.lineWidth = 0.5;
-      const numParallels = 2;
-      for (let i = 1; i <= numParallels; i++) {
-        const yOffset = (i / (numParallels + 1)) * radius * 0.7;
-        context.beginPath();
-        context.arc(x, y, radius - yOffset, 0, 2 * Math.PI);
-        context.stroke();
-        context.beginPath();
-        context.arc(x, y, radius + yOffset, 0, 2 * Math.PI);
-        context.stroke();
-      }
-
-      const numMeridians = 4;
-      for (let i = 0; i < numMeridians; i++) {
-        const angle = (i / numMeridians) * 2 * Math.PI;
-        context.beginPath();
-        context.ellipse(x, y, radius * 0.35, radius * 0.7, angle, 0, Math.PI);
-        context.stroke();
-        context.beginPath();
-        context.ellipse(
-          x,
-          y,
-          radius * 0.35,
-          radius * 0.7,
-          angle + Math.PI,
-          0,
-          Math.PI
-        );
-        context.stroke();
-      }
-
-      context.beginPath();
-      context.arc(x, y, radius * 0.7, 0, 2 * Math.PI);
-      context.stroke();
-      context.beginPath();
-      context.moveTo(x - radius * 0.5, y);
-      context.lineTo(x + radius * 0.5, y);
-      context.stroke();
-    };
-
-    const isSaved = true;
-    if (isSaved) {
-      const text = "APPROVED";
-      const subText = "AC-COMMERCE";
-      const padding = 12;
-      const fontSize = 17;
-      const subFontSize = 13;
-      const globeRadius = 20;
-      const globeMarginRight = 20;
-      const outerLineWidth = 2;
-
-      context.font = `bold ${fontSize}px Arial`;
-      const textMetrics = context.measureText(text);
-      const textWidth = textMetrics.width;
-      const textHeight = fontSize;
-
-      context.font = `normal ${subFontSize}px Arial`;
-      const subTextMetrics = context.measureText(subText);
-      const subTextWidth = subTextMetrics.width;
-      const subTextHeight = subFontSize;
-
-      const totalTextWidth = Math.max(textWidth, subTextWidth);
-      const totalContentWidth =
-        globeRadius * 2 + globeMarginRight + totalTextWidth;
-      const totalHeight = Math.max(globeRadius * 2, textHeight + subTextHeight);
-      const outerWidth = totalContentWidth + 2 * padding;
-      const outerHeight = totalHeight + 2 * padding;
-
-      const rectX = context.canvas.width - outerWidth - 40;
-      const rectY = 80;
-
-      const globeX = rectX + padding + globeRadius;
-      const globeY = rectY + padding + globeRadius;
-
-      const textX = globeX + globeRadius + globeMarginRight;
-      const textY = rectY + padding + textHeight;
-      const subTextX = textX;
-      const subTextY = textY + subFontSize;
-
-      context.strokeStyle = "#00008B";
-      context.lineWidth = outerLineWidth;
-      context.strokeRect(rectX, rectY, outerWidth, outerHeight);
-
-      context.fillStyle = "rgba(252, 252, 243, 0.2)";
-      context.fillRect(rectX, rectY, outerWidth, outerHeight);
-
-      drawGlobe(context, globeX, globeY, globeRadius);
-
-      context.fillStyle = "#00008B";
-      context.font = `bold ${fontSize}px Arial`;
-      context.fillText(text, textX, textY);
-
-      context.fillStyle = "#00008B";
-      context.font = `normal ${subFontSize}px Arial`;
-      context.fillText(subText, subTextX, subTextY + 5);
-
-      context.setLineDash([]);
-    }
-    const renderSignature = () => {
-      if (isSaved) {
-        const text = "APPROVED";
-        const subText = "AC-COMMERCE";
-        const padding = 12;
-        const fontSize = 17;
-        const subFontSize = 13;
-        const globeRadius = 20;
-        const globeMarginRight = 20;
-        const outerLineWidth = 2;
-
-        context.font = `bold ${fontSize}px Arial`;
-        const textMetrics = context.measureText(text);
-        const textWidth = textMetrics.width;
-        const textHeight = fontSize;
-
-        context.font = `normal ${subFontSize}px Arial`;
-        const subTextMetrics = context.measureText(subText);
-        const subTextWidth = subTextMetrics.width;
-        const subTextHeight = subFontSize;
-
-        const totalTextWidth = Math.max(textWidth, subTextWidth);
-        const totalContentWidth =
-          globeRadius * 2 + globeMarginRight + totalTextWidth;
-        const totalHeight = Math.max(
-          globeRadius * 2,
-          textHeight + subTextHeight
-        );
-        const outerWidth = totalContentWidth + 2 * padding;
-        const outerHeight = totalHeight + 2 * padding;
-
-        const rectX = context.canvas.width - outerWidth - 40;
-        const rectY = 80;
-
-        const globeX = rectX + padding + globeRadius;
-        const globeY = rectY + padding + globeRadius;
-
-        const textX = globeX + globeRadius + globeMarginRight;
-        const textY = rectY + padding + textHeight;
-        const subTextX = textX;
-        const subTextY = textY + subFontSize;
-
-        context.strokeStyle = "#00008B";
-        context.lineWidth = outerLineWidth;
-        context.strokeRect(rectX, rectY, outerWidth, outerHeight);
-
-        context.fillStyle = "rgba(252, 252, 243, 0.2)";
-        context.fillRect(rectX, rectY, outerWidth, outerHeight);
-
-        drawGlobe(globeX, globeY, globeRadius);
-
-        context.fillStyle = "#00008B";
-        context.font = `bold ${fontSize}px Arial`;
-        context.fillText(text, textX, textY);
-
-        context.fillStyle = "#00008B";
-        context.font = `normal ${subFontSize}px Arial`;
-        context.fillText(subText, subTextX, subTextY + 5);
-
-        context.setLineDash([]);
-      }
-    };
-
-    renderSignature();
   };
 
   return (
@@ -483,7 +282,6 @@ const Sidebar = () => {
       <Button className="sidebar-toggle" onClick={toggleSidebar}>
         {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
       </Button>
-
       <Modal
         show={isOpen}
         onHide={toggleSidebar}
@@ -527,12 +325,12 @@ const Sidebar = () => {
                       Saved: {new Date(pdf.createdAt).toLocaleString()}
                     </small>
                     <div className="d-flex align-items-center">
-                      <Button onClick={printDrawing} className="btn btn-info">
-                        <i className="fas fa-download"></i>
-                      </Button>
+                      {/* <Button onClick={printDrawing} className="btn btn-info p-1" option= "disabled">
+                        <FaFilePdf color="white" size="1.5em" />
+                      </Button> */}
                       <Button
                         variant="danger"
-                        className="p-2"
+                        className="p-1"
                         onClick={() => handleDeletePdf(pdf._id, pdf.filename)}
                       >
                         <i className="fas fa-trash"></i>

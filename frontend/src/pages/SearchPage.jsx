@@ -191,18 +191,28 @@ export default function SearchPage() {
             <div>
               <h3>Discount</h3>
               <ul>
-                {discounts.map((d) => (
-                  <li key={d.value}>
-                    <Link
-                      to={getFilterUrl({ discount: d.value })}
-                      className={`text-decoration-none ${
-                        d.value === discount ? "text-bold" : ""
-                      }`}
-                    >
-                      {d.name}
-                    </Link>
-                  </li>
-                ))}
+                <li key="any">
+                  <Link
+                    to={getFilterUrl({ discount: "" })}
+                    className={`text-decoration-none ${
+                      !discount ? "text-bold" : ""
+                    }`}
+                  ></Link>
+                </li>
+                {discounts
+                  .filter((d) => d.value !== "")
+                  .map((d) => (
+                    <li key={d.value}>
+                      <Link
+                        to={getFilterUrl({ discount: d.value })}
+                        className={`text-decoration-none ${
+                          d.value === discount ? "text-bold" : ""
+                        }`}
+                      >
+                        {d.name}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
             <div>
@@ -324,7 +334,8 @@ export default function SearchPage() {
                 </Row>
                 <div>
                   {[...Array(pages).keys()].map((x) => (
-                    <NavLink as={Link} 
+                    <NavLink
+                      as={Link}
                       key={x + 1}
                       className="d-inline-block m-1"
                       to={{
