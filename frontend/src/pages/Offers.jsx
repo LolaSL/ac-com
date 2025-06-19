@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -14,26 +14,17 @@ export default function Offers() {
       linkTo:
         "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Shop Now",
-      criteria: (product) => (product.discount = 40),
+      criteria: (product) => product.discount === 40,
     },
     {
-      title: "Energy Saver Discount",
+      title: "Saver Discount",
       description: "Save money and energy!",
       imageSrc: "/images/offer2.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Learn More",
-      criteria: (product) => (product.discount = 50),
-    },
-    {
-      title: "Combo Deals:",
-      description: "Buy  units.",
-      imageSrc: "/images/offer3.jpg",
-      linkTo:
-        "/search?category=all&query=all&price=all&discount=0&rating=all&btu=all&brand=all&order=newest&page=1",
-      linkText: "Explore Deals",
-      criteria: () => true,
-    },
+      criteria: (product) => product.discount === 50,
+    }
   ];
 
   useEffect(() => {
@@ -41,9 +32,10 @@ export default function Offers() {
       try {
         const response = await fetch("/api/products/search");
         const data = await response.json();
-        setProducts(data.products);
+        setProducts(data.products || []);
       } catch (error) {
         console.error("Error fetching products:", error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -52,18 +44,29 @@ export default function Offers() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    if (!loading) {
+      console.log(
+        "All discount values:",
+        products.map((p) => p.discount)
+      );
+    }
+  }, [loading, products]);
+
   const filterOffers = () => {
     if (loading) return [];
 
-    return offers.filter((offer) => {
-      if (typeof offer.criteria === "function") {
+    return offers
+      .map((offer) => {
         const matchingProducts = products.filter((product) =>
           offer.criteria(product)
         );
-        return matchingProducts.length > 0;
-      }
-      return false;
-    });
+
+        return matchingProducts.length > 0
+          ? { ...offer, matchingProducts }
+          : null;
+      })
+      .filter(Boolean);
   };
 
   const filteredOffers = filterOffers();
@@ -80,7 +83,7 @@ export default function Offers() {
       ) : filteredOffers.length > 0 ? (
         <div className="row">
           {filteredOffers.map((offer, index) => (
-            <div className="col-md-4 mb-4" key={index}>
+            <div className="col-md-4 mb-4 " key={index}>
               <Card>
                 <Card.Img
                   variant="top"
@@ -92,17 +95,7 @@ export default function Offers() {
                   <Card.Text className="offer-desc">
                     {offer.description}
                   </Card.Text>
-                  <Button
-                    variant="secondary"
-                    as={Link}
-                    to={
-                      offer.linkText === "Shop Now"
-                        ? "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1"
-                        : offer.linkText === "Learn More"
-                        ? "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1"
-                        : "/search?category=all&query=all&price=all&discount=0&rating=all&btu=all&brand=all&order=newest&page=1"
-                    }
-                  >
+                  <Button variant="secondary" as={Link} to={offer.linkTo}>
                     {offer.linkText}
                   </Button>
                 </Card.Body>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import  { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -43,16 +43,16 @@ export default function PaymentMethodScreen() {
               onChange={(e) => setPaymentMethod(e.target.value)}
             />
           </div>
-          <div className="mb-3">
+          {/* <div className="mb-3">
             <Form.Check
               type="radio"
-              id="Stripe"
-              label="Stripe"
-              value="Stripe"
-              checked={paymentMethodName === 'Stripe'}
+              id="Square"
+              label="Square"
+              value="Square"
+              checked={paymentMethodName === 'Square'}
               onChange={(e) => setPaymentMethod(e.target.value)}
             />
-          </div>
+          </div> */}
           <div className="mb-3">
             <Button className="btn btn-secondary" type="submit">Continue</Button>
           </div>

@@ -14,7 +14,7 @@ import { getError } from "../utils";
 import { useContext } from "react";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
-import CheckboxGroup from "./CheckboxGroup";
+import CheckboxGroup from "./CheckboxGroup.jsx";
 
 function BtuCalculator() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -33,7 +33,7 @@ function BtuCalculator() {
   const [showCondenser, setShowCondenser] = useState(false);
   const [error, setError] = useState("");
   const [totalBTU, setTotalBTU] = useState(0);
-    const [optimalProductCount, setOptimalProductCount] = useState(0);
+  const [optimalProductCount, setOptimalProductCount] = useState(0);
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
       PitchedRoof: false,
@@ -158,9 +158,13 @@ function BtuCalculator() {
       });
     };
 
-    applyMultiplier("insulation", { Poor: 1.2, Average: 1.1, Good: 0.9 });
-    applyMultiplier("sunExposure", { FullSunlight: 1.2, HeavilyShaded: 0.9 });
-    applyMultiplier("climate", { Hot: 1.2, Cold: 0.8, Average: 1.0 });
+    applyMultiplier("insulation", { Poor: 1.2, Average: 1, Good: 0.8 });
+    applyMultiplier("sunExposure", {
+      FullSunlight: 1.2,
+      Average: 1,
+      HeavilyShaded: 0.8,
+    });
+    applyMultiplier("climate", { Hot: 1.2, Average: 1.0, Cold: 0.8 });
     applyMultiplier("typeOfWall", {
       BrickVeneer: 1.1,
       DoubleBrick: 0.9,

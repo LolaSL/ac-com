@@ -9,9 +9,50 @@ import Earnings from '../models/earningModel.js';
 import Project from '../models/projectModel.js';
 import Message from '../models/messageModel.js';
 import Notification from '../models/notificationModel.js';
+// import crypto from 'crypto';
 
+// const square = await import('square');  // dynamic import
+// const { Client } = square.default || square; // sometimes it's under default
+
+// const client = new Client({
+//   accessToken: process.env.SQUARE_ACCESS_TOKEN,
+//   environment: 'sandbox',
+// });
 
 const orderRouter = express.Router();
+
+// orderRouter.post('/pay', async (req, res) => {
+//   const { nonce, orderId } = req.body;
+
+//   if (!nonce || !orderId) {
+//     return res.status(400).json({ error: 'Missing nonce or orderId' });
+//   }
+
+//   try {
+//     const order = await Order.findById(orderId); // your DB fetch
+
+//     if (!order) {
+//       return res.status(404).json({ error: 'Order not found' });
+//     }
+
+//     const amountToPay = Math.round(order.totalPrice * 100);
+
+//     const response = await client.paymentsApi.createPayment({
+//       sourceId: nonce,
+//       idempotencyKey: crypto.randomUUID(),
+//       amountMoney: {
+//         amount: amountToPay,
+//         currency: 'USD',
+//       },
+//     });
+
+//     res.json(response.result);
+//   } catch (error) {
+//     console.error('Payment error:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
 
 orderRouter.get(
   '/',
@@ -36,12 +77,10 @@ orderRouter.post(
   isAuth,
   expressAsyncHandler(async (req, res) => {
 
-    // Check if the orderItems array is empty or missing
     if (!req.body.orderItems || req.body.orderItems.length === 0) {
       return res.status(400).send({ message: 'Cart is empty!' });
     }
 
-    // Process the order items and calculate the discounted prices
     const orderItems = req.body.orderItems.map((item) => {
       const discountedPrice = item.discountedPrice || (item.discount > 0
         ? item.price * (1 - item.discount / 100)
@@ -49,7 +88,6 @@ orderRouter.post(
       return { ...item, product: item._id, price: discountedPrice };
     });
 
-    // Parse prices from the request body
     const itemsPrice = Number.isNaN(parseFloat(req.body.itemsPrice)) ? 0 : parseFloat(req.body.itemsPrice);
     const shippingPrice = Number.isNaN(parseFloat(req.body.shippingPrice)) ? 10 : parseFloat(req.body.shippingPrice);
     const taxPrice = Number.isNaN(parseFloat(req.body.taxPrice)) ? 0 : parseFloat(req.body.taxPrice);
@@ -57,16 +95,15 @@ orderRouter.post(
       ? (itemsPrice + shippingPrice + taxPrice)
       : parseFloat(req.body.totalPrice);
 
-    // Ensure totalPrice is valid
     if (Number.isNaN(totalPrice)) {
       return res.status(400).send({ message: 'Calculation error with total price' });
     }
 
-    // Log the parsed prices for debugging purposes
+ 
     console.log('Order Items:', req.body.orderItems);
     console.log('Parsed Prices:', { itemsPrice, shippingPrice, taxPrice, totalPrice });
 
-    // Create the new order object
+
     const newOrder = new Order({
       orderItems,
       shippingAddress: req.body.shippingAddress,
@@ -79,10 +116,9 @@ orderRouter.post(
       user: req.user._id,
     });
 
-    // Save the order to the database
+
     const order = await newOrder.save();
 
-    // Respond with success
     res.status(201).send({ message: 'New Order Created', order });
   })
 );

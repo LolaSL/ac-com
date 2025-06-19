@@ -364,7 +364,7 @@ const data = {
       ],
     },
     {
-      name: "20000 BTU Wind-Free TM AC",
+      name: "20000 BTU Wind-Free TM",
       slug: "20000-btu-Wind-Free-air-conditioner",
       category: "Wind-Free TM Cooling",
       image: "/images/p8.jpg",
@@ -696,7 +696,7 @@ const data = {
       ],
     },
     {
-      name: "28300 BTU Outdoor Condenser",
+      name: "28300 BTU Outdoor Condenser. Outdoor Unit",
       slug: "28300-outdoor-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p29.jpg",
@@ -733,7 +733,7 @@ const data = {
           description: "Installation Guide Image",
         },
       ],
-    },
+    }, 
     {
       name: "36000 BTU Outdoor Condenser",
       slug: "36000-outdoor-condensing-unit",

@@ -537,14 +537,14 @@ const Annotator = () => {
         </p>
 
         <Form.Control
-          className="mt-4"
+          className="mt-4 form-control"
           type="file"
           ref={fileInputRef}
           onChange={handleChange}
           accept="application/pdf"
         />
       </Form>
-      <h2 className="mt-4 mb-4">Preview of selected file:</h2>
+      <h2 className="mt-4 mb-4 text-secondary">Preview of selected file:</h2>
       {previewUrl && (
         <div className="text-center">
           {previewUrl && (

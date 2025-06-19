@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useContext, useEffect, useReducer } from "react";
+import { useContext, useEffect, useReducer } from "react";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useNavigate, useParams } from "react-router-dom";
 import Row from "react-bootstrap/Row";
@@ -15,6 +15,7 @@ import { getError } from "../utils";
 import { toast } from "react-toastify";
 import Image from "react-bootstrap/Image";
 import { Container } from "react-bootstrap";
+// import SquarePaymentForm from "../components/SquarePaymentForm.jsx";
 
 function printOrder() {
   const orderContainer = document.querySelector(".order-container");
@@ -32,7 +33,6 @@ function printOrder() {
     return;
   }
 
-  // Proceed to print
   const clonedOrder = orderContainer.cloneNode(true);
   const printWindow = window.open("", "_blank");
   printWindow.document.write(`
@@ -305,19 +305,7 @@ export default function OrderPage() {
                           <span>{item.quantity}</span>
                         </Col>
                         <Col md={3}>
-                          <div>
-                            ${item.price.toFixed(2)}
-                            {item.discount > 0 && (
-                              <div style={{ color: "green" }}>
-                                ($
-                                {(
-                                  item.price *
-                                  (1 - item.discount / 100)
-                                ).toFixed(2)}{" "}
-                                after {item.discount}% off)
-                              </div>
-                            )}
-                          </div>
+                          <div>${item.price.toFixed(2)}</div>
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -375,31 +363,37 @@ export default function OrderPage() {
                   ) : (
                     <MessageBox variant="danger">Not Paid</MessageBox>
                   )}
-
                   {!order.isPaid && (
-                   <ListGroup.Item>
-                   <div className="paypal-section">
-                     {isPending ? (
-                       <div className="loading-box">
-                         <LoadingBox />
-                       </div>
-                     ) : (
-                       <div className="paypal-buttons-container">
-                         <PayPalButtons
-                           createOrder={createOrder}
-                           onApprove={onApprove}
-                           onError={onError}
-                         />
-                       </div>
-                     )}
-                     {loadingPay && (
-                       <div className="loading-box">
-                         <LoadingBox />
-                       </div>
-                     )}
-                   </div>
-                 </ListGroup.Item>
-                 
+                    <ListGroup.Item>
+                      <div className="payment-section">
+                        <h5>Pay with PayPal</h5>
+                        <div className="paypal-section">
+                          {isPending ? (
+                            <div className="loading-box">
+                              <LoadingBox />
+                            </div>
+                          ) : (
+                            <div className="paypal-buttons-container">
+                              <PayPalButtons
+                                createOrder={createOrder}
+                                onApprove={onApprove}
+                                onError={onError}
+                              />
+                            </div>
+                          )}
+                          {loadingPay && (
+                            <div className="loading-box">
+                              <LoadingBox />
+                            </div>
+                          )}
+                        </div>
+                        {/* <hr />
+                        <h5>Pay with credit card</h5> */}
+                        {/* <div className="square-section">
+                     <SquarePaymentForm order={order} />
+                        </div> */}
+                      </div>
+                    </ListGroup.Item>
                   )}
                   {userInfo.isAdmin && order.isPaid && !order.isDelivered && (
                     <ListGroup.Item>

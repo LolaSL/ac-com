@@ -4,10 +4,11 @@ import Annotator from "../components/Annotator.jsx";
 import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
+import BtuModalWindow from "../components/BtuModalWindow.jsx";
 
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
-  const [roomData, setRoomData] = useState(null); 
+  const [roomData, setRoomData] = useState(null);
   console.log(roomData);
 
   const fetchSavedPdfs = async () => {
@@ -39,12 +40,14 @@ const Measurement = () => {
     <div>
       <Container>
         <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData} />
+
         <Sidebar
           savedPdfs={savedPdfs}
           fetchSavedPdfs={fetchSavedPdfs}
           roomData={roomData}
           setRoomData={setRoomData}
         />
+        <BtuModalWindow/>
         <BtuCalculator roomData={roomData} />
         <div className=" mt-4 mb-4">
           <Link to="/" className="btn btn-secondary">

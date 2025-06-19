@@ -96,14 +96,6 @@ export default function PlaceOrderPage() {
   };
 
   useEffect(() => {
-    // if (!cart.cartItems || cart.cartItems.length === 0) {
-    //   toast.error("Cart is empty or calculation error!");
-    //   return;
-    // }
-    // if (cart.itemsPrice === 0) {
-    //   toast.error("Cart calculation issue!");
-    //   return;
-    // }
     if (!cart.paymentMethod) {
       navigate("/payment");
     }

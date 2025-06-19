@@ -17,6 +17,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 
 
+
 dotenv.config();
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
@@ -29,11 +30,15 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000', // match your frontend
+    origin: 'http://localhost:3000', 
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'], // <== explicitly allow Authorization
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }));
   
+
+
+
+
   app.use((req, res, next) => {
     console.log('🔍 Incoming headers:', req.headers);
     next();

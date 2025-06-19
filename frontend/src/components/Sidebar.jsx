@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
-// import ArchSymbols from "./ArchSymbolsModal.jsx";
-// import { FaFilePdf } from "react-icons/fa";
-// import jsPDF from "jspdf";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -279,7 +276,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <Button className="sidebar-toggle" onClick={toggleSidebar}>
+      <Button className="sidebar-toggle btn-secondary" onClick={toggleSidebar}>
         {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
       </Button>
       <Modal
@@ -325,9 +322,6 @@ const Sidebar = () => {
                       Saved: {new Date(pdf.createdAt).toLocaleString()}
                     </small>
                     <div className="d-flex align-items-center">
-                      {/* <Button onClick={printDrawing} className="btn btn-info p-1" option= "disabled">
-                        <FaFilePdf color="white" size="1.5em" />
-                      </Button> */}
                       <Button
                         variant="danger"
                         className="p-1"
@@ -351,7 +345,7 @@ const Sidebar = () => {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={toggleSidebar}>
+          <Button variant="btn-secondary" onClick={toggleSidebar}>
             Close
           </Button>
         </Modal.Footer>

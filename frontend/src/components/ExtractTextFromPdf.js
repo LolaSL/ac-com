@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
-import { Helmet } from "react-helmet-async";
 import Tesseract from "tesseract.js";
-import { getDocument } from "pdfjs-dist/webpack.mjs";
+import { getDocument } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
 
 
@@ -13,8 +12,7 @@ const ExtractPdf = () => {
   const [extractedText, setExtractedText] = useState("");
   const [classifiedData, setClassifiedData] = useState([]);
   const [error, setError] = useState("");
- 
-  // Function to process PDF files
+
   const extractText = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -27,7 +25,6 @@ const ExtractPdf = () => {
             const numPages = pdf.numPages;
             let extractedText = "";
 
-            // Process all pages in the PDF
             const processPage = (pageNum) => {
               pdf.getPage(pageNum).then((page) => {
                 const scale = 5; // Increase scale for better OCR accuracy
@@ -51,13 +48,12 @@ const ExtractPdf = () => {
                       extractedText += text;
 
                       if (pageNum === numPages) {
-                        // Process text after the last page
                         setExtractedText(extractedText);
                         const classifiedTable =
                           classifyAndExtractData(extractedText);
                         setClassifiedData(classifiedTable);
                       } else {
-                        processPage(pageNum + 1); // Process the next page
+                        processPage(pageNum + 1);
                       }
                     })
                     .catch((err) => {
@@ -68,7 +64,7 @@ const ExtractPdf = () => {
               });
             };
 
-            processPage(1); // Start with the first page
+            processPage(1); 
           })
           .catch((err) => {
             console.error("Error loading PDF:", err);
@@ -81,7 +77,7 @@ const ExtractPdf = () => {
     }
   };
 
-  // Updated roomPatterns to include necessary patterns
+
   const roomPatterns = {
     bedroom: /bed\s?room|br|bdrm|master\s?bedroom|primary\s?bedroom/i,
     livingRoom: /living\s?(room|&\s?dining\s?area)|lr|outdoor\s?living/i,
@@ -98,15 +94,15 @@ const ExtractPdf = () => {
     office: /office|home\s?office|study|workspace/i,
   };
 
-  // Updated dimension pattern to handle feet and inches, area in sqft and sqm
+
   const dimensionPattern =
     /(\d{1,3})\s*[°'’"]?\s*[xX]\s*(\d{1,3})\s*[°'’"]?|(\d+(\.\d+)?)\s*sqft|(\d+(\.\d+)?)\s*sqm/g;
 
-  // Function to classify and extract room data and dimensions
+
   const classifyAndExtractData = (text) => {
     const cleanedText = text
-      .replace(/[^\w\s.'"\dXx-°]/g, "") // Clean special characters
-      .replace(/\s{2,}/g, " ") // Replace multiple spaces
+      .replace(/[^\w\s.'"\dXx-°]/g, "") 
+      .replace(/\s{2,}/g, " ") 
       .trim()
       .toLowerCase();
 
@@ -116,7 +112,6 @@ const ExtractPdf = () => {
     lines.forEach((line) => {
       let roomType = null;
 
-      // Find room type
       for (const [key, pattern] of Object.entries(roomPatterns)) {
         if (pattern.test(line)) {
           roomType = key;
@@ -124,8 +119,11 @@ const ExtractPdf = () => {
         }
       }
 
-      // Extract dimensions (including area in sqft and sqm)
+
       const dimensions = line.match(dimensionPattern);
+if (!dimensions && roomType) {
+  console.warn("Unmatched dimension line:", line);
+}
 
       if (roomType) {
         if (dimensions) {
@@ -135,34 +133,31 @@ const ExtractPdf = () => {
             let areaSqFt = 0;
             let areaSqM = 0;
 
-            // Check if the dimension is in sqm
+
             if (dim.toLowerCase().includes("sqm")) {
-              areaSqM = parseFloat(dim); // Get area in sqm directly
-              areaSqFt = areaSqM / 0.092903; // Convert to sqft
-              // Set width and height as empty strings
+              areaSqM = parseFloat(dim); 
+              areaSqFt = areaSqM / 0.092903; 
               width = "";
               height = "";
             }
-            // Check if the dimension is in sqft
+
             else if (dim.toLowerCase().includes("sqft")) {
-              areaSqFt = parseFloat(dim); // Get area in sqft directly
-              areaSqM = areaSqFt * 0.092903; // Convert to sqm
-              // Set width and height as empty strings
+              areaSqFt = parseFloat(dim); 
+              areaSqM = areaSqFt * 0.092903; 
               width = "";
               height = "";
             }
-            // Handle dimensions provided in the format of width x height
+            
             else {
               const dimParts = dim.split(/[xX]/);
               if (dimParts.length === 2) {
                 width = convertToFeet(dimParts[0].trim());
                 height = convertToFeet(dimParts[1].trim());
-                areaSqFt = width * height; // Calculate area in sqft
-                areaSqM = areaSqFt * 0.092903; // Convert area to sqm
+                areaSqFt = width * height; 
+                areaSqM = areaSqFt * 0.092903;
               }
             }
 
-            // Add the room data to the table
             if (width <= 100 && height <= 100) {
               table.push({
                 roomType,
@@ -180,15 +175,15 @@ const ExtractPdf = () => {
     return table;
   };
 
-  // Function to convert measurements to feet
+
   const convertToFeet = (measure) => {
-    const parts = measure.match(/(\d+)\s*['’]?\s*-?\s*(\d+)?["”]?/); // For patterns like 12'-4"
+    const parts = measure.match(/(\d+)\s*(?:['’]\s*)?(?:(\d+)\s*(?:["”])?)?/);
     if (parts) {
       const feet = parseInt(parts[1], 10);
       const inches = parts[2] ? parseInt(parts[2], 10) : 0;
       return feet + inches / 12;
     }
-    return 0; // Default case if no pattern matches
+    return 0; 
   };
 
   const downloadJson = () => {
@@ -204,18 +199,8 @@ const ExtractPdf = () => {
 
   return (
   <div>
-      <Helmet>
-        <title>UploadPDF</title>
-      </Helmet>
       <Form>
-        <h1 className="measure-header text-center fw-bold mb-4">
-          Measurement System
-        </h1>
         <Form.Group controlId="input">
-          <Form.Label className="mb-4">
-            Upload PDF file sample.{" "}
-            <strong>*Please, use higher image resolution</strong>
-          </Form.Label>
           <Form.Control
             type="file"
             accept="application/pdf"
@@ -265,3 +250,5 @@ const ExtractPdf = () => {
 )
 }
 export default ExtractPdf;
+
+

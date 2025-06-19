@@ -16,6 +16,7 @@
     "@paypal/react-paypal-js": "^8.8.3",
     "@radix-ui/react-dialog": "^1.1.11",
     "@react-google-maps/api": "^2.20.6",
+    "@square/web-sdk": "^2.1.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -40,6 +41,7 @@
     "react-router-dom": "^7.5.2",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
+    "tesseract.js": "^6.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
