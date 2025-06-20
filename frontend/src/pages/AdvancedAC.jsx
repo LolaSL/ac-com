@@ -7,19 +7,19 @@ const AdvancedAC = () => {
   return (
     <div className="site-container mt-3 pt-3">
       <article>
-        <h2>Advanced Air Conditioning 2025</h2>
-        <h3 className="mb-3 p-3">
+        <h1 className="fs-1">Advanced Air Conditioning 2025</h1>
+        <p className="mb-3 p-3 ac-conditioning fs-4">
           As we step into 2025, the HVAC industry is buzzing with advancements
           that promise to make homes more comfortable, energy-efficient, and
           environmentally friendly. From cutting-edge technology to
           eco-conscious solutions, the future of HVAC is here. If you’ve been
           considering upgrading your system, now is the perfect time to explore
           what’s new.
-        </h3>
-        <h3 className="mb-3 p-3">
+        </p>
+     <h3 className="mb-2 p-4 fs-3 text-bold">
           Energy-Efficient Systems: Saving More, Consuming Less
         </h3>
-        <h4 className="mb-3 p-3 ac-conditioning">
+        <p className="mb-3 p-3 ac-conditioning fs-4">
           Energy efficiency is a leading trend in 2025 HVAC. Modern systems
           utilize innovations like variable-speed compressors and advanced
           sensors to maximize comfort while minimizing energy consumption and
@@ -27,7 +27,7 @@ const AdvancedAC = () => {
           HVAC. New systems employ technologies such as variable-speed
           compressors and improved heat exchangers to deliver optimal comfort
           with lower energy use and a smaller carbon footprint.
-        </h4>
+        </p>
         <div className="mb-4 text-center pb-4">
           <Image
             src="/images/ac5.jpg"
@@ -39,14 +39,14 @@ const AdvancedAC = () => {
         </div>
       </article>
       <article>
-        <h3 className="mb-2 p-4">Heat Pumps: The All-Weather Solution</h3>
-        <h4 className="mb-3 p-3 ac-conditioning">
+        <h3 className="mb-2 p-4 fs-3 text-bold">Heat Pumps: The All-Weather Solution</h3>
+        <p className="mb-3 p-3 ac-conditioning fs-4">
           Heat pumps are becoming a go-to solution for homeowners seeking
           year-round comfort and energy efficiency. With advancements in
           cold-climate heat pump technology, these systems can now effectively
           operate in extreme temperatures, making them a versatile choice for
           any region.
-        </h4>
+        </p>
         <div className="mb-4 text-center pb-4">
           <Image
             src="/images/ac6.jpg"
@@ -58,14 +58,14 @@ const AdvancedAC = () => {
         </div>
       </article>
       <article>
-        <h3 className="mb-2 p-4">Indoor Air Quality Innovations</h3>
-        <h4 className="mb-3 p-3 ac-conditioning">
+       <h3 className="mb-2 p-4 fs-3 text-bold">Indoor Air Quality Innovations</h3>
+           <p className="mb-3 p-3 ac-conditioning fs-4">
           Improving indoor air quality (IAQ) is a top priority for 2025. HVAC
           systems are now integrating air purifiers, UV-C light technology, and
           high-efficiency particulate air (HEPA) filters to remove allergens,
           bacteria, and viruses from your home’s air. These systems ensure a
           healthier living environment for you and your family.
-        </h4>
+        </p>
         <div className="mb-4 text-center">
           <Image
             src="/images/ac7.jpg"
@@ -77,13 +77,13 @@ const AdvancedAC = () => {
         </div>
       </article>
       <article>
-        <h3 className="mb-2 p-4">Why Upgrade in 2025?</h3>
-        <h4 className="mb-3 p-3 ac-conditioning">
+       <h3 className="mb-2 p-4 fs-3 text-bold">Why Upgrade in 2025?</h3>
+         <p className="mb-3 p-3 ac-conditioning fs-4">
           With these exciting advancements, 2025 is the ideal time to upgrade
           your HVAC system. Whether you’re looking to save on energy costs,
           reduce your environmental impact, or enjoy the convenience of smart
           technology, there’s a solution for every home.
-        </h4>
+        </p>
         <div className="mb-4 text-center">
           <Image
             src="/images/ac8.jpg"

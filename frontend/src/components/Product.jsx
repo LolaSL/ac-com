@@ -39,7 +39,9 @@ function Product(props) {
           to={`/product/${product.slug}`}
           className="card-link text-secondary"
         >
-          <Card.Title>{product.name}</Card.Title>
+          <Card.Title><strong>Product:</strong> {product.name}</Card.Title>
+          <span className="fs-5 text-bold">Brand: {product.brand}</span>
+          
         </Link>
         <Rating rating={product.rating} numReviews={product.numReviews} />
         <Card.Text>

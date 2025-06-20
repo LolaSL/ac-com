@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect,  useRef } from "react";
 import {
   Container,
-  Image,
   Row,
   Col,
   Form,
@@ -15,11 +14,26 @@ import { useContext } from "react";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import CheckboxGroup from "./CheckboxGroup.jsx";
-
+import printJS from 'print-js';
 function BtuCalculator() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
 
   const navigate = useNavigate();
+  const componentRef = useRef();
+ const handlePrint = () => {
+    printJS({
+      printable: 'table-responsive', // ID of the HTML element to print
+      type: 'html',
+      header: '<h2>Product List</h2>', // Optional header
+      css: '../index.css', // Optional: path to your CSS file for print styles
+      style: `
+        /* Inline styles for print, or use css option above */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+      `
+    });
+  };
+
 
   const cartItems = state?.cart?.cartItems || [];
   const [height, setHeight] = useState(0);
@@ -562,7 +576,11 @@ function BtuCalculator() {
       {btuResults.length > 0 && (
         <Container className="btu-results mt-4">
           <h3 className="text-center">BTU Results</h3>
-          <div className="table-responsive">
+          <button onClick={handlePrint} className="btn btn-primary mb-3">
+        <i className="bi bi-printer-fill me-2"></i> Print Table
+          </button>
+           <div ref={componentRef}>
+          <div id="table-responsive">
             <Table bordered hover className="table-responsive-md">
               <thead>
                 <tr>
@@ -586,16 +604,8 @@ function BtuCalculator() {
                             to={`/product/${product.slug}`}
                             className="link-product-details"
                           >
-                            <Image
-                              src={product.image || "/images/placeholder.png"}
-                              alt={product.name || "No product available"}
-                              style={{
-                                width: "50px",
-                                height: "auto",
-                                backgroundColor: "grey",
-                              }}
-                              className="responsive rounded"
-                            />
+                            {product.model || "N/A"}{" "}
+                            {/* Renders product.model or "N/A" if null/undefined */}
                           </Link>
                         ) : (
                           "No product available"
@@ -668,7 +678,8 @@ function BtuCalculator() {
                 </tr>
               </tbody>
             </Table>
-          </div>
+            </div>
+            </div>
           <div className="d-flex justify-content-center mt-3">
             <Button
               variant="primary"

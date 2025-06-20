@@ -45,10 +45,10 @@ const FeaturedPage = () => {
   return (
     <div>
       <article className="py-4 mb-4">
-        <h1 className="featured-title text-center pt-4 mb-4 fw-bold">
+        <h1 className="featured-title text-center pt-4 mb-4 fw-bold fs-1">
           Featured Products
         </h1>
-        <h3 className="py-2 mb-2 featured-products text-center">
+        <h3 className="py-2 mb-2 featured-products text-center fs-5">
           Introducing our latest line of air conditioning units
         </h3>
       </article>

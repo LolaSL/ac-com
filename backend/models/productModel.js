@@ -23,6 +23,7 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     slug: { type: String, required: true, unique: true },
+    model: { type: String, required: true },
     image: { type: String, required: true },
     images: [{ type: String }],
     brand: { type: String, required: true },
@@ -35,8 +36,8 @@ const productSchema = new mongoose.Schema(
     numReviews: { type: Number, required: true },
     reviews: [reviewSchema],
     features: [{ type: String }],
-    mode:[{ type: String }],
-    btu: { type: Number },
+    mode: [{ type: String }],
+    btu: { type: Number,  required: true },
     areaCoverage: { type: Number },
     energyEfficiency: { type: Number },
     documents: [documentSchema],

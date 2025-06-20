@@ -51,6 +51,7 @@ const ProductEditPage = () => {
     });
 
   const [name, setName] = useState("");
+  const [model, setModel] = useState("");
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImage] = useState("");
@@ -79,6 +80,7 @@ const ProductEditPage = () => {
         const { data } = await axios.get(`/api/products/${productId}`);
 
         setName(data.name);
+        setModel(data.model);
         setSlug(data.slug);
         setPrice(data.price);
         setImage(data.image);
@@ -118,6 +120,7 @@ const ProductEditPage = () => {
         {
           _id: productId,
           name,
+          model,
           slug,
           price,
           image,
@@ -213,6 +216,14 @@ const ProductEditPage = () => {
               onChange={(e) => setName(e.target.value)}
               required
             />
+            <Form.Group className="mb-3" controlId="model">
+              <Form.Label>Model</Form.Label>
+              <Form.Control
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                required
+              />
+            </Form.Group>
           </Form.Group>
           <Form.Group className="mb-3" controlId="slug">
             <Form.Label>Slug</Form.Label>

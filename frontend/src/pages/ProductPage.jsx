@@ -18,7 +18,15 @@ import { toast } from "react-toastify";
 import Image from "react-bootstrap/Image";
 import { FaFilePdf } from "react-icons/fa";
 import { FaFileImage } from "react-icons/fa";
-import { BsSnow, BsDroplet, BsFan, BsVolumeMute } from "react-icons/bs";
+import {
+  BsSnow,
+  BsDroplet,
+  BsFan,
+  BsVolumeMute,
+  BsBrush,
+  BsMicMute,
+  BsMoonStars,
+} from "react-icons/bs";
 const reducer = (state, action) => {
   switch (action.type) {
     case "REFRESH_PRODUCT":
@@ -45,6 +53,9 @@ const modeIcons = {
   "Drying Mode": <BsDroplet className="mode-icon" />,
   "Fan Mode": <BsFan className="mode-icon" />,
   "Silent Mode": <BsVolumeMute className="mode-icon" />,
+  "Self-cleaning": <BsBrush className="mode-icon" />,
+  "Low Noise": <BsMicMute className="mode-icon" />,
+  "Night Mode": <BsMoonStars className="mode-icon" />,
 };
 
 function ProductPage() {
@@ -223,25 +234,26 @@ function ProductPage() {
               {product.features?.join(", ")}
             </ListGroup.Item>
             <ListGroup.Item>
-  <strong>Mode:</strong> <br />
-  {product.mode?.map((m, index) => {
-    const trimmedMode = m.trim();
-    const icon = modeIcons[trimmedMode]; 
-    
-    return icon ? ( 
-      <span
-        key={index}
-        style={{
-          marginRight: "10px",
-          display: "inline-flex",
-          alignItems: "center",
-        }}
-      >
-        {icon} <span style={{ marginLeft: "5px" }}>{trimmedMode}</span>
-      </span>
-    ) : null; 
-  })}
-</ListGroup.Item>
+              <strong>Mode:</strong> <br />
+              {product.mode?.map((m, index) => {
+                const trimmedMode = m.trim();
+                const icon = modeIcons[trimmedMode];
+
+                return icon ? (
+                  <span
+                    key={index}
+                    style={{
+                      marginRight: "10px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {icon}{" "}
+                    <span style={{ marginLeft: "5px" }}>{trimmedMode}</span>
+                  </span>
+                ) : null;
+              })}
+            </ListGroup.Item>
 
             <ListGroup.Item>
               <strong>Product dimensions (WxHxD):</strong>{" "}
@@ -263,6 +275,12 @@ function ProductPage() {
                     <Col>Brand:</Col>
                     <Col>
                       <p>{product.brand}</p>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>Model:</Col>
+                    <Col>
+                      <p>{product.model}</p>
                     </Col>
                   </Row>
                 </ListGroup.Item>

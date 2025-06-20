@@ -86,6 +86,7 @@ const data = {
   products: [
     {
       name: "10000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "10000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -140,9 +141,10 @@ const data = {
       ],
     },
     {
-      name: "10000 BTU Wall Mounted AC",
+      name: "10000 BTU Wall-Mounted AC",
+      model: "ASTG09CMCA",
       slug: "10000-btu-wall-mounted-air-conditioner",
-      category: "Wall Mounted AC",
+      category: "Wall-Mounted AC",
       image: "/images/p28.jpg",
       price: 459.99,
       discount: 20,
@@ -200,6 +202,7 @@ const data = {
     },
     {
       name: "12000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "12000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -255,6 +258,7 @@ const data = {
     },
     {
       name: "16000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "16000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -310,6 +314,7 @@ const data = {
     },
     {
       name: "18000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "18000-btu-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -365,6 +370,7 @@ const data = {
     },
     {
       name: "20000 BTU Wind-Free TM",
+      model: "AR24TVFCGWKNMG",
       slug: "20000-btu-Wind-Free-air-conditioner",
       category: "Wind-Free TM Cooling",
       image: "/images/p8.jpg",
@@ -421,6 +427,7 @@ const data = {
     },
     {
       name: "22000 BTU Mini Split AC",
+      model: "Haier OZZ 25 INV +WIFI",
       slug: "22000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p26.jpg",
@@ -430,7 +437,7 @@ const data = {
       brand: "Haier",
       rating: 3.5,
       numReviews: 119,
-      description: "Haier inverter air conditioner 2.5 hp - BTU 22000 - 2024 series - model Haier OZ 25 INV +WIFI. The air conditioner with a clean and modern design, inverter technology with a reliable, energy-efficient and economical operation, a variety of functions for advanced use - quiet, with efficient and fast air distribution and adjusting the operation of the air conditioner to your needs, with the sleep function making your sleeping experience nothing less than perfect. Has a hydropoli coating to prevent corrosion and effective control via WiFi.",
+      description: "Haier inverter air conditioner 2.5 hp - BTU 22000 - 2024 series - model Haier OZZ 25 INV +WIFI. The air conditioner with a clean and modern design, inverter technology with a reliable, energy-efficient and economical operation, a variety of functions for advanced use - quiet, with efficient and fast air distribution and adjusting the operation of the air conditioner to your needs, with the sleep function making your sleeping experience nothing less than perfect. Has a hydropoli coating to prevent corrosion and effective control via WiFi.",
       features: [
         'Heating',
         'Cooling',
@@ -477,6 +484,7 @@ const data = {
     },
     {
       name: "24000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "24000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -532,6 +540,7 @@ const data = {
     },
     {
       name: "30000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "30000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -587,6 +596,7 @@ const data = {
     },
     {
       name: "36000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "36000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -641,7 +651,64 @@ const data = {
       ],
     },
     {
+      name: "36000 BTU Wall-Mounted AC",
+      model: "3WMB036S4-1P",
+      slug: "36000-btu-Wall-Mounted-Non-Ducted-ac",
+      category: "Wall-Mounted AC",
+      image: "/images/p32.jpg",
+      price: 659,
+      discount: 0,
+      countInStock: 10,
+      brand: "Lennox",
+      rating: 4.2,
+      numReviews: 128,
+      description: "Efficiency ratings up to 28.1 SEER and 12.5 HSPF. Cooling capacity up to 36,000 BTU. Heating capacity up to 36,000 BTU. Operates with sound levels as low as 24 decibels. Available in 208-230V and 115V, single phase.This is the sleek, compact unit that is mounted high on an interior wall of the room you want to condition. It contains the evaporator coil, a quiet fan, and controls",
+      features: [
+        'Energy Saving',
+        'Remote Control',
+        "Cold catalyst filter",
+        "Three-speed fan",
+        "Dual Sensing",
+        "Auto Restart",
+        "Smart Operation",
+        "Humidity control"
+      ],
+      mode: [
+        "Cooling Mode",
+        " Drying Mode ",
+        "Fan Mode",
+        "Silent Mode",
+        "Self-cleaning"
+      ],
+      btu: 36000,
+      areaCoverage: 85,
+      energyEfficiency: 12,
+      dimension: {
+        width: 118.75,
+        height: 34.29,
+        depth: 26.4,
+      },
+      documents: [
+        {
+          url: "https://www.lennox.com/dA/f643eed488/file1/1069284~507550-06.pdf",
+          type: "PDF",
+          description: "User Manual for Lennox 36000 BTU Wall-Mounted Non-Ducted Mini-AC",
+        },
+        {
+          url: "https://www.lennox.com/dA/ea9a0b482b/fileAsset/13U72_mini_split_bro_0623.pdf",
+          type: "PDF",
+          description: "Technical Specifications for Lennox 36000 BTU Wall-Mounted Non-Ducted Mini-AC",
+        },
+        {
+          url: "https://www.lennox.com/dA/dd1b957072/file1/508430-01.pdf",
+          type: "Image",
+          description: "Installation Guide Image",
+        },
+      ],
+    },
+    {
       name: "40000 BTU Mini Split AC",
+      model: "LSA3AR2M",
       slug: "40000-btu-Mini-Split-air-conditioner",
       category: "Mini Split AC",
       image: "/images/p12.jpg",
@@ -697,6 +764,7 @@ const data = {
     },
     {
       name: "28300 BTU Outdoor Condenser. Outdoor Unit",
+      model: "ASTG09CMCA",
       slug: "28300-outdoor-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p29.jpg",
@@ -733,9 +801,10 @@ const data = {
           description: "Installation Guide Image",
         },
       ],
-    }, 
+    },
     {
       name: "36000 BTU Outdoor Condenser",
+      model: "LMU363HV",
       slug: "36000-outdoor-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p23.jpg",
@@ -775,6 +844,7 @@ const data = {
     },
     {
       name: "48000 BTU Outdoor Condenser",
+      model: "AC048HBMDKH/TC",
       slug: "48000-cac-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p22.jpg",
@@ -814,6 +884,7 @@ const data = {
     },
     {
       name: "54000 BTU Multi-System Condenser",
+      model: "LMU540HV",
       slug: "54000-mini-split-outdoor-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p21.jpg",
@@ -853,6 +924,7 @@ const data = {
     },
     {
       name: "60000 BTU Multi-System Condenser",
+      model: "LMU601HV",
       slug: "60000-mini-split-outdoor-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p21.jpg",
@@ -894,6 +966,7 @@ const data = {
 
     {
       name: "72000 BTU VRF Heat Recovery Multi-Split DC Inverter Outdoor Unit",
+      model: "VRA072L4M-2Y",
       slug: "72000-outdoor-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p24.jpg",
@@ -933,6 +1006,7 @@ const data = {
     },
     {
       name: "96000 BTU VRF Heat Recovery Multi-Split DC Inverter Outdoor Unit",
+      model: "VRA096L4M-2Y",
       slug: "96000-outdoor-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p24.jpg",
@@ -971,8 +1045,53 @@ const data = {
       ],
     },
     {
+      name: "107500 BTU MRV-S Outdoor",
+      model: "AU12NFKERA",
+      slug: "MRV-S-Outdoor-condensing-unit",
+      category: "VRF—MRV",
+      image: "/images/p31.jpg",
+      price: 7200,
+      discount: 10,
+      countInStock: 5,
+      brand: "Haier ",
+      rating:4.9,
+      numReviews: 148,
+      description: "Suited to larger and multi-storey buildings, the MRV-S outdoor unit delivers effective heating and cooling, with multiple indoor unit choices. Heating and cooling, with an operational range from -20°C to 48°C Outdoor unit powers up to 19 indoor units. High-efficiency DC fan motor. Long total piping length of 300m with 175m lift height",
+      features: "Energy Saving",
+       mode: [
+         "Low Noise",
+         "Night Mode"
+      ],
+      btu:107500,
+      areaCoverage: 200,
+      energyEfficiency: 11.3,
+      dimension: {
+        width: 105,
+        height: 163.6,
+        depth: 40,
+      },
+      documents: [
+        {
+          url: "https://manuals.plus/haier/au12nfkera-mrv-s-outdoor-33-5kw-manual.pdf",
+          type: "PDF",
+          description: "User Manual for 107500 BTU MRV-S Outdoor",
+        },
+        {
+          url: "https://manuals.plus/m/65e4728da379f3c17cbc111b49c40be4348dc3b86e820db357415a6f8cc896bc.pdf",
+          type: "PDF",
+          description: "Technical Specifications for  107500 BTU MRV-S Outdoor",
+        },
+        {
+          url: "https://pp.haier.com.au/on/demandware.static/-/Sites-haier-master-catalog/default/dw9fbbc161/technical-content/airconditioning/mrv/hai-aa-aircon-outdoor-user-install-guide-MRVSII-8-12HP-0150552969-A-20211028.pdf",
+          type: "Image",
+          description: "Installation Guide Image",
+        },
+      ],
+    },
+    {
       name: "120000 BTU VRF Heat Recovery Multi-Split DC Inverter Outdoor Unit",
-      slug: "120000-cac-condensing-unit",
+      model: "VPA120H4M-2G",
+      slug: "120000-ac-condensing-unit",
       category: "Outdoor Condenser",
       image: "/images/p24.jpg",
       price: 5600,
@@ -981,7 +1100,7 @@ const data = {
       brand: "Lennox",
       rating: 3,
       numReviews: 18,
-      description: "120000 BTU 'VRF' Heat Recovery Multi-Split DC Inverter Outdoor Unit, Zones: Up To 20, Volts: 208-230, Hertz: 60, Phase: 3, SEER: 13, EER: 11, Refrigerant: R-410A, Factory Charge: 28Lbs 11Oz, Connection Size: 5/8'' X 1-1/8'', Connection Type: Sweat, Metering Device: EEV, Cooling BTU: 120000, Heating BTU: 120000,",
+      description: "120000 BTU 'VRF' Heat Recovery Multi-Split DC Inverter Outdoor Unit, Zones: Up To 20, Volts: 208-230, Hertz: 60, Phase: 3, SEER: 13, EER: 11, Refrigerant: R-410A, Factory Charge: 28Lbs 11Oz, Connection Size: 5/8'' X 1-1/8'', Connection Type: Sweat, Metering Device: EEV, Cooling BTU: 120000, Heating BTU: 120000.",
       features: "Energy Saving",
       btu: 120000,
       areaCoverage: 230,

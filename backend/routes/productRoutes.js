@@ -18,6 +18,7 @@ productRouter.post(
   expressAsyncHandler(async (req, res) => {
     const newProduct = new Product({
       name: 'sample name ' + Date.now(),
+      model: 'sample model ' + Date.now(),
       slug: 'sample-name-' + Date.now(),
       image: '/images/p1.jpg',
       price: 0,
@@ -48,7 +49,10 @@ productRouter.post(
         "Cooling Mode",
        " Drying Mode ",       
         "Fan Mode",
-        "Silent Mode "
+        "Silent Mode ",
+        "Self-cleaning",
+        "Low Noise",
+         "Night Mode"
       ],
       btu: 0,
       areaCoverage: 0,
@@ -85,6 +89,7 @@ productRouter.put(
     const product = await Product.findById(productId);
     if (product) {
       product.name = req.body.name;
+      product.model = req.body.model;
       product.slug = req.body.slug;
       product.price = req.body.price;
       product.image = req.body.image;
