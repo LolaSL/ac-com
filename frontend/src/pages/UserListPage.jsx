@@ -43,7 +43,9 @@ export default function UserListPage() {
   const navigate = useNavigate();
   const { search } = useLocation();
   const { state } = useContext(Store);
-  const { userInfo } = state;
+const { userInfo, adminInfo } = state;
+const token = userInfo?.token || adminInfo?.token;
+
 
   const [
     { loading, error, users = [], loadingDelete, successDelete, pages },
@@ -66,9 +68,10 @@ export default function UserListPage() {
     const fetchData = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
-        const { data } = await axios.get(`/api/users?page=${currentPage}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+ const { data } = await axios.get(`/api/users?page=${currentPage}`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
         dispatch({ type: "FETCH_SUCCESS", payload: data });
         setSortedUsers(data.users || []);
       } catch (err) {
@@ -83,7 +86,7 @@ export default function UserListPage() {
     } else {
       fetchData();
     }
-  }, [userInfo, successDelete, currentPage]);
+  }, [userInfo, successDelete, currentPage, token]);
 
   useEffect(() => {
     if (Array.isArray(users) && users.length > 0) {
@@ -103,9 +106,9 @@ export default function UserListPage() {
     if (window.confirm("Are you sure to delete?")) {
       try {
         dispatch({ type: "DELETE_REQUEST" });
-        await axios.delete(`/api/users/${user._id}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+       await axios.delete(`/api/users/${user._id}`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
         toast.success("User deleted successfully");
         dispatch({ type: "DELETE_SUCCESS" });
       } catch (error) {
@@ -174,6 +177,7 @@ export default function UserListPage() {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => navigate(`/admin/user/${user._id}`)}
                     >
                       Edit
@@ -182,6 +186,7 @@ export default function UserListPage() {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => deleteHandler(user)}
                     >
                       Delete

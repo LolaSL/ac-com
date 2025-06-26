@@ -41,7 +41,8 @@ const BlogEditPage = () => {
   const { id: blogId } = params;
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
 
   const [{ loading, error, loadingUpdate, loadingUpload }, dispatch] =
     useReducer(reducer, {
@@ -87,7 +88,7 @@ const BlogEditPage = () => {
           image,
         },
         {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       dispatch({ type: "UPDATE_SUCCESS" });
@@ -110,7 +111,7 @@ const BlogEditPage = () => {
       const { data } = await axios.post("/api/upload", bodyFormData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          authorization: `Bearer ${userInfo.token}`,
+          authorization: `Bearer ${token}`,
         },
       });
       dispatch({ type: "UPLOAD_SUCCESS" });
@@ -180,7 +181,11 @@ const BlogEditPage = () => {
             />
           </Form.Group>
           <div className="mb-3">
-            <Button disabled={loadingUpdate} type="submit">
+            <Button
+              disabled={loadingUpdate}
+              type="submit"
+              className="go-to-btn btn-text"
+            >
               Update
             </Button>
             {loadingUpdate && <LoadingBox />}

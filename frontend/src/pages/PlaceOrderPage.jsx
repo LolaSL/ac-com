@@ -106,7 +106,7 @@ export default function PlaceOrderPage() {
   return (
     <div>
       <CheckoutSteps step1 step2 step3 step4></CheckoutSteps>
-      <h1 className="my-3">Preview Order</h1>
+      <h1 className="my-3 fs-2">Preview Order</h1>
       <Row>
         <Col md={8}>
           <Card className="mb-3">
@@ -219,7 +219,7 @@ export default function PlaceOrderPage() {
                 <ListGroup.Item>
                   <div className="d-grid">
                     <Button
-                      className="btn btn-secondary"
+                      className="go-to-btn btn-text"
                       type="button"
                       onClick={placeOrderHandler}
                       disabled={cart.cartItems.length === 0}

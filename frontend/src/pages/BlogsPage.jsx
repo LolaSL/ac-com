@@ -77,14 +77,15 @@ export default function BlogsPage() {
   const currentPage = sp.get("page") || 1;
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+const { userInfo, adminInfo } = state;
+const token = userInfo?.token || adminInfo?.token;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
         const { data } = await axios.get(`/api/blogs?page=${currentPage}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
@@ -97,7 +98,7 @@ export default function BlogsPage() {
     } else {
       fetchData();
     }
-  }, [currentPage, userInfo, successDelete]);
+  }, [currentPage, userInfo, successDelete, token]);
 
   const createHandler = async () => {
     if (window.confirm("Are you sure to create?")) {
@@ -107,7 +108,7 @@ export default function BlogsPage() {
           `/api/blogs`,
           {},
           {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         toast.success("Blog created successfully");
@@ -125,7 +126,7 @@ export default function BlogsPage() {
       try {
         dispatch({ type: "DELETE_REQUEST" });
         await axios.delete(`/api/blogs/${blog._id}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("blog deleted successfully");
         dispatch({ type: "DELETE_SUCCESS" });
@@ -146,7 +147,7 @@ export default function BlogsPage() {
           <div>
             <Button
               type="button"
-              className="btn btn-secondary"
+               className="details"
               onClick={createHandler}
             >
               Create Blog
@@ -184,6 +185,7 @@ export default function BlogsPage() {
                     <Button
                       type="button"
                       variant="light"
+                          className="details"
                       onClick={() => navigate(`/admin/blog/${blog._id}`)}
                     >
                       Edit
@@ -192,6 +194,7 @@ export default function BlogsPage() {
                     <Button
                       type="button"
                       variant="light"
+                          className="details"
                       onClick={() => deleteHandler(blog)}
                     >
                       Delete

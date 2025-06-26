@@ -30,19 +30,14 @@ const generateToken = (serviceProvider) => {
 
 export const isAuth = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-
   if (token) {
-    // Verify the token
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         console.error('Token verification failed:', err);
         return res.status(401).send({ message: 'Invalid Token' });
       }
-
-
       req.serviceProvider = decoded;
       req.user = decoded;
-
       next();
     });
   } else {
@@ -91,8 +86,8 @@ serviceProviderRouter.get(
         .skip(pageSize * (page - 1))
         .limit(pageSize);
       const pages = Math.ceil(countServiceProviders / pageSize);
-      
-      res.send({ serviceProviders, page, pages }); 
+
+      res.send({ serviceProviders, page, pages });
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
@@ -265,6 +260,22 @@ serviceProviderRouter.get(
     }
   })
 );
+
+serviceProviderRouter.get(
+  '/messages/:id',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const messageId = req.params.id;
+    const message = await Message.findById(messageId);
+    if (message) {
+      res.send(message);
+    } else {
+      res.status(404).send({ message: 'Message Not Found' });
+    }
+  })
+);
+
 
 serviceProviderRouter.put(
   '/messages/:id',
@@ -458,6 +469,32 @@ serviceProviderRouter.post(
   })
 );
 
+serviceProviderRouter.post(
+  '/admin/create',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const { name, email, password, typeOfProvider, phone, company, experience, portfolio } = req.body;
+    const existingProvider = await ServiceProvider.findOne({ email });
+    if (existingProvider) {
+      return res.status(400).send({ message: 'Service Provider with this email already exists' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 8);
+    const serviceProvider = new ServiceProvider({
+      name,
+      email,
+      password: hashedPassword,
+      typeOfProvider,
+      phone,
+      company,
+      experience,
+      portfolio,
+    });
+    await serviceProvider.save();
+    res.status(201).send({ message: 'Service Provider created', serviceProvider });
+  })
+);
+
 
 serviceProviderRouter.get(
   '/:id',
@@ -548,7 +585,7 @@ serviceProviderRouter.delete(
     try {
       const serviceProvider = await ServiceProvider.findById(req.params.id);
       if (serviceProvider) {
-        await serviceProvider.remove();
+        await serviceProvider.deleteOne();
         res.send({ message: 'Service provider deleted successfully' });
       } else {
         res.status(404).send({ message: 'Service provider not found' });

@@ -23,13 +23,13 @@ sellerRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
     try {
-      
+
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
       const skip = (page - 1) * limit;
       const sellers = await Seller.find().skip(skip).limit(limit);
-      const count = await Seller.countDocuments(); 
-      const totalPages = Math.ceil(count / limit);  
+      const count = await Seller.countDocuments();
+      const totalPages = Math.ceil(count / limit);
       res.json({
         page,
         totalPages,
@@ -43,7 +43,80 @@ sellerRouter.get(
 
 
 
+sellerRouter.get(
+  '/',
+  expressAsyncHandler(async (req, res) => {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const sellers = await Seller.find().skip(skip).limit(limit);
+    const count = await Seller.countDocuments();
+    const totalPages = Math.ceil(count / limit);
+    res.json({ page, totalPages, sellers });
+  })
+);
 
+// POST /api/sellers  — create new seller
+sellerRouter.post(
+  '/',
+  isAuth,
+  isAdmin,
+  upload.single('logo'),
+  expressAsyncHandler(async (req, res) => {
+    const { name, brand, info, link, companyLink } = req.body;
+    const logo = req.file ? `/uploads/${req.file.filename}` : '';
+
+    // Validate all required fields including 'link'
+    if (!name || !brand || !info || !link || !companyLink) {
+      return res.status(400).json({ message: 'All fields (name, brand, info, link, companyLink) are required!' });
+    }
+
+    const newSeller = new Seller({
+      name,
+      brand,
+      info,
+      link,
+      companyLink,
+      logo,
+    });
+
+    const savedSeller = await newSeller.save();
+    res.status(201).send({ message: 'Seller created successfully', seller: savedSeller });
+  })
+);
+
+// PUT /api/sellers/:id — update seller
+sellerRouter.put(
+  '/:id',
+  isAuth,
+  isAdmin,
+  upload.single('logo'),
+  expressAsyncHandler(async (req, res) => {
+    const seller = await Seller.findById(req.params.id);
+    if (!seller) {
+      return res.status(404).send({ message: 'Seller Not Found' });
+    }
+
+    const { name, brand, info, link, companyLink } = req.body;
+
+    seller.name = name || seller.name;
+    seller.brand = brand || seller.brand;
+    seller.info = info || seller.info;
+    seller.link = link || seller.link;
+    seller.companyLink = companyLink || seller.companyLink;
+
+    if (req.file) {
+      seller.logo = `/uploads/${req.file.filename}`;
+    }
+
+    try {
+      const updatedSeller = await seller.save();
+      res.send({ message: 'Seller Updated', seller: updatedSeller });
+    } catch (error) {
+      res.status(400).send({ message: 'Invalid Seller Data', error: error.message });
+    }
+  })
+);
 
 sellerRouter.get(
   '/:id',
@@ -58,60 +131,6 @@ sellerRouter.get(
 );
 
 
-sellerRouter.post(
-  "/",
-  isAuth,
-  isAdmin,
-  upload.single("logo"),
-  expressAsyncHandler(async (req, res) => {
-
-      const { name, brand, info, companyLink } = req.body;
-      const logo = req.file ? `/uploads/${req.file.filename}` : "";
-
-      if (!name || !brand || !info || !companyLink || !logo) {
-        return res.status(400).json({ message: "All fields are required!" });
-      }
-
-      const newSeller = new Seller({
-        name,
-        brand,
-        info,
-        companyLink,
-        logo,
-      });
-
-      const savedSeller = await newSeller.save();
-      console.log(savedSeller);
- 
-  })
-);
-
-
-
-
-sellerRouter.put(
-  '/:id',
-  isAuth,
-  isAdmin,
-  expressAsyncHandler(async (req, res) => {
-    const seller = await Seller.findById(req.params.id);
-    if (seller) {
-      seller.image = req.body.image;
-      seller.name = req.body.name || seller.name;
-      seller.brand = req.body.brand || seller.brand;
-      seller.info = req.body.info || seller.info;
-      seller.companyLink = req.body.companyLink;
-      try {
-        const updatedSeller = await seller.save();
-        res.send({ message: 'Seller Updated', seller: updatedSeller });
-      } catch (error) {
-        res.status(400).send({ message: 'Invalid Seller Data', error: error.message });
-      }
-    } else {
-      res.status(404).send({ message: 'Seller Not Found' });
-    }
-  })
-);
 
 
 sellerRouter.post(

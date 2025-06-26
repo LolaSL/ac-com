@@ -42,7 +42,8 @@ const ProductEditPage = () => {
   const { id: productId } = params;
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
 
   const [{ loading, error, loadingUpdate, loadingUpload }, dispatch] =
     useReducer(reducer, {
@@ -143,7 +144,7 @@ const ProductEditPage = () => {
           },
         },
         {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -168,7 +169,7 @@ const ProductEditPage = () => {
       const { data } = await axios.post("/api/upload", bodyFormData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          authorization: `Bearer ${userInfo.token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -412,7 +413,7 @@ const ProductEditPage = () => {
             <Button
               disabled={loadingUpdate}
               type="submit"
-              className="btn btn-secondary"
+              className="go-to-btn btn-text"
             >
               Update
             </Button>

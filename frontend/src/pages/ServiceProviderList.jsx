@@ -28,6 +28,14 @@ const reducer = (state, action) => {
       return { ...state, loadingDelete: false };
     case "DELETE_RESET":
       return { ...state, loadingDelete: false, successDelete: false };
+    case "CREATE_REQUEST":
+      return { ...state, loadingCreate: true };
+    case "CREATE_SUCCESS":
+      return { ...state, loadingCreate: false, successCreate: true };
+    case "CREATE_FAIL":
+      return { ...state, loadingCreate: false };
+    case "CREATE_RESET":
+      return { ...state, loadingCreate: false, successCreate: false };
     default:
       return state;
   }
@@ -42,6 +50,7 @@ export default function ServiceProviderList() {
       loadingDelete,
       successDelete,
       pages,
+      loadingCreate,
     },
     dispatch,
   ] = useReducer(reducer, {
@@ -49,13 +58,16 @@ export default function ServiceProviderList() {
     error: "",
     serviceProviders: [],
     pages: 1,
+    loadingCreate: false,
+    successCreate: false,
   });
 
   const navigate = useNavigate();
   const { state } = useContext(Store);
-  const { userInfo } = state;
+
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
   const { search } = useLocation();
-  const { token } = userInfo;
 
   const sp = new URLSearchParams(search);
   const currentPage = sp.get("page") || 1;
@@ -88,6 +100,37 @@ export default function ServiceProviderList() {
     }
   }, [currentPage, successDelete, token]);
 
+  const createHandler = async () => {
+    if (window.confirm("Are you sure to create a new service provider?")) {
+      try {
+        dispatch({ type: "CREATE_REQUEST" });
+        const defaultData = {
+          name: "New Provider",
+          email: `provider${Date.now()}@example.com`,
+          password: "defaultPassword123",
+          typeOfProvider: "General",
+          phone: "000-000-0000",
+          company: "Default Company",
+          experience: 0,
+          portfolio: "",
+        };
+        const { data } = await axios.post(
+          "/api/service-providers/register",
+          defaultData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        toast.success("Service Provider created successfully");
+        dispatch({ type: "CREATE_SUCCESS" });
+        navigate(`/admin/manage-service-providers/${data._id}`);
+      } catch (err) {
+        toast.error(getError(err));
+        dispatch({ type: "CREATE_FAIL" });
+      }
+    }
+  };
+
   const deleteHandler = async (serviceProvider) => {
     if (window.confirm("Are you sure to delete?")) {
       try {
@@ -106,7 +149,17 @@ export default function ServiceProviderList() {
 
   return (
     <Container className="provider-container">
-      <h1>Service Providers</h1>
+      <div className="mb-3 d-flex justify-content-between align-items-center">
+        <h1>Service Providers</h1>
+        <Button
+          type="button"
+          className="details"
+          onClick={createHandler}
+          disabled={loadingCreate}
+        >
+          {loadingCreate ? "Creating..." : "Create Service Provider"}
+        </Button>
+      </div>
 
       {loadingDelete && <LoadingBox />}
       {loading ? (
@@ -142,6 +195,7 @@ export default function ServiceProviderList() {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() =>
                         navigate(
                           `/admin/manage-service-providers/${serviceProvider._id}`
@@ -154,6 +208,7 @@ export default function ServiceProviderList() {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => deleteHandler(serviceProvider)}
                     >
                       Delete

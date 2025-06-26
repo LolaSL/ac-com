@@ -1,5 +1,6 @@
 import React from "react";
 import { Container } from "react-bootstrap";
+import { Link } from "react-router";
 const AboutUs = () => {
   return (
     <Container className="site-container-about mt-4 p-4">
@@ -97,6 +98,11 @@ const AboutUs = () => {
           </ul>
         </h3>
       </article>
+            <div className=" mt-4 mb-4">
+          <Link to="/" className="go-to-btn btn-text">
+            Back to Home
+          </Link>
+        </div>
     </Container>
   );
 };

@@ -66,23 +66,37 @@ import Offers from "./pages/Offers.jsx";
 import AdvancedAC from "./pages/AdvancedAC.jsx";
 import MessageEditPage from "./pages/MessageEditPage.jsx";
 import ServiceProviderEditPage from "./pages/ServiceProviderEditPage.jsx";
+import AdminLoginPage from "./pages/AdminLoginPage.jsx";
 
 function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
-  const { fullBox, cart, userInfo, serviceProviderInfo } = state;
+  const { fullBox, cart, userInfo, serviceProviderInfo, adminInfo } = state;
 
   const checkoutHandler = (e) => {
     e.preventDefault();
     window.location.href = "/signin?redirect=/uploadfile";
   };
-  const signoutHandler = () => {
+
+  const adminLogoutHandler = () => {
+    ctxDispatch({ type: "ADMIN_LOGOUT" });
+    localStorage.removeItem("adminInfo");
+    window.location.href = "/";
+  };
+
+  const userSignoutHandler = () => {
     ctxDispatch({ type: "USER_SIGNOUT" });
     localStorage.removeItem("userInfo");
-    localStorage.removeItem("serviceProviderInfo");
     localStorage.removeItem("shippingAddress");
     localStorage.removeItem("paymentMethod");
     window.location.href = "/";
   };
+
+  const serviceProviderSignoutHandler = () => {
+    ctxDispatch({ type: "SERVICE_PROVIDER_SIGNOUT" });
+    localStorage.removeItem("serviceProviderInfo");
+    window.location.href = "/";
+  };
+
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
 
@@ -118,136 +132,124 @@ function App() {
       >
         <ToastContainer position="bottom-center" limit={1} />
         <header className="header-nav">
-          <Navbar className="navbar" expand="lg">
-            <Container>
-              <Button
-                variant="secondary"
-                onClick={() => setSidebarIsOpen(!sidebarIsOpen)}
-                className="btn button-left me-4"
-              >
-                <i className="fas fa-bars"></i>
-              </Button>
-              <Link to="/" className="navbar-brand">
-                <h3>
-                  <span>AC</span> Commerce
-                </h3>
-                <p className="handwritten">Cooling Solutions For Every Space</p>
-              </Link>
-              <Navbar.Toggle aria-controls="basic-navbar-nav" />
-              <Navbar.Collapse id="basic-navbar-nav">
-                <SearchBox />
-                <Nav className="me-auto w-100 justify-content-end">
-                  <Link to="/cart" className="nav-link">
-                    Cart
-                    {cart.cartItems.length > 0 && (
-                      <Badge pill bg="danger">
-                        {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
-                      </Badge>
-                    )}
-                  </Link>
-                  {userInfo ? (
-                    <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
-                      <Link to="/profile" className="dropdown-item">
-                        User Profile
-                      </Link>
-                      <Link to="/orderhistory" className="dropdown-item">
-                        Order History
-                      </Link>
-                      <NavDropdown.Divider />
-                      <Link
-                        className="dropdown-item"
-                        to="#signout"
-                        onClick={signoutHandler}
-                      >
-                        Sign Out
-                      </Link>
-                    </NavDropdown>
-                  ) : (
-                    <Link className="nav-link" to="/signin">
-                      Sign In
-                    </Link>
-                  )}
-                  {serviceProviderInfo ? (
-                    <NavDropdown
-                      title={serviceProviderInfo.name}
-                      id="provider-nav-dropdown"
-                    >
-                      <Link
-                        to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
-                        className="dropdown-item"
-                      >
-                        Service Provider Profile
-                      </Link>
-                      <Link
-                        to="/serviceprovider/projects"
-                        className="dropdown-item"
-                      >
-                        Projects
-                      </Link>
-                      <Link
-                        to="/serviceprovider/hours"
-                        className="dropdown-item"
-                      >
-                        Hours
-                      </Link>
-                      <Link
-                        to="/serviceprovider/earnings"
-                        className="dropdown-item"
-                      >
-                        Earnings
-                      </Link>
-                      <Link
-                        to="/serviceprovider/messages"
-                        className="dropdown-item"
-                      >
-                        Messages
-                      </Link>
-                      <NavDropdown.Divider />
-                      <Link
-                        className="dropdown-item"
-                        to="#signout"
-                        onClick={signoutHandler}
-                      >
-                        Log Out
-                      </Link>
-                    </NavDropdown>
-                  ) : (
-                    <Link className="nav-link" to="/serviceprovider/login">
-                      Service Provider
-                    </Link>
-                  )}
-                  {userInfo && userInfo.isAdmin && (
-                    <NavDropdown title="Admin" id="admin-nav-dropdown">
-                      <Link to="/admin/dashboard" className="dropdown-item">
-                        Dashboard
-                      </Link>
-                      <Link to="/admin/products" className="dropdown-item">
-                        Products
-                      </Link>
-                      <Link to="/admin/orders" className="dropdown-item">
-                        Orders
-                      </Link>
-                      <Link to="/admin/users" className="dropdown-item">
-                        Users
-                      </Link>
-                      <Link
-                        to="/admin/manage-service-providers"
-                        className="dropdown-item"
-                      >
-                        Service Providers
-                      </Link>
-                      <Link to="/admin/sellers" className="dropdown-item">
-                        Sellers
-                      </Link>
-                      <Link to="/admin/blogs-list" className="dropdown-item">
-                        Blogs
-                      </Link>
-                    </NavDropdown>
-                  )}
-                </Nav>
-              </Navbar.Collapse>
-            </Container>
-          </Navbar>
+<Navbar className="navbar" expand="lg">
+  <Container>
+    <Button
+      variant="secondary"
+      onClick={() => setSidebarIsOpen(!sidebarIsOpen)}
+      className="btn-toggle me-4"
+    >
+      <i className="fas fa-bars"></i>
+    </Button>
+    <Link to="/" className="navbar-brand">
+      <h3>AC Commerce</h3>
+      <p className="handwritten">Cooling Solutions For Every Space</p>
+    </Link>
+    <Navbar.Toggle aria-controls="basic-navbar-nav" />
+    <Navbar.Collapse id="basic-navbar-nav">
+      {/* Added flex-grow-1 to make the search box wrapper expand, and me-3 for spacing */}
+      <div className="flex-grow-1 me-3">
+        <SearchBox />
+      </div>
+
+      <Nav className="ms-auto me-4"> {/* ms-auto pushes this Nav to the right, me-4 adds spacing from the right edge */}
+        <Link to="/cart" className="nav-link">
+          Cart
+          {cart.cartItems.length > 0 && (
+            <Badge pill bg="danger">
+              {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
+            </Badge>
+          )}
+        </Link>
+        {userInfo ? (
+          <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
+            <Link to="/profile" className="dropdown-item">
+              User Profile
+            </Link>
+            <Link to="/orderhistory" className="dropdown-item">
+              Order History
+            </Link>
+            <NavDropdown.Divider />
+            <Link className="dropdown-item" to="#signout" onClick={userSignoutHandler}>
+              Sign Out
+            </Link>
+          </NavDropdown>
+        ) : (
+          <Link className="nav-link" to="/signin">
+            User Login
+          </Link>
+        )}
+        {serviceProviderInfo ? (
+          <NavDropdown title={serviceProviderInfo.name} id="provider-nav-dropdown">
+            <Link
+              to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
+              className="dropdown-item"
+            >
+              Service Provider Profile
+            </Link>
+            <Link to="/serviceprovider/projects" className="dropdown-item">
+              Projects
+            </Link>
+            <Link to="/serviceprovider/hours" className="dropdown-item">
+              Hours
+            </Link>
+            <Link to="/serviceprovider/earnings" className="dropdown-item">
+              Earnings
+            </Link>
+            <Link to="/serviceprovider/messages" className="dropdown-item">
+              Messages
+            </Link>
+            <NavDropdown.Divider />
+            <Link
+              className="dropdown-item"
+              to="#signout"
+              onClick={serviceProviderSignoutHandler}
+            >
+              Log Out
+            </Link>
+          </NavDropdown>
+        ) : (
+          <Link className="nav-link" to="/serviceprovider/login">
+            Service Provider Login
+          </Link>
+        )}
+        {adminInfo ? (
+          <NavDropdown title="Admin" id="admin-nav-dropdown">
+            <Link to="/admin/dashboard" className="dropdown-item">
+              Dashboard
+            </Link>
+            <Link to="/admin/products" className="dropdown-item">
+              Products
+            </Link>
+            <Link to="/admin/orders" className="dropdown-item">
+              Orders
+            </Link>
+            <Link to="/admin/users" className="dropdown-item">
+              Users
+            </Link>
+            <Link to="/admin/manage-service-providers" className="dropdown-item">
+              Service Providers
+            </Link>
+            <Link to="/admin/sellers" className="dropdown-item">
+              Sellers
+            </Link>
+            <Link to="/admin/blogs-list" className="dropdown-item">
+              Blogs
+            </Link>
+            <NavDropdown.Divider />
+            <Link className="dropdown-item" to="#adminlogout" onClick={adminLogoutHandler}>
+              Admin Log Out
+            </Link>
+          </NavDropdown>
+        ) : (
+          <Link className="nav-link" to="/admin-login">
+            Admin Login
+          </Link>
+        )}
+      </Nav>
+    </Navbar.Collapse>
+  </Container>
+</Navbar>
         </header>
         <div
           className={
@@ -335,6 +337,7 @@ function App() {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/signin" element={<SignInPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/admin-login" element={<AdminLoginPage />} />
                 <Route
                   path="/serviceprovider/login"
                   element={<ServiceProviderLogin />}

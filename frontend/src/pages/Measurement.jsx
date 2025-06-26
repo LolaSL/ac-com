@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import BtuCalculator from "../components/BtuCalculator.jsx";
 import Annotator from "../components/Annotator.jsx";
 import { Container } from "react-bootstrap";
@@ -9,12 +9,23 @@ import BtuModalWindow from "../components/BtuModalWindow.jsx";
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
   const [roomData, setRoomData] = useState(null);
-  console.log(roomData);
+  const [error, setError] = useState(null);
+  const getToken = () => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      return userInfo?.token || null;
+    } catch {
+      return null;
+    }
+  };
 
-  const fetchSavedPdfs = async () => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const token = userInfo?.token;
-
+const fetchSavedPdfs = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      setError("You must be logged in to fetch saved PDFs.");
+      return;
+    }
+    setError(null);
     try {
       const response = await fetch("/api/user-annotations", {
         headers: {
@@ -25,32 +36,43 @@ const Measurement = () => {
         const data = await response.json();
         setSavedPdfs(data);
       } else {
+        setError(`Failed to fetch saved PDFs: ${response.statusText}`);
         console.error("Failed to fetch saved PDFs:", response.status);
       }
     } catch (error) {
+      setError("Error fetching saved PDFs.");
       console.error("Error fetching saved PDFs:", error);
     }
-  };
+  }, []); 
 
   useEffect(() => {
     fetchSavedPdfs();
-  }, []);
+  }, [fetchSavedPdfs]);
+
+
+  useEffect(() => {
+    fetchSavedPdfs();
+  }, [fetchSavedPdfs]);
 
   return (
     <div>
       <Container>
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
         <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData} />
-
         <Sidebar
           savedPdfs={savedPdfs}
           fetchSavedPdfs={fetchSavedPdfs}
           roomData={roomData}
           setRoomData={setRoomData}
         />
-        <BtuModalWindow/>
+        <BtuModalWindow />
         <BtuCalculator roomData={roomData} />
-        <div className=" mt-4 mb-4">
-          <Link to="/" className="btn btn-secondary">
+        <div className="mt-4 mb-4">
+          <Link to="/" className="go-to-btn btn-text">
             Back to Home
           </Link>
         </div>

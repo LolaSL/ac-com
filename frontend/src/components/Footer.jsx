@@ -21,7 +21,7 @@ const Footer = () => {
               {" "}
               <i className="fa-solid fa-air-conditioner"></i>
               <h3>
-                <span>AC</span> Commerce
+                AC Commerce
               </h3>
               <p className="handwritten">Cooling Solutions For Every Space</p>
             </div>
@@ -31,7 +31,8 @@ const Footer = () => {
               control and manage our indoor and outdoor spaces.
             </p>
 
-            <div className="footer-icons d-flex mb-4">
+            <div className="footer-icons d-flex  ">
+              <h4 className="px-2 follow-us">Follow Us</h4>
               <NavLink
                 href="https://www.facebook.com"
                 target="_blank"
@@ -80,19 +81,20 @@ const Footer = () => {
             >
               Get A Quote
             </NavLink>
-            <NavLink
-              className="text-white"
-              href="/offers"
-            >
+            <NavLink className="text-white" href="/offers">
               Offers
             </NavLink>
             <NavLink className="text-white" href="/sellers">
-            Explore Suppliers
+              Explore Suppliers
             </NavLink>
-       
-
             <NavLink className="text-white" href="/blogs">
               Blogs
+            </NavLink>
+            <NavLink className="text-white" href="/#">
+              Privacy Policy
+            </NavLink>
+            <NavLink className="text-white" href="/#">
+              Terms of Use
             </NavLink>
           </Col>
           <Col className="col-md-6 col-lg-4 col-12 ft-3">

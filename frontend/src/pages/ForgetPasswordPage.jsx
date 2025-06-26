@@ -1,4 +1,4 @@
-import Axios from "axios";
+import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
@@ -11,23 +11,24 @@ import { getError } from "../utils";
 export default function ForgetPasswordPage() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
 
   const { state } = useContext(Store);
   const { userInfo } = state;
 
   useEffect(() => {
     if (userInfo) {
-      navigate('/');
+      navigate("/");
     }
   }, [navigate, userInfo]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await Axios.post('/api/users/forget-password', {
-        email,
-      });
+      const { data } = await axios.post("/api/users/forget-password", {
+  email,
+});
+
       toast.success(data.message);
     } catch (err) {
       toast.error(getError(err));
@@ -47,7 +48,13 @@ export default function ForgetPasswordPage() {
           />
         </Form.Group>
         <div className="mb-3">
-          <Button className="btn btn-secondary" type="submit">submit</Button>
+          <Button
+            className="go-to-btn btn-text"
+            variant="btn-outline"
+            type="submit"
+          >
+            Submit
+          </Button>
         </div>
       </Form>
     </Container>

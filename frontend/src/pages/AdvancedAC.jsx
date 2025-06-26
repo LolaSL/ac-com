@@ -1,5 +1,4 @@
 import React from "react";
-
 import Image from "react-bootstrap/Image";
 import { Link } from "react-router-dom";
 
@@ -16,7 +15,7 @@ const AdvancedAC = () => {
           considering upgrading your system, now is the perfect time to explore
           what’s new.
         </p>
-     <h3 className="mb-2 p-4 fs-3 text-bold">
+        <h3 className="mb-2 p-4 fs-3 text-bold">
           Energy-Efficient Systems: Saving More, Consuming Less
         </h3>
         <p className="mb-3 p-3 ac-conditioning fs-4">
@@ -39,7 +38,9 @@ const AdvancedAC = () => {
         </div>
       </article>
       <article>
-        <h3 className="mb-2 p-4 fs-3 text-bold">Heat Pumps: The All-Weather Solution</h3>
+        <h3 className="mb-2 p-4 fs-3 text-bold">
+          Heat Pumps: The All-Weather Solution
+        </h3>
         <p className="mb-3 p-3 ac-conditioning fs-4">
           Heat pumps are becoming a go-to solution for homeowners seeking
           year-round comfort and energy efficiency. With advancements in
@@ -58,8 +59,10 @@ const AdvancedAC = () => {
         </div>
       </article>
       <article>
-       <h3 className="mb-2 p-4 fs-3 text-bold">Indoor Air Quality Innovations</h3>
-           <p className="mb-3 p-3 ac-conditioning fs-4">
+        <h3 className="mb-2 p-4 fs-3 text-bold">
+          Indoor Air Quality Innovations
+        </h3>
+        <p className="mb-3 p-3 ac-conditioning fs-4">
           Improving indoor air quality (IAQ) is a top priority for 2025. HVAC
           systems are now integrating air purifiers, UV-C light technology, and
           high-efficiency particulate air (HEPA) filters to remove allergens,
@@ -77,8 +80,8 @@ const AdvancedAC = () => {
         </div>
       </article>
       <article>
-       <h3 className="mb-2 p-4 fs-3 text-bold">Why Upgrade in 2025?</h3>
-         <p className="mb-3 p-3 ac-conditioning fs-4">
+        <h3 className="mb-2 p-4 fs-3 text-bold">Why Upgrade in 2025?</h3>
+        <p className="mb-3 p-3 ac-conditioning fs-4">
           With these exciting advancements, 2025 is the ideal time to upgrade
           your HVAC system. Whether you’re looking to save on energy costs,
           reduce your environmental impact, or enjoy the convenience of smart
@@ -95,7 +98,7 @@ const AdvancedAC = () => {
         </div>
       </article>
       <div className=" mt-4 mb-4">
-        <Link to="/" className="btn btn-secondary">
+        <Link to="/" className="go-to-btn btn-text">
           Back to Home
         </Link>
       </div>

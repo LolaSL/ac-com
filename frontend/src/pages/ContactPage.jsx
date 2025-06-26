@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Form, Button, Alert, Image } from "react-bootstrap";
 import axios from "axios";
-
+import { Link } from "react-router";
 const ContactPage = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -219,6 +219,11 @@ const ContactPage = () => {
             </p>
           </div>
         </div>
+      </div>
+      <div className="mt-4 mb-4 me-4">
+        <Link to="/" className="go-to-btn btn-text">
+          Back to Home
+        </Link>
       </div>
     </Container>
   );

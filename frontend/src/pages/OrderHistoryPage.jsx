@@ -30,7 +30,9 @@ const reducer = (state, action) => {
 
 export default function OrderHistoryPage() {
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
+
   const navigate = useNavigate();
   const { search } = useLocation();
   const [{ loading, error, orders, pages }, dispatch] = useReducer(reducer, {
@@ -47,7 +49,7 @@ export default function OrderHistoryPage() {
       try {
         const { data } = await axios.get(
           `/api/orders/mine?page=${currentPage}`,
-          { headers: { Authorization: `Bearer ${userInfo.token}` } }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (error) {
@@ -58,11 +60,11 @@ export default function OrderHistoryPage() {
       }
     };
     fetchData();
-  }, [userInfo, currentPage]);
+  }, [userInfo, currentPage, token]);
+
   return (
     <Container className="provider-container">
       <h1>Order History</h1>
-
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -101,6 +103,7 @@ export default function OrderHistoryPage() {
                       <Button
                         type="button"
                         variant="light"
+                        className="details"
                         onClick={() => navigate(`/order/${order._id}`)}
                       >
                         Details

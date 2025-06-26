@@ -75,9 +75,9 @@ export default function ShippingAddressPage() {
 
           <div className="mb-3">
             <Button
-              id="chooseOnMap"
               type="button"
               variant="light"
+              className='go-to-btn btn-text'
               onClick={handleChooseLocation}
               disabled={isLoading}
             >
@@ -93,7 +93,7 @@ export default function ShippingAddressPage() {
           </div>
 
           <div className="mb-3">
-            <Button variant="secondary" type="submit" className="btn btn-secondary">
+            <Button variant="secondary" type="submit" className="go-to-btn btn-text">
               Continue
             </Button>
           </div>

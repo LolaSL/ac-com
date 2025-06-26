@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -27,10 +27,9 @@ export default function SearchBox() {
           placeholder="search products..."
           aria-label="Search Products"
           aria-describedby="button-search"
-          className=" rounded"
         ></FormControl>
         <Button
-          variant="btn btn-outline-secondary rounded"
+          variant="btn btn-search btn-text"
           type="submit"
           id="button-search"
         >

@@ -3,7 +3,7 @@ import { Form } from "react-bootstrap";
 const CheckboxGroup = ({ title, name, options, onChange }) => {
     return (
       <>
-        <h3 className="mb-3 mt-3">{title}</h3>
+        <h3 className="mb-4 mt-4">{title}</h3>
         {Object.keys(options).map((key) => (
           <Form.Check
             key={key}

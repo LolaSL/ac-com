@@ -41,7 +41,9 @@ export default function UsersProductSales() {
     useReducer(reducer, initialState);
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+
+ const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
 
   const [chartPage, setChartPage] = useState(0);
 
@@ -50,14 +52,14 @@ export default function UsersProductSales() {
       dispatch({ type: "FETCH_REQUEST" });
       try {
         const { data } = await axios.get(`/api/orders/summary?page=${page}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
       }
     },
-    [userInfo]
+    [token]
   );
 
   useEffect(() => {
@@ -186,7 +188,7 @@ export default function UsersProductSales() {
           <div className="charts-row">{chartGroups[chartPage]}</div>
           <div className="text-center my-3">
             <Button
-              className="btn btn-secondary mx-2"
+              className=" details mx-2"
               onClick={() => setChartPage((prev) => Math.max(prev - 1, 0))}
               disabled={chartPage === 0}
             >
@@ -196,7 +198,7 @@ export default function UsersProductSales() {
               Chart Page {chartPage + 1} of {chartGroups.length}
             </span>
             <Button
-              className="btn btn-secondary mx-2"
+              className="details mx-2"
               onClick={() => setChartPage((prev) => Math.min(prev + 1, chartGroups.length - 1))}
               disabled={chartPage === chartGroups.length - 1}
             >

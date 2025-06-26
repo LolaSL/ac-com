@@ -46,7 +46,7 @@ export default function SignInPage() {
 
   return (
     <Container className="small-container p-4">
-      <h1 className="text-center pt-4 mb-4 fw-bold my-3">Sign In</h1>
+      <h1 className="text-center pt-4 mb-4 fw-bold my-3">User Login</h1>
       <Form onSubmit={submitHandler}>
         <Form.Group className="mb-3" controlId="email">
           <Form.Label>Email</Form.Label>
@@ -65,12 +65,10 @@ export default function SignInPage() {
           />
         </Form.Group>
         <div className="mb-3">
-          <Button type="submit" className="btn btn-secondary btn-md me-2">
+          <Button type="submit" className="go-to-btn btn-text me-2">
             Sign In
           </Button>
         </div>
-
-
         <div className="mb-3">
           New customer?{" "}
           <Link to={`/signup?redirect=${redirect}`}>Create your account</Link>

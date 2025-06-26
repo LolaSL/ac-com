@@ -10,7 +10,7 @@ const serviceProviderSchema = new mongoose.Schema(
         typeOfProvider: { type: String, required: true },
         phone: { type: String, required: true },
         company: { type: String },
-        experience: { type: Number },
+      experience: { type: String },
         portfolio: { type: String },
         isActive: { type: Boolean, default: true, required: true }, 
         isAdmin: { type: Boolean, default: false, required: true },

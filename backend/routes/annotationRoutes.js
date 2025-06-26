@@ -4,9 +4,9 @@ import AnnotationModel from '../models/annotationModel.js';
 import { isAuth } from '../utils.js';
 import { PDFDocument, rgb, degrees } from 'pdf-lib';
 import fetch from 'node-fetch';
+
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
-
 
 router.post('/upload-annotate', isAuth, upload.single('pdfFile'), async (req, res) => {
   try {
@@ -39,7 +39,6 @@ router.post('/upload-annotate', isAuth, upload.single('pdfFile'), async (req, re
       rotation: rect.rotation || 0,
     }));
 
-
     const percentComments = parsedComments.map(comment => ({
       id: comment.id,
       rectId: comment.rectId,
@@ -50,16 +49,14 @@ router.post('/upload-annotate', isAuth, upload.single('pdfFile'), async (req, re
       textColor: comment.textColor,
     }));
 
-
     const percentLines = parsedLines.map(line => ({
       id: line.id,
       rectId: line.rectId,
       commentId: line.commentId,
-      points: line.points.map((p, i) => i % 2 === 0 ? p / width : p / height), 
+      points: line.points.map((p, i) => (i % 2 === 0 ? p / width : p / height)),
       stroke: line.stroke,
       strokeWidth: line.strokeWidth,
     }));
-
 
     const newAnnotation = new AnnotationModel({
       filename: req.file.originalname,
@@ -74,14 +71,14 @@ router.post('/upload-annotate', isAuth, upload.single('pdfFile'), async (req, re
     });
 
     const savedAnnotation = await newAnnotation.save();
-    res.status(201).json({ message: 'PDF and annotations saved successfully!', id: savedAnnotation._id });
+    return res.status(201).json({ message: 'PDF and annotations saved successfully!', id: savedAnnotation._id });
   } catch (error) {
     console.error('Error saving PDF and annotations:', error);
-    res.status(500).json({ message: 'Failed to save PDF and annotations.', error: error.message });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Failed to save PDF and annotations.', error: error.message });
+    }
   }
 });
-
-
 
 router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
   try {
@@ -90,29 +87,24 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
       return res.status(404).json({ message: 'Annotated PDF not found.' });
     }
 
+    const tokenUserId = req.user._id?.toString() || req.user.id?.toString() || req.user.userId?.toString();
+    if (!tokenUserId || annotation.userId.toString() !== tokenUserId) {
+      return res.status(403).json({ message: 'Unauthorized access.' });
+    }
+
     // Load the base PDF
     const pdfDoc = await PDFDocument.load(annotation.pdfData);
     const pages = pdfDoc.getPages();
 
     const watermarkText = `AC Design — User: ${req.user.email || 'Unknown User'}`;
 
-    // IF you have an image (canvas export) from the frontend
     if (annotation.annotatedImageUrl) {
       const imageBytes = await fetch(annotation.annotatedImageUrl).then(res => res.arrayBuffer());
-      const embeddedImage = await pdfDoc.embedPng(imageBytes); // or embedJpg
+      const embeddedImage = await pdfDoc.embedPng(imageBytes);
 
       pages.forEach((page) => {
         const { width, height } = page.getSize();
-
-        // Draw the flattened annotations image over the page
-        page.drawImage(embeddedImage, {
-          x: 0,
-          y: 0,
-          width,
-          height,
-        });
-
-        // Add watermark
+        page.drawImage(embeddedImage, { x: 0, y: 0, width, height });
         page.drawText(watermarkText, {
           x: width / 4,
           y: height / 2,
@@ -123,7 +115,6 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
         });
       });
     } else {
-      // Fallback: add only watermark
       pages.forEach((page) => {
         const { width, height } = page.getSize();
         page.drawText(watermarkText, {
@@ -139,24 +130,20 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
 
     const pdfBytes = await pdfDoc.save();
 
-    if (annotation.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Unauthorized access.' });
-    }
-
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${annotation.filename || 'annotated.pdf'}"`,
       'Content-Length': pdfBytes.length,
     });
 
-    res.send(Buffer.from(pdfBytes));
+    return res.send(Buffer.from(pdfBytes));
   } catch (error) {
     console.error('Error generating annotated PDF:', error);
-    res.status(500).json({ message: 'Failed to generate annotated PDF.' });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Failed to generate annotated PDF.' });
+    }
   }
 });
-
-
 
 router.get('/annotations/:id', isAuth, async (req, res) => {
   try {
@@ -165,34 +152,32 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
       return res.status(404).json({ message: 'Annotations not found for this PDF.' });
     }
 
-    if (annotation.userId.toString() !== req.user.id) {
+    const tokenUserId = req.user._id?.toString() || req.user.id?.toString() || req.user.userId?.toString();
+    if (!tokenUserId || annotation.userId.toString() !== tokenUserId) {
       return res.status(403).json({ message: 'Unauthorized to access these annotations.' });
     }
 
-    res.json(annotation.annotations);
+    return res.json(annotation.annotations);
   } catch (error) {
     console.error('Error fetching annotations:', error);
-    res.status(500).json({ message: 'Failed to fetch annotations.', error: error.message });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Failed to fetch annotations.', error: error.message });
+    }
   }
 });
-
 
 router.get('/user-annotations', isAuth, async (req, res) => {
   try {
     const userId = req.user._id;
-    const userAnnotations = await AnnotationModel.find({ userId: userId }).select('_id filename pdfId createdAt updatedAt');
-    res.json(userAnnotations);
+    const userAnnotations = await AnnotationModel.find({ userId }).select('_id filename pdfId createdAt updatedAt');
+    return res.json(userAnnotations);
   } catch (error) {
     console.error('Error fetching user annotations:', error);
-    res.status(500).json({ message: 'Failed to fetch user annotations.', error: error.message });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Failed to fetch user annotations.', error: error.message });
+    }
   }
 });
-
-
-
-
-
-
 
 router.delete('/annotations/:id', isAuth, async (req, res) => {
   try {
@@ -200,14 +185,14 @@ router.delete('/annotations/:id', isAuth, async (req, res) => {
     if (!annotation) {
       return res.status(404).json({ message: 'Annotation not found.' });
     }
-
     await AnnotationModel.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Annotation deleted successfully by admin.' });
+    return res.json({ message: 'Annotation deleted successfully.' });
   } catch (error) {
     console.error('Error deleting annotation:', error);
-    res.status(500).json({ message: 'Failed to delete annotation.', error: error.message });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Failed to delete annotation.', error: error.message });
+    }
   }
 });
-
 
 export default router;

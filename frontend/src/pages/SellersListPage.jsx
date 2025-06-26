@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from "react";
+import { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,7 +7,8 @@ import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
 import { Container, Table, Button } from "react-bootstrap";
-
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -42,7 +43,7 @@ const reducer = (state, action) => {
   }
 };
 
-const SellersEditPage = () => {
+const SellersListPage = () => {
   const [
     {
       loading,
@@ -66,14 +67,15 @@ const SellersEditPage = () => {
   const sp = new URLSearchParams(search);
   const currentPage = sp.get("page") || 1;
   const { state } = useContext(Store);
-  const { userInfo } = state;
+const { userInfo, adminInfo } = state;
+const token = userInfo?.token || adminInfo?.token;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
         const { data } = await axios.get(`/api/sellers/?page=${currentPage}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
@@ -86,14 +88,48 @@ const SellersEditPage = () => {
     } else {
       fetchData();
     }
-  }, [currentPage, userInfo, successDelete]);
+  }, [currentPage, userInfo, successDelete, token]);
+
+const createHandler = async () => {
+  if (window.confirm("Are you sure to create a new seller?")) {
+    try {
+      dispatch({ type: "CREATE_REQUEST" });
+
+      const newSeller = {
+        name: "Test Seller",
+        brand: "Test Brand",
+        info: "Test info",
+        link: "https://test-link.com", 
+        companyLink: "https://test-company.com",
+        logo: "/images/default-logo.png",
+      };
+
+      const { data } = await axios.post(
+        "/api/sellers",
+        newSeller,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success("Seller created successfully");
+      dispatch({ type: "CREATE_SUCCESS" });
+      navigate(`/admin/sellers/${data.seller._id}`);
+    } catch (err) {
+      toast.error(getError(err));
+      dispatch({ type: "CREATE_FAIL" });
+    }
+  }
+};
+
+
 
   const deleteHandler = async (seller) => {
     if (window.confirm("Are you sure to delete?")) {
       try {
         dispatch({ type: "DELETE_REQUEST" });
         await axios.delete(`/api/sellers/${seller._id}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Seller deleted successfully");
         dispatch({ type: "DELETE_SUCCESS" });
@@ -106,6 +142,19 @@ const SellersEditPage = () => {
 
   return (
     <Container className="provider-container">
+      <Row>
+        <Col>
+          <h1>Sellers</h1>
+        </Col>
+        <Col className="col text-end">
+          <div>
+            <Button type="button" className="details" onClick={createHandler}>
+              Create Seller
+            </Button>
+          </div>
+        </Col>
+      </Row>
+
       {loadingCreate && <LoadingBox></LoadingBox>}
       {loadingDelete && <LoadingBox></LoadingBox>}
 
@@ -151,6 +200,7 @@ const SellersEditPage = () => {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => navigate(`/admin/sellers/${seller._id}`)}
                     >
                       Edit
@@ -159,6 +209,7 @@ const SellersEditPage = () => {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => deleteHandler(seller)}
                     >
                       Delete
@@ -221,4 +272,4 @@ const SellersEditPage = () => {
   );
 };
 
-export default SellersEditPage;
+export default SellersListPage;

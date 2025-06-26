@@ -40,7 +40,9 @@ const ServiceProviders = () => {
   });
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +50,7 @@ const ServiceProviders = () => {
       try {
         const { data } = await axios.get("/api/service-providers/summary", {
           params: { page: currentPage, pageSize: 10 },
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
@@ -59,7 +61,7 @@ const ServiceProviders = () => {
       }
     };
     fetchData();
-  }, [currentPage, userInfo]);
+  }, [currentPage, token, userInfo]);
 
   const barChartData = [
     ["Provider", "Earnings"],
@@ -196,7 +198,7 @@ const ServiceProviders = () => {
           </div>
           <div className="pagination my-3 text-center">
             <button
-              className="btn btn-primary mx-2"
+            className="details mx-2"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -207,7 +209,7 @@ const ServiceProviders = () => {
               Page {currentPage} / {totalPages}{" "}
             </span>
             <button
-              className="btn btn-primary mx-2"
+            className="details mx-2"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >

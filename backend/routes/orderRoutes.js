@@ -9,50 +9,8 @@ import Earnings from '../models/earningModel.js';
 import Project from '../models/projectModel.js';
 import Message from '../models/messageModel.js';
 import Notification from '../models/notificationModel.js';
-// import crypto from 'crypto';
-
-// const square = await import('square');  // dynamic import
-// const { Client } = square.default || square; // sometimes it's under default
-
-// const client = new Client({
-//   accessToken: process.env.SQUARE_ACCESS_TOKEN,
-//   environment: 'sandbox',
-// });
 
 const orderRouter = express.Router();
-
-// orderRouter.post('/pay', async (req, res) => {
-//   const { nonce, orderId } = req.body;
-
-//   if (!nonce || !orderId) {
-//     return res.status(400).json({ error: 'Missing nonce or orderId' });
-//   }
-
-//   try {
-//     const order = await Order.findById(orderId); // your DB fetch
-
-//     if (!order) {
-//       return res.status(404).json({ error: 'Order not found' });
-//     }
-
-//     const amountToPay = Math.round(order.totalPrice * 100);
-
-//     const response = await client.paymentsApi.createPayment({
-//       sourceId: nonce,
-//       idempotencyKey: crypto.randomUUID(),
-//       amountMoney: {
-//         amount: amountToPay,
-//         currency: 'USD',
-//       },
-//     });
-
-//     res.json(response.result);
-//   } catch (error) {
-//     console.error('Payment error:', error);
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
 
 orderRouter.get(
   '/',
@@ -91,7 +49,7 @@ orderRouter.post(
     const itemsPrice = Number.isNaN(parseFloat(req.body.itemsPrice)) ? 0 : parseFloat(req.body.itemsPrice);
     const shippingPrice = Number.isNaN(parseFloat(req.body.shippingPrice)) ? 10 : parseFloat(req.body.shippingPrice);
     const taxPrice = Number.isNaN(parseFloat(req.body.taxPrice)) ? 0 : parseFloat(req.body.taxPrice);
-    const totalPrice = Number.isNaN(parseFloat(req.body.totalPrice)) 
+    const totalPrice = Number.isNaN(parseFloat(req.body.totalPrice))
       ? (itemsPrice + shippingPrice + taxPrice)
       : parseFloat(req.body.totalPrice);
 
@@ -99,7 +57,7 @@ orderRouter.post(
       return res.status(400).send({ message: 'Calculation error with total price' });
     }
 
- 
+
     console.log('Order Items:', req.body.orderItems);
     console.log('Parsed Prices:', { itemsPrice, shippingPrice, taxPrice, totalPrice });
 

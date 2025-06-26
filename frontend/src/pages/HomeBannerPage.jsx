@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Banner from "../components/Banner.jsx";
 import NotificationPopUp from "../components/NotificationPopUp";
 import { Store } from "../Store";
@@ -33,7 +33,6 @@ const notifications = [
 ];
 
 export default function HomeBannerPage() {
-
   const [notification, setNotification] = useState(null);
   const { state } = useContext(Store);
   const { userInfo, serviceProviderInfo } = state;
@@ -43,101 +42,57 @@ export default function HomeBannerPage() {
     {
       title: "Welcome To AC Commerce",
       imageSrc: "/images/header2.jpg",
-      paragraph:
-        "Save Time. Cut Costs. Stay Ahead.",
+      linkText: "Save Time. Cut Costs. Stay Ahead",
       linkTo: "/advanced-ac",
-      linkText: "Learn More",
     },
     {
-      title: "Elevate your comfort:",
+      title: "Elevate your comfort wherever you are",
       imageSrc: "/images/banner.jpg",
-      paragraph: "Discover the perfect fit for your needs",
+      linkText: "Discover the perfect fit for your needs",
       linkTo: "/blogs",
-      linkText: "Learn More",
     },
     {
       title: "Stay with AC Commerce",
       imageSrc: "/images/banner1.jpg",
-      paragraph:
-        "Redefining Air Conditioning Design — Smart. Fast. Certified.",
+      linkText: "Redefining Air Conditioning Design — Smart. Fast. Certified",
       linkTo: "/uploadfile",
-      linkText: "Design Now",
     },
     {
       title: "Featured Products",
       imageSrc: "/images/hero.jpg",
-      paragraph:
-        "Maximize the comfort of your property with our advanced air systems.",
+      linkText:
+        "Maximize the comfort of your property with our advanced air systems",
       linkTo: "/products",
-      linkText: "Explore Now",
     },
   ];
 
-  // useEffect(() => {
-  //   if (notifications.length > 0) {
-  //     let notificationToShow = null;
+  useEffect(() => {
+    let notificationToShow = null;
 
-  //     if (userInfo) {
-  //       notificationToShow = notifications.find(
-  //         (notification) =>
-  //           notification.recipientType === "user" && !notification.isRead
-  //       );
-  //     } else if (serviceProviderInfo) {
-  //       notificationToShow = notifications.find(
-  //         (notification) =>
-  //           notification.recipientType === "serviceProvider" &&
-  //           !notification.isRead
-  //       );
-  //     } else {
-  //       notificationToShow = notifications.find(
-  //         (notification) =>
-  //           notification.recipientType === "" && !notification.isRead
-  //       );
-  //     }
+    if (serviceProviderInfo) {
+      notificationToShow = notifications.find(
+        (n) => n.recipientType === "serviceProvider" && !n.isRead
+      );
+    } else if (userInfo) {
+      notificationToShow = notifications.find(
+        (n) => n.recipientType === "user" && !n.isRead
+      );
+    } else {
+      notificationToShow = notifications.find(
+        (n) => n.recipientType === "" && !n.isRead
+      );
+    }
 
-  //     if (notificationToShow) {
-  //       setNotification(notificationToShow);
+    if (notificationToShow) {
+      setNotification(notificationToShow);
 
-  //       const timer = setTimeout(() => {
-  //         setNotification(null);
-  //       }, 5000);
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000);
 
-  //       return () => clearTimeout(timer);
-  //     }
-  //   }
-  // }, [userInfo, serviceProviderInfo, currentNotificationIndex]);
-
-useEffect(() => {
-  let notificationToShow = null;
-
-  if (serviceProviderInfo) {
-    // Priority 1: serviceProvider
-    notificationToShow = notifications.find(
-      (n) => n.recipientType === "serviceProvider" && !n.isRead
-    );
-  } else if (userInfo) {
-    // Priority 2: user
-    notificationToShow = notifications.find(
-      (n) => n.recipientType === "user" && !n.isRead
-    );
-  } else {
-    // Priority 3: default/anonymous
-    notificationToShow = notifications.find(
-      (n) => n.recipientType === "" && !n.isRead
-    );
-  }
-
-  if (notificationToShow) {
-    setNotification(notificationToShow);
-
-    const timer = setTimeout(() => {
-      setNotification(null);
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }
-}, [userInfo, serviceProviderInfo]);
-
+      return () => clearTimeout(timer);
+    }
+  }, [userInfo, serviceProviderInfo]);
 
   const handleNotificationClick = (buttonText) => {
     if (buttonText === "Get Quote") {
@@ -178,7 +133,6 @@ useEffect(() => {
           key={index}
           title={banner.title}
           imageSrc={banner.imageSrc}
-          paragraph={banner.paragraph}
           linkTo={banner.linkTo}
           linkText={banner.linkText}
         ></Banner>

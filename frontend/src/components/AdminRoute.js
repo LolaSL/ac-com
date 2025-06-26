@@ -5,14 +5,13 @@ import { Store } from '../Store';
 export default function AdminRoute({ children }) {
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const {  adminInfo } = state;
 
-  if (userInfo && userInfo.isAdmin) {
+  if ( adminInfo) {
     return children;
   }
 
-  
-  const serviceProviderInfo = localStorage.getItem('serviceProviderInfo')
+    const serviceProviderInfo = localStorage.getItem('serviceProviderInfo')
     ? JSON.parse(localStorage.getItem('serviceProviderInfo'))
     : null;
 
@@ -23,3 +22,4 @@ export default function AdminRoute({ children }) {
 
   return <Navigate to="/signin" />;
 }
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Link, useNavigate, useLocation, NavLink } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ import MessageBox from "../components/MessageBox.jsx";
 import Button from "react-bootstrap/Button";
 import Product from "../components/Product.jsx";
 import { useParams } from "react-router-dom";
+import Container from "react-bootstrap/Container";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -130,228 +131,231 @@ export default function SearchPage() {
   };
 
   return (
-    <div>
-      <div className="search">
-        <Row className="mt-4 p-4">
-          <Col md={3}>
-            <h3>AC Unit</h3>
-            <div>
-              <ul className="all">
-                <li>
-                  <Link
-                    className={`text-decoration-none ${
-                      "all" === category ? "text-bold" : ""
-                    }`}
-                    to={getFilterUrl({ category: "all" })}
-                  >
-                    Any
-                  </Link>
-                </li>
-                {categories.map((c) => (
-                  <li key={c}>
+    <Container fluid>
+      <div>
+        <div className="search">
+          <Row className="mt-4 p-4">
+            <Col md={3}>
+              <h3>AC Unit</h3>
+              <div>
+                <ul className="all">
+                  <li>
                     <Link
                       className={`text-decoration-none ${
-                        c === category ? "text-bold" : ""
+                        "all" === category ? "text-bold" : ""
                       }`}
-                      to={getFilterUrl({ category: c })}
+                      to={getFilterUrl({ category: "all" })}
                     >
-                      {c}
+                      Any
                     </Link>
                   </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Price</h3>
-              <ul>
-                <li>
-                  <Link
-                    className={`text-decoration-none ${
-                      "all" === price ? "text-bold" : ""
-                    }`}
-                    to={getFilterUrl({ price: "all" })}
-                  >
-                    Any
-                  </Link>
-                </li>
-                {prices.map((p) => (
-                  <li key={p.value}>
-                    <Link
-                      to={getFilterUrl({ price: p.value })}
-                      className={`text-decoration-none ${
-                        p.value === price ? "text-bold" : ""
-                      }`}
-                    >
-                      {p.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Discount</h3>
-              <ul>
-                <li key="any">
-                  <Link
-                    to={getFilterUrl({ discount: "" })}
-                    className={`text-decoration-none ${
-                      !discount ? "text-bold" : ""
-                    }`}
-                  ></Link>
-                </li>
-                {discounts
-                  .filter((d) => d.value !== "")
-                  .map((d) => (
-                    <li key={d.value}>
+                  {categories.map((c) => (
+                    <li key={c}>
                       <Link
-                        to={getFilterUrl({ discount: d.value })}
                         className={`text-decoration-none ${
-                          d.value === discount ? "text-bold" : ""
+                          c === category ? "text-bold" : ""
                         }`}
+                        to={getFilterUrl({ category: c })}
                       >
-                        {d.name}
+                        {c}
                       </Link>
                     </li>
                   ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Brands</h3>
-              <ul>
-                <li>
-                  <Link
-                    to={getFilterUrl({ brand: "all" })}
-                    className={`text-decoration-none ${
-                      brand === "all" ? "text-bold" : ""
-                    }`}
-                  >
-                    Any
-                  </Link>
-                </li>
-                {brandsList.map((b) => (
-                  <li key={b}>
+                </ul>
+              </div>
+              <div>
+                <h3>Price</h3>
+                <ul>
+                  <li>
                     <Link
-                      to={getFilterUrl({ brand: b })}
                       className={`text-decoration-none ${
-                        brand === b ? "text-bold" : ""
+                        "all" === price ? "text-bold" : ""
                       }`}
+                      to={getFilterUrl({ price: "all" })}
                     >
-                      {b}
+                      Any
                     </Link>
                   </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Customer Review</h3>
-              <ul>
-                {ratings.map((r) => (
-                  <li key={r.name}>
+                  {prices.map((p) => (
+                    <li key={p.value}>
+                      <Link
+                        to={getFilterUrl({ price: p.value })}
+                        className={`text-decoration-none ${
+                          p.value === price ? "text-bold" : ""
+                        }`}
+                      >
+                        {p.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Discount</h3>
+                <ul>
+                  <li key="any">
+                    <Link
+                      to={getFilterUrl({ discount: "" })}
+                      className={`text-decoration-none ${
+                        !discount ? "text-bold" : ""
+                      }`}
+                    ></Link>
+                  </li>
+                  {discounts
+                    .filter((d) => d.value !== "")
+                    .map((d) => (
+                      <li key={d.value}>
+                        <Link
+                          to={getFilterUrl({ discount: d.value })}
+                          className={`text-decoration-none ${
+                            d.value === discount ? "text-bold" : ""
+                          }`}
+                        >
+                          {d.name}
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Brands</h3>
+                <ul>
+                  <li>
+                    <Link
+                      to={getFilterUrl({ brand: "all" })}
+                      className={`text-decoration-none ${
+                        brand === "all" ? "text-bold" : ""
+                      }`}
+                    >
+                      Any
+                    </Link>
+                  </li>
+                  {brandsList.map((b) => (
+                    <li key={b}>
+                      <Link
+                        to={getFilterUrl({ brand: b })}
+                        className={`text-decoration-none ${
+                          brand === b ? "text-bold" : ""
+                        }`}
+                      >
+                        {b}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Customer Review</h3>
+                <ul>
+                  {ratings.map((r) => (
+                    <li key={r.name}>
+                      <Link
+                        to={getFilterUrl({ rating: "all" })}
+                        className={`text-decoration-none ${
+                          rating === "all" ? "text-bold" : ""
+                        }`}
+                      >
+                        <Rating caption={" & up"} rating={r.rating}></Rating>
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
                     <Link
                       to={getFilterUrl({ rating: "all" })}
-                      className={`text-decoration-none ${
-                        rating === "all" ? "text-bold" : ""
-                      }`}
+                      className={rating === "all" ? "text-bold" : ""}
                     >
-                      <Rating caption={" & up"} rating={r.rating}></Rating>
+                      <Rating caption={" & up"} rating={0}></Rating>
                     </Link>
                   </li>
-                ))}
-                <li>
-                  <Link
-                    to={getFilterUrl({ rating: "all" })}
-                    className={rating === "all" ? "text-bold" : ""}
-                  >
-                    <Rating caption={" & up"} rating={0}></Rating>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </Col>
-          <Col md={9}>
-            {loading ? (
-              <LoadingBox></LoadingBox>
-            ) : error ? (
-              <MessageBox variant="danger">{error}</MessageBox>
-            ) : (
-              <>
-                <Row className="justify-content-between mb-3">
-                  <Col md={6}>
-                    <div>
-                      {countProducts === 0 ? "No" : countProducts} Results
-                      {query !== "all" && " : " + query}
-                      {category !== "all" && " : " + category}
-                      {price !== "all" && " : Price " + price}
-                      {rating !== "all" && " : Rating " + rating + " & up"}
-                      {query !== "all" ||
-                      category !== "all" ||
-                      rating !== "all" ||
-                      btu !== "all" ||
-                      brand !== "all" ||
-                      price !== "all" ? (
-                        <Button
-                          variant="light"
-                          onClick={() => navigate("/search")}
-                        >
-                          <i className="fas fa-times-circle"></i>
-                        </Button>
-                      ) : null}
-                    </div>
-                  </Col>
-                  <Col className="text-end">
-                    Sort by{" "}
-                    <select
-                      value={order}
-                      onChange={(e) => {
-                        navigate(getFilterUrl({ order: e.target.value }));
-                      }}
-                    >
-                      <option value="newest">Newest Arrivals</option>
-                      <option value="lowest">Price: Low to High</option>
-                      <option value="highest">Price: High to Low</option>
-                      <option value="toprated">Customer Reviews</option>
-                      <option value="brand">Brand Name</option>
-                    </select>
-                  </Col>
-                </Row>
-                {products.length === 0 && (
-                  <MessageBox>No Product Found</MessageBox>
-                )}
-                <Row className="gy-4">
-                  {products.map((product) => (
-                    <Col
-                      xs={12}
-                      md={4}
-                      lg={3}
-                      key={product._id}
-                      className="product-item"
-                    >
-                      <div className="product-card">
-                        <Product product={product}></Product>
+                </ul>
+              </div>
+            </Col>
+            <Col md={9}>
+              {loading ? (
+                <LoadingBox></LoadingBox>
+              ) : error ? (
+                <MessageBox variant="danger">{error}</MessageBox>
+              ) : (
+                <>
+                  <Row className="justify-content-between mb-3">
+                    <Col md={6}>
+                      <div>
+                        {countProducts === 0 ? "No" : countProducts} Results
+                        {query !== "all" && " : " + query}
+                        {category !== "all" && " : " + category}
+                        {price !== "all" && " : Price " + price}
+                        {rating !== "all" && " : Rating " + rating + " & up"}
+                        {query !== "all" ||
+                        category !== "all" ||
+                        rating !== "all" ||
+                        btu !== "all" ||
+                        brand !== "all" ||
+                        price !== "all" ? (
+                          <Button
+                            variant="light"
+                            onClick={() => navigate("/search")}
+                          >
+                            <i className="fas fa-times-circle"></i>
+                          </Button>
+                        ) : null}
                       </div>
                     </Col>
-                  ))}
-                </Row>
-                <div>
-                  {[...Array(pages).keys()].map((x) => (
-                    <NavLink
-                      as={Link}
-                      key={x + 1}
-                      className="d-inline-block m-1"
-                      to={{
-                        pathname: "/search",
-                        search: getFilterUrl({ page: x + 1 }).split("?")[1],
-                      }}
-                    >
-                      <Button variant="light">{x + 1}</Button>
-                    </NavLink>
-                  ))}
-                </div>
-              </>
-            )}
-          </Col>
-        </Row>
+                    <Col className="text-end">
+                      Sort by{" "}
+                      <select
+                        value={order}
+                        onChange={(e) => {
+                          navigate(getFilterUrl({ order: e.target.value }));
+                        }}
+                      >
+                        <option value="newest">Newest Arrivals</option>
+                        <option value="lowest">Price: Low to High</option>
+                        <option value="highest">Price: High to Low</option>
+                        <option value="toprated">Customer Reviews</option>
+                        <option value="brand">Brand Name</option>
+                      </select>
+                    </Col>
+                  </Row>
+                  {products.length === 0 && (
+                    <MessageBox>No Product Found</MessageBox>
+                  )}
+                  <Col md={9}>
+                    <Row className="gy-3 row-cols-1 row-cols-md-2 row-cols-lg-3">
+                      {products.map((product) => (
+                        <Col key={product._id} className="d-flex">
+                          <div className="product-card w-100">
+                            <Product product={product} />
+                          </div>
+                        </Col>
+                      ))}
+                    </Row>
+                  </Col>
+                  <div>
+                    {[...Array(pages).keys()].map((x) => (
+                      <NavLink
+                        as={Link}
+                        key={x + 1}
+                        className="d-inline-block m-1"
+                        to={{
+                          pathname: "/search",
+                          search: getFilterUrl({ page: x + 1 }).split("?")[1],
+                        }}
+                      >
+                        <Button variant="light">{x + 1}</Button>
+                      </NavLink>
+                    ))}
+                  </div>
+                </>
+              )}
+            </Col>
+          </Row>
+        </div>
+        <div className=" mt-4 mb-4">
+          <Link to="/" className="go-to-btn btn-text">
+            Back to Home
+          </Link>
+        </div>
       </div>
-    </div>
+    </Container>
   );
 }

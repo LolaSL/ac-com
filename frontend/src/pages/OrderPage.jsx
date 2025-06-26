@@ -15,10 +15,10 @@ import { getError } from "../utils";
 import { toast } from "react-toastify";
 import Image from "react-bootstrap/Image";
 import { Container } from "react-bootstrap";
-// import SquarePaymentForm from "../components/SquarePaymentForm.jsx";
+import printJS from "print-js";
 
 function printOrder() {
-  const orderContainer = document.querySelector(".order-container");
+  const orderContainer = document.querySelector("#order-container");
 
   if (!orderContainer) {
     alert("Order details not found.");
@@ -33,25 +33,24 @@ function printOrder() {
     return;
   }
 
-  const clonedOrder = orderContainer.cloneNode(true);
-  const printWindow = window.open("", "_blank");
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Print Order</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; margin: 0; }
-          header, footer, nav, .navbar, .sidebar { display: none; } 
-          .order-container { width: 100%; }
-        </style>
-      </head>
-      <body>
-        ${clonedOrder.innerHTML}
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.print();
+  printJS({
+    printable: "order-container",
+    type: "html",
+    scanStyles: false,
+    header: `
+    <style>
+      @media print {
+        .cart-thumbnail {
+          max-width: 100px !important;
+          height: auto !important;
+          margin: 20px;
+        }
+      }
+    </style>
+    <h1 style="text-align: center;">Order Details</h1>
+  `,
+    documentTitle: "Customer Order",
+  });
 }
 
 function reducer(state, action) {
@@ -70,7 +69,6 @@ function reducer(state, action) {
       return { ...state, loadingPay: false };
     case "PAY_RESET":
       return { ...state, loadingPay: false, successPay: false };
-
     case "DELIVER_REQUEST":
       return { ...state, loadingDeliver: true };
     case "DELIVER_SUCCESS":
@@ -78,22 +76,21 @@ function reducer(state, action) {
     case "DELIVER_FAIL":
       return { ...state, loadingDeliver: false };
     case "DELIVER_RESET":
-      return {
-        ...state,
-        loadingDeliver: false,
-        successDeliver: false,
-      };
+      return { ...state, loadingDeliver: false, successDeliver: false };
     default:
       return state;
   }
 }
+
 export default function OrderPage() {
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state || {};
+  const token = userInfo?.token || adminInfo?.token;
+  const isAdmin = userInfo?.isAdmin || adminInfo?.isAdmin;
 
+  const navigate = useNavigate();
   const params = useParams();
   const { id: orderId } = params;
-  const navigate = useNavigate();
 
   const [
     {
@@ -112,53 +109,23 @@ export default function OrderPage() {
     error: "",
     successPay: false,
     loadingPay: false,
+    loadingDeliver: false,
+    successDeliver: false,
   });
 
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
-  function createOrder(data, actions) {
-    return actions.order
-      .create({
-        purchase_units: [
-          {
-            amount: { value: order.totalPrice },
-          },
-        ],
-      })
-      .then((orderID) => {
-        return orderID;
-      });
-  }
-
-  function onApprove(data, actions) {
-    return actions.order.capture().then(async function (details) {
-      try {
-        dispatch({ type: "PAY_REQUEST" });
-        const { data } = await axios.put(
-          `/api/orders/${order._id}/pay`,
-          details,
-          {
-            headers: { authorization: `Bearer ${userInfo.token}` },
-          }
-        );
-        dispatch({ type: "PAY_SUCCESS", payload: data });
-        toast.success("Order is paid");
-      } catch (err) {
-        dispatch({ type: "PAY_FAIL", payload: getError(err) });
-        toast.error(getError(err));
-      }
-    });
-  }
-  function onError(err) {
-    toast.error(getError(err));
-  }
-
   useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     const fetchOrder = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
         const { data } = await axios.get(`/api/orders/${orderId}`, {
-          headers: { authorization: `Bearer ${userInfo.token}` },
+          headers: { authorization: `Bearer ${token}` },
         });
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
@@ -166,9 +133,6 @@ export default function OrderPage() {
       }
     };
 
-    if (!userInfo) {
-      return navigate("/login");
-    }
     if (
       !order._id ||
       successPay ||
@@ -176,36 +140,36 @@ export default function OrderPage() {
       (order._id && order._id !== orderId)
     ) {
       fetchOrder();
-      if (successPay) {
-        dispatch({ type: "PAY_RESET" });
-      }
-      if (successDeliver) {
-        dispatch({ type: "DELIVER_RESET" });
-      }
+      if (successPay) dispatch({ type: "PAY_RESET" });
+      if (successDeliver) dispatch({ type: "DELIVER_RESET" });
     } else {
       const loadPaypalScript = async () => {
-        const { data: clientId } = await axios.get("/api/keys/paypal", {
-          headers: { authorization: `Bearer ${userInfo.token}` },
-        });
-        paypalDispatch({
-          type: "resetOptions",
-          value: {
-            "client-id": clientId,
-            currency: "USD",
-          },
-        });
-        paypalDispatch({ type: "setLoadingStatus", value: "pending" });
+        try {
+          const { data: clientId } = await axios.get("/api/keys/paypal", {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          paypalDispatch({
+            type: "resetOptions",
+            value: {
+              "client-id": clientId,
+              currency: "USD",
+            },
+          });
+          paypalDispatch({ type: "setLoadingStatus", value: "pending" });
+        } catch (err) {
+          toast.error("Failed to load PayPal script");
+        }
       };
       loadPaypalScript();
     }
   }, [
     order,
-    userInfo,
     orderId,
+    token,
     navigate,
-    paypalDispatch,
     successPay,
     successDeliver,
+    paypalDispatch,
   ]);
 
   async function deliverOrderHandler() {
@@ -215,7 +179,7 @@ export default function OrderPage() {
         `/api/orders/${order._id}/deliver`,
         {},
         {
-          headers: { authorization: `Bearer ${userInfo.token}` },
+          headers: { authorization: `Bearer ${token}` },
         }
       );
       dispatch({ type: "DELIVER_SUCCESS", payload: data });
@@ -226,13 +190,49 @@ export default function OrderPage() {
     }
   }
 
+  function createOrder(data, actions) {
+    return actions.order
+      .create({
+        purchase_units: [{ amount: { value: order.totalPrice } }],
+      })
+      .then((orderID) => orderID);
+  }
+
+  function onApprove(data, actions) {
+    return actions.order.capture().then(async function (details) {
+      try {
+        dispatch({ type: "PAY_REQUEST" });
+        const { data } = await axios.put(
+          `/api/orders/${order._id}/pay`,
+          details,
+          {
+            headers: { authorization: `Bearer ${token}` },
+          }
+        );
+        dispatch({ type: "PAY_SUCCESS", payload: data });
+        toast.success("Order is paid");
+      } catch (err) {
+        dispatch({ type: "PAY_FAIL", payload: getError(err) });
+        toast.error(getError(err));
+      }
+    });
+  }
+
+  function onError(err) {
+    toast.error(getError(err));
+  }
+
+  if (!token) return null;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
   return loading ? (
     <LoadingBox></LoadingBox>
   ) : error ? (
     <MessageBox variant="danger">{error}</MessageBox>
   ) : (
     <div>
-      <Container className="order-container">
+      <Container id="order-container">
         <h1 className="my-3">Order {orderId}</h1>
         <Row>
           <Col md={8}>
@@ -387,20 +387,15 @@ export default function OrderPage() {
                             </div>
                           )}
                         </div>
-                        {/* <hr />
-                        <h5>Pay with credit card</h5> */}
-                        {/* <div className="square-section">
-                     <SquarePaymentForm order={order} />
-                        </div> */}
                       </div>
                     </ListGroup.Item>
                   )}
-                  {userInfo.isAdmin && order.isPaid && !order.isDelivered && (
+                  {isAdmin === true && order.isPaid && !order.isDelivered && (
                     <ListGroup.Item>
-                      {loadingDeliver && <LoadingBox></LoadingBox>}
+                      {loadingDeliver && <LoadingBox />}
                       <div className="d-grid">
                         <Button
-                          className="btn btn-secondary"
+                          className="go-to-btn btn-text"
                           type="button"
                           onClick={deliverOrderHandler}
                         >

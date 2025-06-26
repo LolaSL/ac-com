@@ -3,21 +3,21 @@ import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { Container, Table, Button } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
-      return { ...state, loading: true };
+      return { ...state, loading: true, error: "" };
     case "FETCH_SUCCESS":
       return {
         ...state,
         messages: action.payload.messages || [],
         loading: false,
-        currentPage: action.payload.currentPage,
-        totalPages: action.payload.totalPages,
-        totalMessages: action.payload.totalMessages,
-        page: action.payload.page,
+        currentPage: action.payload.currentPage || 1,
+        totalPages: action.payload.totalPages || 1,
+        totalMessages: action.payload.totalMessages || 0,
+        successDelete: false,
       };
     case "FETCH_FAIL":
       return { ...state, loading: false, error: action.payload };
@@ -34,7 +34,9 @@ const reducer = (state, action) => {
 
 const MessagesServiceProviders = () => {
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
+
   const [{ loading, error, messages, successDelete, currentPage }, dispatch] =
     useReducer(reducer, {
       loading: true,
@@ -46,65 +48,37 @@ const MessagesServiceProviders = () => {
     });
 
   const { search } = useLocation();
+  const navigate = useNavigate();
   const sp = new URLSearchParams(search);
-  const page = sp.get("page") || 1;
+  const pageFromUrl = parseInt(sp.get("page"), 10) || 1;
 
   const [sortedMessages, setSortedMessages] = useState([]);
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
 
+
   useEffect(() => {
-    if (messages) {
-      const sorted = [...messages].sort((a, b) => {
-        const valueA =
-          sortColumn === "serviceProvider"
-            ? a[sortColumn]?.name
-            : a[sortColumn];
-        const valueB =
-          sortColumn === "serviceProvider"
-            ? b[sortColumn]?.name
-            : b[sortColumn];
+    if (currentPage !== pageFromUrl) {
 
-        if (valueA === undefined || valueB === undefined) {
-          return 0;
-        }
-
-        if (typeof valueA === "string" && typeof valueB === "string") {
-          const nameComparison = valueA.localeCompare(valueB);
-          if (nameComparison !== 0)
-            return sortOrder === "asc" ? nameComparison : -nameComparison;
-        }
-
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        if (dateA !== dateB) {
-          return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-        }
-
-        return 0;
-      });
-
-      setSortedMessages(sorted);
+      dispatch({ type: "FETCH_SUCCESS", payload: { messages, currentPage: pageFromUrl, totalPages: 1, totalMessages: 0 } });
     }
-  }, [messages, sortColumn, sortOrder]);
+  }, [pageFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   useEffect(() => {
+    if (!token) {
+
+      navigate("/admin-login", { replace: true });
+      return;
+    }
+
     const fetchMessages = async () => {
       dispatch({ type: "FETCH_REQUEST" });
-      if (!userInfo || !userInfo.token) {
-        console.error("User is not authenticated.");
-        return;
-      }
       try {
-        const { data } = await axios.get(
-          `/api/service-providers/messages/all`,
-          {
-            params: { page: currentPage, pageSize: 10 },
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-            },
-          }
-        );
+        const { data } = await axios.get(`/api/service-providers/messages/all`, {
+          params: { page: pageFromUrl, pageSize: 10 },
+          headers: { Authorization: `Bearer ${token}` },
+        });
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
@@ -112,7 +86,41 @@ const MessagesServiceProviders = () => {
     };
 
     fetchMessages();
-  }, [userInfo, successDelete, currentPage, page]);
+  }, [token, pageFromUrl, successDelete, navigate]);
+
+  useEffect(() => {
+    if (!messages || messages.length === 0) {
+      setSortedMessages([]);
+      return;
+    }
+
+    const sorted = [...messages].sort((a, b) => {
+      let valueA, valueB;
+
+      if (sortColumn === "serviceProvider") {
+        valueA = a.serviceProvider?.name || "";
+        valueB = b.serviceProvider?.name || "";
+      } else if (sortColumn === "client") {
+        valueA = a.client || "";
+        valueB = b.client || "";
+      } else if (sortColumn === "date") {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      } else {
+        valueA = a[sortColumn] || "";
+        valueB = b[sortColumn] || "";
+      }
+
+      if (typeof valueA === "string" && typeof valueB === "string") {
+        const comparison = valueA.localeCompare(valueB);
+        return sortOrder === "asc" ? comparison : -comparison;
+      }
+      return 0;
+    });
+
+    setSortedMessages(sorted);
+  }, [messages, sortColumn, sortOrder]);
 
   const deleteHandler = async (messageId) => {
     if (!messageId || !messageId.match(/^[0-9a-fA-F]{24}$/)) {
@@ -122,13 +130,10 @@ const MessagesServiceProviders = () => {
     if (window.confirm("Are you sure you want to delete this message?")) {
       dispatch({ type: "DELETE_REQUEST" });
       try {
-        const { data } = await axios.delete(
-          `/api/service-providers/message/${messageId}`,
-          {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          }
-        );
-        dispatch({ type: "DELETE_SUCCESS", payload: data });
+        await axios.delete(`/api/service-providers/message/${messageId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        dispatch({ type: "DELETE_SUCCESS" });
       } catch (err) {
         dispatch({ type: "DELETE_FAIL" });
         alert(getError(err));
@@ -146,7 +151,7 @@ const MessagesServiceProviders = () => {
   };
 
   const editHandler = (messageId) => {
-    window.location.href = `/admin/message/${messageId}/edit`;
+    navigate(`/admin/message/${messageId}/edit`);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -155,41 +160,34 @@ const MessagesServiceProviders = () => {
   return (
     <Container>
       <h1 className="mt-4 mb-4 fw-bold">Service Provider Messages</h1>
-      {messages.length === 0 && (
+      {messages.length === 0 ? (
         <div>
           <p>No messages available</p>
           <p>Check API response and ensure messages exist in the database.</p>
         </div>
-      )}
-      {messages.length > 0 && (
+      ) : (
         <div className="table-responsive">
           <Table striped bordered hover responsive className="messages">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>
-                  <button
-                    type="button"
-                    onClick={() => handleSort("serviceProvider")}
-                  >
+                  <button type="button" onClick={() => handleSort("serviceProvider")}>
                     Provider{" "}
-                    {sortColumn === "serviceProvider" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
+                    {sortColumn === "serviceProvider" && (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
                 <th>
                   <button type="button" onClick={() => handleSort("client")}>
                     Client{" "}
-                    {sortColumn === "client" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
+                    {sortColumn === "client" && (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
                 <th>Project</th>
                 <th>Message</th>
                 <th>
                   <button type="button" onClick={() => handleSort("date")}>
-                    Date{" "}
-                    {sortColumn === "date" && (sortOrder === "asc" ? "↑" : "↓")}
+                    Date {sortColumn === "date" && (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
                 <th>Actions</th>
@@ -197,31 +195,18 @@ const MessagesServiceProviders = () => {
             </thead>
             <tbody>
               {sortedMessages.map((message, index) => (
-                <tr key={message._id}>
+                <tr key={message._id || index}>
                   <td data-label="ID">{index + 1}</td>
-                  <td data-label="Provider ">
-                    {message.serviceProvider?.name}
-                  </td>
-                  <td data-label="Client ">{message.client}</td>
-                  <td data-label="Project">{message.projectName}</td>
-                  <td data-label="Message">{message.text}</td>
-                  <td data-label="Date">
-                    {new Date(message.date).toLocaleDateString()}
-                  </td>
+                  <td data-label="Provider">{message.serviceProvider?.name || "N/A"}</td>
+                  <td data-label="Client">{message.client || "N/A"}</td>
+                  <td data-label="Project">{message.projectName || "N/A"}</td>
+                  <td data-label="Message">{message.text || "N/A"}</td>
+                  <td data-label="Date">{new Date(message.date).toLocaleDateString()}</td>
                   <td>
-                    <Button
-                      variant="secondary"
-                      className="me-2  btn-sm"
-                      onClick={() => editHandler(message._id)}
-                    >
+                    <Button className="details me-2" onClick={() => editHandler(message._id)}>
                       Edit
                     </Button>
-                    &nbsp;
-                    <Button
-                      variant="danger"
-                      className="me-2 btn-sm "
-                      onClick={() => deleteHandler(message._id)}
-                    >
+                    <Button className="details me-2" onClick={() => deleteHandler(message._id)}>
                       Delete
                     </Button>
                   </td>

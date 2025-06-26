@@ -36,7 +36,8 @@ export default function UserEditPage() {
   });
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
 
   const params = useParams();
   const { id: userId } = params;
@@ -51,7 +52,7 @@ export default function UserEditPage() {
       try {
         dispatch({ type: "FETCH_REQUEST" });
         const { data } = await axios.get(`/api/users/${userId}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setName(data.name);
         setEmail(data.email);
@@ -65,7 +66,7 @@ export default function UserEditPage() {
       }
     };
     fetchData();
-  }, [userId, userInfo]);
+  }, [token, userId, userInfo]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -75,7 +76,7 @@ export default function UserEditPage() {
         `/api/users/${userId}`,
         { _id: userId, name, email, isAdmin },
         {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       dispatch({
@@ -126,7 +127,11 @@ export default function UserEditPage() {
           />
 
           <div className="mb-3">
-            <Button disabled={loadingUpdate} type="submit" className="btn btn-secondary">
+            <Button
+              disabled={loadingUpdate}
+              type="submit"
+              className="go-to-btn btn-text"
+            >
               Update
             </Button>
             {loadingUpdate && <LoadingBox></LoadingBox>}

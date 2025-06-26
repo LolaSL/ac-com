@@ -24,7 +24,7 @@ export default function Offers() {
         "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Learn More",
       criteria: (product) => product.discount === 50,
-    }
+    },
   ];
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function Offers() {
                   <Card.Text className="offer-desc">
                     {offer.description}
                   </Card.Text>
-                  <Button variant="secondary" as={Link} to={offer.linkTo}>
+                  <Button variant="secondary"  as={Link} to={offer.linkTo}>
                     {offer.linkText}
                   </Button>
                 </Card.Body>
@@ -108,6 +108,11 @@ export default function Offers() {
           No offers match your criteria at this time.
         </p>
       )}
+      <div className="mt-4 mb-4">
+        <Link to="/" className="go-to-btn btn-text">
+          Back to Home
+        </Link>
+      </div>
     </div>
   );
 }

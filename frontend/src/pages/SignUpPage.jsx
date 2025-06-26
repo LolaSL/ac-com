@@ -83,7 +83,7 @@ export default function SignUpPage() {
           </Form.Group>
         </Form.Group>
         <div className="mb-3">
-          <Button type="submit" className="btn btn-secondary btn-md me-2">Sign Up</Button>
+          <Button type="submit" className="go-to-btn btn-text me-2">Sign Up</Button>
         </div>
         <div className="mb-3">
           Already have an account?{' '}

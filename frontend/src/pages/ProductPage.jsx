@@ -300,7 +300,7 @@ function ProductPage() {
                 {product.countInStock > 0 && (
                   <ListGroup.Item>
                     <div className="d-grid">
-                      <Button onClick={addToCartHandler} variant="secondary">
+                      <Button onClick={addToCartHandler}  className="btn-success">
                         Add to Cart
                       </Button>
                     </div>
@@ -393,7 +393,7 @@ function ProductPage() {
 
               <div className="mb-2">
                 <Button
-                  className="btn btn-secondary"
+                className="go-to-btn btn-text"
                   disabled={loadingCreateReview}
                   type="submit"
                 >

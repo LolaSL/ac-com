@@ -763,7 +763,7 @@ const data = {
       ],
     },
     {
-      name: "28300 BTU Outdoor Condenser. Outdoor Unit",
+      name: "28300 BTU Outdoor Condenser",
       model: "ASTG09CMCA",
       slug: "28300-outdoor-condensing-unit",
       category: "Outdoor Condenser",
@@ -1054,15 +1054,15 @@ const data = {
       discount: 10,
       countInStock: 5,
       brand: "Haier ",
-      rating:4.9,
+      rating: 4.9,
       numReviews: 148,
       description: "Suited to larger and multi-storey buildings, the MRV-S outdoor unit delivers effective heating and cooling, with multiple indoor unit choices. Heating and cooling, with an operational range from -20°C to 48°C Outdoor unit powers up to 19 indoor units. High-efficiency DC fan motor. Long total piping length of 300m with 175m lift height",
       features: "Energy Saving",
-       mode: [
-         "Low Noise",
-         "Night Mode"
+      mode: [
+        "Low Noise",
+        "Night Mode"
       ],
-      btu:107500,
+      btu: 107500,
       areaCoverage: 200,
       energyEfficiency: 11.3,
       dimension: {
@@ -1147,7 +1147,7 @@ const data = {
       brand: "Samsung",
       rating: 4.5,
       info: "Samsung provides the best air conditioner systems to fit your needs, whether you are seeking solutions for your home or for a business. WindFree™ technology creates a much gentler and milder air flow, evenly distributed through tens of thousands of micro holes, so people in the room feel almost no wind - just comfortable cool air",
-      link: "https://www.youtube.com/embed/1dQ1MBSUHoQ?si=XgYwIiFsEHXc1Cl7&clip=UgkxU-wNgQmBp0v_YmQiAkAlIHFzL6GTFAIK&clipt=ENizARjwqAI",
+      link: "https://www.youtube.com/embed/6YdWTZ5lvpQ?si=D_ZqkbvDxv4JQoo4",
       companyLink: "https://www.samsung.com/levant/business/system-air-conditioner-solutions/home/",
       numReviews: 38,
       isAdmin: false,

@@ -79,8 +79,8 @@ const FeaturedPage = () => {
           </MessageBox>
         )}
       </div>
-      <div className="mt-4 mb-4 text-center">
-        <Link to="/" className="btn btn-secondary">
+      <div className=" mt-4 mb-4">
+        <Link to="/" className="go-to-btn btn-text">
           Back to Home
         </Link>
       </div>

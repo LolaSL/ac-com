@@ -5,6 +5,7 @@ import { getError } from "../utils.js";
 import LoadingBox from "./LoadingBox.jsx";
 import MessageBox from "./MessageBox.jsx";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const initialState = {
   loading: true,
@@ -52,26 +53,34 @@ const reducer = (state, action) => {
 };
 
 export default function Notifications() {
+  const navigate = useNavigate();
   const [{ loading, notifications, error }, dispatch] = useReducer(
     reducer,
     initialState
   );
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/login", { replace: true });
+    }
+  }, [token, navigate]);
 
   const fetchNotifications = useCallback(async () => {
-    if (!userInfo?.token) return;
+    if (!token) return;
 
     dispatch({ type: "FETCH_REQUEST" });
     try {
       const { data } = await axios.get(`/api/notifications`, {
-        headers: { Authorization: `Bearer ${userInfo.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       dispatch({ type: "FETCH_SUCCESS", payload: data });
     } catch (err) {
       dispatch({ type: "FETCH_FAIL", payload: getError(err) });
     }
-  }, [userInfo?.token]);
+  }, [token]);
 
   useEffect(() => {
     fetchNotifications();
@@ -80,7 +89,7 @@ export default function Notifications() {
   const markAsRead = async (id) => {
     try {
       await axios.put(`/api/notifications/${id}/read`, null, {
-        headers: { Authorization: `Bearer ${userInfo.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       dispatch({ type: "MARK_AS_READ", payload: id });
     } catch (err) {
@@ -98,7 +107,7 @@ export default function Notifications() {
       try {
         dispatch({ type: "DELETE_REQUEST" });
         await axios.delete(`/api/notifications/${notification._id}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Notification deleted successfully");
         dispatch({ type: "DELETE_SUCCESS", payload: notification._id });
@@ -111,7 +120,7 @@ export default function Notifications() {
 
   return (
     <div>
-      <h2>Notifications</h2>
+   <h1 className="mb-4 mt-4">Notifications</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -122,7 +131,9 @@ export default function Notifications() {
         <ul style={{ listStyle: "none", padding: 0 }}>
           {notifications.map((notification) => (
             <li
-              key={notification._id || `${notification.title}-${notification.createdAt}`}
+              key={
+                notification._id || `${notification.title}-${notification.createdAt}`
+              }
               style={{
                 backgroundColor: notification.isRead ? "#f1f1f1" : "#fff",
                 padding: "16px",

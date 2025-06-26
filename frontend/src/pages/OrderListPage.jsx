@@ -41,10 +41,11 @@ const reducer = (state, action) => {
 };
 
 export default function OrderListPage() {
-  const navigate = useNavigate();
+   const navigate = useNavigate();
   const { search } = useLocation();
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state || {};
+  const token = userInfo?.token || adminInfo?.token;
 
   const [
     { loading, error, orders, loadingDelete, successDelete, pages },
@@ -60,6 +61,13 @@ export default function OrderListPage() {
   const [sortedOrders, setSortedOrders] = useState([]);
   const [sortColumn, setSortColumn] = useState("date");
   const [sortOrder, setSortOrder] = useState("asc");
+
+
+   useEffect(() => {
+    if (!token) {
+      navigate("/login");
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     if (!orders || orders.length === 0) return;
@@ -79,15 +87,17 @@ export default function OrderListPage() {
 
       return 0;
     });
-
+    
     setSortedOrders(sorted);
   }, [orders, sortColumn, sortOrder]);
-  useEffect(() => {
+
+
+   useEffect(() => {
     const fetchData = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
         const { data } = await axios.get(`/api/orders/?page=${currentPage}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
@@ -97,24 +107,25 @@ export default function OrderListPage() {
         });
       }
     };
+
     if (successDelete) {
       dispatch({ type: "DELETE_RESET" });
     } else {
       fetchData();
     }
-  }, [userInfo, successDelete, currentPage]);
+  }, [token, successDelete, currentPage]);
 
   const deleteHandler = async (order) => {
     if (window.confirm("Are you sure to delete?")) {
       try {
         dispatch({ type: "DELETE_REQUEST" });
         await axios.delete(`/api/orders/${order._id}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        toast.success("order deleted successfully");
+        toast.success("Order deleted successfully");
         dispatch({ type: "DELETE_SUCCESS" });
       } catch (err) {
-        toast.error(getError(error));
+        toast.error(getError(err));
         dispatch({
           type: "DELETE_FAIL",
         });
@@ -175,6 +186,7 @@ export default function OrderListPage() {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => {
                         navigate(`/order/${order._id}`);
                       }}
@@ -185,6 +197,7 @@ export default function OrderListPage() {
                     <Button
                       type="button"
                       variant="light"
+                         className="details"
                       onClick={() => deleteHandler(order)}
                     >
                       Delete

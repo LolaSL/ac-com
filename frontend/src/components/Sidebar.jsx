@@ -1,12 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react"; 
 import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
+import { Store } from "../Store"; // Adjust the import path as needed
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
 const Sidebar = () => {
+  const { state } = useContext(Store);
+  const token = state?.userInfo?.token || state?.adminInfo?.token;
+
   const [savedPdfs, setSavedPdfs] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState(null);
@@ -14,14 +18,12 @@ const Sidebar = () => {
 
   useEffect(() => {
     fetchSavedPdfs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSavedPdfs = async () => {
     try {
       setError(null);
-      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-      const token = userInfo?.token;
-
       if (!token) {
         console.warn("User not authenticated, skipping fetch.");
         return;
@@ -65,9 +67,6 @@ const Sidebar = () => {
 
   const viewPdfWithAnnotations = async (pdfId) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-      const token = userInfo?.token;
-
       if (!token) {
         console.error("Authentication token not found.");
         return;
@@ -127,9 +126,6 @@ const Sidebar = () => {
     try {
       setSuccessMessage(null);
       setError(null);
-      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-      const token = userInfo?.token;
-
       if (!token) {
         setError("Authentication token not found. Please log in.");
         return;
@@ -276,14 +272,14 @@ const Sidebar = () => {
 
   return (
     <>
-      <Button className="sidebar-toggle btn-secondary" onClick={toggleSidebar}>
+      <Button
+        className="go-to-btn btn-text me-2 my-2"
+        variant="btn-outline"
+        onClick={toggleSidebar}
+      >
         {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
       </Button>
-      <Modal
-        show={isOpen}
-        onHide={toggleSidebar}
-        dialogClassName="custom-modal-width"
-      >
+      <Modal show={isOpen} onHide={toggleSidebar} dialogClassName="custom-modal-width">
         <Modal.Header closeButton>
           <Modal.Title>Saved Documents</Modal.Title>
         </Modal.Header>
@@ -310,11 +306,11 @@ const Sidebar = () => {
                     className="d-flex justify-content-between align-items-center pdf-drawing"
                   >
                     <Button
-                      variant="links"
+                      variant="btn-outline"
                       onClick={() =>
                         viewPdfWithAnnotations(pdf._id, pdf.filename)
                       }
-                      className="p-2 text-left"
+                      className="p-2 text-left go-to-btn btn-text"
                     >
                       {pdf.filename || "Untitled Document"}
                     </Button>
@@ -338,14 +334,11 @@ const Sidebar = () => {
                 No saved documents yet.
               </p>
             )}
-            <div
-              id="pdf-container"
-              style={{ flexGrow: 1, marginTop: "1rem" }}
-            ></div>
+            <div id="pdf-container" style={{ flexGrow: 1, marginTop: "1rem" }}></div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="btn-secondary" onClick={toggleSidebar}>
+          <Button className="go-to-btn btn-text" variant="btn-outline" onClick={toggleSidebar}>
             Close
           </Button>
         </Modal.Footer>

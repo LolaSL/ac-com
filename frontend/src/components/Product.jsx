@@ -65,7 +65,7 @@ function Product(props) {
           </Button>
         ) : (
           <Button
-            className="btn btn-secondary"
+           className="go-to-btn btn-text"
             onClick={() => addToCartHandler(product)}
           >
             Add to cart

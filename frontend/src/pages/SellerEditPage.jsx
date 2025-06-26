@@ -34,7 +34,9 @@ export default function SellerEditPage() {
   const { id } = useParams();
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
+
   const [{ loading, error, loadingUpdate }, dispatch] = useReducer(reducer, {
     loading: true,
     error: "",
@@ -45,7 +47,7 @@ export default function SellerEditPage() {
   const [info, setInfo] = useState("");
   const [logo, setLogo] = useState("");
   const [companyLink, setCompanyLink] = useState("");
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -79,10 +81,10 @@ export default function SellerEditPage() {
           brand,
           info,
           logo,
-          companyLink
+          companyLink,
         },
         {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       dispatch({
@@ -104,25 +106,25 @@ export default function SellerEditPage() {
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
-            <Form onSubmit={submitHandler}>
-        <Form.Group className="mb-3" controlId="logo">
-        <Form.Label>Logo</Form.Label>
-        <Form.Control
-          type="file"
-          accept="image/*"
-          required
-          onChange={(e) => setLogo(e.target.files[0])} 
-        />
-              </Form.Group>     
-              <Form.Group className="mb-3" controlId="companyLink">
-        <Form.Label>Company Link</Form.Label>
-        <Form.Control
-          type="text"
-          required
-          value={companyLink}
-          onChange={(e) => setCompanyLink(e.target.value)}
-        />
-      </Form.Group>        
+        <Form onSubmit={submitHandler}>
+          <Form.Group className="mb-3" controlId="logo">
+            <Form.Label>Logo</Form.Label>
+            <Form.Control
+              type="file"
+              accept="image/*"
+              required
+              onChange={(e) => setLogo(e.target.files[0])}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="companyLink">
+            <Form.Label>Company Link</Form.Label>
+            <Form.Control
+              type="text"
+              required
+              value={companyLink}
+              onChange={(e) => setCompanyLink(e.target.value)}
+            />
+          </Form.Group>
           <Form.Group className="mb-3" controlId="name">
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -148,7 +150,11 @@ export default function SellerEditPage() {
             />
           </Form.Group>
           <div className="mb-3">
-            <Button disabled={loadingUpdate} type="submit">
+            <Button
+              disabled={loadingUpdate}
+              type="submit"
+              className="go-to-btn btn-text"
+            >
               Update
             </Button>
             {loadingUpdate && <LoadingBox></LoadingBox>}

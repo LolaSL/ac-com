@@ -41,7 +41,7 @@ const ServiceProviderRegister = () => {
       });
       ctxDispatch({ type: "SERVICE_PROVIDER_REGISTER", payload: data });
       localStorage.setItem("serviceProviderInfo", JSON.stringify(data));
-      navigate(redirect || "/"); 
+      navigate(redirect || "/");
     } catch (err) {
       toast.error(getError(err));
     }
@@ -139,8 +139,8 @@ const ServiceProviderRegister = () => {
         <div className="mb-3">
           <Button
             type="submit"
-            variant="secondary"
-            className="btn btn-secondary btn-md me-2"
+            className="go-to-btn btn-text mt-2"
+            variant="btn-outline"
           >
             Register
           </Button>

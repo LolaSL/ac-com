@@ -1,12 +1,5 @@
-import  { useState, useEffect,  useRef } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Form,
-  Button,
-  Table,
-} from "react-bootstrap";
+import { useState, useEffect, useRef } from "react";
+import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { getError } from "../utils";
@@ -14,26 +7,49 @@ import { useContext } from "react";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import CheckboxGroup from "./CheckboxGroup.jsx";
-import printJS from 'print-js';
+import printJS from "print-js";
 function BtuCalculator() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
 
   const navigate = useNavigate();
   const componentRef = useRef();
- const handlePrint = () => {
-    printJS({
-      printable: 'table-responsive', // ID of the HTML element to print
-      type: 'html',
-      header: '<h2>Product List</h2>', // Optional header
-      css: '../index.css', // Optional: path to your CSS file for print styles
-      style: `
-        /* Inline styles for print, or use css option above */
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; }
-      `
-    });
-  };
 
+  const handlePrint = () => {
+    const condenserRow = document.createElement("tr");
+    condenserRow.className = "text-center";
+    condenserRow.innerHTML = `
+    <td colspan="5" class="text-center bg-info">
+      <strong>
+        Recommended Condenser: 
+        ${(
+          products.reduce((total, product) => total + (product.btu || 0), 0) *
+          0.8
+        ).toFixed(0)} BTU
+      </strong>
+    </td>
+  `;
+
+    const tableBody = document.querySelector("#table-responsive tbody");
+
+    if (showCondenser && tableBody) {
+      tableBody.appendChild(condenserRow);
+    }
+
+    printJS({
+      printable: "table-responsive",
+      type: "html",
+      header: "<h2>Product List</h2>",
+      css: "../index.css",
+      style: `
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border: 1px solid #ddd; padding: 8px; }
+    `,
+    });
+
+    if (showCondenser && tableBody) {
+      tableBody.removeChild(condenserRow);
+    }
+  };
 
   const cartItems = state?.cart?.cartItems || [];
   const [height, setHeight] = useState(0);
@@ -576,124 +592,124 @@ function BtuCalculator() {
       {btuResults.length > 0 && (
         <Container className="btu-results mt-4">
           <h3 className="text-center">BTU Results</h3>
-          <button onClick={handlePrint} className="btn btn-primary mb-3">
-        <i className="bi bi-printer-fill me-2"></i> Print Table
-          </button>
-           <div ref={componentRef}>
-          <div id="table-responsive">
-            <Table bordered hover className="table-responsive-md">
-              <thead>
-                <tr>
-                  <th>Room</th>
-                  <th>Room BTU</th>
-                  <th>Optimal Product</th>
-                  <th>Product BTU</th>
-                  <th>Product Price, ($)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rooms.map((room, index) => {
-                  const product = products[index] || {};
-                  return (
-                    <tr key={index}>
-                      <td data-label="Room">{room.name}</td>
-                      <td data-label="Room BTU">{btuResults[index]}</td>
-                      <td data-label="Optimal Product">
-                        {product.slug ? (
-                          <Link
-                            to={`/product/${product.slug}`}
-                            className="link-product-details"
-                          >
-                            {product.model || "N/A"}{" "}
-                            {/* Renders product.model or "N/A" if null/undefined */}
-                          </Link>
-                        ) : (
-                          "No product available"
-                        )}
-                      </td>
-                      <td data-label="Product BTU">
-                        {product.name || "No product available"}
-                      </td>
-                      <td data-label="Product Price">
-                        {product.discount > 0
-                          ? (
-                              product.price -
-                              (product.price * product.discount) / 100
-                            ).toFixed(2)
-                          : product.price
-                          ? product.price.toFixed(2)
-                          : "No price available"}
-                      </td>
-                    </tr>
-                  );
-                })}
-                <tr>
-                  <td data-label="Total" className="total-results bg-warning">
-                    <strong>Total</strong>
-                  </td>
-                  <td
-                    data-label="Total Room Btu"
-                    className="total-results bg-warning"
-                  >
-                    <strong>{totalBTU}</strong>
-                  </td>
-                  <td
-                    data-label="Total Optimal Products"
-                    className="total-results bg-warning"
-                  >
-                    <strong>
-                      {optimalProductCount || "No optimal product available"}
-                    </strong>
-                  </td>
-                  <td
-                    data-label="Total Product BTU"
-                    className="total-results bg-warning"
-                  >
-                    <strong>
-                      {products
-                        .reduce(
-                          (total, product) => total + (product.btu || 0),
-                          0
-                        )
-                        .toFixed(0)}
-                    </strong>
-                  </td>
-                  <td
-                    data-label="Total Product Price"
-                    className="total-results bg-warning"
-                  >
-                    <strong>
-                      {products.length > 0
-                        ? products
-                            .reduce((total, product) => {
-                              const price =
+          <Button onClick={handlePrint} className="go-to-btn btn-text mb-3">
+            <i className="bi bi-printer-fill me-2"></i> Print Table
+          </Button>
+          <div ref={componentRef}>
+            <div id="table-responsive" className="table">
+              <Table bordered hover className="table-responsive-md">
+                <thead>
+                  <tr>
+                    <th>Room</th>
+                    <th>Room BTU</th>
+                    <th>Optimal Product, Model</th>
+                    <th>Product BTU</th>
+                    <th>Product Price, ($)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rooms.map((room, index) => {
+                    const product = products[index] || {};
+                    return (
+                      <tr key={index}>
+                        <td data-label="Room">{room.name}</td>
+                        <td data-label="Room BTU">{btuResults[index]}</td>
+                        <td data-label="Optimal Product">
+                          {product.slug ? (
+                            <Link
+                              to={`/product/${product.slug}`}
+                              className="link-product-details"
+                            >
+                              {product.model || "N/A"}{" "}
+                            </Link>
+                          ) : (
+                            "No product available"
+                          )}
+                        </td>
+                        <td data-label="Product BTU">
+                          {product.name || "No product available"}
+                        </td>
+                        <td data-label="Product Price">
+                          {product.discount > 0
+                            ? (
                                 product.price -
-                                (product.price * (product.discount || 0)) / 100;
-                              return total + price;
-                            }, 0)
-                            .toFixed(2)
-                        : "No price available"}
-                    </strong>
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
+                                (product.price * product.discount) / 100
+                              ).toFixed(2)
+                            : product.price
+                            ? product.price.toFixed(2)
+                            : "No price available"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr>
+                    <td data-label="Total" className="total-results bg-light">
+                      <strong>Total</strong>
+                    </td>
+                    <td
+                      data-label="Total Room Btu"
+                      className="total-results bg-light"
+                    >
+                      <strong>{totalBTU}</strong>
+                    </td>
+                    <td
+                      data-label="Total Optimal Products"
+                      className="total-results bg-light"
+                    >
+                      <strong>
+                        {optimalProductCount || "No optimal product available"}
+                      </strong>
+                    </td>
+                    <td
+                      data-label="Total Product BTU"
+                      className="total-results bg-light"
+                    >
+                      <strong>
+                        {products
+                          .reduce(
+                            (total, product) => total + (product.btu || 0),
+                            0
+                          )
+                          .toFixed(0)}
+                      </strong>
+                    </td>
+                    <td
+                      data-label="Total Product Price"
+                      className="total-results bg-light"
+                    >
+                      <strong>
+                        {products.length > 0
+                          ? products
+                              .reduce((total, product) => {
+                                const price =
+                                  product.price -
+                                  (product.price * (product.discount || 0)) /
+                                    100;
+                                return total + price;
+                              }, 0)
+                              .toFixed(2)
+                          : "No price available"}
+                      </strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
             </div>
-            </div>
+          </div>
           <div className="d-flex justify-content-center mt-3">
             <Button
               variant="primary"
               onClick={saveResultsToCart}
-              className="mt-2 mb-4"
+              className="go-to-btn btn-text mt-2 mb-4"
             >
               Save to Cart
             </Button>
           </div>
           {showCondenser && (
             <tr className="text-center">
-              <td colSpan="5" className="text-center bg-info ">
+              <td colSpan="5" className="text-center bg-light ">
                 <strong>
-                  <strong>
+                  <strong className="text-primary fs-5">
                     Recommended Condenser:{" "}
                     {(
                       products.reduce(

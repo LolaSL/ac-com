@@ -36,7 +36,8 @@ export default function ServiceProviderEditPage() {
   });
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
 
   const params = useParams();
   const { id: serviceProviderId } = params;
@@ -50,9 +51,12 @@ export default function ServiceProviderEditPage() {
     const fetchData = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
-        const { data } = await axios.get(`/api/service-providers/${serviceProviderId}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await axios.get(
+          `/api/service-providers/${serviceProviderId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setName(data.name);
         setEmail(data.email);
         setIsActive(data.isActive);
@@ -65,7 +69,7 @@ export default function ServiceProviderEditPage() {
       }
     };
     fetchData();
-  }, [serviceProviderId, userInfo]);
+  }, [serviceProviderId, token, userInfo]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -75,7 +79,7 @@ export default function ServiceProviderEditPage() {
         `/api/service-providers/${serviceProviderId}`,
         { _id: serviceProviderId, name, email, isActive },
         {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       dispatch({
@@ -127,7 +131,11 @@ export default function ServiceProviderEditPage() {
           />
 
           <div className="mb-3">
-            <Button disabled={loadingUpdate} type="submit" className="btn btn-secondary"  >
+            <Button
+              disabled={loadingUpdate}
+              type="submit"
+              className="go-to-btn btn-text"
+            >
               Update
             </Button>
             {loadingUpdate && <LoadingBox></LoadingBox>}

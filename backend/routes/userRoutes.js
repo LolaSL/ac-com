@@ -91,7 +91,7 @@ userRouter.post(
             subject: `Reset Password`,
             html: ` 
              <p>Please Click the following link to reset your password:</p> 
-             <a href="${baseUrl()}/reset-password/${token}"}>Reset Password</a>
+           <a href="${baseUrl()}/reset-password/${token}">Reset Password</a>
              `,
           },
           (error, body) => {
@@ -166,6 +166,35 @@ userRouter.delete(
     }
   })
 );
+
+userRouter.post(
+  '/admin/signin',
+  expressAsyncHandler(async (req, res) => {
+    const admin = await User.findOne({ email: req.body.email });
+    console.log('admin found:', admin);
+    if (admin) {
+      console.log('password matches:', bcrypt.compareSync(req.body.password, admin.password));
+      console.log('isAdmin:', admin.isAdmin);
+    }
+    if (
+      admin &&
+      bcrypt.compareSync(req.body.password, admin.password) &&
+      admin.isAdmin
+    ) {
+      res.send({
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        isAdmin: true,
+        token: generateToken(admin),
+      });
+    } else {
+      res.status(401).send({ message: 'Invalid admin credentials' });
+    }
+  })
+);
+
+
 
 
 userRouter.post(

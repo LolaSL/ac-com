@@ -11,7 +11,7 @@ import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
 
 const reducer = (state, action) => {
-  switch (action.type) { 
+  switch (action.type) {
     case "FETCH_REQUEST":
       return { ...state, loading: true };
     case "FETCH_SUCCESS":
@@ -75,20 +75,18 @@ export default function ProductListPage() {
   const currentPage = sp.get("page") || 1;
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+const token = state?.userInfo?.token || state?.adminInfo?.token;
 
   const [sortedProducts, setSortedProducts] = useState([]);
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  
-  
-  
+
   useEffect(() => {
     if (products) {
       const sorted = [...products].sort((a, b) => {
         const valueA = a[sortColumn];
         const valueB = b[sortColumn];
-  
+
         if (valueA === undefined || valueB === undefined) {
           return 0;
         }
@@ -101,23 +99,24 @@ export default function ProductListPage() {
             ? valueA.localeCompare(valueB)
             : valueB.localeCompare(valueA);
         }
-  
+
         return 0;
       });
-  
+
       setSortedProducts(sorted);
     }
   }, [products, sortColumn, sortOrder]);
-  
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
-        const { data } = await axios.get(`/api/products/admin?page=${currentPage}`, {
-         
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await axios.get(
+          `/api/products/admin?page=${currentPage}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
@@ -129,35 +128,41 @@ export default function ProductListPage() {
     } else {
       fetchData();
     }
-  }, [currentPage, userInfo, successDelete]);
+  }, [currentPage, successDelete, token]);
 
   const createHandler = async () => {
-    if (window.confirm("Are you sure to create?")) {
-      try {
-        dispatch({ type: "CREATE_REQUEST" });
-        const { data } = await axios.post(
-          "/api/products",
-          {},
-          {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          }
-        );
-        toast.success("Product created successfully");
-        dispatch({ type: "CREATE_SUCCESS" });
-        navigate(`/admin/product/${data.product._id}`);
-      } catch (err) {
-        toast.error(getError(err));
-        dispatch({ type: "CREATE_FAIL" });
-      }
+  if (!token) {
+    toast.error("Unauthorized: Please log in as an admin.");
+    return;
+  }
+
+  if (window.confirm("Are you sure to create?")) {
+    try {
+      dispatch({ type: "CREATE_REQUEST" });
+      const { data } = await axios.post(
+        "/api/products",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Product created successfully");
+      dispatch({ type: "CREATE_SUCCESS" });
+      navigate(`/admin/product/${data.product._id}`);
+    } catch (err) {
+      toast.error(getError(err));
+      dispatch({ type: "CREATE_FAIL" });
     }
-  };
+  }
+};
+
 
   const deleteHandler = async (product) => {
     if (window.confirm("Are you sure to delete?")) {
       try {
         dispatch({ type: "DELETE_REQUEST" });
         await axios.delete(`/api/products/${product._id}`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Product deleted successfully");
         dispatch({ type: "DELETE_SUCCESS" });
@@ -185,7 +190,7 @@ export default function ProductListPage() {
         </Col>
         <Col className="col text-end">
           <div>
-            <Button className="btn btn-secondary" type="button" onClick={createHandler}>
+            <Button type="button" className="details" onClick={createHandler}>
               Create Product
             </Button>
           </div>
@@ -253,6 +258,7 @@ export default function ProductListPage() {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => navigate(`/admin/product/${product._id}`)}
                     >
                       Edit
@@ -261,6 +267,7 @@ export default function ProductListPage() {
                     <Button
                       type="button"
                       variant="light"
+                      className="details"
                       onClick={() => deleteHandler(product)}
                     >
                       Delete

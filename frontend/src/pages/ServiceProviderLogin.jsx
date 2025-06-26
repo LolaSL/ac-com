@@ -8,8 +8,6 @@ import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
 
-
-
 const ServiceProviderLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,7 +42,7 @@ const ServiceProviderLogin = () => {
 
   return (
     <Container className="small-container">
-      <h1 className="text-center pt-4 mb-4 fw-bold my-3">Log In</h1>
+      <h1 className="text-center pt-4 mb-4 fw-bold my-3">  Service Provider Login</h1>
       <Form onSubmit={submitHandler}>
         <Form.Group controlId="email">
           <Form.Label>Email Address</Form.Label>
@@ -70,10 +68,10 @@ const ServiceProviderLogin = () => {
         <div className="mb-3">
           <Button
             type="submit"
-            variant="secondary"
-            className="btn btn-secondary btn-md me-2"
+            className="go-to-btn btn-text"
+            variant="btn-outline"
           >
-            Login
+           Login
           </Button>
         </div>
         <div className="mb-3">

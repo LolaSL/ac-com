@@ -13,9 +13,9 @@ import Button from "react-bootstrap/Button";
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
-      return { ...state, loading: true };
+      return { ...state, loading: true, error: "" };
     case "FETCH_SUCCESS":
-      return { ...state, loading: false };
+      return { ...state, loading: false, error: "" };
     case "FETCH_FAIL":
       return { ...state, loading: false, error: action.payload };
     case "UPDATE_REQUEST":
@@ -24,12 +24,6 @@ const reducer = (state, action) => {
       return { ...state, loadingUpdate: false };
     case "UPDATE_FAIL":
       return { ...state, loadingUpdate: false };
-    case "UPLOAD_REQUEST":
-      return { ...state, loadingUpload: true, errorUpload: "" };
-    case "UPLOAD_SUCCESS":
-      return { ...state, loadingUpload: false, errorUpload: "" };
-    case "UPLOAD_FAIL":
-      return { ...state, loadingUpload: false, errorUpload: action.payload };
     default:
       return state;
   }
@@ -37,11 +31,11 @@ const reducer = (state, action) => {
 
 const MessageEditPage = () => {
   const navigate = useNavigate();
-  const params = useParams();
-  const { id: messageId } = params;
+  const { id: messageId } = useParams();
 
   const { state } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
 
   const [{ loading, error, loadingUpdate }, dispatch] = useReducer(reducer, {
     loading: true,
@@ -52,53 +46,61 @@ const MessageEditPage = () => {
   const [text, setText] = useState("");
   const [date, setDate] = useState("");
   const [serviceProvider, setServiceProvider] = useState("");
-  const [projectName, setProjectName] = useState([]);
+  const [projectName, setProjectName] = useState("");
   const [serviceProviders, setServiceProviders] = useState([]);
 
+  // Fetch all service providers
   useEffect(() => {
+    if (!token) return;
+
     const fetchServiceProviders = async () => {
       try {
-        const { data } = await axios.get('/api/service-providers/all', {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+        const { data } = await axios.get("/api/service-providers/all", {
+          headers: { Authorization: `Bearer ${token}` },
         });
         setServiceProviders(data);
       } catch (error) {
-        toast.error(getError(error)); 
+        toast.error(getError(error));
       }
     };
     fetchServiceProviders();
-  }, [userInfo]);
-    
+  }, [token]);
+
   useEffect(() => {
-    const fetchData = async () => {
+    if (!token) return;
+
+    const fetchMessage = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
-        const { data } = await axios.get(`/api/service-providers/messages`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+        const { data } = await axios.get(`/api/service-providers/messages/${messageId}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setClient(data.client);
-        setText(data.text);
-        setDate(data.date);
-        setServiceProvider(data.serviceProvider);
-        setProjectName(data.projectName);
+
+        setClient(data.client || "");
+        setText(data.text || "");
+        setDate(data.date ? data.date.substring(0, 10) : ""); // ISO date (yyyy-mm-dd)
+        setServiceProvider(data.serviceProvider?._id || data.serviceProvider || "");
+        setProjectName(data.projectName || "");
         dispatch({ type: "FETCH_SUCCESS" });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
       }
     };
-    fetchData();
-  }, [messageId, userInfo.token]);
 
-
+    fetchMessage();
+  }, [messageId, token]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (!token) {
+      toast.error("You are not authenticated.");
+      return;
+    }
     try {
       dispatch({ type: "UPDATE_REQUEST" });
       await axios.put(
         `/api/service-providers/messages/${messageId}`,
         {
-          _id: messageId,
           client,
           text,
           date,
@@ -106,7 +108,7 @@ const MessageEditPage = () => {
           projectName,
         },
         {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       dispatch({ type: "UPDATE_SUCCESS" });
@@ -127,30 +129,37 @@ const MessageEditPage = () => {
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <Form onSubmit={submitHandler}>
-          <Form.Group className="mb-3" controlId="name">
+          <Form.Group className="mb-3" controlId="client">
             <Form.Label>Client</Form.Label>
             <Form.Control
+              type="text"
               value={client}
               onChange={(e) => setClient(e.target.value)}
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="slug">
+
+          <Form.Group className="mb-3" controlId="text">
             <Form.Label>Text</Form.Label>
             <Form.Control
+              as="textarea"
+              rows={3}
               value={text}
               onChange={(e) => setText(e.target.value)}
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="price">
+
+          <Form.Group className="mb-3" controlId="date">
             <Form.Label>Date</Form.Label>
             <Form.Control
+              type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
             />
           </Form.Group>
+
           <Form.Group className="mb-3" controlId="serviceProvider">
             <Form.Label>Service Provider</Form.Label>
             <Form.Select
@@ -166,20 +175,19 @@ const MessageEditPage = () => {
               ))}
             </Form.Select>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="category">
+
+          <Form.Group className="mb-3" controlId="projectName">
             <Form.Label>Project Name</Form.Label>
             <Form.Control
+              type="text"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               required
             />
           </Form.Group>
+
           <div className="mb-3">
-            <Button
-              disabled={loadingUpdate}
-              type="submit"
-              className="btn btn-secondary"
-            >
+            <Button disabled={loadingUpdate} type="submit" variant="secondary">
               Update
             </Button>
             {loadingUpdate && <LoadingBox />}

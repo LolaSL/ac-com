@@ -138,8 +138,8 @@ export default function CartPage() {
       <h1>Shopping Cart</h1>
       <div className="p-4">
         {showAlert && (
-          <div className="bg-info p-3 mb-3 text-center">
-            <strong>
+          <div className="bg-light p-3 mb-3 text-center">
+            <strong className="text-primary fs-5">
     Recommended Condenser: {recommendedCondenser}
   </strong>
           </div>
@@ -148,7 +148,7 @@ export default function CartPage() {
       <Button
         variant="primary"
         onClick={() => setShowModal(true)}
-        className="btn btn-secondary mb-4"
+        className="go-to-btn btn-text mb-4"
       >
         Select a Recommended Condenser
       </Button>
@@ -272,6 +272,7 @@ export default function CartPage() {
                     <Button
                       type="button"
                       variant="secondary"
+                      className="go-to-btn btn-text"
                       onClick={checkoutHandler}
                       disabled={cartItems.length === 0}
                     >

@@ -37,9 +37,10 @@ const ModalWindow = ({ show, onHide, products, addToCart }) => {
             <h5>{product.name}</h5>
             <p>BTU: {product.btu}</p>
             <Button
-              variant="primary"
+                   className="go-to-btn btn-text"
+            variant="btn-outline"
               onClick={() => addToCart(product)}
-              className="btn-add-to-cart"
+             
             >
               Add to Cart
             </Button>
@@ -49,14 +50,17 @@ const ModalWindow = ({ show, onHide, products, addToCart }) => {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
+        <Button      className="go-to-btn btn-text"
+            variant="btn-outline" onClick={onHide}>
           Close
         </Button>
-        <Button variant="primary" onClick={prevProduct} disabled={currentProductIndex === 0}>
+        <Button      className="go-to-btn btn-text"
+            variant="btn-outline" onClick={prevProduct} disabled={currentProductIndex === 0}>
           Previous
         </Button>
         <Button
-          variant="primary"
+            className="go-to-btn btn-text"
+            variant="btn-outline"
           onClick={nextProduct}
           disabled={currentProductIndex === products.length - 1}
         >

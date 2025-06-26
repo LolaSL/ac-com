@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useContext,  useCallback } from "react";
 import { Stage, Layer, Rect, Line, Text } from "react-konva";
 import { Button, Form } from "react-bootstrap";
+import { Store } from '../Store.js';
 import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -8,7 +9,9 @@ import PdfHelpVideo from "./PdfHelpVideo.jsx";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
-const Annotator = () => {
+const Annotator = ({ setRoomData }) => {
+  const { state } = useContext(Store);
+  const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
   const canvasRef = useRef(null);
@@ -23,6 +26,7 @@ const Annotator = () => {
   const [lines, setLines] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [pdfId] = useState("unique-pdf-identifier-" + Date.now());
+
 
   const handleChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -426,10 +430,8 @@ const Annotator = () => {
     formData.append("imageWidth", imageWidth);
     formData.append("imageHeight", imageHeight);
 
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const authToken = userInfo?.token;
-
-    if (!authToken) {
+    
+    if (!token) {
       alert("You must be signed in to save.");
       return;
     }
@@ -440,7 +442,7 @@ const Annotator = () => {
       const response = await fetch("/api/upload-annotate", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -501,8 +503,7 @@ const Annotator = () => {
       </h1>
       <PdfHelpVideo />
       <Form className="btu-calculation-measure mt-4">
-        <Form.Label className=" label-upload fw-bold text-secondary fs-5">
-        </Form.Label>
+        <Form.Label className=" label-upload fw-bold text-secondary fs-5"></Form.Label>
         <p className="text-secondary fw-bold upload-paragraph">
           *Supported: High Resolution PDFs files (.pdf). Recommended to place
           air conditioner (rectangle) above door in drawing.
@@ -658,16 +659,16 @@ const Annotator = () => {
             {file && file.type === "application/pdf" && (
               <>
                 <Button
-                  variant="secondary"
+                  variant="btn-outline"
                   onClick={saveToBackend}
                   disabled={isSaving}
-                  className="mt-2 me-2 rounded mb-3"
+                  className="mt-2 me-2 go-to-btn btn-text mb-3"
                 >
                   {isSaving ? "Saving..." : "Save PDF File"}{" "}
                 </Button>
                 <Button
-                  variant="secondary"
-                  className="mt-2 rounded mb-3"
+                  variant="btn-outline"
+                  className="mt-2 mb-3 go-to-btn btn-text"
                   onClick={clearCanvas}
                 >
                   Clear

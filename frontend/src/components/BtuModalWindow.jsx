@@ -1,78 +1,76 @@
 import { useState } from "react";
+import { Modal, Button } from "react-bootstrap";
 
 const BtuModalWindow = () => {
-  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [show, setShow] = useState(false);
+  const handleShow = () => {
+    setShow(true);
+    setTimeout(() => {
+      setShow(false);
+    }, 15000);
+  };
+
   return (
-    <div className="btu-modal text-secondary mt-4">
-      {showInfoModal && (
-        <div
-          id="infoModal"
-          className="fixed    flex items-center justify-center p-4 "
-          onClick={() => setShowInfoModal(false)}
-        >
-          <div
-            className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
-              How BTU Calculation Works
-            </h2>
-            <p className="text-gray-700 mb-4">
-              BTU (British Thermal Unit) is a measure of heat. This calculator
-              provides an estimation based on common factors:
-            </p>
-            <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
-              <li>
-                <strong className="text">Base Calculation:</strong> 600 BTU/m2
-                used as a base rule.
-              </li>
-              <li>
-                <strong className="text">
-                  Outdoor Unit (Condenser) Location:
-                </strong>
-                Desired location of outdoor unit.
-              </li>
-              <li >
-                <strong className="text">Number of people:</strong>Each person adds a fixed BTU amount
-                (e.g., 600 BTU).
-              </li>
-              <li>
-                <strong className="text">Type of wall:</strong>
-                Real wall type.
-              </li>
-              <li>
-                <strong className="text">Insulation:</strong> Poor insulation
-                increases BTU needs.
-              </li>
-              <li>
-                <strong className="text">Sun Exposure:</strong> Each window adds
-                ~1000 BTU.
-              </li>
-              <li>
-                <strong className="text">Climate:</strong> BTU needs vary by
-                temperature zone.
-              </li>
-            </ul>
-            <p className="text-gray-700 mb-4">
-              <strong className="text-red-600">Important:</strong> This is an
-              estimate. Consult an HVAC expert for precise needs.
-            </p>
-            <button
-              onClick={() => setShowInfoModal(false)}
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-200"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-      <button
-        onClick={() => setShowInfoModal(true)}
-        className="mt-4 w-full bg-gray-200 text-gray-800 py-2 rounded-md font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 transition duration-200 shadow-sm"
+    <>
+      <Button
+        className="go-to-btn btn-text"
+        variant="btn-outline"
+        onClick={handleShow}
       >
-        HOW BTU CALCULATION WORKS?
-      </button>
-    </div>
+        How BTU Calculation Works
+      </Button>
+      <Modal show={show} onHide={() => setShow(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="text-danger text-bold">
+            How BTU Calculation Works
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="text-gray-700 mb-4 fs-5">
+            BTU (British Thermal Unit) is a measure of heat. This calculator
+            provides an estimation based on common factors:
+          </p>
+          <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
+            <li className="fs-5 ">
+              <strong>Base Calculation:</strong> 600 BTU/m2 used as a base rule.
+            </li>
+            <li className="fs-5 ">
+              <strong>Outdoor Unit (Condenser) Location:</strong>
+              Desired location of outdoor unit.
+            </li>
+            <li className=" fs-5 ">
+              <strong>Number of people:</strong> Each person adds a fixed BTU
+              amount (e.g., 600 BTU).
+            </li>
+            <li className=" fs-5 ">
+              <strong>Type of wall:</strong> Real wall type.
+            </li>
+            <li className=" fs-5 ">
+              <strong>Insulation:</strong> Poor insulation increases BTU needs.
+            </li>
+            <li className=" fs-5 ">
+              <strong>Sun Exposure:</strong> Each window adds ~1000 BTU.
+            </li>
+            <li className="fs-5 ">
+              <strong>Climate:</strong> BTU needs vary by temperature zone.
+            </li>
+          </ul>
+          <p className=" fs-5 ">
+            <strong className="text-red-600">Important:</strong> This is an
+            estimate. Consult an HVAC expert for precise needs.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            className="go-to-btn btn-text"
+            variant="btn-outline"
+            onClick={() => setShow(false)}
+          >
+            Close Now
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 

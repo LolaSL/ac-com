@@ -189,7 +189,7 @@ export default function SellerPage() {
                   <div className="mb-3">
                     <Button
                       disabled={loadingCreateReview}
-                      className="btn btn-secondary"
+                      className="go-to-btn btn-text"
                       type="submit"
                     >
                       Submit
