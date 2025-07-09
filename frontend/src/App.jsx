@@ -72,10 +72,17 @@ function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { fullBox, cart, userInfo, serviceProviderInfo, adminInfo } = state;
 
-  const checkoutHandler = (e) => {
-    e.preventDefault();
+const checkoutHandler = (e) => {
+  e.preventDefault();
+
+  const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+
+  if (adminInfo) {
+    window.location.href = "/uploadfile";
+  } else {
     window.location.href = "/signin?redirect=/uploadfile";
-  };
+  }
+};
 
   const adminLogoutHandler = () => {
     ctxDispatch({ type: "ADMIN_LOGOUT" });
@@ -147,12 +154,12 @@ function App() {
     </Link>
     <Navbar.Toggle aria-controls="basic-navbar-nav" />
     <Navbar.Collapse id="basic-navbar-nav">
-      {/* Added flex-grow-1 to make the search box wrapper expand, and me-3 for spacing */}
+
       <div className="flex-grow-1 me-3">
         <SearchBox />
       </div>
 
-      <Nav className="ms-auto me-4"> {/* ms-auto pushes this Nav to the right, me-4 adds spacing from the right edge */}
+      <Nav className="ms-auto me-4"> 
         <Link to="/cart" className="nav-link">
           Cart
           {cart.cartItems.length > 0 && (
@@ -577,7 +584,6 @@ function App() {
           <Footer />
         </div>
       </div>
-      {/* </div> */}
     </BrowserRouter>
   );
 }

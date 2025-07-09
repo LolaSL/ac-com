@@ -175,6 +175,8 @@ userRouter.post(
     if (admin) {
       console.log('password matches:', bcrypt.compareSync(req.body.password, admin.password));
       console.log('isAdmin:', admin.isAdmin);
+      console.log('admin found:', admin); 
+
     }
     if (
       admin &&

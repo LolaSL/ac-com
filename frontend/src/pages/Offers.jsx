@@ -95,7 +95,7 @@ export default function Offers() {
                   <Card.Text className="offer-desc">
                     {offer.description}
                   </Card.Text>
-                  <Button variant="secondary"  as={Link} to={offer.linkTo}>
+                  <Button variant="secondary" className="go-to-btn btn-text" as={Link} to={offer.linkTo}>
                     {offer.linkText}
                   </Button>
                 </Card.Body>

@@ -14,8 +14,12 @@ export default function AdminLoginPage() {
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
+    const envUrl = process.env.REACT_APP_API_BASE_URL;
     const API_BASE_URL =
-      process.env.REACT_APP_API_BASE_URL || "http://localhost:5020";
+      envUrl && envUrl.startsWith("http") ? envUrl : "http://localhost:5020";
+
+    console.log("Using API_BASE_URL:", API_BASE_URL);
+
     try {
       const { data } = await axios.post(
         `${API_BASE_URL}/api/users/admin/signin`,
@@ -24,12 +28,16 @@ export default function AdminLoginPage() {
           password,
         }
       );
-      console.log(data);
+
+      console.log("Admin login successful:", data);
+
       ctxDispatch({ type: "ADMIN_LOGIN", payload: data });
       localStorage.setItem("adminInfo", JSON.stringify(data));
+
       toast.success("Welcome, Admin!");
       navigate("/admin/dashboard");
     } catch (error) {
+      console.error("Login error:", error);
       toast.error(error.response?.data?.message || "Invalid admin credentials");
     }
   };

@@ -3,7 +3,7 @@ import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
-import { Store } from "../Store"; // Adjust the import path as needed
+import { Store } from "../Store"; 
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
