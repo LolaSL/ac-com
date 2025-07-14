@@ -90,6 +90,28 @@ function BtuCalculator() {
       HotTelAviv: false,
       ColdStockholm: false,
     },
+    appliances: {
+      Oven: false,
+      Television: false,
+      Computer: false,
+    },
+    windowType: {
+      SingleGlazed: false,
+      DoubleGlazed: false,
+      TripleGlazed: false,
+      Louvered: false,
+    },
+    roofType: {
+      Flat: false,
+      Pitched: false,
+      Gable: false,
+    },
+    apartmentOrientation: {
+      North: false,
+      East: false,
+      South: false,
+      West: false,
+    },
   });
 
   const [btuResults, setBtuResults] = useState([]);
@@ -105,6 +127,38 @@ function BtuCalculator() {
       PitchedRoof: 1.1,
       WallBrackets: 1.05,
       HardGround: 1.0,
+    },
+    windowMultipliers: {
+      SingleGlazed: 1.2,
+      DoubleGlazed: 1.0,
+      TripleGlazed: 0.8,
+      Louvered: 1.3,
+    },
+    roofTypeMultipliers: {
+      FlatRoof: 1.2,
+      PitchedRoof: 1.0,
+    },
+    roofMaterialMultipliers: {
+      Metal: 1.2,
+      Tile: 1.0,
+      Concrete: 1.1,
+      AsphaltShingle: 1.05,
+    },
+    roofInsulationMultipliers: {
+      Poor: 1.2,
+      Average: 1.0,
+      Good: 0.8,
+    },
+    apartmentOrientation: {
+      North: 0.9,
+      East: 1.0,
+      South: 1.2,
+      West: 1.3,
+    },
+    applianceBTUAdditions: {
+      Oven: 3000,
+      Television: 500,
+      Computer: 600,
     },
   };
 
@@ -168,6 +222,17 @@ function BtuCalculator() {
   const handleClimateChange = (e) =>
     handleOptionChange("climate", e.target.name);
 
+  const handleAppliancesChange = (e) =>
+    handleOptionChange("appliances", e.target.name);
+
+  const handleWindowChange = (e) =>
+    handleOptionChange("windowType", e.target.name);
+
+  const handleRoofChange = (e) => handleOptionChange("roofType", e.target.name);
+
+  const handleApartmentChange = (e) =>
+    handleOptionChange("apartmentOrientation", e.target.name);
+
   const calculateBTUForRoom = (room) => {
     let area = convertArea(parseFloat(room.size));
     let height = parseFloat(ceilingHeight);
@@ -183,31 +248,52 @@ function BtuCalculator() {
     if (room.name === "Kitchen") btu += CONSTANTS.KITCHEN_BTU_ADDITION;
 
     const applyMultiplier = (category, multipliers) => {
+      if (!multipliers || typeof multipliers !== "object") return;
+      if (!options[category] || typeof options[category] !== "object") return;
+
       Object.keys(multipliers).forEach((key) => {
-        if (options[category][key]) btu *= multipliers[key];
+        if (options[category][key]) {
+          btu *= multipliers[key];
+        }
       });
     };
 
-    applyMultiplier("insulation", { Poor: 1.2, Average: 1, Good: 0.8 });
+    // Apply all relevant multipliers safely
+    applyMultiplier("insulation", {
+      Poor: 1.2,
+      Average: 1,
+      Good: 0.8,
+    });
+
     applyMultiplier("sunExposure", {
       FullSunlight: 1.2,
       Average: 1,
       HeavilyShaded: 0.8,
     });
-    applyMultiplier("climate", { Hot: 1.2, Average: 1.0, Cold: 0.8 });
+
+    applyMultiplier("climate", {
+      HotTelAviv: 1.2,
+      AverageWarsaw: 1.0,
+      ColdStockholm: 0.8,
+    });
+
     applyMultiplier("typeOfWall", {
       BrickVeneer: 1.1,
       DoubleBrick: 0.9,
-      FoarmCladding: 0.8,
+      FoamCladding: 0.8, // ✅ Fixed typo from "FoarmCladding"
     });
+
     applyMultiplier(
       "OutdoorUnitLocation",
       CONSTANTS.OUTDOOR_LOCATION_BTU_ADJUSTMENTS
     );
+    applyMultiplier(
+      "apartmentOrientation",
+      CONSTANTS.apartmentOrientationMultipliers
+    );
 
     return { btu: Math.round(btu), error: null };
   };
-
   const handleCalculate = async () => {
     setError("");
     const results = [];
@@ -373,12 +459,12 @@ function BtuCalculator() {
   };
 
   return (
-    <div>
+<div className="btu-calculator-wrapper">
       <Container className="btu-calculator-container mt-4 mb-4 rounded ">
         <Form className="btu-form">
           <h3 className="mt-4 mb-4 text-center title">BTU Calculator</h3>
           <Row className="my-4">
-            <Col xs={12} md={6} lg={8}>
+           <Col xs={12} md={6} lg={12}>
               <Form.Group controlId="measurementSystem">
                 <Form.Label className="fw-bold">Calculate Area </Form.Label>
                 <Form.Control
@@ -393,7 +479,7 @@ function BtuCalculator() {
             </Col>
           </Row>
           <Row className="my-4">
-            <Col xs={12} md={6} lg={8}>
+            <Col xs={12} md={6} lg={12}>
               <Form.Group controlId="height">
                 <Form.Label>
                   Height ({measurementSystem === "meters" ? "m" : "ft"}):
@@ -411,7 +497,7 @@ function BtuCalculator() {
             </Col>
           </Row>
           <Row className="my-4">
-            <Col xs={12} md={6} lg={8}>
+         <Col xs={12} md={6} lg={12}>
               <Form.Group controlId="width">
                 <Form.Label>
                   Width ({measurementSystem === "meters" ? "m" : "ft"}):
@@ -530,41 +616,75 @@ function BtuCalculator() {
           >
             Add Desired Room
           </Button>
-          <hr className="ms-2 mt-1 mb-5" style={{ width: "66%" }}></hr>
-          <CheckboxGroup
-            title="Outdoor Unit (Condenser) Location"
-            name="OutdoorUnitLocation"
-            options={options.OutdoorUnitLocation}
-            onChange={handleOutdoorUnitLocationChange}
-          />
+          <hr className="ms-2 mt-1 mb-5" style={{ width: "66%" }} />
+<Row className="g-6">
+  <Col md={6}>
+    <CheckboxGroup
+      title="Outdoor Unit Location"
+      name="OutdoorUnitLocation"
+      options={options.OutdoorUnitLocation}
+      onChange={handleOutdoorUnitLocationChange}
+    />
 
-          <CheckboxGroup
-            title="Type of Wall"
-            name="typeOfWall"
-            options={options.typeOfWall}
-            onChange={handleWallChange}
-          />
+    <CheckboxGroup
+      title="Insulation Condition"
+      name="insulation"
+      options={options.insulation}
+      onChange={handleInsulationChange}
+    />
 
-          <CheckboxGroup
-            title="Insulation Condition"
-            name="insulation"
-            options={options.insulation}
-            onChange={handleInsulationChange}
-          />
+    <CheckboxGroup
+      title="Climate"
+      name="climate"
+      options={options.climate}
+      onChange={handleClimateChange}
+    />
 
-          <CheckboxGroup
-            title="Sun Exposure"
-            name="sunExposure"
-            options={options.sunExposure}
-            onChange={handleSunExposureChange}
-          />
+    <CheckboxGroup
+      title="Window Type"
+      name="windowType"
+      options={options.windowType}
+      onChange={handleWindowChange}
+    />
 
-          <CheckboxGroup
-            title="Climate"
-            name="climate"
-            options={options.climate}
-            onChange={handleClimateChange}
-          />
+    <CheckboxGroup
+      title="Apartment Orientation"
+      name="apartment"
+      options={options.apartmentOrientation}
+      onChange={handleApartmentChange}
+    />
+  </Col>
+
+  <Col md={6}>
+    <CheckboxGroup
+      title="Type of Wall"
+      name="typeOfWall"
+      options={options.typeOfWall}
+      onChange={handleWallChange}
+    />
+
+    <CheckboxGroup
+      title="Sun Exposure"
+      name="sunExposure"
+      options={options.sunExposure}
+      onChange={handleSunExposureChange}
+    />
+
+    <CheckboxGroup
+      title="Appliances"
+      name="appliances"
+      options={options.appliances}
+      onChange={handleAppliancesChange}
+    />
+
+    <CheckboxGroup
+      title="Roof Type"
+      name="roofType"
+      options={options.roofType}
+      onChange={handleRoofChange}
+    />
+  </Col>
+</Row>
 
           <Button
             variant="primary"

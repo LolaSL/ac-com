@@ -7,28 +7,29 @@ let pdfjsLib;
  * Defines regex patterns for various room types.
  * Patterns are refined to be more precise and flexible to handle OCR variations.
  */
+
 const roomPatterns = {
   // Outdoor
-  terrace: /\b(terrace|deck|patio)\b/i,
+  terrace: /\b(terrace|deck|patio|open\s*deck|cov(?:ered)?\s*deck|cov(?:ered)?\s*entry|cov\.?\s*entry)\b/i,
 
   // Dining & Living
-  diningRoom: /\b(dining|dining\s*(room|area)|dr)\b/i,
-  livingRoom: /\b(living|living\s*(room|area)|lr)\b/i,
+  diningRoom: /\b(dining|dining\s*(room|area)?|dr)\b/i,
+  livingRoom: /\b(living|living\s*(room|area)?|lr)\b/i,
   sittingRoom: /\bsitting\s*(room|area)?\b/i,
   lounge: /\b(lounge|mstr\s*suite)\b/i,
   hall: /\b(hall|living\s*hall|parking)\b/i,
-  greatRoom: /\bgreat\s*room\b/i,
+  greatRoom: /\bgreat\s*rm\.?|great\s*room\b/i,
   commonRoom: /\bcommon\s*room\b/i,
   familyRoom: /\bfamily\s*room\b/i,
 
   // Kitchen
-  kitchen: /\bkitchen(\s*(ref|refrig|refr|\d{1,2}['’′]?\s*\d{0,2}["”°]?\s*[xX×]\s*\d{1,2}['’′]?\s*\d{0,2}["”°]?))?\b/i,
+  kitchen: /\b(kitchen|kitc?hen|ktcn|ktch?n)\b/i,
   breakfastRoom: /\b(breakfast\s*room|brkfst)\b/i,
 
   // Bedrooms
-  bedroom: /\bbed(room|rm)?\b/i,
+  bedroom: /\bbed(room|rm)?\b|\bb(?:e|o|a|d)?d[\s._#]*(room|rm|#?\d)?\b|\bbdrm\.?#?\d?\b/i,
   secondBedroom: /\b(sec(?:ond)?\s*)?bedroom|bed\s*2|br\s*2\b/i,
-  masterBedroom: /\b(master|mstr)\s*bed(room)?|mb\b/i,
+  masterBedroom: /\b(master|mstr|mst)\s*(bed(room)?|suite)?\b/i,
   primaryBedroom: /\b(primary|main)\s*bed(room)?\b/i,
 
   // Work/study/office
@@ -39,29 +40,31 @@ const roomPatterns = {
 
   // Wellness
   gym: /\b(home\s*)?(gym|fitness|workout)(\s*room)?\b/i,
+
+  // Other
+  garage: /\bgarage\b/i
 };
+
 
 
 const roomTypePriorities = [
   'kitchen', 'livingroom', 'diningroom', 'office', 'greatroom', 'familyroom',
   'masterbedroom', 'primarybedroom', 'bedroom', 'secondbedroom', 'terrace',
-  'sittingroom', 'desk', 'gym', 'drawingroom', 'breakfastroom', 'lounge', 'hall', 'commonroom', 'study'
+  'sittingroom', 'desk', 'gym', 'drawingroom', 'breakfastroom', 'lounge', 'hall', 'commonroom', 'study', 'garage'
 ];
 
 
 const dimensionPatterns = [
-  // Matches: 12'-6" x 13'-0"
-  /\b(\d{1,2})['’′]?\s*(\d{0,2})?["”]?\s*[xX×]\s*(\d{1,2})['’′]?\s*(\d{0,2})?["”]?\b/g,
+  /\b(\d{1,2})['’′]?\s*(\d{1,2})?["”]?\s*[xX×]\s*(\d{1,3})['’′]?\s*(\d{0,2})?["”]?\b/g,       // 16'6 x 10'4
+  /\b(\d+(?:\.\d+)?)\s*ft\s*[xX×]\s*(\d+(?:\.\d+)?)\s*ft\b/g,                                 // 16 ft x 10 ft
+  /\b(\d{1,3})[-](\d{1,3})\s*[xX×]\s*(\d{1,3})[-](\d{1,3})\b/g,                               // 16-6 x 10-4
+  /\b(\d{1,3})\s*[xX×]\s*(\d{1,3})\b/g,                                                       // 20 x 10 (assume feet)
+  /\b(\d{1,2})[’']\s*(\d{1,2})["”]?\s*[xX×]\s*(\d{1,2})[’']\s*(\d{1,2})["”]?\b/g,             // additional: 13'6" x 13'
+  /\b(\d{1,2})['’′]?\s*[xX×]\s*(\d{1,2})(\d{1,2})\b/g                                           // matches: 16'x104 (-> 10'4)
 
-  // Matches: 12 ft x 13 ft
-  /\b(\d+(?:\.\d+)?)\s*ft\s*[xX×]\s*(\d+(?:\.\d+)?)\s*ft\b/g,
-
-  // Matches: 12-6 x 13-0
-  /\b(\d{1,2})(?:-(\d{1,2}))?\s*[xX×]\s*(\d{1,2})(?:-(\d{1,2}))?\b/g,
-
-  // NEW fallback: 12 x 13 (assuming in feet)
-  /\b(\d{1,2})\s*[xX×]\s*(\d{1,2})\b/g,
 ];
+
+
 
 
 
@@ -159,17 +162,12 @@ const parseRoomDataFromText = (text) => {
   const lines = text.split("\n").map(cleanTextLine).filter(Boolean);
   const table = [];
   const addedRoomKeys = new Set();
-  const potentialRoomTypes = [];
   const apartmentTypeMatch = text.match(apartmentTypePattern);
   const apartmentType = apartmentTypeMatch ? apartmentTypeMatch[1].trim() : null;
-
   const totalSfMatch = text.match(totalSfPattern);
   const totalSf = totalSfMatch ? totalSfMatch[1].trim() : null;
-
   const searchWindowSize = 5;
   const extendedRoomPatterns = { ...roomPatterns };
-
-
 
   const normalizeLineForRoomMatch = (line) =>
     line
@@ -185,8 +183,9 @@ const parseRoomDataFromText = (text) => {
 
   const getNearestRoomType = (roomCandidates) => {
     roomCandidates.sort((a, b) => {
-      if (a.distance !== b.distance) return a.distance - b.distance;
-      return roomTypePriorities.indexOf(a.type) - roomTypePriorities.indexOf(b.type);
+      const aScore = a.distance <= 1 ? -10 : a.distance;
+      const bScore = b.distance <= 1 ? -10 : b.distance;
+      return aScore - bScore || roomTypePriorities.indexOf(a.type) - roomTypePriorities.indexOf(b.type);
     });
     return roomCandidates[0]?.type || null;
   };
@@ -206,7 +205,7 @@ const parseRoomDataFromText = (text) => {
           for (const [key, pattern] of Object.entries(extendedRoomPatterns)) {
             if (pattern.test(nearbyLine)) {
               console.log(`Matched room type '${key}' on line: "${nearbyLine}"`);
-              potentialRoomTypes.push({ type: key, distance: Math.abs(offset) });
+              roomCandidates.push({ type: key, distance: Math.abs(offset) });
             }
           }
 
@@ -241,9 +240,25 @@ const parseRoomDataFromText = (text) => {
     if (!matches.length) return;
 
     // Step 1: Search for nearby room types
-    let foundRoomType = null;
-    const potentialRoomTypes = [];
-    // Promote first secondBedroom to primary if none exists yet
+    let roomCandidates = [];
+
+    for (let offset = -searchWindowSize; offset <= searchWindowSize; offset++) {
+      const checkIndex = index + offset;
+      if (checkIndex >= 0 && checkIndex < lines.length) {
+        const nearbyLine = normalizeLineForRoomMatch(lines[checkIndex]);
+        for (const [key, pattern] of Object.entries(extendedRoomPatterns)) {
+          if (pattern.test(nearbyLine)) {
+            roomCandidates.push({ type: key, distance: Math.abs(offset) });
+          }
+        }
+      }
+    }
+
+    if (!roomCandidates.length) return;
+
+    let foundRoomType = getNearestRoomType(roomCandidates);
+
+    // Optional logic: Promote secondBedroom to primary if no primary exists yet
     if (foundRoomType === "secondBedroom" && !table.some(r => r.roomType === "Primary Bedroom")) {
       foundRoomType = "primaryBedroom";
     } else if (
@@ -252,38 +267,32 @@ const parseRoomDataFromText = (text) => {
     ) {
       foundRoomType = "bedroom";
     }
-    for (let offset = -searchWindowSize; offset <= searchWindowSize; offset++) {
-      const checkIndex = index + offset;
-      if (checkIndex >= 0 && checkIndex < lines.length) {
-        const nearbyLine = normalizeLineForRoomMatch(lines[checkIndex]);
-        for (const [key, pattern] of Object.entries(extendedRoomPatterns)) {
-          if (pattern.test(nearbyLine)) {
-            potentialRoomTypes.push({ type: key, distance: Math.abs(offset) });
-          }
-        }
-      }
-    }
-
-    if (potentialRoomTypes.length > 0) {
-      foundRoomType = getNearestRoomType(potentialRoomTypes);
-    }
-
-    if (!foundRoomType) return;
 
     const normalizedRoomType = normalizeRoomType(foundRoomType);
 
     // Step 2: Parse each matched dimension
     matches.forEach((match) => {
       const parseFeetInches = (feetStr, inchStr) => {
-        const feet = parseInt(feetStr || "0", 10);
+        let feet = parseInt(feetStr || "0", 10);
         let inches = parseInt(inchStr || "0", 10);
 
-        // Fix bad OCR readings like "0A", "l0", "OA"
+        // Fix OCR misreads
         if (isNaN(inches)) {
-          const fixed = inchStr?.toLowerCase();
-          if (fixed === "oa" || fixed === "0a") inches = 4;
-          else if (fixed === "l0" || fixed === "lo") inches = 10;
-          else inches = 0; // fallback
+          const raw = (inchStr || "").toLowerCase();
+          if (/^\d{3}$/.test(raw)) {
+            // e.g., 104 → 10'4"
+            const parts = raw.match(/^(\d)(\d{2})$/);
+            if (parts) {
+              feet += parseInt(parts[1]);
+              inches = parseInt(parts[2]);
+            }
+          } else if (["0a", "oa"].includes(raw)) {
+            inches = 4;
+          } else if (["l0", "lo", "io"].includes(raw)) {
+            inches = 10;
+          } else {
+            inches = 0;
+          }
         }
 
         return feet + inches / 12;
@@ -293,19 +302,15 @@ const parseRoomDataFromText = (text) => {
       let height = 0;
 
       if (match.input.match(dimensionPatterns[0])) {
-        // Pattern: 17'1" x 10'10"
         width = parseFeetInches(match[1], match[2]);
         height = parseFeetInches(match[3], match[4]);
       } else if (match.input.match(dimensionPatterns[1])) {
-        // Pattern: 17 ft x 10 ft
         width = parseFloat(match[1]);
         height = parseFloat(match[2]);
       } else if (match.input.match(dimensionPatterns[2])) {
-        // Pattern: 17-1 x 10-10
         width = parseFeetInches(match[1], match[2]);
         height = parseFeetInches(match[3], match[4]);
       } else if (match.input.match(dimensionPatterns[3])) {
-        // Pattern: 17 x 10 (assume feet)
         width = parseFloat(match[1]);
         height = parseFloat(match[2]);
       }
@@ -313,46 +318,50 @@ const parseRoomDataFromText = (text) => {
       const sqft = width * height;
       const sqm = sqft * 0.092903;
 
-      const isValid =
-        width > 1 && height > 1 &&
-        width < 100 && height < 100 &&
-        sqft > 10 && sqft < 1000;
+      const isBroken =
+        isNaN(width) || isNaN(height) ||
+        width <= 3 || height <= 3 ||
+        width > 50 || height > 50 ||
+        sqft < 30 || sqft > 1000;
 
-      if (isValid) {
-        const roomKey = `${normalizedRoomType}-${width.toFixed(1)}x${height.toFixed(1)}`;
-        if (!addedRoomKeys.has(roomKey)) {
-          table.push({
-            roomType: normalizedRoomType,
-            width: `${width.toFixed(2)} ft`,
-            height: `${height.toFixed(2)} ft`,
-            areaSqFt: `${sqft.toFixed(2)} sqft`,
-            areaSqM: `${sqm.toFixed(2)} sqm`,
-          });
-          addedRoomKeys.add(roomKey);
-        }
+      if (isBroken) {
+        return; // Skip unrealistic or tiny junk rooms
+      }
+
+      const roomKey = `${normalizedRoomType}-${width.toFixed(1)}x${height.toFixed(1)}`;
+      if (!addedRoomKeys.has(roomKey)) {
+        table.push({
+          roomType: normalizedRoomType,
+          width: `${width.toFixed(2)} ft`,
+          height: `${height.toFixed(2)} ft`,
+          areaSqFt: `${sqft.toFixed(2)} sqft`,
+          areaSqM: `${sqm.toFixed(2)} sqm`,
+        });
+        addedRoomKeys.add(roomKey);
       }
     });
   });
-  // Add room types found in text even if no dimensions matched
-  lines.forEach((line, index) => {
-    const normLine = normalizeLineForRoomMatch(line);
-    for (const [key, pattern] of Object.entries(roomPatterns)) {
-      if (pattern.test(normLine)) {
-        const normalizedType = normalizeRoomType(key);
-        const roomKey = `${normalizedType}-NODIM-${index}`;
-        if (!addedRoomKeys.has(roomKey)) {
-          table.push({
-            roomType: normalizedType,
-            width: "N/A",
-            height: "N/A",
-            areaSqFt: "N/A",
-            areaSqM: "N/A",
-          });
-          addedRoomKeys.add(roomKey);
-        }
-      }
-    }
-  });
+
+
+  // lines.forEach((line, index) => {
+  //   const normLine = normalizeLineForRoomMatch(line);
+  //   for (const [key, pattern] of Object.entries(roomPatterns)) {
+  //     if (pattern.test(normLine)) {
+  //       const normalizedType = normalizeRoomType(key);
+  //       const roomKey = `${normalizedType}-NODIM-${index}`;
+  //       if (!addedRoomKeys.has(roomKey)) {
+  //         table.push({
+  //           roomType: normalizedType,
+  //           width: "N/A",
+  //           height: "N/A",
+  //           areaSqFt: "N/A",
+  //           areaSqM: "N/A",
+  //         });
+  //         addedRoomKeys.add(roomKey);
+  //       }
+  //     }
+  //   }
+  // });
 
   // If no rooms found but dimensions exist, add placeholder
   if (table.length === 0 && text.match(/\d{1,2}['’′]?\s*(\d{1,2})?["”°]?\s*[xX×]\s*\d{1,2}/)) {
@@ -435,8 +444,8 @@ export default function UniversalPdfExtractor() {
     }
 
     setLoading(true);
-    setImages([]);       // clear previous preview
-    setResults([]);      // clear previous results
+    setImages([]);
+    setResults([]);
 
     const output = [];
 
