@@ -1540,10 +1540,10 @@ hr {
 .link-product-details:hover {
   color: teal;
 }
-.btu-calculator-wrapper {
+/* .btu-calculator-wrapper {
   display: flex;
   justify-content: center;
-}
+} */
 
 
 .btu-calculator-container {
