@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext } from "react"; 
+import { useState, useEffect, useContext } from "react";
 import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
-import { Store } from "../Store"; 
+import { Store } from "../Store";
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
@@ -248,26 +248,42 @@ const Sidebar = () => {
     }
 
     if (annotations?.comments) {
-      annotations.comments.forEach((comment) => {
-        const x = comment.xPercent * canvasWidth;
-        const y = comment.yPercent * canvasHeight;
-        const padding = 10;
-        const fontSize = 17;
-        context.font = `${fontSize}px Arial`;
-        const textWidth = context.measureText(comment.text).width;
+  annotations.comments.forEach((comment) => {
+    const x = comment.xPercent * canvasWidth;
+    const y = comment.yPercent * canvasHeight;
+    const padding = 10;
+    const fontSize = 17;
+    const text = comment.text;
 
-        context.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
-        context.fillRect(
-          x - padding,
-          y - fontSize - padding,
-          textWidth + padding * 2,
-          fontSize + padding * 2
-        );
-        context.font = `bold ${fontSize}px Arial`;
-        context.fillStyle = comment.textColor || "#FF1493";
-        context.fillText(comment.text, x, y);
-      });
-    }
+    context.font = `bold ${fontSize}px Arial`;
+    const textWidth = context.measureText(text).width;
+    const textHeight = fontSize;
+
+
+    context.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
+    context.fillRect(
+      x - padding,
+      y - textHeight - padding,
+      textWidth + padding * 2,
+      textHeight + padding * 2
+    );
+
+  
+    context.strokeStyle = "black";
+    context.lineWidth = 1;
+    context.strokeRect(
+      x - padding,
+      y - textHeight - padding,
+      textWidth + padding * 2,
+      textHeight + padding * 2
+    );
+
+  
+    context.fillStyle = comment.textColor || "#FF1493";
+    context.fillText(text, x, y);
+  });
+}
+
   };
 
   return (
@@ -279,7 +295,11 @@ const Sidebar = () => {
       >
         {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
       </Button>
-      <Modal show={isOpen} onHide={toggleSidebar} dialogClassName="custom-modal-width">
+      <Modal
+        show={isOpen}
+        onHide={toggleSidebar}
+        dialogClassName="custom-modal-width"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Saved Documents</Modal.Title>
         </Modal.Header>
@@ -334,11 +354,18 @@ const Sidebar = () => {
                 No saved documents yet.
               </p>
             )}
-            <div id="pdf-container" style={{ flexGrow: 1, marginTop: "1rem" }}></div>
+            <div
+              id="pdf-container"
+              style={{ flexGrow: 1, marginTop: "1rem" }}
+            ></div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button className="go-to-btn btn-text" variant="btn-outline" onClick={toggleSidebar}>
+          <Button
+            className="go-to-btn btn-text"
+            variant="btn-outline"
+            onClick={toggleSidebar}
+          >
             Close
           </Button>
         </Modal.Footer>

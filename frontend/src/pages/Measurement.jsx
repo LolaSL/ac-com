@@ -5,7 +5,7 @@ import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import BtuModalWindow from "../components/BtuModalWindow.jsx";
-import ExtractPdf from "../components/ExtractTextFromPdf.js";
+// import ExtractPdf from "../components/ExtractTextFromPdf.js";
 
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
@@ -70,7 +70,7 @@ const fetchSavedPdfs = useCallback(async () => {
           roomData={roomData}
           setRoomData={setRoomData}
         />
-        <ExtractPdf/>
+        {/* <ExtractPdf/> */}
         <BtuModalWindow />
         <BtuCalculator roomData={roomData} />
         <div className="mt-4 mb-4">

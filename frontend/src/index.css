@@ -887,6 +887,9 @@ button.thumbnail {
   color: white;
   border: none;
   cursor: pointer;
+  font-size: 18px;
+   text-transform: uppercase;
+
 }
 
 .contact-form button:hover {

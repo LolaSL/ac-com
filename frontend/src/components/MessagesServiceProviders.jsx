@@ -203,10 +203,10 @@ const MessagesServiceProviders = () => {
                   <td data-label="Message">{message.text || "N/A"}</td>
                   <td data-label="Date">{new Date(message.date).toLocaleDateString()}</td>
                   <td>
-                    <Button className="details me-2" onClick={() => editHandler(message._id)}>
+                    <Button className="details me-2 mb-2" onClick={() => editHandler(message._id)}>
                       Edit
                     </Button>
-                    <Button className="details me-2" onClick={() => deleteHandler(message._id)}>
+                    <Button className="details me-2 mb-2 " onClick={() => deleteHandler(message._id)}>
                       Delete
                     </Button>
                   </td>

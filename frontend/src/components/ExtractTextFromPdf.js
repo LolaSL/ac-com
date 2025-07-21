@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 
 let Tesseract;
 let pdfjsLib;
@@ -64,13 +64,10 @@ const dimensionPatterns = [
 
 ];
 
-
-
-
-
 const apartmentTypePattern = /\b(\d+\s*(?:bedroom|studio|loft|bath)\s*apartment\s*-?\s*model\s*[A-Z\d]+)\b/i
 
 const totalSfPattern = /\b(\d{3,5})\s*(?:sq\s*ft|sf)\b/i
+
 
 
 /**
@@ -137,19 +134,39 @@ const runOcrOnImages = async (images) => {
   }
 
   let fullText = "";
+  let allWords = [];
+
   for (const image of images) {
     const {
-      data: { text },
+      data: { text, words },
     } = await Tesseract.recognize(image, "eng");
 
     const cleanedText = text
       .replace(/[^\x20-\x7E\n\r\t]/g, "")
       .replace(/ﬁ/g, "fi")
       .replace(/(\d+)\s*(?:sq\.?ft|ft²)/gi, "$1 sqft");
+
     fullText += cleanedText + "\n";
+
+    const cleanedWords = words.map((word) => ({
+      text: word.text,
+      bbox: {
+        x0: word.bbox.x0,
+        y0: word.bbox.y0,
+        x1: word.bbox.x1,
+        y1: word.bbox.y1,
+      },
+    }));
+
+    allWords = [...allWords, ...cleanedWords];
   }
-  return fullText;
+
+  return {
+    text: fullText,
+    ocrWords: allWords,
+  };
 };
+
 
 /**
  * Parses room data, apartment type, and total square footage from the extracted text.
@@ -190,7 +207,6 @@ const parseRoomDataFromText = (text) => {
     return roomCandidates[0]?.type || null;
   };
 
-  // --- Parse area-based entries ---
   lines.forEach((line, index) => {
     const cleanLine = fixAreaUnit(line);
 
@@ -234,12 +250,10 @@ const parseRoomDataFromText = (text) => {
     }
   });
 
-  // --- Parse dimension-based entries ---
   lines.forEach((line, index) => {
     const matches = dimensionPatterns.flatMap((pattern) => [...line.matchAll(pattern)]);
     if (!matches.length) return;
 
-    // Step 1: Search for nearby room types
     let roomCandidates = [];
 
     for (let offset = -searchWindowSize; offset <= searchWindowSize; offset++) {
@@ -257,8 +271,6 @@ const parseRoomDataFromText = (text) => {
     if (!roomCandidates.length) return;
 
     let foundRoomType = getNearestRoomType(roomCandidates);
-
-    // Optional logic: Promote secondBedroom to primary if no primary exists yet
     if (foundRoomType === "secondBedroom" && !table.some(r => r.roomType === "Primary Bedroom")) {
       foundRoomType = "primaryBedroom";
     } else if (
@@ -270,17 +282,14 @@ const parseRoomDataFromText = (text) => {
 
     const normalizedRoomType = normalizeRoomType(foundRoomType);
 
-    // Step 2: Parse each matched dimension
     matches.forEach((match) => {
       const parseFeetInches = (feetStr, inchStr) => {
         let feet = parseInt(feetStr || "0", 10);
         let inches = parseInt(inchStr || "0", 10);
 
-        // Fix OCR misreads
         if (isNaN(inches)) {
           const raw = (inchStr || "").toLowerCase();
           if (/^\d{3}$/.test(raw)) {
-            // e.g., 104 → 10'4"
             const parts = raw.match(/^(\d)(\d{2})$/);
             if (parts) {
               feet += parseInt(parts[1]);
@@ -325,7 +334,7 @@ const parseRoomDataFromText = (text) => {
         sqft < 30 || sqft > 1000;
 
       if (isBroken) {
-        return; // Skip unrealistic or tiny junk rooms
+        return; 
       }
 
       const roomKey = `${normalizedRoomType}-${width.toFixed(1)}x${height.toFixed(1)}`;
@@ -363,7 +372,7 @@ const parseRoomDataFromText = (text) => {
   //   }
   // });
 
-  // If no rooms found but dimensions exist, add placeholder
+
   if (table.length === 0 && text.match(/\d{1,2}['’′]?\s*(\d{1,2})?["”°]?\s*[xX×]\s*\d{1,2}/)) {
     table.push({
       roomType: "Unlabeled Room",
@@ -379,11 +388,25 @@ const parseRoomDataFromText = (text) => {
 
 
 
+
+
 export default function UniversalPdfExtractor() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
   const [images, setImages] = useState([]);
+  const canvasRef = useRef(null);
+  const ROOM_TYPE_COLORS = useMemo(
+    () => ({
+      kitchen: "rgba(255, 165, 0, 0.3)",
+      bedroom: "rgba(0, 0, 255, 0.3)",
+      bathroom: "rgba(0, 255, 255, 0.3)",
+      living: "rgba(0, 255, 0, 0.3)",
+      dining: "rgba(255, 0, 0, 0.3)",
+      garage: "rgba(128, 0, 128, 0.3)",
+    }),
+    []
+  );
 
   useEffect(() => {
     const loadScript = (src, id, onloadCallback) => {
@@ -391,7 +414,7 @@ export default function UniversalPdfExtractor() {
         onloadCallback();
         return;
       }
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = src;
       script.id = id;
       script.onload = onloadCallback;
@@ -406,11 +429,9 @@ export default function UniversalPdfExtractor() {
       if (tesseractLoaded && pdfjsLoaded) {
         Tesseract = window.Tesseract;
         pdfjsLib = window.pdfjsLib || window.pdfjs;
-
-        if (pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
-          pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
-        } else {
-          console.error("pdfjsLib or its GlobalWorkerOptions are not available after loading. Please check CDN script.");
+        if (pdfjsLib?.GlobalWorkerOptions) {
+          pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js";
         }
         setScriptsLoaded(true);
       }
@@ -434,14 +455,10 @@ export default function UniversalPdfExtractor() {
       }
     );
   }, []);
+
   const handleFiles = async (event) => {
     const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    if (!scriptsLoaded) {
-      console.warn("Libraries not yet loaded. Please wait and try again.");
-      return;
-    }
+    if (!files?.length || !scriptsLoaded) return;
 
     setLoading(true);
     setImages([]);
@@ -451,17 +468,21 @@ export default function UniversalPdfExtractor() {
 
     for (const file of files) {
       try {
-        if (!Tesseract || !pdfjsLib) {
-          throw new Error("Required libraries (Tesseract.js or PDF.js) are not loaded.");
-        }
+        const extractedImages = await extractImagesFromPdf(file);
+        setImages(extractedImages);
 
-        const images = await extractImagesFromPdf(file);
-        setImages(images); // ✅ Preview for current file (optional)
+        const { text, ocrWords } = await runOcrOnImages(extractedImages);
 
-        const text = await runOcrOnImages(images);
         const { apartmentType, totalSf, rooms } = parseRoomDataFromText(text);
 
-        output.push({ fileName: file.name, text, apartmentType, totalSf, rooms });
+        output.push({
+          fileName: file.name,
+          text,
+          ocrWords,
+          apartmentType,
+          totalSf,
+          rooms,
+        });
       } catch (err) {
         console.error("Error processing file:", file.name, err);
         output.push({ fileName: file.name, error: err.message });
@@ -473,9 +494,129 @@ export default function UniversalPdfExtractor() {
   };
 
 
+ useEffect(() => {
+  if (!results.length || !images.length) return;
+
+  const canvas = document.getElementById("pdfCanvas");
+  if (!canvas) return;
+
+  const context = canvas.getContext("2d");
+  const img = new Image();
+  img.src = images[0];
+
+
+  function renderClassifiedRoomsByOcr(
+    canvas,
+    context,
+    classifiedRooms,
+    ocrWords,
+    canvasWidth,
+    canvasHeight,
+    originalImageWidth,
+    originalImageHeight
+  ) {
+    const scaleX = canvasWidth / originalImageWidth;
+    const scaleY = canvasHeight / originalImageHeight;
+    const PADDING_RATIO = 0.4; 
+
+    const roomsSorted = classifiedRooms.slice().sort((a, b) => {
+      const getArea = (roomType) => {
+        const regex = new RegExp(`\\b${roomType.toLowerCase()}\\b`);
+        const words = ocrWords.filter(word => regex.test(word.text.toLowerCase()));
+        if (!words.length) return 0;
+        const x0 = Math.min(...words.map(w => w.bbox.x0));
+        const y0 = Math.min(...words.map(w => w.bbox.y0));
+        const x1 = Math.max(...words.map(w => w.bbox.x1));
+        const y1 = Math.max(...words.map(w => w.bbox.y1));
+        return (x1 - x0) * (y1 - y0);
+      };
+      return getArea(b.roomType) - getArea(a.roomType);
+    });
+
+    roomsSorted.forEach(({ roomType }) => {
+      const regex = new RegExp(`\\b${roomType.toLowerCase()}\\b`);
+      const matches = ocrWords.filter(word => regex.test(word.text.toLowerCase()));
+      if (!matches.length) return;
+
+      const x0s = matches.map(w => w.bbox.x0);
+      const y0s = matches.map(w => w.bbox.y0);
+      const x1s = matches.map(w => w.bbox.x1);
+      const y1s = matches.map(w => w.bbox.y1);
+
+      const avgHeight =
+        y1s.reduce((a, b) => a + b, 0) / y1s.length -
+        y0s.reduce((a, b) => a + b, 0) / y0s.length;
+      const padding = avgHeight * PADDING_RATIO;
+
+      const rectX1 = Math.max(0, Math.min(...x0s) - padding);
+      const rectY1 = Math.max(0, Math.min(...y0s) - padding);
+      const rectX2 = Math.min(originalImageWidth, Math.max(...x1s) + padding);
+      const rectY2 = Math.min(originalImageHeight, Math.max(...y1s) + padding);
+
+      const rectX = rectX1 * scaleX;
+      const rectY = rectY1 * scaleY;
+      const rectW = (rectX2 - rectX1) * scaleX;
+      const rectH = (rectY2 - rectY1) * scaleY;
+
+      const color = ROOM_TYPE_COLORS[roomType.toLowerCase()] || "rgba(100, 100, 100, 0.3)";
+      context.fillStyle = color;
+      context.fillRect(rectX, rectY, rectW, rectH);
+
+      context.strokeStyle = "black";
+      context.lineWidth = 1;
+      context.strokeRect(rectX, rectY, rectW, rectH);
+
+      context.fillStyle = "black";
+      context.font = "12px Arial";
+      context.fillText(roomType, rectX + 5, rectY + 15);
+    });
+  }
+
+  img.onload = () => {
+    const originalImageWidth = img.width;
+    const originalImageHeight = img.height;
+
+    canvas.width = originalImageWidth;
+    canvas.height = originalImageHeight;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(img, 0, 0);
+
+    const lines = results[0]?.text?.split("\n") || [];
+    lines.forEach((line, index) => {
+      for (const [room, color] of Object.entries(ROOM_TYPE_COLORS)) {
+        if (line.toLowerCase().includes(room)) {
+          const x = 40;
+          const y = 30 + index * 20;
+          const width = 200;
+          const height = 20;
+
+          context.fillStyle = color;
+          context.fillRect(x, y, width, height);
+
+          context.font = "16px Arial";
+          context.fillStyle = "black";
+          context.fillText(line.trim(), x + 5, y + 16);
+        }
+      }
+    });
+
+ 
+    renderClassifiedRoomsByOcr(
+      canvas,
+      context,
+      results[0].rooms,
+      results[0].ocrWords,
+      canvas.width,
+      canvas.height,
+      originalImageWidth,
+      originalImageHeight
+    );
+  };
+}, [results, images, ROOM_TYPE_COLORS]);
+
   return (
-    <div className=" bg-light d-flex flex-column align-items-center py-4 font-sans">
-      <div className="bg-white p-4 rounded shadow w-100" style={{ maxWidth: '64rem' }}>
+    <div className="bg-light d-flex flex-column align-items-center py-4 font-sans">
+      <div className="bg-white p-4 rounded shadow w-100" style={{ maxWidth: "64rem" }}>
         <h4 className="text-center fw-bold mb-4">Batch PDF Room Extractor</h4>
 
         <div className="mb-3">
@@ -492,16 +633,9 @@ export default function UniversalPdfExtractor() {
             disabled={!scriptsLoaded || loading}
           />
         </div>
-        {process.env.NODE_ENV === "development" && (
-          <div className="mt-3">
-            <h6 className="fw-bold">Extracted Pages Preview</h6>
-            <div className="d-flex flex-wrap gap-2">
-              {images.map((src, idx) => (
-                <img key={idx} src={src} alt={`Page ${idx + 1}`} style={{ width: "200px", border: "1px solid #ccc" }} />
-              ))}
-            </div>
-          </div>
-        )}
+
+        <canvas id="pdfCanvas" ref={canvasRef} className="mb-4 border rounded shadow-sm" style={{ width: "100%", maxWidth: "100%" }} />
+
         {(loading || !scriptsLoaded) && (
           <div className="d-flex align-items-center justify-content-center text-primary my-3">
             <div className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
@@ -509,65 +643,70 @@ export default function UniversalPdfExtractor() {
           </div>
         )}
 
-        {scriptsLoaded && results.map((result, i) => (
-          <div key={i} className="mt-4 p-4 bg-white rounded shadow-sm border">
-            <h5 className="mb-3">{result.fileName}</h5>
+        {scriptsLoaded &&
+          results.map((result, i) => (
+            <div key={i} className="mt-4 p-4 bg-white rounded shadow-sm border">
+              <h5 className="mb-3">{result.fileName}</h5>
 
-            {result.error ? (
-              <div className="text-danger fw-semibold">Error: {result.error}</div>
-            ) : (
-              <>
-                <h6 className="fw-semibold mb-2">Extracted Text</h6>
-                <pre
-                  className="bg-light p-3 rounded border text-wrap"
-                  style={{ height: '16rem', overflowY: 'auto', whiteSpace: 'pre-wrap' }}
-                >
-                  {result.text}
-                </pre>
+              {result.error ? (
+                <div className="text-danger fw-semibold">Error: {result.error}</div>
+              ) : (
+                <>
+                  <h6 className="fw-semibold mb-2">Extracted Text</h6>
+                  <pre
+                    className="bg-light p-3 rounded border text-wrap"
+                    style={{
+                      height: "16rem",
+                      overflowY: "auto",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {result.text}
+                  </pre>
 
-                {result.apartmentType && (
-                  <p className="mt-3 fw-semibold">
-                    Apartment Type: <span className="text-primary">{result.apartmentType}</span>
-                  </p>
-                )}
-                <h6 className="fw-semibold mt-4 mb-3">Classified Room Data</h6>
-                {result.rooms && result.rooms.length > 0 ? (
-                  <div className="table-responsive rounded border shadow-sm">
-                    <table className="table table-striped mb-0">
-                      <thead className="table-light">
-                        <tr>
-                          <th scope="col" className="text-start">#</th>
-                          <th scope="col" className="text-start">Room Type</th>
-                          <th scope="col" className="text-start">Width</th>
-                          <th scope="col" className="text-start">Height</th>
-                          <th scope="col" className="text-start">Area (sqft)</th>
-                          <th scope="col" className="text-start">Area (sqm)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.rooms.map((room, idx) => (
-                          <tr key={idx}>
-                            <td>{idx + 1}</td>
-                            <td>{room.roomType || 'Unknown'}</td>
-                            <td>{room.width}</td>
-                            <td>{room.height}</td>
-                            <td>{room.areaSqFt}</td>
-                            <td>{room.areaSqM}</td>
+                  {result.apartmentType && (
+                    <p className="mt-3 fw-semibold">
+                      Apartment Type: <span className="text-primary">{result.apartmentType}</span>
+                    </p>
+                  )}
+
+                  <h6 className="fw-semibold mt-4 mb-3">Classified Room Data</h6>
+                  {result.rooms?.length ? (
+                    <div className="table-responsive rounded border shadow-sm">
+                      <table className="table table-striped mb-0">
+                        <thead className="table-light">
+                          <tr>
+                            <th>#</th>
+                            <th>Room Type</th>
+                            <th>Width</th>
+                            <th>Height</th>
+                            <th>Area (sqft)</th>
+                            <th>Area (sqm)</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="fst-italic text-secondary">No classified room data found.</p>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+                        </thead>
+                        <tbody>
+                          {result.rooms.map((room, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{room.roomType || "Unknown"}</td>
+                              <td>{room.width}</td>
+                              <td>{room.height}</td>
+                              <td>{room.areaSqFt}</td>
+                              <td>{room.areaSqM}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="fst-italic text-secondary">No classified room data found.</p>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
       </div>
     </div>
-
   );
 }
 

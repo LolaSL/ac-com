@@ -35,9 +35,10 @@ const notifications = [
 export default function HomeBannerPage() {
   const [notification, setNotification] = useState(null);
   const { state } = useContext(Store);
-  const { userInfo, serviceProviderInfo } = state;
+  const { adminInfo, userInfo, serviceProviderInfo } = state;
   const navigate = useNavigate();
 
+ 
   const banners = [
     {
       title: "Welcome To AC Commerce",
@@ -73,7 +74,7 @@ export default function HomeBannerPage() {
       notificationToShow = notifications.find(
         (n) => n.recipientType === "serviceProvider" && !n.isRead
       );
-    } else if (userInfo) {
+    } else if (adminInfo || userInfo) {
       notificationToShow = notifications.find(
         (n) => n.recipientType === "user" && !n.isRead
       );
@@ -92,20 +93,22 @@ export default function HomeBannerPage() {
 
       return () => clearTimeout(timer);
     }
-  }, [userInfo, serviceProviderInfo]);
+  }, [userInfo, serviceProviderInfo, adminInfo]);
 
-  const handleNotificationClick = (buttonText) => {
-    if (buttonText === "Get Quote") {
-      if (userInfo || serviceProviderInfo) {
-        navigate("/uploadfile");
-      } else {
-        navigate("/signup");
-      }
-    } else if (buttonText === "Review Details") {
-      navigate("/serviceprovider/messages");
+const handleNotificationClick = (buttonText) => {
+  if (buttonText === "Get Quote") {
+    if (adminInfo || userInfo || serviceProviderInfo) {
+      navigate("/uploadfile");
+    } else {
+      navigate("/signin?redirect=/uploadfile"); 
     }
-    setNotification(null);
-  };
+  } else if (buttonText === "Review Details") {
+    navigate("/serviceprovider/messages");
+  }
+
+  setNotification(null);
+};
+
 
   return (
     <div className="container">
@@ -128,15 +131,33 @@ export default function HomeBannerPage() {
         />
       )}
 
-      {banners.map((banner, index) => (
-        <Banner
-          key={index}
-          title={banner.title}
-          imageSrc={banner.imageSrc}
-          linkTo={banner.linkTo}
-          linkText={banner.linkText}
-        ></Banner>
-      ))}
+     {banners.map((banner, index) => {
+  const requiresLogin =
+    banner.linkText ===
+    "Redefining Air Conditioning Design — Smart. Fast. Certified";
+
+  const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
+
+  const handleClick = () => {
+    if (requiresLogin && !isLoggedIn) {
+      navigate("/signin?redirect=/uploadfile");
+    } else {
+      navigate(banner.linkTo);
+    }
+  };
+
+  return (
+    <Banner
+      key={index}
+      title={banner.title}
+      imageSrc={banner.imageSrc}
+      linkText={banner.linkText}
+      onClick={handleClick} 
+    />
+  );
+})}
+
+
     </div>
   );
 }
