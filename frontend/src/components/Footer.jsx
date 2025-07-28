@@ -20,19 +20,16 @@ const Footer = () => {
             <div>
               {" "}
               <i className="fa-solid fa-air-conditioner"></i>
-              <h3>
-                AC Commerce
-              </h3>
+              <h3>AC Commerce</h3>
               <p className="handwritten">Cooling Solutions For Every Space</p>
             </div>
             <p>
               {" "}
               We believe in the power of innovation to revolutionize the way we
               control and manage our indoor and outdoor spaces.
-            </p>
-
-            <div className="footer-icons d-flex  ">
-              <h4 className="px-2 follow-us">Follow Us</h4>
+            </p>         
+            <div className="footer-icons d-flex align-items-center gap-2">
+                <h3 className="follow-us mb-3">Follow Us</h3>
               <NavLink
                 href="https://www.facebook.com"
                 target="_blank"

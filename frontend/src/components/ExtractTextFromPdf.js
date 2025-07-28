@@ -334,7 +334,7 @@ const parseRoomDataFromText = (text) => {
         sqft < 30 || sqft > 1000;
 
       if (isBroken) {
-        return; 
+        return;
       }
 
       const roomKey = `${normalizedRoomType}-${width.toFixed(1)}x${height.toFixed(1)}`;
@@ -504,73 +504,115 @@ export default function UniversalPdfExtractor() {
   const img = new Image();
   img.src = images[0];
 
+function renderClassifiedRoomsByOcr(
+  canvas,
+  context,
+  classifiedRooms,
+  ocrWords,
+  canvasWidth,
+  canvasHeight,
+  originalImageWidth,
+  originalImageHeight
+) {
+  const scaleX = canvasWidth / originalImageWidth;
+  const scaleY = canvasHeight / originalImageHeight;
+  const PADDING_RATIO = 0.4;
+  const TITLE_BLOCK_HEIGHT_RATIO = 0.15;
 
-  function renderClassifiedRoomsByOcr(
-    canvas,
-    context,
-    classifiedRooms,
-    ocrWords,
-    canvasWidth,
-    canvasHeight,
-    originalImageWidth,
-    originalImageHeight
-  ) {
-    const scaleX = canvasWidth / originalImageWidth;
-    const scaleY = canvasHeight / originalImageHeight;
-    const PADDING_RATIO = 0.4; 
+  const titleBlockCutoffY = originalImageHeight * TITLE_BLOCK_HEIGHT_RATIO;
 
-    const roomsSorted = classifiedRooms.slice().sort((a, b) => {
-      const getArea = (roomType) => {
-        const regex = new RegExp(`\\b${roomType.toLowerCase()}\\b`);
-        const words = ocrWords.filter(word => regex.test(word.text.toLowerCase()));
-        if (!words.length) return 0;
-        const x0 = Math.min(...words.map(w => w.bbox.x0));
-        const y0 = Math.min(...words.map(w => w.bbox.y0));
-        const x1 = Math.max(...words.map(w => w.bbox.x1));
-        const y1 = Math.max(...words.map(w => w.bbox.y1));
-        return (x1 - x0) * (y1 - y0);
-      };
-      return getArea(b.roomType) - getArea(a.roomType);
-    });
+// Inside component or drawOverlay function:
+const EXCLUDE_REGIONS = [
+  {
+    x: 0,
+    y: 0,
+    width: 800,
+    height: 150,
+  },
+];
 
-    roomsSorted.forEach(({ roomType }) => {
-      const regex = new RegExp(`\\b${roomType.toLowerCase()}\\b`);
-      const matches = ocrWords.filter(word => regex.test(word.text.toLowerCase()));
-      if (!matches.length) return;
-
-      const x0s = matches.map(w => w.bbox.x0);
-      const y0s = matches.map(w => w.bbox.y0);
-      const x1s = matches.map(w => w.bbox.x1);
-      const y1s = matches.map(w => w.bbox.y1);
-
-      const avgHeight =
-        y1s.reduce((a, b) => a + b, 0) / y1s.length -
-        y0s.reduce((a, b) => a + b, 0) / y0s.length;
-      const padding = avgHeight * PADDING_RATIO;
-
-      const rectX1 = Math.max(0, Math.min(...x0s) - padding);
-      const rectY1 = Math.max(0, Math.min(...y0s) - padding);
-      const rectX2 = Math.min(originalImageWidth, Math.max(...x1s) + padding);
-      const rectY2 = Math.min(originalImageHeight, Math.max(...y1s) + padding);
-
-      const rectX = rectX1 * scaleX;
-      const rectY = rectY1 * scaleY;
-      const rectW = (rectX2 - rectX1) * scaleX;
-      const rectH = (rectY2 - rectY1) * scaleY;
-
-      const color = ROOM_TYPE_COLORS[roomType.toLowerCase()] || "rgba(100, 100, 100, 0.3)";
-      context.fillStyle = color;
-      context.fillRect(rectX, rectY, rectW, rectH);
-
-      context.strokeStyle = "black";
-      context.lineWidth = 1;
-      context.strokeRect(rectX, rectY, rectW, rectH);
-
-      context.fillStyle = "black";
-      context.font = "12px Arial";
-      context.fillText(roomType, rectX + 5, rectY + 15);
-    });
+const isWithinExcludedRegion = (x, y, width, height) => {
+  for (const region of EXCLUDE_REGIONS) {
+    if (
+      x < region.x + region.width + 10 &&
+      x + width > region.x - 10 &&
+      y < region.y + region.height + 10 &&
+      y + height > region.y - 10
+    ) {
+      return true;
+    }
   }
+  return false;
+};
+
+// Inside your rendering loop:
+ocrWords.forEach((word) => {
+  const { x0, y0, x1, y1 } = word.bbox;
+  const width = x1 - x0;
+  const height = y1 - y0;
+
+  if (!isWithinExcludedRegion(x0, y0, width, height)) {
+    context.fillStyle = 'rgba(0, 255, 0, 0.3)';
+    context.fillRect(x0, y0, width, height);
+  }
+});
+
+  const roomsSorted = classifiedRooms.slice().sort((a, b) => {
+    const getArea = (roomType) => {
+      const regex = new RegExp(`\\b${roomType.toLowerCase()}\\b`);
+      const words = ocrWords.filter((word) => regex.test(word.text.toLowerCase()));
+      if (!words.length) return 0;
+      const x0 = Math.min(...words.map((w) => w.bbox.x0));
+      const y0 = Math.min(...words.map((w) => w.bbox.y0));
+      const x1 = Math.max(...words.map((w) => w.bbox.x1));
+      const y1 = Math.max(...words.map((w) => w.bbox.y1));
+      return (x1 - x0) * (y1 - y0);
+    };
+    return getArea(b.roomType) - getArea(a.roomType);
+  });
+
+  roomsSorted.forEach(({ roomType }) => {
+    const regex = new RegExp(`\\b${roomType.toLowerCase()}\\b`);
+    const matches = ocrWords.filter((word) => regex.test(word.text.toLowerCase()));
+    if (!matches.length) return;
+
+    const x0s = matches.map((w) => w.bbox.x0);
+    const y0s = matches.map((w) => w.bbox.y0);
+    const x1s = matches.map((w) => w.bbox.x1);
+    const y1s = matches.map((w) => w.bbox.y1);
+
+    const avgHeight =
+      y1s.reduce((a, b) => a + b, 0) / y1s.length -
+      y0s.reduce((a, b) => a + b, 0) / y0s.length;
+    const padding = avgHeight * PADDING_RATIO;
+
+    const rectX1 = Math.max(0, Math.min(...x0s) - padding);
+    const rectY1 = Math.max(0, Math.min(...y0s) - padding);
+    const rectX2 = Math.min(originalImageWidth, Math.max(...x1s) + padding);
+    const rectY2 = Math.min(originalImageHeight, Math.max(...y1s) + padding);
+
+
+    if (rectY2 < titleBlockCutoffY) return;
+
+    const rectX = rectX1 * scaleX;
+    const rectY = rectY1 * scaleY;
+    const rectW = (rectX2 - rectX1) * scaleX;
+    const rectH = (rectY2 - rectY1) * scaleY;
+
+    const color = ROOM_TYPE_COLORS[roomType.toLowerCase()] || "rgba(100, 100, 100, 0.3)";
+    context.fillStyle = color;
+    context.fillRect(rectX, rectY, rectW, rectH);
+
+    context.strokeStyle = "black";
+    context.lineWidth = 1;
+    context.strokeRect(rectX, rectY, rectW, rectH);
+
+    context.fillStyle = "black";
+    context.font = "12px Arial";
+    context.fillText(roomType, rectX + 5, rectY + 15);
+  });
+}
+
 
   img.onload = () => {
     const originalImageWidth = img.width;
@@ -709,5 +751,4 @@ export default function UniversalPdfExtractor() {
     </div>
   );
 }
-
 

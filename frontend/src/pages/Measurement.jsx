@@ -5,6 +5,7 @@ import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import BtuModalWindow from "../components/BtuModalWindow.jsx";
+import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
 // import ExtractPdf from "../components/ExtractTextFromPdf.js";
 
 const Measurement = () => {
@@ -63,8 +64,10 @@ const fetchSavedPdfs = useCallback(async () => {
             {error}
           </div>
         )}
-        <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData} />
-        <Sidebar
+              <h1 className="mt-4 mb-4 title-measurement">
+        Measurement Service System
+      </h1>
+         <PdfHelpVideo /><Sidebar
           savedPdfs={savedPdfs}
           fetchSavedPdfs={fetchSavedPdfs}
           roomData={roomData}
@@ -72,6 +75,8 @@ const fetchSavedPdfs = useCallback(async () => {
         />
         {/* <ExtractPdf/> */}
         <BtuModalWindow />
+        <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData} />
+        
         <BtuCalculator roomData={roomData} />
         <div className="mt-4 mb-4">
           <Link to="/" className="go-to-btn btn-text">

@@ -1211,21 +1211,33 @@ form.d-flex {
   font-weight: 500;
 }
 
+.footer-icons {
+  display: flex;
+  text-align: left;
+  flex-direction: row; /* Stack icons vertically */
+  gap: 0.5rem; /* Add spacing between icons */
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .footer-icons i {
   padding: 0.4rem 0.5rem;
   background: #e1e1e1;
   color: #322a50;
   margin: 0 0.5rem;
   border-radius: 50%;
-  display: inline;
+  display: inline-block;
+  font-size: 1.2rem;
+  transition: 0.6s;
 }
 
 .footer-icons i:hover {
   background: #ec133e;
   color: #fff;
-  transition: 0.6s;
   cursor: pointer;
 }
+
+
 
 .footer h5 {
   color: white;
@@ -2840,8 +2852,11 @@ h2 {
 }
 
 .follow-us {
-  margin-right: 15px;
+  margin-right:20px;
+  margin-top:5px;
+
 }
 #infoModal {
   text-align: justify;
 }
+
