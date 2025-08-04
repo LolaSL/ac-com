@@ -16,37 +16,38 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
 let Tesseract;
 
 /**
- * Defines regex patterns for various room types.
- * Patterns are refined to be more precise and flexible to handle OCR variations.
+ * @fileoverview This file contains functions for parsing room data from text,
+ * including OCR-extracted text from floor plan images.
  */
 
+// Global configuration objects.
 const roomPatterns = {
   // Outdoor
-  terrace:
-    /\b(terrace|deck|patio|open\s*deck|cov(?:ered)?\s*deck|cov(?:ered)?\s*entry|cov\.?\s*entry)\b/i,
+  // terrace:
+  //   /\b(terrace|deck|patio|open\s*deck|cov(?:ered)?\s*deck|cov(?:ered)?\s*entry|cov\.?\s*entry)\b/i,
+  // patioDeck: /\b(patio|deck)\b/i,
 
   // Dining & Living
-  diningRoom: /\b(dining|dining\s*(room|area)?|dr)\b/i,
+  diningRoom: /\b(dining|dining\s*(room|area)?|dr|ining)\b/i, // Added 'ining' for OCR error
   livingRoom: /\b(living|living\s*(room|area)?|lr)\b/i,
+  livingDining:
+    /\b(living\s*room|dining\s*room|living\/dining|living[-\s]?\/?dining)\b/i,
   sittingRoom: /\bsitting\s*(room|area)?\b/i,
   lounge: /\b(lounge|mstr\s*suite)\b/i,
   hall: /\b(hall|living\s*hall|parking)\b/i,
   greatRoom: /\bgreat\s*rm\.?|great\s*room\b/i,
   commonRoom: /\bcommon\s*room\b/i,
   familyRoom: /\bfamily\s*room\b/i,
-
+  sunroom: /\bsunroom\b/i,
   // Kitchen
   kitchen: /\b(kitchen|kitc?hen|ktcn|ktch?n)\b/i,
   breakfastRoom: /\b(breakfast\s*room|brkfst)\b/i,
 
   // Bedrooms
   bedroom:
-    /\bbed(?:room|rm)?\b|b[eoia]d[\s._#-]*?(?:room|rm|#?\d)?\b|bdrm\.?#?\d?\b/i,
-
+    /\b(bed(?:room|rm)?|b[eoia]d[\s._#-]*?(?:room|rm|#?\d)?|bdrm\.?#?\d?\b|edroom)\b/i,
   secondBedroom: /\b(?:sec(?:ond)?\s*)?bed(?:room)?\b|bed\s*2|br\s*2\b/i,
-
   masterBedroom: /\b(master|mstr|mst)[\s._-]*(?:bed(?:room)?|suite)?\b/i,
-
   primaryBedroom: /\b(primary|main)[\s._-]*bed(?:room)?\b/i,
 
   // Work/study/office
@@ -59,30 +60,31 @@ const roomPatterns = {
   gym: /\b(home\s*)?(gym|fitness|workout)(\s*room)?\b/i,
 
   // Other
-  garage: /\bgarage\b/i,
+  // garage: /\bgarage\b/i,
 };
 
 const roomTypePriorities = [
-  "kitchen",
-  "livingroom",
-  "diningroom",
-  "office",
-  "greatroom",
-  "familyroom",
-  "masterbedroom",
-  "primarybedroom",
+  "primaryBedroom",
+  "masterBedroom",
+  "secondBedroom",
   "bedroom",
-  "secondbedroom",
-  "terrace",
-  "sittingroom",
-  "desk",
-  "gym",
-  "drawingroom",
-  "breakfastroom",
+  "livingRoom",
+  "greatRoom",
+  "familyRoom",
+  "diningRoom",
+  "kitchen",
+  "breakfastRoom",
+  "sittingRoom",
   "lounge",
   "hall",
-  "commonroom",
+  "office",
+  "desk",
   "study",
+  "drawingRoom",
+  "gym",
+  "terrace",
+  "patioDeck",
+  "commonRoom",
   "garage",
 ];
 
@@ -91,7 +93,7 @@ const dimensionPatterns = [
   /\b(\d+(?:\.\d+)?)\s*ft\s*[xX×]\s*(\d+(?:\.\d+)?)\s*ft\b/g, // 16 ft x 10 ft
   /\b(\d{1,3})[-](\d{1,3})\s*[xX×]\s*(\d{1,3})[-](\d{1,3})\b/g, // 16-6 x 10-4
   /\b(\d{1,3})\s*[xX×]\s*(\d{1,3})\b/g, // 20 x 10 (assume feet)
-  /\b(\d{1,2})[’']\s*(\d{1,2})["”]?\s*[xX×]\s*(\d{1,2})[’']\s*(\d{1,2})["”]?\b/g, // additional: 13'6" x 13'
+  /\b(\d{1,2})[’']\s*(\d{1,2})["”]?\s*[xX×]\s*(\d{1,2})[’']\s*(\d{1,2})["”]?\b/g, // 13'6" x 13'
   /\b(\d{1,2})['’′]?\s*[xX×]\s*(\d{1,2})(\d{1,2})\b/g, // matches: 16'x104 (-> 10'4)
 ];
 
@@ -126,12 +128,13 @@ const cleanTextLine = (line) =>
 const normalizeRoomType = (raw) =>
   raw
     .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/Patio Deck/g, "Patio/ Deck"); // Specific fix for this case
 
 /**
  * Extracts images from a PDF file using pdfjs-dist.
  * @param {File} file - The PDF file object.
- * @returns {Promise<string[]>} An array of image data URLs.
+ * @returns {Promise<string[]>}
  */
 const extractImagesFromPdf = async (file) => {
   if (!pdfjsLib || !pdfjsLib.getDocument) {
@@ -161,20 +164,27 @@ const extractImagesFromPdf = async (file) => {
 /**
  * Runs OCR on image data URLs using Tesseract.js.
  * @param {string[]} images - An array of image data URLs.
- * @returns {Promise<string>} The combined extracted text.
+ * @returns {Promise<string>}
  */
-const runOcrOnImages = async (images) => {
+const runOcrOnImages = async (images, setRoomData) => {
   if (!Tesseract?.recognize) {
     throw new Error("Tesseract.js not available.");
   }
 
   let fullText = "";
   let allWords = [];
+  let allParsedResults = [];
 
   for (const image of images) {
     const {
       data: { text, words },
     } = await Tesseract.recognize(image, "eng");
+
+    const parsedData = parseRoomDataFromText(text);
+
+    if (parsedData?.rooms?.length) {
+      allParsedResults.push(...parsedData.rooms);
+    }
 
     const cleanedText = text
       .replace(/[^\x20-\x7E\n\r\t]/g, "")
@@ -183,6 +193,7 @@ const runOcrOnImages = async (images) => {
 
     fullText += cleanedText + "\n";
 
+    // Extract and clean bounding boxes
     const cleanedWords = words.map((word) => ({
       text: word.text,
       bbox: {
@@ -193,12 +204,17 @@ const runOcrOnImages = async (images) => {
       },
     }));
 
-    allWords = [...allWords, ...cleanedWords];
+    allWords.push(...cleanedWords);
+  }
+
+  if (typeof setRoomData === "function") {
+    setRoomData(allParsedResults);
   }
 
   return {
     text: fullText,
     ocrWords: allWords,
+    parsedRoomData: allParsedResults,
   };
 };
 
@@ -210,7 +226,27 @@ const runOcrOnImages = async (images) => {
  * @returns {{apartmentType: string|null, totalSf: string|null, rooms: Array<Object>}}
  */
 const parseRoomDataFromText = (text) => {
-  const lines = text.split("\n").map(cleanTextLine).filter(Boolean);
+  // 🔧 Split multi-room lines for better classification
+  const splitMultiRoomLines = (rawLines) => {
+    const splitLines = [];
+    rawLines.forEach((line) => {
+      if (!line || typeof line !== "string") return;
+      const roomMatches = Object.values(roomPatterns)
+        .map((pat) => pat.source)
+        .join("|");
+      const parts = line.split(new RegExp(`(?=${roomMatches})`, "i"));
+      parts.forEach((p) => {
+        if (p && typeof p === "string") splitLines.push(p.trim());
+      });
+    });
+    return splitLines;
+  };
+
+  // 👇 Replace original lines array here:
+  const lines = splitMultiRoomLines(
+    text.split("\n").map(cleanTextLine).filter(Boolean)
+  );
+
   const table = [];
   const addedRoomKeys = new Set();
   const apartmentTypeMatch = text.match(apartmentTypePattern);
@@ -218,6 +254,7 @@ const parseRoomDataFromText = (text) => {
     ? apartmentTypeMatch[1].trim()
     : null;
   const totalSfMatch = text.match(totalSfPattern);
+  // FIX: Corrected variable usage from `totalSf` to `totalSfMatch`
   const totalSf = totalSfMatch ? totalSfMatch[1].trim() : null;
   const searchWindowSize = 5;
   const extendedRoomPatterns = { ...roomPatterns };
@@ -235,20 +272,25 @@ const parseRoomDataFromText = (text) => {
   const areaValuePattern = /(\d+(?:[.,]\d{1,2})?)\s*m(?:²|[?®*])?/gi;
 
   const getNearestRoomType = (roomCandidates) => {
+    // Sort by distance first, then by predefined priority
     roomCandidates.sort((a, b) => {
-      const aScore = a.distance <= 1 ? -10 : a.distance;
-      const bScore = b.distance <= 1 ? -10 : b.distance;
+      // Prioritize exact matches (distance 0) significantly
+      const aScore = a.distance === 0 ? -100 : a.distance;
+      const bScore = b.distance === 0 ? -100 : b.distance;
+
+      if (aScore !== bScore) {
+        return aScore - bScore;
+      }
       return (
-        aScore - bScore ||
         roomTypePriorities.indexOf(a.type) - roomTypePriorities.indexOf(b.type)
       );
     });
     return roomCandidates[0]?.type || null;
   };
 
+  // Area-based detection (left as-is since the core issue is dimension-based)
   lines.forEach((line, index) => {
     const cleanLine = fixAreaUnit(line);
-
     const areaMatches = [...cleanLine.matchAll(areaValuePattern)];
     if (areaMatches.length > 0) {
       let roomCandidates = [];
@@ -263,9 +305,6 @@ const parseRoomDataFromText = (text) => {
           const nearbyLine = normalizeLineForRoomMatch(lines[nearbyIndex]);
           for (const [key, pattern] of Object.entries(extendedRoomPatterns)) {
             if (pattern.test(nearbyLine)) {
-              console.log(
-                `Matched room type '${key}' on line: "${nearbyLine}"`
-              );
               roomCandidates.push({ type: key, distance: Math.abs(offset) });
             }
           }
@@ -296,6 +335,7 @@ const parseRoomDataFromText = (text) => {
     }
   });
 
+  // Dimension-based detection
   lines.forEach((line, index) => {
     const matches = dimensionPatterns.flatMap((pattern) => [
       ...line.matchAll(pattern),
@@ -304,12 +344,26 @@ const parseRoomDataFromText = (text) => {
 
     let roomCandidates = [];
 
+    // Same-line room name boost
+    const normalizedLine = normalizeLineForRoomMatch(line);
+    for (const [key, pattern] of Object.entries(extendedRoomPatterns)) {
+      if (pattern.test(normalizedLine)) {
+        roomCandidates.push({ type: key, distance: 0 }); // Highest priority for same-line matches
+      }
+    }
+
+    // Nearby-line search
     for (let offset = -searchWindowSize; offset <= searchWindowSize; offset++) {
       const checkIndex = index + offset;
       if (checkIndex >= 0 && checkIndex < lines.length) {
         const nearbyLine = normalizeLineForRoomMatch(lines[checkIndex]);
         for (const [key, pattern] of Object.entries(extendedRoomPatterns)) {
-          if (pattern.test(nearbyLine)) {
+          if (
+            pattern.test(nearbyLine) &&
+            !roomCandidates.some(
+              (rc) => rc.type === key && rc.distance <= Math.abs(offset)
+            )
+          ) {
             roomCandidates.push({ type: key, distance: Math.abs(offset) });
           }
         }
@@ -319,16 +373,56 @@ const parseRoomDataFromText = (text) => {
     if (!roomCandidates.length) return;
 
     let foundRoomType = getNearestRoomType(roomCandidates);
-    if (
-      foundRoomType === "secondBedroom" &&
-      !table.some((r) => r.roomType === "Primary Bedroom")
-    ) {
-      foundRoomType = "primaryBedroom";
-    } else if (
-      foundRoomType === "secondBedroom" &&
-      table.filter((r) => r.roomType === "Second Bedroom").length > 1
-    ) {
+
+    // --- New Heuristics for OCR Ambiguity ---
+    // Rule 1: Living room detection
+    if (normalizedLine.includes("living room")) {
+      foundRoomType = "livingRoom";
+    }
+
+    // Rule 2: Ambiguous "Kitchen" vs "Bedroom"
+    const hasKitchenHint = normalizedLine.includes("kitchen");
+    const hasBedroomHint =
+      normalizedLine.includes("bed") || normalizedLine.includes("edroom");
+    const hasDiningHint =
+      normalizedLine.includes("dining") || normalizedLine.includes("ining");
+
+    if (hasKitchenHint && !hasBedroomHint && !hasDiningHint) {
+      // The current line strongly suggests "Kitchen"
+      // Check for nearby Bedroom hints as a potential override
+      const nearbyBedroomCandidate = roomCandidates.find(
+        (c) => c.type === "bedroom" && c.distance > 0 && c.distance <= 2
+      );
+      if (nearbyBedroomCandidate) {
+        foundRoomType = "bedroom";
+      }
+    } else if (hasBedroomHint && (hasKitchenHint || hasDiningHint)) {
+      // The line is ambiguous, but has a bedroom hint. Prioritize bedroom.
       foundRoomType = "bedroom";
+    } else if (foundRoomType === "kitchen" && hasDiningHint) {
+      foundRoomType = "diningRoom";
+    }
+    // --- End New Heuristics ---
+
+    // Special rule for Patio/ Deck
+    if (normalizedLine.includes("patio") || normalizedLine.includes("deck")) {
+      foundRoomType = "patioDeck";
+    }
+
+    // Heuristics for naming bedrooms correctly
+    if (
+      foundRoomType === "bedroom" ||
+      foundRoomType === "secondBedroom" ||
+      foundRoomType === "masterBedroom" ||
+      foundRoomType === "primaryBedroom"
+    ) {
+      if (!table.some((r) => r.roomType === "Primary Bedroom")) {
+        foundRoomType = "primaryBedroom";
+      } else if (!table.some((r) => r.roomType === "Second Bedroom")) {
+        foundRoomType = "secondBedroom";
+      } else {
+        foundRoomType = "bedroom";
+      }
     }
 
     const normalizedRoomType = normalizeRoomType(foundRoomType);
@@ -354,13 +448,13 @@ const parseRoomDataFromText = (text) => {
             inches = 0;
           }
         }
-
         return feet + inches / 12;
       };
 
       let width = 0;
       let height = 0;
 
+      // Extracting dimensions based on the specific pattern that matched
       if (match.input.match(dimensionPatterns[0])) {
         width = parseFeetInches(match[1], match[2]);
         height = parseFeetInches(match[3], match[4]);
@@ -373,6 +467,12 @@ const parseRoomDataFromText = (text) => {
       } else if (match.input.match(dimensionPatterns[3])) {
         width = parseFloat(match[1]);
         height = parseFloat(match[2]);
+      } else if (match.input.match(dimensionPatterns[4])) {
+        width = parseFeetInches(match[1], match[2]);
+        height = parseFeetInches(match[3], match[4]);
+      } else if (match.input.match(dimensionPatterns[5])) {
+        width = parseFeetInches(match[1], "0");
+        height = parseFeetInches(match[2], match[3]);
       }
 
       const sqft = width * height;
@@ -388,9 +488,7 @@ const parseRoomDataFromText = (text) => {
         sqft < 30 ||
         sqft > 1000;
 
-      if (isBroken) {
-        return;
-      }
+      if (isBroken) return;
 
       const roomKey = `${normalizedRoomType}-${width.toFixed(
         1
@@ -408,6 +506,7 @@ const parseRoomDataFromText = (text) => {
     });
   });
 
+  // Fallback if dimensions found but no room classified
   if (
     table.length === 0 &&
     text.match(/\d{1,2}['’′]?\s*(\d{1,2})?["”°]?\s*[xX×]\s*\d{1,2}/)
@@ -424,7 +523,7 @@ const parseRoomDataFromText = (text) => {
   return { apartmentType, totalSf, rooms: table };
 };
 
-const Annotator = ({ setRoomData }) => {
+const Annotator = ({ rooms, result, setRoomData }) => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
@@ -441,16 +540,18 @@ const Annotator = ({ setRoomData }) => {
   const [lines, setLines] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [pdfId] = useState("unique-pdf-identifier-" + Date.now());
-
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
   const [images, setImages] = useState([]);
-
+  const [sortKey, setSortKey] = useState("roomType");
+  const [sortOrder, setSortOrder] = useState("asc"); // or 'desc'
+  const [filterText, setFilterText] = useState("");
+  const [pdfInfo, setPdfInfo] = useState(null);
 
   const clearResults = () => {
-  setResults([]);
-};
+    setResults([]);
+  };
 
   useEffect(() => {
     const loadScript = (src, id, onloadCallback) => {
@@ -502,8 +603,11 @@ const Annotator = ({ setRoomData }) => {
 
   const handleChange = async (event) => {
     const files = event.target.files;
+
     if (!files?.length || !scriptsLoaded) return;
 
+    const file = files[0];
+    setPdfInfo({ fileName: file.name });
     setLoading(true);
     setImages([]);
     setResults([]);
@@ -537,7 +641,7 @@ const Annotator = ({ setRoomData }) => {
           totalSf,
           rooms,
         });
-
+        console.log(text);
         if (!previewUrl) {
           setPreviewUrl(URL.createObjectURL(file));
           setFile(file);
@@ -969,7 +1073,7 @@ const Annotator = ({ setRoomData }) => {
         setRectangles([]);
         setComments([]);
         setLines([]);
-        clearResults(); 
+        clearResults();
       } else {
         const errorData = await response.json();
         console.error("Error saving data:", errorData);
@@ -1102,7 +1206,7 @@ const Annotator = ({ setRoomData }) => {
         context.fillText(roomType, rectX + 5, rectY + 15);
       });
     }
-
+    setRoomData(renderClassifiedRoomsByOcr);
     img.onload = () => {
       const originalImageWidth = img.width;
       const originalImageHeight = img.height;
@@ -1123,7 +1227,18 @@ const Annotator = ({ setRoomData }) => {
         originalImageHeight
       );
     };
-  }, [results, images]);
+  }, [results, images, setRoomData]);
+
+  useEffect(() => {
+    if (results.rooms?.length && typeof setRoomData === "function") {
+      const formattedRooms = results.rooms.map((room) => ({
+        name: room.roomType || "Unknown",
+        size: parseFloat(room.areaSqM || 0).toFixed(2),
+        btu: 0,
+      }));
+      setRoomData(formattedRooms);
+    }
+  }, [results.rooms, setRoomData]);
 
   useEffect(() => {
     if (isSaved) {
@@ -1134,24 +1249,23 @@ const Annotator = ({ setRoomData }) => {
     }
   }, [isSaved]);
 
-const clearCanvas = () => {
-  const canvas = canvasRef.current;
-  if (canvas) {
-    const context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-  }
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
-  setIconPositions([]);
-  setPreviewUrl(null);
-  setIsSaved(false);
-  setRectangles([]);
-  setComments([]);
-  setFile(null);            
-  setResults([]);         
-  setError(null);           
-  console.log("Canvas and table data cleared.");
-};
-
+    setIconPositions([]);
+    setPreviewUrl(null);
+    setIsSaved(false);
+    setRectangles([]);
+    setComments([]);
+    setFile(null);
+    setResults([]);
+    setError(null);
+    console.log("Canvas and table data cleared.");
+  };
 
   return (
     <div>
@@ -1212,62 +1326,180 @@ const clearCanvas = () => {
           {scriptsLoaded ? "Processing..." : "Loading libraries..."}
         </div>
       )}
-
       {scriptsLoaded &&
-        results.map((result, i) => (
-          <div key={i} className="mt-4 p-4 bg-white rounded shadow-sm border">
-            <h5 className="mb-3">File Name: {result.fileName}</h5>
+        results?.map((result, i) => {
+          // Make sure rooms exist
+          // const rooms = result.rooms || [];
 
-            {result.error ? (
-              <div className="text-danger fw-semibold">
-                Error: {result.error}
-              </div>
-            ) : (
-              <>
-                {result.apartmentType && (
-                  <p className="mt-3 fw-semibold">
-                    Apartment Type:{" "}
-                    <span className="text-primary">{result.apartmentType}</span>
-                  </p>
-                )}
+          // // Helper to parse numbers from strings
+          // const _parseNumber = (str) => parseFloat(str) || 0;
 
-                <h6 className="fw-semibold mt-4 mb-3">Classified Room Data</h6>
-                {result.rooms?.length ? (
-                  <div className="table-responsive rounded border shadow-sm">
-                    <table className="table table-striped mb-0">
-                      <thead className="table-light">
-                        <tr>
-                          <th>#</th>
-                          <th>Room Type</th>
-                          <th>Width</th>
-                          <th>Height</th>
-                          <th>Area (sqft)</th>
-                          <th>Area (sqm)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.rooms.map((room, idx) => (
-                          <tr key={idx}>
-                            <td>{idx + 1}</td>
-                            <td>{room.roomType || "Unknown"}</td>
-                            <td>{room.width}</td>
-                            <td>{room.height}</td>
-                            <td>{room.areaSqFt}</td>
-                            <td>{room.areaSqM}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+          // Filter and sort rooms per current filterText, sortKey, sortOrder
+          const filteredRooms = (result.rooms || [])
+            .filter(
+              (room) =>
+                parseFloat(room.areaSqFt) >= 100 &&
+                parseFloat(room.areaSqM) >= 10 &&
+                room.roomType?.toLowerCase().includes(filterText.toLowerCase())
+            )
+            .sort((a, b) => {
+              let aVal, bVal;
+              switch (sortKey) {
+                case "roomType":
+                  aVal = a.roomType?.toLowerCase() || "";
+                  bVal = b.roomType?.toLowerCase() || "";
+                  return sortOrder === "asc"
+                    ? aVal.localeCompare(bVal)
+                    : bVal.localeCompare(aVal);
+                case "width":
+                  aVal = parseFloat(a.width);
+                  bVal = parseFloat(b.width);
+                  break;
+                case "height":
+                  aVal = parseFloat(a.height);
+                  bVal = parseFloat(b.height);
+                  break;
+                case "areaSqft":
+                  aVal = parseFloat(a.areaSqFt);
+                  bVal = parseFloat(b.areaSqFt);
+                  break;
+                case "areaSqm":
+                  aVal = parseFloat(a.areaSqM);
+                  bVal = parseFloat(b.areaSqM);
+                  break;
+                default:
+                  return 0;
+              }
+              return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+            });
+
+          const handleExportResult = (filteredRooms = [], pdfInfo = null) => {
+            if (!filteredRooms.length) {
+              alert("No rooms to export");
+              return;
+            }
+
+            const fileName = pdfInfo?.fileName || "annotated_data";
+
+            const exportData = filteredRooms.map((room) => ({
+              roomType: room.roomType,
+              width: room.width,
+              height: room.height,
+              areaSqFt: room.areaSqFt,
+              areaSqM: room.areaSqM,
+            }));
+
+            const json = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${fileName}-data.json`;
+            a.click();
+
+            URL.revokeObjectURL(url);
+          };
+
+          return (
+            <div key={i} className="mt-4 p-4 bg-white rounded shadow-sm border">
+              <h5 className="mb-3">File Name: {result.fileName}</h5>
+
+              {result.error ? (
+                <div className="text-danger fw-semibold">
+                  Error: {result.error}
+                </div>
+              ) : (
+                <>
+                  {result.apartmentType && (
+                    <p className="mt-3 fw-semibold">
+                      Apartment Type:{" "}
+                      <span className="text-primary">
+                        {result.apartmentType}
+                      </span>
+                    </p>
+                  )}
+                  <h6 className="fw-semibold mt-4 mb-3">
+                    Classified Room Data Table
+                  </h6>
+
+                  <div className="mb-3 d-flex gap-3 align-items-center">
+                    <input
+                      type="text"
+                      placeholder="Filter by room type"
+                      value={filterText}
+                      onChange={(e) => setFilterText(e.target.value)}
+                      className="form-control w-auto"
+                    />
+
+                    <select
+                      value={sortKey}
+                      onChange={(e) => setSortKey(e.target.value)}
+                      className="form-select w-auto"
+                    >
+                      <option value="roomType">Room Type</option>
+                      <option value="width">Width</option>
+                      <option value="height">Height</option>
+                      <option value="areaSqft">Area (sqft)</option>
+                      <option value="areaSqm">Area (sqm)</option>
+                    </select>
+
+                    <Button
+                      variant="light"
+                      className="go-to-btn btn-text"
+                      onClick={() =>
+                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                      }
+                      title="Toggle sort order"
+                    >
+                      Sort: {sortOrder === "asc" ? "ASC" : "DESC"}
+                    </Button>
+
+                    <Button
+                      variant="light"
+                      className="go-to-btn btn-text"
+                      onClick={() => handleExportResult(filteredRooms, pdfInfo)}
+                    >
+                      Export JSON
+                    </Button>
                   </div>
-                ) : (
-                  <p className="fst-italic text-secondary">
-                    No classified room data found.
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+                  {filteredRooms.length ? (
+                    <div className="table-responsive rounded border shadow-sm">
+                      <table className="table table-striped mb-0">
+                        <thead className="table-light">
+                          <tr>
+                            <th>#</th>
+                            <th>Room Type</th>
+                            <th>Width</th>
+                            <th>Height</th>
+                            <th>Area (sqft)</th>
+                            <th>Area (sqm)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredRooms.map((room, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{room.roomType || "Unknown"}</td>
+                              <td>{room.width}</td>
+                              <td>{room.height}</td>
+                              <td>{room.areaSqFt}</td>
+                              <td>{room.areaSqM}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="fst-italic text-secondary">
+                      No classified room data found.
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
 
       {previewUrl && (
         <div className="text-center">

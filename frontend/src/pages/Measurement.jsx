@@ -6,11 +6,10 @@ import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import BtuModalWindow from "../components/BtuModalWindow.jsx";
 import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
-// import ExtractPdf from "../components/ExtractTextFromPdf.js";
 
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
-  const [roomData, setRoomData] = useState(null);
+ const [roomData, setRoomData] = useState([]);
   const [error, setError] = useState(null);
   const getToken = () => {
     try {
@@ -21,7 +20,7 @@ const Measurement = () => {
     }
   };
 
-const fetchSavedPdfs = useCallback(async () => {
+  const fetchSavedPdfs = useCallback(async () => {
     const token = getToken();
     if (!token) {
       setError("You must be logged in to fetch saved PDFs.");
@@ -45,12 +44,11 @@ const fetchSavedPdfs = useCallback(async () => {
       setError("Error fetching saved PDFs.");
       console.error("Error fetching saved PDFs:", error);
     }
-  }, []); 
+  }, []);
 
   useEffect(() => {
     fetchSavedPdfs();
   }, [fetchSavedPdfs]);
-
 
   useEffect(() => {
     fetchSavedPdfs();
@@ -64,19 +62,18 @@ const fetchSavedPdfs = useCallback(async () => {
             {error}
           </div>
         )}
-              <h1 className="mt-4 mb-4 title-measurement">
-        Measurement Service System
-      </h1>
-         <PdfHelpVideo /><Sidebar
+        <h1 className="mt-4 mb-4 title-measurement">
+          Measurement Service System
+        </h1>
+        <PdfHelpVideo />
+        <Sidebar
           savedPdfs={savedPdfs}
           fetchSavedPdfs={fetchSavedPdfs}
           roomData={roomData}
           setRoomData={setRoomData}
         />
-        {/* <ExtractPdf/> */}
         <BtuModalWindow />
         <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData} />
-        
         <BtuCalculator roomData={roomData} />
         <div className="mt-4 mb-4">
           <Link to="/" className="go-to-btn btn-text">

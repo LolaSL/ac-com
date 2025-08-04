@@ -8,12 +8,48 @@ import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import CheckboxGroup from "./CheckboxGroup.jsx";
 import printJS from "print-js";
-function BtuCalculator() {
+
+function BtuCalculator({ roomData }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
 
   const navigate = useNavigate();
   const componentRef = useRef();
 
+// useEffect(() => {
+//   if (Array.isArray(roomData) && roomData.length > 0) {
+//     const system = roomData[0].measurementSystem || "meters";
+//     setMeasurementSystem(system);
+
+//     const parsedRooms = roomData.map((room, index) => ({
+//       name: room.roomType || `Room ${index + 1}`,
+//       size:
+//         system === "meters"
+//           ? room.areaSqM || ""
+//           : room.areaSqFt || "",
+//       btu: 0, 
+//     }));
+
+//     setHeight(roomData[0].height || "");
+//     setWidth(roomData[0].width || "");
+
+//     setRooms(parsedRooms);
+//   }
+// }, [roomData]);
+
+useEffect(() => {
+  if (roomData?.length) {
+    const formattedRooms = roomData.map((room) => ({
+      name: room.name,
+      size: room.size,
+      btu: 0,
+    }));
+    setRooms(formattedRooms);
+  }
+}, [roomData]);
+
+
+
+  
   const handlePrint = () => {
     const condenserRow = document.createElement("tr");
     condenserRow.className = "text-center";
@@ -233,7 +269,7 @@ function BtuCalculator() {
   };
 
   const addRoom = () => {
-    setRooms([...rooms, { name: "", size: "", btu: 0 }]);
+    setRooms([...rooms, { name: "Bedroom", size: "", btu: 0 }]);
   };
 
   const removeRoom = (index) => {
@@ -288,7 +324,7 @@ function BtuCalculator() {
       "Cold Stockholm": 2500,
     };
 
-    const userSelectedClimate = "Hot Tel Aviv"; 
+    const userSelectedClimate = "Hot Tel Aviv";
 
     if (room.name === "Dining Room") {
       btu += diningRoomBtuByClimate[userSelectedClimate] || 3000;
@@ -304,8 +340,6 @@ function BtuCalculator() {
         }
       });
     };
-
-    // Apply all relevant multipliers safely
     applyMultiplier("insulation", {
       Poor: 1.2,
       Average: 1,
@@ -515,9 +549,7 @@ function BtuCalculator() {
   };
 
   return (
-    <div
-    // className="btu-calculator-wrapper"
-    >
+    <div>
       <Container className="btu-calculator-container mt-4 mb-4 rounded ">
         <Form className="btu-form">
           <h3 className="mt-4 mb-4 text-center title">BTU Calculator</h3>
