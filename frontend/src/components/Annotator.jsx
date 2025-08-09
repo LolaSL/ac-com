@@ -23,12 +23,12 @@ let Tesseract;
 // Global configuration objects.
 const roomPatterns = {
   // Outdoor
-  // terrace:
-  //   /\b(terrace|deck|patio|open\s*deck|cov(?:ered)?\s*deck|cov(?:ered)?\s*entry|cov\.?\s*entry)\b/i,
-  // patioDeck: /\b(patio|deck)\b/i,
+  terrace:
+    /\b(terrace|deck|patio|open\s*deck|cov(?:ered)?\s*deck|cov\.?\s*entry)\b/i,
+  patioDeck: /\b(patio|deck)\b/i,
 
   // Dining & Living
-  diningRoom: /\b(dining|dining\s*(room|area)?|dr|ining)\b/i, // Added 'ining' for OCR error
+  diningRoom: /\b(dining|dining\s*(room|area)?|dr|ining)\b/i,
   livingRoom: /\b(living|living\s*(room|area)?|lr)\b/i,
   livingDining:
     /\b(living\s*room|dining\s*room|living\/dining|living[-\s]?\/?dining)\b/i,
@@ -39,6 +39,7 @@ const roomPatterns = {
   commonRoom: /\bcommon\s*room\b/i,
   familyRoom: /\bfamily\s*room\b/i,
   sunroom: /\bsunroom\b/i,
+
   // Kitchen
   kitchen: /\b(kitchen|kitc?hen|ktcn|ktch?n)\b/i,
   breakfastRoom: /\b(breakfast\s*room|brkfst)\b/i,
@@ -55,12 +56,15 @@ const roomPatterns = {
   desk: /\bdesk(\s*(area|room))?\b/i,
   study: /\bstudy\b/i,
   drawingRoom: /\bdrawing\s*room|pooja\b/i,
+  landing: /\b(landing)\b/i,
+  den: /\b(den|study)\b/i, // Added den
+  entryway: /\b(entryway|entry|foyer)\b/i, // Added entryway
 
   // Wellness
-  gym: /\b(home\s*)?(gym|fitness|workout)(\s*room)?\b/i,
+  gym: /\b(gym|fitness|workout)(\s*room)?\b/i,
 
   // Other
-  // garage: /\bgarage\b/i,
+  garage: /\bgarage\b/i,
 };
 
 const roomTypePriorities = [
@@ -85,7 +89,10 @@ const roomTypePriorities = [
   "terrace",
   "patioDeck",
   "commonRoom",
+  "landing",
   "garage",
+  "entryway",
+  "den"
 ];
 
 const dimensionPatterns = [
@@ -379,6 +386,13 @@ const parseRoomDataFromText = (text) => {
     if (normalizedLine.includes("living room")) {
       foundRoomType = "livingRoom";
     }
+  
+    // --- END NEW HEURISTIC ---
+
+    // The rest of your existing heuristics follow...
+    if (normalizedLine.includes("living room")) {
+      foundRoomType = "livingRoom";
+    }
 
     // Rule 2: Ambiguous "Kitchen" vs "Bedroom"
     const hasKitchenHint = normalizedLine.includes("kitchen");
@@ -402,6 +416,7 @@ const parseRoomDataFromText = (text) => {
     } else if (foundRoomType === "kitchen" && hasDiningHint) {
       foundRoomType = "diningRoom";
     }
+      
     // --- End New Heuristics ---
 
     // Special rule for Patio/ Deck
@@ -1328,13 +1343,6 @@ const Annotator = ({ rooms, result, setRoomData }) => {
       )}
       {scriptsLoaded &&
         results?.map((result, i) => {
-          // Make sure rooms exist
-          // const rooms = result.rooms || [];
-
-          // // Helper to parse numbers from strings
-          // const _parseNumber = (str) => parseFloat(str) || 0;
-
-          // Filter and sort rooms per current filterText, sortKey, sortOrder
           const filteredRooms = (result.rooms || [])
             .filter(
               (room) =>
