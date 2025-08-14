@@ -9,6 +9,7 @@ import { Stage, Layer, Rect, Line, Text } from "react-konva";
 import { Button, Form } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
+import ExcelJS from "exceljs";
 import * as pdfjsLib from "pdfjs-dist";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
@@ -92,16 +93,25 @@ const roomTypePriorities = [
   "landing",
   "garage",
   "entryway",
-  "den"
+  "den",
 ];
 
 const dimensionPatterns = [
-  /\b(\d{1,2})['’′]?\s*(\d{1,2})?["”]?\s*[xX×]\s*(\d{1,3})['’′]?\s*(\d{0,2})?["”]?\b/g, // 16'6 x 10'4
-  /\b(\d+(?:\.\d+)?)\s*ft\s*[xX×]\s*(\d+(?:\.\d+)?)\s*ft\b/g, // 16 ft x 10 ft
-  /\b(\d{1,3})[-](\d{1,3})\s*[xX×]\s*(\d{1,3})[-](\d{1,3})\b/g, // 16-6 x 10-4
-  /\b(\d{1,3})\s*[xX×]\s*(\d{1,3})\b/g, // 20 x 10 (assume feet)
-  /\b(\d{1,2})[’']\s*(\d{1,2})["”]?\s*[xX×]\s*(\d{1,2})[’']\s*(\d{1,2})["”]?\b/g, // 13'6" x 13'
-  /\b(\d{1,2})['’′]?\s*[xX×]\s*(\d{1,2})(\d{1,2})\b/g, // matches: 16'x104 (-> 10'4)
+  // Matches feet & inches formats, allowing optional spaces and OCR noise chars
+  // Examples: 16'6" x 10'4", 9'11" x 9'6", 911" x 9%", 13'6" x 13'
+  /\b(\d{1,2})['’′]?\s*(\d{0,2})?["”%]?\s*[xX×]\s*(\d{1,2})['’′]?\s*(\d{0,2})?["”%]?\b/g,
+
+  // Decimal feet with "ft" units, e.g. 16 ft x 10 ft
+  /\b(\d+(?:\.\d+)?)\s*ft\s*[xX×]\s*(\d+(?:\.\d+)?)\s*ft\b/g,
+
+  // Hyphenated feet-inches with x, e.g. 16-6 x 10-4
+  /\b(\d{1,3})-(\d{1,2})\s*[xX×]\s*(\d{1,3})-(\d{1,2})\b/g,
+
+  // Simple numbers separated by x, assume feet, e.g. 20 x 10
+  /\b(\d{1,3})\s*[xX×]\s*(\d{1,3})\b/g,
+
+  // Pattern for OCR where inches are missing or messy: e.g. 16'x104 (interpreted as 16' x 10'4")
+  /\b(\d{1,2})['’′]?\s*[xX×]\s*(\d{1,2})(\d{1,2})\b/g,
 ];
 
 const apartmentTypePattern =
@@ -386,7 +396,7 @@ const parseRoomDataFromText = (text) => {
     if (normalizedLine.includes("living room")) {
       foundRoomType = "livingRoom";
     }
-  
+
     // --- END NEW HEURISTIC ---
 
     // The rest of your existing heuristics follow...
@@ -416,7 +426,7 @@ const parseRoomDataFromText = (text) => {
     } else if (foundRoomType === "kitchen" && hasDiningHint) {
       foundRoomType = "diningRoom";
     }
-      
+
     // --- End New Heuristics ---
 
     // Special rule for Patio/ Deck
@@ -1381,33 +1391,149 @@ const Annotator = ({ rooms, result, setRoomData }) => {
               return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
             });
 
-          const handleExportResult = (filteredRooms = [], pdfInfo = null) => {
-            if (!filteredRooms.length) {
-              alert("No rooms to export");
-              return;
-            }
+          // const handleExportResult = (filteredRooms = [], pdfInfo = null) => {
+          //   if (!filteredRooms.length) {
+          //     alert("No rooms to export");
+          //     return;
+          //   }
 
-            const fileName = pdfInfo?.fileName || "annotated_data";
+          //   const fileName = pdfInfo?.fileName || "annotated_data";
 
-            const exportData = filteredRooms.map((room) => ({
-              roomType: room.roomType,
-              width: room.width,
-              height: room.height,
-              areaSqFt: room.areaSqFt,
-              areaSqM: room.areaSqM,
-            }));
+          //   const exportData = filteredRooms.map((room) => ({
+          //     roomType: room.roomType,
+          //     width: room.width,
+          //     height: room.height,
+          //     areaSqFt: room.areaSqFt,
+          //     areaSqM: room.areaSqM,
+          //   }));
 
-            const json = JSON.stringify(exportData, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
+          //   const json = JSON.stringify(exportData, null, 2);
+          //   const blob = new Blob([json], { type: "application/json" });
+          //   const url = URL.createObjectURL(blob);
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${fileName}-data.json`;
-            a.click();
+          //   const a = document.createElement("a");
+          //   a.href = url;
+          //   a.download = `${fileName}-data.json`;
+          //   a.click();
 
-            URL.revokeObjectURL(url);
-          };
+          //   URL.revokeObjectURL(url);
+          // };
+          // const handleExportCsv = () => {
+          //   const fileName = pdfInfo?.fileName || "annotated_data";
+
+          //   if (!filteredRooms.length) {
+          //     alert("No rooms to export");
+          //     return;
+          //   }
+
+          //   // CSV header
+          //   const headers = ["Room Type", "Width", "Height", "Area (sqft)", "Area (sqm)"];
+
+          //   // CSV rows
+          //   const rows = filteredRooms.map((room) => [
+          //     room.roomType,
+          //     room.width,
+          //     room.height,
+          //     room.areaSqFt,
+          //     room.areaSqM
+          //   ]);
+
+          //   // Combine header + rows into CSV string
+          //   const csvContent = [headers, ...rows]
+          //     .map((row) =>
+          //       row
+          //         .map((value) => `"${value ?? ""}"`) // wrap in quotes to handle commas
+          //         .join(",")
+          //     )
+          //     .join("\n");
+
+          //   // Create a Blob and trigger download
+          //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+          //   const url = URL.createObjectURL(blob);
+
+          //   const a = document.createElement("a");
+          //   a.href = url;
+          //   a.download = `${fileName}-data.csv`;
+          //   a.click();
+
+          //   URL.revokeObjectURL(url);
+          // };
+  const handleExportExcelStyled = async () => {
+  const fileName = pdfInfo?.fileName || "annotated_data";
+
+  if (!filteredRooms.length) {
+    alert("No rooms to export");
+    return;
+  }
+
+  // Create a new workbook and add a worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Room Data");
+
+  // Define columns
+  worksheet.columns = [
+    { header: "Room Type", key: "roomType", width: 20 },
+    { header: "Width", key: "width", width: 15 },
+    { header: "Height", key: "height", width: 15 },
+    { header: "Area (sqft)", key: "areaSqFt", width: 15 },
+    { header: "Area (sqm)", key: "areaSqM", width: 15 },
+  ];
+
+  // Add rows
+  filteredRooms.forEach((room) => {
+    worksheet.addRow({
+      roomType: room.roomType,
+      width: room.width,
+      height: room.height,
+      areaSqFt: room.areaSqFt,
+      areaSqM: room.areaSqM,
+    });
+  });
+
+  // Style header row
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
+  headerRow.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FF4F81BD" }, // blue header
+  };
+
+  // Add alternating row colors
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber !== 1) {
+      const fillColor =
+        rowNumber % 2 === 0
+          ? { argb: "FFDCE6F1" } // light blue
+          : { argb: "FFFFFFFF" }; // white
+      row.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: fillColor,
+        };
+      });
+    }
+  });
+
+  // Enable filter drop-downs
+  worksheet.autoFilter = {
+    from: "A1",
+    to: "E1",
+  };
+
+  // Save to file
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${fileName}-data.xlsx`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
 
           return (
             <div key={i} className="mt-4 p-4 bg-white rounded shadow-sm border">
@@ -1466,9 +1592,9 @@ const Annotator = ({ rooms, result, setRoomData }) => {
                     <Button
                       variant="light"
                       className="go-to-btn btn-text"
-                      onClick={() => handleExportResult(filteredRooms, pdfInfo)}
+                      onClick={() =>  handleExportExcelStyled(filteredRooms, pdfInfo)}
                     >
-                      Export JSON
+                      Export Excel
                     </Button>
                   </div>
                   {filteredRooms.length ? (

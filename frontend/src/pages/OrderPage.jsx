@@ -33,11 +33,11 @@ function printOrder() {
     return;
   }
 
-  printJS({
-    printable: "order-container",
-    type: "html",
-    scanStyles: false,
-    header: `
+printJS({
+  printable: "order-container",
+  type: "html",
+  scanStyles: false,
+  header: `
     <style>
       @media print {
         .cart-thumbnail {
@@ -45,12 +45,19 @@ function printOrder() {
           height: auto !important;
           margin: 20px;
         }
+        h1.order-title {
+          font-size: 36px !important; /* bigger */
+          font-weight: bold !important; /* bold */
+          text-align: center !important;
+          margin-bottom: 30px !important; /* spacing below */
+        }
       }
     </style>
-    <h1 style="text-align: center;">Order Details</h1>
+    <h1 class="order-title">Order Details</h1>
   `,
-    documentTitle: "Customer Order",
-  });
+  documentTitle: "Customer Order",
+});
+
 }
 
 function reducer(state, action) {

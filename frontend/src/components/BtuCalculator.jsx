@@ -122,9 +122,9 @@ useEffect(() => {
       HeavilyShaded: false,
     },
     climate: {
-      AverageWarsaw: false,
-      HotTelAviv: false,
-      ColdStockholm: false,
+      AverageEurope: false,
+      HotMiddleEast: false,
+      ColdAlaska: false,
     },
     appliances: {
       Oven: false,
@@ -319,12 +319,12 @@ useEffect(() => {
     if (room.name === "Kitchen") btu += CONSTANTS.KITCHEN_BTU_ADDITION;
 
     const diningRoomBtuByClimate = {
-      "Average Warsaw": 3000,
-      "Hot Tel Aviv": 4000,
-      "Cold Stockholm": 2500,
+      "Average Europe": 3000,
+      "Hot Middle East": 4000,
+      "Cold Alaska": 2500,
     };
 
-    const userSelectedClimate = "Hot Tel Aviv";
+    const userSelectedClimate = "Hot Middle East";
 
     if (room.name === "Dining Room") {
       btu += diningRoomBtuByClimate[userSelectedClimate] || 3000;
@@ -358,9 +358,9 @@ useEffect(() => {
     });
 
     applyMultiplier("climate", {
-      HotTelAviv: 1.2,
-      AverageWarsaw: 1.0,
-      ColdStockholm: 0.8,
+      HotMiddleEast: 1.2,
+      AverageEurope: 1.0,
+      ColdSAlaska: 0.8,
     });
 
     applyMultiplier("typeOfWall", {
@@ -537,9 +537,9 @@ useEffect(() => {
         HeavilyShaded: false,
       },
       climate: {
-        AverageWarsaw: false,
-        HotTelAviv: false,
-        ColdStockholm: false,
+        AverageEurope: false,
+        HotMiddleEast: false,
+        ColdAlaska: false,
       },
     });
 
