@@ -26,20 +26,28 @@ const roomPatterns = {
   // Outdoor
   terrace:
     /\b(terrace|deck|patio|open\s*deck|cov(?:ered)?\s*deck|cov\.?\s*entry)\b/i,
-  patioDeck: /\b(patio|deck)\b/i,
+  patioDeck: /\b(?:patio|deck|balcony|veranda)\b/i,
+  bonusRoom: /b[o0]nus[\s-]*room/i,
+  covEnrty: /\bCOV\.?\s*ENTRY\b/i,
 
   // Dining & Living
-  diningRoom: /\b(dining|dining\s*(room|area)?|dr|ining)\b/i,
+  formalDining: /\bFORMAL\s*DINING\b/i,
+  dining:
+    /\b(din(?:ing|n+g|ng|inette)|dn(?:ing|n+g)|dr|dining\s*room|dining\s*area)\b/i,
   livingRoom: /\b(living|living\s*(room|area)?|lr)\b/i,
+  living: /\bliving\b/i,
   livingDining:
-    /\b(living\s*room|dining\s*room|living\/dining|living[-\s]?\/?dining)\b/i,
+    /\b(?:living\s*\/\s*din(?:ing|n?g|lng)|living[-\s]?\/?din(?:ing|n?g|lng)|living\s*room|dining\s*room)(?:\s*(room|area))?\b/i,
+  livingDiningRoom:
+    /\b(?:living\s*\/?\s*din(?:ing|n?g|lng)|living\s*dining|living\s*room|dining\s*room)(?:\s*(room|area))?\b/i,
   sittingRoom: /\bsitting\s*(room|area)?\b/i,
   lounge: /\b(lounge|mstr\s*suite)\b/i,
   hall: /\b(hall|living\s*hall|parking)\b/i,
   greatRoom: /\bgreat\s*rm\.?|great\s*room\b/i,
   commonRoom: /\bcommon\s*room\b/i,
-  familyRoom: /\bfamily\s*room\b/i,
-  sunroom: /\bsunroom\b/i,
+  familyRoom: /\b(family\s*room|owner'?s?\s*suite)\b/i,
+  sunRoom: /\bsunroom\b/i,
+  chambre: /\bchambre\b/i,
 
   // Kitchen
   kitchen: /\b(kitchen|kitc?hen|ktcn|ktch?n)\b/i,
@@ -47,25 +55,30 @@ const roomPatterns = {
 
   // Bedrooms
   bedroom:
-    /\b(bed(?:room|rm)?|b[eoia]d[\s._#-]*?(?:room|rm|#?\d)?|bdrm\.?#?\d?\b|edroom)\b/i,
-  secondBedroom: /\b(?:sec(?:ond)?\s*)?bed(?:room)?\b|bed\s*2|br\s*2\b/i,
+    /\b(?:primary\s+bed\s+room|master\s+bed\s+room|bed\s*rm|bd\s*rm|bed\s*room|bedrm|bdrm|bdr|borm|br)(?:\s*#?\s*\d+)?(?:\s*D)?\b/i,
   masterBedroom: /\b(master|mstr|mst)[\s._-]*(?:bed(?:room)?|suite)?\b/i,
   primaryBedroom: /\b(primary|main)[\s._-]*bed(?:room)?\b/i,
-
+  bedroomPattern: /\b(BEDROOM\s*\d*)\b/i,
   // Work/study/office
-  office: /\boffice|home\s*office|workspace\b/i,
+  office: /\b(?:office|home\s*office|workspace)\b/i,
   desk: /\bdesk(\s*(area|room))?\b/i,
   study: /\bstudy\b/i,
   drawingRoom: /\bdrawing\s*room|pooja\b/i,
   landing: /\b(landing)\b/i,
-  den: /\b(den|study)\b/i, // Added den
-  entryway: /\b(entryway|entry|foyer)\b/i, // Added entryway
+  den: /\b(den|study)\b/i,
+  entryway: /\b(entryway|entry|foyer)\b/i,
 
   // Wellness
   gym: /\b(gym|fitness|workout)(\s*room)?\b/i,
 
   // Other
   garage: /\bgarage\b/i,
+  foyer: /\b(foyer|entry|entryway)\b/i,
+  porch: /\bporch\b/i,
+  corridor: /\bcorridor\b/i,
+  laundry: /\blaundry\b/i,
+  masterBathroom: /\b(master|mstr|mst)[\s._-]*(?:bath(?:room)?|dush)?\b/i,
+  bathroom: /\bbathroom|bath\b/i,
 };
 
 const roomTypePriorities = [
@@ -74,9 +87,10 @@ const roomTypePriorities = [
   "secondBedroom",
   "bedroom",
   "livingRoom",
+  "livingDiningRoom",
   "greatRoom",
   "familyRoom",
-  "diningRoom",
+  "dining",
   "kitchen",
   "breakfastRoom",
   "sittingRoom",
@@ -94,30 +108,38 @@ const roomTypePriorities = [
   "garage",
   "entryway",
   "den",
+  "bonusRoom",
+  "sunRoom",
+  "foyer",
+  "porch",
+  "laundry",
+  "masterBathroom",
+  "bathroom",
+  "covEntry",
+  "formalDining",
+  "living",
+  "bedroomPattern",
 ];
 
 const dimensionPatterns = [
-  // Matches feet & inches formats, allowing optional spaces and OCR noise chars
-  // Examples: 16'6" x 10'4", 9'11" x 9'6", 911" x 9%", 13'6" x 13'
+  // Most robust OCR-friendly: allows optional inches, messy quotes, missing spaces
   /\b(\d{1,2})['’′]?\s*(\d{0,2})?["”%]?\s*[xX×]\s*(\d{1,2})['’′]?\s*(\d{0,2})?["”%]?\b/g,
 
-  // Decimal feet with "ft" units, e.g. 16 ft x 10 ft
+  // Decimal feet with "ft" units: 16 ft x 10 ft
   /\b(\d+(?:\.\d+)?)\s*ft\s*[xX×]\s*(\d+(?:\.\d+)?)\s*ft\b/g,
 
-  // Hyphenated feet-inches with x, e.g. 16-6 x 10-4
+  // Hyphenated feet-inches: 16-6 x 10-4
   /\b(\d{1,3})-(\d{1,2})\s*[xX×]\s*(\d{1,3})-(\d{1,2})\b/g,
 
-  // Simple numbers separated by x, assume feet, e.g. 20 x 10
+  // Simple numbers separated by x, assume feet: 20 x 10
   /\b(\d{1,3})\s*[xX×]\s*(\d{1,3})\b/g,
 
-  // Pattern for OCR where inches are missing or messy: e.g. 16'x104 (interpreted as 16' x 10'4")
+  // OCR like "16'x104" → interpret as 16' x 10'4"
   /\b(\d{1,2})['’′]?\s*[xX×]\s*(\d{1,2})(\d{1,2})\b/g,
+
+  // Extra forgiving: "9' x 10", "9 x 10'", "9 x10"
+  /\b(\d{1,2})\s*['’′]?\s*[xX×]\s*(\d{1,2})\s*['’′"]?\b/g,
 ];
-
-const apartmentTypePattern =
-  /\b(\d+\s*(?:bedroom|studio|loft|bath)\s*apartment\s*-?\s*model\s*[A-Z\d]+)\b/i;
-
-const totalSfPattern = /\b(\d{3,5})\s*(?:sq\s*ft|sf)\b/i;
 
 /**
  * Cleans a single line of text by removing unwanted characters and normalizing spaces.
@@ -144,9 +166,23 @@ const cleanTextLine = (line) =>
  */
 const normalizeRoomType = (raw) =>
   raw
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .replace(/Patio Deck/g, "Patio/ Deck"); // Specific fix for this case
+    .replace(/\bMstr\s*(Bath|Bathroom|Bth|Bthrm|Dush)?\b/i, "Master Bathroom")
+    .replace(/\b(Bath|Bth|Bthrm|Dush)(?:\s*a)?\b/i, "Bathroom")
+    .replace(/\bPrim(?:ary)?\s*Br\b/i, "Primary Bedroom")
+    .replace(/\bSecond\s*Br\b/i, "Second Bedroom")
+    .replace(/\bBr\b/i, "Bedroom")
+    .replace(/\bBdrm\b/i, "Bedroom")
+    .replace(/\bBedrm\b/i, "Bedroom")
+    .replace(/\bHall\b/i, "Hall")
+    .replace(/\bOffice\b/i, "Office")
+    .replace(/\bKitchen\b/i, "Kitchen")
+    .replace(/\bDining\b/i, "Dining Room")
+    .replace(/\bLiving\b/i, "Living Room")
+    .replace(/\bFamily\b/i, "Family Room")
+    .replace(/\bPatio\b/i, "Patio/Deck")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
 /**
  * Extracts images from a PDF file using pdfjs-dist.
@@ -210,7 +246,6 @@ const runOcrOnImages = async (images, setRoomData) => {
 
     fullText += cleanedText + "\n";
 
-    // Extract and clean bounding boxes
     const cleanedWords = words.map((word) => ({
       text: word.text,
       bbox: {
@@ -242,47 +277,136 @@ const runOcrOnImages = async (images, setRoomData) => {
  * @param {string} text - The full extracted text from the PDF.
  * @returns {{apartmentType: string|null, totalSf: string|null, rooms: Array<Object>}}
  */
-const parseRoomDataFromText = (text) => {
-  // 🔧 Split multi-room lines for better classification
-  const splitMultiRoomLines = (rawLines) => {
-    const splitLines = [];
-    rawLines.forEach((line) => {
-      if (!line || typeof line !== "string") return;
-      const roomMatches = Object.values(roomPatterns)
-        .map((pat) => pat.source)
-        .join("|");
-      const parts = line.split(new RegExp(`(?=${roomMatches})`, "i"));
-      parts.forEach((p) => {
-        if (p && typeof p === "string") splitLines.push(p.trim());
-      });
-    });
-    return splitLines;
+const parseRoomDataFromText = (rawText, fileName) => {
+  // let text = rawText
+  //   .replace(/[^\x20-\x7E\n\r\t]/g, "")
+  //   .replace(/ﬁ/g, "fi")
+  //   .replace(/(\d+)\s*(?:sq\.?ft|ft²)/gi, "$1 sqft");
+  let text = rawText
+    // Remove non-ASCII chars
+    .replace(/[^\x20-\x7E\n\r\t]/g, "")
+    // Fix common ligatures
+    .replace(/ﬁ/g, "fi")
+    // Normalize sqft
+    .replace(/(\d+)\s*(?:sq\.?ft|ft²)/gi, "$1 sqft")
+    // Merge lines where room type is alone and dimensions follow
+    .replace(
+      /(\b(BATH|BATHROOM|BTH|BTHRM|DUSH|BEDROOM|KITCHEN|LIVING|DINING|FOYER|PATIO)\b)[\r\n]+([^\r\n]+)/gi,
+      "$1 $3"
+    )
+    // Collapse multiple spaces
+    .replace(/\s+/g, " ")
+    // Fix quotes and apostrophes
+    .replace(/[”“]/g, '"')
+    .replace(/[‘’]/g, "'")
+    // Normalize dashes
+    .replace(/–|—/g, "-")
+    // Collapse multiple spaces
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  const result = {
+    apartmentType: null,
+    rooms: null,
+    fileName: fileName,
+    error: null,
+    totalSf: null,
   };
 
-  // 👇 Replace original lines array here:
+  const splitMultiRoomLines = (rawLines) => {
+    const splitLines = [];
+    if (!Array.isArray(rawLines)) return splitLines;
+
+    // Combine all room patterns into one regex
+    const roomMatches = Object.values(roomPatterns)
+      .map((pat) => pat.source)
+      .join("|");
+    const roomRegex = new RegExp(`(?=${roomMatches})`, "i"); // lookahead split
+
+    rawLines.forEach((line) => {
+      if (!line || typeof line !== "string") return;
+
+      // Remove extra OCR noise before splitting
+      line = line
+        .replace(/[^\x20-\x7E]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!line) return;
+
+      // Split at every room type
+      const parts = line.split(roomRegex);
+      parts.forEach((p) => {
+        if (p && typeof p === "string" && p.trim()) splitLines.push(p.trim());
+      });
+    });
+
+    return splitLines;
+  };
+  const getApartmentTypes = (cleanedText) => {
+    const apartmentTypePattern =
+      /\b(\d+\s+(?:bedroom|bed)\s*(?:[^\n]*?apartment|suite)?(?:\s*-\s*model\s*[A-Z\d]+)?|studio\s*apartment|loft\s*apartment)\b/gi;
+    const matches = [...cleanedText.matchAll(apartmentTypePattern)];
+    return matches.map((m) => m[1].trim());
+  };
+
+  const apartmentTypes = getApartmentTypes(text);
+  const apartmentType = apartmentTypes[0] || null;
+  // console.log(apartmentTypes);
+  const cleanedApartmentTypes = apartmentTypes
+    .map((type) => {
+      // Keep only the part starting with "1 Bedroom" or "Studio/Loft"
+      const match = type.match(
+        /\b(\d+\s+Bedroom\s+Apartment\s*-\s*Model\s*[A-Z\d]+|Studio\s+Apartment|Loft\s+Apartment)\b/i
+      );
+      return match ? match[1].trim() : null;
+    })
+    .filter(Boolean);
+
+  console.log(cleanedApartmentTypes);
+
   const lines = splitMultiRoomLines(
     text.split("\n").map(cleanTextLine).filter(Boolean)
   );
 
   const table = [];
+  result.rooms = table;
   const addedRoomKeys = new Set();
-  const apartmentTypeMatch = text.match(apartmentTypePattern);
-  const apartmentType = apartmentTypeMatch
-    ? apartmentTypeMatch[1].trim()
-    : null;
+
+  const totalSfPattern = /\b(\d{3,5})\s*(?:sq\s*ft|sf)\b/i;
   const totalSfMatch = text.match(totalSfPattern);
-  // FIX: Corrected variable usage from `totalSf` to `totalSfMatch`
   const totalSf = totalSfMatch ? totalSfMatch[1].trim() : null;
+  result.totalSf = totalSf;
+
+  result.totalSf = totalSfMatch ? totalSfMatch[1].trim() : null;
   const searchWindowSize = 5;
   const extendedRoomPatterns = { ...roomPatterns };
 
-  const normalizeLineForRoomMatch = (line) =>
-    line
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+  const normalizeLineForRoomMatch = (line) => {
+    if (!line) {
+      return "";
+    }
 
+    let normalized = String(line).toLowerCase();
+
+    // Step 1: Normalize common character transcription errors first
+    // Replaces smart quotes and other variations with standard ones
+    normalized = normalized.replace(/[“”„]/g, '"');
+    normalized = normalized.replace(/[‘’`´]/g, "'");
+
+    // Step 2: Remove a list of known junk characters (e.g., from OCR)
+    normalized = normalized.replace(/[|()[\]:;={}]/g, " ");
+
+    // Step 3: Replace any character that isn't a letter, number, whitespace,
+    // or a core symbol like a quote, apostrophe, or hashtag with a space.
+    // This is a more refined version of your original regex.
+    normalized = normalized.replace(/[^a-z0-9\s#'"x/.]/g, " ");
+
+    // Step 4: Collapse multiple spaces into a single one
+    normalized = normalized.replace(/\s+/g, " ");
+
+    // Step 5: Trim leading and trailing whitespace
+    return normalized.trim();
+  };
   const fixAreaUnit = (s) =>
     s.replace(/m[?®*]/gi, "m²").replace(/nv[?]/gi, "m²");
 
@@ -305,7 +429,6 @@ const parseRoomDataFromText = (text) => {
     return roomCandidates[0]?.type || null;
   };
 
-  // Area-based detection (left as-is since the core issue is dimension-based)
   lines.forEach((line, index) => {
     const cleanLine = fixAreaUnit(line);
     const areaMatches = [...cleanLine.matchAll(areaValuePattern)];
@@ -352,7 +475,6 @@ const parseRoomDataFromText = (text) => {
     }
   });
 
-  // Dimension-based detection
   lines.forEach((line, index) => {
     const matches = dimensionPatterns.flatMap((pattern) => [
       ...line.matchAll(pattern),
@@ -361,15 +483,20 @@ const parseRoomDataFromText = (text) => {
 
     let roomCandidates = [];
 
-    // Same-line room name boost
-    const normalizedLine = normalizeLineForRoomMatch(line);
+    const normalizedLine = normalizeLineForRoomMatch(
+      line
+        .replace(/\//g, " / ")
+        .replace(/[^a-z0-9\s]/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    );
+
     for (const [key, pattern] of Object.entries(extendedRoomPatterns)) {
       if (pattern.test(normalizedLine)) {
-        roomCandidates.push({ type: key, distance: 0 }); // Highest priority for same-line matches
+        roomCandidates.push({ type: key, distance: 0 });
       }
     }
 
-    // Nearby-line search
     for (let offset = -searchWindowSize; offset <= searchWindowSize; offset++) {
       const checkIndex = index + offset;
       if (checkIndex >= 0 && checkIndex < lines.length) {
@@ -387,24 +514,76 @@ const parseRoomDataFromText = (text) => {
       }
     }
 
+    if (!roomCandidates.length) {
+      for (let offset = -2; offset <= 2; offset++) {
+        if (offset === 0) continue;
+        const neighbor = lines[index + offset];
+        if (!neighbor) continue;
+
+        const cleanedNeighbor = normalizeRoomType(neighbor);
+
+        if (
+          /\b(bed\s*room|bdrm|borm|br|bed\s*rm)\b/i.test(cleanedNeighbor) ||
+          /\b(mstr|master)\s*(bed(room)?|bdrm|br)\b/i.test(cleanedNeighbor) ||
+          /\b(prim(?:ary)?)\s*(bed(room)?|bdrm|br)\b/i.test(cleanedNeighbor)
+        ) {
+          let type = "bedroom";
+          if (/\b(mstr|master)/i.test(cleanedNeighbor)) type = "masterBedroom";
+          else if (/\bprim/i.test(cleanedNeighbor)) type = "primaryBedroom";
+
+          roomCandidates.push({ type, distance: Math.abs(offset) });
+          break;
+        }
+      }
+    }
+
     if (!roomCandidates.length) return;
 
     let foundRoomType = getNearestRoomType(roomCandidates);
+    const sameLine = normalizeLineForRoomMatch(line);
 
-    // --- New Heuristics for OCR Ambiguity ---
-    // Rule 1: Living room detection
-    if (normalizedLine.includes("living room")) {
+    // 1️⃣ Explicit room type detection
+    if (/kitchen/i.test(sameLine)) {
+      foundRoomType = "kitchen";
+    } else if (
+      /living\s*\/?\s*din(?:ing|n?g|lng)?/i.test(sameLine) ||
+      /\bdining\s*(room|area)?\b/i.test(sameLine) ||
+      /\bdr\b/i.test(sameLine)
+    ) {
+      foundRoomType = "livingDiningRoom";
+    } else if (/living\s*room/i.test(sameLine)) {
       foundRoomType = "livingRoom";
+    } else if (/\b(patio|deck|balcony)\b/i.test(sameLine)) {
+      foundRoomType = "patioDeck";
     }
 
-    // --- END NEW HEURISTIC ---
-
-    // The rest of your existing heuristics follow...
-    if (normalizedLine.includes("living room")) {
-      foundRoomType = "livingRoom";
+    // 2️⃣ Bedrooms — only assign if no explicit room type detected
+    if (
+      !foundRoomType &&
+      /\b(mstr|master)\s*(bed|bdrm|br)?\b/i.test(sameLine)
+    ) {
+      foundRoomType = !table.some((r) => r.roomType === "Primary Bedroom")
+        ? "primaryBedroom"
+        : !table.some((r) => r.roomType === "Second Bedroom")
+        ? "secondBedroom"
+        : "bedroom";
+    } else if (
+      !foundRoomType &&
+      /\b(prim|primary)\s*(bed|bdrm|br)?\b/i.test(sameLine)
+    ) {
+      foundRoomType = !table.some((r) => r.roomType === "Primary Bedroom")
+        ? "primaryBedroom"
+        : !table.some((r) => r.roomType === "Second Bedroom")
+        ? "secondBedroom"
+        : "bedroom";
+    } else if (!foundRoomType && /\b(bed(room)?|bdrm|br)\b/i.test(sameLine)) {
+      foundRoomType = !table.some((r) => r.roomType === "Primary Bedroom")
+        ? "primaryBedroom"
+        : !table.some((r) => r.roomType === "Second Bedroom")
+        ? "secondBedroom"
+        : "bedroom";
     }
 
-    // Rule 2: Ambiguous "Kitchen" vs "Bedroom"
     const hasKitchenHint = normalizedLine.includes("kitchen");
     const hasBedroomHint =
       normalizedLine.includes("bed") || normalizedLine.includes("edroom");
@@ -412,8 +591,6 @@ const parseRoomDataFromText = (text) => {
       normalizedLine.includes("dining") || normalizedLine.includes("ining");
 
     if (hasKitchenHint && !hasBedroomHint && !hasDiningHint) {
-      // The current line strongly suggests "Kitchen"
-      // Check for nearby Bedroom hints as a potential override
       const nearbyBedroomCandidate = roomCandidates.find(
         (c) => c.type === "bedroom" && c.distance > 0 && c.distance <= 2
       );
@@ -421,65 +598,70 @@ const parseRoomDataFromText = (text) => {
         foundRoomType = "bedroom";
       }
     } else if (hasBedroomHint && (hasKitchenHint || hasDiningHint)) {
-      // The line is ambiguous, but has a bedroom hint. Prioritize bedroom.
       foundRoomType = "bedroom";
     } else if (foundRoomType === "kitchen" && hasDiningHint) {
       foundRoomType = "diningRoom";
     }
 
-    // --- End New Heuristics ---
-
-    // Special rule for Patio/ Deck
     if (normalizedLine.includes("patio") || normalizedLine.includes("deck")) {
       foundRoomType = "patioDeck";
     }
 
-    // Heuristics for naming bedrooms correctly
+    if (foundRoomType === "livingDining") {
+      foundRoomType = "livingDiningRoom";
+    }
+
+    // Only normalize bedroom types here
     if (
       foundRoomType === "bedroom" ||
       foundRoomType === "secondBedroom" ||
       foundRoomType === "masterBedroom" ||
       foundRoomType === "primaryBedroom"
     ) {
-      if (!table.some((r) => r.roomType === "Primary Bedroom")) {
-        foundRoomType = "primaryBedroom";
-      } else if (!table.some((r) => r.roomType === "Second Bedroom")) {
-        foundRoomType = "secondBedroom";
-      } else {
-        foundRoomType = "bedroom";
+      // Ensure the candidate really is a bedroom line
+      if (/bed(room)?|bdrm|br/i.test(normalizedLine)) {
+        if (!table.some((r) => r.roomType === "Primary Bedroom")) {
+          foundRoomType = "primaryBedroom";
+        } else if (!table.some((r) => r.roomType === "Second Bedroom")) {
+          foundRoomType = "secondBedroom";
+        } else {
+          foundRoomType = "bedroom";
+        }
       }
     }
 
-    const normalizedRoomType = normalizeRoomType(foundRoomType);
+    let normalizedRoomType = normalizeRoomType(foundRoomType);
+
+    // Fix messy OCR variants like "BATH a"
+    normalizedRoomType = normalizedRoomType.replace(
+      /\b(Bath|Bth|Bthrm|Dush)(?:\s*a)?\b/i,
+      "Bathroom"
+    );
+    if (!normalizedRoomType) return;
 
     matches.forEach((match) => {
       const parseFeetInches = (feetStr, inchStr) => {
         let feet = parseInt(feetStr || "0", 10);
         let inches = parseInt(inchStr || "0", 10);
 
-        if (isNaN(inches)) {
-          const raw = (inchStr || "").toLowerCase();
-          if (/^\d{3}$/.test(raw)) {
-            const parts = raw.match(/^(\d)(\d{2})$/);
-            if (parts) {
-              feet += parseInt(parts[1]);
-              inches = parseInt(parts[2]);
-            }
-          } else if (["0a", "oa"].includes(raw)) {
-            inches = 4;
-          } else if (["l0", "lo", "io"].includes(raw)) {
-            inches = 10;
+        if (isNaN(inches) && inchStr) {
+          const raw = inchStr.replace(/[^0-9]/g, "");
+          if (raw.length === 3) {
+            feet += parseInt(raw[0]);
+            inches = parseInt(raw.slice(1));
+          } else if (raw.length === 2) {
+            inches = parseInt(raw);
           } else {
             inches = 0;
           }
         }
+
         return feet + inches / 12;
       };
 
-      let width = 0;
-      let height = 0;
+      let width = parseFeetInches(match[1], match[2]);
+      let height = parseFeetInches(match[3], match[4]);
 
-      // Extracting dimensions based on the specific pattern that matched
       if (match.input.match(dimensionPatterns[0])) {
         width = parseFeetInches(match[1], match[2]);
         height = parseFeetInches(match[3], match[4]);
@@ -531,7 +713,6 @@ const parseRoomDataFromText = (text) => {
     });
   });
 
-  // Fallback if dimensions found but no room classified
   if (
     table.length === 0 &&
     text.match(/\d{1,2}['’′]?\s*(\d{1,2})?["”°]?\s*[xX×]\s*\d{1,2}/)
@@ -545,10 +726,10 @@ const parseRoomDataFromText = (text) => {
     });
   }
 
-  return { apartmentType, totalSf, rooms: table };
+  return { apartmentType, rooms: table, totalSf, fileName };
 };
 
-const Annotator = ({ rooms, result, setRoomData }) => {
+const Annotator = ({ rooms }) => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
@@ -573,6 +754,10 @@ const Annotator = ({ rooms, result, setRoomData }) => {
   const [sortOrder, setSortOrder] = useState("asc"); // or 'desc'
   const [filterText, setFilterText] = useState("");
   const [pdfInfo, setPdfInfo] = useState(null);
+  // const [showRoomOverlays, setShowRoomOverlays] = useState(true);
+  // eslint-disable-next-line no-unused-vars
+  const [roomData, setRoomData] = useState([]);
+  // const [roomColorRectangles, setRoomColorRectangles] = useState([]);
 
   const clearResults = () => {
     setResults([]);
@@ -1232,6 +1417,8 @@ const Annotator = ({ rooms, result, setRoomData }) => {
       });
     }
     setRoomData(renderClassifiedRoomsByOcr);
+    // setRoomData(results[0]?.rooms || []);
+
     img.onload = () => {
       const originalImageWidth = img.width;
       const originalImageHeight = img.height;
@@ -1273,6 +1460,69 @@ const Annotator = ({ rooms, result, setRoomData }) => {
       });
     }
   }, [isSaved]);
+  const handleExportExcelStyled = async (filteredRooms, pdfInfo) => {
+    const fileName = pdfInfo?.fileName || "annotated_data";
+    if (!filteredRooms.length) {
+      alert("No rooms to export");
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Room Data");
+
+    worksheet.columns = [
+      { header: "Room Type", key: "roomType", width: 20 },
+      { header: "Width", key: "width", width: 15 },
+      { header: "Height", key: "height", width: 15 },
+      { header: "Area (sqft)", key: "areaSqFt", width: 15 },
+      { header: "Area (sqm)", key: "areaSqM", width: 15 },
+    ];
+
+    filteredRooms.forEach((room) => {
+      worksheet.addRow({
+        roomType: room.roomType,
+        width: room.width,
+        height: room.height,
+        areaSqFt: room.areaSqFt,
+        areaSqM: room.areaSqM,
+      });
+    });
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    headerRow.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF4F81BD" },
+    };
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber !== 1) {
+        const fillColor =
+          rowNumber % 2 === 0 ? { argb: "FFDCE6F1" } : { argb: "FFFFFFFF" };
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: fillColor,
+          };
+        });
+      }
+    });
+
+    worksheet.autoFilter = { from: "A1", to: "E1" };
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${fileName}-data.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -1354,12 +1604,23 @@ const Annotator = ({ rooms, result, setRoomData }) => {
       {scriptsLoaded &&
         results?.map((result, i) => {
           const filteredRooms = (result.rooms || [])
-            .filter(
-              (room) =>
-                parseFloat(room.areaSqFt) >= 100 &&
-                parseFloat(room.areaSqM) >= 10 &&
+            .filter((room) => {
+              const sqft = parseFloat(
+                (room.areaSqFt || "").replace(/[^\d.]/g, "")
+              );
+              const sqm = parseFloat(
+                (room.areaSqM || "").replace(/[^\d.]/g, "")
+              );
+
+              return (
+                //    sqft >= 100 && // relaxed filter for OCR messiness
+                // sqm >= 10 &&
+                sqft >= 50 && // relaxed filter for OCR messiness
+                sqm >= 4.65 &&
                 room.roomType?.toLowerCase().includes(filterText.toLowerCase())
-            )
+              );
+            })
+
             .sort((a, b) => {
               let aVal, bVal;
               switch (sortKey) {
@@ -1370,170 +1631,26 @@ const Annotator = ({ rooms, result, setRoomData }) => {
                     ? aVal.localeCompare(bVal)
                     : bVal.localeCompare(aVal);
                 case "width":
-                  aVal = parseFloat(a.width);
-                  bVal = parseFloat(b.width);
+                  aVal = parseFloat((a.width || "").replace(/[^\d.]/g, ""));
+                  bVal = parseFloat((b.width || "").replace(/[^\d.]/g, ""));
                   break;
                 case "height":
-                  aVal = parseFloat(a.height);
-                  bVal = parseFloat(b.height);
+                  aVal = parseFloat((a.height || "").replace(/[^\d.]/g, ""));
+                  bVal = parseFloat((b.height || "").replace(/[^\d.]/g, ""));
                   break;
                 case "areaSqft":
-                  aVal = parseFloat(a.areaSqFt);
-                  bVal = parseFloat(b.areaSqFt);
+                  aVal = parseFloat((a.areaSqFt || "").replace(/[^\d.]/g, ""));
+                  bVal = parseFloat((b.areaSqFt || "").replace(/[^\d.]/g, ""));
                   break;
                 case "areaSqm":
-                  aVal = parseFloat(a.areaSqM);
-                  bVal = parseFloat(b.areaSqM);
+                  aVal = parseFloat((a.areaSqM || "").replace(/[^\d.]/g, ""));
+                  bVal = parseFloat((b.areaSqM || "").replace(/[^\d.]/g, ""));
                   break;
                 default:
                   return 0;
               }
               return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
             });
-
-          // const handleExportResult = (filteredRooms = [], pdfInfo = null) => {
-          //   if (!filteredRooms.length) {
-          //     alert("No rooms to export");
-          //     return;
-          //   }
-
-          //   const fileName = pdfInfo?.fileName || "annotated_data";
-
-          //   const exportData = filteredRooms.map((room) => ({
-          //     roomType: room.roomType,
-          //     width: room.width,
-          //     height: room.height,
-          //     areaSqFt: room.areaSqFt,
-          //     areaSqM: room.areaSqM,
-          //   }));
-
-          //   const json = JSON.stringify(exportData, null, 2);
-          //   const blob = new Blob([json], { type: "application/json" });
-          //   const url = URL.createObjectURL(blob);
-
-          //   const a = document.createElement("a");
-          //   a.href = url;
-          //   a.download = `${fileName}-data.json`;
-          //   a.click();
-
-          //   URL.revokeObjectURL(url);
-          // };
-          // const handleExportCsv = () => {
-          //   const fileName = pdfInfo?.fileName || "annotated_data";
-
-          //   if (!filteredRooms.length) {
-          //     alert("No rooms to export");
-          //     return;
-          //   }
-
-          //   // CSV header
-          //   const headers = ["Room Type", "Width", "Height", "Area (sqft)", "Area (sqm)"];
-
-          //   // CSV rows
-          //   const rows = filteredRooms.map((room) => [
-          //     room.roomType,
-          //     room.width,
-          //     room.height,
-          //     room.areaSqFt,
-          //     room.areaSqM
-          //   ]);
-
-          //   // Combine header + rows into CSV string
-          //   const csvContent = [headers, ...rows]
-          //     .map((row) =>
-          //       row
-          //         .map((value) => `"${value ?? ""}"`) // wrap in quotes to handle commas
-          //         .join(",")
-          //     )
-          //     .join("\n");
-
-          //   // Create a Blob and trigger download
-          //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-          //   const url = URL.createObjectURL(blob);
-
-          //   const a = document.createElement("a");
-          //   a.href = url;
-          //   a.download = `${fileName}-data.csv`;
-          //   a.click();
-
-          //   URL.revokeObjectURL(url);
-          // };
-  const handleExportExcelStyled = async () => {
-  const fileName = pdfInfo?.fileName || "annotated_data";
-
-  if (!filteredRooms.length) {
-    alert("No rooms to export");
-    return;
-  }
-
-  // Create a new workbook and add a worksheet
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Room Data");
-
-  // Define columns
-  worksheet.columns = [
-    { header: "Room Type", key: "roomType", width: 20 },
-    { header: "Width", key: "width", width: 15 },
-    { header: "Height", key: "height", width: 15 },
-    { header: "Area (sqft)", key: "areaSqFt", width: 15 },
-    { header: "Area (sqm)", key: "areaSqM", width: 15 },
-  ];
-
-  // Add rows
-  filteredRooms.forEach((room) => {
-    worksheet.addRow({
-      roomType: room.roomType,
-      width: room.width,
-      height: room.height,
-      areaSqFt: room.areaSqFt,
-      areaSqM: room.areaSqM,
-    });
-  });
-
-  // Style header row
-  const headerRow = worksheet.getRow(1);
-  headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
-  headerRow.fill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FF4F81BD" }, // blue header
-  };
-
-  // Add alternating row colors
-  worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber !== 1) {
-      const fillColor =
-        rowNumber % 2 === 0
-          ? { argb: "FFDCE6F1" } // light blue
-          : { argb: "FFFFFFFF" }; // white
-      row.eachCell((cell) => {
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: fillColor,
-        };
-      });
-    }
-  });
-
-  // Enable filter drop-downs
-  worksheet.autoFilter = {
-    from: "A1",
-    to: "E1",
-  };
-
-  // Save to file
-  const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${fileName}-data.xlsx`;
-  a.click();
-
-  URL.revokeObjectURL(url);
-};
 
           return (
             <div key={i} className="mt-4 p-4 bg-white rounded shadow-sm border">
@@ -1592,7 +1709,9 @@ const Annotator = ({ rooms, result, setRoomData }) => {
                     <Button
                       variant="light"
                       className="go-to-btn btn-text"
-                      onClick={() =>  handleExportExcelStyled(filteredRooms, pdfInfo)}
+                      onClick={() =>
+                        handleExportExcelStyled(filteredRooms, pdfInfo)
+                      }
                     >
                       Export Excel
                     </Button>
@@ -1650,7 +1769,6 @@ const Annotator = ({ rooms, result, setRoomData }) => {
                 height={pdfSize.height}
                 onClick={handleCanvasEvent}
               />
-
               <Stage
                 ref={stageRef}
                 width={pdfSize.width}
@@ -1672,6 +1790,8 @@ const Annotator = ({ rooms, result, setRoomData }) => {
                       strokeWidth={line.strokeWidth}
                     />
                   ))}
+                </Layer>
+                <Layer>
                   {rectangles.map((rect) => (
                     <React.Fragment key={rect.id}>
                       <Rect
