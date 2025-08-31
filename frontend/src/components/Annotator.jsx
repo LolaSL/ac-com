@@ -6,9 +6,10 @@ import React, {
   useCallback,
 } from "react";
 import { Stage, Layer, Rect, Line, Text } from "react-konva";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Table } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
+import ModalCalculator from "./ModalCalculator.jsx";
 import ExcelJS from "exceljs";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -52,6 +53,7 @@ const roomPatterns = {
   // Kitchen
   kitchen: /\b(kitchen|kitc?hen|ktcn|ktch?n)\b/i,
   breakfastRoom: /\b(breakfast\s*room|brkfst)\b/i,
+  eatingRoom: /\b(?:EAT(?:ING)?\.?\s*(?:ROOM|RM))\b/i,
 
   // Bedrooms
   bedroom:
@@ -70,7 +72,6 @@ const roomPatterns = {
 
   // Wellness
   gym: /\b(gym|fitness|workout)(\s*room)?\b/i,
-
   // Other
   garage: /\bgarage\b/i,
   foyer: /\b(foyer|entry|entryway)\b/i,
@@ -119,6 +120,7 @@ const roomTypePriorities = [
   "formalDining",
   "living",
   "bedroomPattern",
+  "eatingRoom",
 ];
 
 const dimensionPatterns = [
@@ -729,7 +731,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
   return { apartmentType, rooms: table, totalSf, fileName };
 };
 
-const Annotator = ({ rooms }) => {
+const Annotator = ({ result, filteredRoomsForTable }) => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
@@ -754,10 +756,22 @@ const Annotator = ({ rooms }) => {
   const [sortOrder, setSortOrder] = useState("asc"); // or 'desc'
   const [filterText, setFilterText] = useState("");
   const [pdfInfo, setPdfInfo] = useState(null);
-  // const [showRoomOverlays, setShowRoomOverlays] = useState(true);
+  // Add this line with your other useState calls
+  const [editingRoomId, setEditingRoomId] = useState(null);
+  const [allRooms, setAllRooms] = useState([]);
+  const [editingRoomData, setEditingRoomData] = useState(null);
+  const [editingFileIdx, setEditingFileIdx] = useState(null);
+  const [editingRoomIdx, setEditingRoomIdx] = useState(null);
+  const [newRoom, setNewRoom] = useState({
+    roomType: "",
+    width: "",
+    height: "",
+    areaSqFt: "",
+    areaSqM: "",
+  });
+
   // eslint-disable-next-line no-unused-vars
   const [roomData, setRoomData] = useState([]);
-  // const [roomColorRectangles, setRoomColorRectangles] = useState([]);
 
   const clearResults = () => {
     setResults([]);
@@ -872,6 +886,121 @@ const Annotator = ({ rooms }) => {
     }
   };
 
+  const generateUniqueId = () => {
+    return `id-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+  };
+  // Initialize rooms for this file if not yet
+  // Find this useEffect block
+  useEffect(() => {
+    if (results) {
+      setAllRooms(
+        results.map((result) => {
+          // For each file, map over its rooms and add a unique ID
+          const roomsWithIds = (result.rooms || []).map((room) => ({
+            ...room,
+            uniqueId: generateUniqueId(), // Use the new generator here too
+          }));
+          return roomsWithIds;
+        })
+      );
+    }
+  }, [results]);
+
+  const handleAddRoom = (fileIdx) => {
+    console.log("Add Room button clicked for fileIdx:", fileIdx);
+    // Basic validation...
+    if (!newRoom.roomType.trim()) {
+      alert("Room Type is required.");
+      return;
+    }
+
+    setAllRooms((prev) => {
+      const updated = [...prev];
+      if (!Array.isArray(updated[fileIdx])) {
+        updated[fileIdx] = [];
+      }
+      // Use the new generator to ensure the ID is unique
+      updated[fileIdx] = [
+        ...updated[fileIdx],
+        { ...newRoom, uniqueId: generateUniqueId() },
+      ];
+      return updated;
+    });
+    setNewRoom({
+      roomType: "",
+      width: "",
+      height: "",
+      areaSqFt: "",
+      areaSqM: "",
+    });
+  };
+
+  // Start editing a room
+  const handleEditClick = (room, roomIdx, fileIdx) => {
+    setEditingRoomData({ ...room });
+    setEditingRoomIdx(roomIdx);
+    setEditingFileIdx(fileIdx);
+    // Store the stable, unique ID for saving later
+    setEditingRoomId(room.uniqueId);
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingRoomData(null);
+    setEditingRoomIdx(null);
+    setEditingFileIdx(null);
+  };
+
+  // Handle changes in the edit input fields
+  const handleEditingChange = (field, value) => {
+    setEditingRoomData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Save the edited room
+  const handleSaveEdit = () => {
+    setAllRooms((prev) => {
+      const updated = [...prev];
+      const roomsForFile = updated[editingFileIdx];
+
+      if (roomsForFile) {
+        // Find the ORIGINAL index of the room using its unique ID
+        const roomToUpdateIndex = roomsForFile.findIndex(
+          (r) => r.uniqueId === editingRoomId
+        );
+
+        // Check if the room was found before trying to update it
+        if (roomToUpdateIndex !== -1) {
+          // Update the room at its stable, original position
+          roomsForFile[roomToUpdateIndex] = { ...editingRoomData };
+        }
+      }
+      return updated;
+    });
+
+    // Reset all editing state variables after saving
+    setEditingRoomData(null);
+    setEditingRoomIdx(null);
+    setEditingFileIdx(null);
+    setEditingRoomId(null);
+  };
+
+  // Delete a room
+  const handleDeleteRoom = (roomId, fileIdx) => {
+    setAllRooms((prev) => {
+      const updated = [...prev];
+      // Ensure the array for the current file exists and is an array
+      if (Array.isArray(updated[fileIdx])) {
+        // Filter out the room that has the matching unique ID
+        updated[fileIdx] = updated[fileIdx].filter(
+          (room) => room.uniqueId !== roomId
+        );
+      }
+      return updated;
+    });
+  };
   const handleStageClick = (event) => {
     if (event.target === event.target.getStage() && !isRotating) {
       const pointerPosition = stageRef.current.getPointerPosition();
@@ -879,7 +1008,18 @@ const Annotator = ({ rooms }) => {
       const commentText = prompt("Enter your ac unit number (ac1, ac2, ...):");
 
       if (commentText) {
-        const newRectId = Date.now();
+        // Check if the same comment already exists based on the comment text
+        const existingComment = comments.some(
+          (comment) => comment.text.toLowerCase() === commentText.toLowerCase()
+        );
+
+        if (existingComment) {
+          alert("This comment already exists.");
+          return; // Don't add the comment if it already exists
+        }
+
+        const newRectId = Date.now(); // Now, we create the new rectId after checking for duplicates
+
         const newRect = {
           id: newRectId,
           x: pointerPosition.x,
@@ -901,6 +1041,7 @@ const Annotator = ({ rooms }) => {
           fill: "rgba(226, 218, 228, 0.3)",
         };
         setComments((prevComments) => [...prevComments, newComment]);
+
         const newLine = {
           id: `line-${Date.now()}`,
           rectId: newRectId,
@@ -1036,6 +1177,7 @@ const Annotator = ({ rooms }) => {
       })
     );
   };
+  
   const rotateRectangle = useCallback((rectId) => {
     console.log("rotateRectangle called for:", rectId);
 
@@ -1046,6 +1188,25 @@ const Annotator = ({ rooms }) => {
       )
     );
   }, []);
+// const rotateRectangle = useCallback((rectId) => {
+//   setRectangles((prevRects) =>
+//     prevRects.map((rect) => {
+//       if (rect.id === rectId) {
+//         // new rotation
+//         const newRotation = (rect.rotation + 90) % 360;
+
+//         // swap width/height if rotated 90° or 270°
+//         let { width, height } = rect;
+//         if (newRotation % 180 !== 0) {
+//           [width, height] = [height, width];
+//         }
+
+//         return { ...rect, rotation: newRotation, width, height };
+//       }
+//       return rect;
+//     })
+//   );
+// }, []);
 
   const renderComments = useCallback(
     (context) => {
@@ -1119,16 +1280,30 @@ const Annotator = ({ rooms }) => {
     if (!context) return;
   }, []);
 
-  const drawRotatedRectangle = useCallback(
-    (context, x, y, width, height, angle) => {
-      context.save();
-      context.translate(x, y);
-      context.rotate(angle);
-      context.fillRect(-width / 2, -height / 2, width, height);
-      context.restore();
-    },
-    []
-  );
+  // const drawRotatedRectangle = useCallback(
+  //   (context, x, y, width, height, angle) => {
+  //     context.save();
+  //     context.translate(x, y);
+  //     context.rotate(angle);
+  //     context.fillRect(-width / 2, -height / 2, width, height);
+  //     context.restore();
+  //   },
+  //   []
+  // );
+const drawRotatedRectangle = useCallback(
+  (context, x, y, width, height, angle) => {
+    // compute center
+    const centerX = x + width / 2;
+    const centerY = y + height / 2;
+
+    context.save();
+    context.translate(centerX, centerY); // move to center
+    context.rotate(angle * (Math.PI / 180)); // convert degrees to radians
+    context.fillRect(-width / 2, -height / 2, width, height); // draw centered
+    context.restore();
+  },
+  []
+);
 
   const renderPDFOnCanvas = useCallback(
     async (pdfData) => {
@@ -1460,9 +1635,9 @@ const Annotator = ({ rooms }) => {
       });
     }
   }, [isSaved]);
-  const handleExportExcelStyled = async (filteredRooms, pdfInfo) => {
+  const handleExportExcelStyled = async (filteredRoomsForTable, pdfInfo) => {
     const fileName = pdfInfo?.fileName || "annotated_data";
-    if (!filteredRooms.length) {
+    if (!filteredRoomsForTable.length) {
       alert("No rooms to export");
       return;
     }
@@ -1478,7 +1653,7 @@ const Annotator = ({ rooms }) => {
       { header: "Area (sqm)", key: "areaSqM", width: 15 },
     ];
 
-    filteredRooms.forEach((room) => {
+    filteredRoomsForTable.forEach((room) => {
       worksheet.addRow({
         roomType: room.roomType,
         width: room.width,
@@ -1545,42 +1720,41 @@ const Annotator = ({ rooms }) => {
   return (
     <div>
       <Form className="btu-calculation-measure mt-4">
-        <Form.Label className=" label-upload fw-bold text-secondary fs-5"></Form.Label>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           *Supported: High Resolution PDFs files (.pdf). Recommended to place
           air conditioner (rectangle) above door in drawing.
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           * PDFs files (.pdf) should be flat/appartment drawing and without any
           modifications.
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           *Add rectangle: <kbd>Click On Empty Area</kbd>
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           *Enter to appeared prompt window relevant to air conditioner comment.
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           *Rotate rectangle: <kbd>Click</kbd>
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           *Delete rectangle for small screens: <kbd>Tap And Hold</kbd>
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           *Delete rectangle for large screens: <kbd>Right Click</kbd>
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           *For saving approved drawing:{" "}
           <kbd>Click on the button "Save PDF File"</kbd>{" "}
         </p>
-        <p className="text-secondary fw-bold upload-paragraph">
+        <p className="text-secondary fw-bold upload-paragraph fs-5">
           <span className="me-1"></span>
           *To remove unnecessary drawing, simply click the <kbd>Clear</kbd>{" "}
           button.
         </p>
-
         <Form.Control
-          className="mt-4 form-control"
+          className="my-4 form-control"
           id="file-upload"
           type="file"
           multiple
@@ -1602,25 +1776,22 @@ const Annotator = ({ rooms }) => {
         </div>
       )}
       {scriptsLoaded &&
-        results?.map((result, i) => {
-          const filteredRooms = (result.rooms || [])
+        results?.map((result, fileIdx) => {
+          const rooms = allRooms[fileIdx] || [];
+          const filteredRoomsForTable = rooms
             .filter((room) => {
               const sqft = parseFloat(
-                (room.areaSqFt || "").replace(/[^\d.]/g, "")
+                (room.areaSqFt || "").toString().replace(/[^\d.]/g, "")
               );
               const sqm = parseFloat(
-                (room.areaSqM || "").replace(/[^\d.]/g, "")
+                (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
               );
-
               return (
-                //    sqft >= 100 && // relaxed filter for OCR messiness
-                // sqm >= 10 &&
-                sqft >= 50 && // relaxed filter for OCR messiness
-                sqm >= 4.65 &&
+                sqft >= 30 &&
+                sqm >= 3.25 &&
                 room.roomType?.toLowerCase().includes(filterText.toLowerCase())
               );
             })
-
             .sort((a, b) => {
               let aVal, bVal;
               switch (sortKey) {
@@ -1653,7 +1824,10 @@ const Annotator = ({ rooms }) => {
             });
 
           return (
-            <div key={i} className="mt-4 p-4 bg-white rounded shadow-sm border">
+            <div
+              key={fileIdx}
+              className="mt-4 p-4 bg-white rounded shadow-sm border"
+            >
               <h5 className="mb-3">File Name: {result.fileName}</h5>
 
               {result.error ? (
@@ -1695,57 +1869,239 @@ const Annotator = ({ rooms }) => {
                       <option value="areaSqm">Area (sqm)</option>
                     </select>
 
-                    <Button
-                      variant="light"
-                      className="go-to-btn btn-text"
-                      onClick={() =>
-                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-                      }
-                      title="Toggle sort order"
-                    >
-                      Sort: {sortOrder === "asc" ? "ASC" : "DESC"}
-                    </Button>
+                    <div className="container button-group">
+                      <Button
+                        variant="light"
+                        className="go-to-btn btn-text"
+                        onClick={() =>
+                          setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                        }
+                        title="Toggle sort order"
+                      >
+                        Sort: {sortOrder === "asc" ? "ASC" : "DESC"}
+                      </Button>
 
-                    <Button
-                      variant="light"
-                      className="go-to-btn btn-text"
-                      onClick={() =>
-                        handleExportExcelStyled(filteredRooms, pdfInfo)
+                      <Button
+                        variant="light"
+                        className="go-to-btn btn-text"
+                        onClick={() =>
+                          handleExportExcelStyled(
+                            filteredRoomsForTable,
+                            pdfInfo
+                          )
+                        }
+                      >
+                        Export Excel
+                      </Button>
+
+                      <ModalCalculator />
+                    </div>
+                  </div>
+                  {/* Add New Room Form */}
+                  <div className="mb-3 mt-2">
+                    <input
+                      type="text"
+                      placeholder="Room Type"
+                      value={newRoom.roomType}
+                      onChange={(e) =>
+                        setNewRoom({ ...newRoom, roomType: e.target.value })
                       }
+                      className="form-control"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Width"
+                      value={newRoom.width}
+                      onChange={(e) =>
+                        setNewRoom({ ...newRoom, width: e.target.value })
+                      }
+                      className="form-control"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Height"
+                      value={newRoom.height}
+                      onChange={(e) =>
+                        setNewRoom({ ...newRoom, height: e.target.value })
+                      }
+                      className="form-control"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Area (sqft)"
+                      value={newRoom.areaSqFt}
+                      onChange={(e) =>
+                        setNewRoom({ ...newRoom, areaSqFt: e.target.value })
+                      }
+                    />
+                    <input
+                      type="number"
+                      placeholder="Area (sqm)"
+                      value={newRoom.areaSqM}
+                      onChange={(e) =>
+                        setNewRoom({ ...newRoom, areaSqM: e.target.value })
+                      }
+                      className="form-control"
+                    />
+                    <Button
+                      variant="primary"
+                      onClick={() => handleAddRoom(fileIdx)}
+                      className="btn-text"
                     >
-                      Export Excel
+                      Add Room
                     </Button>
                   </div>
-                  {filteredRooms.length ? (
-                    <div className="table-responsive rounded border shadow-sm">
-                      <table className="table table-striped mb-0">
-                        <thead className="table-light">
-                          <tr>
-                            <th>#</th>
-                            <th>Room Type</th>
-                            <th>Width</th>
-                            <th>Height</th>
-                            <th>Area (sqft)</th>
-                            <th>Area (sqm)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredRooms.map((room, idx) => (
-                            <tr key={idx}>
-                              <td>{idx + 1}</td>
-                              <td>{room.roomType || "Unknown"}</td>
-                              <td>{room.width}</td>
-                              <td>{room.height}</td>
-                              <td>{room.areaSqFt}</td>
-                              <td>{room.areaSqM}</td>
+
+                  {/* Room Table */}
+                  {filteredRoomsForTable?.length > 0 ? (
+                    <Table striped bordered hover responsive>
+                      <thead>
+                        <tr>
+                          <th>Room Type</th>
+                          <th>Width</th>
+                          <th>Height</th>
+                          <th>Area (sqft)</th>
+                          <th>Area (sqm)</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredRoomsForTable.map((room, roomIdx) => {
+                          const isEditing =
+                            editingRoomIdx === roomIdx &&
+                            editingFileIdx === fileIdx;
+                          return (
+                            <tr key={room.uniqueId}>
+                              <td>
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editingRoomData.roomType}
+                                    onChange={(e) =>
+                                      handleEditingChange(
+                                        "roomType",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                ) : (
+                                  room.roomType
+                                )}
+                              </td>
+                              <td>
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editingRoomData.width}
+                                    onChange={(e) =>
+                                      handleEditingChange(
+                                        "width",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                ) : (
+                                  room.width
+                                )}
+                              </td>
+                              <td>
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editingRoomData.height}
+                                    onChange={(e) =>
+                                      handleEditingChange(
+                                        "height",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                ) : (
+                                  room.height
+                                )}
+                              </td>
+                              <td>
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editingRoomData.areaSqFt}
+                                    onChange={(e) =>
+                                      handleEditingChange(
+                                        "areaSqFt",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                ) : (
+                                  room.areaSqFt
+                                )}
+                              </td>
+                              <td>
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editingRoomData.areaSqM}
+                                    onChange={(e) =>
+                                      handleEditingChange(
+                                        "areaSqM",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                ) : (
+                                  room.areaSqM
+                                )}
+                              </td>
+                              <td>
+                                {isEditing ? (
+                                  <div className="d-flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="success"
+                                      onClick={handleSaveEdit}
+                                    >
+                                      Save
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="secondary"
+                                      onClick={handleCancelEdit}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div className="d-flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="info"
+                                      onClick={() =>
+                                        handleEditClick(room, roomIdx, fileIdx)
+                                      }
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="danger"
+                                      onClick={() =>
+                                        handleDeleteRoom(room.uniqueId, fileIdx)
+                                      }
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                )}
+                              </td>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
                   ) : (
                     <p className="fst-italic text-secondary">
-                      No classified room data found.
+                      No classified room data found. Add a room using the form
+                      above.
                     </p>
                   )}
                 </>
@@ -1753,7 +2109,28 @@ const Annotator = ({ rooms }) => {
             </div>
           );
         })}
-
+      <div className="d-flex">
+        {file && file.type === "application/pdf" && (
+          <>
+            <Button
+              variant="btn-outline"
+              onClick={saveToBackend}
+              disabled={isSaving}
+              className="mt-2 me-2 go-to-btn btn-text mb-3"
+            >
+              {isSaving ? "Saving..." : "Save PDF File"}{" "}
+            </Button>
+            <Button
+              variant="btn-outline"
+              className="mt-2 mb-3 go-to-btn btn-text"
+              onClick={clearCanvas}
+            >
+              Clear
+            </Button>
+          </>
+        )}
+      </div>
+      {error && <p className="error-message mt-4">{error}</p>}
       {previewUrl && (
         <div className="text-center">
           {previewUrl && (
@@ -1761,14 +2138,16 @@ const Annotator = ({ rooms }) => {
               style={{ position: "relative", display: "inline-block" }}
               className="container-main"
             >
-              <canvas
-                id="my-canvas"
-                ref={canvasRef}
-                style={{ border: "1px solid black" }}
-                width={pdfSize.width}
-                height={pdfSize.height}
-                onClick={handleCanvasEvent}
-              />
+              <div className="canvas-wrapper">
+                <canvas
+                  id="my-canvas"
+                  ref={canvasRef}
+                  width={pdfSize.width}
+                  height={pdfSize.height}
+                  onClick={handleCanvasEvent}
+                />
+              
+
               <Stage
                 ref={stageRef}
                 width={pdfSize.width}
@@ -1860,32 +2239,9 @@ const Annotator = ({ rooms }) => {
                     />
                   ))}
                 </Layer>
-              </Stage>
+              </Stage></div>
             </div>
           )}
-
-          <div className="d-flex">
-            {file && file.type === "application/pdf" && (
-              <>
-                <Button
-                  variant="btn-outline"
-                  onClick={saveToBackend}
-                  disabled={isSaving}
-                  className="mt-2 me-2 go-to-btn btn-text mb-3"
-                >
-                  {isSaving ? "Saving..." : "Save PDF File"}{" "}
-                </Button>
-                <Button
-                  variant="btn-outline"
-                  className="mt-2 mb-3 go-to-btn btn-text"
-                  onClick={clearCanvas}
-                >
-                  Clear
-                </Button>
-              </>
-            )}
-          </div>
-          {error && <p className="error-message mt-4">{error}</p>}
         </div>
       )}
     </div>

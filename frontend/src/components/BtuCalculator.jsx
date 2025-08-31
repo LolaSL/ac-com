@@ -15,26 +15,6 @@ function BtuCalculator({ roomData }) {
   const navigate = useNavigate();
   const componentRef = useRef();
 
-// useEffect(() => {
-//   if (Array.isArray(roomData) && roomData.length > 0) {
-//     const system = roomData[0].measurementSystem || "meters";
-//     setMeasurementSystem(system);
-
-//     const parsedRooms = roomData.map((room, index) => ({
-//       name: room.roomType || `Room ${index + 1}`,
-//       size:
-//         system === "meters"
-//           ? room.areaSqM || ""
-//           : room.areaSqFt || "",
-//       btu: 0, 
-//     }));
-
-//     setHeight(roomData[0].height || "");
-//     setWidth(roomData[0].width || "");
-
-//     setRooms(parsedRooms);
-//   }
-// }, [roomData]);
 
 useEffect(() => {
   if (roomData?.length) {
@@ -88,10 +68,11 @@ useEffect(() => {
   };
 
   const cartItems = state?.cart?.cartItems || [];
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
-  const [areaFeet, setAreaFeet] = useState(0);
-  const [areaMeters, setAreaMeters] = useState(0);
+  // const [height, setHeight] = useState(0);
+  // const [width, setWidth] = useState(0);
+  // const [areaFeet, setAreaFeet] = useState(0);
+  // const [areaMeters, setAreaMeters] = useState(0);
+    // eslint-disable-next-line no-unused-vars
   const [measurementSystem, setMeasurementSystem] = useState("meters");
   const [rooms, setRooms] = useState([{ name: "Bedroom 1", size: "", btu: 0 }]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
@@ -243,24 +224,24 @@ useEffect(() => {
     }));
   };
 
-  const calculateArea = (e) => {
-    e.preventDefault();
-    const h = parseFloat(height);
-    const w = parseFloat(width);
-    if (isNaN(h) || isNaN(w)) return;
+  // const calculateArea = (e) => {
+  //   e.preventDefault();
+  //   const h = parseFloat(height);
+  //   const w = parseFloat(width);
+  //   if (isNaN(h) || isNaN(w)) return;
 
-    const area = h * w;
-    setAreaFeet(
-      measurementSystem === "feet"
-        ? area
-        : area / CONSTANTS.CONVERT_FEET_TO_METERS
-    );
-    setAreaMeters(
-      measurementSystem === "meters"
-        ? area
-        : area * CONSTANTS.CONVERT_FEET_TO_METERS
-    );
-  };
+  //   const area = h * w;
+  //   setAreaFeet(
+  //     measurementSystem === "feet"
+  //       ? area
+  //       : area / CONSTANTS.CONVERT_FEET_TO_METERS
+  //   );
+  //   setAreaMeters(
+  //     measurementSystem === "meters"
+  //       ? area
+  //       : area * CONSTANTS.CONVERT_FEET_TO_METERS
+  //   );
+  // };
 
   const handleRoomChange = (index, field, value) => {
     const updatedRooms = [...rooms];
@@ -553,7 +534,7 @@ useEffect(() => {
       <Container className="btu-calculator-container mt-4 mb-4 rounded ">
         <Form className="btu-form">
           <h3 className="mt-4 mb-4 text-center title">BTU Calculator</h3>
-          <Row className="my-4">
+          {/* <Row className="my-4">
             <Col xs={12} md={6} lg={12}>
               <Form.Group controlId="measurementSystem">
                 <Form.Label className="fw-bold">Calculate Area </Form.Label>
@@ -617,7 +598,7 @@ useEffect(() => {
               <p>Area in Square Feet: {areaFeet.toFixed(2)} sq ft</p>
               <p>Area in Square Meters: {areaMeters.toFixed(2)} sq m</p>
             </div>
-          )}
+          )} */}
           <Row>
             <Col xs={12} md={6} lg={4} className="my-4">
               <Form.Group controlId="ceilingHeight">
@@ -693,9 +674,9 @@ useEffect(() => {
               <Button
                 variant="primary"
                 onClick={() => removeRoom(index)}
-                className="btn btn-sm mb-4  my-4"
+              className="btn-add mb-3 mt-4"
               >
-                <i className="fas fa-trash"></i>
+              Clean <i className="fas fa-trash"></i>
               </Button>
             </Row>
           ))}

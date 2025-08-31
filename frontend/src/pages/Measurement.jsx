@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-// import BtuCalculator from "../components/BtuCalculator.jsx";
+import BtuCalculator from "../components/BtuCalculator.jsx";
 import Annotator from "../components/Annotator.jsx";
 import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
-// import BtuModalWindow from "../components/BtuModalWindow.jsx";
-// import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
+import BtuModalWindow from "../components/BtuModalWindow.jsx";
+import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
+
+
 
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
@@ -65,16 +67,16 @@ const Measurement = () => {
         <h1 className="mt-4 mb-4 title-measurement">
           Measurement Service System
         </h1>
-        {/* <PdfHelpVideo /> */}
+        <PdfHelpVideo />
         <Sidebar
           savedPdfs={savedPdfs}
           fetchSavedPdfs={fetchSavedPdfs}
           roomData={roomData}
           setRoomData={setRoomData}
         />
-        {/* <BtuModalWindow /> */}
+        <BtuModalWindow />
         <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData}   roomData={roomData} />
-        {/* <BtuCalculator roomData={roomData} /> */}
+        <BtuCalculator roomData={roomData} />
         <div className="mt-4 mb-4">
           <Link to="/" className="go-to-btn btn-text">
             Back to Home
