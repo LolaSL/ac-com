@@ -8,71 +8,116 @@ import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import CheckboxGroup from "./CheckboxGroup.jsx";
 import printJS from "print-js";
+import TableBody from "./TableBody";
 
 function BtuCalculator({ roomData }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
-
   const navigate = useNavigate();
   const componentRef = useRef();
 
+  useEffect(() => {
+    if (roomData?.length) {
+      const formattedRooms = roomData.map((room) => ({
+        name: room.name,
+        size: room.size,
+        btu: 0,
+      }));
+      setRooms(formattedRooms);
+    }
+  }, [roomData]);
 
-useEffect(() => {
-  if (roomData?.length) {
-    const formattedRooms = roomData.map((room) => ({
-      name: room.name,
-      size: room.size,
-      btu: 0,
-    }));
-    setRooms(formattedRooms);
-  }
-}, [roomData]);
-
-
-
-  
   const handlePrint = () => {
-    const condenserRow = document.createElement("tr");
-    condenserRow.className = "text-center";
-    condenserRow.innerHTML = `
-    <td colspan="5" class="text-center bg-info">
-      <strong>
-        Recommended Condenser: 
-        ${(
-          products.reduce((total, product) => total + (product.btu || 0), 0) *
-          0.8
-        ).toFixed(0)} BTU
-      </strong>
-    </td>
+    if (!rooms?.length || !btuResults?.length) return;
+
+    // Calculate totals
+    const totalBTU = btuResults.reduce((sum, btu) => sum + (btu || 0), 0);
+    const totalProductBTU = products.reduce(
+      (sum, product) => sum + (product.btu || 0),
+      0
+    );
+    const totalPrice = products.length
+      ? products.reduce((sum, product) => {
+          const price =
+            product.price - (product.price * (product.discount || 0)) / 100;
+          return sum + price;
+        }, 0)
+      : 0;
+    const optimalProductCount = products.filter((p) => p.model).length;
+
+    // Build table HTML
+    let tableHtml = `
+    <table>
+      <thead>
+        <tr>
+          <th>Room</th>
+          <th>Room BTU</th>
+          <th>Optimal Product</th>
+          <th>Product BTU</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${btuResults
+          .map(
+            (btu, i) => `
+          <tr>
+            <td>${rooms[i]?.name || ""}</td>
+            <td>${btu}</td>
+            <td>${products[i]?.model || ""}</td>
+            <td>${products[i]?.btu || ""}</td>
+            <td>${products[i]?.price || ""}</td>
+          </tr>
+        `
+          )
+          .join("")}
+        <tr class="total-results bg-light">
+          <td><strong>Total</strong></td>
+          <td><strong>${totalBTU}</strong></td>
+          <td><strong>${
+            optimalProductCount || "No optimal product available"
+          }</strong></td>
+          <td><strong>${totalProductBTU.toFixed(0)}</strong></td>
+          <td><strong>${
+            products.length > 0 ? totalPrice.toFixed(2) : "No price available"
+          }</strong></td>
+        </tr>
+      </tbody>
+    </table>
   `;
 
-    const tableBody = document.querySelector("#table-responsive tbody");
-
-    if (showCondenser && tableBody) {
-      tableBody.appendChild(condenserRow);
+    // Add condenser recommendation if needed
+    if (showCondenser) {
+      const recommendedCondenserBTU = (totalProductBTU * 0.8).toFixed(0);
+      const condenserRow = `
+      <tr class="text-center bg-info">
+        <td colspan="5"><strong>Recommended Condenser: ${recommendedCondenserBTU} BTU</strong></td>
+      </tr>
+    `;
+      tableHtml = tableHtml.replace("</tbody>", `${condenserRow}</tbody>`);
     }
 
+    // Show table in React (optional)
+    setShowTable(true);
+
+    // Print table
     printJS({
-      printable: "table-responsive",
-      type: "html",
+      printable: tableHtml,
+      type: "raw-html",
       header: "<h2>Product List</h2>",
       css: "../index.css",
       style: `
       table { width: 100%; border-collapse: collapse; }
-      th, td { border: 1px solid #ddd; padding: 8px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+      thead { background: #eee; }
+      .bg-light { background: #f8f9fa; }
+      .bg-info { background: #cce5ff; }
+      .total-results { font-weight: bold; }
     `,
     });
-
-    if (showCondenser && tableBody) {
-      tableBody.removeChild(condenserRow);
-    }
   };
 
   const cartItems = state?.cart?.cartItems || [];
-  // const [height, setHeight] = useState(0);
-  // const [width, setWidth] = useState(0);
-  // const [areaFeet, setAreaFeet] = useState(0);
-  // const [areaMeters, setAreaMeters] = useState(0);
-    // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars
   const [measurementSystem, setMeasurementSystem] = useState("meters");
   const [rooms, setRooms] = useState([{ name: "Bedroom 1", size: "", btu: 0 }]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
@@ -80,6 +125,8 @@ useEffect(() => {
   const [showCondenser, setShowCondenser] = useState(false);
   const [error, setError] = useState("");
   const [totalBTU, setTotalBTU] = useState(0);
+  // eslint-disable-next-line no-unused-vars
+  const [showTable, setShowTable] = useState(false);
   const [optimalProductCount, setOptimalProductCount] = useState(0);
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
@@ -223,25 +270,6 @@ useEffect(() => {
       [category]: { ...prev[category], [name]: !prev[category][name] },
     }));
   };
-
-  // const calculateArea = (e) => {
-  //   e.preventDefault();
-  //   const h = parseFloat(height);
-  //   const w = parseFloat(width);
-  //   if (isNaN(h) || isNaN(w)) return;
-
-  //   const area = h * w;
-  //   setAreaFeet(
-  //     measurementSystem === "feet"
-  //       ? area
-  //       : area / CONSTANTS.CONVERT_FEET_TO_METERS
-  //   );
-  //   setAreaMeters(
-  //     measurementSystem === "meters"
-  //       ? area
-  //       : area * CONSTANTS.CONVERT_FEET_TO_METERS
-  //   );
-  // };
 
   const handleRoomChange = (index, field, value) => {
     const updatedRooms = [...rooms];
@@ -495,7 +523,7 @@ useEffect(() => {
     setRooms([{ name: "Bedroom 1", size: "", btu: 0 }]);
     setCeilingHeight("2.5");
     setNumPeople(2);
-
+    setMeasurementSystem();
     setOptions({
       OutdoorUnitLocation: {
         PitchedRoof: false,
@@ -534,71 +562,6 @@ useEffect(() => {
       <Container className="btu-calculator-container mt-4 mb-4 rounded ">
         <Form className="btu-form">
           <h3 className="mt-4 mb-4 text-center title">BTU Calculator</h3>
-          {/* <Row className="my-4">
-            <Col xs={12} md={6} lg={12}>
-              <Form.Group controlId="measurementSystem">
-                <Form.Label className="fw-bold">Calculate Area </Form.Label>
-                <Form.Control
-                  as="select"
-                  value={measurementSystem}
-                  onChange={(e) => setMeasurementSystem(e.target.value)}
-                >
-                  <option value="meters">Square Meters (m²)</option>
-                  <option value="feet">Square Feet (ft²)</option>
-                </Form.Control>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row className="my-4">
-            <Col xs={12} md={6} lg={12}>
-              <Form.Group controlId="height">
-                <Form.Label>
-                  Height ({measurementSystem === "meters" ? "m" : "ft"}):
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  placeholder={`Enter height in ${
-                    measurementSystem === "meters" ? "meters" : "feet"
-                  }`}
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row className="my-4">
-            <Col xs={12} md={6} lg={12}>
-              <Form.Group controlId="width">
-                <Form.Label>
-                  Width ({measurementSystem === "meters" ? "m" : "ft"}):
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  placeholder={`Enter width in ${
-                    measurementSystem === "meters" ? "meters" : "feet"
-                  }`}
-                  value={width}
-                  onChange={(e) => setWidth(e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <Button
-            variant="primary"
-            onClick={calculateArea}
-            className="btn-calculate mt-2 mb-4 w-70"
-          >
-            Calculate Area
-          </Button>
-          {areaFeet > 0 && (
-            <div className="result mt-4 mb-4">
-              <h3 className="mb-3 mt-3">Results:</h3>
-              <p>Area in Square Feet: {areaFeet.toFixed(2)} sq ft</p>
-              <p>Area in Square Meters: {areaMeters.toFixed(2)} sq m</p>
-            </div>
-          )} */}
           <Row>
             <Col xs={12} md={6} lg={4} className="my-4">
               <Form.Group controlId="ceilingHeight">
@@ -641,12 +604,13 @@ useEffect(() => {
                     <option>Bedroom 3</option>
                     <option>Bedroom 4</option>
                     <option>Bedroom 5</option>
-                    <option>Living Room</option>
-                    <option>Dining Room</option>
-                    <option>Kitchen</option>
                     <option>Bathroom</option>
-                    <option>Terrace</option>
+                    <option>Dining Room</option>
+                    <option>Family Room</option>
+                    <option>Living Room</option>
+                    <option>Kitchen</option>
                     <option>Loft</option>
+                    <option>Terrace</option>
                     <option>Single Storey</option>
                     <option>Double Storey</option>
                     <option>Split Level House</option>
@@ -674,9 +638,9 @@ useEffect(() => {
               <Button
                 variant="primary"
                 onClick={() => removeRoom(index)}
-              className="btn-add mb-3 mt-4"
+                className="btn-add mb-3 mt-4"
               >
-              Clean <i className="fas fa-trash"></i>
+                Clean <i className="fas fa-trash"></i>
               </Button>
             </Row>
           ))}
@@ -789,9 +753,17 @@ useEffect(() => {
       {btuResults.length > 0 && (
         <Container className="btu-results mt-4">
           <h3 className="text-center">BTU Results</h3>
-          <Button onClick={handlePrint} className="go-to-btn btn-text mb-3">
-            <i className="bi bi-printer-fill me-2"></i> Print Table
+          <Button
+            variant="light"
+            size="sm"
+            className="go-to-btn btn-text  w-auto pt-2"
+            onClick={() => {
+              handlePrint();
+            }}
+          >
+            Print Table
           </Button>
+
           <div ref={componentRef}>
             <div id="table-responsive" className="table">
               <Table bordered hover className="table-responsive-md">
@@ -804,8 +776,9 @@ useEffect(() => {
                     <th>Product Price, ($)</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {rooms.map((room, index) => {
+                <TableBody
+                  data={rooms}
+                  renderRow={(room, index) => {
                     const product = products[index] || {};
                     return (
                       <tr key={index}>
@@ -817,7 +790,7 @@ useEffect(() => {
                               to={`/product/${product.slug}`}
                               className="link-product-details"
                             >
-                              {product.model || "N/A"}{" "}
+                              {product.model || "N/A"}
                             </Link>
                           ) : (
                             "No product available"
@@ -838,68 +811,66 @@ useEffect(() => {
                         </td>
                       </tr>
                     );
-                  })}
-                  <tr>
-                    <td data-label="Total" className="total-results bg-light">
-                      <strong>Total</strong>
-                    </td>
-                    <td
-                      data-label="Total Room Btu"
-                      className="total-results bg-light"
-                    >
-                      <strong>{totalBTU}</strong>
-                    </td>
-                    <td
-                      data-label="Total Optimal Products"
-                      className="total-results bg-light"
-                    >
-                      <strong>
-                        {optimalProductCount || "No optimal product available"}
-                      </strong>
-                    </td>
-                    <td
-                      data-label="Total Product BTU"
-                      className="total-results bg-light"
-                    >
-                      <strong>
-                        {products
-                          .reduce(
-                            (total, product) => total + (product.btu || 0),
-                            0
-                          )
-                          .toFixed(0)}
-                      </strong>
-                    </td>
-                    <td
-                      data-label="Total Product Price"
-                      className="total-results bg-light"
-                    >
-                      <strong>
-                        {products.length > 0
-                          ? products
-                              .reduce((total, product) => {
-                                const price =
-                                  product.price -
-                                  (product.price * (product.discount || 0)) /
-                                    100;
-                                return total + price;
-                              }, 0)
-                              .toFixed(2)
-                          : "No price available"}
-                      </strong>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="total-results text-center"
-                      style={{ fontWeight: "bold", fontSize: "1.1em" }}
-                    >
-                      Total Cooling Load: {displayValue} {selectedUnit}
-                    </td>
-                  </tr>
-                </tbody>
+                  }}
+                />{" "}
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="total-results text-center"
+                    style={{ fontWeight: "bold", fontSize: "1.1em" }}
+                  >
+                    Total Cooling Load: {displayValue} {selectedUnit}
+                  </td>
+                </tr>
+                <tr>
+                  <td data-label="Total" className="total-results bg-light">
+                    <strong>Total</strong>
+                  </td>
+                  <td
+                    data-label="Total Room Btu"
+                    className="total-results bg-light"
+                  >
+                    <strong>{totalBTU}</strong>
+                  </td>
+                  <td
+                    data-label="Total Optimal Products"
+                    className="total-results bg-light"
+                  >
+                    <strong>
+                      {optimalProductCount || "No optimal product available"}
+                    </strong>
+                  </td>
+                  <td
+                    data-label="Total Product BTU"
+                    className="total-results bg-light"
+                  >
+                    <strong>
+                      {products
+                        .reduce(
+                          (total, product) => total + (product.btu || 0),
+                          0
+                        )
+                        .toFixed(0)}
+                    </strong>
+                  </td>
+                  <td
+                    data-label="Total Product Price"
+                    className="total-results bg-light"
+                  >
+                    <strong>
+                      {products.length > 0
+                        ? products
+                            .reduce((total, product) => {
+                              const price =
+                                product.price -
+                                (product.price * (product.discount || 0)) / 100;
+                              return total + price;
+                            }, 0)
+                            .toFixed(2)
+                        : "No price available"}
+                    </strong>
+                  </td>
+                </tr>
               </Table>
             </div>
           </div>
@@ -912,7 +883,7 @@ useEffect(() => {
               Save to Cart
             </Button>
           </div>
-          {showCondenser && (
+          {setShowCondenser && (
             <tr className="text-center">
               <td colSpan="5" className="text-center bg-light ">
                 <strong>

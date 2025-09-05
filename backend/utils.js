@@ -29,6 +29,10 @@ export const generateToken = (user) => {
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
+      // CORRECTED: Add the isServiceProvider property
+      isServiceProvider: user.isServiceProvider,
+      // CORRECTED: Add the type property for filtering notifications
+      type: user.isServiceProvider ? 'serviceProvider' : 'user',
     },
     process.env.JWT_SECRET,
     {

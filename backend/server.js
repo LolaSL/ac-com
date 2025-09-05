@@ -15,17 +15,24 @@ import annotationRoutes from './routes/annotationRoutes.js'
 import path from "path";
 import cors from 'cors';
 import bodyParser from 'body-parser';
-
+import Notification from './models/notificationModel.js';
 
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGODB_URI).then(() => {
-    console.log("Connected to Mongo DB")
-})
-    .catch((err) => {
-        console.log(err.message);
-    })
+async function start() {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI); // no extra options needed
+    console.log("Connected to MongoDB");
+
+    const notifications = await Notification.find();
+    console.log(notifications);
+  } catch (err) {
+    console.error("MongoDB connection error:", err.message);
+  }
+}
+
+start();
 
 const app = express();
 

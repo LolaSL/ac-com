@@ -19,7 +19,8 @@ const generateToken = (serviceProvider) => {
       _id: serviceProvider._id,
       name: serviceProvider.name,
       email: serviceProvider.email,
-      isServiceProvider: true
+      isServiceProvider: true,
+      type: 'serviceProvider'
     },
     process.env.JWT_SECRET,
     {
@@ -447,20 +448,19 @@ serviceProviderRouter.post(
   })
 );
 
-
 serviceProviderRouter.post(
   '/login',
   expressAsyncHandler(async (req, res) => {
     const { email, password } = req.body;
-
     const serviceProvider = await ServiceProvider.findOne({ email });
-
+    
     if (serviceProvider && (await serviceProvider.matchPassword(password))) {
       res.send({
         _id: serviceProvider._id,
         name: serviceProvider.name,
         email: serviceProvider.email,
-        isAdmin: serviceProvider.isAdmin,
+        isServiceProvider: true,
+        type: 'serviceProvider',
         token: generateToken(serviceProvider),
       });
     } else {
@@ -468,6 +468,7 @@ serviceProviderRouter.post(
     }
   })
 );
+
 
 serviceProviderRouter.post(
   '/admin/create',

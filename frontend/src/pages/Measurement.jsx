@@ -67,7 +67,8 @@ const Measurement = () => {
         <h1 className="mt-4 mb-4 title-measurement">
           Measurement Service System
         </h1>
-        <PdfHelpVideo />
+      <div className=" flex-row d-flex">
+           <PdfHelpVideo />
         <Sidebar
           savedPdfs={savedPdfs}
           fetchSavedPdfs={fetchSavedPdfs}
@@ -75,10 +76,11 @@ const Measurement = () => {
           setRoomData={setRoomData}
         />
         <BtuModalWindow />
+          </div>    
         <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData}   roomData={roomData} />
         <BtuCalculator roomData={roomData} />
         <div className="mt-4 mb-4">
-          <Link to="/" className="go-to-btn btn-text">
+          <Link to="/" className="go-to-btn btn-text w-auto">
             Back to Home
           </Link>
         </div>

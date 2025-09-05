@@ -2,34 +2,28 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import Notification from '../models/notificationModel.js';
-import { isAuth, isAdmin } from '../utils.js';
+import { isAuth, isAdmin } from '../utils.js'
 
 const notificationRouter = express.Router();
+
 
 
 notificationRouter.get(
   '/',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    let notifications;
+    console.log('User type from token:', req.user.type);
+    const filter = { recipientType: req.user.type };
+    console.log('Database query filter:', filter);
 
-    if (req.user.isAdmin) {
-  
-      notifications = await Notification.find().sort({ createdAt: -1 });
-    } else {
- 
-      notifications = await Notification.find({
-        $or: [
-          { recipientType: 'admin' },
-          { recipientType: req.user.type }, 
-        ],
-      }).sort({ createdAt: -1 });
-    }
+   const notifications = await Notification.find(filter)
+  .sort({ createdAt: -1 })
+  .lean({ virtuals: true }); // ✅ include virtuals
+console.log(notifications[0].localDate); // "2025-09-05"
 
-    res.json(notifications);
+res.json(notifications);
   })
 );
-
 
 
 notificationRouter.put(
@@ -59,7 +53,7 @@ notificationRouter.post(
       title,
       message,
       type,
-      recipientType,  
+      recipientType,
     });
 
     const createdNotification = await notification.save();

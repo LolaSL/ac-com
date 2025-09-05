@@ -192,40 +192,38 @@ const Sidebar = () => {
   };
 
   const overlayAnnotations = (context, annotations) => {
-    const canvasWidth = context.canvas.width;
+     const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
 
     if (annotations?.rectangles) {
-      annotations.rectangles.forEach((rect) => {
-        const x = rect.xPercent * canvasWidth;
-        const y = rect.yPercent * canvasHeight;
-        const width = rect.widthPercent * canvasWidth;
-        const height = rect.heightPercent * canvasHeight;
+        annotations.rectangles.forEach((rect) => {
+            const x = rect.xPercent * canvasWidth;
+            const y = rect.yPercent * canvasHeight;
+            const width = rect.widthPercent * canvasWidth;
+            const height = rect.heightPercent * canvasHeight;
 
-        const angle = rect.rotation % 360;
-        const normalizedRotation = angle === 90 || angle === -270 ? 90 : 0;
-        const rotationAngle = normalizedRotation * (Math.PI / 180);
+            // Rotation in radians
+            const angle = (rect.rotation || 0) * (Math.PI / 180);
 
-        const rotatedWidth = normalizedRotation === 90 ? height : width;
-        const rotatedHeight = normalizedRotation === 90 ? width : height;
+            context.save();
 
-        const centerX = x + rotatedWidth / 2;
-        const centerY = y + rotatedHeight / 2;
+            // Translate to the top-left corner of the rectangle
+            context.translate(x, y);
 
-        context.save();
-        context.translate(centerX, centerY);
-        context.rotate(rotationAngle);
+            // Rotate the context around the origin (which is now the top-left corner)
+            context.rotate(angle);
 
-        context.beginPath();
-        context.rect(-width / 2, -height / 2, width, height);
-        context.fillStyle = rect.fill || "rgba(20, 205, 230, 0.4)";
-        context.fill();
-        context.lineWidth = 2;
-        context.strokeStyle = rect.stroke || "black";
-        context.stroke();
+            // Draw the rectangle at the new origin (0, 0)
+            context.beginPath();
+            context.rect(0, 0, width, height);
+            context.fillStyle = rect.fill || "rgba(20, 205, 230, 0.4)";
+            context.fill();
+            context.lineWidth = 2;
+            context.strokeStyle = rect.stroke || "black";
+            context.stroke();
 
-        context.restore();
-      });
+            context.restore();
+        });
     }
 
     if (annotations?.lines) {
@@ -248,48 +246,45 @@ const Sidebar = () => {
     }
 
     if (annotations?.comments) {
-  annotations.comments.forEach((comment) => {
-    const x = comment.xPercent * canvasWidth;
-    const y = comment.yPercent * canvasHeight;
-    const padding = 10;
-    const fontSize = 17;
-    const text = comment.text;
+      annotations.comments.forEach((comment) => {
+        const x = comment.xPercent * canvasWidth;
+        const y = comment.yPercent * canvasHeight;
+        const padding = 10;
+        const fontSize = 17;
+        const text = comment.text;
 
-    context.font = `bold ${fontSize}px Arial`;
-    const textWidth = context.measureText(text).width;
-    const textHeight = fontSize;
+        context.font = `bold ${fontSize}px Arial`;
+        const textWidth = context.measureText(text).width;
+        const textHeight = fontSize;
 
+        context.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
+        context.fillRect(
+          x - padding,
+          y - textHeight - padding,
+          textWidth + padding * 2,
+          textHeight + padding * 2
+        );
 
-    context.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
-    context.fillRect(
-      x - padding,
-      y - textHeight - padding,
-      textWidth + padding * 2,
-      textHeight + padding * 2
-    );
+        context.strokeStyle = "black";
+        context.lineWidth = 1;
+        context.strokeRect(
+          x - padding,
+          y - textHeight - padding,
+          textWidth + padding * 2,
+          textHeight + padding * 2
+        );
 
-  
-    context.strokeStyle = "black";
-    context.lineWidth = 1;
-    context.strokeRect(
-      x - padding,
-      y - textHeight - padding,
-      textWidth + padding * 2,
-      textHeight + padding * 2
-    );
-
-  
-    context.fillStyle = comment.textColor || "#FF1493";
-    context.fillText(text, x, y);
-  });
-}
-
+        context.fillStyle = comment.textColor || "#FF1493";
+        context.fillText(text, x, y);
+      });
+    }
   };
 
   return (
     <>
       <Button
-        className="go-to-btn btn-text me-2 my-2"
+        className="go-to-btn btn-text w-auto"
+              size="sm"
         variant="btn-outline"
         onClick={toggleSidebar}
       >
@@ -326,7 +321,8 @@ const Sidebar = () => {
                     className="d-flex justify-content-between align-items-center pdf-drawing"
                   >
                     <Button
-                      variant="btn-outline"
+                      variant="btn-outline w-auto"
+                      size="sm"
                       onClick={() =>
                         viewPdfWithAnnotations(pdf._id, pdf.filename)
                       }

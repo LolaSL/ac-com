@@ -13,51 +13,44 @@ import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { toast } from "react-toastify";
-import Image from "react-bootstrap/Image";
 import { Container } from "react-bootstrap";
 import printJS from "print-js";
 
 function printOrder() {
   const orderContainer = document.querySelector("#order-container");
+  if (!orderContainer) return;
 
-  if (!orderContainer) {
-    alert("Order details not found.");
-    return;
-  }
+  // Clone so we don’t affect the live DOM
+  const clone = orderContainer.cloneNode(true);
 
-  const paidText = orderContainer.innerText.toLowerCase();
-  const isPaid = paidText.includes("paid at");
+  // Remove unwanted elements
+  clone.querySelectorAll("button").forEach((btn) => btn.remove());
+  clone.querySelectorAll(".cart-thumbnail").forEach((img) => img.remove());
 
-  if (!isPaid) {
-    alert("This order cannot be printed because it is not paid.");
-    return;
-  }
+  // Convert clone to string HTML
+  const html = clone.outerHTML;
 
-printJS({
-  printable: "order-container",
-  type: "html",
-  scanStyles: false,
-  header: `
-    <style>
+  printJS({
+    printable: html,
+    type: "raw-html",   // <-- use raw-html, not html
+    header: `
+      <h1 class="order-title">Order Details</h1>
+    `,
+    style: `
       @media print {
-        .cart-thumbnail {
-          max-width: 100px !important;
-          height: auto !important;
-          margin: 20px;
+        .no-print {
+          display: none !important;
         }
         h1.order-title {
-          font-size: 36px !important; /* bigger */
-          font-weight: bold !important; /* bold */
+          font-size: 36px !important;
+          font-weight: bold !important;
           text-align: center !important;
-          margin-bottom: 30px !important; /* spacing below */
+          margin-bottom: 30px !important;
         }
       }
-    </style>
-    <h1 class="order-title">Order Details</h1>
-  `,
-  documentTitle: "Customer Order",
-});
-
+    `,
+    documentTitle: "Customer Order",
+  });
 }
 
 function reducer(state, action) {
@@ -301,17 +294,12 @@ export default function OrderPage() {
                         >
                           {item.name}
                         </Link>
-                        <Col md={6}>
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            className="img-fluid rounded cart-thumbnail"
-                          ></Image>{" "}
-                        </Col>
                         <Col md={3}>
+                          <strong>Quantity:</strong>{" "}
                           <span>{item.quantity}</span>
                         </Col>
                         <Col md={3}>
+                          <strong>Price:</strong>{" "}
                           <div>${item.price.toFixed(2)}</div>
                         </Col>
                       </Row>
@@ -357,7 +345,10 @@ export default function OrderPage() {
                   {order.isPaid && (
                     <ListGroup.Item>
                       <div className="d-grid">
-                        <Button onClick={printOrder} className="btn btn-info">
+                        <Button
+                          onClick={printOrder}
+                          className="btn btn-info hide-on-print"
+                        >
                           Print Order
                         </Button>
                       </div>

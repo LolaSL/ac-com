@@ -13,11 +13,12 @@ const BtuModalWindow = () => {
   return (
     <>
       <Button
-        className="go-to-btn btn-text"
+        className="go-to-btn btn-text w-auto"
+              size="sm"
         variant="btn-outline"
         onClick={handleShow}
       >
-        How BTU Calculation Works
+       BTU Calculator Tutorial
       </Button>
       <Modal show={show} onHide={() => setShow(false)} centered>
         <Modal.Header closeButton>

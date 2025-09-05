@@ -9,7 +9,7 @@ import { Stage, Layer, Rect, Line, Text } from "react-konva";
 import { Button, Form, Table } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
-import ModalCalculator from "./ModalCalculator.jsx";
+import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -186,6 +186,51 @@ const normalizeRoomType = (raw) =>
     .trim()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
+const normalizeRoomData = (room) => {
+  const widthFt = parseToFeet(room.width);
+  const heightFt = parseToFeet(room.height);
+
+  const areaSqFt = widthFt * heightFt;
+  const areaSqM = areaSqFt * 0.092903;
+
+  return {
+    ...room,
+    width: widthFt ? widthFt.toFixed(2) : "",
+    height: heightFt ? heightFt.toFixed(2) : "",
+    areaSqFt: areaSqFt ? areaSqFt.toFixed(2) : "",
+    areaSqM: areaSqM ? areaSqM.toFixed(2) : "",
+  };
+};
+
+const parseToFeet = (val) => {
+  if (!val) return 0;
+  val = val.trim();
+
+  // feet + inches + optional fraction, e.g., 12' 3 1/2"
+  const feetInchFraction = val.match(/^(\d+)'\s*(\d+)?(?:\s+(\d+)\/(\d+))?"?$/);
+  if (feetInchFraction) {
+    const feet = parseInt(feetInchFraction[1], 10) || 0;
+    const inches = parseInt(feetInchFraction[2], 10) || 0;
+    const numerator = parseInt(feetInchFraction[3], 10) || 0;
+    const denominator = parseInt(feetInchFraction[4], 10) || 1;
+    const frac = numerator && denominator ? numerator / denominator : 0;
+    return feet + (inches + frac) / 12;
+  }
+
+  // feet + decimal inches, e.g., 12' 3.5"
+  const feetInchDecimal = val.match(/^(\d+)'\s*(\d+(?:\.\d+)?)"?$/);
+  if (feetInchDecimal) {
+    const feet = parseInt(feetInchDecimal[1], 10) || 0;
+    const inches = parseFloat(feetInchDecimal[2]) || 0;
+    return feet + inches / 12;
+  }
+
+  // plain decimal or number
+  const num = parseFloat(val);
+  if (!isNaN(num)) return num;
+
+  return 0;
+};
 /**
  * Extracts images from a PDF file using pdfjs-dist.
  * @param {File} file - The PDF file object.
@@ -280,10 +325,6 @@ const runOcrOnImages = async (images, setRoomData) => {
  * @returns {{apartmentType: string|null, totalSf: string|null, rooms: Array<Object>}}
  */
 const parseRoomDataFromText = (rawText, fileName) => {
-  // let text = rawText
-  //   .replace(/[^\x20-\x7E\n\r\t]/g, "")
-  //   .replace(/ﬁ/g, "fi")
-  //   .replace(/(\d+)\s*(?:sq\.?ft|ft²)/gi, "$1 sqft");
   let text = rawText
     // Remove non-ASCII chars
     .replace(/[^\x20-\x7E\n\r\t]/g, "")
@@ -319,16 +360,14 @@ const parseRoomDataFromText = (rawText, fileName) => {
     const splitLines = [];
     if (!Array.isArray(rawLines)) return splitLines;
 
-    // Combine all room patterns into one regex
     const roomMatches = Object.values(roomPatterns)
       .map((pat) => pat.source)
       .join("|");
-    const roomRegex = new RegExp(`(?=${roomMatches})`, "i"); // lookahead split
+    const roomRegex = new RegExp(`(?=${roomMatches})`, "i");
 
     rawLines.forEach((line) => {
       if (!line || typeof line !== "string") return;
 
-      // Remove extra OCR noise before splitting
       line = line
         .replace(/[^\x20-\x7E]/g, " ")
         .replace(/\s+/g, " ")
@@ -353,10 +392,8 @@ const parseRoomDataFromText = (rawText, fileName) => {
 
   const apartmentTypes = getApartmentTypes(text);
   const apartmentType = apartmentTypes[0] || null;
-  // console.log(apartmentTypes);
   const cleanedApartmentTypes = apartmentTypes
     .map((type) => {
-      // Keep only the part starting with "1 Bedroom" or "Studio/Loft"
       const match = type.match(
         /\b(\d+\s+Bedroom\s+Apartment\s*-\s*Model\s*[A-Z\d]+|Studio\s+Apartment|Loft\s+Apartment)\b/i
       );
@@ -390,23 +427,15 @@ const parseRoomDataFromText = (rawText, fileName) => {
 
     let normalized = String(line).toLowerCase();
 
-    // Step 1: Normalize common character transcription errors first
-    // Replaces smart quotes and other variations with standard ones
     normalized = normalized.replace(/[“”„]/g, '"');
     normalized = normalized.replace(/[‘’`´]/g, "'");
 
-    // Step 2: Remove a list of known junk characters (e.g., from OCR)
     normalized = normalized.replace(/[|()[\]:;={}]/g, " ");
 
-    // Step 3: Replace any character that isn't a letter, number, whitespace,
-    // or a core symbol like a quote, apostrophe, or hashtag with a space.
-    // This is a more refined version of your original regex.
     normalized = normalized.replace(/[^a-z0-9\s#'"x/.]/g, " ");
 
-    // Step 4: Collapse multiple spaces into a single one
     normalized = normalized.replace(/\s+/g, " ");
 
-    // Step 5: Trim leading and trailing whitespace
     return normalized.trim();
   };
   const fixAreaUnit = (s) =>
@@ -415,9 +444,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
   const areaValuePattern = /(\d+(?:[.,]\d{1,2})?)\s*m(?:²|[?®*])?/gi;
 
   const getNearestRoomType = (roomCandidates) => {
-    // Sort by distance first, then by predefined priority
     roomCandidates.sort((a, b) => {
-      // Prioritize exact matches (distance 0) significantly
       const aScore = a.distance === 0 ? -100 : a.distance;
       const bScore = b.distance === 0 ? -100 : b.distance;
 
@@ -559,7 +586,6 @@ const parseRoomDataFromText = (rawText, fileName) => {
       foundRoomType = "patioDeck";
     }
 
-    // 2️⃣ Bedrooms — only assign if no explicit room type detected
     if (
       !foundRoomType &&
       /\b(mstr|master)\s*(bed|bdrm|br)?\b/i.test(sameLine)
@@ -613,14 +639,12 @@ const parseRoomDataFromText = (rawText, fileName) => {
       foundRoomType = "livingDiningRoom";
     }
 
-    // Only normalize bedroom types here
     if (
       foundRoomType === "bedroom" ||
       foundRoomType === "secondBedroom" ||
       foundRoomType === "masterBedroom" ||
       foundRoomType === "primaryBedroom"
     ) {
-      // Ensure the candidate really is a bedroom line
       if (/bed(room)?|bdrm|br/i.test(normalizedLine)) {
         if (!table.some((r) => r.roomType === "Primary Bedroom")) {
           foundRoomType = "primaryBedroom";
@@ -634,7 +658,6 @@ const parseRoomDataFromText = (rawText, fileName) => {
 
     let normalizedRoomType = normalizeRoomType(foundRoomType);
 
-    // Fix messy OCR variants like "BATH a"
     normalizedRoomType = normalizedRoomType.replace(
       /\b(Bath|Bth|Bthrm|Dush)(?:\s*a)?\b/i,
       "Bathroom"
@@ -753,10 +776,9 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
   const [images, setImages] = useState([]);
   const [sortKey, setSortKey] = useState("roomType");
-  const [sortOrder, setSortOrder] = useState("asc"); // or 'desc'
+  const [sortOrder, setSortOrder] = useState("asc");
   const [filterText, setFilterText] = useState("");
   const [pdfInfo, setPdfInfo] = useState(null);
-  // Add this line with your other useState calls
   const [editingRoomId, setEditingRoomId] = useState(null);
   const [allRooms, setAllRooms] = useState([]);
   const [editingRoomData, setEditingRoomData] = useState(null);
@@ -856,14 +878,14 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
 
         const { text, ocrWords } = await runOcrOnImages(extractedImages);
         const { apartmentType, totalSf, rooms } = parseRoomDataFromText(text);
-
+        const normalizedRooms = rooms.map(normalizeRoomData);
         output.push({
           fileName: file.name,
           text,
           ocrWords,
           apartmentType,
           totalSf,
-          rooms,
+          rooms: normalizedRooms,
         });
         console.log(text);
         if (!previewUrl) {
@@ -889,16 +911,14 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
   const generateUniqueId = () => {
     return `id-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
   };
-  // Initialize rooms for this file if not yet
-  // Find this useEffect block
+
   useEffect(() => {
     if (results) {
       setAllRooms(
         results.map((result) => {
-          // For each file, map over its rooms and add a unique ID
           const roomsWithIds = (result.rooms || []).map((room) => ({
             ...room,
-            uniqueId: generateUniqueId(), // Use the new generator here too
+            uniqueId: generateUniqueId(),
           }));
           return roomsWithIds;
         })
@@ -907,25 +927,28 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
   }, [results]);
 
   const handleAddRoom = (fileIdx) => {
-    console.log("Add Room button clicked for fileIdx:", fileIdx);
-    // Basic validation...
-    if (!newRoom.roomType.trim()) {
-      alert("Room Type is required.");
-      return;
-    }
-
     setAllRooms((prev) => {
       const updated = [...prev];
-      if (!Array.isArray(updated[fileIdx])) {
-        updated[fileIdx] = [];
-      }
-      // Use the new generator to ensure the ID is unique
-      updated[fileIdx] = [
-        ...updated[fileIdx],
-        { ...newRoom, uniqueId: generateUniqueId() },
-      ];
+
+      const widthFt = parseToFeet(newRoom.width);
+      const heightFt = parseToFeet(newRoom.height);
+
+      const areaSqFt = widthFt * heightFt;
+      const areaSqM = areaSqFt * 0.092903;
+
+      const roomWithAreas = {
+        ...newRoom,
+        width: widthFt.toFixed(2),
+        height: heightFt.toFixed(2),
+        areaSqFt: areaSqFt.toFixed(2),
+        areaSqM: areaSqM.toFixed(2),
+        uniqueId: Date.now() + Math.random(),
+      };
+
+      updated[fileIdx] = [...(updated[fileIdx] || []), roomWithAreas];
       return updated;
     });
+
     setNewRoom({
       roomType: "",
       width: "",
@@ -935,65 +958,80 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     });
   };
 
-  // Start editing a room
   const handleEditClick = (room, roomIdx, fileIdx) => {
     setEditingRoomData({ ...room });
     setEditingRoomIdx(roomIdx);
     setEditingFileIdx(fileIdx);
-    // Store the stable, unique ID for saving later
     setEditingRoomId(room.uniqueId);
   };
 
-  // Cancel editing
   const handleCancelEdit = () => {
     setEditingRoomData(null);
     setEditingRoomIdx(null);
     setEditingFileIdx(null);
   };
 
-  // Handle changes in the edit input fields
   const handleEditingChange = (field, value) => {
-    setEditingRoomData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    const newEditingRoomData = { ...editingRoomData, [field]: value };
+
+    const parseFeetAndInches = (inputValue) => {
+      if (inputValue.includes("'") || inputValue.includes('"')) {
+        const parts = inputValue.split(/[ '"]+/).filter(Boolean);
+        const feet = parseFloat(parts[0]) || 0;
+        const inches = parseFloat(parts[1]) || 0;
+        return feet + inches / 12;
+      } else {
+        return parseFloat(inputValue);
+      }
+    };
+
+    if (field === "width" || field === "height") {
+      const newWidth = parseFeetAndInches(newEditingRoomData.width);
+      const newHeight = parseFeetAndInches(newEditingRoomData.height);
+
+      if (!isNaN(newWidth) && !isNaN(newHeight)) {
+        const areaSqFt = (newWidth * newHeight).toFixed(2);
+        const areaSqM = (areaSqFt * 0.092903).toFixed(2);
+
+        newEditingRoomData.areaSqFt = areaSqFt;
+        newEditingRoomData.areaSqM = areaSqM;
+      } else {
+        newEditingRoomData.areaSqFt = "Invalid input";
+        newEditingRoomData.areaSqM = "Invalid input";
+      }
+    }
+
+    setEditingRoomData(newEditingRoomData);
   };
 
-  // Save the edited room
   const handleSaveEdit = () => {
     setAllRooms((prev) => {
       const updated = [...prev];
       const roomsForFile = updated[editingFileIdx];
 
       if (roomsForFile) {
-        // Find the ORIGINAL index of the room using its unique ID
         const roomToUpdateIndex = roomsForFile.findIndex(
           (r) => r.uniqueId === editingRoomId
         );
 
-        // Check if the room was found before trying to update it
         if (roomToUpdateIndex !== -1) {
-          // Update the room at its stable, original position
           roomsForFile[roomToUpdateIndex] = { ...editingRoomData };
         }
       }
       return updated;
     });
 
-    // Reset all editing state variables after saving
     setEditingRoomData(null);
     setEditingRoomIdx(null);
     setEditingFileIdx(null);
     setEditingRoomId(null);
   };
 
-  // Delete a room
   const handleDeleteRoom = (roomId, fileIdx) => {
     setAllRooms((prev) => {
       const updated = [...prev];
-      // Ensure the array for the current file exists and is an array
+
       if (Array.isArray(updated[fileIdx])) {
-        // Filter out the room that has the matching unique ID
         updated[fileIdx] = updated[fileIdx].filter(
           (room) => room.uniqueId !== roomId
         );
@@ -1008,17 +1046,16 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       const commentText = prompt("Enter your ac unit number (ac1, ac2, ...):");
 
       if (commentText) {
-        // Check if the same comment already exists based on the comment text
         const existingComment = comments.some(
           (comment) => comment.text.toLowerCase() === commentText.toLowerCase()
         );
 
         if (existingComment) {
           alert("This comment already exists.");
-          return; // Don't add the comment if it already exists
+          return;
         }
 
-        const newRectId = Date.now(); // Now, we create the new rectId after checking for duplicates
+        const newRectId = Date.now();
 
         const newRect = {
           id: newRectId,
@@ -1177,7 +1214,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       })
     );
   };
-  
+
   const rotateRectangle = useCallback((rectId) => {
     console.log("rotateRectangle called for:", rectId);
 
@@ -1188,25 +1225,6 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       )
     );
   }, []);
-// const rotateRectangle = useCallback((rectId) => {
-//   setRectangles((prevRects) =>
-//     prevRects.map((rect) => {
-//       if (rect.id === rectId) {
-//         // new rotation
-//         const newRotation = (rect.rotation + 90) % 360;
-
-//         // swap width/height if rotated 90° or 270°
-//         let { width, height } = rect;
-//         if (newRotation % 180 !== 0) {
-//           [width, height] = [height, width];
-//         }
-
-//         return { ...rect, rotation: newRotation, width, height };
-//       }
-//       return rect;
-//     })
-//   );
-// }, []);
 
   const renderComments = useCallback(
     (context) => {
@@ -1280,30 +1298,20 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     if (!context) return;
   }, []);
 
-  // const drawRotatedRectangle = useCallback(
-  //   (context, x, y, width, height, angle) => {
-  //     context.save();
-  //     context.translate(x, y);
-  //     context.rotate(angle);
-  //     context.fillRect(-width / 2, -height / 2, width, height);
-  //     context.restore();
-  //   },
-  //   []
-  // );
-const drawRotatedRectangle = useCallback(
-  (context, x, y, width, height, angle) => {
-    // compute center
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
+  const drawRotatedRectangle = useCallback(
+    (context, x, y, width, height, angle) => {
+      // compute center
+      const centerX = x + width / 2;
+      const centerY = y + height / 2;
 
-    context.save();
-    context.translate(centerX, centerY); // move to center
-    context.rotate(angle * (Math.PI / 180)); // convert degrees to radians
-    context.fillRect(-width / 2, -height / 2, width, height); // draw centered
-    context.restore();
-  },
-  []
-);
+      context.save();
+      context.translate(centerX, centerY);
+      context.rotate(angle * (Math.PI / 180));
+      context.fillRect(-width / 2, -height / 2, width, height);
+      context.restore();
+    },
+    []
+  );
 
   const renderPDFOnCanvas = useCallback(
     async (pdfData) => {
@@ -1847,32 +1855,33 @@ const drawRotatedRectangle = useCallback(
                   <h6 className="fw-semibold mt-4 mb-3">
                     Classified Room Data Table
                   </h6>
+                  <div className="mb-3 d-flex d-inline flex-sm-row gap-3 align-items-start align-sm-items-center">
+                    <div className="d-inline flex-sm-row gap-2 mt-2 mt-sm-0">
+                      <input
+                        type="text"
+                        placeholder="Filter by room type"
+                        value={filterText}
+                        onChange={(e) => setFilterText(e.target.value)}
+                        className="form-control flex-grow-1 my-2"
+                      />
 
-                  <div className="mb-3 d-flex gap-3 align-items-center">
-                    <input
-                      type="text"
-                      placeholder="Filter by room type"
-                      value={filterText}
-                      onChange={(e) => setFilterText(e.target.value)}
-                      className="form-control w-auto"
-                    />
-
-                    <select
-                      value={sortKey}
-                      onChange={(e) => setSortKey(e.target.value)}
-                      className="form-select w-auto"
-                    >
-                      <option value="roomType">Room Type</option>
-                      <option value="width">Width</option>
-                      <option value="height">Height</option>
-                      <option value="areaSqft">Area (sqft)</option>
-                      <option value="areaSqm">Area (sqm)</option>
-                    </select>
-
-                    <div className="container button-group">
+                      <select
+                        value={sortKey}
+                        onChange={(e) => setSortKey(e.target.value)}
+                        className="form-select flex-grow-1"
+                      >
+                        <option value="roomType">Room Type</option>
+                        <option value="width">Width</option>
+                        <option value="height">Height</option>
+                        <option value="areaSqft">Area (sqft)</option>
+                        <option value="areaSqm">Area (sqm)</option>
+                      </select>
+                    </div>
+                    <div className="d-inline flex-sm-row gap-2 mt-2 mt-sm-0">
                       <Button
                         variant="light"
-                        className="go-to-btn btn-text"
+                        size="sm"
+                        className="go-to-btn btn-text  w-auto pt-2"
                         onClick={() =>
                           setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                         }
@@ -1883,7 +1892,8 @@ const drawRotatedRectangle = useCallback(
 
                       <Button
                         variant="light"
-                        className="go-to-btn btn-text"
+                        size="sm"
+                        className="go-to-btn btn-text  w-auto pt-2"
                         onClick={() =>
                           handleExportExcelStyled(
                             filteredRoomsForTable,
@@ -1893,11 +1903,8 @@ const drawRotatedRectangle = useCallback(
                       >
                         Export Excel
                       </Button>
-
-                      <ModalCalculator />
                     </div>
                   </div>
-                  {/* Add New Room Form */}
                   <div className="mb-3 mt-2">
                     <input
                       type="text"
@@ -1910,7 +1917,7 @@ const drawRotatedRectangle = useCallback(
                     />
                     <input
                       type="text"
-                      placeholder="Width"
+                      placeholder="Enter width in decimal ft e.g., 10.5 for 10'6 "
                       value={newRoom.width}
                       onChange={(e) =>
                         setNewRoom({ ...newRoom, width: e.target.value })
@@ -1919,54 +1926,37 @@ const drawRotatedRectangle = useCallback(
                     />
                     <input
                       type="text"
-                      placeholder="Height"
+                      placeholder="Enter height in decimal ft e.g., 10.5 for 10'6"
                       value={newRoom.height}
                       onChange={(e) =>
                         setNewRoom({ ...newRoom, height: e.target.value })
                       }
                       className="form-control"
                     />
-                    <input
-                      type="number"
-                      placeholder="Area (sqft)"
-                      value={newRoom.areaSqFt}
-                      onChange={(e) =>
-                        setNewRoom({ ...newRoom, areaSqFt: e.target.value })
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Area (sqm)"
-                      value={newRoom.areaSqM}
-                      onChange={(e) =>
-                        setNewRoom({ ...newRoom, areaSqM: e.target.value })
-                      }
-                      className="form-control"
-                    />
                     <Button
-                      variant="primary"
+                      variant="light"
+                      size="sm"
+                      className="go-to-btn btn-text w-auto"
                       onClick={() => handleAddRoom(fileIdx)}
-                      className="btn-text"
                     >
                       Add Room
                     </Button>
                   </div>
-
-                  {/* Room Table */}
                   {filteredRoomsForTable?.length > 0 ? (
                     <Table striped bordered hover responsive>
                       <thead>
                         <tr>
                           <th>Room Type</th>
-                          <th>Width</th>
-                          <th>Height</th>
+                          <th>Width (ft)</th>
+                          <th>Height (ft)</th>
                           <th>Area (sqft)</th>
                           <th>Area (sqm)</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {filteredRoomsForTable.map((room, roomIdx) => {
+                      <TableBody
+                        data={filteredRoomsForTable}
+                        renderRow={(room, roomIdx) => {
                           const isEditing =
                             editingRoomIdx === roomIdx &&
                             editingFileIdx === fileIdx;
@@ -2001,7 +1991,7 @@ const drawRotatedRectangle = useCallback(
                                     }
                                   />
                                 ) : (
-                                  room.width
+                                  `${room.width} ft`
                                 )}
                               </td>
                               <td>
@@ -2017,7 +2007,7 @@ const drawRotatedRectangle = useCallback(
                                     }
                                   />
                                 ) : (
-                                  room.height
+                                  `${room.height} ft`
                                 )}
                               </td>
                               <td>
@@ -2033,7 +2023,7 @@ const drawRotatedRectangle = useCallback(
                                     }
                                   />
                                 ) : (
-                                  room.areaSqFt
+                                  `${room.areaSqFt} sqft`
                                 )}
                               </td>
                               <td>
@@ -2049,7 +2039,7 @@ const drawRotatedRectangle = useCallback(
                                     }
                                   />
                                 ) : (
-                                  room.areaSqM
+                                  `${room.areaSqM} sqm`
                                 )}
                               </td>
                               <td>
@@ -2095,8 +2085,8 @@ const drawRotatedRectangle = useCallback(
                               </td>
                             </tr>
                           );
-                        })}
-                      </tbody>
+                        }}
+                      />
                     </Table>
                   ) : (
                     <p className="fst-italic text-secondary">
@@ -2114,15 +2104,17 @@ const drawRotatedRectangle = useCallback(
           <>
             <Button
               variant="btn-outline"
+              size="sm"
               onClick={saveToBackend}
               disabled={isSaving}
-              className="mt-2 me-2 go-to-btn btn-text mb-3"
+              className="mt-2 me-2 go-to-btn btn-text mb-3 w-auto"
             >
               {isSaving ? "Saving..." : "Save PDF File"}{" "}
             </Button>
             <Button
               variant="btn-outline"
-              className="mt-2 mb-3 go-to-btn btn-text"
+              size="sm"
+              className="mt-2 mb-3 go-to-btn btn-text w-auto"
               onClick={clearCanvas}
             >
               Clear
@@ -2146,100 +2138,100 @@ const drawRotatedRectangle = useCallback(
                   height={pdfSize.height}
                   onClick={handleCanvasEvent}
                 />
-              
 
-              <Stage
-                ref={stageRef}
-                width={pdfSize.width}
-                height={pdfSize.height}
-                onClick={handleStageClick}
-                onContextMenu={handleRectangleRightClick}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                }}
-              >
-                <Layer>
-                  {lines.map((line) => (
-                    <Line
-                      key={line.id}
-                      points={line.points}
-                      stroke={line.stroke}
-                      strokeWidth={line.strokeWidth}
-                    />
-                  ))}
-                </Layer>
-                <Layer>
-                  {rectangles.map((rect) => (
-                    <React.Fragment key={rect.id}>
-                      <Rect
-                        key={rect.id}
-                        id={rect.id}
-                        name="rect"
-                        x={rect.x}
-                        y={rect.y}
-                        width={rect.width}
-                        height={rect.height}
-                        fill={rect.fill}
+                <Stage
+                  ref={stageRef}
+                  width={pdfSize.width}
+                  height={pdfSize.height}
+                  onClick={handleStageClick}
+                  onContextMenu={handleRectangleRightClick}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                >
+                  <Layer>
+                    {lines.map((line) => (
+                      <Line
+                        key={line.id}
+                        points={line.points}
+                        stroke={line.stroke}
+                        strokeWidth={line.strokeWidth}
+                      />
+                    ))}
+                  </Layer>
+                  <Layer>
+                    {rectangles.map((rect) => (
+                      <React.Fragment key={rect.id}>
+                        <Rect
+                          key={rect.id}
+                          id={rect.id}
+                          name="rect"
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height={rect.height}
+                          fill={rect.fill}
+                          draggable={true}
+                          rotation={rect.rotation}
+                          onContextMenu={(event) => {
+                            event.evt.preventDefault();
+                            event.cancelBubble = true;
+                            const clickedRectId = event.target.attrs.id;
+                            console.log(
+                              "Rectangle right-clicked (removing)",
+                              clickedRectId
+                            );
+
+                            setRectangles((prevRects) =>
+                              prevRects.filter((r) => r.id !== clickedRectId)
+                            );
+
+                            setComments((prevComments) =>
+                              prevComments.filter(
+                                (comment) => comment.rectId !== clickedRectId
+                              )
+                            );
+                            setLines((prevLines) =>
+                              prevLines.filter(
+                                (line) => line.rectId !== clickedRectId
+                              )
+                            );
+                          }}
+                          onDragMove={handleDragMove}
+                          onDragEnd={handleDragEnd}
+                          onClick={(event) => {
+                            console.log(
+                              "Rectangle clicked",
+                              event.target.attrs.id
+                            );
+                            event.cancelBubble = true;
+                            const clickedRectId = event.target.attrs.id;
+                            setIsRotating(true);
+                            rotateRectangle(clickedRectId);
+                            setTimeout(() => setIsRotating(false), 100);
+                          }}
+                          onTouchStart={handleTouchStart}
+                        />
+                      </React.Fragment>
+                    ))}
+                    {comments.map((comment) => (
+                      <Text
+                        key={comment.id}
+                        id={comment.id}
+                        x={comment.x}
+                        y={comment.y}
+                        text={""}
+                        fill={comment.fill}
                         draggable={true}
-                        rotation={rect.rotation}
-                        onContextMenu={(event) => {
-                          event.evt.preventDefault();
-                          event.cancelBubble = true;
-                          const clickedRectId = event.target.attrs.id;
-                          console.log(
-                            "Rectangle right-clicked (removing)",
-                            clickedRectId
-                          );
-
-                          setRectangles((prevRects) =>
-                            prevRects.filter((r) => r.id !== clickedRectId)
-                          );
-
-                          setComments((prevComments) =>
-                            prevComments.filter(
-                              (comment) => comment.rectId !== clickedRectId
-                            )
-                          );
-                          setLines((prevLines) =>
-                            prevLines.filter(
-                              (line) => line.rectId !== clickedRectId
-                            )
-                          );
-                        }}
                         onDragMove={handleDragMove}
                         onDragEnd={handleDragEnd}
-                        onClick={(event) => {
-                          console.log(
-                            "Rectangle clicked",
-                            event.target.attrs.id
-                          );
-                          event.cancelBubble = true;
-                          const clickedRectId = event.target.attrs.id;
-                          setIsRotating(true);
-                          rotateRectangle(clickedRectId);
-                          setTimeout(() => setIsRotating(false), 100);
-                        }}
-                        onTouchStart={handleTouchStart}
                       />
-                    </React.Fragment>
-                  ))}
-                  {comments.map((comment) => (
-                    <Text
-                      key={comment.id}
-                      id={comment.id}
-                      x={comment.x}
-                      y={comment.y}
-                      text={""}
-                      fill={comment.fill}
-                      draggable={true}
-                      onDragMove={handleDragMove}
-                      onDragEnd={handleDragEnd}
-                    />
-                  ))}
-                </Layer>
-              </Stage></div>
+                    ))}
+                  </Layer>
+                </Stage>
+              </div>
             </div>
           )}
         </div>

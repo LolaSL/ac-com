@@ -10,7 +10,8 @@ const PdfHelpVideoModal = () => {
   return (
     <>
       <Button
-        className="go-to-btn btn-text"
+        className="go-to-btn btn-text w-auto"
+              size="sm"
         variant="btn-outline"
         onClick={handleShow}
       >
@@ -40,8 +41,9 @@ const PdfHelpVideoModal = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button
-            className="go-to-btn btn-text"
+            className="go-to-btn btn-text w-auto"
             variant="btn-outline"
+            size="sm"
             onClick={handleClose}
           >
             Close Video

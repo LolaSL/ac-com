@@ -37,7 +37,8 @@ const ModalWindow = ({ show, onHide, products, addToCart }) => {
             <h5>{product.name}</h5>
             <p>BTU: {product.btu}</p>
             <Button
-                   className="go-to-btn btn-text"
+              className="go-to-btn btn-text"
+               
             variant="btn-outline"
               onClick={() => addToCart(product)}
              
