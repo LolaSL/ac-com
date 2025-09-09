@@ -3,7 +3,6 @@ import { Card, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 export default function Offers() {
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const offers = [
@@ -14,7 +13,6 @@ export default function Offers() {
       linkTo:
         "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Shop Now",
-      criteria: (product) => product.discount === 40,
     },
     {
       title: "Saver Discount",
@@ -23,53 +21,30 @@ export default function Offers() {
       linkTo:
         "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Learn More",
-      criteria: (product) => product.discount === 50,
+    },
+    {
+      title: "Hot Autumn Deals",
+      description: "Stay cool with up to 30% off!",
+      imageSrc: "/images/offer3.jpg",
+      linkTo:
+        "/search?category=all&query=all&price=all&discount=21-30&rating=all&btu=all&brand=all&order=newest&page=1",
+      linkText: "Cool Savings",
+    },
+    {
+      title: "Premium Comfort Offer",
+      description:
+        "AC units and outdoor condensers with 5-star reviews and special discounts!",
+      imageSrc: "/images/offer4.jpg",
+      linkTo:
+        "/search?category=all&query=all&price=all&discount=10-20&rating=5&btu=all&brand=all&order=newest&page=1",
+      linkText: "View Premium",
     },
   ];
 
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const response = await fetch("/api/products/search");
-        const data = await response.json();
-        setProducts(data.products || []);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchProducts();
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (!loading) {
-      console.log(
-        "All discount values:",
-        products.map((p) => p.discount)
-      );
-    }
-  }, [loading, products]);
-
-  const filterOffers = () => {
-    if (loading) return [];
-
-    return offers
-      .map((offer) => {
-        const matchingProducts = products.filter((product) =>
-          offer.criteria(product)
-        );
-
-        return matchingProducts.length > 0
-          ? { ...offer, matchingProducts }
-          : null;
-      })
-      .filter(Boolean);
-  };
-
-  const filteredOffers = filterOffers();
 
   return (
     <div className="container mt-5">
@@ -80,10 +55,10 @@ export default function Offers() {
             <span className="visually-hidden">Loading...</span>
           </Spinner>
         </div>
-      ) : filteredOffers.length > 0 ? (
+      ) : (
         <div className="row">
-          {filteredOffers.map((offer, index) => (
-            <div className="col-md-4 mb-4 " key={index}>
+          {offers.map((offer, index) => (
+            <div className="col-md-4 mb-4" key={index}>
               <Card>
                 <Card.Img
                   variant="top"
@@ -95,7 +70,12 @@ export default function Offers() {
                   <Card.Text className="offer-desc">
                     {offer.description}
                   </Card.Text>
-                  <Button variant="secondary" className="go-to-btn btn-text" as={Link} to={offer.linkTo}>
+                  <Button
+                    variant="secondary"
+                    className="go-to-btn btn-text"
+                    as={Link}
+                    to={offer.linkTo}
+                  >
                     {offer.linkText}
                   </Button>
                 </Card.Body>
@@ -103,12 +83,8 @@ export default function Offers() {
             </div>
           ))}
         </div>
-      ) : (
-        <p className="text-center">
-          No offers match your criteria at this time.
-        </p>
       )}
-      <div className="mt-4 mb-4">
+      <div className="mt-4 mb-4 text-center">
         <Link to="/" className="go-to-btn btn-text">
           Back to Home
         </Link>

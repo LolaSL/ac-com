@@ -66,7 +66,7 @@ export default function SearchPage() {
   const category = sp.get("category") || "all";
   const query = sp.get("query") || "all";
   const price = sp.get("price") || "all";
-  const discount = sp.get("discount") || "0";
+  const discount = sp.get("discount") || "any";
   const rating = sp.get("rating") || "all";
   const btu = sp.get("btu") || "all";
   const brand = sp.get("brand") || "all";
@@ -193,28 +193,18 @@ export default function SearchPage() {
               <div>
                 <h3>Discount</h3>
                 <ul>
-                  <li key="any">
-                    <Link
-                      to={getFilterUrl({ discount: "" })}
-                      className={`text-decoration-none ${
-                        !discount ? "text-bold" : ""
-                      }`}
-                    ></Link>
-                  </li>
-                  {discounts
-                    .filter((d) => d.value !== "")
-                    .map((d) => (
-                      <li key={d.value}>
-                        <Link
-                          to={getFilterUrl({ discount: d.value })}
-                          className={`text-decoration-none ${
-                            d.value === discount ? "text-bold" : ""
-                          }`}
-                        >
-                          {d.name}
-                        </Link>
-                      </li>
-                    ))}
+                  {discounts.map((d) => (
+                    <li key={d.value}>
+                      <Link
+                        to={getFilterUrl({ discount: d.value })}
+                        className={`text-decoration-none ${
+                          discount === d.value ? "text-bold" : ""
+                        }`}
+                      >
+                        {d.name}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </div>
               <div>

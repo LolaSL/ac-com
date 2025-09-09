@@ -6,12 +6,11 @@ import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import BtuModalWindow from "../components/BtuModalWindow.jsx";
 import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
-
-
+import ArchSymbolsModal from "../components/ArchSymbolsModal.jsx";
 
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
- const [roomData, setRoomData] = useState([]);
+  const [roomData, setRoomData] = useState([]);
   const [error, setError] = useState(null);
   const getToken = () => {
     try {
@@ -67,17 +66,41 @@ const Measurement = () => {
         <h1 className="mt-4 mb-4 title-measurement">
           Measurement Service System
         </h1>
-      <div className=" flex-row d-flex">
-           <PdfHelpVideo />
-        <Sidebar
-          savedPdfs={savedPdfs}
+        <div className="container">
+          <div className="row row-cols-2 row-cols-md-4 g-3">
+            <div className="col d-flex">
+              <div className="w-100 h-100 d-flex align-items-stretch">
+                <PdfHelpVideo className="flex-fill" />
+              </div>
+            </div>
+            <div className="col d-flex">
+              <div className="w-100 h-100 d-flex align-items-stretch">
+                <ArchSymbolsModal className="flex-fill" />
+              </div>
+            </div>
+            <div className="col d-flex">
+              <div className="w-100 h-100 d-flex align-items-stretch">
+                <Sidebar
+                  savedPdfs={savedPdfs}
+                  fetchSavedPdfs={fetchSavedPdfs}
+                  roomData={roomData}
+                  setRoomData={setRoomData}
+                  className="flex-fill"
+                />
+              </div>
+            </div>
+            <div className="col d-flex">
+              <div className="w-100 h-100 d-flex align-items-stretch">
+                <BtuModalWindow className="flex-fill" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <Annotator
           fetchSavedPdfs={fetchSavedPdfs}
-          roomData={roomData}
           setRoomData={setRoomData}
+          roomData={roomData}
         />
-        <BtuModalWindow />
-          </div>    
-        <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData}   roomData={roomData} />
         <BtuCalculator roomData={roomData} />
         <div className="mt-4 mb-4">
           <Link to="/" className="go-to-btn btn-text w-auto">

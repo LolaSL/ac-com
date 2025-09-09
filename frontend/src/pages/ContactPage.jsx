@@ -185,7 +185,7 @@ const ContactPage = () => {
             />
           </Form.Group>
           <Button
-            variant="secondary"
+            variant="success"
             type="submit"
             className="mt-4 mb-4 btn btn-success"
             disabled={loading}

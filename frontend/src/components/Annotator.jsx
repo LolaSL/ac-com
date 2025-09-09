@@ -1795,8 +1795,8 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                 (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
               );
               return (
-                sqft >= 30 &&
-                sqm >= 3.25 &&
+                sqft >= 64 &&
+                sqm >= 5.94 &&
                 room.roomType?.toLowerCase().includes(filterText.toLowerCase())
               );
             })
@@ -1852,9 +1852,17 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                       </span>
                     </p>
                   )}
-                  <h6 className="fw-semibold mt-4 mb-3">
+                  <h6 className="fw-semibold fs-5 mt-4 mb-3">
                     Classified Room Data Table
                   </h6>
+                  <div>
+                    <p className="fs-5">General Guidelines by Room Size: </p>
+                    <ol className="fs-6">
+                      <li>Small Rooms (90-250 sq. ft.)</li>
+                      <li>Medium Rooms (250–350 sq. ft.)</li>
+                      <li>Large Rooms (350-550 sq. ft.)</li>
+                    </ol>
+                  </div>
                   <div className="mb-3 d-flex d-inline flex-sm-row gap-3 align-items-start align-sm-items-center">
                     <div className="d-inline flex-sm-row gap-2 mt-2 mt-sm-0">
                       <input
@@ -1943,151 +1951,171 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                     </Button>
                   </div>
                   {filteredRoomsForTable?.length > 0 ? (
-                    <Table striped bordered hover responsive>
-                      <thead>
-                        <tr>
-                          <th>Room Type</th>
-                          <th>Width (ft)</th>
-                          <th>Height (ft)</th>
-                          <th>Area (sqft)</th>
-                          <th>Area (sqm)</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <TableBody
-                        data={filteredRoomsForTable}
-                        renderRow={(room, roomIdx) => {
-                          const isEditing =
-                            editingRoomIdx === roomIdx &&
-                            editingFileIdx === fileIdx;
-                          return (
-                            <tr key={room.uniqueId}>
-                              <td>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editingRoomData.roomType}
-                                    onChange={(e) =>
-                                      handleEditingChange(
-                                        "roomType",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                ) : (
-                                  room.roomType
-                                )}
-                              </td>
-                              <td>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editingRoomData.width}
-                                    onChange={(e) =>
-                                      handleEditingChange(
-                                        "width",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                ) : (
-                                  `${room.width} ft`
-                                )}
-                              </td>
-                              <td>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editingRoomData.height}
-                                    onChange={(e) =>
-                                      handleEditingChange(
-                                        "height",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                ) : (
-                                  `${room.height} ft`
-                                )}
-                              </td>
-                              <td>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editingRoomData.areaSqFt}
-                                    onChange={(e) =>
-                                      handleEditingChange(
-                                        "areaSqFt",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                ) : (
-                                  `${room.areaSqFt} sqft`
-                                )}
-                              </td>
-                              <td>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editingRoomData.areaSqM}
-                                    onChange={(e) =>
-                                      handleEditingChange(
-                                        "areaSqM",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                ) : (
-                                  `${room.areaSqM} sqm`
-                                )}
-                              </td>
-                              <td>
-                                {isEditing ? (
-                                  <div className="d-flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      variant="success"
-                                      onClick={handleSaveEdit}
-                                    >
-                                      Save
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="secondary"
-                                      onClick={handleCancelEdit}
-                                    >
-                                      Cancel
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <div className="d-flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      variant="info"
-                                      onClick={() =>
-                                        handleEditClick(room, roomIdx, fileIdx)
+                    <div className="table-responsive">
+                      <Table striped bordered hover responsive size="sm">
+                        <thead>
+                          <tr>
+                            <th>Room Type</th>
+                            <th>Width (ft)</th>
+                            <th>Height (ft)</th>
+                            <th>Area (sqft)</th>
+                            <th>Area (sqm)</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <TableBody
+                          data={filteredRoomsForTable}
+                          renderRow={(room, roomIdx) => {
+                            const isEditing =
+                              editingRoomIdx === roomIdx &&
+                              editingFileIdx === fileIdx;
+                            return (
+                              <tr key={room.uniqueId}>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={editingRoomData.roomType}
+                                      onChange={(e) =>
+                                        handleEditingChange(
+                                          "roomType",
+                                          e.target.value
+                                        )
                                       }
-                                    >
-                                      Edit
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="danger"
-                                      onClick={() =>
-                                        handleDeleteRoom(room.uniqueId, fileIdx)
+                                    />
+                                  ) : (
+                                    room.roomType
+                                  )}
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={editingRoomData.width}
+                                      onChange={(e) =>
+                                        handleEditingChange(
+                                          "width",
+                                          e.target.value
+                                        )
                                       }
-                                    >
-                                      Delete
-                                    </Button>
-                                  </div>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        }}
-                      />
-                    </Table>
+                                    />
+                                  ) : (
+                                    `${room.width} ft`
+                                  )}
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={editingRoomData.height}
+                                      onChange={(e) =>
+                                        handleEditingChange(
+                                          "height",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  ) : (
+                                    `${room.height} ft`
+                                  )}
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={editingRoomData.areaSqFt}
+                                      onChange={(e) =>
+                                        handleEditingChange(
+                                          "areaSqFt",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  ) : (
+                                    `${room.areaSqFt} sqft`
+                                  )}
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={editingRoomData.areaSqM}
+                                      onChange={(e) =>
+                                        handleEditingChange(
+                                          "areaSqM",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  ) : (
+                                    `${room.areaSqM} sqm`
+                                  )}
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <div className="d-flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="success"
+                                        onClick={handleSaveEdit}
+                                      >
+                                        Save
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={handleCancelEdit}
+                                      >
+                                        Cancel
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div className="d-flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="info"
+                                        onClick={() =>
+                                          handleEditClick(
+                                            room,
+                                            roomIdx,
+                                            fileIdx
+                                          )
+                                        }
+                                      >
+                                        Edit
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="danger"
+                                        onClick={() =>
+                                          handleDeleteRoom(
+                                            room.uniqueId,
+                                            fileIdx
+                                          )
+                                        }
+                                      >
+                                        Delete
+                                      </Button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          }}
+                        />
+                       
+                        </Table>
+                         <p className="fw-bold text-center mt-3">
+  Total:{" "}
+  {filteredRoomsForTable
+    .reduce((sum, room) => sum + parseFloat(room.areaSqFt || 0), 0)
+    .toFixed(2)} sqft |{" "}
+  {filteredRoomsForTable
+    .reduce((sum, room) => sum + parseFloat(room.areaSqM || 0), 0)
+    .toFixed(2)} sqm
+</p>
+
+                    </div>
                   ) : (
                     <p className="fst-italic text-secondary">
                       No classified room data found. Add a room using the form

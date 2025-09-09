@@ -56,7 +56,6 @@ sellerRouter.get(
   })
 );
 
-// POST /api/sellers  — create new seller
 sellerRouter.post(
   '/',
   isAuth,
@@ -65,8 +64,6 @@ sellerRouter.post(
   expressAsyncHandler(async (req, res) => {
     const { name, brand, info, link, companyLink } = req.body;
     const logo = req.file ? `/uploads/${req.file.filename}` : '';
-
-    // Validate all required fields including 'link'
     if (!name || !brand || !info || !link || !companyLink) {
       return res.status(400).json({ message: 'All fields (name, brand, info, link, companyLink) are required!' });
     }
@@ -85,7 +82,6 @@ sellerRouter.post(
   })
 );
 
-// PUT /api/sellers/:id — update seller
 sellerRouter.put(
   '/:id',
   isAuth,
@@ -129,9 +125,6 @@ sellerRouter.get(
     }
   })
 );
-
-
-
 
 sellerRouter.post(
   '/:id/reviews',

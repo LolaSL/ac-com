@@ -77,8 +77,9 @@ const BtuModalWindow = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button
-            className="go-to-btn btn-text"
+            className="go-to-btn btn-text w-auto"
             variant="btn-outline"
+            size="sm"
             onClick={() => setShow(false)}
           >
             Close Now

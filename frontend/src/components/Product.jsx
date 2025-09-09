@@ -65,7 +65,7 @@ function Product(props) {
           </Button>
         ) : (
           <Button
-           className="go-to-btn btn-text"
+           className="go-to-btn btn-text w-auto"
             onClick={() => addToCartHandler(product)}
           >
             Add to cart

@@ -22,8 +22,13 @@ const ArchSymbolsModal = () => {
 
   return (
     <>
-      <Button variant="outline-secondary" onClick={handleShow}>
-        View Architectural Symbols
+      <Button
+        variant="btn-outline w-auto"
+        size="sm"
+        className=" text-center go-to-btn btn-text"
+        onClick={handleShow}
+      >
+        View Arch Symbols
       </Button>
       <Modal
         show={show}
@@ -41,14 +46,28 @@ const ArchSymbolsModal = () => {
             activeIndex={index}
             onSelect={handleSelect}
             className="w-100"
+            interval={3000}
+            slide={true}
           >
             {images.map((image, i) => (
               <Carousel.Item key={i}>
-                <div className="w-100 d-flex justify-content-center">
+                <div
+                  className="w-100 d-flex justify-content-center align-items-center"
+                  style={{
+                    maxHeight: "500px",
+                    height: "60vh",
+                    overflow: "hidden",
+                  }}
+                >
                   <img
-                    className="d-block w-100 h-auto rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
                     src={image}
                     alt={`Slide ${i + 1}`}
+                    style={{
+                      width: "auto",
+                      height: "100%",
+                      objectFit: "contain",
+                    }}
+                    className="rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
                   />
                 </div>
               </Carousel.Item>
@@ -56,7 +75,11 @@ const ArchSymbolsModal = () => {
           </Carousel>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button
+             className="go-to-btn btn-text w-auto"
+            variant="btn-outline"
+            size="sm"
+            onClick={handleClose}>
             Close
           </Button>
         </Modal.Footer>

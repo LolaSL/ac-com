@@ -120,10 +120,10 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
         page.drawText(watermarkText, {
           x: width / 4,
           y: height / 2,
-          size: 18,
+          size: 20,                  
           rotate: degrees(-40),
-          opacity: 0.15,
-          color: rgb(0.6, 0.6, 0.6),
+          opacity: 0.25,                
+          color: rgb(0.3, 0.3, 0.3),  
         });
       });
     }

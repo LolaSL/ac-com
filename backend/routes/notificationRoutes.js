@@ -18,8 +18,8 @@ notificationRouter.get(
 
    const notifications = await Notification.find(filter)
   .sort({ createdAt: -1 })
-  .lean({ virtuals: true }); // ✅ include virtuals
-console.log(notifications[0].localDate); // "2025-09-05"
+  .lean({ virtuals: true }); 
+console.log(notifications[0].localDate); 
 
 res.json(notifications);
   })

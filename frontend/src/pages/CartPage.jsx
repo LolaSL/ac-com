@@ -24,24 +24,21 @@ export default function CartPage() {
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [totalBTU, setTotalBTU] = useState(0);
 
-
   useEffect(() => {
-   
     const airConditionerBTU = cartItems
-      .filter((item) => item.category !== "Outdoor Condenser") 
+      .filter((item) => item.category !== "Outdoor Condenser")
       .reduce((sum, item) => sum + item.quantity * (item.btu || 0), 0);
-  
-    setTotalBTU(airConditionerBTU); 
+
+    setTotalBTU(airConditionerBTU);
   }, [cartItems]);
-  const recommendedCondenser = totalBTU ? (totalBTU * 0.8).toFixed(0) : 0;  
+  const recommendedCondenser = totalBTU ? (totalBTU * 0.8).toFixed(0) : 0;
 
   useEffect(() => {
-  
-      const timer = setTimeout(() => {
-        setShowAlert(false);
-      }, 6000);
-  
-    return () => clearTimeout(timer);  
+    const timer = setTimeout(() => {
+      setShowAlert(false);
+    }, 6000);
+
+    return () => clearTimeout(timer);
   }, [showAlert, totalBTU]);
 
   const addToCart = (product) => {
@@ -122,7 +119,6 @@ export default function CartPage() {
         );
 
         setRecommendedProducts(condensers);
-
       } catch (error) {
         console.error("Error fetching recommended products:", error);
       }
@@ -140,8 +136,8 @@ export default function CartPage() {
         {showAlert && (
           <div className="bg-light p-3 mb-3 text-center">
             <strong className="text-primary fs-5">
-    Recommended Condenser: {recommendedCondenser}
-  </strong>
+              Recommended Condenser: {recommendedCondenser}
+            </strong>
           </div>
         )}
       </div>
@@ -196,7 +192,6 @@ export default function CartPage() {
                           onClick={() =>
                             updateCartHandler(item, item.quantity - 1)
                           }
-                          variant="light"
                           disabled={item.quantity === 1}
                           className="btn-icon"
                         >
@@ -204,7 +199,6 @@ export default function CartPage() {
                         </Button>{" "}
                         <span>{item.quantity}</span>{" "}
                         <Button
-                          variant="light"
                           onClick={() =>
                             updateCartHandler(item, item.quantity + 1)
                           }
@@ -235,7 +229,7 @@ export default function CartPage() {
                       <Col md={2}>
                         <Button
                           onClick={() => removeItemHandler(item)}
-                          variant="light"
+                          className="btn-trash"
                         >
                           <i className="fas fa-trash"></i>
                         </Button>

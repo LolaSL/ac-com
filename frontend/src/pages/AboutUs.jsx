@@ -10,14 +10,14 @@ const AboutUs = () => {
           className="p-5 text-center responsive-image-about rounded mb-3"
           style={{
             backgroundImage: `url("/images/about-us.jpg")`,
-           maxHeight: "100%",
+            maxHeight: "100%",
           }}
         ></div>
         <h3 className="about-paragraph p-2">
-          <strong className="fs-4">AC Commerce</strong> is a cutting-edge platform designed to
-          fully automate the planning and design process for air conditioning
-          systems — eliminating the need for professional intervention in the
-          early stages.
+          <strong className="fs-4">AC Commerce</strong> is a cutting-edge
+          platform designed to fully automate the planning and design process
+          for air conditioning systems — eliminating the need for professional
+          intervention in the early stages.
         </h3>
         <h3 className="about-paragraph mt-4 pb-2">
           Our platform delivers precise, efficient, and professionally validated
@@ -35,22 +35,22 @@ const AboutUs = () => {
       </article>
       <article className="about mt-4 mb-4">
         <h3 className="about-paragraph mt-4">
-          <strong className="fs-4 mb-2" >
+          <strong className="fs-4 mb-2">
             Our Measurement Service System process is straightforward:
           </strong>
           <ul className="mt-2">
             <li>Upload your architectural plan ( PDF file)</li>
             <li>
-              Place created air conditioning unit with relevant comment on the
-              uploaded architectural plan.
+              Place the created air conditioning unit with a relevant comment on
+              the uploaded architectural plan.
             </li>
             <li>
               Save AC architectural plan — complete with a digital signature
-              from a certified air conditioning engineer
+              from a certified air conditioning engineer.
             </li>
             <li>
-              Complete a short set of guided questions of BTU Calculator
-              regarding the property’s specifications and user preferences.
+              Complete a brief set of BTU Calculator guided questions regarding
+              the property’s specifications and user preferences.
             </li>
             <li>
               {" "}
@@ -63,7 +63,7 @@ const AboutUs = () => {
       </article>
       <article className="about mt-4 mb-4">
         <h3 className="goals-paragraph  mt-2 pb-4">
-          <strong className="fs-4 mb-2" >With AC Commenrce, users can: </strong>
+          <strong className="fs-4 mb-2">With AC Commerce users can: </strong>
           <ul className="mt-2">
             <li>Generate air conditioning system layouts.</li>
             <li>Share professional-grade visual designs.</li>
@@ -75,13 +75,7 @@ const AboutUs = () => {
           </ul>
         </h3>
         <h3 className="goals-paragraph  mt-2 pb-4">
-          Traditionally, the planning and design of air conditioning systems
-          have been exclusively handled by professionals — a process often
-          characterized by high costs, extended timelines, and significant
-          effort from both service providers and clients. AC Commerce redefines
-          this process by delivering substantial cost savings and reducing
-          project turnaround times for both consumers and industry
-          professionals.
+         Traditionally, the planning and design of air conditioning systems have been the domain of professionals, often involving high costs, lengthy timelines, and considerable effort from both service providers and clients. AC Commerce transforms this process by offering significant cost savings and faster project completion for consumers and industry professionals alike.
         </h3>{" "}
       </article>
       <article className="about mt-4 mb-4">
@@ -98,11 +92,11 @@ const AboutUs = () => {
           </ul>
         </h3>
       </article>
-            <div className=" mt-4 mb-4">
-          <Link to="/" className="go-to-btn btn-text">
-            Back to Home
-          </Link>
-        </div>
+      <div className=" mt-4 mb-4">
+        <Link to="/" className="go-to-btn btn-text">
+          Back to Home
+        </Link>
+      </div>
     </Container>
   );
 };
