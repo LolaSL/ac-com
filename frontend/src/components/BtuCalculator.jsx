@@ -30,7 +30,6 @@ function BtuCalculator({ roomData }) {
   const handlePrint = () => {
     if (!rooms?.length || !btuResults?.length) return;
 
-    // Calculate totals
     const totalBTU = btuResults.reduce((sum, btu) => sum + (btu || 0), 0);
     const totalProductBTU = products.reduce(
       (sum, product) => sum + (product.btu || 0),

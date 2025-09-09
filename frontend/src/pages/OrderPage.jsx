@@ -20,19 +20,16 @@ function printOrder() {
   const orderContainer = document.querySelector("#order-container");
   if (!orderContainer) return;
 
-  // Clone so we don’t affect the live DOM
   const clone = orderContainer.cloneNode(true);
 
-  // Remove unwanted elements
   clone.querySelectorAll("button").forEach((btn) => btn.remove());
   clone.querySelectorAll(".cart-thumbnail").forEach((img) => img.remove());
 
-  // Convert clone to string HTML
   const html = clone.outerHTML;
 
   printJS({
     printable: html,
-    type: "raw-html",   // <-- use raw-html, not html
+    type: "raw-html",
     header: `
       <h1 class="order-title">Order Details</h1>
     `,
@@ -347,8 +344,26 @@ export default function OrderPage() {
                       <div className="d-grid">
                         <Button
                           onClick={printOrder}
-                          className="btn btn-info hide-on-print"
+                          variant="light"
+                          size="sm"
+                          className="go-to-btn btn-text w-auto pt-2"
                         >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide lucide-printer"
+                          >
+                            <polyline points="6 9 6 2 18 2 18 9" />
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                            <rect width="12" height="8" x="6" y="14" />
+                          </svg>
                           Print Order
                         </Button>
                       </div>
