@@ -24,7 +24,7 @@ export default function Offers() {
     },
     {
       title: "Hot Autumn Deals",
-      description: "Stay cool with up to 30% off!",
+      description: "Stay cool with 30% off!",
       imageSrc: "/images/offer3.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=21-30&rating=all&btu=all&brand=all&order=newest&page=1",
@@ -32,8 +32,7 @@ export default function Offers() {
     },
     {
       title: "Premium Comfort Offer",
-      description:
-        "AC units and outdoor condensers with 5-star reviews and special discounts!",
+      description: "5-star and discount!",
       imageSrc: "/images/offer4.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=10-20&rating=5&btu=all&brand=all&order=newest&page=1",
