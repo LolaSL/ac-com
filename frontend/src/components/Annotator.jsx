@@ -762,7 +762,11 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
   const canvasRef = useRef(null);
   const [file, setFile] = useState(null);
   const stageRef = useRef(null);
-  const [pdfSize, setPdfSize] = useState({ width: "100%", height: "100%" });
+  // const [pdfSize, setPdfSize] = useState({ width: "100%", height: "100%" });
+  const [pdfSize, setPdfSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
   const [previewUrl, setPreviewUrl] = useState(null);
   const [error, setError] = useState(null);
   const [comments, setComments] = useState([]);
@@ -1643,6 +1647,8 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       });
     }
   }, [isSaved]);
+
+  
   const handleExportExcelStyled = async (filteredRoomsForTable, pdfInfo) => {
     const fileName = pdfInfo?.fileName || "annotated_data";
     if (!filteredRoomsForTable.length) {
@@ -2103,18 +2109,24 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                             );
                           }}
                         />
-                       
-                        </Table>
-                         <p className="fw-bold text-center mt-3">
-  Total:{" "}
-  {filteredRoomsForTable
-    .reduce((sum, room) => sum + parseFloat(room.areaSqFt || 0), 0)
-    .toFixed(2)} sqft |{" "}
-  {filteredRoomsForTable
-    .reduce((sum, room) => sum + parseFloat(room.areaSqM || 0), 0)
-    .toFixed(2)} sqm
-</p>
-
+                      </Table>
+                      <p className="fw-bold text-center mt-3">
+                        Total:{" "}
+                        {filteredRoomsForTable
+                          .reduce(
+                            (sum, room) => sum + parseFloat(room.areaSqFt || 0),
+                            0
+                          )
+                          .toFixed(2)}{" "}
+                        sqft |{" "}
+                        {filteredRoomsForTable
+                          .reduce(
+                            (sum, room) => sum + parseFloat(room.areaSqM || 0),
+                            0
+                          )
+                          .toFixed(2)}{" "}
+                        sqm
+                      </p>
                     </div>
                   ) : (
                     <p className="fst-italic text-secondary">
@@ -2194,7 +2206,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                       <React.Fragment key={rect.id}>
                         <Rect
                           key={rect.id}
-                          id={rect.id}
+                          id={(rect.id)}
                           name="rect"
                           x={rect.x}
                           y={rect.y}

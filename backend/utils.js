@@ -33,6 +33,7 @@ export const generateToken = (user) => {
       isServiceProvider: user.isServiceProvider,
       // CORRECTED: Add the type property for filtering notifications
       type: user.isServiceProvider ? 'serviceProvider' : 'user',
+     isPaid: user.isPaid,
     },
     process.env.JWT_SECRET,
     {
@@ -58,6 +59,8 @@ export const isAuth = (req, res, next) => {
     res.status(401).send({ message: 'No token' });
   }
 };
+
+
 
 export const isAdmin = (req, res, next) => {
   if (req.user && req.user.isAdmin) {

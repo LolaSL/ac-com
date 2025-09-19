@@ -1,229 +1,126 @@
 import { useState, useEffect, useContext } from "react";
 import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
-import { Store } from "../Store";
+import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
+import { Store } from "../Store.js";
+import SaveAsPDF from "./SaveAsPDF.jsx";
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
+
+// SVG icons
+const FaFilePdf = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
+    width="20"
+    height="20"
+    fill="currentColor"
+    className="me-2 text-primary"
+  >
+    <path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z" />
+  </svg>
+);
+
+const FaLock = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 448 512"
+    width="20"
+    height="20"
+    fill="currentColor"
+    className="ms-2 text-danger"
+  >
+    <path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z" />
+  </svg>
+);
+
+const FaTrash = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 448 512"
+    width="20"
+    height="20"
+    fill="currentColor"
+  >
+    <path d="M135.2 17.7C140.9 6.8 152.6 0 165.2 0H282.8c12.6 0 24.3 6.8 30 17.7L384 80H448c6.9 0 12.5 5.6 12.5 12.5s-5.6 12.5-12.5 12.5H0C-6.9 105-12.5 99.4-12.5 92.5S-6.9 80 0 80H64L135.2 17.7zM192 256c0-4.4 3.6-8 8-8h32c4.4 0 8 3.6 8 8v160c0 4.4-3.6 8-8 8h-32c-4.4 0-8-3.6-8-8V256zm-64 0c0-4.4 3.6-8 8-8h32c4.4 0 8 3.6 8 8v160c0 4.4-3.6 8-8 8h-32c-4.4 0-8-3.6-8-8V256zm192 0c0-4.4 3.6-8 8-8h32c4.4 0 8 3.6 8 8v160c0 4.4-3.6 8-8 8h-32c-4.4 0-8-3.6-8-8V256zM56.8 208.5c-.3-4.5-4.1-7.8-8.6-7.8H8.6C3.9 200.7 0 204.6 0 209.3s3.9 8.6 8.6 8.6H48.2c4.5 0 8.3-3.3 8.6-7.8z" />
+  </svg>
+);
 
 const Sidebar = () => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
-
   const [savedPdfs, setSavedPdfs] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [selectedPdf, setSelectedPdf] = useState(null);
+  const [selectedPdfFile, setSelectedPdfFile] = useState(null);
+  const [selectedAnnotations, setSelectedAnnotations] = useState(null);
 
-  useEffect(() => {
-    fetchSavedPdfs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // Fetch PDFs
   const fetchSavedPdfs = async () => {
+    if (!token) return setError("User not authenticated.");
     try {
       setError(null);
-      if (!token) {
-        console.warn("User not authenticated, skipping fetch.");
-        return;
-      }
-
       const response = await fetch("/api/user-annotations", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.ok) {
-        const data = await response.json();
-
-        const enhancedData = data.map((item) => ({
-          ...item,
-          pdfUrl: `/api/annotations/pdf/${item._id}`,
-        }));
-
-        setSavedPdfs(enhancedData);
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || "Failed to fetch saved PDFs.");
+        throw new Error(errorData.message || "Failed to fetch saved PDFs");
       }
-    } catch (error) {
-      console.error("Error fetching saved PDFs:", error);
+      const data = await response.json();
+      const enhancedData = data.map((item) => ({
+        ...item,
+        pdfUrl: `/api/annotations/pdf/${item._id}`,
+        isPaid: item.isPaid ?? false, // ensure flag exists
+      }));
+      setSavedPdfs(enhancedData);
+      console.log("Saved PDFs:", enhancedData);
+    } catch (err) {
+      console.error(err);
       setError("Error fetching saved PDFs. Please try again.");
     }
   };
 
+  useEffect(() => {
+    if (isOpen) fetchSavedPdfs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   const toggleSidebar = () => {
-    if (!isOpen) {
-      fetchSavedPdfs();
-    }
     setIsOpen(!isOpen);
     if (isOpen) {
+      setSelectedPdf(null);
+      setSelectedPdfFile(null);
+      setSelectedAnnotations(null);
       setError(null);
-      setSuccessMessage(null);
     }
   };
-
-  const viewPdfWithAnnotations = async (pdfId) => {
-    try {
-      if (!token) {
-        console.error("Authentication token not found.");
-        return;
-      }
-
-      const pdfResponse = await fetch(`/api/annotated-pdf/${pdfId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!pdfResponse.ok) {
-        console.error(
-          `Failed to fetch PDF with ID ${pdfId}:`,
-          pdfResponse.status
-        );
-        return;
-      }
-
-      const pdfBlob = await pdfResponse.blob();
-      const pdfUrl = window.URL.createObjectURL(pdfBlob);
-
-      const annotationsResponse = await fetch(`/api/annotations/${pdfId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!annotationsResponse.ok) {
-        console.error(
-          `Failed to fetch annotations for PDF ID ${pdfId}:`,
-          annotationsResponse.status
-        );
-        window.URL.revokeObjectURL(pdfUrl);
-        return;
-      }
-
-      const annotationsData = await annotationsResponse.json();
-      renderPdfWithAnnotations(pdfUrl, annotationsData);
-    } catch (error) {
-      console.error(
-        `Error viewing PDF with annotations for ID ${pdfId}:`,
-        error
-      );
-    }
-  };
-
-  const handleDeletePdf = async (pdfId, filename) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete "${filename || "this document"}"?`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      setSuccessMessage(null);
-      setError(null);
-      if (!token) {
-        setError("Authentication token not found. Please log in.");
-        return;
-      }
-
-      const response = await fetch(`/api/annotations/${pdfId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        toast.success("PDF deleted successfully!");
-        setSavedPdfs((prev) => prev.filter((pdf) => pdf._id !== pdfId));
-        const container = document.getElementById("pdf-container");
-        if (container) container.innerHTML = "";
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to delete PDF.");
-      }
-    } catch (error) {
-      setError("Error deleting PDF. Please try again.");
-    }
-  };
-
-  const renderPdfWithAnnotations = (pdfUrl, annotations) => {
-    const container = document.getElementById("pdf-container");
-    if (!container) return;
-    container.innerHTML = "";
-
-    const loadingTask = pdfjsLib.getDocument(pdfUrl);
-    loadingTask.promise.then((pdf) => {
-      pdf.getPage(1).then((page) => {
-        const scale = 1.5;
-        const viewport = page.getViewport({ scale });
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        container.appendChild(canvas);
-
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-        };
-
-        page.render(renderContext).promise.then(() => {
-          const overlayCanvas = document.createElement("canvas");
-          overlayCanvas.width = viewport.width;
-          overlayCanvas.height = viewport.height;
-          overlayCanvas.style.position = "absolute";
-          overlayCanvas.style.top = "0";
-          overlayCanvas.style.left = "0";
-          overlayCanvas.style.pointerEvents = "none";
-          container.style.position = "relative";
-          container.appendChild(overlayCanvas);
-          const overlayContext = overlayCanvas.getContext("2d");
-          overlayAnnotations(overlayContext, annotations);
-        });
-      });
-    });
-  };
-
   const overlayAnnotations = (context, annotations) => {
-     const canvasWidth = context.canvas.width;
+    const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
 
     if (annotations?.rectangles) {
-        annotations.rectangles.forEach((rect) => {
-            const x = rect.xPercent * canvasWidth;
-            const y = rect.yPercent * canvasHeight;
-            const width = rect.widthPercent * canvasWidth;
-            const height = rect.heightPercent * canvasHeight;
+      annotations.rectangles.forEach((rect) => {
+        const x = rect.xPercent * canvasWidth;
+        const y = rect.yPercent * canvasHeight;
+        const width = rect.widthPercent * canvasWidth;
+        const height = rect.heightPercent * canvasHeight;
+        const angle = (rect.rotation || 0) * (Math.PI / 180);
 
-            // Rotation in radians
-            const angle = (rect.rotation || 0) * (Math.PI / 180);
-
-            context.save();
-
-            // Translate to the top-left corner of the rectangle
-            context.translate(x, y);
-
-            // Rotate the context around the origin (which is now the top-left corner)
-            context.rotate(angle);
-
-            // Draw the rectangle at the new origin (0, 0)
-            context.beginPath();
-            context.rect(0, 0, width, height);
-            context.fillStyle = rect.fill || "rgba(20, 205, 230, 0.4)";
-            context.fill();
-            context.lineWidth = 2;
-            context.strokeStyle = rect.stroke || "black";
-            context.stroke();
-
-            context.restore();
-        });
+        context.save();
+        context.translate(x, y);
+        context.rotate(angle);
+        context.beginPath();
+        context.rect(0, 0, width, height);
+        context.fillStyle = rect.fill || "rgba(20, 205, 230, 0.4)";
+        context.fill();
+        context.lineWidth = 2;
+        context.strokeStyle = rect.stroke || "black";
+        context.stroke();
+        context.restore();
+      });
     }
 
     if (annotations?.lines) {
@@ -280,16 +177,114 @@ const Sidebar = () => {
     }
   };
 
+  const viewPdfWithAnnotations = async (pdf) => {
+    if (!token) return setError("User not authenticated.");
+    try {
+      if (!pdf.isPaid) {
+        alert("You need to pay to view this PDF with annotations.");
+        return; //prevent to get attotated file from the backend
+      }
+
+      setSelectedPdf(pdf);
+      const pdfResponse = await fetch(`/api/annotated-pdf/${pdf._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!pdfResponse.ok) {
+        throw new Error(`Failed to fetch PDF: ${pdfResponse.status}`);
+      }
+      const pdfBlob = await pdfResponse.blob();
+      const pdfFile = new File([pdfBlob], pdf.filename || "untitled.pdf", {
+        type: "application/pdf",
+      });
+      setSelectedPdfFile(pdfFile);
+
+      const pdfUrl = window.URL.createObjectURL(pdfBlob);
+      const annotationsResponse = await fetch(`/api/annotations/${pdf._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!annotationsResponse.ok) {
+        throw new Error(
+          `Failed to fetch annotations: ${annotationsResponse.status}`
+        );
+      }
+      const annotationsData = await annotationsResponse.json();
+      setSelectedAnnotations(annotationsData);
+
+      // Render PDF
+      const container = document.getElementById("pdf-container");
+      if (!container) return;
+      container.innerHTML = "";
+      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      const pdfDoc = await loadingTask.promise;
+      const page = await pdfDoc.getPage(1);
+      const scale = 1.5;
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const context = canvas.getContext("2d");
+      container.appendChild(canvas);
+      await page.render({ canvasContext: context, viewport }).promise;
+
+      // After page.render
+      page.render({ canvasContext: context, viewport }).promise.then(() => {
+        if (annotationsData) {
+          const overlayCanvas = document.createElement("canvas");
+          overlayCanvas.width = viewport.width;
+          overlayCanvas.height = viewport.height;
+          overlayCanvas.style.position = "absolute";
+          overlayCanvas.style.top = "0";
+          overlayCanvas.style.left = "0";
+          overlayCanvas.style.pointerEvents = "none";
+          container.style.position = "relative";
+          container.appendChild(overlayCanvas);
+
+          const overlayContext = overlayCanvas.getContext("2d");
+          overlayAnnotations(overlayContext, annotationsData); // << draw rectangles/comments/lines
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load PDF. See console for details.");
+    }
+  };
+
+  const handleDeletePdf = async (pdfId, filename) => {
+    if (!window.confirm(`Delete "${filename}"?`)) return;
+    if (!token) return setError("User not authenticated.");
+    try {
+      const response = await fetch(`/api/annotations/${pdfId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete PDF.");
+      }
+      toast.success("PDF deleted successfully!");
+      setSavedPdfs((prev) => prev.filter((pdf) => pdf._id !== pdfId));
+      const container = document.getElementById("pdf-container");
+      if (container) container.innerHTML = "";
+      setSelectedPdf(null);
+      setSelectedPdfFile(null);
+      setSelectedAnnotations(null);
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    }
+  };
+
   return (
     <>
       <Button
         className="go-to-btn btn-text w-auto"
-              size="sm"
+        size="sm"
         variant="btn-outline"
         onClick={toggleSidebar}
       >
         {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
       </Button>
+
       <Modal
         show={isOpen}
         onHide={toggleSidebar}
@@ -300,17 +295,18 @@ const Sidebar = () => {
         </Modal.Header>
         <Modal.Body>
           {error && <p className="text-danger">{error}</p>}
-          {successMessage && <p className="text-success">{successMessage}</p>}
+
           <div
             style={{
               width: "100%",
               height: "80vh",
+
               border: "1px solid #ccc",
               overflow: "auto",
               marginTop: "1rem",
               display: "flex",
               flexDirection: "column",
-              alignItems: "left",
+              alignItems: "stretch",
             }}
           >
             {savedPdfs.length > 0 ? (
@@ -323,23 +319,24 @@ const Sidebar = () => {
                     <Button
                       variant="btn-outline w-auto"
                       size="sm"
-                      onClick={() =>
-                        viewPdfWithAnnotations(pdf._id, pdf.filename)
-                      }
-                      className="p-2 text-left go-to-btn btn-text"
+                      onClick={() => viewPdfWithAnnotations(pdf)}
+                      disabled={!pdf.isPaid} // disable if not paid
+                      className="p-2 text-left go-to-btn btn-text d-flex align-items-center"
                     >
+                      <FaFilePdf />
                       {pdf.filename || "Untitled Document"}
+                      {!pdf.isPaid && <FaLock />}
                     </Button>
-                    <small className="text-muted">
+                    <small className=" text-muted">
                       Saved: {new Date(pdf.createdAt).toLocaleString()}
                     </small>
                     <div className="d-flex align-items-center">
                       <Button
                         variant="danger"
-                        className="p-1"
+                        className="p-1 ms-2"
                         onClick={() => handleDeletePdf(pdf._id, pdf.filename)}
                       >
-                        <i className="fas fa-trash"></i>
+                        <FaTrash />
                       </Button>
                     </div>
                   </ListGroup.Item>
@@ -350,9 +347,20 @@ const Sidebar = () => {
                 No saved documents yet.
               </p>
             )}
+
+            {selectedPdfFile && (
+              <SaveAsPDF
+                file={selectedPdfFile}
+                isPaid={selectedPdf?.isPaid}
+                pdfId={selectedPdf?._id}
+                token={token}
+                annotations={selectedAnnotations}
+              />
+            )}
+
             <div
               id="pdf-container"
-              style={{ flexGrow: 1, marginTop: "1rem" }}
+              style={{ flexGrow: 1, marginTop: "1rem", position: "relative" }}
             ></div>
           </div>
         </Modal.Body>

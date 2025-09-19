@@ -2,133 +2,246 @@ import express from 'express';
 import multer from 'multer';
 import AnnotationModel from '../models/annotationModel.js';
 import { isAuth } from '../utils.js';
-import { PDFDocument, rgb, degrees } from 'pdf-lib';
-import fetch from 'node-fetch';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
+import fs from 'fs';   
+import path from 'path'; 
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/upload-annotate', isAuth, upload.single('pdfFile'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No PDF file uploaded.' });
-    }
+router.post(
+  "/upload-annotate",
+  isAuth,
+  upload.single("pdfFile"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No PDF file uploaded." });
+      }
 
-    const userId = req.user._id;
-    const { rectangles, comments, lines, pdfId, imageWidth, imageHeight } = req.body;
+      const userId = req.user._id;
+      const isPaid = req.user.isPaid; // <-- ensure user’s isPaid is used
 
-    if (!imageWidth || !imageHeight) {
-      return res.status(400).json({ message: 'Missing image dimensions.' });
-    }
+      const { pdfId, rectangles, comments, lines, imageWidth, imageHeight } =
+        req.body;
 
-    const width = parseFloat(imageWidth);
-    const height = parseFloat(imageHeight);
+      if (!imageWidth || !imageHeight) {
+        return res
+          .status(400)
+          .json({ message: "Missing image dimensions." });
+      }
 
-    const parsedRectangles = JSON.parse(rectangles || '[]');
-    const parsedComments = JSON.parse(comments || '[]');
-    const parsedLines = JSON.parse(lines || '[]');
+      const width = parseFloat(imageWidth);
+      const height = parseFloat(imageHeight);
 
-    const percentRectangles = parsedRectangles.map(rect => ({
-      id: rect.id,
-      xPercent: rect.x / width,
-      yPercent: rect.y / height,
-      widthPercent: rect.width / width,
-      heightPercent: rect.height / height,
-      fill: rect.fill,
-      stroke: rect.stroke,
-      rotation: rect.rotation || 0,
-    }));
+      // Parse annotation arrays safely
+      const parsedRectangles = JSON.parse(rectangles || "[]");
+      const parsedComments = JSON.parse(comments || "[]");
+      const parsedLines = JSON.parse(lines || "[]");
 
-    const percentComments = parsedComments.map(comment => ({
-      id: comment.id,
-      rectId: comment.rectId,
-      text: comment.text,
-      xPercent: comment.x / width,
-      yPercent: comment.y / height,
-      fill: comment.fill,
-      textColor: comment.textColor,
-    }));
+      // Convert to percentages relative to image dimensions
+      const percentRectangles = parsedRectangles.map((rect) => ({
+        id: rect.id,
+        xPercent: rect.x / width,
+        yPercent: rect.y / height,
+        widthPercent: rect.width / width,
+        heightPercent: rect.height / height,
+        fill: rect.fill,
+        stroke: rect.stroke,
+        rotation: rect.rotation || 0,
+      }));
 
-    const percentLines = parsedLines.map(line => ({
-      id: line.id,
-      rectId: line.rectId,
-      commentId: line.commentId,
-      points: line.points.map((p, i) => (i % 2 === 0 ? p / width : p / height)),
-      stroke: line.stroke,
-      strokeWidth: line.strokeWidth,
-    }));
+      const percentComments = parsedComments.map((comment) => ({
+        id: comment.id,
+        rectId: comment.rectId,
+        text: comment.text,
+        xPercent: comment.x / width,
+        yPercent: comment.y / height,
+        fill: comment.fill,
+        textColor: comment.textColor,
+      }));
 
-    const newAnnotation = new AnnotationModel({
-      filename: req.file.originalname,
-      pdfData: req.file.buffer,
-      userId,
-      pdfId,
-      annotations: {
-        rectangles: percentRectangles,
-        comments: percentComments,
-        lines: percentLines,
-      },
-    });
+      const percentLines = parsedLines.map((line) => ({
+        id: line.id,
+        rectId: line.rectId,
+        commentId: line.commentId,
+        points: line.points.map((p, i) => (i % 2 === 0 ? p / width : p / height)),
+        stroke: line.stroke,
+        strokeWidth: line.strokeWidth,
+      }));
 
-    const savedAnnotation = await newAnnotation.save();
-    return res.status(201).json({ message: 'PDF and annotations saved successfully!', id: savedAnnotation._id });
-  } catch (error) {
-    console.error('Error saving PDF and annotations:', error);
-    if (!res.headersSent) {
-      return res.status(500).json({ message: 'Failed to save PDF and annotations.', error: error.message });
+      const newAnnotation = new AnnotationModel({
+        filename: req.file.originalname,
+        pdfData: req.file.buffer,
+        userId,
+        pdfId,
+        isPaid, // <-- attach user’s isPaid
+        originalImageWidth: width,
+        originalImageHeight: height,
+        annotations: {
+          rectangles: percentRectangles,
+          comments: percentComments,
+          lines: percentLines,
+        },
+      });
+
+      const savedAnnotation = await newAnnotation.save();
+
+      return res.status(201).json({
+        message: "PDF and annotations saved successfully!",
+        id: savedAnnotation._id,
+      });
+    } catch (error) {
+      console.error("Error saving PDF and annotations:", error);
+      if (!res.headersSent) {
+        return res.status(500).json({
+          message: "Failed to save PDF and annotations.",
+          error: error.message,
+        });
+      }
     }
   }
-});
+);
 
 router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
+  console.log('--- Starting PDF generation for annotation ID:', req.params.id);
+  
   try {
     const annotation = await AnnotationModel.findById(req.params.id);
     if (!annotation || !annotation.pdfData) {
+      console.error('Annotated PDF not found or missing pdfData.');
       return res.status(404).json({ message: 'Annotated PDF not found.' });
     }
+    
+    // Check user's paid status
+    const { isPaid, email } = req.user;
+    console.log(`User isPaid: ${isPaid}, User Email: ${email}`);
 
-    const tokenUserId = req.user._id?.toString() || req.user.id?.toString() || req.user.userId?.toString();
-    if (!tokenUserId || annotation.userId.toString() !== tokenUserId) {
-      return res.status(403).json({ message: 'Unauthorized access.' });
-    }
-
-    // Load the base PDF
     const pdfDoc = await PDFDocument.load(annotation.pdfData);
     const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
 
-    const watermarkText = `AC Design — User: ${req.user.email || 'Unknown User'}`;
+    const marginLeft = 20;
+    const marginBottom = 20;
+//  const isPaidTemp = true;
+    // Premium features are now all controlled by the `isPaid` check.
+    if (
+        // isPaidTemp
+    !isPaid//stamp does not render
+    ) {
+      console.log('User is a paid member. Applying premium content.');
 
-    if (annotation.annotatedImageUrl) {
-      const imageBytes = await fetch(annotation.annotatedImageUrl).then(res => res.arrayBuffer());
-      const embeddedImage = await pdfDoc.embedPng(imageBytes);
-
-      pages.forEach((page) => {
-        const { width, height } = page.getSize();
-        page.drawImage(embeddedImage, { x: 0, y: 0, width, height });
-        page.drawText(watermarkText, {
-          x: width / 4,
-          y: height / 2,
-          size: 18,
-          rotate: degrees(-40),
-          opacity: 0.15,
-          color: rgb(0.6, 0.6, 0.6),
+      // --- NEW: Logic to draw annotations from the database ---
+      if (annotation.annotations && Array.isArray(annotation.annotations)) {
+        console.log(`Found ${annotation.annotations.length} annotations. Rendering...`);
+        annotation.annotations.forEach(ann => {
+          const page = pdfDoc.getPages()[ann.pageIndex] || firstPage;
+          switch (ann.type) {
+            case 'text':
+              page.drawText(ann.text, {
+                x: ann.x,
+                y: ann.y,
+                size: ann.size,
+                color: rgb(ann.color.r, ann.color.g, ann.color.b),
+              });
+              break;
+            case 'rectangle':
+              page.drawRectangle({
+                x: ann.x,
+                y: ann.y,
+                width: ann.width,
+                height: ann.height,
+                borderColor: rgb(ann.borderColor.r, ann.borderColor.g, ann.borderColor.b),
+                borderWidth: ann.borderWidth,
+              });
+              break;
+            // Add more cases for other annotation types (e.g., lines, circles, etc.)
+            // The structure depends on what your frontend sends.
+            default:
+              console.warn(`Unknown annotation type: ${ann.type}`);
+              break;
+          }
         });
+      } else {
+        console.log('No annotations found in the database document.');
+      }
+      
+      // --- Watermark Logic ---
+      const watermarkText = `AC Commerce — User: ${email || 'Unknown User'}`;
+      if (annotation.annotatedImageUrl) {
+        console.log('Found annotatedImageUrl. Drawing image-based watermark.');
+        const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) => res.arrayBuffer());
+        const embeddedImage = await pdfDoc.embedPng(imageBytes);
+
+        pages.forEach((page) => {
+          const { width, height } = page.getSize();
+          page.drawImage(embeddedImage, { x: 0, y: 0, width, height });
+          const fontSize = 18;
+          const textWidth = watermarkText.length * fontSize * 0.6;
+          const xPos = (width - textWidth) / 2;
+          const yPos = (height - fontSize) / 2;
+
+          page.drawText(watermarkText, {
+            x: xPos,
+            y: yPos,
+            size: fontSize,
+            rotate: degrees(0),
+            opacity: 0.15,
+            color: rgb(0.6, 0.6, 0.6),
+            font: pdfDoc.embedFont(StandardFonts.Helvetica),
+          });
+        });
+      } else {
+        console.log('No annotatedImageUrl found. Drawing text-based watermark.');
+        pages.forEach((page) => {
+          const { width, height } = page.getSize();
+          page.drawText(watermarkText, {
+            x: width / 4,
+            y: height / 3,
+            size: 20,
+            rotate: degrees(0),
+            opacity: 0.25,
+            color: rgb(0.3, 0.3, 0.3),
+          });
+        });
+      }
+
+      // --- Draw APPROVED stamp ---
+      console.log('Drawing APPROVED stamp.');
+      const boxX = marginLeft - 10;
+      const boxY = marginBottom + 10;
+      const boxWidth = 110;
+      const boxHeight = 60;
+
+      firstPage.drawRectangle({
+        x: boxX,
+        y: boxY,
+        width: boxWidth,
+        height: boxHeight,
+        borderColor: rgb(0, 0.6, 0),
+        borderWidth: 1.5,
+      });
+
+      firstPage.drawText('APPROVED', {
+        x: marginLeft,
+        y: marginBottom + 45,
+        size: 17,
+        color: rgb(0, 0.6, 0),
+        opacity: 0.75,
+      });
+
+      firstPage.drawText('AC COMMERCE', {
+        x: marginLeft,
+        y: marginBottom + 30,
+        size: 9,
+        color: rgb(0, 0.6, 0),
       });
     } else {
-      pages.forEach((page) => {
-        const { width, height } = page.getSize();
-        page.drawText(watermarkText, {
-          x: width / 4,
-          y: height / 2,
-          size: 20,                  
-          rotate: degrees(-40),
-          opacity: 0.25,                
-          color: rgb(0.3, 0.3, 0.3),  
-        });
-      });
+      console.log('User is not a paid member. Rendering basic PDF.');
     }
 
     const pdfBytes = await pdfDoc.save();
+    console.log('PDF generation successful. Sending response.');
 
     res.set({
       'Content-Type': 'application/pdf',
@@ -144,6 +257,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
     }
   }
 });
+
 
 router.get('/annotations/:id', isAuth, async (req, res) => {
   try {
@@ -169,13 +283,21 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
 router.get('/user-annotations', isAuth, async (req, res) => {
   try {
     const userId = req.user._id;
-    const userAnnotations = await AnnotationModel.find({ userId }).select('_id filename pdfId createdAt updatedAt');
-    return res.json(userAnnotations);
+
+    const annotations = await AnnotationModel.find({ userId });
+
+    // Make sure you send 'isPaid' along with other fields
+    const data = annotations.map((a) => ({
+      _id: a._id,
+      filename: a.filename,
+      pdfId: a.pdfId,
+      createdAt: a.createdAt,
+      isPaid: a.isPaid, // <-- important
+    }));
+
+    res.json(data);
   } catch (error) {
-    console.error('Error fetching user annotations:', error);
-    if (!res.headersSent) {
-      return res.status(500).json({ message: 'Failed to fetch user annotations.', error: error.message });
-    }
+    res.status(500).json({ message: 'Failed to fetch annotations', error: error.message });
   }
 });
 
@@ -192,6 +314,92 @@ router.delete('/annotations/:id', isAuth, async (req, res) => {
     if (!res.headersSent) {
       return res.status(500).json({ message: 'Failed to delete annotation.', error: error.message });
     }
+  }
+});
+
+router.get("/print-annotated-pdf/:id", isAuth, async (req, res) => {
+  try {
+    const annotationId = req.params.id;
+    const annotation = await AnnotationModel.findById(annotationId);
+
+    if (!annotation) {
+      return res.status(404).json({ message: "PDF not found." });
+    }
+
+    if (!annotation.isPaid) {
+      return res.status(403).json({
+        message: "Printing is available only for paid documents.",
+      });
+    }
+
+    // Load original PDF from buffer
+    const pdfDoc = await PDFDocument.load(annotation.pdfData);
+
+    // Add watermark text to all pages
+    const pages = pdfDoc.getPages();
+    pages.forEach((page) => {
+      const { width, height } = page.getSize();
+      page.drawText("CONFIDENTIAL", {
+        x: width / 2 - 100,
+        y: height / 2,
+        size: 50,
+        color: rgb(0.8, 0.8, 0.8),
+        rotate: { degrees: 45 },
+        opacity: 0.3,
+      });
+    });
+
+    // Add signature stamp (example PNG)
+    const stampPath = path.join(
+      process.cwd(),
+      "backend/assets/approved-seal.png"
+    );
+    if (fs.existsSync(stampPath)) {
+      const stampImageBytes = fs.readFileSync(stampPath);
+      const stampImage = await pdfDoc.embedPng(stampImageBytes);
+
+      const firstPage = pdfDoc.getPages()[0];
+      firstPage.drawImage(stampImage, {
+        x: 50,
+        y: 50,
+        width: 100,
+        height: 100,
+      });
+    }
+
+    // Draw rectangle annotations on first page
+    const firstPage = pdfDoc.getPages()[0];
+    const { width: pdfWidth, height: pdfHeight } = firstPage.getSize();
+    const { rectangles, comments, lines } = annotation.annotations || {};
+
+    rectangles?.forEach((rect) => {
+      firstPage.drawRectangle({
+        x: rect.xPercent * pdfWidth,
+        y: rect.yPercent * pdfHeight,
+        width: rect.widthPercent * pdfWidth,
+        height: rect.heightPercent * pdfHeight,
+        color: rgb(0, 0.8, 0.9),
+        opacity: 0.3,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 2,
+      });
+    });
+
+    // You can optionally draw lines and comments as well here
+
+    const pdfBytes = await pdfDoc.save();
+
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${annotation.filename || "document"}.pdf"`
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(Buffer.from(pdfBytes));
+  } catch (error) {
+    console.error("Error generating printable PDF:", error);
+    res
+      .status(500)
+      .json({ message: "Error generating printable PDF.", error: error.message });
   }
 });
 

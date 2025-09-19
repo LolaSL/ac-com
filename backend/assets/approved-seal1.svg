@@ -1,0 +1,9 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="360" height="160" fill="none" stroke="#059669" stroke-width="8"/>
+
+  <text x="200" y="100" text-anchor="middle" font-size="48" font-weight="bold" fill="#059669" font-family="Arial, sans-serif">
+    SIGNED
+  </text>
+  
+  <line x1="120" y1="140" x2="280" y2="140" stroke="#059669" stroke-width="4"/>
+</svg>
