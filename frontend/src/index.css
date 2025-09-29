@@ -487,32 +487,30 @@ button {
 }
 
 .btn-icon:disabled i {
-  color: #aaa; 
+  color: #aaa;
 }
 
 .btn-icon:hover i {
-  color: #666; 
+  color: #666;
 }
 
 .btn-icon:disabled i {
   color: #c0bfbfff;
 }
 
-
 .btn-trash {
-  background-color: #f8d7da !important; 
-  border-color: #f5c2c7 !important;     
+  background-color: #f8d7da !important;
+  border-color: #f5c2c7 !important;
 }
 
 .btn-trash i {
-  color: #dc3545; 
+  color: #dc3545;
   transition: color 0.2s ease;
 }
 
 .btn-trash:hover i {
-  color: #a71d2a; 
+  color: #a71d2a;
 }
-
 
 button:hover {
   background-color: grey;
@@ -921,8 +919,7 @@ button.thumbnail {
   border: none;
   cursor: pointer;
   font-size: 18px;
-   text-transform: uppercase;
-
+  text-transform: uppercase;
 }
 
 .contact-form button:hover {
@@ -1248,9 +1245,9 @@ form.d-flex {
   display: flex;
   text-align: left;
   flex-direction: row;
-  gap: 0.5rem; 
-    margin-left: auto;
-    margin-right: auto;
+  gap: 0.5rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .footer-icons i {
@@ -1269,8 +1266,6 @@ form.d-flex {
   color: #fff;
   cursor: pointer;
 }
-
-
 
 .footer h5 {
   color: white;
@@ -1589,8 +1584,6 @@ hr {
   color: teal;
 }
 
-
-
 .btu-calculator-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -1600,7 +1593,7 @@ hr {
   background-color: #f8f9fa;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 800px; 
+  max-width: 800px;
   margin: 0 auto;
 }
 .btu-form {
@@ -1608,7 +1601,6 @@ hr {
   flex-direction: column;
   align-items: center;
 }
-
 
 .btu-form .form-group {
   width: 100%;
@@ -1721,22 +1713,20 @@ hr {
 }
 
 .btu-results td {
-  background-color: #f8f9fa; 
+  background-color: #f8f9fa;
   padding: 8px;
   text-align: center;
   font-size: 0.95rem;
   border: 1px solid #ddd;
 }
 
-
 .total-results {
   font-weight: bold !important;
   color: red !important;
-  background-color: #e0e0e0 !important; 
+  background-color: #e0e0e0 !important;
   text-align: center !important;
   font-size: 1rem;
 }
-
 
 @media (max-width: 768px) {
   .btu-results table,
@@ -1785,20 +1775,16 @@ hr {
     text-align: center !important;
     padding-left: 0 !important;
   }
-  
 }
-
 
 .btu-results .go-to-btn {
   margin: 0.5rem;
 }
 
-
 .btu-results .btn-text svg {
   margin-right: 5px;
   vertical-align: middle;
 }
-
 
 .link-product-details img {
   max-width: 100px;
@@ -2922,7 +2908,6 @@ h2 {
   background-color: green;
 }
 
-
 .go-to-btn {
   display: inline-flex;
   align-items: center;
@@ -2989,7 +2974,7 @@ h2 {
   }
 
   .button-wrapper .btn {
-    width: 100%; 
+    width: 100%;
   }
 }
 
@@ -2997,4 +2982,10 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
- 
+.excel-icon-button {
+  background-color: transparent;
+}
+.excel-icon-button:hover {
+  text-decoration: none;
+  background-color: transparent;
+}

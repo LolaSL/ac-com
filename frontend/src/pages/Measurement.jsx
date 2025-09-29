@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import BtuCalculator from "../components/BtuCalculator.jsx";
 import Annotator from "../components/Annotator.jsx";
 import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -7,6 +6,10 @@ import Sidebar from "../components/Sidebar.jsx";
 import BtuModalWindow from "../components/BtuModalWindow.jsx";
 import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
 import ArchSymbolsModal from "../components/ArchSymbolsModal.jsx";
+import AnnotatorErrorBoundary from "../components/AnnotatorErrorBoundary.js";
+import  BtuCalculator  from "../components/BtuCalculator.jsx";
+
+
 
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
@@ -51,9 +54,7 @@ const Measurement = () => {
     fetchSavedPdfs();
   }, [fetchSavedPdfs]);
 
-  useEffect(() => {
-    fetchSavedPdfs();
-  }, [fetchSavedPdfs]);
+
 
   return (
     <div>
@@ -96,12 +97,13 @@ const Measurement = () => {
             </div>
           </div>
         </div>
+        <AnnotatorErrorBoundary>
         <Annotator
           fetchSavedPdfs={fetchSavedPdfs}
           setRoomData={setRoomData}
           roomData={roomData}
-        />
-        <BtuCalculator roomData={roomData} />
+        /></AnnotatorErrorBoundary>
+        <BtuCalculator roomData={roomData || []} />
         <div className="mt-4 mb-4">
           <Link to="/" className="go-to-btn btn-text w-auto">
             Back to Home

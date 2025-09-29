@@ -22,7 +22,7 @@ dotenv.config();
 
 async function start() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI); // no extra options needed
+    await mongoose.connect(process.env.MONGODB_URI); 
     console.log("Connected to MongoDB");
 
     const notifications = await Notification.find();

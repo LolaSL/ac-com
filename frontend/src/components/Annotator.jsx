@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
 import * as pdfjsLib from "pdfjs-dist";
-
+import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
 let Tesseract;
@@ -205,8 +205,6 @@ const normalizeRoomData = (room) => {
 const parseToFeet = (val) => {
   if (!val) return 0;
   val = val.trim();
-
-  // feet + inches + optional fraction, e.g., 12' 3 1/2"
   const feetInchFraction = val.match(/^(\d+)'\s*(\d+)?(?:\s+(\d+)\/(\d+))?"?$/);
   if (feetInchFraction) {
     const feet = parseInt(feetInchFraction[1], 10) || 0;
@@ -217,7 +215,6 @@ const parseToFeet = (val) => {
     return feet + (inches + frac) / 12;
   }
 
-  // feet + decimal inches, e.g., 12' 3.5"
   const feetInchDecimal = val.match(/^(\d+)'\s*(\d+(?:\.\d+)?)"?$/);
   if (feetInchDecimal) {
     const feet = parseInt(feetInchDecimal[1], 10) || 0;
@@ -225,7 +222,6 @@ const parseToFeet = (val) => {
     return feet + inches / 12;
   }
 
-  // plain decimal or number
   const num = parseFloat(val);
   if (!isNaN(num)) return num;
 
@@ -326,25 +322,17 @@ const runOcrOnImages = async (images, setRoomData) => {
  */
 const parseRoomDataFromText = (rawText, fileName) => {
   let text = rawText
-    // Remove non-ASCII chars
     .replace(/[^\x20-\x7E\n\r\t]/g, "")
-    // Fix common ligatures
     .replace(/ﬁ/g, "fi")
-    // Normalize sqft
     .replace(/(\d+)\s*(?:sq\.?ft|ft²)/gi, "$1 sqft")
-    // Merge lines where room type is alone and dimensions follow
     .replace(
       /(\b(BATH|BATHROOM|BTH|BTHRM|DUSH|BEDROOM|KITCHEN|LIVING|DINING|FOYER|PATIO)\b)[\r\n]+([^\r\n]+)/gi,
       "$1 $3"
     )
-    // Collapse multiple spaces
     .replace(/\s+/g, " ")
-    // Fix quotes and apostrophes
     .replace(/[”“]/g, '"')
     .replace(/[‘’]/g, "'")
-    // Normalize dashes
     .replace(/–|—/g, "-")
-    // Collapse multiple spaces
     .replace(/\s{2,}/g, " ")
     .trim();
 
@@ -374,7 +362,6 @@ const parseRoomDataFromText = (rawText, fileName) => {
         .trim();
       if (!line) return;
 
-      // Split at every room type
       const parts = line.split(roomRegex);
       parts.forEach((p) => {
         if (p && typeof p === "string" && p.trim()) splitLines.push(p.trim());
@@ -762,11 +749,11 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
   const canvasRef = useRef(null);
   const [file, setFile] = useState(null);
   const stageRef = useRef(null);
-  // const [pdfSize, setPdfSize] = useState({ width: "100%", height: "100%" });
   const [pdfSize, setPdfSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
+  const [exportStatus, setExportStatus] = useState("idle");
   const [previewUrl, setPreviewUrl] = useState(null);
   const [error, setError] = useState(null);
   const [comments, setComments] = useState([]);
@@ -795,7 +782,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     areaSqFt: "",
     areaSqM: "",
   });
-
+  const [downloadedFiles, setDownloadedFiles] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [roomData, setRoomData] = useState([]);
 
@@ -1604,7 +1591,6 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       });
     }
     setRoomData(renderClassifiedRoomsByOcr);
-    // setRoomData(results[0]?.rooms || []);
 
     img.onload = () => {
       const originalImageWidth = img.width;
@@ -1648,70 +1634,114 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     }
   }, [isSaved]);
 
-  
-  const handleExportExcelStyled = async (filteredRoomsForTable, pdfInfo) => {
-    const fileName = pdfInfo?.fileName || "annotated_data";
-    if (!filteredRoomsForTable.length) {
+  const handleExportExcelStyled = async (data, info) => {
+    const baseName = info?.fileName || "annotated_data";
+
+    if (!data.length) {
       alert("No rooms to export");
       return;
     }
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Room Data");
+    setExportStatus("loading");
 
-    worksheet.columns = [
-      { header: "Room Type", key: "roomType", width: 20 },
-      { header: "Width", key: "width", width: 15 },
-      { header: "Height", key: "height", width: 15 },
-      { header: "Area (sqft)", key: "areaSqFt", width: 15 },
-      { header: "Area (sqm)", key: "areaSqM", width: 15 },
-    ];
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Room Data");
 
-    filteredRoomsForTable.forEach((room) => {
-      worksheet.addRow({
-        roomType: room.roomType,
-        width: room.width,
-        height: room.height,
-        areaSqFt: room.areaSqFt,
-        areaSqM: room.areaSqM,
-      });
-    });
+      worksheet.columns = [
+        { header: "Room Type", key: "roomType", width: 20 },
+        { header: "Width", key: "width", width: 15 },
+        { header: "Height", key: "height", width: 15 },
+        { header: "Area (sqft)", key: "areaSqFt", width: 15 },
+        { header: "Area (sqm)", key: "areaSqM", width: 15 },
+      ];
 
-    const headerRow = worksheet.getRow(1);
-    headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
-    headerRow.fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "FF4F81BD" },
-    };
-
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber !== 1) {
-        const fillColor =
-          rowNumber % 2 === 0 ? { argb: "FFDCE6F1" } : { argb: "FFFFFFFF" };
-        row.eachCell((cell) => {
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: fillColor,
-          };
+      data.forEach((room) => {
+        worksheet.addRow({
+          roomType: room.roomType,
+          width: room.width,
+          height: room.height,
+          areaSqFt: room.areaSqFt,
+          areaSqM: room.areaSqM,
         });
-      }
-    });
+      });
 
-    worksheet.autoFilter = { from: "A1", to: "E1" };
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      headerRow.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF4F81BD" },
+      };
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${fileName}-data.xlsx`;
-    a.click();
-    URL.revokeObjectURL(url);
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber !== 1) {
+          const fillColor =
+            rowNumber % 2 === 0 ? { argb: "FFDCE6F1" } : { argb: "FFFFFFFF" };
+          row.eachCell((cell) => {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: fillColor,
+            };
+          });
+        }
+      });
+
+      worksheet.autoFilter = { from: "A1", to: "E1" };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const finalFileName = `${baseName}-data-${Date.now()}.xlsx`;
+
+      const url = URL.createObjectURL(blob);
+
+      setDownloadedFiles((prev) => [
+        ...prev,
+        { id: Date.now(), name: finalFileName, url: url },
+      ]);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = finalFileName;
+      a.click();
+
+      setExportStatus("success");
+      setTimeout(() => setExportStatus("idle"), 5000);
+    } catch (error) {
+      console.error("Export failed:", error);
+      setExportStatus("error");
+      alert("Failed to export Excel file.");
+      setTimeout(() => setExportStatus("idle"), 5000);
+    }
   };
+
+  const handleRemoveFile = (fileToRemove) => {
+    URL.revokeObjectURL(fileToRemove.url);
+
+    setDownloadedFiles((prev) =>
+      prev.filter((file) => file.id !== fileToRemove.id)
+    );
+  };
+
+  useEffect(() => {
+    return () => {
+      downloadedFiles.forEach((file) => {
+        URL.revokeObjectURL(file.url);
+      });
+    };
+  }, [downloadedFiles]);
+
+  React.useEffect(() => {
+    return () => {
+      downloadedFiles.forEach((file) => {
+        URL.revokeObjectURL(file.url);
+      });
+    };
+  }, [downloadedFiles]);
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -1905,20 +1935,98 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                       </Button>
 
                       <Button
-                        variant="light"
-                        size="sm"
-                        className="go-to-btn btn-text  w-auto pt-2"
+                        variant="link"
+                        className="excel-icon-button "
+                        title="Export and Download Excel File"
                         onClick={() =>
                           handleExportExcelStyled(
                             filteredRoomsForTable,
                             pdfInfo
                           )
                         }
+                        disabled={exportStatus === "loading"}
+                        style={{ padding: 0 }}
                       >
-                        Export Excel
+                        {exportStatus === "loading" ? (
+                          <FaSpinner
+                            size={32}
+                            color="#007bff"
+                            className="spin"
+                          />
+                        ) : (
+                          <FaFileExcel size={32} color="#217346" />
+                        )}
                       </Button>
+                      {exportStatus === "success" && (
+                        <span style={{ color: "#28a745", marginLeft: "10px" }}>
+                          <FaDownload /> Download Started!
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        borderLeft: "1px solid #ccc",
+                        paddingLeft: "20px",
+                        minWidth: "300px",
+                      }}
+                    >
+                      <h5>Recent Exports (Click to Download/Open)</h5>
+                      {downloadedFiles.length === 0 ? (
+                        <p style={{ color: "#6c757d" }}>
+                          No files exported in this session.
+                        </p>
+                      ) : (
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                          {downloadedFiles.map((file) => (
+                            <li
+                              key={file.id}
+                              style={{
+                                marginBottom: "10px",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <a
+                                href={file.url} // Blob URL
+                                download={file.name} // CRITICAL: Forces browser download
+                                title={`Click to download and open: ${file.name}`}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  textDecoration: "none",
+                                  color: "#007bff",
+                                  flexGrow: 1,
+                                }}
+                              >
+                                <FaFileExcel
+                                  className="excel-icon-button "
+                                  size={20}
+                                  color="#217346"
+                                  style={{ marginRight: "8px" }}
+                                />
+                                <span style={{ fontSize: "0.9em" }}>
+                                  {file.name}
+                                </span>
+                              </a>
+                              <button
+                                onClick={() => handleRemoveFile(file)}
+                                title="Remove link from list (frees memory)"
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  marginLeft: "5px",
+                                }}
+                              >
+                                <FaTimes size={14} color="#dc3545" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </div>
+
                   <div className="mb-3 mt-2">
                     <input
                       type="text"
@@ -2206,7 +2314,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                       <React.Fragment key={rect.id}>
                         <Rect
                           key={rect.id}
-                          id={(rect.id)}
+                          id={rect.id}
                           name="rect"
                           x={rect.x}
                           y={rect.y}

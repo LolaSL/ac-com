@@ -167,34 +167,6 @@ userRouter.delete(
   })
 );
 
-// userRouter.post(
-//   '/admin/signin',
-//   expressAsyncHandler(async (req, res) => {
-//     const admin = await User.findOne({ email: req.body.email });
-//     console.log('admin found:', admin);
-//     if (admin) {
-//       console.log('password matches:', bcrypt.compareSync(req.body.password, admin.password));
-//       console.log('isAdmin:', admin.isAdmin);
-//       console.log('admin found:', admin); 
-
-//     }
-//     if (
-//       admin &&
-//       bcrypt.compareSync(req.body.password, admin.password) &&
-//       admin.isAdmin
-//     ) {
-//       res.send({
-//         _id: admin._id,
-//         name: admin.name,
-//         email: admin.email,
-//         isAdmin: true,
-//         token: generateToken(admin),
-//       });
-//     } else {
-//       res.status(401).send({ message: 'Invalid admin credentials' });
-//     }
-//   })
-// );
 userRouter.post(
   '/admin/signin',
   expressAsyncHandler(async (req, res) => {
@@ -209,7 +181,7 @@ userRouter.post(
         name: admin.name,
         email: admin.email,
         isAdmin: true,
-        type: 'admin',               // include type
+        type: 'admin',               
         token: generateToken(admin),
       });
     } else {

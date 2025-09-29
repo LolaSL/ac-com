@@ -34,12 +34,9 @@ router.post(
       const width = parseFloat(imageWidth);
       const height = parseFloat(imageHeight);
 
-      // Parse annotation arrays safely
       const parsedRectangles = JSON.parse(rectangles || "[]");
       const parsedComments = JSON.parse(comments || "[]");
       const parsedLines = JSON.parse(lines || "[]");
-
-      // Convert to percentages relative to image dimensions
       const percentRectangles = parsedRectangles.map((rect) => ({
         id: rect.id,
         xPercent: rect.x / width,
@@ -75,7 +72,7 @@ router.post(
         pdfData: req.file.buffer,
         userId,
         pdfId,
-        isPaid, // <-- attach user’s isPaid
+        isPaid, 
         originalImageWidth: width,
         originalImageHeight: height,
         annotations: {
@@ -112,8 +109,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
       console.error('Annotated PDF not found or missing pdfData.');
       return res.status(404).json({ message: 'Annotated PDF not found.' });
     }
-    
-    // Check user's paid status
+
     const { isPaid, email } = req.user;
     console.log(`User isPaid: ${isPaid}, User Email: ${email}`);
 
@@ -130,8 +126,6 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
     !isPaid//stamp does not render
     ) {
       console.log('User is a paid member. Applying premium content.');
-
-      // --- NEW: Logic to draw annotations from the database ---
       if (annotation.annotations && Array.isArray(annotation.annotations)) {
         console.log(`Found ${annotation.annotations.length} annotations. Rendering...`);
         annotation.annotations.forEach(ann => {
@@ -155,8 +149,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
                 borderWidth: ann.borderWidth,
               });
               break;
-            // Add more cases for other annotation types (e.g., lines, circles, etc.)
-            // The structure depends on what your frontend sends.
+
             default:
               console.warn(`Unknown annotation type: ${ann.type}`);
               break;
@@ -165,8 +158,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
       } else {
         console.log('No annotations found in the database document.');
       }
-      
-      // --- Watermark Logic ---
+
       const watermarkText = `AC Commerce — User: ${email || 'Unknown User'}`;
       if (annotation.annotatedImageUrl) {
         console.log('Found annotatedImageUrl. Drawing image-based watermark.');
@@ -206,7 +198,6 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
         });
       }
 
-      // --- Draw APPROVED stamp ---
       console.log('Drawing APPROVED stamp.');
       const boxX = marginLeft - 10;
       const boxY = marginBottom + 10;
@@ -286,13 +277,12 @@ router.get('/user-annotations', isAuth, async (req, res) => {
 
     const annotations = await AnnotationModel.find({ userId });
 
-    // Make sure you send 'isPaid' along with other fields
     const data = annotations.map((a) => ({
       _id: a._id,
       filename: a.filename,
       pdfId: a.pdfId,
       createdAt: a.createdAt,
-      isPaid: a.isPaid, // <-- important
+      isPaid: a.isPaid, 
     }));
 
     res.json(data);
@@ -332,10 +322,8 @@ router.get("/print-annotated-pdf/:id", isAuth, async (req, res) => {
       });
     }
 
-    // Load original PDF from buffer
     const pdfDoc = await PDFDocument.load(annotation.pdfData);
 
-    // Add watermark text to all pages
     const pages = pdfDoc.getPages();
     pages.forEach((page) => {
       const { width, height } = page.getSize();
@@ -349,7 +337,7 @@ router.get("/print-annotated-pdf/:id", isAuth, async (req, res) => {
       });
     });
 
-    // Add signature stamp (example PNG)
+
     const stampPath = path.join(
       process.cwd(),
       "backend/assets/approved-seal.png"
@@ -367,7 +355,6 @@ router.get("/print-annotated-pdf/:id", isAuth, async (req, res) => {
       });
     }
 
-    // Draw rectangle annotations on first page
     const firstPage = pdfDoc.getPages()[0];
     const { width: pdfWidth, height: pdfHeight } = firstPage.getSize();
     const { rectangles, comments, lines } = annotation.annotations || {};
@@ -385,7 +372,6 @@ router.get("/print-annotated-pdf/:id", isAuth, async (req, res) => {
       });
     });
 
-    // You can optionally draw lines and comments as well here
 
     const pdfBytes = await pdfDoc.save();
 

@@ -29,9 +29,7 @@ export const generateToken = (user) => {
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
-      // CORRECTED: Add the isServiceProvider property
       isServiceProvider: user.isServiceProvider,
-      // CORRECTED: Add the type property for filtering notifications
       type: user.isServiceProvider ? 'serviceProvider' : 'user',
      isPaid: user.isPaid,
     },
@@ -46,12 +44,12 @@ export const generateToken = (user) => {
 export const isAuth = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (authorization) {
-    const token = authorization.slice(7); // remove "Bearer "
+    const token = authorization.slice(7); 
     jwt.verify(token, process.env.JWT_SECRET, (err, decode) => {
       if (err) {
         res.status(401).send({ message: 'Invalid token' });
       } else {
-        req.user = decode; // contains isAdmin!
+        req.user = decode; 
         next();
       }
     });

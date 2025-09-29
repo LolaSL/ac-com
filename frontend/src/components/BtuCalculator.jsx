@@ -80,7 +80,7 @@ function BtuCalculator({ roomData }) {
             products.length > 0 ? totalPrice.toFixed(2) : "No price available"
           }</strong></td>
         </tr>
-        <tr>     
+        <tr>
         <td
           <td
                   colSpan="5"
@@ -1013,3 +1013,5 @@ function BtuCalculator({ roomData }) {
 }
 
 export default BtuCalculator;
+
+

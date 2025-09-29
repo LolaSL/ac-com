@@ -57,7 +57,7 @@ const Sidebar = () => {
   const [selectedPdfFile, setSelectedPdfFile] = useState(null);
   const [selectedAnnotations, setSelectedAnnotations] = useState(null);
 
-  // Fetch PDFs
+
   const fetchSavedPdfs = async () => {
     if (!token) return setError("User not authenticated.");
     try {
@@ -73,7 +73,7 @@ const Sidebar = () => {
       const enhancedData = data.map((item) => ({
         ...item,
         pdfUrl: `/api/annotations/pdf/${item._id}`,
-        isPaid: item.isPaid ?? false, // ensure flag exists
+        isPaid: item.isPaid ?? false,
       }));
       setSavedPdfs(enhancedData);
       console.log("Saved PDFs:", enhancedData);
@@ -182,7 +182,7 @@ const Sidebar = () => {
     try {
       if (!pdf.isPaid) {
         alert("You need to pay to view this PDF with annotations.");
-        return; //prevent to get attotated file from the backend
+        return;
       }
 
       setSelectedPdf(pdf);
@@ -226,7 +226,6 @@ const Sidebar = () => {
       container.appendChild(canvas);
       await page.render({ canvasContext: context, viewport }).promise;
 
-      // After page.render
       page.render({ canvasContext: context, viewport }).promise.then(() => {
         if (annotationsData) {
           const overlayCanvas = document.createElement("canvas");
@@ -240,7 +239,7 @@ const Sidebar = () => {
           container.appendChild(overlayCanvas);
 
           const overlayContext = overlayCanvas.getContext("2d");
-          overlayAnnotations(overlayContext, annotationsData); // << draw rectangles/comments/lines
+          overlayAnnotations(overlayContext, annotationsData); 
         }
       });
     } catch (err) {
