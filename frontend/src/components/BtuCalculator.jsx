@@ -484,13 +484,16 @@ function BtuCalculator({ roomData }) {
     const acProducts = [];
     let condenserCandidates = [];
 
-    productResults.forEach(({ room, product }) => {
-      if (!/condenser/i.test(product.name || product.title)) {
-        acProducts.push(product);
-      } else {
-        condenserCandidates.push(product);
-      }
-    });
+productResults.forEach(({ room, product }) => {
+    if ((product.category && product.category.toLowerCase().includes('condenser')) ||
+        /condenser/i.test(product.name || product.title)) {
+        
+        condenserCandidates.push(product); 
+
+    } else {
+        acProducts.push(product); 
+    }
+});
 
     let condenser = condenserCandidates[0] || null;
 
@@ -1013,5 +1016,3 @@ function BtuCalculator({ roomData }) {
 }
 
 export default BtuCalculator;
-
-

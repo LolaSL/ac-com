@@ -45,14 +45,14 @@ productRouter.post(
         "Anti Corrosion Gold Fin™",
         "Auto Restart"
       ],
-      mode:[
+      mode: [
         "Cooling Mode",
-       " Drying Mode ",       
+        " Drying Mode ",
         "Fan Mode",
         "Silent Mode ",
         "Self-cleaning",
         "Low Noise",
-         "Night Mode"
+        "Night Mode"
       ],
       btu: 0,
       areaCoverage: 0,
@@ -79,7 +79,7 @@ productRouter.put(
     const features = Array.isArray(req.body.features)
       ? req.body.features
       : req.body.features.split(',').map((feature) => feature.trim());
-      const mode = Array.isArray(req.body.mode)
+    const mode = Array.isArray(req.body.mode)
       ? req.body.mode
       : req.body.mode.split(',').map((mode) => mode.trim());
     const documents = Array.isArray(req.body.documents)
@@ -329,7 +329,7 @@ productRouter.get('/slug/:slug', async (req, res) => {
 });
 
 productRouter.get("/:id", async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid product ID" });
@@ -349,10 +349,11 @@ productRouter.get("/:id", async (req, res) => {
   }
 });
 
+
 productRouter.get('/condensers/:btu', async (req, res) => {
   try {
     const requiredBTU = parseInt(req.params.btu);
-    
+
     const condensers = await Product.find({ category: "Outdoor condenser" }).sort({ btu: 1 });
 
     let selected = [];
@@ -378,35 +379,66 @@ productRouter.get('/condensers/:btu', async (req, res) => {
 
 
 productRouter.get('/btu/:btu', async (req, res) => {
+  const targetBTU = parseInt(req.params.btu, 10);
+
+  if (isNaN(targetBTU)) {
+    return res.status(400).send({ message: 'Invalid BTU value provided.' });
+  }
+
   try {
-    const targetBTU = parseInt(req.params.btu);
+    // Define the categories that are explicitly indoor AC units.
+    const INDOOR_AC_CATEGORIES = [
+      "Wall-Mounted AC",
+      "Mini Split AC",
+      "Indoor Unit",
+      "Split System Indoor",
+      // Add any other categories that are NOT condensers here!
+    ];
 
+    const query = {
+      btu: { $gte: targetBTU },
 
-    const product = await Product.findOne({
-      btu: {
-        $gte: targetBTU,
-      }
-    }).sort({ btu: 1 });
+      // 🛑 CRITICAL FIX: Explicitly include only INDOOR AC units.
+      // This is safer than excluding condensers, which fail due to naming variations.
+      category: { $in: INDOOR_AC_CATEGORIES },
 
+      // Robust Stock Condition (Only includes products with count/quantity > 0 OR if the field is missing/undefined)
+      $and: [
+        { $or: [{ count: { $exists: false } }, { count: { $gt: 0 } }] },
+        { $or: [{ quantity: { $exists: false } }, { quantity: { $gt: 0 } }] }
+      ]
+    };
 
-    if (!product) {
-      const closestProduct = await Product.findOne({
-        btu: { $lte: targetBTU }
-      }).sort({ btu: -1 });
+    // Use find() to get ALL potential candidates and sort them by BTU.
+    const candidates = await Product.find(query)
+      .sort({ btu: 1 }); // Finds the smallest suitable product first
 
-      if (closestProduct) {
-        res.send(closestProduct);
-      } else {
-        res.status(404).send({ message: 'Product not found' });
-      }
+    if (candidates.length === 0) {
+      console.log('❌ PRODUCT NOT FOUND for BTU:', targetBTU);
+      return res.status(404).send({ message: 'No suitable product found with available stock.' });
+    }
+
+    // Final Filter: Pick the first valid product (must have price/name)
+    const validProduct = candidates.find(p =>
+      p.price > 0 &&
+      (p.displayName || p.name)
+    );
+
+    if (validProduct) {
+      const productName = validProduct.displayName || validProduct.name || `Product ID: ${validProduct._id}`;
+      console.log('✅ FOUND PRODUCT (Indoor AC):', productName, validProduct.btu);
+
+      // Return clean JSON to the client
+      return res.json(validProduct);
+
     } else {
-      res.send(product);
+      console.log('❌ PRODUCT FOUND IN DB BUT INVALID DATA (Price/Name issue):', targetBTU);
+      return res.status(404).send({ message: 'All found products are invalid or incomplete.' });
     }
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    console.error('Server error during product search:', error);
+    res.status(500).send({ message: "Server error", error: error.message });
   }
 });
-
-
 
 export default productRouter;

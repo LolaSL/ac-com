@@ -57,7 +57,6 @@ const Sidebar = () => {
   const [selectedPdfFile, setSelectedPdfFile] = useState(null);
   const [selectedAnnotations, setSelectedAnnotations] = useState(null);
 
-
   const fetchSavedPdfs = async () => {
     if (!token) return setError("User not authenticated.");
     try {
@@ -180,7 +179,8 @@ const Sidebar = () => {
   const viewPdfWithAnnotations = async (pdf) => {
     if (!token) return setError("User not authenticated.");
     try {
-      if (!pdf.isPaid) {
+      if (pdf.isPaid)//alert if isPaid===true annotated pdf file renders
+      {
         alert("You need to pay to view this PDF with annotations.");
         return;
       }
@@ -209,8 +209,6 @@ const Sidebar = () => {
       }
       const annotationsData = await annotationsResponse.json();
       setSelectedAnnotations(annotationsData);
-
-      // Render PDF
       const container = document.getElementById("pdf-container");
       if (!container) return;
       container.innerHTML = "";
@@ -239,7 +237,7 @@ const Sidebar = () => {
           container.appendChild(overlayCanvas);
 
           const overlayContext = overlayCanvas.getContext("2d");
-          overlayAnnotations(overlayContext, annotationsData); 
+          overlayAnnotations(overlayContext, annotationsData);
         }
       });
     } catch (err) {
@@ -324,7 +322,7 @@ const Sidebar = () => {
                     >
                       <FaFilePdf />
                       {pdf.filename || "Untitled Document"}
-                      {!pdf.isPaid && <FaLock />}
+                      {!pdf.isPaid && <FaLock />} 
                     </Button>
                     <small className=" text-muted">
                       Saved: {new Date(pdf.createdAt).toLocaleString()}

@@ -1970,7 +1970,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                         minWidth: "300px",
                       }}
                     >
-                      <h5>Recent Exports (Click to Download/Open)</h5>
+                      <h5>Recent Exports (Click to Re-download)</h5>
                       {downloadedFiles.length === 0 ? (
                         <p style={{ color: "#6c757d" }}>
                           No files exported in this session.

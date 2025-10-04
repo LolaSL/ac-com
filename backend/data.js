@@ -968,7 +968,7 @@ const data = {
       name: "72000 BTU VRF Heat Recovery Multi-Split DC Inverter Outdoor Unit",
       model: "VRA072L4M-2Y",
       slug: "72000-outdoor-condensing-unit",
-      category: "VRF",
+      category: "Outdoor Condenser",
       image: "/images/p24.jpg",
       price: 6000,
       discount: 50,
@@ -1008,7 +1008,7 @@ const data = {
       name: "96000 BTU VRF Heat Recovery Multi-Split DC Inverter Outdoor Unit",
       model: "VRA096L4M-2Y",
       slug: "96000-outdoor-condensing-unit",
-      category: "VRF",
+      category: "Outdoor Condenser",
       image: "/images/p24.jpg",
       price: 6400,
       discount: 50,
@@ -1048,7 +1048,7 @@ const data = {
       name: "107500 BTU MRV-S Outdoor",
       model: "AU12NFKERA",
       slug: "MRV-S-Outdoor-condensing-unit",
-      category: "VRF",
+      category: "Outdoor Condenser",
       image: "/images/p31.jpg",
       price: 7200,
       discount: 10,
@@ -1092,7 +1092,7 @@ const data = {
       name: "120000 BTU VRF Heat Recovery Multi-Split DC Inverter Outdoor Unit",
       model: "VPA120H4M-2G",
       slug: "120000-ac-condensing-unit",
-      category: "VRF",
+      category: "Outdoor Condenser",
       image: "/images/p24.jpg",
       price: 5600,
       discount: 40,
@@ -1698,6 +1698,7 @@ const data = {
 
     },
   ]
+
 
 }
 

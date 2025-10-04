@@ -3,8 +3,8 @@ import multer from 'multer';
 import AnnotationModel from '../models/annotationModel.js';
 import { isAuth } from '../utils.js';
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
-import fs from 'fs';   
-import path from 'path'; 
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -72,7 +72,7 @@ router.post(
         pdfData: req.file.buffer,
         userId,
         pdfId,
-        isPaid, 
+        isPaid,
         originalImageWidth: width,
         originalImageHeight: height,
         annotations: {
@@ -102,7 +102,7 @@ router.post(
 
 router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
   console.log('--- Starting PDF generation for annotation ID:', req.params.id);
-  
+
   try {
     const annotation = await AnnotationModel.findById(req.params.id);
     if (!annotation || !annotation.pdfData) {
@@ -119,11 +119,12 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
 
     const marginLeft = 20;
     const marginBottom = 20;
-//  const isPaidTemp = true;
+    const isPaidTemp = true;
     // Premium features are now all controlled by the `isPaid` check.
     if (
-        // isPaidTemp
-    !isPaid//stamp does not render
+      isPaidTemp
+      // !isPaid
+      //stamp does not render
     ) {
       console.log('User is a paid member. Applying premium content.');
       if (annotation.annotations && Array.isArray(annotation.annotations)) {
@@ -159,44 +160,50 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
         console.log('No annotations found in the database document.');
       }
 
-      const watermarkText = `AC Commerce — User: ${email || 'Unknown User'}`;
-      if (annotation.annotatedImageUrl) {
-        console.log('Found annotatedImageUrl. Drawing image-based watermark.');
-        const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) => res.arrayBuffer());
-        const embeddedImage = await pdfDoc.embedPng(imageBytes);
+   const watermarkText = `AC Commerce — User: ${email || 'Unknown User'}`;
+const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-        pages.forEach((page) => {
-          const { width, height } = page.getSize();
-          page.drawImage(embeddedImage, { x: 0, y: 0, width, height });
-          const fontSize = 18;
-          const textWidth = watermarkText.length * fontSize * 0.6;
-          const xPos = (width - textWidth) / 2;
-          const yPos = (height - fontSize) / 2;
+if (annotation.annotatedImageUrl) {
+  console.log('Found annotatedImageUrl. Drawing image-based watermark.');
+  const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) => res.arrayBuffer());
+  const embeddedImage = await pdfDoc.embedPng(imageBytes);
 
-          page.drawText(watermarkText, {
-            x: xPos,
-            y: yPos,
-            size: fontSize,
-            rotate: degrees(0),
-            opacity: 0.15,
-            color: rgb(0.6, 0.6, 0.6),
-            font: pdfDoc.embedFont(StandardFonts.Helvetica),
-          });
-        });
-      } else {
-        console.log('No annotatedImageUrl found. Drawing text-based watermark.');
-        pages.forEach((page) => {
-          const { width, height } = page.getSize();
-          page.drawText(watermarkText, {
-            x: width / 4,
-            y: height / 3,
-            size: 20,
-            rotate: degrees(0),
-            opacity: 0.25,
-            color: rgb(0.3, 0.3, 0.3),
-          });
-        });
-      }
+  pages.forEach((page) => {
+    const { width, height } = page.getSize();
+    page.drawImage(embeddedImage, { x: 0, y: 0, width, height });
+
+    const fontSize = 14;
+    const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+    const xPos = (width - textWidth) / 2;
+    const yPos = 40;
+
+    page.drawText(watermarkText, {
+      x: xPos,
+      y: yPos,
+      size: fontSize,
+      rotate: degrees(45), 
+      opacity: 0.15,
+      color: rgb(0.6, 0.6, 0.6),
+      font: helveticaFont, 
+    });
+  });
+} else {
+  console.log('No annotatedImageUrl found. Drawing text-based watermark.');
+  const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica); 
+  pages.forEach((page) => {
+    const { width, height } = page.getSize();
+    page.drawText(watermarkText, {
+      x: width / 4,
+      y: 40, 
+      size: 20,
+      rotate: degrees(45), 
+      opacity: 0.25,
+      color: rgb(0.3, 0.3, 0.3),
+      font: helveticaFont,
+    });
+  });
+}
+
 
       console.log('Drawing APPROVED stamp.');
       const boxX = marginLeft - 10;
@@ -282,7 +289,7 @@ router.get('/user-annotations', isAuth, async (req, res) => {
       filename: a.filename,
       pdfId: a.pdfId,
       createdAt: a.createdAt,
-      isPaid: a.isPaid, 
+      isPaid: a.isPaid,
     }));
 
     res.json(data);
