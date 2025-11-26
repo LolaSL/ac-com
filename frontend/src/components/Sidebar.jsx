@@ -179,8 +179,8 @@ const Sidebar = () => {
   const viewPdfWithAnnotations = async (pdf) => {
     if (!token) return setError("User not authenticated.");
     try {
-      if (pdf.isPaid)//alert if isPaid===true annotated pdf file renders
-      {
+      if (pdf.isPaid) {
+        //alert if isPaid===true annotated pdf file renders
         alert("You need to pay to view this PDF with annotations.");
         return;
       }
@@ -292,7 +292,6 @@ const Sidebar = () => {
         </Modal.Header>
         <Modal.Body>
           {error && <p className="text-danger">{error}</p>}
-
           <div
             style={{
               width: "100%",
@@ -317,12 +316,12 @@ const Sidebar = () => {
                       variant="btn-outline w-auto"
                       size="sm"
                       onClick={() => viewPdfWithAnnotations(pdf)}
-                      disabled={!pdf.isPaid} // disable if not paid
+                      disabled={pdf.isPaid} // disable if not paid
                       className="p-2 text-left go-to-btn btn-text d-flex align-items-center"
                     >
                       <FaFilePdf />
                       {pdf.filename || "Untitled Document"}
-                      {!pdf.isPaid && <FaLock />} 
+                      {pdf.isPaid && <FaLock />}
                     </Button>
                     <small className=" text-muted">
                       Saved: {new Date(pdf.createdAt).toLocaleString()}

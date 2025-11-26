@@ -53,6 +53,10 @@ const Measurement = () => {
   useEffect(() => {
     fetchSavedPdfs();
   }, [fetchSavedPdfs]);
+  
+useEffect(() => {
+  console.log("ROOM DATA UPDATED:", roomData);
+}, [roomData]);
 
 
 
@@ -101,7 +105,7 @@ const Measurement = () => {
         <Annotator
           fetchSavedPdfs={fetchSavedPdfs}
           setRoomData={setRoomData}
-          roomData={roomData}
+          // roomData={roomData}
         /></AnnotatorErrorBoundary>
         <BtuCalculator roomData={roomData || []} />
         <div className="mt-4 mb-4">

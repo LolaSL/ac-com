@@ -203,37 +203,77 @@ if (annotation.annotatedImageUrl) {
     });
   });
 }
+console.log('Drawing APPROVAL stamp in top-left corner.');
+
+const { width, height } = firstPage.getSize(); // Get page size
+
+// Position with 50px margin from LEFT
+const stampMarginX = 50;  // ← Updated to 50px from left
+const stampMarginY = height - 100; // Distance FROM TOP (80px down)
+
+// Box size
+const boxWidth = 140;
+const boxHeight = 60;
+
+// Draw stamp box
+firstPage.drawRectangle({
+  x: stampMarginX - 10,
+  y: stampMarginY - 10,
+  width: boxWidth,
+  height: boxHeight,
+  borderColor: rgb(0, 0.6, 0),
+  borderWidth: 2,
+});
+
+// Draw text - APPROVED
+firstPage.drawText('APPROVED', {
+  x: stampMarginX,
+  y: stampMarginY + 30,
+  size: 20,
+  font: helveticaFont,
+  color: rgb(0, 0.6, 0),
+  opacity: 0.85,
+});
+
+// Draw text - AC COMMERCE
+firstPage.drawText('AC COMMERCE', {
+  x: stampMarginX,
+  y: stampMarginY + 10,
+  size: 10,
+  font: helveticaFont,
+  color: rgb(0, 0.6, 0),
+});
 
 
-      console.log('Drawing APPROVED stamp.');
-      const boxX = marginLeft - 10;
-      const boxY = marginBottom + 10;
-      const boxWidth = 110;
-      const boxHeight = 60;
+      // console.log('Drawing APPROVED stamp.');
+      // const boxX = marginLeft - 10;
+      // const boxY = marginBottom + 10;
+      // const boxWidth = 110;
+      // const boxHeight = 60;
 
-      firstPage.drawRectangle({
-        x: boxX,
-        y: boxY,
-        width: boxWidth,
-        height: boxHeight,
-        borderColor: rgb(0, 0.6, 0),
-        borderWidth: 1.5,
-      });
+      // firstPage.drawRectangle({
+      //   x: boxX,
+      //   y: boxY,
+      //   width: boxWidth,
+      //   height: boxHeight,
+      //   borderColor: rgb(0, 0.6, 0),
+      //   borderWidth: 1.5,
+      // });
 
-      firstPage.drawText('APPROVED', {
-        x: marginLeft,
-        y: marginBottom + 45,
-        size: 17,
-        color: rgb(0, 0.6, 0),
-        opacity: 0.75,
-      });
+      // firstPage.drawText('APPROVED', {
+      //   x: marginLeft,
+      //   y: marginBottom + 45,
+      //   size: 17,
+      //   color: rgb(0, 0.6, 0),
+      //   opacity: 0.75,
+      // });
 
-      firstPage.drawText('AC COMMERCE', {
-        x: marginLeft,
-        y: marginBottom + 30,
-        size: 9,
-        color: rgb(0, 0.6, 0),
-      });
+      // firstPage.drawText('AC COMMERCE', {
+      //   x: marginLeft,
+      //   y: marginBottom + 30,
+      //   size: 9,
+      //   color: rgb(0, 0.6, 0),
+      // });
     } else {
       console.log('User is not a paid member. Rendering basic PDF.');
     }

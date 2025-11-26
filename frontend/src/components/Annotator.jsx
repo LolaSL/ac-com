@@ -13,6 +13,7 @@ import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
+import Legend from "./Legend.jsx";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
 let Tesseract;
@@ -1765,38 +1766,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     <div>
       <Form className="btu-calculation-measure mt-4">
         <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          *Supported: High Resolution PDFs files (.pdf). Recommended to place
-          air conditioner (rectangle) above door in drawing.
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          * PDFs files (.pdf) should be flat/appartment drawing and without any
-          modifications.
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          *Add rectangle: <kbd>Click On Empty Area</kbd>
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          *Enter to appeared prompt window relevant to air conditioner comment.
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          *Rotate rectangle: <kbd>Click</kbd>
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          *Delete rectangle for small screens: <kbd>Tap And Hold</kbd>
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          *Delete rectangle for large screens: <kbd>Right Click</kbd>
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          *For saving approved drawing:{" "}
-          <kbd>Click on the button "Save PDF File"</kbd>{" "}
-        </p>
-        <p className="text-secondary fw-bold upload-paragraph fs-5">
-          <span className="me-1"></span>
-          *To remove unnecessary drawing, simply click the <kbd>Clear</kbd>{" "}
-          button.
-        </p>
+        <Legend />
         <Form.Control
           className="my-4 form-control"
           id="file-upload"
@@ -2312,6 +2282,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                   <Layer>
                     {rectangles.map((rect) => (
                       <React.Fragment key={rect.id}>
+                        
                         <Rect
                           key={rect.id}
                           id={rect.id}
@@ -2362,6 +2333,20 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                           }}
                           onTouchStart={handleTouchStart}
                         />
+                         {/* <Text
+    key={`icon-${rect.id}`}
+    x={rect.x + rect.width / 2} // center inside rectangle
+    y={rect.y + rect.height / 2}
+    text="❄️"
+    fontSize={rect.height * 0.9} // adjust size relative to rectangle height
+    align="center"
+    verticalAlign="middle"
+    offsetX={(rect.height * 0.9) / 2} // center horizontally
+    offsetY={(rect.height * 0.9) / 2} // center vertically
+    rotation={rect.rotation} // rotate with rectangle
+    listening={false} // ignore events on the symbol
+    fill="white" // ← color changed to white
+  /> */}
                       </React.Fragment>
                     ))}
                     {comments.map((comment) => (
