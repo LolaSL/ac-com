@@ -13,7 +13,7 @@ import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
-import Legend from "./Legend.jsx";
+import ModalLegend from './ModalLegend.jsx';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
 let Tesseract;
@@ -1766,7 +1766,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     <div>
       <Form className="btu-calculation-measure mt-4">
         <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
-        <Legend />
+       <ModalLegend/>
         <Form.Control
           className="my-4 form-control"
           id="file-upload"
@@ -1957,8 +1957,8 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                               }}
                             >
                               <a
-                                href={file.url} // Blob URL
-                                download={file.name} // CRITICAL: Forces browser download
+                                href={file.url} 
+                                download={file.name} 
                                 title={`Click to download and open: ${file.name}`}
                                 style={{
                                   display: "flex",
@@ -2333,20 +2333,6 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                           }}
                           onTouchStart={handleTouchStart}
                         />
-                         {/* <Text
-    key={`icon-${rect.id}`}
-    x={rect.x + rect.width / 2} // center inside rectangle
-    y={rect.y + rect.height / 2}
-    text="❄️"
-    fontSize={rect.height * 0.9} // adjust size relative to rectangle height
-    align="center"
-    verticalAlign="middle"
-    offsetX={(rect.height * 0.9) / 2} // center horizontally
-    offsetY={(rect.height * 0.9) / 2} // center vertically
-    rotation={rect.rotation} // rotate with rectangle
-    listening={false} // ignore events on the symbol
-    fill="white" // ← color changed to white
-  /> */}
                       </React.Fragment>
                     ))}
                     {comments.map((comment) => (

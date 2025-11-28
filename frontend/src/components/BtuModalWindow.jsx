@@ -7,7 +7,7 @@ const BtuModalWindow = () => {
     setShow(true);
     setTimeout(() => {
       setShow(false);
-    }, 15000);
+    }, 45000);
   };
 
   return (
