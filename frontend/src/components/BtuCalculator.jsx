@@ -128,7 +128,6 @@ function BtuCalculator({ roomData }) {
       {item.name} - {item.quantity}
     </div>
   ));
-  // eslint-disable-next-line no-unused-vars
   const [measurementSystem, setMeasurementSystem] = useState("meters");
   const [rooms, setRooms] = useState([{ name: "Bedroom 1", size: "", btu: 0 }]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
@@ -306,19 +305,6 @@ function BtuCalculator({ roomData }) {
     }));
   };
 
-  const handleRoomChange = (index, field, value) => {
-    const updatedRooms = [...rooms];
-    updatedRooms[index][field] = value;
-    setRooms(updatedRooms);
-  };
-
-  const addRoom = () => {
-    setRooms([...rooms, { name: "Bedroom", size: "", btu: 0 }]);
-  };
-
-  const removeRoom = (index) => {
-    setRooms(rooms.filter((_, i) => i !== index));
-  };
   const handleOutdoorUnitLocationChange = (e) =>
     handleOptionChange("OutdoorUnitLocation", e.target.name);
 
@@ -484,16 +470,17 @@ function BtuCalculator({ roomData }) {
     const acProducts = [];
     let condenserCandidates = [];
 
-productResults.forEach(({ room, product }) => {
-    if ((product.category && product.category.toLowerCase().includes('condenser')) ||
-        /condenser/i.test(product.name || product.title)) {
-        
-        condenserCandidates.push(product); 
-
-    } else {
-        acProducts.push(product); 
-    }
-});
+    productResults.forEach(({ room, product }) => {
+      if (
+        (product.category &&
+          product.category.toLowerCase().includes("condenser")) ||
+        /condenser/i.test(product.name || product.title)
+      ) {
+        condenserCandidates.push(product);
+      } else {
+        acProducts.push(product);
+      }
+    });
 
     let condenser = condenserCandidates[0] || null;
 
@@ -602,7 +589,7 @@ productResults.forEach(({ room, product }) => {
     setRooms([{ name: "Bedroom 1", size: "", btu: 0 }]);
     setCeilingHeight("2.5");
     setNumPeople(2);
-    setMeasurementSystem();
+    setMeasurementSystem("meters");
     setOptions({
       OutdoorUnitLocation: {
         PitchedRoof: false,
@@ -629,10 +616,46 @@ productResults.forEach(({ room, product }) => {
         HotMiddleEast: false,
         ColdAlaska: false,
       },
+      appliances: {
+        Oven: false,
+        Television: false,
+        Computer: false,
+      },
+      windowType: {
+        SingleGlazed: false,
+        DoubleGlazed: false,
+        TripleGlazed: false,
+        Louvered: false,
+      },
+      roofType: {
+        Roof: false,
+        Flat: false,
+        Pitched: false,
+        Gable: false,
+      },
+      floorType: {
+        Marble: false,
+        Timber: false,
+        Concrete: false,
+        Carpeted: false,
+      },
+      apartmentOrientation: {
+        North: false,
+        East: false,
+        South: false,
+        West: false,
+      },
+      outputUnit: {
+        BTU: true,
+        Watt: false,
+        kW: false,
+      },
     });
 
     setBtuResults([]);
     setProducts([]);
+    setTotalBTU(0);
+    setCondenser(null);
     setError("");
   };
 
@@ -677,74 +700,18 @@ productResults.forEach(({ room, product }) => {
             </Form.Group>
           </Col>
         </Row>
-
-        {rooms.map((room, index) => (
-          <Row key={index} className="my-4">
-            <Col xs={12} md={6} lg={4} className="my-4">
-              <Form.Group controlId={`roomType-${index}`}>
-                <Form.Label>Room Type {index + 1}:</Form.Label>
-                <Form.Control
-                  as="select"
-                  value={room.name}
-                  onChange={(e) =>
-                    handleRoomChange(index, "name", e.target.value)
-                  }
-                >
-                  <option>Bedroom 1</option>
-                  <option>Bedroom 2</option>
-                  <option>Bedroom 3</option>
-                  <option>Bedroom 4</option>
-                  <option>Bedroom 5</option>
-                  <option>Bathroom</option>
-                  <option>Dining Room</option>
-                  <option>Family Room</option>
-                  <option>Living Room</option>
-                  <option>Kitchen</option>
-                  <option>Loft</option>
-                  <option>Terrace</option>
-                  <option>Single Storey</option>
-                  <option>Double Storey</option>
-                  <option>Split Level House</option>
-                  <option>Entire First Floor</option>
-                  <option>Entire Second Floor And Above</option>
-                  <option>Office Room</option>
-                </Form.Control>
-              </Form.Group>
-            </Col>
-            <Col xs={12} md={6} lg={4} className="my-4">
-              <Form.Group controlId={`roomSize-${index}`}>
-                <Form.Label>
-                  Room Size ({measurementSystem === "meters" ? "m²" : "ft²"}):
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  placeholder={`Enter room size in ${
-                    measurementSystem === "meters" ? "m²" : "ft²"
-                  }`}
-                  value={room.size}
-                  onChange={(e) =>
-                    handleRoomChange(index, "size", e.target.value)
-                  }
-                />
-              </Form.Group>
-            </Col>
-            <Button
-              variant="primary"
-              onClick={() => removeRoom(index)}
-              className="btn-add mb-3 mt-4"
-            >
-              Clean <i className="fas fa-trash"></i>
-            </Button>
-          </Row>
-        ))}
-
-        <Button
-          variant="primary"
-          onClick={addRoom}
-          className="btn-add mb-3 mt-4"
-        >
-          Add Desired Room
-        </Button>
+        {rooms.length > 0 && (
+          <div className="mb-4">
+            <h5>Rooms from Annotator:</h5>
+            <ul className="list-group">
+              {rooms.map((room, index) => (
+                <li key={index} className="list-group-item">
+                  <strong>{room.name}</strong> - {room.size} m²
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <hr className="ms-2 mt-1 mb-5" style={{ width: "66%" }} />
         <Row className="g-6">
           <Col md={6}>

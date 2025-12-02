@@ -11,9 +11,10 @@ import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
+
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
-import ModalLegend from './ModalLegend.jsx';
+import ModalLegend from "./ModalLegend.jsx";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
 let Tesseract;
@@ -742,7 +743,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
   return { apartmentType, rooms: table, totalSf, fileName };
 };
 
-const Annotator = ({ result, filteredRoomsForTable }) => {
+const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
@@ -754,6 +755,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+  const [allRooms, setAllRooms] = useState([]);
   const [exportStatus, setExportStatus] = useState("idle");
   const [previewUrl, setPreviewUrl] = useState(null);
   const [error, setError] = useState(null);
@@ -772,10 +774,10 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
   const [filterText, setFilterText] = useState("");
   const [pdfInfo, setPdfInfo] = useState(null);
   const [editingRoomId, setEditingRoomId] = useState(null);
-  const [allRooms, setAllRooms] = useState([]);
   const [editingRoomData, setEditingRoomData] = useState(null);
   const [editingFileIdx, setEditingFileIdx] = useState(null);
   const [editingRoomIdx, setEditingRoomIdx] = useState(null);
+  const filteredRoomsRef = useRef([]);
   const [newRoom, setNewRoom] = useState({
     roomType: "",
     width: "",
@@ -783,9 +785,8 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     areaSqFt: "",
     areaSqM: "",
   });
+  
   const [downloadedFiles, setDownloadedFiles] = useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [roomData, setRoomData] = useState([]);
 
   const clearResults = () => {
     setResults([]);
@@ -917,6 +918,14 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       );
     }
   }, [results]);
+
+  useEffect(() => {
+    if (setRoomData && allRooms.length > 0) {
+      // Flatten and pass all rooms to parent
+      const flattenedRooms = allRooms.flat().filter(Boolean);
+      setRoomData(flattenedRooms);
+    }
+  }, [allRooms, setRoomData]);
 
   const handleAddRoom = (fileIdx) => {
     setAllRooms((prev) => {
@@ -1591,7 +1600,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
         context.fillText(roomType, rectX + 5, rectY + 15);
       });
     }
-    setRoomData(renderClassifiedRoomsByOcr);
+    // setRoomData(renderClassifiedRoomsByOcr);
 
     img.onload = () => {
       const originalImageWidth = img.width;
@@ -1616,15 +1625,12 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
   }, [results, images, setRoomData]);
 
   useEffect(() => {
-    if (results.rooms?.length && typeof setRoomData === "function") {
-      const formattedRooms = results.rooms.map((room) => ({
-        name: room.roomType || "Unknown",
-        size: parseFloat(room.areaSqM || 0).toFixed(2),
-        btu: 0,
-      }));
-      setRoomData(formattedRooms);
+    if (setRoomData && allRooms.length > 0) {
+      const flattenedRooms = allRooms.flat().filter(Boolean);
+      console.log("Syncing rooms to parent:", flattenedRooms);
+      setRoomData(flattenedRooms);
     }
-  }, [results.rooms, setRoomData]);
+  }, [allRooms, setRoomData]);
 
   useEffect(() => {
     if (isSaved) {
@@ -1634,6 +1640,34 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       });
     }
   }, [isSaved]);
+
+  const handleExportToBtuCalculator = (roomsToExport) => {
+
+    const refRooms = filteredRoomsRef.current.flat().filter(Boolean);
+    const flatRooms =
+      refRooms && refRooms.length > 0
+        ? refRooms
+        : roomsToExport && roomsToExport.length > 0
+        ? roomsToExport
+        : allRooms.flat().filter(Boolean);
+
+    console.log("Exporting filtered rooms to BTU Calculator:", flatRooms);
+
+    const formattedRooms = flatRooms.map((room) => ({
+      name: room.roomType || "Room",
+      size:
+        parseFloat((room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")) ||
+        0,
+      btu: 0,
+      unit: "meters",
+    }));
+
+    console.log("Formatted rooms:", formattedRooms);
+
+    if (typeof setRoomData === "function") {
+      setRoomData(formattedRooms);
+    }
+  };
 
   const handleExportExcelStyled = async (data, info) => {
     const baseName = info?.fileName || "annotated_data";
@@ -1766,7 +1800,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
     <div>
       <Form className="btu-calculation-measure mt-4">
         <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
-       <ModalLegend/>
+        <ModalLegend />
         <Form.Control
           className="my-4 form-control"
           id="file-upload"
@@ -1836,7 +1870,7 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
               }
               return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
             });
-
+          filteredRoomsRef.current[fileIdx] = filteredRoomsForTable;
           return (
             <div
               key={fileIdx}
@@ -1957,8 +1991,8 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                               }}
                             >
                               <a
-                                href={file.url} 
-                                download={file.name} 
+                                href={file.url}
+                                download={file.name}
                                 title={`Click to download and open: ${file.name}`}
                                 style={{
                                   display: "flex",
@@ -2220,6 +2254,44 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
       <div className="d-flex">
         {file && file.type === "application/pdf" && (
           <>
+                
+        <Button
+            variant="btn-outline"
+              size="sm"
+              className="mt-2 me-2 go-to-btn btn-text mb-3 w-auto"
+          onClick={() => {
+            // Collect ALL filtered rooms from ALL files
+            const allFilteredRooms = results
+              .map((result, fileIdx) => {
+                const rooms = allRooms[fileIdx] || [];
+                return rooms.filter((room) => {
+                  const sqft = parseFloat(
+                    (room.areaSqFt || "").toString().replace(/[^\d.]/g, "")
+                  );
+                  const sqm = parseFloat(
+                    (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
+                  );
+                  return (
+                    sqft >= 64 &&
+                    sqm >= 5.94 &&
+                    room.roomType
+                      ?.toLowerCase()
+                      .includes(filterText.toLowerCase())
+                  );
+                });
+              })
+              .flat();
+
+            handleExportToBtuCalculator(allFilteredRooms);
+          }}
+          disabled={
+            filteredRoomsRef.current.flat().filter(Boolean).length === 0
+          }
+        >
+          Export to BTU Calculator (
+          {filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
+        </Button>
+    
             <Button
               variant="btn-outline"
               size="sm"
@@ -2282,7 +2354,6 @@ const Annotator = ({ result, filteredRoomsForTable }) => {
                   <Layer>
                     {rectangles.map((rect) => (
                       <React.Fragment key={rect.id}>
-                        
                         <Rect
                           key={rect.id}
                           id={rect.id}

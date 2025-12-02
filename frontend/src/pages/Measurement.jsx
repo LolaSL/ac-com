@@ -75,8 +75,6 @@ const Measurement = () => {
           <Sidebar
             savedPdfs={savedPdfs}
             fetchSavedPdfs={fetchSavedPdfs}
-            roomData={roomData}
-            setRoomData={setRoomData}
           />
         </GridItem>
         <br/>
@@ -85,9 +83,15 @@ const Measurement = () => {
       </div>
      
       <AnnotatorErrorBoundary>
-        <Annotator fetchSavedPdfs={fetchSavedPdfs} setRoomData={setRoomData} />
+        <Annotator 
+          fetchSavedPdfs={fetchSavedPdfs} 
+          setRoomData={setRoomData}
+        />
       </AnnotatorErrorBoundary>
-      <BtuCalculator roomData={roomData || []} />
+         {roomData && roomData.length > 0 && (
+        <BtuCalculator roomData={roomData} />
+      )}
+
       <div className="mt-4 mb-4">
         <Link to="/" className="go-to-btn btn-text w-auto">
           Back to Home
