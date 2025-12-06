@@ -154,6 +154,9 @@ export default function CartPage() {
         products={recommendedProducts}
         addToCart={addToCart}
       />
+              <Link to="/search" className="go-to-btn btn-text mb-4 rounded">
+             Explore Featured Products
+               </Link>
       <Row>
         <Col md={8}>
           {cartItems.length === 0 ? (

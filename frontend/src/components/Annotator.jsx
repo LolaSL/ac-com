@@ -785,7 +785,7 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
     areaSqFt: "",
     areaSqM: "",
   });
-  
+
   const [downloadedFiles, setDownloadedFiles] = useState([]);
 
   const clearResults = () => {
@@ -1642,7 +1642,6 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
   }, [isSaved]);
 
   const handleExportToBtuCalculator = (roomsToExport) => {
-
     const refRooms = filteredRoomsRef.current.flat().filter(Boolean);
     const flatRooms =
       refRooms && refRooms.length > 0
@@ -1835,8 +1834,8 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
                 (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
               );
               return (
-                sqft >= 64 &&
-                sqm >= 5.94 &&
+                sqft &&
+                sqm &&
                 room.roomType?.toLowerCase().includes(filterText.toLowerCase())
               );
             })
@@ -2254,44 +2253,43 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
       <div className="d-flex">
         {file && file.type === "application/pdf" && (
           <>
-                
-        <Button
-            variant="btn-outline"
+            <Button
+              variant="btn-outline"
               size="sm"
               className="mt-2 me-2 go-to-btn btn-text mb-3 w-auto"
-          onClick={() => {
-            // Collect ALL filtered rooms from ALL files
-            const allFilteredRooms = results
-              .map((result, fileIdx) => {
-                const rooms = allRooms[fileIdx] || [];
-                return rooms.filter((room) => {
-                  const sqft = parseFloat(
-                    (room.areaSqFt || "").toString().replace(/[^\d.]/g, "")
-                  );
-                  const sqm = parseFloat(
-                    (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
-                  );
-                  return (
-                    sqft >= 64 &&
-                    sqm >= 5.94 &&
-                    room.roomType
-                      ?.toLowerCase()
-                      .includes(filterText.toLowerCase())
-                  );
-                });
-              })
-              .flat();
+              onClick={() => {
+                // Collect ALL filtered rooms from ALL files
+                const allFilteredRooms = results
+                  .map((result, fileIdx) => {
+                    const rooms = allRooms[fileIdx] || [];
+                    return rooms.filter((room) => {
+                      const sqft = parseFloat(
+                        (room.areaSqFt || "").toString().replace(/[^\d.]/g, "")
+                      );
+                      const sqm = parseFloat(
+                        (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
+                      );
+                      return (
+                        sqft >= 64 &&
+                        sqm >= 5.94 &&
+                        room.roomType
+                          ?.toLowerCase()
+                          .includes(filterText.toLowerCase())
+                      );
+                    });
+                  })
+                  .flat();
 
-            handleExportToBtuCalculator(allFilteredRooms);
-          }}
-          disabled={
-            filteredRoomsRef.current.flat().filter(Boolean).length === 0
-          }
-        >
-          Export to BTU Calculator (
-          {filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
-        </Button>
-    
+                handleExportToBtuCalculator(allFilteredRooms);
+              }}
+              disabled={
+                filteredRoomsRef.current.flat().filter(Boolean).length === 0
+              }
+            >
+              Export to BTU Calculator (
+              {filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
+            </Button>
+
             <Button
               variant="btn-outline"
               size="sm"

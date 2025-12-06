@@ -22,6 +22,7 @@ function BtuCalculator({ roomData }) {
         name: room.name,
         size: room.size,
         btu: 0,
+        unit: "meters", // Track that Annotator data is in meters
       }));
       setRooms(formattedRooms);
     }
@@ -279,20 +280,28 @@ function BtuCalculator({ roomData }) {
     setRooms((prevRooms) =>
       prevRooms.map((room) => {
         if (!room.size) return room;
-        if (measurementSystem === "meters" && room.unit === "feet") {
-          return {
-            ...room,
-            size: (room.size / 10.764).toFixed(2),
-            unit: "meters",
-          };
-        }
-        if (measurementSystem === "feet" && room.unit === "meters") {
+
+        const currentUnit = room.unit || "meters"; // Default to meters if not set
+
+        // Converting FROM meters TO feet
+        if (measurementSystem === "feet" && currentUnit === "meters") {
           return {
             ...room,
             size: (room.size * 10.764).toFixed(2),
             unit: "feet",
           };
         }
+
+        // Converting FROM feet TO meters
+        if (measurementSystem === "meters" && currentUnit === "feet") {
+          return {
+            ...room,
+            size: (room.size / 10.764).toFixed(2),
+            unit: "meters",
+          };
+        }
+
+        // Already in correct unit
         return room;
       })
     );
@@ -304,6 +313,7 @@ function BtuCalculator({ roomData }) {
       [category]: { ...prev[category], [name]: !prev[category][name] },
     }));
   };
+  
 
   const handleOutdoorUnitLocationChange = (e) =>
     handleOptionChange("OutdoorUnitLocation", e.target.name);
@@ -586,7 +596,7 @@ function BtuCalculator({ roomData }) {
   }, [ctxDispatch]);
 
   const handleClear = () => {
-    setRooms([{ name: "Bedroom 1", size: "", btu: 0 }]);
+    setRooms([{ name: "Bedroom 1", size: "", btu: 0, unit: "meters" }]);
     setCeilingHeight("2.5");
     setNumPeople(2);
     setMeasurementSystem("meters");

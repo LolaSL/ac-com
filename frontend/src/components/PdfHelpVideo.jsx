@@ -15,13 +15,13 @@ const PdfHelpVideoModal = () => {
         variant="btn-outline"
         onClick={handleShow}
       >
-        Watch Tutorial
+        Learn with Video
       </Button>
 
       <Modal show={show} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title className="text-primary text-bold">
-            PDF Annotation Tutorial
+            PDF Annotation Instruction Video
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

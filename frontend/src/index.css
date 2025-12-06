@@ -375,6 +375,7 @@ body {
   background-size: contain;
   background-position: center;
   text-align: center;
+  object-fit: cover;
 }
 .sale-badge {
   position: absolute;
@@ -1373,14 +1374,14 @@ form.d-flex {
 
 .blog-item img {
   width: 100%;
-  height: auto;
+height:auto;
   border-radius: 10px;
 }
 
 .blog-item {
   position: relative;
   width: 100%;
-  min-height: 300px;
+  min-height: 320px;
   border-radius: 10px;
   overflow: hidden;
   display: flex;
@@ -2989,4 +2990,33 @@ button:disabled {
 .excel-icon-button:hover {
   text-decoration: none;
   background-color: transparent;
+}
+/* image box for uniform display */
+.image-box {
+  width: 100%;
+  max-width: 900px; /* adjust as needed */
+  aspect-ratio: 16 / 9; /* pick desired ratio (4/3, 1/1, etc.) */
+  overflow: hidden;
+  border-radius: 6px;
+  background: #f6f6f6;
+  margin: 0 auto;
+}
+
+.uniform-image,
+.image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* use 'contain' if you don't want cropping */
+  display: block;
+}
+
+/* fallback for browsers without aspect-ratio */
+.image-box.fallback {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 -> 9/16 = 56.25% */
+}
+.image-box.fallback img {
+  position: absolute;
+  top: 0;
+  left: 0;
 }

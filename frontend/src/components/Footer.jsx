@@ -28,14 +28,14 @@ const Footer = () => {
               We believe in the power of innovation to revolutionize the way we
               control and manage our indoor and outdoor spaces.
             </p>         
-            <div className="footer-icons d-flex align-items-center gap-2">
-                <h3 className="follow-us mb-3">Follow Us</h3>
+            <div className="footer-icons d-flex align-items-center gap-2 ">
+                <h3 className="follow-us">Follow Us</h3>
               <NavLink
                 href="https://www.facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <i className="fa-brands fa-facebook"></i>
+                <i className="fa-brands fa-facebook "></i>
               </NavLink>
               <NavLink
                 href="https://www.twitter.com"

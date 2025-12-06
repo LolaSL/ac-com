@@ -22,7 +22,7 @@ dotenv.config();
 
 async function start() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI); 
+    await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to MongoDB");
 
     const notifications = await Notification.find();
@@ -37,20 +37,20 @@ start();
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000', 
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }));
-  
+  origin: 'http://localhost:3000',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 
 
 
-  app.use((req, res, next) => {
-    console.log('🔍 Incoming headers:', req.headers);
-    next();
-  });
-  
+
+app.use((req, res, next) => {
+  console.log('🔍 Incoming headers:', req.headers);
+  next();
+});
+
 app.use(express.json());
 
 app.use(bodyParser.json());
@@ -58,11 +58,11 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/keys/paypal", (req, res) => {
-    res.send(process.env.PAYPAL_CLIENT_ID || "sb");
+  res.send(process.env.PAYPAL_CLIENT_ID || "sb");
 });
 
 app.get("/api/keys/google", (req, res) => {
-    res.send({ key: process.env.GOOGLE_API_KEY || "" });
+  res.send({ key: process.env.GOOGLE_API_KEY || "" });
 });
 
 app.use('/api/seed', seedRouter);
@@ -78,7 +78,7 @@ app.use('/api/blogs', blogRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api', annotationRoutes);
 
-  
+
 
 const __dirname = path.resolve();
 // app.use(express.static(path.join(__dirname, "/frontend/build")));
@@ -88,20 +88,22 @@ const __dirname = path.resolve();
 
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.get('/', (req, res) => {
-    res.send('Hello, World!');
+  res.send('Hello, World!');
 });
 app.use((err, req, res, next) => {
-    res.status(500).send({ message: err.message });
+  res.status(500).send({ message: err.message });
 });
 
 const port = process.env.PORT || 5050;
 const server = app.listen(port, () => {
-    console.log(`Server is listening at http://localhost:${port}`);
+  console.log(`Server is listening at http://localhost:${port}`);
 });
 
 process.on('SIGINT', () => {
-    server.close(() => {
-        console.log('Server gracefully shut down');
-        process.exit(0);
-    });
+  server.close(() => {
+    console.log('Server gracefully shut down');
+    process.exit(0);
+  });
 });
+
+

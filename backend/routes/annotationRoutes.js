@@ -117,20 +117,19 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
-    const marginLeft = 20;
-    const marginBottom = 20;
-    const isPaidTemp = true;
-    // Premium features are now all controlled by the `isPaid` check.
-    if (
-      isPaidTemp
-      // !isPaid
-      //stamp does not render
-    ) {
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    const isPaidTemp = true; // ← TEMP for testing
+
+    if (isPaidTemp) {
       console.log('User is a paid member. Applying premium content.');
+
       if (annotation.annotations && Array.isArray(annotation.annotations)) {
         console.log(`Found ${annotation.annotations.length} annotations. Rendering...`);
-        annotation.annotations.forEach(ann => {
-          const page = pdfDoc.getPages()[ann.pageIndex] || firstPage;
+
+        annotation.annotations.forEach((ann) => {
+          const page = pages[ann.pageIndex] || firstPage;
+
           switch (ann.type) {
             case 'text':
               page.drawText(ann.text, {
@@ -140,6 +139,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
                 color: rgb(ann.color.r, ann.color.g, ann.color.b),
               });
               break;
+
             case 'rectangle':
               page.drawRectangle({
                 x: ann.x,
@@ -153,131 +153,103 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
 
             default:
               console.warn(`Unknown annotation type: ${ann.type}`);
-              break;
           }
         });
       } else {
-        console.log('No annotations found in the database document.');
+        console.log('No annotations found.');
       }
 
-   const watermarkText = `AC Commerce — User: ${email || 'Unknown User'}`;
-const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const date = new Date().toLocaleDateString();
+      const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Created at ${date}`;
 
-if (annotation.annotatedImageUrl) {
-  console.log('Found annotatedImageUrl. Drawing image-based watermark.');
-  const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) => res.arrayBuffer());
-  const embeddedImage = await pdfDoc.embedPng(imageBytes);
+      if (annotation.annotatedImageUrl) {
+        console.log('Found annotatedImageUrl – using image + centered text watermark.');
 
-  pages.forEach((page) => {
-    const { width, height } = page.getSize();
-    page.drawImage(embeddedImage, { x: 0, y: 0, width, height });
+        const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) =>
+          res.arrayBuffer()
+        );
+        const embeddedImage = await pdfDoc.embedPng(imageBytes);
 
-    const fontSize = 14;
-    const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-    const xPos = (width - textWidth) / 2;
-    const yPos = 40;
+        pages.forEach((page) => {
+          const fontSize = 18;
+          const { width, height } = page.getSize();
 
-    page.drawText(watermarkText, {
-      x: xPos,
-      y: yPos,
-      size: fontSize,
-      rotate: degrees(45), 
-      opacity: 0.15,
-      color: rgb(0.6, 0.6, 0.6),
-      font: helveticaFont, 
-    });
-  });
-} else {
-  console.log('No annotatedImageUrl found. Drawing text-based watermark.');
-  const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica); 
-  pages.forEach((page) => {
-    const { width, height } = page.getSize();
-    page.drawText(watermarkText, {
-      x: width / 4,
-      y: 40, 
-      size: 20,
-      rotate: degrees(45), 
-      opacity: 0.25,
-      color: rgb(0.3, 0.3, 0.3),
-      font: helveticaFont,
-    });
-  });
-}
-console.log('Drawing APPROVAL stamp in top-left corner.');
+          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
 
-const { width, height } = firstPage.getSize(); // Get page size
+          const xPos = (width - textWidth) / 2;
+          const yPos = height / 2 - fontSize / 2;
 
-// Position with 50px margin from LEFT
-const stampMarginX = 50;  // ← Updated to 50px from left
-const stampMarginY = height - 100; // Distance FROM TOP (80px down)
+          page.drawText(watermarkText, {
+            x: xPos,
+            y: yPos,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(0.6, 0.6, 0.6),
+            opacity: 0.15,
+          });
 
-// Box size
-const boxWidth = 140;
-const boxHeight = 60;
+        });
+      } else {
+        console.log('No annotatedImageUrl – drawing only centered text watermark.');
 
-// Draw stamp box
-firstPage.drawRectangle({
-  x: stampMarginX - 10,
-  y: stampMarginY - 10,
-  width: boxWidth,
-  height: boxHeight,
-  borderColor: rgb(0, 0.6, 0),
-  borderWidth: 2,
-});
+        pages.forEach((page) => {
+          const { width, height } = page.getSize();
+          const fontSize = 14;
 
-// Draw text - APPROVED
-firstPage.drawText('APPROVED', {
-  x: stampMarginX,
-  y: stampMarginY + 30,
-  size: 20,
-  font: helveticaFont,
-  color: rgb(0, 0.6, 0),
-  opacity: 0.85,
-});
+          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+          const xPos = (width - textWidth) / 2;
+          const yPos = 30; // ← bottom padding
 
-// Draw text - AC COMMERCE
-firstPage.drawText('AC COMMERCE', {
-  x: stampMarginX,
-  y: stampMarginY + 10,
-  size: 10,
-  font: helveticaFont,
-  color: rgb(0, 0.6, 0),
-});
+          page.drawText(watermarkText, {
+            x: xPos,
+            y: yPos,
+            size: fontSize,
+            font: helveticaFont,
+            opacity: 0.4,
+            color: rgb(0.5, 0.5, 0.5),
+          });
+        });
 
+      }
 
-      // console.log('Drawing APPROVED stamp.');
-      // const boxX = marginLeft - 10;
-      // const boxY = marginBottom + 10;
-      // const boxWidth = 110;
-      // const boxHeight = 60;
+      console.log('Drawing APPROVAL stamp.');
+      const { width, height } = firstPage.getSize();
 
-      // firstPage.drawRectangle({
-      //   x: boxX,
-      //   y: boxY,
-      //   width: boxWidth,
-      //   height: boxHeight,
-      //   borderColor: rgb(0, 0.6, 0),
-      //   borderWidth: 1.5,
-      // });
+      const stampMarginX = 50; 
+      const stampMarginY = height - 100; 
+      const boxWidth = 140;
+      const boxHeight = 60;
 
-      // firstPage.drawText('APPROVED', {
-      //   x: marginLeft,
-      //   y: marginBottom + 45,
-      //   size: 17,
-      //   color: rgb(0, 0.6, 0),
-      //   opacity: 0.75,
-      // });
+      firstPage.drawRectangle({
+        x: stampMarginX - 10,
+        y: stampMarginY - 10,
+        width: boxWidth,
+        height: boxHeight,
+        borderColor: rgb(0, 0.6, 0),
+        borderWidth: 2,
+      });
 
-      // firstPage.drawText('AC COMMERCE', {
-      //   x: marginLeft,
-      //   y: marginBottom + 30,
-      //   size: 9,
-      //   color: rgb(0, 0.6, 0),
-      // });
-    } else {
-      console.log('User is not a paid member. Rendering basic PDF.');
+      firstPage.drawText('APPROVED', {
+        x: stampMarginX,
+        y: stampMarginY + 30,
+        size: 20,
+        font: helveticaFont,
+        color: rgb(0, 0.6, 0),
+        opacity: 0.85,
+      });
+
+      firstPage.drawText('AC COMMERCE', {
+        x: stampMarginX,
+        y: stampMarginY + 10,
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0.6, 0),
+      });
     }
 
+    // ------------------------------------------------------------
+    // SAVE + SEND PDF
+    // ------------------------------------------------------------
     const pdfBytes = await pdfDoc.save();
     console.log('PDF generation successful. Sending response.');
 
