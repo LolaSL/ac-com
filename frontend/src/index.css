@@ -56,6 +56,8 @@ body {
 .blogs-title,
 .sellers-title,
 .contacts-title,
+.featured-title,
+.advanced-title,
 .title-measurement,
 .about-us {
   position: relative;
@@ -79,7 +81,7 @@ body {
   );
   background-repeat: no-repeat;
   background-size: 80%;
-  animation: animate 10s linear infinite;
+  animation: animate 12s linear infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: rgba(255, 255, 255, 0);
 }
@@ -169,11 +171,6 @@ body {
   text-shadow: 1px 1px 1px grey;
 }
 
-.featured-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #333;
-}
 
 .featured-products {
   font-size: 1.2rem;
@@ -268,7 +265,7 @@ body {
   }
 
   .featured-products {
-    font-size: 1rem;
+    font-size: 2.3rem;
   }
 
   .products {
@@ -282,7 +279,7 @@ body {
 
 @media (max-width: 992px) {
   .featured-title {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
   }
 
   .products {
@@ -300,7 +297,7 @@ body {
 
 @media (max-width: 768px) {
   .featured-title {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
 
   .featured-products {
@@ -1317,10 +1314,8 @@ form.d-flex {
 }
 
 .responsive-image-about {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 330px;
+   max-width: 100%;
+      height: auto;
 }
 
 @media (max-width: 992px) {
@@ -1354,18 +1349,29 @@ form.d-flex {
   }
 
   .responsive-image-about {
-    min-height: 180px;
+    height: 100%
   }
 }
 
 .blog-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: 1fr; 
   gap: 30px;
   padding: 20px;
-  max-width: 1200px;
+  width: 100%;
+  max-width: 100%;
   margin: auto;
 }
+
+
+@media (min-width: 1024px) {
+  .blog-container {
+    grid-template-columns: repeat(4, minmax(280px, 1fr));
+  }
+}
+
+
+
 .blogs-title {
   text-align: center;
   font-size: 1.5rem;
@@ -1386,7 +1392,6 @@ height:auto;
   overflow: hidden;
   display: flex;
   align-items: flex-end;
-  margin-bottom: 20px;
   padding: 20px;
   color: white;
   text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
@@ -1397,16 +1402,12 @@ height:auto;
   transform: scale(1.02);
 }
 
+
 .blog-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
   width: 100%;
-  background-color: rgba(69, 71, 91, 0.5);
+  padding: 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
   color: white;
-  padding: 20px;
-  text-align: center;
-  box-sizing: border-box;
 }
 
 .blog-title {
@@ -2055,6 +2056,7 @@ iframe {
 }
 .banner-card {
   border-radius: 0 !important;
+  
 }
 .banner-container {
   position: relative;

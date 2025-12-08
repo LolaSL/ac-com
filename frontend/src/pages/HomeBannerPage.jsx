@@ -5,34 +5,6 @@ import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// const notifications = [
-//   {
-//     title: "Service Request Assigned",
-//     message:
-//       "You have got a new service request message. Please review the details and respond promptly.",
-//     type: "urgent",
-//     recipientType: "serviceProvider",
-//     isRead: false,
-//     createdAt: new Date(),
-//   },
-//   {
-//     title: "Get A Quote",
-//     message: "Your Dream Deal Starts Here – Get a Quote Now!",
-//     type: "quote",
-//     recipientType: "user",
-//     isRead: false,
-//     createdAt: new Date(),
-//   },
-//   {
-//     title: "Get A Quote",
-//     message: "Stay Cool and Comfortable All Year – Get a Quote Now!",
-//     type: "quote",
-//     recipientType: "",
-//     isRead: false,
-//     createdAt: new Date(),
-//   },
-// ];
-
 export default function HomeBannerPage() {
   const [fetchedNotifications, setFetchedNotifications] = useState([]);
   const [currentNotification, setCurrentNotification] = useState(null);
@@ -69,30 +41,29 @@ export default function HomeBannerPage() {
     },
   ];
 
-useEffect(() => {
-  const fetchNotifications = async (token) => {
-    try {
-      const { data } = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFetchedNotifications(data);
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+  useEffect(() => {
+    const fetchNotifications = async (token) => {
+      try {
+        const { data } = await axios.get("/api/notifications", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFetchedNotifications(data);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+      }
+    };
+
+    const userToken =
+      userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
+
+    if (userToken) {
+      fetchNotifications(userToken);
     }
-  };
-
-  const userToken = userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
-
-  // Only proceed if a user is logged in and we have a token
-  if (userToken) {
-    fetchNotifications(userToken);
-  }
-}, [userInfo, adminInfo, serviceProviderInfo]);
+  }, [userInfo, adminInfo, serviceProviderInfo]);
   useEffect(() => {
     let timer;
 
     if (fetchedNotifications.length > 0) {
-      // Find the first unread notification to display
       const firstUnread = fetchedNotifications.find(
         (notification) => !notification.isRead
       );
@@ -100,7 +71,6 @@ useEffect(() => {
       if (firstUnread) {
         setCurrentNotification(firstUnread);
 
-        // Remove the notification from the list so we don't display it again
         const updatedNotifications = fetchedNotifications.filter(
           (n) => n._id !== firstUnread._id
         );
@@ -108,42 +78,37 @@ useEffect(() => {
         timer = setTimeout(() => {
           setCurrentNotification(null);
           setFetchedNotifications(updatedNotifications);
-        }, 4000); // Wait 4 seconds before hiding and moving to the next
+        }, 4000);
       }
     }
 
-    // Clean up the timer when the component unmounts or state changes
     return () => {
       clearTimeout(timer);
     };
   }, [fetchedNotifications]);
 
-const handleNotificationClick = () => {
-  if (!currentNotification) return;
+  const handleNotificationClick = () => {
+    if (!currentNotification) return;
 
-  if (currentNotification.title === "Get A Quote") {
-    if (adminInfo || userInfo || serviceProviderInfo) {
-      navigate("/uploadfile");
-    } else {
-      navigate("/signin?redirect=/uploadfile");
+    if (currentNotification.title === "Get A Quote") {
+      if (adminInfo || userInfo || serviceProviderInfo) {
+        navigate("/uploadfile");
+      } else {
+        navigate("/signin?redirect=/uploadfile");
+      }
+    } else if (currentNotification.title === "Discount Offer") {
+      navigate("/offers");
+    } else if (currentNotification.recipientType === "serviceProvider") {
+      navigate("/serviceprovider/messages");
     }
-  } else if (currentNotification.title === "Discount Offer") {
-    // This is the new navigation for the discount offer
-    navigate("/offers");
-  } else if (currentNotification.recipientType === "serviceProvider") {
-    navigate("/serviceprovider/messages");
-  }
-  
-  // After clicking, hide the pop-up
-  setCurrentNotification(null);
-};
 
+    setCurrentNotification(null);
+  };
 
-return (
-  <div className="container">
-    {/* This section will render a list of all relevant notifications */}
+  return (
+    <div className="container">
       {currentNotification && (
-      <NotificationPopUp
+        <NotificationPopUp
           notification={currentNotification}
           onClose={() => setCurrentNotification(null)}
           buttonText={
@@ -155,32 +120,31 @@ return (
         />
       )}
 
-    {/* The rest of your code for rendering banners remains unchanged */}
-    {banners.map((banner, index) => {
-      const requiresLogin =
-        banner.linkText ===
-        "Redefining Air Conditioning Design — Smart. Fast. Certified";
+      {banners.map((banner, index) => {
+        const requiresLogin =
+          banner.linkText ===
+          "Redefining Air Conditioning Design — Smart. Fast. Certified";
 
-      const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
+        const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
 
-      const handleClick = () => {
-        if (requiresLogin && !isLoggedIn) {
-          navigate("/signin?redirect=/uploadfile");
-        } else {
-          navigate(banner.linkTo);
-        }
-      };
+        const handleClick = () => {
+          if (requiresLogin && !isLoggedIn) {
+            navigate("/signin?redirect=/uploadfile");
+          } else {
+            navigate(banner.linkTo);
+          }
+        };
 
-      return (
-        <Banner
-          key={index}
-          title={banner.title}
-          imageSrc={banner.imageSrc}
-          linkText={banner.linkText}
-          onClick={handleClick}
-        />
-      );
-    })}
-  </div>
-);
+        return (
+          <Banner
+            key={index}
+            title={banner.title}
+            imageSrc={banner.imageSrc}
+            linkText={banner.linkText}
+            onClick={handleClick}
+          />
+        );
+      })}
+    </div>
+  );
 }

@@ -68,7 +68,7 @@ const Measurement = () => {
     <Container>
       {error && <div className="alert alert-danger">{error}</div>}
       <h1 className="mt-4 mb-4 title-measurement">Measurement Service System</h1>
-      <div className="row row-cols-2 row-cols-md-4 g-3">
+      <div className="row row-cols-2 row-cols-md-4 g-3 pt-4 mt-4">
         <GridItem><PdfHelpVideo /></GridItem>
         <GridItem><ArchSymbolsModal /></GridItem>
         <GridItem>

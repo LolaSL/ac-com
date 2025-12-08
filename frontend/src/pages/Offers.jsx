@@ -7,25 +7,25 @@ export default function Offers() {
 
   const offers = [
     {
-      title: "Season Sale!",
+      title: "Winter Sales!",
       description: "Units on sale!",
-      imageSrc: "/images/offer1.jpg",
+      imageSrc: "/images/offer-crist1.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Shop Now",
     },
     {
-      title: "Saver Discount",
+      title: "Winter Hot Deals",
       description: "Save money and energy!",
-      imageSrc: "/images/offer2.jpg",
+      imageSrc: "/images/offer-crist2.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Learn More",
     },
     {
-      title: "Hot Autumn Deals",
+      title: "Happy Hanukkah",
       description: "Stay cool with 30% off!",
-      imageSrc: "/images/offer3.jpg",
+      imageSrc: "/images/offer-crist4.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=21-30&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Cool Savings",
@@ -33,7 +33,7 @@ export default function Offers() {
     {
       title: "Premium Comfort Offer",
       description: "5-star and discount!",
-      imageSrc: "/images/offer4.jpg",
+      imageSrc: "/images/offer-crist5.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=10-20&rating=5&btu=all&brand=all&order=newest&page=1",
       linkText: "View Premium",

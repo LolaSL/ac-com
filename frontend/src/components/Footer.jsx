@@ -27,9 +27,9 @@ const Footer = () => {
               {" "}
               We believe in the power of innovation to revolutionize the way we
               control and manage our indoor and outdoor spaces.
-            </p>         
-            <div className="footer-icons d-flex align-items-center gap-2 ">
-                <h3 className="follow-us">Follow Us</h3>
+            </p>
+            <h3 className="follow-us">Follow Us</h3>
+            <div className="footer-icons  align-items-center gap-2">
               <NavLink
                 href="https://www.facebook.com"
                 target="_blank"
@@ -95,7 +95,7 @@ const Footer = () => {
             </NavLink>
           </Col>
           <Col className="col-md-6 col-lg-4 col-12 ft-3">
-            <h5>Contact</h5>
+            <h5>Contact Us</h5>
             <p className="contact-item">
               <i className="fa-solid fa-phone-volume"></i>
               <a href="tel:+12515469442"> (251) 546 9442</a>,

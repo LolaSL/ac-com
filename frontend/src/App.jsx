@@ -72,17 +72,17 @@ function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { fullBox, cart, userInfo, serviceProviderInfo, adminInfo } = state;
 
-const checkoutHandler = (e) => {
-  e.preventDefault();
+  const checkoutHandler = (e) => {
+    e.preventDefault();
 
-  const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+    const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
 
-  if (adminInfo) {
-    window.location.href = "/uploadfile";
-  } else {
-    window.location.href = "/signin?redirect=/uploadfile";
-  }
-};
+    if (adminInfo) {
+      window.location.href = "/uploadfile";
+    } else {
+      window.location.href = "/signin?redirect=/uploadfile";
+    }
+  };
 
   const adminLogoutHandler = () => {
     ctxDispatch({ type: "ADMIN_LOGOUT" });
@@ -139,124 +139,149 @@ const checkoutHandler = (e) => {
       >
         <ToastContainer position="bottom-center" limit={1} />
         <header className="header-nav">
-<Navbar className="navbar" expand="lg">
-  <Container>
-    <Button
-      variant="secondary"
-      onClick={() => setSidebarIsOpen(!sidebarIsOpen)}
-      className="btn-toggle me-4"
-    >
-      <i className="fas fa-bars"></i>
-    </Button>
-    <Link to="/" className="navbar-brand">
-      <h3>AC Commerce</h3>
-      <p className="handwritten">Cooling Solutions For Every Space</p>
-    </Link>
-    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-    <Navbar.Collapse id="basic-navbar-nav">
+          <Navbar className="navbar" expand="lg">
+            <Container>
+              <Button
+                variant="secondary"
+                onClick={() => setSidebarIsOpen(!sidebarIsOpen)}
+                className="btn-toggle me-4"
+              >
+                <i className="fas fa-bars"></i>
+              </Button>
+              <Link to="/" className="navbar-brand">
+                <h3>AC Commerce</h3>
+                <p className="handwritten">Cooling Solutions For Every Space</p>
+              </Link>
+              <Navbar.Toggle aria-controls="basic-navbar-nav" />
+              <Navbar.Collapse id="basic-navbar-nav">
+                <div className="flex-grow-1 me-3">
+                  <SearchBox />
+                </div>
 
-      <div className="flex-grow-1 me-3">
-        <SearchBox />
-      </div>
-
-      <Nav className="ms-auto me-4"> 
-        <Link to="/cart" className="nav-link">
-          Cart
-          {cart.cartItems.length > 0 && (
-            <Badge pill bg="danger">
-              {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
-            </Badge>
-          )}
-        </Link>
-        {userInfo ? (
-          <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
-            <Link to="/profile" className="dropdown-item">
-              User Profile
-            </Link>
-            <Link to="/orderhistory" className="dropdown-item">
-              Order History
-            </Link>
-            <NavDropdown.Divider />
-            <Link className="dropdown-item" to="#signout" onClick={userSignoutHandler}>
-              Sign Out
-            </Link>
-          </NavDropdown>
-        ) : (
-          <Link className="nav-link" to="/signin">
-            User Login
-          </Link>
-        )}
-        {serviceProviderInfo ? (
-          <NavDropdown title={serviceProviderInfo.name} id="provider-nav-dropdown">
-            <Link
-              to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
-              className="dropdown-item"
-            >
-              Service Provider Profile
-            </Link>
-            <Link to="/serviceprovider/projects" className="dropdown-item">
-              Projects
-            </Link>
-            <Link to="/serviceprovider/hours" className="dropdown-item">
-              Hours
-            </Link>
-            <Link to="/serviceprovider/earnings" className="dropdown-item">
-              Earnings
-            </Link>
-            <Link to="/serviceprovider/messages" className="dropdown-item">
-              Messages
-            </Link>
-            <NavDropdown.Divider />
-            <Link
-              className="dropdown-item"
-              to="#signout"
-              onClick={serviceProviderSignoutHandler}
-            >
-              Log Out
-            </Link>
-          </NavDropdown>
-        ) : (
-          <Link className="nav-link" to="/serviceprovider/login">
-            Service Provider Login
-          </Link>
-        )}
-        {adminInfo ? (
-          <NavDropdown title="Admin" id="admin-nav-dropdown">
-            <Link to="/admin/dashboard" className="dropdown-item">
-              Dashboard
-            </Link>
-            <Link to="/admin/products" className="dropdown-item">
-              Products
-            </Link>
-            <Link to="/admin/orders" className="dropdown-item">
-              Orders
-            </Link>
-            <Link to="/admin/users" className="dropdown-item">
-              Users
-            </Link>
-            <Link to="/admin/manage-service-providers" className="dropdown-item">
-              Service Providers
-            </Link>
-            <Link to="/admin/sellers" className="dropdown-item">
-              Sellers
-            </Link>
-            <Link to="/admin/blogs-list" className="dropdown-item">
-              Blogs
-            </Link>
-            <NavDropdown.Divider />
-            <Link className="dropdown-item" to="#adminlogout" onClick={adminLogoutHandler}>
-              Admin Log Out
-            </Link>
-          </NavDropdown>
-        ) : (
-          <Link className="nav-link" to="/admin-login">
-            Admin Login
-          </Link>
-        )}
-      </Nav>
-    </Navbar.Collapse>
-  </Container>
-</Navbar>
+                <Nav className="ms-auto me-4">
+                  <Link to="/cart" className="nav-link">
+                    Cart
+                    {cart.cartItems.length > 0 && (
+                      <Badge pill bg="danger">
+                        {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
+                      </Badge>
+                    )}
+                  </Link>
+                  {userInfo ? (
+                    <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
+                      <Link to="/profile" className="dropdown-item">
+                        User Profile
+                      </Link>
+                      <Link to="/orderhistory" className="dropdown-item">
+                        Order History
+                      </Link>
+                      <NavDropdown.Divider />
+                      <Link
+                        className="dropdown-item"
+                        to="#signout"
+                        onClick={userSignoutHandler}
+                      >
+                        Sign Out
+                      </Link>
+                    </NavDropdown>
+                  ) : (
+                    <Link className="nav-link" to="/signin">
+                      User Login
+                    </Link>
+                  )}
+                  {serviceProviderInfo ? (
+                    <NavDropdown
+                      title={serviceProviderInfo.name}
+                      id="provider-nav-dropdown"
+                    >
+                      <Link
+                        to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
+                        className="dropdown-item"
+                      >
+                        Service Provider Profile
+                      </Link>
+                      <Link
+                        to="/serviceprovider/projects"
+                        className="dropdown-item"
+                      >
+                        Projects
+                      </Link>
+                      <Link
+                        to="/serviceprovider/hours"
+                        className="dropdown-item"
+                      >
+                        Hours
+                      </Link>
+                      <Link
+                        to="/serviceprovider/earnings"
+                        className="dropdown-item"
+                      >
+                        Earnings
+                      </Link>
+                      <Link
+                        to="/serviceprovider/messages"
+                        className="dropdown-item"
+                      >
+                        Messages
+                      </Link>
+                      <NavDropdown.Divider />
+                      <Link
+                        className="dropdown-item"
+                        to="#signout"
+                        onClick={serviceProviderSignoutHandler}
+                      >
+                        Log Out
+                      </Link>
+                    </NavDropdown>
+                  ) : (
+                    <Link className="nav-link" to="/serviceprovider/login">
+                      Service Provider Login
+                    </Link>
+                  )}
+                  {adminInfo ? (
+                    <NavDropdown title="Admin" id="admin-nav-dropdown">
+                      <Link to="/admin/dashboard" className="dropdown-item">
+                        Dashboard
+                      </Link>
+                      <Link to="/admin/products" className="dropdown-item">
+                        Products
+                      </Link>
+                      <Link to="/admin/orders" className="dropdown-item">
+                        Orders
+                      </Link>
+                      <Link to="/admin/users" className="dropdown-item">
+                        Users
+                      </Link>
+                      <Link
+                        to="/admin/manage-service-providers"
+                        className="dropdown-item"
+                      >
+                        Service Providers
+                      </Link>
+                      <Link to="/admin/sellers" className="dropdown-item">
+                        Sellers
+                      </Link>
+                      <Link to="/admin/blogs-list" className="dropdown-item">
+                        Blogs
+                      </Link>
+                      <NavDropdown.Divider />
+                      <Link
+                        className="dropdown-item"
+                        to="#adminlogout"
+                        onClick={adminLogoutHandler}
+                      >
+                        Admin Log Out
+                      </Link>
+                    </NavDropdown>
+                  ) : (
+                    <Link className="nav-link" to="/admin-login">
+                      Admin Login
+                    </Link>
+                  )}
+                </Nav>
+              </Navbar.Collapse>
+            </Container>
+          </Navbar>
         </header>
         <div
           className={
@@ -323,7 +348,7 @@ const checkoutHandler = (e) => {
             </Nav.Item>
             <Nav.Item className="search-title me-auto">
               <Link to="/contact" className="nav-link-side fw-bold">
-                Contact
+                Contact Us
               </Link>
             </Nav.Item>
             <Nav.Item className="search-title me-auto">

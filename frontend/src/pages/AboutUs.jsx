@@ -7,12 +7,16 @@ const AboutUs = () => {
       <h1 className="about-us">About Us</h1>
       <article className="about mt-4 mb-4">
         <div
-          className="p-5 text-center responsive-image-about rounded mb-3"
+          className="responsive-image-about rounded mb-3"
           style={{
             backgroundImage: `url("/images/about-us.jpg")`,
-            maxHeight: "100%",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            width: "100%",
+            paddingTop: "56.25%",
           }}
         ></div>
+
         <h3 className="about-paragraph p-2">
           <strong className="fs-4">AC Commerce</strong> is a cutting-edge
           platform designed to fully automate the planning and design process
@@ -75,7 +79,12 @@ const AboutUs = () => {
           </ul>
         </h3>
         <h3 className="goals-paragraph  mt-2 pb-4">
-         Traditionally, the planning and design of air conditioning systems have been the domain of professionals, often involving high costs, lengthy timelines, and considerable effort from both service providers and clients. AC Commerce transforms this process by offering significant cost savings and faster project completion for consumers and industry professionals alike.
+          Traditionally, the planning and design of air conditioning systems
+          have been the domain of professionals, often involving high costs,
+          lengthy timelines, and considerable effort from both service providers
+          and clients. AC Commerce transforms this process by offering
+          significant cost savings and faster project completion for consumers
+          and industry professionals alike.
         </h3>{" "}
       </article>
       <article className="about mt-4 mb-4">

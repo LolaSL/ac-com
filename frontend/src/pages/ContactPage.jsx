@@ -74,7 +74,7 @@ const ContactPage = () => {
       <h1 className="contacts-title mt-4 mb-4">Contact Us</h1>
       <div>
         <Image
-          src="/images/contact1.jpg"
+          src="/images/contact-us.jpg"
           alt="Contact Us"
           className="responsive-image-contact rounded mt-4"
         />

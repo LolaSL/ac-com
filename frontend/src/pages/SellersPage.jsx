@@ -47,44 +47,49 @@ export default function SellersPage() {
     };
     fetchData();
   }, []);
-  
-  return (
-    <Container className="seller-container">
-      <h1 className="sellers-title">Suppliers</h1>
-      <h2>Air Conditioning Products and VRF Systems</h2>
-      {loading ? (
-        <LoadingBox></LoadingBox>
-      ) : error ? (
-        <MessageBox variant="danger">{error}</MessageBox>
-      ) : (
-        <div>
-          {sellers.map((seller, index) => (
-            <Card key={index} className="mb-3">
-              <div className="mt-4 mb-4">
-              {seller.logo ? (
-          <div className="logo-container p-4">
-           <img src={`${seller.logo}`} alt={`${seller.name} logo`} className="seller-logo" />
 
-          </div>
+  return (
+    <>
+      <Container className="seller-container">
+        <h1 className="sellers-title">Suppliers</h1>
+        <h2>Air Conditioning Products and VRF Systems</h2>
+        {loading ? (
+          <LoadingBox></LoadingBox>
+        ) : error ? (
+          <MessageBox variant="danger">{error}</MessageBox>
         ) : (
-          <p>No logo available</p>
+          <div>
+            {sellers.map((seller, index) => (
+              <Card key={index} className="mb-3">
+                <div className="mt-4 mb-4">
+                  {seller.logo ? (
+                    <div className="logo-container p-4">
+                      <img
+                        src={`${seller.logo}`}
+                        alt={`${seller.name} logo`}
+                        className="seller-logo"
+                      />
+                    </div>
+                  ) : (
+                    <p>No logo available</p>
+                  )}
+                  <Link
+                    to={`/sellers/${seller._id}`}
+                    className="seller-name text-secondary"
+                  >
+                    <h2 className="seller-name p-4">{seller.name}</h2>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
-                <Link
-                  to={`/sellers/${seller._id}`}
-                  className="seller-name text-secondary"
-                >
-                  <h2 className="seller-name p-4">{seller.name}</h2>
-                </Link>
-                  </div>
-            </Card>
-          ))}
-        </div>
-      )}
-         <div className="mt-4 mb-4">
+      </Container>{" "}
+      <div className="mt-4 mb-4">
         <Link to="/" className="go-to-btn btn-text">
           Back to Home
         </Link>
       </div>
-    </Container>
+    </>
   );
 }
