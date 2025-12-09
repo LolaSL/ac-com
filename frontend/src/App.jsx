@@ -67,6 +67,11 @@ import AdvancedAC from "./pages/AdvancedAC.jsx";
 import MessageEditPage from "./pages/MessageEditPage.jsx";
 import ServiceProviderEditPage from "./pages/ServiceProviderEditPage.jsx";
 import AdminLoginPage from "./pages/AdminLoginPage.jsx";
+import ShipMentPage from "./pages/ShipMentPage.jsx";
+import ReturnsPage from "./pages/ReturnsPage.jsx";
+import CancellationPage from "./pages/CancellationPage.jsx";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
+import TermsOfUsePage from "./pages/TermsOfusepage.jsx";
 
 function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -264,6 +269,7 @@ function App() {
                       <Link to="/admin/blogs-list" className="dropdown-item">
                         Blogs
                       </Link>
+
                       <NavDropdown.Divider />
                       <Link
                         className="dropdown-item"
@@ -347,13 +353,38 @@ function App() {
               </Link>
             </Nav.Item>
             <Nav.Item className="search-title me-auto">
-              <Link to="/contact" className="nav-link-side fw-bold">
-                Contact Us
+              <Link to="/shipment" className="nav-link-side fw-bold">
+                Shipment & Delivery
+              </Link>
+            </Nav.Item>
+            <Nav.Item className="search-title me-auto">
+              <Link to="/returns" className="nav-link-side fw-bold">
+                Returns
+              </Link>
+            </Nav.Item>
+            <Nav.Item className="search-title me-auto">
+              <Link to="/privacy-policy" className="nav-link-side fw-bold">
+                Privacy Policy
+              </Link>
+            </Nav.Item>
+            <Nav.Item className="search-title me-auto">
+              <Link to="/terms-of-use" className="nav-link-side fw-bold">
+                Terms of Use
+              </Link>
+            </Nav.Item>
+            <Nav.Item className="search-title me-auto">
+              <Link to="/cancellation-policy" className="nav-link-side fw-bold">
+                Cancellation Policy
               </Link>
             </Nav.Item>
             <Nav.Item className="search-title me-auto">
               <Link to="/blogs" className="nav-link-side fw-bold">
                 Blogs
+              </Link>
+            </Nav.Item>
+            <Nav.Item className="search-title me-auto">
+              <Link to="/contact" className="nav-link-side fw-bold">
+                Contact Us
               </Link>
             </Nav.Item>
           </Nav>
@@ -602,6 +633,14 @@ function App() {
                 <Route path="/advanced-ac" element={<AdvancedAC />} />
                 <Route path="/blogs/:id" element={<BlogDetails />} />
                 <Route path="/blogs-list" element={<BlogsPage />} />
+                <Route path="/shippment" element={<ShipMentPage />} />
+                <Route path="/returns" element={<ReturnsPage />} />
+                <Route
+                  path="/cancellation-policy"
+                  element={<CancellationPage />}
+                />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms-of-use" element={<TermsOfUsePage />} />
                 <Route path="/" element={<HomeBannerPage />} />
               </Routes>
             </Container>
