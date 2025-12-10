@@ -21,7 +21,7 @@ export default function HomeBannerPage() {
       linkTo: "/advanced-ac",
     },
     {
-      title: "Elevate your comfort wherever you are",
+      title: "Elevate your comfort",
       imageSrc: "/images/banner.jpg",
       linkText: "Discover the perfect fit for your needs",
       linkTo: "/blogs",

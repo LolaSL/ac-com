@@ -12,7 +12,6 @@ export default function Banner({ title, imageSrc, linkText, onClick }) {
         </Card.ImgOverlay>
         <Card.Footer className="banner-footer bg-white text-center">
           <Button
-            variant="light"
             className="go-to-btn btn-text"
             onClick={onClick}
           >

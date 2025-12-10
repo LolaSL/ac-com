@@ -12,11 +12,11 @@ export default function Offers() {
       imageSrc: "/images/offer-crist1.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",
-      linkText: "Shop Now",
+      linkText: "Learn More",
     },
     {
-      title: "Winter Hot Deals",
-      description: "Save money and energy!",
+      title: "Christmas Deals!",
+      description: "Save money!",
       imageSrc: "/images/offer-crist2.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1",
@@ -24,11 +24,11 @@ export default function Offers() {
     },
     {
       title: "Happy Hanukkah",
-      description: "Stay cool with 30% off!",
+      description: "Save energy!",
       imageSrc: "/images/offer-crist4.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=21-30&rating=all&btu=all&brand=all&order=newest&page=1",
-      linkText: "Cool Savings",
+      linkText: "Learn More",
     },
     {
       title: "Premium Comfort Offer",
@@ -36,7 +36,7 @@ export default function Offers() {
       imageSrc: "/images/offer-crist5.jpg",
       linkTo:
         "/search?category=all&query=all&price=all&discount=10-20&rating=5&btu=all&brand=all&order=newest&page=1",
-      linkText: "View Premium",
+      linkText: "Learn More",
     },
   ];
 
@@ -71,7 +71,8 @@ export default function Offers() {
                   </Card.Text>
                   <Button
                     variant="secondary"
-                    className="go-to-btn btn-text"
+                    size="sm"
+                    className="go-to-btn btn-text w-auto"
                     as={Link}
                     to={offer.linkTo}
                   >

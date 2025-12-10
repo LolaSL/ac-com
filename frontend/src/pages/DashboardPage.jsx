@@ -4,6 +4,7 @@ import ServiceProviders from "../components/ServiceProviders.jsx";
 import Notifications from "../components/Notifications.jsx";
 import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx";
 import { Link } from "react-router";
+import { Button } from "react-bootstrap";
 function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("Users Product Sales");
   const [sidebarOpen, setSidebarOpen] = useState(false); 
@@ -24,12 +25,12 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <div className="sidebar-toggle d-md-none">
-        <button
+        <Button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="toggle-button"
         >
           ☰ Menu
-        </button>
+        </Button>
         {sidebarOpen && (
           <div className="sidebar-dropdown">{renderSidebarContent()}</div>
         )}

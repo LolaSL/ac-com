@@ -146,12 +146,7 @@ body {
   font-family: "Cedarville Cursive", cursive;
 }
 
-.text {
-  text-align: justify;
-  text-transform: capitalize;
-  font-family: "Roboto", sans-serif;
-  color: black;
-}
+
 
 .banner-footer {
   text-transform: capitalize;
@@ -250,14 +245,6 @@ body {
   z-index: 100;
 }
 
-.btn-text {
-  margin-right: 12px;
-  text-decoration: none;
-  color: #322a50;
-  font-size: 18px;
-  font-weight: bold;
-  z-index: 100;
-}
 @media (max-width: 1200px) {
   .featured-title {
     font-size: 2rem;
@@ -332,11 +319,6 @@ body {
     padding: 8px 16px;
     font-size: 0.9rem;
   }
-}
-
-.original-price {
-  text-decoration: line-through;
-  color: grey;
 }
 
 .discounted-price {
@@ -2965,15 +2947,6 @@ h2 {
   background-color: #f5f5f5;
   opacity: 0.8;
   border: 3px solid #ec2222;
-}
-
-.btn-text {
-  margin-right: 12px;
-  text-decoration: none;
-  color: #322a50;
-  font-size: 18px;
-  font-weight: bold;
-  z-index: 100;
 }
 
 .btn-arrow {
