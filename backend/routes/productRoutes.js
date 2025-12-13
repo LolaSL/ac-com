@@ -141,7 +141,7 @@ productRouter.post(
     const productId = req.params.id;
     const product = await Product.findById(productId);
     if (product) {
-      if (product.reviews.find((x) => x.name === req.user.name)) {
+      if (product.reviews.find((x) => ((x.user?.toString() === req.user._id.toString()) || x.name === req.user.name) && !x.deleted)) {
         return res
           .status(400)
           .send({ message: 'You already submitted a review' });
@@ -151,12 +151,14 @@ productRouter.post(
         name: req.user.name,
         rating: Number(req.body.rating),
         comment: req.body.comment,
+        user: req.user._id,
       };
       product.reviews.push(review);
-      product.numReviews = product.reviews.length;
+      const activeReviews = product.reviews.filter((r) => !r.deleted);
+      product.numReviews = activeReviews.length;
       product.rating =
-        product.reviews.reduce((a, c) => c.rating + a, 0) /
-        product.reviews.length;
+        activeReviews.reduce((a, c) => c.rating + a, 0) /
+        (activeReviews.length || 1);
       const updatedProduct = await product.save();
       res.status(201).send({
         message: 'Review Created',

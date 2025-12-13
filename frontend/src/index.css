@@ -34,15 +34,74 @@ body {
   display: flex;
   flex-direction: column;
 }
+/* =====================
+   MOBILE (default)
+   ===================== */
 
 .header-nav {
-  top: 0;
-  left: 0;
   width: 100%;
-  margin-top: -10px;
+  margin: 0;
   padding: 0;
-  margin-right: 500px;
 }
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* LEFT */
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* Force navbar layout */
+.navbar {
+  width: 100%;
+  justify-content: flex-start !important;
+}
+
+/* VERY IMPORTANT */
+.navbar > .container,
+.navbar > .container-fluid {
+  justify-content: flex-start !important;
+}
+
+/* Brand */
+.navbar-brand {
+  text-align: left;
+  margin: 0;
+}
+
+/* Collapse content */
+.navbar-collapse {
+  width: 100%;
+  justify-content: flex-start !important;
+  text-align: left;
+}
+
+/* Nav items */
+.navbar-nav {
+  align-items: flex-start !important;
+  text-align: left;
+}
+
+/* =====================
+   LARGE SCREENS ONLY
+   ===================== */
+@media (min-width: 992px) {
+  .header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .navbar-nav {
+    margin-left: auto;
+    align-items: center !important;
+  }
+
+  .navbar-collapse .flex-grow-1 {
+    max-width: 520px;
+  }
+}
+
 
 .banner-title {
   margin-top: 5rem;

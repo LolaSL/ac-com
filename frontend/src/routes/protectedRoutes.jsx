@@ -7,6 +7,9 @@ import EarningsPage from "../pages/EarningsPage.jsx";
 import HoursPage from "../pages/HoursPage.jsx";
 import ProjectsPage from "../pages/ProjectsPage.jsx";
 import MessagesPage from "../pages/MessagesPage.jsx";
+import BrowsingHistoryPage from "../pages/BrowsingHistoryPage.jsx";
+import UserReviewsPage from "../pages/UserReviewsPage.jsx";
+import UserMessagesPage from "../pages/UserMessagesPage.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.js";
 
 export const protectedRoutes = [
@@ -79,6 +82,30 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <MessagesPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/browsing-history",
+    element: (
+      <ProtectedRoute>
+        <BrowsingHistoryPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/my-reviews",
+    element: (
+      <ProtectedRoute>
+        <UserReviewsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/order-messages",
+    element: (
+      <ProtectedRoute>
+        <UserMessagesPage />
       </ProtectedRoute>
     ),
   },

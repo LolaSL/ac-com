@@ -92,6 +92,27 @@ function ProductPage() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo } = state;
 
+  // Track product view for logged-in users
+  useEffect(() => {
+    const recordView = async () => {
+      if (userInfo && product._id) {
+        try {
+          await axios.post(
+            "/api/browsing-history",
+            { productId: product._id },
+            {
+              headers: { Authorization: `Bearer ${userInfo.token}` },
+            }
+          );
+        } catch (err) {
+          // Silently fail - browsing history is not critical
+          console.log("Could not record view");
+        }
+      }
+    };
+    recordView();
+  }, [product._id, userInfo]);
+
   const addToCartHandler = async () => {
     const existItem = cart.cartItems.find((x) => x._id === product._id);
     const quantity = existItem ? existItem.quantity + 1 : 1;
@@ -300,8 +321,11 @@ function ProductPage() {
                 {product.countInStock > 0 && (
                   <ListGroup.Item>
                     <div className="d-grid">
-                      <Button onClick={addToCartHandler}  variant="light"
-            className="go-to-btn btn-text">
+                      <Button
+                        onClick={addToCartHandler}
+                        variant="light"
+                        className="go-to-btn btn-text"
+                      >
                         Add to Cart
                       </Button>
                     </div>
@@ -394,7 +418,7 @@ function ProductPage() {
 
               <div className="mb-2">
                 <Button
-                className="go-to-btn btn-text"
+                  className="go-to-btn btn-text"
                   disabled={loadingCreateReview}
                   type="submit"
                 >

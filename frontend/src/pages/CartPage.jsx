@@ -22,6 +22,7 @@ export default function CartPage() {
   const [showAlert, setShowAlert] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [totalBTU, setTotalBTU] = useState(0);
 
   useEffect(() => {
@@ -64,6 +65,61 @@ export default function CartPage() {
       fetchProducts();
     }
   }, [showModal]);
+
+  // Fetch related products when cart has items
+  useEffect(() => {
+    const fetchRelated = async () => {
+      try {
+        if (!cartItems || cartItems.length === 0) {
+          setRelatedProducts([]);
+          return;
+        }
+        const categories = [
+          ...new Set(cartItems.map((i) => i.category).filter(Boolean)),
+        ];
+        const brands = [
+          ...new Set(cartItems.map((i) => i.brand).filter(Boolean)),
+        ];
+
+        // Prefer same category, fallback to same brand
+        let results = [];
+        for (const category of categories) {
+          const { data } = await axios.get(
+            `/api/products/search?category=${encodeURIComponent(
+              category
+            )}&query=all&price=all&discount=any&rating=all&btu=all&brand=all&order=newest&page=1&pageSize=8`
+          );
+          results = results.concat(data.products || []);
+        }
+        if (results.length < 4) {
+          for (const brand of brands) {
+            const { data } = await axios.get(
+              `/api/products/search?category=all&query=all&price=all&discount=any&rating=all&btu=all&brand=${encodeURIComponent(
+                brand
+              )}&order=toprated&page=1&pageSize=8`
+            );
+            results = results.concat(data.products || []);
+          }
+        }
+
+        // Exclude items already in cart, de-duplicate
+        const cartIds = new Set(cartItems.map((i) => i._id));
+        const unique = [];
+        const seen = new Set();
+        results.forEach((p) => {
+          if (!p || !p._id) return;
+          if (cartIds.has(p._id)) return;
+          if (seen.has(p._id)) return;
+          seen.add(p._id);
+          unique.push(p);
+        });
+        setRelatedProducts(unique.slice(0, 8));
+      } catch (err) {
+        console.error("Error fetching related products", err);
+      }
+    };
+    fetchRelated();
+  }, [cartItems]);
 
   const updateCartHandler = async (item, quantity) => {
     try {
@@ -154,9 +210,6 @@ export default function CartPage() {
         products={recommendedProducts}
         addToCart={addToCart}
       />
-              <Link to="/search" className="go-to-btn btn-text mb-4 rounded">
-             Explore Featured Products
-               </Link>
       <Row>
         <Col md={8}>
           {cartItems.length === 0 ? (
@@ -280,6 +333,55 @@ export default function CartPage() {
               </ListGroup>
             </Card.Body>
           </Card>
+          {cartItems.length > 0 && relatedProducts.length > 0 && (
+            <div className="mt-4">
+              <h5>Recommended for your cart</h5>
+              <Row>
+                {relatedProducts.map((p) => (
+                  <Col key={p._id} sm={6} className="mb-3">
+                    <Card className="h-100">
+                      <Link to={`/product/${p.slug}`}>
+                        <Image
+                          src={p.image}
+                          alt={p.name}
+                          style={{
+                            width: "100%",
+                            height: 140,
+                            objectFit: "cover",
+                          }}
+                        />
+                      </Link>
+                      <Card.Body>
+                        <Link
+                          to={`/product/${p.slug}`}
+                          className="text-decoration-none"
+                        >
+                          <div
+                            className="fw-semibold"
+                            style={{ minHeight: 40 }}
+                          >
+                            {p.name}
+                          </div>
+                        </Link>
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                          <span className="fw-bold">
+                            ${(p.price || 0).toFixed(2)}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            onClick={() => addToCart(p)}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          )}
         </Col>
       </Row>
     </div>

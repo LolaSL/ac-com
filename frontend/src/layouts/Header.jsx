@@ -1,4 +1,4 @@
-import React, {  useContext } from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
@@ -36,7 +36,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   return (
     <header className="header-nav">
       <Navbar className="navbar" expand="lg">
-        <Container>
+        <Container fluid className="header-container">
           <Button
             variant="secondary"
             onClick={() => setSidebarIsOpen(!sidebarIsOpen)}
@@ -44,30 +44,65 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
           >
             <i className="fas fa-bars"></i>
           </Button>
-          
+
           <Link to="/" className="navbar-brand">
             <h3>AC Commerce</h3>
             <p className="handwritten">Cooling Solutions For Every Space</p>
           </Link>
-          
+
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
+          <Navbar.Collapse
+            id="basic-navbar-nav"
+            className="justify-content-start"
+          >
             <div className="flex-grow-1 me-3">
               <SearchBox />
             </div>
-
-            <Nav className="ms-auto me-4">
-              {/* Cart Link */}
-              <Link to="/cart" className="nav-link">
-                Cart
-                {cart.cartItems.length > 0 && (
-                  <Badge pill bg="danger">
-                    {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
+            <Nav
+              className=" align-items-center gap-3 ms-auto me-4"
+              // style={{ justifyContent: "flex-start" }}
+            >
+              <div
+                className="d-flex align-items-center gap-1"
+                style={{
+                  flexWrap: "nowrap",
+                }}
+              >
+                <Link
+                  to="/cart"
+                  className="text-decoration-none d-flex align-items-center"
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Cart
+                </Link>
+                {cart.cartItems.length > 0 ? (
+                  <Badge
+                    bg="danger"
+                    role="button"
+                    onClick={() =>
+                      (window.location.href = "/signin?redirect=/shipping")
+                    }
+                    style={{
+                      whiteSpace: "nowrap",
+                      fontSize: "0.75rem",
+                      padding: "0.25rem 0.5rem",
+                    }}
+                  >
+                    Checkout
+                  </Badge>
+                ) : (
+                  <Badge
+                    pill
+                    bg="secondary"
+                    style={{ whiteSpace: "nowrap", fontSize: "0.75rem" }}
+                  >
+                    Empty
                   </Badge>
                 )}
+              </div>
+              <Link to="/offers" className="nav-link">
+                Offers
               </Link>
-
-              {/* User Menu */}
               {userInfo ? (
                 <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
                   <Link to="/profile" className="dropdown-item">
@@ -75,6 +110,18 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </Link>
                   <Link to="/orderhistory" className="dropdown-item">
                     Order History
+                  </Link>
+                  <Link to="/order-messages" className="dropdown-item">
+                    Order Messages
+                  </Link>
+                  <Link to="/offers" className="dropdown-item">
+                    Offers
+                  </Link>
+                  <Link to="/browsing-history" className="dropdown-item">
+                    Browsing History
+                  </Link>
+                  <Link to="/my-reviews" className="dropdown-item">
+                    My Reviews
                   </Link>
                   <NavDropdown.Divider />
                   <Link
@@ -90,8 +137,6 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   User Login
                 </Link>
               )}
-
-              {/* Service Provider Menu */}
               {serviceProviderInfo ? (
                 <NavDropdown
                   title={serviceProviderInfo.name}
@@ -138,8 +183,6 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   Service Provider Login
                 </Link>
               )}
-
-              {/* Admin Menu */}
               {adminInfo ? (
                 <NavDropdown title="Admin" id="admin-nav-dropdown">
                   <Link to="/admin/dashboard" className="dropdown-item">

@@ -5,6 +5,8 @@ const reviewSchema = new mongoose.Schema(
     name: { type: String, required: true },
     comment: { type: String, required: true },
     rating: { type: Number, required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    deleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
@@ -37,7 +39,7 @@ const productSchema = new mongoose.Schema(
     reviews: [reviewSchema],
     features: [{ type: String }],
     mode: [{ type: String }],
-    btu: { type: Number,  required: true },
+    btu: { type: Number, required: true },
     areaCoverage: { type: Number },
     energyEfficiency: { type: Number },
     documents: [documentSchema],

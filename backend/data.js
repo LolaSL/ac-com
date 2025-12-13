@@ -256,6 +256,62 @@ const data = {
         },
       ],
     },
+        {
+      name: "14000 BTU Mini Split AC",
+      model: "LSA3AR2M",
+      slug: "14000-btu-Mini-Split-air-conditioner",
+      category: "Mini Split AC",
+      image: "/images/p12.jpg",
+      price: 650,
+      discount: 10,
+      countInStock: 0,
+      brand: "LG",
+      rating: 4.5,
+      numReviews: 141,
+      description: "14000 BTU Mini Split Air Conditioner, Model LSA3AR2M. Smart Saver System. 10 Meter Wind Blast. Easy to Clean Filter. Optimal Airflow. Two Years Compressor, Parts and service warranty.",
+      features: [
+        'Energy Saving',
+        'Remote Control',
+        "Anti-Bacteria Filter",
+        "Dust Filter",
+        "Fast Cooling",
+        "Dual Sensing",
+        "Anti Corrosion Gold Fin™",
+        "Auto Restart",
+        "Smart Operation"
+      ],
+      mode: [
+        "Cooling Mode",
+        " Drying Mode ",
+        "Fan Mode",
+        "Silent Mode"
+      ],
+      btu: 14000,
+      areaCoverage: 42,
+      energyEfficiency: 12,
+      dimension: {
+        width: 89,
+        height: 21.6,
+        depth: 28,
+      },
+      documents: [
+        {
+          url: "https://www.lg.com/content/dam/channel/wcms/au/support/products/documents/S24AWN.pdf",
+          type: "PDF",
+          description: "User Manual for LG 14000 BTU Mini Split AC",
+        },
+        {
+          url: "https://www.lg.com/content/dam/channel/wcms/au/support/products/documents/Split_Systems_Brochure.pdf",
+          type: "PDF",
+          description: "Technical Specifications for LG 14000 BTU Mini Split AC",
+        },
+        {
+          url: "https://img.yumpu.com/10373739/1/500x640/installation-manual-air-conditioner-lg-duct-free-system.jpg",
+          type: "Image",
+          description: "Installation Guide Image",
+        },
+      ],
+    },
     {
       name: "16000 BTU Mini Split AC",
       model: "LSA3AR2M",

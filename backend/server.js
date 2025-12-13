@@ -12,6 +12,8 @@ import serviceProviderRouter from './routes/serviceProviderRoutes.js'
 import blogRouter from './routes/blogRoutes.js'
 import notificationRouter from './routes/notificationRoutes.js';
 import annotationRoutes from './routes/annotationRoutes.js'
+import browsingHistoryRouter from './routes/browsingHistoryRoutes.js';
+import userReviewsRouter from './routes/userReviewsRoutes.js';
 import path from "path";
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -77,6 +79,8 @@ app.use('/api/service-providers', serviceProviderRouter);
 app.use('/api/blogs', blogRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api', annotationRoutes);
+app.use('/api/browsing-history', browsingHistoryRouter);
+app.use('/api/user-reviews', userReviewsRouter);
 
 
 
