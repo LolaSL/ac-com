@@ -10,6 +10,7 @@ import MessagesPage from "../pages/MessagesPage.jsx";
 import BrowsingHistoryPage from "../pages/BrowsingHistoryPage.jsx";
 import UserReviewsPage from "../pages/UserReviewsPage.jsx";
 import UserMessagesPage from "../pages/UserMessagesPage.jsx";
+import WishlistPage from "../pages/WishlistPage.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.js";
 
 export const protectedRoutes = [
@@ -106,6 +107,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <UserMessagesPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/wishlist",
+    element: (
+      <ProtectedRoute>
+        <WishlistPage />
       </ProtectedRoute>
     ),
   },

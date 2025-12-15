@@ -40,12 +40,12 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
           <Button
             variant="secondary"
             onClick={() => setSidebarIsOpen(!sidebarIsOpen)}
-            className="btn-toggle me-4"
+            className="btn-toggle me-4 w-auto"
           >
             <i className="fas fa-bars"></i>
           </Button>
 
-          <Link to="/" className="navbar-brand">
+          <Link to="/" className="navbar-brand me-4">
             <h3>AC Commerce</h3>
             <p className="handwritten">Cooling Solutions For Every Space</p>
           </Link>
@@ -58,10 +58,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             <div className="flex-grow-1 me-3">
               <SearchBox />
             </div>
-            <Nav
-              className=" align-items-center gap-3 ms-auto me-4"
-              // style={{ justifyContent: "flex-start" }}
-            >
+            <Nav className=" align-items-center gap-3 ms-auto me-4">
               <div
                 className="d-flex align-items-center gap-1"
                 style={{
@@ -70,7 +67,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
               >
                 <Link
                   to="/cart"
-                  className="text-decoration-none d-flex align-items-center"
+                  className="text-decoration-none d-flex nav-link "
                   style={{ whiteSpace: "nowrap" }}
                 >
                   Cart
@@ -100,16 +97,20 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </Badge>
                 )}
               </div>
-              <Link to="/offers" className="nav-link">
-                Offers
-              </Link>
               {userInfo ? (
                 <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
-                  <Link to="/profile" className="dropdown-item">
+                  <Link to="/profile" className="dropdown-item ">
                     User Profile
                   </Link>
                   <Link to="/orderhistory" className="dropdown-item">
                     Order History
+                  </Link>
+                  <Link to="/wishlist" className="dropdown-item">
+                    <i
+                      className="fas fa-heart me-2"
+                      style={{ color: "#ff6b35" }}
+                    ></i>
+                    My Wishlist
                   </Link>
                   <Link to="/order-messages" className="dropdown-item">
                     Order Messages

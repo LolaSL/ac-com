@@ -5,11 +5,19 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import { toast } from "react-toastify";
 import { getError } from "../utils.js";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
+
   const [categories, setCategories] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const navigate = useNavigate();
+  
+  const handleNavigation = (e) => {
+    e.preventDefault();
+    navigate("/signin?redirect=/uploadfile");
+  };
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -54,7 +62,6 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
         {sidebarItems.map((item) => (
           <Nav.Item className="search-title me-auto mb-2" key={item.label}>
             {item.type === "categories" ? (
-              // Categories Dropdown
               <NavDropdown
                 title={<strong>{item.label}</strong>}
                 id="categories-dropdown"
@@ -83,11 +90,14 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
                 )}
               </NavDropdown>
             ) : (
-              // Regular Link
               <Link
                 to={item.path}
                 className="nav-link-side fw-bold"
-                onClick={handleNavClick}
+                onClick={
+                  item.path === "/uploadfile"
+                    ? handleNavigation
+                    : handleNavClick
+                }
               >
                 {item.label}
               </Link>

@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from "mongoose";
+import multer from 'multer';
 import seedRouter from './routes/seedRoutes.js';
 import productRouter from './routes/productRoutes.js';
 import userRouter from './routes/userRoutes.js';
@@ -14,6 +15,7 @@ import notificationRouter from './routes/notificationRoutes.js';
 import annotationRoutes from './routes/annotationRoutes.js'
 import browsingHistoryRouter from './routes/browsingHistoryRoutes.js';
 import userReviewsRouter from './routes/userReviewsRoutes.js';
+import wishlistRouter from './routes/wishlistRoutes.js';
 import path from "path";
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -59,6 +61,20 @@ app.use(bodyParser.json());
 
 app.use(express.urlencoded({ extended: true }));
 
+
+const upload = multer({
+  limits: { fileSize: 10 * 1024 * 1024 }, 
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
+
+app.use('/api/products/image-search', upload.single('image'));
+
 app.get("/api/keys/paypal", (req, res) => {
   res.send(process.env.PAYPAL_CLIENT_ID || "sb");
 });
@@ -81,6 +97,7 @@ app.use('/api/notifications', notificationRouter);
 app.use('/api', annotationRoutes);
 app.use('/api/browsing-history', browsingHistoryRouter);
 app.use('/api/user-reviews', userReviewsRouter);
+app.use('/api/wishlist', wishlistRouter);
 
 
 

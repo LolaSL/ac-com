@@ -34,9 +34,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-/* =====================
-   MOBILE (default)
-   ===================== */
 
 .header-nav {
   width: 100%;
@@ -47,45 +44,42 @@ body {
 .header-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* LEFT */
+  justify-content: flex-start; 
   width: 100%;
   padding: 0 1rem;
 }
 
-/* Force navbar layout */
+
 .navbar {
   width: 100%;
   justify-content: flex-start !important;
 }
 
-/* VERY IMPORTANT */
+
 .navbar > .container,
 .navbar > .container-fluid {
   justify-content: flex-start !important;
 }
 
-/* Brand */
 .navbar-brand {
   text-align: left;
   margin: 0;
 }
 
-/* Collapse content */
+
 .navbar-collapse {
   width: 100%;
   justify-content: flex-start !important;
   text-align: left;
 }
 
-/* Nav items */
+
 .navbar-nav {
   align-items: flex-start !important;
   text-align: left;
 }
 
-/* =====================
-   LARGE SCREENS ONLY
-   ===================== */
+
 @media (min-width: 992px) {
   .header-container {
     max-width: 1400px;
@@ -286,6 +280,8 @@ body {
   opacity: 0.8;
   border: 3px solid #ec2222;
 }
+
+
 .btn-text {
   margin-right: 12px;
   text-decoration: none;
@@ -415,9 +411,7 @@ body {
   object-fit: cover;
 }
 .sale-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  position: static;
   background-color: red;
   color: white;
   padding: 5px 5px;
@@ -426,7 +420,13 @@ body {
   border-radius: 5px;
   width: auto;
   font-family: "Roboto", sans-serif;
-  z-index: 10;
+
+}
+
+.discount-text {
+  color: red;
+  font-weight: 700;
+  text-shadow: none;
 }
 
 .original-price {
@@ -637,7 +637,7 @@ button:hover {
 
 .handwritten {
   font-family: system-ui;
-  font-size: 13px !important;
+  font-size: 12px !important;
   color: #ea2e2e;
   text-shadow: 1px 1px 1px rgb(188, 158, 173);
   font-weight: bold !important;
