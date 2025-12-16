@@ -97,11 +97,19 @@ function reducer(state, action) {
 
     case 'SERVICE_PROVIDER_REGISTER':
     case 'SERVICE_PROVIDER_LOGIN':
+      // Clear other user types when service provider logs in
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('adminInfo');
       localStorage.setItem(
         'serviceProviderInfo',
         JSON.stringify(action.payload)
       );
-      return { ...state, serviceProviderInfo: action.payload };
+      return { 
+        ...state, 
+        serviceProviderInfo: action.payload,
+        userInfo: null,
+        adminInfo: null
+      };
 
     case 'SERVICE_PROVIDER_SIGNOUT':
       localStorage.removeItem('serviceProviderInfo');
@@ -109,17 +117,34 @@ function reducer(state, action) {
         ...state,
         serviceProviderInfo: null,
       };
-case 'ADMIN_LOGIN':
-  localStorage.setItem('adminInfo', JSON.stringify(action.payload));
-  return { ...state, adminInfo: action.payload };
 
-case 'ADMIN_LOGOUT':
-  localStorage.removeItem('adminInfo');
-  return { ...state, adminInfo: null };
+    case 'ADMIN_LOGIN':
+      // Clear other user types when admin logs in
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('serviceProviderInfo');
+      localStorage.setItem('adminInfo', JSON.stringify(action.payload));
+      return { 
+        ...state, 
+        adminInfo: action.payload,
+        userInfo: null,
+        serviceProviderInfo: null
+      };
+
+    case 'ADMIN_LOGOUT':
+      localStorage.removeItem('adminInfo');
+      return { ...state, adminInfo: null };
 
     case 'USER_SIGNIN':
+      // Clear other user types when user logs in
+      localStorage.removeItem('adminInfo');
+      localStorage.removeItem('serviceProviderInfo');
       localStorage.setItem('userInfo', JSON.stringify(action.payload));
-      return { ...state, userInfo: action.payload };
+      return { 
+        ...state, 
+        userInfo: action.payload,
+        adminInfo: null,
+        serviceProviderInfo: null
+      };
 
     case 'USER_SIGNOUT':
       localStorage.removeItem('userInfo');

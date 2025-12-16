@@ -9,6 +9,65 @@ import { extractTextFromPDF } from '../utils/pdfUtils.js';
 const upload = multer();
 const uploadRouter = express.Router();
 
+// User avatar upload (only requires isAuth)
+uploadRouter.post(
+  '/avatar',
+  isAuth,
+  upload.single('image'),
+  async (req, res) => {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    const streamUpload = (req) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'avatars',
+            transformation: [
+              { width: 300, height: 300, crop: 'fill', gravity: 'face' }
+            ]
+          },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+    };
+
+    try {
+      if (!req.file) {
+        return res.status(400).send({ message: 'No image file provided' });
+      }
+
+      // Validate file type
+      if (!req.file.mimetype.startsWith('image/')) {
+        return res.status(400).send({ message: 'Only image files are allowed' });
+      }
+
+      const result = await streamUpload(req);
+      console.log('Uploaded Avatar URL:', result.secure_url);
+
+      res.send({
+        message: 'Avatar uploaded successfully',
+        secure_url: result.secure_url,
+        url: result.url,
+      });
+    } catch (error) {
+      console.error('Error during avatar upload:', error);
+      res.status(500).send({ message: 'Error uploading avatar', error: error.message });
+    }
+  }
+);
+
+// Admin product upload (requires isAdmin)
 uploadRouter.post(
   '/',
   isAuth,
@@ -62,7 +121,7 @@ uploadRouter.post(
         extractedText: extractedText,
       });
 
-      await product.save(); 
+      await product.save();
 
       res.send({
         message: 'File uploaded successfully',

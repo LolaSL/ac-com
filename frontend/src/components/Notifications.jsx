@@ -6,6 +6,7 @@ import LoadingBox from "./LoadingBox.jsx";
 import MessageBox from "./MessageBox.jsx";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Button, Badge, Card, Container, Row, Col } from "react-bootstrap";
 
 const initialState = {
   loading: true,
@@ -59,8 +60,9 @@ export default function Notifications() {
     initialState
   );
   const { state } = useContext(Store);
-  const { userInfo, adminInfo } = state;
-  const token = userInfo?.token || adminInfo?.token;
+  const { userInfo, adminInfo, serviceProviderInfo } = state;
+  const token = userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
+  const isAdmin = adminInfo !== null;
 
   useEffect(() => {
     if (!token) {
@@ -118,87 +120,102 @@ export default function Notifications() {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const getNotificationBadge = (type) => {
+    const badges = {
+      info: "info",
+      discount: "success",
+      urgent: "danger",
+      quote: "warning",
+    };
+    return badges[type] || "secondary";
+  };
+
   return (
-    <div>
-   <h1 className="mb-4 mt-4">Notifications</h1>
-      {loading ? (
-        <LoadingBox />
-      ) : error ? (
-        <MessageBox variant="danger">{error}</MessageBox>
-      ) : notifications.length === 0 ? (
-        <MessageBox>No notifications to display.</MessageBox>
-      ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {notifications.map((notification) => (
-            <li
-              key={
-                notification._id || `${notification.title}-${notification.createdAt}`
-              }
-              style={{
-                backgroundColor: notification.isRead ? "#f1f1f1" : "#fff",
-                padding: "16px",
-                marginBottom: "12px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              }}
-            >
-              <strong>{notification.title}</strong>
-              <p>{notification.message}</p>
-              <div style={{ fontSize: "0.85rem", color: "#666" }}>
-                Recipient: <em>{notification.recipientType}</em>
-              </div>
-              <div style={{ marginTop: "12px" }}>
-                {!notification.isRead && (
-                  <button
-                    onClick={() => markAsRead(notification._id)}
-                    style={{
-                      padding: "8px 16px",
-                      backgroundColor: "#007bff",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      marginRight: "10px",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                      transition: "background-color 0.3s",
-                    }}
-                    onMouseOver={(e) =>
-                      (e.target.style.backgroundColor = "#0056b3")
-                    }
-                    onMouseOut={(e) =>
-                      (e.target.style.backgroundColor = "#007bff")
-                    }
-                  >
-                    Mark as Read
-                  </button>
-                )}
-                <button
-                  onClick={() => deleteHandler(notification)}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor: "#dc3545",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    transition: "background-color 0.3s",
-                  }}
-                  onMouseOver={(e) =>
-                    (e.target.style.backgroundColor = "#b02a37")
-                  }
-                  onMouseOut={(e) =>
-                    (e.target.style.backgroundColor = "#dc3545")
-                  }
+    <Container className="py-4">
+      <Row>
+        <Col>
+          <h1 className="mb-4">Notifications</h1>
+          {loading ? (
+            <LoadingBox />
+          ) : error ? (
+            <MessageBox variant="danger">{error}</MessageBox>
+          ) : notifications.length === 0 ? (
+            <MessageBox>No notifications to display.</MessageBox>
+          ) : (
+            <div>
+              {notifications.map((notification) => (
+                <Card
+                  key={notification._id || `${notification.title}-${notification.createdAt}`}
+                  className="mb-3"
+                  bg={notification.isRead ? "light" : "white"}
+                  border={notification.isRead ? "secondary" : "primary"}
                 >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+                  <Card.Body>
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <Card.Title className="mb-0">
+                        {notification.title}
+                        {!notification.isRead && (
+                          <Badge bg="primary" className="ms-2">New</Badge>
+                        )}
+                      </Card.Title>
+                      <Badge bg={getNotificationBadge(notification.type)}>
+                        {notification.type}
+                      </Badge>
+                    </div>
+                    <Card.Text className="mt-2">{notification.message}</Card.Text>
+                    <div className="text-muted small mb-3">
+                      <div>
+                        <i className="bi bi-person-badge"></i> Recipient: <em>{notification.recipientType}</em>
+                      </div>
+                      <div>
+                        <i className="bi bi-calendar"></i> {formatDate(notification.createdAt)} at {formatTime(notification.createdAt)}
+                      </div>
+                    </div>
+                    <div className="d-flex gap-2">
+                      {!notification.isRead && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => markAsRead(notification._id)}
+                        >
+                          <i className="bi bi-check2"></i> Mark as Read
+                        </Button>
+                      )}
+                      {isAdmin && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => deleteHandler(notification)}
+                        >
+                          <i className="bi bi-trash"></i> Delete
+                        </Button>
+                      )}
+                    </div>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          )}
+        </Col>
+      </Row>
+    </Container>
   );
 }

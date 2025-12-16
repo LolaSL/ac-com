@@ -52,10 +52,15 @@ export default function CartPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(
-          "/api/products?category=Outdoor%20Condenser"
+        const { data } = await axios.get("/api/products");
+        // Filter for all outdoor unit types
+        const outdoorUnits = data.filter(
+          (product) =>
+            product.category === "Outdoor Condenser" ||
+            product.category === "VRF Heat Recovery" ||
+            product.category === "MRV-S Outdoor"
         );
-        setRecommendedProducts(data);
+        setRecommendedProducts(outdoorUnits);
       } catch (error) {
         console.error("Error fetching recommended products:", error);
       }
@@ -167,14 +172,16 @@ export default function CartPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(
-          "/api/products?category=Outdoor%20Condenser"
-        );
-        const condensers = data.filter(
-          (product) => product.category === "Outdoor Condenser"
+        const { data } = await axios.get("/api/products");
+        // Filter for all outdoor unit types
+        const outdoorUnits = data.filter(
+          (product) =>
+            product.category === "Outdoor Condenser" ||
+            product.category === "VRF Heat Recovery" ||
+            product.category === "MRV-S Outdoor"
         );
 
-        setRecommendedProducts(condensers);
+        setRecommendedProducts(outdoorUnits);
       } catch (error) {
         console.error("Error fetching recommended products:", error);
       }

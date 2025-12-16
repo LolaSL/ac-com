@@ -97,16 +97,23 @@ notificationRouter.get(
     let notifications;
 
     if (req.user.isAdmin) {
-      // Admin sees all notifications
-      notifications = await Notification.find()
+      // Admin sees all admin notifications (no userId) or specifically for them
+      notifications = await Notification.find({
+        $or: [
+          { recipientType: 'admin', userId: { $exists: false } }, // General admin notifications
+          { recipientType: 'admin', userId: req.user._id },       // Specific admin notifications
+          { recipientType: 'all' },                               // General notifications
+        ],
+      })
         .sort({ createdAt: -1 })
         .lean({ virtuals: true });
     } else {
-      // Users / service providers see only their notifications + general
+      // Users / service providers see their specific notifications + general ones for their type
       notifications = await Notification.find({
         $or: [
-          { recipientType: req.user.type }, // 'user' or 'serviceProvider'
-          { recipientType: 'all' },         // general notifications
+          { recipientType: req.user.type, userId: req.user._id }, // Their specific notifications
+          { recipientType: req.user.type, userId: { $exists: false } }, // General for their type
+          { recipientType: 'all' },                               // General notifications
         ],
       })
         .sort({ createdAt: -1 })

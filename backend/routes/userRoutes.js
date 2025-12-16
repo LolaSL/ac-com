@@ -47,19 +47,37 @@ userRouter.put(
   '/profile',
   isAuth,
   expressAsyncHandler(async (req, res) => {
+    console.log('Profile update request received:', {
+      userId: req.user._id,
+      hasPassword: !!req.body.password,
+      body: { ...req.body, password: req.body.password ? '[REDACTED]' : undefined }
+    });
+
     const user = await User.findById(req.user._id);
     if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
+      if (req.body.phone !== undefined) {
+        user.phone = req.body.phone;
+      }
+      if (req.body.avatar !== undefined) {
+        user.avatar = req.body.avatar;
+      }
+
       if (req.body.password) {
+        console.log('Updating password for user:', user.email);
         user.password = bcrypt.hashSync(req.body.password, 8);
       }
 
       const updatedUser = await user.save();
+      console.log('User updated successfully:', updatedUser.email);
+
       res.send({
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
+        phone: updatedUser.phone,
+        avatar: updatedUser.avatar,
         isAdmin: updatedUser.isAdmin,
         token: generateToken(updatedUser),
       });
@@ -80,25 +98,38 @@ userRouter.post(
       });
       user.resetToken = token;
       await user.save();
-      console.log(`${baseUrl()}/reset-password/${token}`);
 
-      mailgun()
-        .messages()
-        .send(
-          {
-            from: 'AC Commerce <me@mg.yourdomain.com>',
-            to: `${user.name} <${user.email}>`,
-            subject: `Reset Password`,
-            html: ` 
-             <p>Please Click the following link to reset your password:</p> 
-           <a href="${baseUrl()}/reset-password/${token}">Reset Password</a>
-             `,
-          },
-          (error, body) => {
-            console.log(error);
-            console.log(body);
-          }
-        );
+      const resetLink = `${baseUrl()}/reset-password/${token}`;
+      console.log('===================================');
+      console.log('PASSWORD RESET LINK:');
+      console.log(resetLink);
+      console.log('===================================');
+
+      // Only send email if Mailgun is configured
+      if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
+        try {
+          mailgun()
+            .messages()
+            .send(
+              {
+                from: 'AC Commerce <me@mg.yourdomain.com>',
+                to: `${user.name} <${user.email}>`,
+                subject: `Reset Password`,
+                html: ` 
+                 <p>Please Click the following link to reset your password:</p> 
+               <a href="${resetLink}">Reset Password</a>
+                 `,
+              },
+              (error, body) => {
+                console.log(error);
+                console.log(body);
+              }
+            );
+        } catch (error) {
+          console.log('Email sending failed (Mailgun not configured):', error.message);
+        }
+      }
+
       res.send({ message: 'We sent reset password link to your email.' });
     } else {
       res.status(404).send({ message: 'User not found' });
@@ -181,7 +212,7 @@ userRouter.post(
         name: admin.name,
         email: admin.email,
         isAdmin: true,
-        type: 'admin',               
+        type: 'admin',
         token: generateToken(admin),
       });
     } else {
@@ -200,6 +231,8 @@ userRouter.post(
         _id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        avatar: user.avatar,
         isAdmin: user.isAdmin,
         isServiceProvider: user.isServiceProvider,
         type: user.isServiceProvider ? 'serviceProvider' : 'user',
@@ -224,6 +257,8 @@ userRouter.post(
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      avatar: user.avatar,
       isAdmin: user.isAdmin,
       token: generateToken(user),
     });

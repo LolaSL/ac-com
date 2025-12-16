@@ -98,7 +98,39 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                 )}
               </div>
               {userInfo ? (
-                <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
+                <NavDropdown
+                  title={
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {userInfo.avatar ? (
+                        <img
+                          src={userInfo.avatar}
+                          alt={userInfo.name}
+                          style={{
+                            width: "30px",
+                            height: "30px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid white",
+                            display: "block",
+                          }}
+                        />
+                      ) : (
+                        <i
+                          className="fas fa-user-circle"
+                          style={{ fontSize: "30px", lineHeight: "1" }}
+                        ></i>
+                      )}
+                      <span style={{ lineHeight: "1" }}>{userInfo.name}</span>
+                    </span>
+                  }
+                  id="basic-nav-dropdown"
+                >
                   <Link to="/profile" className="dropdown-item ">
                     User Profile
                   </Link>

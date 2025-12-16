@@ -78,6 +78,23 @@ orderRouter.post(
 
     const order = await newOrder.save();
 
+    // Create notification for user
+    await Notification.create({
+      title: 'Order Confirmed',
+      message: `Your order #${order._id.toString().slice(-6)} has been placed successfully. Total: $${totalPrice.toFixed(2)}`,
+      type: 'info',
+      recipientType: 'user',
+      userId: req.user._id,
+    });
+
+    // Create notification for admin
+    await Notification.create({
+      title: 'New Order Received',
+      message: `New order #${order._id.toString().slice(-6)} from ${req.user.name}. Total: $${totalPrice.toFixed(2)}`,
+      type: 'urgent',
+      recipientType: 'admin',
+    });
+
     res.status(201).send({ message: 'New Order Created', order });
   })
 );
@@ -278,6 +295,19 @@ orderRouter.put(
       order.isDelivered = true;
       order.deliveredAt = Date.now();
       await order.save();
+
+      // Notify user of delivery
+      const user = await User.findById(order.user);
+      if (user) {
+        await Notification.create({
+          title: 'Order Delivered',
+          message: `Your order #${order._id.toString().slice(-6)} has been delivered successfully!`,
+          type: 'info',
+          recipientType: 'user',
+          userId: order.user,
+        });
+      }
+
       res.send({ message: 'Order Delivered' });
     } else {
       res.status(404).send({ message: 'Order Not Found' });
@@ -304,6 +334,23 @@ orderRouter.put(
       };
 
       const updatedOrder = await order.save();
+
+      // Notify user of successful payment
+      await Notification.create({
+        title: 'Payment Confirmed',
+        message: `Payment for order #${order._id.toString().slice(-6)} has been processed successfully.`,
+        type: 'info',
+        recipientType: 'user',
+        userId: order.user._id,
+      });
+
+      // Notify admin
+      await Notification.create({
+        title: 'Order Payment Received',
+        message: `Payment received for order #${order._id.toString().slice(-6)} from ${order.user.name}.`,
+        type: 'info',
+        recipientType: 'admin',
+      });
 
       res.send({ message: 'Order Paid', order: updatedOrder });
     } else {

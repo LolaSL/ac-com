@@ -12,6 +12,7 @@ export default function ForgetPasswordPage() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -24,14 +25,16 @@ export default function ForgetPasswordPage() {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const { data } = await axios.post("/api/users/forget-password", {
-  email,
-});
-
-      toast.success(data.message);
+        email,
+      });
+      toast.success(data.message || "Password reset link sent to your email!");
     } catch (err) {
       toast.error(getError(err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,8 +55,20 @@ export default function ForgetPasswordPage() {
             className="go-to-btn btn-text"
             variant="btn-outline"
             type="submit"
+            disabled={loading}
           >
-            Submit
+            {loading ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Sending...
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </div>
       </Form>

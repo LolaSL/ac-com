@@ -1,5 +1,6 @@
 import express from 'express';
-import Contact from '../models/contactModel.js'; 
+import Contact from '../models/contactModel.js';
+import Notification from '../models/notificationModel.js';
 
 const contactRouter = express.Router();
 
@@ -34,6 +35,21 @@ contactRouter.post('/', async (req, res) => {
     
     const savedContact = await newContact.save();
 
+    // Notify service providers about new quote request
+    await Notification.create({
+      title: 'New Quote Request',
+      message: `New ${serviceType} quote request from ${fullName} in ${country}.`,
+      type: 'quote',
+      recipientType: 'serviceProvider',
+    });
+
+    // Notify admin
+    await Notification.create({
+      title: 'New Contact Form Submission',
+      message: `${fullName} submitted a quote request for ${serviceType}.`,
+      type: 'info',
+      recipientType: 'admin',
+    });
    
     res.status(201).json({
       message: 'Contact message sent successfully',

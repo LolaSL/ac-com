@@ -14,9 +14,30 @@ export default function ResetPasswordPage() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { state } = useContext(Store);
   const { userInfo } = state;
+
+  const getPasswordStrength = (pass) => {
+    if (!pass) return { strength: 0, label: "", color: "" };
+    let strength = 0;
+    if (pass.length >= 8) strength++;
+    if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) strength++;
+    if (/\d/.test(pass)) strength++;
+    if (/[^a-zA-Z\d]/.test(pass)) strength++;
+
+    const levels = [
+      { strength: 0, label: "", color: "" },
+      { strength: 1, label: "Weak", color: "danger" },
+      { strength: 2, label: "Fair", color: "warning" },
+      { strength: 3, label: "Good", color: "info" },
+      { strength: 4, label: "Strong", color: "success" },
+    ];
+    return levels[strength];
+  };
 
   useEffect(() => {
     if (userInfo || !token) {
@@ -30,15 +51,24 @@ export default function ResetPasswordPage() {
       toast.error("Passwords do not match");
       return;
     }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setLoading(true);
     try {
       await Axios.post("/api/users/reset-password", {
         password,
         token,
       });
-      navigate("/signin");
-      toast.success("Password updated successfully");
+      toast.success("Password updated successfully! Redirecting...");
+      setTimeout(() => {
+        navigate("/signin");
+      }, 1500);
     } catch (err) {
       toast.error(getError(err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,19 +78,111 @@ export default function ResetPasswordPage() {
       <Form onSubmit={submitHandler}>
         <Form.Group className="mb-3" controlId="password">
           <Form.Label>New Password</Form.Label>
-          <Form.Control
-            type="password"
-            required
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="position-relative">
+            <Form.Control
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button
+              variant="link"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                padding: "0",
+                border: "none",
+                background: "none",
+                color: "#6c757d",
+              }}
+            >
+              <i
+                className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}
+              ></i>
+            </Button>
+          </div>
+          {password && (
+            <div className="mt-2">
+              <div className="d-flex align-items-center gap-2">
+                <div
+                  style={{
+                    flex: 1,
+                    height: "8px",
+                    backgroundColor: "#e9ecef",
+                    borderRadius: "4px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${
+                        (getPasswordStrength(password).strength / 4) * 100
+                      }%`,
+                      height: "100%",
+                      backgroundColor:
+                        getPasswordStrength(password).color === "danger"
+                          ? "#dc3545"
+                          : getPasswordStrength(password).color === "warning"
+                          ? "#ffc107"
+                          : getPasswordStrength(password).color === "info"
+                          ? "#0dcaf0"
+                          : "#198754",
+                      transition: "width 0.3s ease",
+                    }}
+                  />
+                </div>
+                <small
+                  className={`text-${getPasswordStrength(password).color}`}
+                  style={{ minWidth: "60px" }}
+                >
+                  {getPasswordStrength(password).label}
+                </small>
+              </div>
+              <Form.Text className="text-muted">
+                Use 8+ characters with mix of letters, numbers & symbols
+              </Form.Text>
+            </div>
+          )}
         </Form.Group>
+
         <Form.Group className="mb-3" controlId="confirmPassword">
           <Form.Label>Confirm New Password</Form.Label>
-          <Form.Control
-            type="password"
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
+          <div className="position-relative">
+            <Form.Control
+              type={showConfirmPassword ? "text" : "password"}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={confirmPassword}
+              required
+            />
+            <Button
+              variant="link"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                padding: "0",
+                border: "none",
+                background: "none",
+                color: "#6c757d",
+              }}
+            >
+              <i
+                className={
+                  showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"
+                }
+              ></i>
+            </Button>
+          </div>
+          {confirmPassword && password !== confirmPassword && (
+            <Form.Text className="text-danger">
+              Passwords do not match
+            </Form.Text>
+          )}
         </Form.Group>
 
         <div className="mb-3">
@@ -68,8 +190,20 @@ export default function ResetPasswordPage() {
             className="go-to-btn btn-text"
             variant="btn-outline"
             type="submit"
+            disabled={loading}
           >
-            Reset Password
+            {loading ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Resetting...
+              </>
+            ) : (
+              "Reset Password"
+            )}
           </Button>
         </div>
       </Form>

@@ -10,6 +10,7 @@ const notificationSchema = new mongoose.Schema(
       enum: ['user', 'admin', 'serviceProvider', 'all'],
       required: true
     },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Specific user (optional)
     isRead: { type: Boolean, default: false },
   },
   { timestamps: true }
