@@ -34,8 +34,8 @@ const reducer = (state, action) => {
 
 const MessagesServiceProviders = () => {
   const { state } = useContext(Store);
-  const { userInfo, adminInfo } = state;
-  const token = userInfo?.token || adminInfo?.token;
+  const { adminInfo } = state;
+  const token = adminInfo?.token;
 
   const [{ loading, error, messages, successDelete, currentPage }, dispatch] =
     useReducer(reducer, {
@@ -56,18 +56,22 @@ const MessagesServiceProviders = () => {
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
 
-
   useEffect(() => {
     if (currentPage !== pageFromUrl) {
-
-      dispatch({ type: "FETCH_SUCCESS", payload: { messages, currentPage: pageFromUrl, totalPages: 1, totalMessages: 0 } });
+      dispatch({
+        type: "FETCH_SUCCESS",
+        payload: {
+          messages,
+          currentPage: pageFromUrl,
+          totalPages: 1,
+          totalMessages: 0,
+        },
+      });
     }
   }, [pageFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-
   useEffect(() => {
-    if (!token) {
-
+    if (!adminInfo || !token) {
       navigate("/admin-login", { replace: true });
       return;
     }
@@ -75,10 +79,13 @@ const MessagesServiceProviders = () => {
     const fetchMessages = async () => {
       dispatch({ type: "FETCH_REQUEST" });
       try {
-        const { data } = await axios.get(`/api/service-providers/messages/all`, {
-          params: { page: pageFromUrl, pageSize: 10 },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await axios.get(
+          `/api/service-providers/messages/all`,
+          {
+            params: { page: pageFromUrl, pageSize: 10 },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
@@ -86,7 +93,7 @@ const MessagesServiceProviders = () => {
     };
 
     fetchMessages();
-  }, [token, pageFromUrl, successDelete, navigate]);
+  }, [adminInfo, token, pageFromUrl, successDelete, navigate]);
 
   useEffect(() => {
     if (!messages || messages.length === 0) {
@@ -127,13 +134,23 @@ const MessagesServiceProviders = () => {
       alert("Invalid message ID.");
       return;
     }
-    if (window.confirm("Are you sure you want to delete this message?")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this message? This action is logged for audit purposes and cannot be undone."
+      )
+    ) {
       dispatch({ type: "DELETE_REQUEST" });
       try {
         await axios.delete(`/api/service-providers/message/${messageId}`, {
           headers: { Authorization: `Bearer ${token}` },
+          data: {
+            adminAction: true,
+            reason: "Admin deletion",
+            timestamp: new Date().toISOString(),
+          },
         });
         dispatch({ type: "DELETE_SUCCESS" });
+        alert("Message deleted successfully. Action has been logged.");
       } catch (err) {
         dispatch({ type: "DELETE_FAIL" });
         alert(getError(err));
@@ -159,7 +176,17 @@ const MessagesServiceProviders = () => {
 
   return (
     <Container>
-      <h1 className="mt-4 mb-4 fw-bold">Service Provider Messages</h1>
+      <div className="mb-4 mt-4">
+        <h1 className="mb-2 fw-bold">Admin - Service Provider Messages</h1>
+        <p className="text-muted mb-0">
+          Monitor and moderate communications between clients and service
+          providers for quality assurance and support.
+        </p>
+        <small className="text-muted">
+          Access to messages is granted for platform moderation, dispute
+          resolution, and customer support in accordance with Terms of Service.
+        </small>
+      </div>
       {messages.length === 0 ? (
         <div>
           <p>No messages available</p>
@@ -172,22 +199,28 @@ const MessagesServiceProviders = () => {
               <tr>
                 <th>ID</th>
                 <th>
-                  <button type="button" onClick={() => handleSort("serviceProvider")}>
+                  <button
+                    type="button"
+                    onClick={() => handleSort("serviceProvider")}
+                  >
                     Provider{" "}
-                    {sortColumn === "serviceProvider" && (sortOrder === "asc" ? "↑" : "↓")}
+                    {sortColumn === "serviceProvider" &&
+                      (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
                 <th>
                   <button type="button" onClick={() => handleSort("client")}>
                     Client{" "}
-                    {sortColumn === "client" && (sortOrder === "asc" ? "↑" : "↓")}
+                    {sortColumn === "client" &&
+                      (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
                 <th>Project</th>
                 <th>Message</th>
                 <th>
                   <button type="button" onClick={() => handleSort("date")}>
-                    Date {sortColumn === "date" && (sortOrder === "asc" ? "↑" : "↓")}
+                    Date{" "}
+                    {sortColumn === "date" && (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
                 <th>Actions</th>
@@ -197,16 +230,26 @@ const MessagesServiceProviders = () => {
               {sortedMessages.map((message, index) => (
                 <tr key={message._id || index}>
                   <td data-label="ID">{index + 1}</td>
-                  <td data-label="Provider">{message.serviceProvider?.name || "N/A"}</td>
+                  <td data-label="Provider">
+                    {message.serviceProvider?.name || "N/A"}
+                  </td>
                   <td data-label="Client">{message.client || "N/A"}</td>
                   <td data-label="Project">{message.projectName || "N/A"}</td>
                   <td data-label="Message">{message.text || "N/A"}</td>
-                  <td data-label="Date">{new Date(message.date).toLocaleDateString()}</td>
+                  <td data-label="Date">
+                    {new Date(message.date).toLocaleDateString()}
+                  </td>
                   <td>
-                    <Button className="details me-2 mb-2" onClick={() => editHandler(message._id)}>
+                    <Button
+                      className="details me-2 mb-2"
+                      onClick={() => editHandler(message._id)}
+                    >
                       Edit
                     </Button>
-                    <Button className="details me-2 mb-2 " onClick={() => deleteHandler(message._id)}>
+                    <Button
+                      className="details me-2 mb-2 "
+                      onClick={() => deleteHandler(message._id)}
+                    >
                       Delete
                     </Button>
                   </td>

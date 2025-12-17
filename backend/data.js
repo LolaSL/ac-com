@@ -1448,7 +1448,7 @@ const data = {
     {
       client: "John Doe",
       text: "Can we update the room layout?",
-      date: "2024-12-26",
+      date: "2025-12-26",
       serviceProvider: "test-company1@example.com",
       projectName: "Residential House Design"
     },
@@ -1456,7 +1456,7 @@ const data = {
     {
       client: "Loft&Hubs Corp",
       text: "We obtained the last transh and last milestone.",
-      date: "2024-11-05",
+      date: "2025-11-05",
       serviceProvider: "test-company2@example.com",
       projectName: "Loft Renovation",
 
@@ -1464,7 +1464,7 @@ const data = {
     {
       client: "ABC Corp",
       text: "Can we upgrade the office layout?",
-      date: "2024-10-26",
+      date: "2025-10-26",
       serviceProvider: "test-company3@example.com",
       projectName: "Office Interior Renovation"
     },
@@ -1472,21 +1472,21 @@ const data = {
     {
       client: "Michaella Donowan",
       text: "Negotiation Status regarding the project readiness is 'Closed'.",
-      date: "2024-12-23",
+      date: "2025-12-23",
       serviceProvider: "test-company4@example.com",
       projectName: "Appartments Design"
     },
     {
       client: "Marvine MC'Machon",
       text: "HVAC System Planning development. First phase - events planning.",
-      date: "2025-03-03",
+      date: "2026-03-03",
       serviceProvider: "test-company5@example.com",
       projectName: "HVAC System Planning"
     },
     {
       client: "Viki Crage",
       text: "Can we upgrade the construction layout?",
-      date: "2025-01-22",
+      date: "2026-01-22",
       serviceProvider: "test-company1@example.com",
       projectName: "Construction Design",
     },
@@ -1494,14 +1494,14 @@ const data = {
     {
       client: "Venty Corp",
       text: "When will we get the second transh for the second draft and previous milestone?",
-      date: "2025-02-15",
+      date: "2026-02-15",
       serviceProvider: "test-company2@example.com",
       projectName: "Ventilation System Architecting"
     },
     {
       client: "Zyclon LLP",
       text: "We got the last transh yesterday. We are ready for commissioning phase.",
-      date: "2024-08-30",
+      date: "2025-08-30",
       serviceProvider: "test-company3@example.com",
       projectName: "Constraction of a supply and exhaust ventilation system"
     },
@@ -1509,14 +1509,14 @@ const data = {
     {
       client: "ACVent Corp",
       text: "	The commissioning phase was passed without any obstacles. Can we sign the final account papers?",
-      date: "2024-05-30",
+      date: "2025-05-30",
       serviceProvider: "test-company4@example.com",
       projectName: "Design of a chimney system"
     },
     {
       client: "Cooling System Ltd",
       text: "	The commissioning phase was passed without any obstacles. Can we sign the final account papers?",
-      date: "2025-02-19",
+      date: "2026-02-19",
       serviceProvider: "test-company5@example.com",
       projectName: "HVAC System Planning & Arcitect"
     },
@@ -1530,19 +1530,19 @@ const data = {
     },
     {
       amount: 3945,
-      date: '2024-12-04',
+      date: '2025-12-04',
       hoursWorked: 123,
       status: 'Paid',
     },
     {
       amount: 1282,
-      date: '2024-11-29',
+      date: '2025-11-29',
       hoursWorked: 40,
       status: 'Paid',
     },
     {
       amount: 699,
-      date: '2024-12-20',
+      date: '2025-12-17',
       hoursWorked: 53,
       status: 'Paid',
     },
@@ -1567,13 +1567,13 @@ const data = {
     },
     {
       amount: 6450,
-      date: '2024-09-03',
+      date: '2025-09-03',
       hoursWorked: 200,
       status: 'Paid',
     },
     {
       amount: 2885,
-      date: '2024-06-12',
+      date: '2025-06-12',
       hoursWorked: 90,
       status: 'Paid',
     },

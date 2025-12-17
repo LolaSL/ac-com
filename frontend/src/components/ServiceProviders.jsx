@@ -1,11 +1,12 @@
-import React, { useContext, useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useReducer, useCallback } from "react";
 import axios from "axios";
 import { Chart } from "react-google-charts";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
-import { Container, Table } from "react-bootstrap";
+import { Container, Table, Button } from "react-bootstrap";
+import "./ServiceProviders.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -40,28 +41,28 @@ const ServiceProviders = () => {
   });
 
   const { state } = useContext(Store);
-  const { userInfo, adminInfo } = state;
-  const token = userInfo?.token || adminInfo?.token;
+  const { adminInfo } = state;
+  const token = adminInfo?.token;
 
+  const fetchData = useCallback(async () => {
+    dispatch({ type: "FETCH_REQUEST" });
+    try {
+      const { data } = await axios.get("/api/service-providers/summary", {
+        params: { page: currentPage, pageSize: 10 },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      dispatch({ type: "FETCH_SUCCESS", payload: data });
+    } catch (err) {
+      dispatch({
+        type: "FETCH_FAIL",
+        payload: getError(err),
+      });
+    }
+  }, [currentPage, token]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      dispatch({ type: "FETCH_REQUEST" });
-      try {
-        const { data } = await axios.get("/api/service-providers/summary", {
-          params: { page: currentPage, pageSize: 10 },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        dispatch({ type: "FETCH_SUCCESS", payload: data });
-      } catch (err) {
-        dispatch({
-          type: "FETCH_FAIL",
-          payload: getError(err),
-        });
-      }
-    };
     fetchData();
-  }, [currentPage, token, userInfo]);
+  }, [fetchData]);
 
   const barChartData = [
     ["Provider", "Earnings"],
@@ -77,7 +78,7 @@ const ServiceProviders = () => {
     hAxis: { title: "Earnings (USD)", minValue: 0 },
     vAxis: { title: "Provider" },
     legend: "none",
-    colors: ["#10b2ad"], 
+    colors: ["#10b2ad"],
   };
 
   const pieChartData = [
@@ -103,7 +104,7 @@ const ServiceProviders = () => {
     pieHole: 0.4,
     is3D: false,
     legend: { position: "bottom" },
-    colors: ["#0ac22f", "#cd17ee" ], 
+    colors: ["#0ac22f", "#cd17ee"],
   };
 
   const handlePageChange = (newPage) => {
@@ -113,7 +114,7 @@ const ServiceProviders = () => {
     axios
       .get("/api/service-providers", {
         params: { page: newPage, pageSize: 10 },
-        headers: { Authorization: `Bearer ${userInfo.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
         dispatch({ type: "FETCH_SUCCESS", payload: response.data });
@@ -125,11 +126,29 @@ const ServiceProviders = () => {
 
   return (
     <Container className="provider-container">
-      <h1 className="mb-4 mt-4">Service Providers Dashboard</h1>
+      <div className="provider-header">
+        <div>
+          <h1 className="mb-2">Admin Service Providers Sales</h1>
+          <p className="text-muted mb-0">
+            Monitor service provider performance and earnings
+          </p>
+        </div>
+        <Button
+          className="details"
+          onClick={() => fetchData()}
+          disabled={loading}
+        >
+          {loading ? "Refreshing..." : "Refresh Data"}
+        </Button>
+      </div>
       {loading ? (
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
+      ) : !adminInfo ? (
+        <MessageBox variant="warning">
+          Admin access required to view this dashboard.
+        </MessageBox>
       ) : (
         <div className="table-responsive">
           <Table striped bordered hover responsive className="table-sm">
@@ -151,72 +170,79 @@ const ServiceProviders = () => {
               {serviceProviders.length > 0 ? (
                 serviceProviders.map((serviceProvider, index) => (
                   <tr key={index}>
-              <td data-label="ID">{(currentPage - 1) * 10 + index + 1}</td>
-              <td data-label="Name">{serviceProvider.name}</td>
-              <td data-label="Company">{serviceProvider.company}</td>
-              <td data-label="Specialty">{serviceProvider.typeOfProvider}</td>
-              <td data-label="Experience">{serviceProvider.experience} years</td>
-              <td data-label="Email">{serviceProvider.email}</td>
-              <td data-label="Phone">{serviceProvider.phone}</td>
-              <td data-label="Completed Projects" className="text-center">
-                {serviceProvider.completedProjects}
-              </td>
-              <td data-label="In Progress Projects">
-                {serviceProvider.inProgressProjects}
-              </td>
-              <td data-label="Total Earnings">
-                ${serviceProvider.totalEarnings?.toFixed(2) || 0}
-              </td>
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="10" className="text-center">No service providers found</td>
-          </tr>
-        )}
-      </tbody>
+                    <td data-label="ID">
+                      {(currentPage - 1) * 10 + index + 1}
+                    </td>
+                    <td data-label="Name">{serviceProvider.name}</td>
+                    <td data-label="Company">{serviceProvider.company}</td>
+                    <td data-label="Specialty">
+                      {serviceProvider.typeOfProvider}
+                    </td>
+                    <td data-label="Experience">
+                      {serviceProvider.experience} years
+                    </td>
+                    <td data-label="Email">{serviceProvider.email}</td>
+                    <td data-label="Phone">{serviceProvider.phone}</td>
+                    <td data-label="Completed Projects" className="text-center">
+                      {serviceProvider.completedProjects}
+                    </td>
+                    <td data-label="In Progress Projects">
+                      {serviceProvider.inProgressProjects}
+                    </td>
+                    <td data-label="Total Earnings">
+                      ${serviceProvider.totalEarnings?.toFixed(2) || 0}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="10" className="text-center">
+                    No service providers found
+                  </td>
+                </tr>
+              )}
+            </tbody>
           </Table>
-          <div className="mt-5">
+          <div className="chart-container">
             <h3>Project Distribution</h3>
             <Chart
               chartType="PieChart"
               width="100%"
-              height="400px"
+              height="300px"
               data={pieChartData}
               options={pieChartOptions}
             />
           </div>
-          <div className="mt-5">
+          <div className="chart-container">
             <h3>Provider vs Earnings</h3>
             <Chart
               chartType="BarChart"
               width="100%"
-              height="400px"
+              height="300px"
               data={barChartData}
               options={barChartOptions}
             />
           </div>
-          <div className="pagination my-3 text-center">
+          <div className="pagination-container">
             <button
-            className="details mx-2"
+              className="details"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
-              Previous
+              ← Previous
             </button>
             <span>
-              {" "}
-              Page {currentPage} / {totalPages}{" "}
+              Page {currentPage} / {totalPages}
             </span>
             <button
-            className="details mx-2"
+              className="details"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
-              Next
+              Next →
             </button>
           </div>
-          </div>
+        </div>
       )}
     </Container>
   );

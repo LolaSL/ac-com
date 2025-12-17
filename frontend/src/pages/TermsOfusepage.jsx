@@ -1,7 +1,7 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 
-const TermsOfUsePage = () => {
+const TermsOfusePage = () => {
   return (
     <Container className="my-5">
       <h2 className="mb-4">Terms of Use / Terms & Conditions</h2>
@@ -109,6 +109,52 @@ const TermsOfUsePage = () => {
         discretion.
       </p>
 
+      <h4>Service Provider Communications and Platform Monitoring</h4>
+      <p className="fs-5">
+        AC-Com Home Supply operates as a platform connecting customers with
+        service providers for HVAC installations, maintenance, and related
+        services. To ensure service quality, resolve disputes, provide customer
+        support, and maintain platform integrity, AC-Com Home Supply reserves
+        the right to access, monitor, review, and moderate communications
+        between customers and service providers. This includes but is not
+        limited to messages, quotes, service requests, and project-related
+        correspondence transmitted through the platform.
+      </p>
+      <p className="fs-5">
+        By using our service provider messaging system, both customers and
+        service providers acknowledge and consent that:
+      </p>
+      <ul className="fs-5">
+        <li>
+          Platform administrators may access and review message content for
+          quality assurance, dispute resolution, fraud prevention, and
+          compliance purposes.
+        </li>
+        <li>
+          AC-Com Home Supply may intervene in communications to ensure
+          compliance with our terms, applicable laws, and professional
+          standards.
+        </li>
+        <li>
+          All administrative actions including message moderation or deletion
+          are logged for audit and accountability purposes.
+        </li>
+        <li>
+          Communications should remain professional, respectful, and relevant to
+          service transactions.
+        </li>
+        <li>
+          Sensitive personal information (such as financial details) should not
+          be shared through the messaging system.
+        </li>
+      </ul>
+      <p className="fs-5">
+        This monitoring is conducted in good faith to maintain a safe,
+        professional, and trustworthy marketplace for all users. AC-Com Home
+        Supply will not disclose message content to third parties except as
+        required by law or with user consent.
+      </p>
+
       <h4>Indemnification</h4>
       <p className="fs-5">
         By using this website or placing an order, you agree to indemnify AC-Com
@@ -154,4 +200,4 @@ const TermsOfUsePage = () => {
   );
 };
 
-export default TermsOfUsePage;
+export default TermsOfusePage;

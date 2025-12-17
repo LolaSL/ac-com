@@ -1,4 +1,10 @@
-import  { useContext, useEffect, useReducer, useCallback, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useReducer,
+  useCallback,
+  useState,
+} from "react";
 import Chart from "react-google-charts";
 import axios from "axios";
 import { Store } from "../Store.js";
@@ -12,8 +18,6 @@ import Button from "react-bootstrap/Button";
 const initialState = {
   loading: true,
   summary: {},
-  totalPages: 1,
-  currentPage: 1,
   error: "",
 };
 
@@ -25,8 +29,6 @@ const reducer = (state, action) => {
       return {
         ...state,
         summary: action.payload,
-        currentPage: action.payload.currentPage || 1,
-        totalPages: action.payload.totalPages || 1,
         loading: false,
       };
     case "FETCH_FAIL":
@@ -37,13 +39,15 @@ const reducer = (state, action) => {
 };
 
 export default function UsersProductSales() {
-  const [{ loading, summary,  error }, dispatch] =
-    useReducer(reducer, initialState);
+  const [{ loading, summary, error }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
   const { state } = useContext(Store);
 
- const { userInfo, adminInfo } = state;
-  const token = userInfo?.token || adminInfo?.token;
+  const { adminInfo } = state;
+  const token = adminInfo?.token;
 
   const [chartPage, setChartPage] = useState(0);
 
@@ -66,7 +70,6 @@ export default function UsersProductSales() {
     fetchData();
   }, [fetchData]);
 
-
   const renderCard = (title, value) => (
     <Card className="mb-3 chart-card me-2">
       <Card.Body>
@@ -76,23 +79,30 @@ export default function UsersProductSales() {
     </Card>
   );
 
-  const renderChart = (title, data, chartType, options = {}) => (
-    <div className="chart-col my-4">
-      <h3 className="text-center">{title}</h3>
-      {data.length === 0 ? (
-        <MessageBox>No Data Available</MessageBox>
-      ) : (
-        <Chart
-          width="100%"
-          height="400px"
-          chartType={chartType}
-          loader={<div>Loading Chart...</div>}
-          data={data}
-          options={options}
-        />
-      )}
-    </div>
-  );
+  const renderChart = (title, data, chartType, options = {}) => {
+    const hasData = data && data.length > 1;
+    return (
+      <div className="chart-col my-4">
+        <h3 className="text-center">{title}</h3>
+        {!hasData ? (
+          <MessageBox>No Data Available</MessageBox>
+        ) : (
+          <Chart
+            width="100%"
+            height="400px"
+            chartType={chartType}
+            loader={<div>Loading Chart...</div>}
+            data={data}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              ...options,
+            }}
+          />
+        )}
+      </div>
+    );
+  };
 
   const chartGroups = [
     [
@@ -100,7 +110,8 @@ export default function UsersProductSales() {
         "Sales Orders",
         [
           ["Date", "Sales"],
-          ...(summary.dailyOrders?.map((x) => [new Date(x._id), x.sales]) || []),
+          ...(summary.dailyOrders?.map((x) => [new Date(x._id), x.sales]) ||
+            []),
         ],
         "AreaChart"
       ),
@@ -118,7 +129,10 @@ export default function UsersProductSales() {
         "Product Discount",
         [
           ["Category", "Discount"],
-          ...(summary.productDiscount?.map((x) => [x._id || "Unknown", x.discount || 0]) || []),
+          ...(summary.productDiscount?.map((x) => [
+            x._id || "Unknown",
+            x.discount || 0,
+          ]) || []),
         ],
         "PieChart"
       ),
@@ -126,7 +140,10 @@ export default function UsersProductSales() {
         "Top Orders by Sales",
         [
           ["Order", "Sales"],
-          ...(summary.dailyOrders?.map((x) => [`Paid Orders (${x._id})`, x.sales]) || []),
+          ...(summary.dailyOrders?.map((x) => [
+            `Paid Orders (${x._id})`,
+            x.sales,
+          ]) || []),
         ],
         "BarChart",
         {
@@ -149,7 +166,8 @@ export default function UsersProductSales() {
           ],
           [
             "Not Paid",
-            summary.dailyOrders?.reduce((sum, x) => sum + x.notPaidOrders, 0) || 0,
+            summary.dailyOrders?.reduce((sum, x) => sum + x.notPaidOrders, 0) ||
+              0,
           ],
         ],
         "PieChart"
@@ -158,10 +176,20 @@ export default function UsersProductSales() {
         "Product Status Distribution",
         [
           ["Status", "Number of Orders"],
-          ...(summary.dailyOrders?.flatMap((x) => [
-            ["Delivered", x.deliveredOrders],
-            ["Not Delivered", x.notDeliveredOrders],
-          ]) || []),
+          [
+            "Delivered",
+            summary.dailyOrders?.reduce(
+              (sum, x) => sum + (x.deliveredOrders || 0),
+              0
+            ) || 0,
+          ],
+          [
+            "Not Delivered",
+            summary.dailyOrders?.reduce(
+              (sum, x) => sum + (x.notDeliveredOrders || 0),
+              0
+            ) || 0,
+          ],
         ],
         "PieChart"
       ),
@@ -170,39 +198,66 @@ export default function UsersProductSales() {
 
   return (
     <div>
-      <h1 className="mb-4 mt-4">Users Product Sales Dashboard</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div>
+          <h1 className="mb-0">Admin Sales Dashboard</h1>
+          <p className="text-muted mb-0">
+            Monitor platform performance and analytics
+          </p>
+        </div>
+        <Button
+          className="details"
+          onClick={() => fetchData()}
+          disabled={loading}
+        >
+          {loading ? "Refreshing..." : "Refresh Data"}
+        </Button>
+      </div>
 
       {loading ? (
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
+      ) : !adminInfo ? (
+        <MessageBox variant="warning">
+          Admin access required to view this dashboard.
+        </MessageBox>
       ) : (
         <>
-          <h3 className="mb-4 mt-4">Users</h3>
+          <h3 className="mb-4 mt-4">Overview</h3>
           <Row>
             {renderCard("Users", summary?.users?.[0]?.numUsers)}
             {renderCard("Orders", summary?.orders?.[0]?.numOrders)}
-            {renderCard("Sales", summary?.orders?.[0]?.totalSales?.toFixed(2))}
+            {renderCard(
+              "Sales",
+              summary?.orders?.[0]?.totalSales
+                ? `$${summary.orders[0].totalSales.toFixed(2)}`
+                : "$0.00"
+            )}
           </Row>
 
           <div className="charts-row">{chartGroups[chartPage]}</div>
-          <div className="text-center my-3">
+          <div className="d-flex justify-content-center align-items-center my-4 gap-3">
             <Button
-              className=" details mx-2"
+              className="details"
               onClick={() => setChartPage((prev) => Math.max(prev - 1, 0))}
               disabled={chartPage === 0}
             >
-              Previous 
+              ← Previous
             </Button>
-            <span>
-              Chart Page {chartPage + 1} of {chartGroups.length}
+            <span className="fw-bold">
+              Page {chartPage + 1} of {chartGroups.length}
             </span>
             <Button
-              className="details mx-2"
-              onClick={() => setChartPage((prev) => Math.min(prev + 1, chartGroups.length - 1))}
+              className="details"
+              onClick={() =>
+                setChartPage((prev) =>
+                  Math.min(prev + 1, chartGroups.length - 1)
+                )
+              }
               disabled={chartPage === chartGroups.length - 1}
             >
-              Next 
+              Next →
             </Button>
           </div>
         </>

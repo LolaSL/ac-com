@@ -67,8 +67,8 @@ const SellersListPage = () => {
   const sp = new URLSearchParams(search);
   const currentPage = sp.get("page") || 1;
   const { state } = useContext(Store);
-const { userInfo, adminInfo } = state;
-const token = userInfo?.token || adminInfo?.token;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,39 +90,33 @@ const token = userInfo?.token || adminInfo?.token;
     }
   }, [currentPage, userInfo, successDelete, token]);
 
-const createHandler = async () => {
-  if (window.confirm("Are you sure to create a new seller?")) {
-    try {
-      dispatch({ type: "CREATE_REQUEST" });
+  const createHandler = async () => {
+    if (window.confirm("Are you sure to create a new seller?")) {
+      try {
+        dispatch({ type: "CREATE_REQUEST" });
 
-      const newSeller = {
-        name: "Test Seller",
-        brand: "Test Brand",
-        info: "Test info",
-        link: "https://test-link.com", 
-        companyLink: "https://test-company.com",
-        logo: "/images/default-logo.png",
-      };
+        const newSeller = {
+          name: "Test Seller",
+          brand: "Test Brand",
+          info: "Test info",
+          link: "https://test-link.com",
+          companyLink: "https://test-company.com",
+          logo: "/images/default-logo.png",
+        };
 
-      const { data } = await axios.post(
-        "/api/sellers",
-        newSeller,
-        {
+        const { data } = await axios.post("/api/sellers", newSeller, {
           headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        });
 
-      toast.success("Seller created successfully");
-      dispatch({ type: "CREATE_SUCCESS" });
-      navigate(`/admin/sellers/${data.seller._id}`);
-    } catch (err) {
-      toast.error(getError(err));
-      dispatch({ type: "CREATE_FAIL" });
+        toast.success("Seller created successfully");
+        dispatch({ type: "CREATE_SUCCESS" });
+        navigate(`/admin/sellers/${data.seller._id}`);
+      } catch (err) {
+        toast.error(getError(err));
+        dispatch({ type: "CREATE_FAIL" });
+      }
     }
-  }
-};
-
-
+  };
 
   const deleteHandler = async (seller) => {
     if (window.confirm("Are you sure to delete?")) {
@@ -227,9 +221,7 @@ const createHandler = async () => {
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/serviceProviders?page=${
-                      Number(currentPage) - 1
-                    }`}
+                    to={`/admin/sellers?page=${Number(currentPage) - 1}`}
                   >
                     &lt;
                   </Link>
@@ -243,7 +235,7 @@ const createHandler = async () => {
                   >
                     <Link
                       className="page-link"
-                      to={`/admin/serviceProviders?page=${x + 1}`}
+                      to={`/admin/sellers?page=${x + 1}`}
                     >
                       {x + 1}
                     </Link>
@@ -256,9 +248,7 @@ const createHandler = async () => {
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/serviceProviders?page=${
-                      Number(currentPage) + 1
-                    }`}
+                    to={`/admin/sellers?page=${Number(currentPage) + 1}`}
                   >
                     &gt;
                   </Link>
