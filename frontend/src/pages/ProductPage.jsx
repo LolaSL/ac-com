@@ -1,5 +1,13 @@
 import axios from "axios";
-import { useContext, useEffect, useReducer, useRef, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -18,6 +26,8 @@ import { toast } from "react-toastify";
 import Image from "react-bootstrap/Image";
 import { FaFilePdf } from "react-icons/fa";
 import { FaFileImage } from "react-icons/fa";
+import Modal from "react-bootstrap/Modal";
+import Spinner from "react-bootstrap/Spinner";
 import {
   BsSnow,
   BsDroplet,
@@ -26,6 +36,7 @@ import {
   BsBrush,
   BsMicMute,
   BsMoonStars,
+  BsZoomIn,
 } from "react-icons/bs";
 const reducer = (state, action) => {
   switch (action.type) {
@@ -64,6 +75,11 @@ function ProductPage() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [inWishlist, setInWishlist] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
 
   const navigate = useNavigate();
   const params = useParams();
@@ -71,7 +87,28 @@ function ProductPage() {
 
   const [{ loading, error, product, loadingCreateReview }, dispatch] =
     useReducer(reducer, {
-      product: { images: [], reviews: [] },
+      product: {
+        images: [],
+        reviews: [],
+        price: 0,
+        discount: 0,
+        name: "",
+        slug: "",
+        image: "",
+        brand: "",
+        model: "",
+        countInStock: 0,
+        rating: 0,
+        numReviews: 0,
+        description: "",
+        btu: 0,
+        areaCoverage: 0,
+        energyEfficiency: 0,
+        features: [],
+        mode: [],
+        documents: [],
+        dimension: { width: 0, height: 0, depth: 0 },
+      },
       loading: true,
       error: "",
     });
@@ -89,8 +126,44 @@ function ProductPage() {
     fetchData();
   }, [slug]);
 
+  // Handle screen resize for responsive modal
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo } = state;
+
+  // Check if product is in wishlist
+  useEffect(() => {
+    let isMounted = true;
+    const checkWishlist = async () => {
+      if (userInfo && product._id) {
+        try {
+          const { data } = await axios.get(
+            `/api/wishlist/check/${product._id}`,
+            {
+              headers: { Authorization: `Bearer ${userInfo.token}` },
+            }
+          );
+          if (isMounted) {
+            setInWishlist(data.inWishlist);
+          }
+        } catch (error) {
+          console.error("Error checking wishlist:", error);
+        }
+      }
+    };
+    checkWishlist();
+    return () => {
+      isMounted = false;
+    };
+  }, [product._id, userInfo]);
 
   // Track product view for logged-in users
   useEffect(() => {
@@ -113,31 +186,91 @@ function ProductPage() {
     recordView();
   }, [product._id, userInfo]);
 
-  const addToCartHandler = async () => {
-    const existItem = cart.cartItems.find((x) => x._id === product._id);
-    const quantity = existItem ? existItem.quantity + 1 : 1;
-    const { data } = await axios.get(`/api/products/${product._id}`);
-    if (data.countInStock < quantity) {
-      window.alert("Sorry. Product is out of stock");
+  const addToCartHandler = useCallback(async () => {
+    if (addingToCart || !product._id) return;
+
+    try {
+      setAddingToCart(true);
+      const existItem = cart.cartItems.find((x) => x._id === product._id);
+      const quantity = existItem ? existItem.quantity + 1 : 1;
+
+      const { data } = await axios.get(`/api/products/${product._id}`);
+
+      if (!data.countInStock || data.countInStock < quantity) {
+        toast.error("Sorry. Product is out of stock");
+        return;
+      }
+
+      ctxDispatch({
+        type: "CART_ADD_ITEM",
+        payload: { ...product, quantity },
+      });
+
+      toast.success(`${product.name || "Product"} added to cart!`);
+      navigate("/cart");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to add to cart");
+    } finally {
+      setAddingToCart(false);
+    }
+  }, [addingToCart, cart.cartItems, product, ctxDispatch, navigate]);
+
+  const toggleWishlistHandler = useCallback(async () => {
+    if (!userInfo) {
+      toast.info("Please sign in to save products to your wishlist");
+      navigate(`/signin?redirect=/product/${product.slug || ""}`);
       return;
     }
-    ctxDispatch({
-      type: "CART_ADD_ITEM",
-      payload: { ...product, quantity },
-    });
-    navigate("/cart");
-  };
+
+    if (!product._id) return;
+
+    try {
+      if (inWishlist) {
+        await axios.delete(`/api/wishlist/${product._id}`, {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        });
+        setInWishlist(false);
+        toast.success("Removed from wishlist");
+      } else {
+        await axios.post(
+          "/api/wishlist",
+          { productId: product._id },
+          {
+            headers: { Authorization: `Bearer ${userInfo.token}` },
+          }
+        );
+        setInWishlist(true);
+        toast.success("Added to wishlist");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update wishlist");
+    }
+  }, [userInfo, inWishlist, product, navigate]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    if (!comment || !rating) {
-      toast.error("Please enter comment and rating");
+
+    if (!rating) {
+      toast.error("Please select a rating");
       return;
     }
+
+    if (!comment || comment.trim().length < 10) {
+      toast.error("Please enter a comment with at least 10 characters");
+      return;
+    }
+
+    if (comment.trim().length > 500) {
+      toast.error("Comment must be less than 500 characters");
+      return;
+    }
+
     try {
+      dispatch({ type: "CREATE_REQUEST" });
+
       const { data } = await axios.post(
         `/api/products/${product._id}/reviews`,
-        { rating, comment, name: userInfo.name },
+        { rating, comment: comment.trim(), name: userInfo.name },
         {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         }
@@ -146,11 +279,18 @@ function ProductPage() {
       dispatch({
         type: "CREATE_SUCCESS",
       });
+
       toast.success("Review submitted successfully");
+
       product.reviews.unshift(data.review);
       product.numReviews = data.numReviews;
       product.rating = data.rating;
       dispatch({ type: "REFRESH_PRODUCT", payload: product });
+
+      // Reset form
+      setRating(0);
+      setComment("");
+
       window.scrollTo({
         behavior: "smooth",
         top: reviewsRef.current.offsetTop,
@@ -161,27 +301,93 @@ function ProductPage() {
     }
   };
 
+  const discountedPrice = useMemo(() => {
+    if (!product.price) return "0.00";
+    if (product.discount > 0) {
+      return (product.price * (1 - product.discount / 100)).toFixed(2);
+    }
+    return product.price.toFixed(2);
+  }, [product.price, product.discount]);
+
+  const allImages = useMemo(() => {
+    if (!product.image) return [];
+    return [product.image, ...(product.images || [])];
+  }, [product.image, product.images]);
+
   return loading ? (
     <LoadingBox />
   ) : error ? (
     <MessageBox variant="danger">{error}</MessageBox>
   ) : (
-    <div className="p-4">
-      <Row>
+    <div className="p-4 product-page-container">
+      <Row className="g-4">
         <Col md={6}>
           <ListGroup.Item>
             <h1 className="product-title">
               <strong>{product.name}</strong>
             </h1>
           </ListGroup.Item>
-          <Image
-            className="responsive"
-            src={selectedImage || product.image}
-            alt={product.name}
-          ></Image>
+
+          <div style={{ position: "relative" }}>
+            {imageLoading && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 1,
+                }}
+              >
+                <Spinner animation="border" variant="primary" />
+              </div>
+            )}
+            <Image
+              className="responsive product-main-image"
+              src={selectedImage || product.image}
+              alt={product.name}
+              onLoad={() => setImageLoading(false)}
+              onError={() => setImageLoading(false)}
+              onClick={(e) => {
+                if (isSmallScreen) {
+                  e.preventDefault();
+                  setShowImageModal(true);
+                }
+              }}
+              style={{
+                opacity: imageLoading ? 0 : 1,
+                transition: "opacity 0.3s",
+                cursor: isSmallScreen ? "pointer" : "default",
+              }}
+            />
+            {isSmallScreen && (
+              <div
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowImageModal(true);
+                }}
+                style={{
+                  position: "absolute",
+                  bottom: "10px",
+                  right: "10px",
+                  background: "rgba(0,0,0,0.6)",
+                  color: "white",
+                  padding: "8px 12px",
+                  borderRadius: "5px",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                }}
+              >
+                <BsZoomIn /> Click to zoom
+              </div>
+            )}
+          </div>
         </Col>
         <Col md={3}>
-          <ListGroup variant="flush">
+          <ListGroup variant="flush" className="product-details-section">
             <ListGroup.Item>
               <Rating
                 rating={product.rating}
@@ -202,35 +408,56 @@ function ProductPage() {
                       >
                         ${product.price.toFixed(2)}
                       </span>
-                      <span className="ms-2">
-                        $
-                        {(product.price * (1 - product.discount / 100)).toFixed(
-                          2
-                        )}
+                      <span
+                        className="ms-2 fw-bold text-success"
+                        style={{ fontSize: "1.3rem" }}
+                      >
+                        ${discountedPrice}
                       </span>
-                      <span className="ms-2 text-success">
-                        On Sale! Save {product.discount}%
-                      </span>
+                      <Badge bg="danger" className="ms-2">
+                        Save {product.discount}%
+                      </Badge>
                     </>
                   ) : (
-                    <span>${product.price.toFixed(2)}</span>
+                    <span className="fw-bold" style={{ fontSize: "1.2rem" }}>
+                      ${(product.price || 0).toFixed(2)}
+                    </span>
                   )}
                 </Col>
               </Row>
             </ListGroup.Item>
 
-            <ListGroup.Item>
+            <ListGroup.Item className="product-image-gallery">
               <Row xs={1} md={2} className="g-2">
-                {[product.image, ...(product.images || [])].map((x) => (
+                {allImages.map((x, idx) => (
                   <Col key={x}>
-                    <Card>
+                    <Card
+                      className={selectedImage === x ? "border-primary" : ""}
+                      style={{
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        boxShadow:
+                          selectedImage === x
+                            ? "0 0 10px rgba(13,110,253,0.5)"
+                            : "none",
+                      }}
+                    >
                       <Button
-                        className="thumbnail"
+                        className="thumbnail p-0"
                         type="button"
                         variant="light"
-                        onClick={() => setSelectedImage(x)}
+                        onClick={() => {
+                          setSelectedImage(x);
+                          setImageLoading(true);
+                        }}
+                        style={{ border: "none" }}
                       >
-                        <Card.Img variant="top" src={x} alt="product" />
+                        <Card.Img
+                          variant="top"
+                          src={x}
+                          alt={`product view ${idx + 1}`}
+                          loading="lazy"
+                        />
                       </Button>
                     </Card>
                   </Col>
@@ -288,7 +515,7 @@ function ProductPage() {
           </ListGroup>
         </Col>
         <Col md={3}>
-          <Card>
+          <Card className="product-info-card">
             <Card.Body>
               <ListGroup variant="flush">
                 <ListGroup.Item>
@@ -310,7 +537,14 @@ function ProductPage() {
                     <Col>Status:</Col>
                     <Col>
                       {product.countInStock > 0 ? (
-                        <Badge bg="success">In Stock</Badge>
+                        <>
+                          <Badge bg="success">In Stock</Badge>
+                          {product.countInStock <= 5 && (
+                            <div className="text-warning small mt-1">
+                              Only {product.countInStock} left!
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <Badge bg="danger">Unavailable</Badge>
                       )}
@@ -319,17 +553,58 @@ function ProductPage() {
                 </ListGroup.Item>
 
                 {product.countInStock > 0 && (
-                  <ListGroup.Item>
-                    <div className="d-grid">
-                      <Button
-                        onClick={addToCartHandler}
-                        variant="light"
-                        className="go-to-btn btn-text"
-                      >
-                        Add to Cart
-                      </Button>
-                    </div>
-                  </ListGroup.Item>
+                  <>
+                    <ListGroup.Item>
+                      <div className="d-grid">
+                        <Button
+                          onClick={addToCartHandler}
+                          variant="primary"
+                          className="go-to-btn btn-text"
+                          disabled={addingToCart}
+                        >
+                          {addingToCart ? (
+                            <>
+                              <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                className="me-2"
+                              />
+                              Adding...
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-shopping-cart me-2"></i>
+                              Add to Cart
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </ListGroup.Item>
+
+                    <ListGroup.Item>
+                      <div className="d-grid">
+                        <Button
+                          onClick={toggleWishlistHandler}
+                          variant={inWishlist ? "danger" : "outline-danger"}
+                          className="go-to-btn btn-text"
+                        >
+                          <i
+                            className={
+                              inWishlist
+                                ? "fas fa-heart me-2"
+                                : "far fa-heart me-2"
+                            }
+                          ></i>
+                          {inWishlist
+                            ? "Remove from Wishlist"
+                            : "Add to Wishlist"}
+                        </Button>
+                      </div>
+                    </ListGroup.Item>
+                  </>
                 )}
               </ListGroup>
             </Card.Body>
@@ -405,7 +680,7 @@ function ProductPage() {
               </Form.Group>
               <FloatingLabel
                 controlId="floatingTextarea"
-                label="Comments"
+                label="Comments (minimum 10 characters)"
                 className="mb-3"
               >
                 <Form.Control
@@ -413,7 +688,13 @@ function ProductPage() {
                   placeholder="Leave a comment here"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
+                  rows={4}
+                  maxLength={500}
+                  style={{ minHeight: "100px" }}
                 />
+                <Form.Text className="text-muted">
+                  {comment.length}/500 characters
+                </Form.Text>
               </FloatingLabel>
 
               <div className="mb-2">
@@ -422,9 +703,22 @@ function ProductPage() {
                   disabled={loadingCreateReview}
                   type="submit"
                 >
-                  Submit
+                  {loadingCreateReview ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Review"
+                  )}
                 </Button>
-                {loadingCreateReview && <LoadingBox />}
               </div>
             </form>
           ) : (
@@ -438,6 +732,34 @@ function ProductPage() {
           )}
         </div>
       </div>
+
+      {/* Image Zoom Modal */}
+      <Modal
+        show={showImageModal}
+        onHide={() => {
+          console.log("Closing modal");
+          setShowImageModal(false);
+        }}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{product.name || "Product Image"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          <Image
+            src={selectedImage || product.image}
+            alt={product.name}
+            fluid
+            style={{ maxHeight: "70vh", objectFit: "contain" }}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowImageModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

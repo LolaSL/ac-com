@@ -6,9 +6,33 @@ import mongoose from 'mongoose';
 
 const productRouter = express.Router();
 
+// Cache for frequently accessed data
+const cache = {
+  categories: { data: null, timestamp: null },
+  brands: { data: null, timestamp: null },
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Helper to check cache validity
+const isCacheValid = (cacheEntry) => {
+  return cacheEntry.data && cacheEntry.timestamp &&
+    (Date.now() - cacheEntry.timestamp < CACHE_DURATION);
+};
+
+// Helper to invalidate cache
+const invalidateCache = () => {
+  cache.categories = { data: null, timestamp: null };
+  cache.brands = { data: null, timestamp: null };
+};
+
 productRouter.get('/', async (req, res) => {
-  const products = await Product.find();
-  res.send(products);
+  try {
+    const products = await Product.find().select('-reviews').lean();
+    res.send(products);
+  } catch (error) {
+    res.status(500).send({ message: 'Error fetching products', error: error.message });
+  }
 });
 
 productRouter.post(
@@ -66,6 +90,10 @@ productRouter.post(
       },
     });
     const product = await newProduct.save();
+
+    // Invalidate cache after creating product
+    invalidateCache();
+
     res.send({ message: 'Product Created', product });
   })
 );
@@ -76,6 +104,35 @@ productRouter.put(
   isAdmin,
   expressAsyncHandler(async (req, res) => {
     const productId = req.params.id;
+
+    // Validate product ID
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).send({ message: 'Invalid product ID' });
+    }
+
+    // Validate required fields
+    const { name, model, slug, price, countInStock, btu } = req.body;
+
+    if (!name || name.trim().length === 0) {
+      return res.status(400).send({ message: 'Product name is required' });
+    }
+
+    if (!model || model.trim().length === 0) {
+      return res.status(400).send({ message: 'Product model is required' });
+    }
+
+    if (!slug || slug.trim().length === 0) {
+      return res.status(400).send({ message: 'Product slug is required' });
+    }
+
+    if (price === undefined || price < 0) {
+      return res.status(400).send({ message: 'Valid price is required' });
+    }
+
+    if (countInStock === undefined || countInStock < 0) {
+      return res.status(400).send({ message: 'Valid stock count is required' });
+    }
+
     const features = Array.isArray(req.body.features)
       ? req.body.features
       : req.body.features.split(',').map((feature) => feature.trim());
@@ -88,28 +145,35 @@ productRouter.put(
 
     const product = await Product.findById(productId);
     if (product) {
-      product.name = req.body.name;
-      product.model = req.body.model;
-      product.slug = req.body.slug;
-      product.price = req.body.price;
+      product.name = req.body.name.trim();
+      product.model = req.body.model.trim();
+      product.slug = req.body.slug.trim();
+      product.price = Number(req.body.price);
       product.image = req.body.image;
       product.images = req.body.images;
       product.category = req.body.category;
       product.brand = req.body.brand;
-      product.countInStock = req.body.countInStock;
+      product.countInStock = Number(req.body.countInStock);
       product.description = req.body.description;
       product.features = features;
       product.mode = mode;
-      product.btu = req.body.btu;
-      product.areaCoverage = req.body.areaCoverage;
-      product.energyEfficiency = req.body.energyEfficiency;
+      product.btu = Number(req.body.btu) || 0;
+      product.areaCoverage = Number(req.body.areaCoverage) || 0;
+      product.energyEfficiency = Number(req.body.energyEfficiency) || 0;
       product.documents = documents;
+      product.discount = req.body.discount !== undefined
+        ? Math.min(Math.max(Number(req.body.discount), 0), 100)
+        : 0;
       product.dimension = req.body.dimension || {
         width: 0,
         height: 0,
         depth: 0,
       };
       await product.save();
+
+      // Invalidate cache after updating product
+      invalidateCache();
+
       res.send({ message: 'Product Updated', product });
     } else {
       res.status(404).send({ message: 'Product Not Found' });
@@ -126,6 +190,10 @@ productRouter.delete(
     const product = await Product.findById(req.params.id);
     if (product) {
       await product.deleteOne();
+
+      // Invalidate cache after deleting product
+      invalidateCache();
+
       res.send({ message: 'Product Deleted' });
     } else {
       res.status(404).send({ message: 'Product Not Found' });
@@ -139,36 +207,62 @@ productRouter.post(
   isAuth,
   expressAsyncHandler(async (req, res) => {
     const productId = req.params.id;
-    const product = await Product.findById(productId);
-    if (product) {
-      if (product.reviews.find((x) => ((x.user?.toString() === req.user._id.toString()) || x.name === req.user.name) && !x.deleted)) {
-        return res
-          .status(400)
-          .send({ message: 'You already submitted a review' });
-      }
 
-      const review = {
-        name: req.user.name,
-        rating: Number(req.body.rating),
-        comment: req.body.comment,
-        user: req.user._id,
-      };
-      product.reviews.push(review);
-      const activeReviews = product.reviews.filter((r) => !r.deleted);
-      product.numReviews = activeReviews.length;
-      product.rating =
-        activeReviews.reduce((a, c) => c.rating + a, 0) /
-        (activeReviews.length || 1);
-      const updatedProduct = await product.save();
-      res.status(201).send({
-        message: 'Review Created',
-        review: updatedProduct.reviews[updatedProduct.reviews.length - 1],
-        numReviews: product.numReviews,
-        rating: product.rating,
-      });
-    } else {
-      res.status(404).send({ message: 'Product Not Found' });
+    // Validate product ID
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).send({ message: 'Invalid product ID' });
     }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).send({ message: 'Product Not Found' });
+    }
+
+    // Validate review data
+    const { rating, comment } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).send({ message: 'Rating must be between 1 and 5' });
+    }
+
+    if (!comment || comment.trim().length < 10) {
+      return res.status(400).send({ message: 'Comment must be at least 10 characters' });
+    }
+
+    if (comment.trim().length > 500) {
+      return res.status(400).send({ message: 'Comment must be less than 500 characters' });
+    }
+
+    // Check for duplicate review
+    if (product.reviews.find((x) => ((x.user?.toString() === req.user._id.toString()) || x.name === req.user.name) && !x.deleted)) {
+      return res
+        .status(400)
+        .send({ message: 'You already submitted a review' });
+    }
+
+    const review = {
+      name: req.user.name,
+      rating: Number(rating),
+      comment: comment.trim(),
+      user: req.user._id,
+    };
+
+    product.reviews.push(review);
+    const activeReviews = product.reviews.filter((r) => !r.deleted);
+    product.numReviews = activeReviews.length;
+    product.rating =
+      activeReviews.reduce((a, c) => c.rating + a, 0) /
+      (activeReviews.length || 1);
+
+    const updatedProduct = await product.save();
+
+    res.status(201).send({
+      message: 'Review Created',
+      review: updatedProduct.reviews[updatedProduct.reviews.length - 1],
+      numReviews: product.numReviews,
+      rating: product.rating,
+    });
   })
 );
 
@@ -209,21 +303,64 @@ productRouter.get(
     const rating = query.rating || '';
     const order = query.order || '';
     const brand = query.brand || '';
-    const searchQuery = query.query || '';
+    const searchQuery = (query.query || '').trim();
+
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const isNumericQuery = searchQuery && /^\d+(?:\.\d+)?$/.test(searchQuery);
+    const regexForQuery =
+      searchQuery && searchQuery !== 'all'
+        ? new RegExp(
+          isNumericQuery
+            ? `\\b${escapeRegex(searchQuery)}\\b`
+            : escapeRegex(searchQuery),
+          'i'
+        )
+        : null;
 
     const queryFilter =
       searchQuery && searchQuery !== 'all'
         ? {
-          name: {
-            $regex: searchQuery,
-            $options: 'i',
-          },
+          $or: [
+            regexForQuery
+              ? {
+                name: {
+                  $regex: regexForQuery,
+                },
+              }
+              : null,
+            regexForQuery
+              ? {
+                brand: {
+                  $regex: regexForQuery,
+                },
+              }
+              : null,
+            regexForQuery
+              ? {
+                model: {
+                  $regex: regexForQuery,
+                },
+              }
+              : null,
+            isNumericQuery
+              ? {
+                btu: Number(searchQuery),
+              }
+              : null,
+          ].filter(Boolean),
         }
         : {};
 
     const btuFilter = btu && btu !== 'all' ? { btu: { $gte: Number(btu) } } : {};
     const categoryFilter = category && category !== 'all' ? { category } : {};
-    const brandFilter = brand && brand !== 'all' ? { brand } : {};
+    const brandFilter =
+      brand && brand !== 'all'
+        ? {
+          brand: {
+            $regex: new RegExp(`^${brand.trim()}$`, 'i'),
+          },
+        }
+        : {};
     const ratingFilter =
       rating && rating !== 'all'
         ? {
@@ -305,28 +442,54 @@ productRouter.get(
 productRouter.get(
   '/categories',
   expressAsyncHandler(async (req, res) => {
+    // Check cache first
+    if (isCacheValid(cache.categories)) {
+      return res.send(cache.categories.data);
+    }
+
     const categories = await Product.find().distinct('category');
+
+    // Update cache
+    cache.categories = {
+      data: categories,
+      timestamp: Date.now(),
+    };
+
     res.send(categories);
   })
 );
 
 productRouter.get('/brands', async (req, res) => {
   try {
+    // Check cache first
+    if (isCacheValid(cache.brands)) {
+      return res.json(cache.brands.data);
+    }
 
     const brands = await Product.distinct('brand');
+
+    // Update cache
+    cache.brands = {
+      data: brands,
+      timestamp: Date.now(),
+    };
+
     res.json(brands);
   } catch (err) {
-
     res.status(500).json({ message: 'Error fetching brands', error: err.message });
   }
 });
 
 productRouter.get('/slug/:slug', async (req, res) => {
-  const product = await Product.findOne({ slug: req.params.slug });
-  if (product) {
-    res.send(product);
-  } else {
-    res.status(404).send({ message: 'Product Not Found' });
+  try {
+    const product = await Product.findOne({ slug: req.params.slug }).lean();
+    if (product) {
+      res.send(product);
+    } else {
+      res.status(404).send({ message: 'Product Not Found' });
+    }
+  } catch (error) {
+    res.status(500).send({ message: 'Error fetching product', error: error.message });
   }
 });
 
@@ -338,7 +501,7 @@ productRouter.get("/:id", async (req, res) => {
   }
 
   try {
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).lean();
 
     if (product) {
       res.json(product);

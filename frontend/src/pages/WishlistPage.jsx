@@ -103,17 +103,16 @@ export default function WishlistPage() {
           Your wishlist is empty. <Link to="/search">Continue Shopping</Link>
         </MessageBox>
       ) : (
-        <Row>
+        <Row className="g-3 mx-0">
           {wishlistItems.map((item) => (
-            <Col key={item._id} sm={6} md={4} lg={3} className="mb-4">
+            <Col key={item._id} xs={12} sm={6} md={4} lg={3} className="p-2">
               <Card className="h-100">
                 <div style={{ position: "relative" }}>
                   <Link to={`/product/${item.product.slug}`}>
                     <Image
                       src={item.product.image}
                       alt={item.product.name}
-                      className="card-img-top"
-                      style={{ height: "200px", objectFit: "cover" }}
+                      className="card-img-top wishlist-card-img"
                     />
                   </Link>
                   <button

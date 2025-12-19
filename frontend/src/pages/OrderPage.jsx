@@ -22,31 +22,96 @@ function printOrder() {
 
   const clone = orderContainer.cloneNode(true);
 
-  clone.querySelectorAll("button").forEach((btn) => btn.remove());
-  clone.querySelectorAll(".cart-thumbnail").forEach((img) => img.remove());
+  // Remove elements that shouldn't be printed
+  clone
+    .querySelectorAll("button, a, .badge, .no-print")
+    .forEach((el) => el.remove());
 
-  const html = clone.outerHTML;
+  // Get order ID from the heading
+  // const orderHeading = clone.querySelector("h1");
+  const orderNumber = clone.querySelector(".fw-bold")?.textContent || "";
 
   printJS({
-    printable: html,
+    printable: clone.innerHTML,
     type: "raw-html",
-    header: `
-      <h1 class="order-title">Order Details</h1>
-    `,
     style: `
       @media print {
-        .no-print {
-          display: none !important;
+        * {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        h1.order-title {
-          font-size: 36px !important;
-          font-weight: bold !important;
-          text-align: center !important;
-          margin-bottom: 30px !important;
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+        h1 {
+          font-size: 24px;
+          font-weight: bold;
+          margin-bottom: 20px;
+          border-bottom: 2px solid #333;
+          padding-bottom: 10px;
+        }
+        .card {
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 15px;
+          margin-bottom: 20px;
+          page-break-inside: avoid;
+        }
+        .card-title {
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 15px;
+          color: #333;
+        }
+        .card-text {
+          line-height: 1.6;
+          margin-bottom: 10px;
+        }
+        img {
+          max-width: 80px;
+          height: auto;
+          display: block;
+        }
+        .row {
+          display: flex;
+          margin-bottom: 10px;
+        }
+        .col-md-8 {
+          width: 66%;
+        }
+        .col-md-4 {
+          width: 33%;
+        }
+        .list-group-item {
+          border: 1px solid #eee;
+          padding: 10px;
+          margin-bottom: 5px;
+        }
+        strong {
+          font-weight: bold;
+        }
+        .alert {
+          padding: 10px;
+          margin: 10px 0;
+          border-radius: 4px;
+        }
+        .alert-success {
+          background-color: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        }
+        .alert-warning {
+          background-color: #fff3cd;
+          color: #856404;
+          border: 1px solid #ffeeba;
+        }
+        a {
+          display: none;
         }
       }
     `,
-    documentTitle: "Customer Order",
+    documentTitle: "Order " + orderNumber,
   });
 }
 
@@ -220,17 +285,57 @@ export default function OrderPage() {
   }
 
   if (!token) return null;
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
 
-  return loading ? (
-    <LoadingBox></LoadingBox>
-  ) : error ? (
-    <MessageBox variant="danger">{error}</MessageBox>
-  ) : (
+  if (loading) {
+    return <LoadingBox></LoadingBox>;
+  }
+
+  if (error) {
+    return <MessageBox variant="danger">{error}</MessageBox>;
+  }
+
+  if (!order || !order.shippingAddress) {
+    return <LoadingBox></LoadingBox>;
+  }
+
+  return (
     <div>
       <Container id="order-container">
-        <h1 className="my-3">Order {orderId}</h1>
+        <div className="d-flex justify-space-between align-items-center my-3 fs-1">
+          <h1 className="my-3">Order: #{orderId} </h1>
+          <div>
+            {order.isPaid ? (
+              <span
+                className="badge bg-success me-2 "
+                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
+              >
+                Paid
+              </span>
+            ) : (
+              <span
+                className="badge bg-warning  me-2"
+                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
+              >
+                Unpaid
+              </span>
+            )}
+            {order.isDelivered ? (
+              <span
+                className="badge bg-success"
+                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
+              >
+                Delivered
+              </span>
+            ) : (
+              <span
+                className="badge bg-secondary"
+                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
+              >
+                Pending
+              </span>
+            )}
+          </div>
+        </div>
         <Row>
           <Col md={8}>
             <Card className="mb-3">
@@ -238,27 +343,38 @@ export default function OrderPage() {
                 <Card.Title>Shipping</Card.Title>
                 <Card.Text>
                   <strong>Name:</strong> {order.shippingAddress.fullName} <br />
-                  <strong>Address: </strong> {order.shippingAddress.address},
+                  <strong>Address:</strong> {order.shippingAddress.address},{" "}
                   {order.shippingAddress.city},{" "}
-                  {order.shippingAddress.postalCode},
+                  {order.shippingAddress.postalCode},{" "}
                   {order.shippingAddress.country}
-                  &nbsp;
                   {order.shippingAddress.location &&
                     order.shippingAddress.location.lat && (
-                      <a
-                        target="_new"
-                        href={`https://maps.google.com?q=${order.shippingAddress.location.lat},${order.shippingAddress.location.lng}`}
-                      >
-                        Show On Map
-                      </a>
+                      <>
+                        <br />
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={`https://maps.google.com?q=${order.shippingAddress.location.lat},${order.shippingAddress.location.lng}`}
+                          className="btn btn-sm go-to-btn btn-text mt-2"
+                        >
+                          📍 Show On Map
+                        </a>
+                      </>
                     )}
                 </Card.Text>
                 {order.isDelivered ? (
                   <MessageBox variant="success">
-                    Delivered at {order.deliveredAt}
+                    Delivered on{" "}
+                    {new Date(order.deliveredAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </MessageBox>
                 ) : (
-                  <MessageBox variant="danger">Not Delivered</MessageBox>
+                  <MessageBox variant="warning">Not Delivered Yet</MessageBox>
                 )}
               </Card.Body>
             </Card>
@@ -270,34 +386,49 @@ export default function OrderPage() {
                 </Card.Text>
                 {order.isPaid ? (
                   <MessageBox variant="success">
-                    Paid at {order.paidAt}
+                    Paid on{" "}
+                    {new Date(order.paidAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </MessageBox>
                 ) : (
-                  <MessageBox variant="danger">Not Paid</MessageBox>
+                  <MessageBox variant="warning">Awaiting Payment</MessageBox>
                 )}
               </Card.Body>
             </Card>
 
             <Card className="mb-3">
               <Card.Body>
-                <Card.Title>Items</Card.Title>
+                <Card.Title>Items ({order.orderItems.length})</Card.Title>
                 <ListGroup variant="flush">
                   {order.orderItems.map((item) => (
                     <ListGroup.Item key={item._id}>
                       <Row className="align-items-center">
-                        <Link
-                          to={`/product/${item.slug}`}
-                          className="mb-2 order-link"
-                        >
-                          {item.name}
-                        </Link>
-                        <Col md={3}>
-                          <strong>Quantity:</strong>{" "}
-                          <span>{item.quantity}</span>
+                        <Col md={2}>
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="img-fluid rounded"
+                            style={{ maxHeight: "80px", objectFit: "contain" }}
+                          />
+                        </Col>
+                        <Col md={4}>
+                          <Link
+                            to={`/product/${item.slug}`}
+                            className="order-link"
+                          >
+                            {item.name}
+                          </Link>
                         </Col>
                         <Col md={3}>
-                          <strong>Price:</strong>{" "}
-                          <div>${item.price.toFixed(2)}</div>
+                          <strong>Quantity:</strong> {item.quantity}
+                        </Col>
+                        <Col md={3}>
+                          <strong>Price:</strong> ${item.price.toFixed(2)}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -371,12 +502,17 @@ export default function OrderPage() {
                   )}
                   {order.isPaid ? (
                     <MessageBox variant="success order-paid">
-                      Paid at {order.paidAt}
+                      Paid on{" "}
+                      {new Date(order.paidAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </MessageBox>
                   ) : (
-                    <MessageBox variant="danger">Not Paid</MessageBox>
+                    <MessageBox variant="warning">Awaiting Payment</MessageBox>
                   )}
-                  {!order.isPaid && (
+                  {!order.isPaid && !isAdmin && (
                     <ListGroup.Item>
                       <div className="payment-section">
                         <h5>Pay with PayPal</h5>

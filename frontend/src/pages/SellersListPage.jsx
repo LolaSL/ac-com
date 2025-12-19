@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from "react";
+import { useContext, useEffect, useReducer, useState } from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,9 +6,10 @@ import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
-import { Container, Table, Button } from "react-bootstrap";
+import { Container, Table, Button, Form, InputGroup } from "react-bootstrap";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -69,6 +70,7 @@ const SellersListPage = () => {
   const { state } = useContext(Store);
   const { userInfo, adminInfo } = state;
   const token = userInfo?.token || adminInfo?.token;
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,127 +137,110 @@ const SellersListPage = () => {
   };
 
   return (
-    <Container className="provider-container">
-      <Row>
+    <Container className="admin-page-container">
+      <Row className="align-items-center mb-4">
         <Col>
-          <h1>Sellers</h1>
+          <h1 className="admin-page-title">Sellers Management</h1>
         </Col>
-        <Col className="col text-end">
-          <div>
-            <Button type="button" className="details" onClick={createHandler}>
-              Create Seller
-            </Button>
-          </div>
+        <Col className="text-end">
+          <Button
+            className="btn-admin-action"
+            onClick={createHandler}
+            disabled={loadingCreate}
+          >
+            <FaPlus className="me-2" />
+            {loadingCreate ? "Creating..." : "Create Seller"}
+          </Button>
         </Col>
       </Row>
 
-      {loadingCreate && <LoadingBox></LoadingBox>}
-      {loadingDelete && <LoadingBox></LoadingBox>}
+      <InputGroup className="mb-4 admin-search-box">
+        <InputGroup.Text className="admin-search-icon">
+          <FaSearch />
+        </InputGroup.Text>
+        <Form.Control
+          placeholder="Search by name, brand..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="admin-search-input"
+        />
+      </InputGroup>
+
+      {loadingCreate && <LoadingBox />}
+      {loadingDelete && <LoadingBox />}
 
       {loading ? (
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
-        <div className="table-responsive">
-          <Table striped bordered hover>
-            <thead>
+        <div className="table-responsive admin-table-wrapper">
+          <Table striped bordered hover className="admin-table">
+            <thead className="admin-table-header">
               <tr>
                 <th>ID</th>
                 <th>LOGO</th>
-                <th>LINK</th>
                 <th>NAME</th>
                 <th>BRAND</th>
-                <th>INFO</th>
+                <th>COMPANY LINK</th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {sellers.map((seller) => (
-                <tr key={seller._id}>
-                  <td data-label="ID">{seller._id}</td>
-                  <td data-label="Logo">
-                    <img src={seller.logo} alt="logo" width="50" />
-                  </td>
-                  <td data-label="Link">
-                    <a
-                      href={seller.companyLink}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View
-                    </a>
-                  </td>
-                  <td data-label="Name">{seller.name}</td>
-                  <td data-label="Brand">{seller.brand}</td>
-                  <td data-label="Info">{seller.info}</td>
-
-                  <td>
-                    <Button
-                      type="button"
-                      variant="light"
-                      className="details"
-                      onClick={() => navigate(`/admin/sellers/${seller._id}`)}
-                    >
-                      Edit
-                    </Button>
-                    &nbsp;
-                    <Button
-                      type="button"
-                      variant="light"
-                      className="details"
-                      onClick={() => deleteHandler(seller)}
-                    >
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {sellers
+                .filter(
+                  (seller) =>
+                    seller.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    seller.brand.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((seller) => (
+                  <tr key={seller._id} className="admin-table-row">
+                    <td data-label="ID" className="small-text">
+                      {seller._id.substring(0, 8)}...
+                    </td>
+                    <td data-label="Logo" className="logo-cell">
+                      <img
+                        src={seller.logo}
+                        alt="logo"
+                        width="40"
+                        height="40"
+                        style={{ objectFit: "contain", borderRadius: "4px" }}
+                      />
+                    </td>
+                    <td data-label="Name">{seller.name}</td>
+                    <td data-label="Brand">{seller.brand}</td>
+                    <td data-label="Company Link">
+                      <a
+                        href={seller.companyLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="admin-link"
+                      >
+                        Visit
+                      </a>
+                    </td>
+                    <td className="actions-cell">
+                      <Button
+                        variant="sm"
+                        className="btn-admin-edit"
+                        onClick={() => navigate(`/admin/sellers/${seller._id}`)}
+                        title="Edit seller"
+                      >
+                        <FaEdit />
+                      </Button>
+                      <Button
+                        variant="sm"
+                        className="btn-admin-delete ms-2"
+                        onClick={() => deleteHandler(seller)}
+                        title="Delete seller"
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </Table>
-          <div>
-            <nav>
-              <ul className="pagination">
-                <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-                >
-                  <Link
-                    className="page-link"
-                    to={`/admin/sellers?page=${Number(currentPage) - 1}`}
-                  >
-                    &lt;
-                  </Link>
-                </li>
-                {[...Array(totalPages).keys()].map((x) => (
-                  <li
-                    key={x + 1}
-                    className={`page-item ${
-                      x + 1 === Number(currentPage) ? "active" : ""
-                    }`}
-                  >
-                    <Link
-                      className="page-link"
-                      to={`/admin/sellers?page=${x + 1}`}
-                    >
-                      {x + 1}
-                    </Link>
-                  </li>
-                ))}
-                <li
-                  className={`page-item ${
-                    currentPage === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <Link
-                    className="page-link"
-                    to={`/admin/sellers?page=${Number(currentPage) + 1}`}
-                  >
-                    &gt;
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
         </div>
       )}
     </Container>

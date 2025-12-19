@@ -32,7 +32,18 @@ const FeaturedPage = () => {
       dispatch({ type: "FETCH_REQUEST" });
       try {
         const { data } = await axios.get("/api/products");
-        dispatch({ type: "FETCH_SUCCESS", payload: data });
+
+        // Filter for featured products: high ratings, discounts, or in stock
+        const featuredProducts = data
+          .filter(
+            (product) =>
+              product.discount > 0 ||
+              product.rating >= 4.5 ||
+              (product.countInStock > 0 && product.rating >= 4.0)
+          )
+          .slice(0, 12); // Limit to 12 featured products
+
+        dispatch({ type: "FETCH_SUCCESS", payload: featuredProducts });
       } catch (err) {
         console.error("Error fetching products:", err.message);
         dispatch({ type: "FETCH_FAIL", payload: err.message });
@@ -43,41 +54,40 @@ const FeaturedPage = () => {
   }, []);
 
   return (
-    <div>
+    <div className="featured-page-wrapper">
       <article className="py-4 mb-4">
         <h1 className="featured-title ">Featured Products</h1>
         <h3 className="py-2 mb-2 featured-products text-center fs-4">
-          Introducing our latest line of air conditioning units
+          Discover our top-rated and special offer air conditioning units
         </h3>
       </article>
-      <div className="products">
+      <div className="featured-products-container">
         {loading ? (
           <LoadingBox />
         ) : error ? (
           <MessageBox variant="danger">{error}</MessageBox>
         ) : products.length ? (
-          <Row className="gy-4">
+          <Row className="g-3 mx-0">
             {products.map((product) => (
               <Col
                 key={product.slug}
                 xs={12}
+                sm={6}
                 md={4}
                 lg={3}
-                className="product-item"
+                className="p-2"
               >
-                <div className="product-card">
-                  <Product product={product} />
-                </div>
+                <Product product={product} />
               </Col>
             ))}
           </Row>
         ) : (
           <MessageBox variant="info">
-            No products match the selected offer.
+            No featured products available at the moment. Check back soon!
           </MessageBox>
         )}
       </div>
-      <div className=" mt-4 mb-4">
+      <div className="mt-4 mb-4 text-center">
         <Link to="/" className="go-to-btn btn-text">
           Back to Home
         </Link>

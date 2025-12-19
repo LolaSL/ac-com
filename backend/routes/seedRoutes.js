@@ -9,15 +9,19 @@ import Message from '../models/messageModel.js';
 import Earnings from '../models/earningModel.js';
 import Blog from '../models/blogModel.js';
 import Notification from '../models/notificationModel.js';
-import Annotation from '../models/annotationModel.js'; 
+import Annotation from '../models/annotationModel.js';
+import Order from '../models/orderModel.js';
 import data from '../data.js';
 
 const seedRouter = express.Router();
 
 seedRouter.get('/', async (req, res) => {
   try {
+    const includeOrders = req.query.includeOrders === 'true';
+    const ordersMode = req.query.ordersMode || (includeOrders ? 'append' : 'skip');
+
     await Product.deleteMany({});
-    await User.deleteMany({});
+    // Preserve users and orders; do not delete to keep manual data
     await Seller.deleteMany({});
     await Contact.deleteMany({});
     await ServiceProvider.deleteMany({});
@@ -57,23 +61,74 @@ seedRouter.get('/', async (req, res) => {
 
     // Seed other collections
     const createdProducts = await Product.insertMany(data.products);
-    const createdUsers = await User.insertMany(data.users);
+
+    // Preserve existing users; seed defaults only if none exist
+    let createdUsers = await User.find({});
+    if (createdUsers.length === 0) {
+      createdUsers = await User.insertMany(data.users);
+    }
     const createdSellers = await Seller.insertMany(data.sellers);
     const createdContacts = await Contact.insertMany(data.contacts);
     const createdBlogs = await Blog.insertMany(data.blogs);
     const createdNotifications = await Notification.insertMany(data.notifications);
 
+    // Seed Orders with proper user and product references
+    let createdOrders = [];
+    if (ordersMode === 'reset') {
+      await Order.deleteMany({});
+      const ordersWithIds = data.orders.map((order, index) => {
+        const userId = createdUsers[index % createdUsers.length]._id;
+        const orderItemsWithProductIds = order.orderItems.map((item) => {
+          const product = createdProducts.find(p => p.slug === item.slug);
+          return {
+            ...item,
+            product: product ? product._id : createdProducts[0]._id,
+          };
+        });
+        return {
+          ...order,
+          user: userId,
+          orderItems: orderItemsWithProductIds,
+        };
+      });
+      // Use raw insert to preserve createdAt/updatedAt from seed data
+      const result = await Order.collection.insertMany(ordersWithIds, { ordered: true });
+      createdOrders = Object.values(result.insertedIds);
+    } else if (ordersMode === 'append') {
+      const existingCount = await Order.countDocuments();
+      if (existingCount === 0) {
+        const ordersWithIds = data.orders.map((order, index) => {
+          const userId = createdUsers[index % createdUsers.length]._id;
+          const orderItemsWithProductIds = order.orderItems.map((item) => {
+            const product = createdProducts.find(p => p.slug === item.slug);
+            return {
+              ...item,
+              product: product ? product._id : createdProducts[0]._id,
+            };
+          });
+          return {
+            ...order,
+            user: userId,
+            orderItems: orderItemsWithProductIds,
+          };
+        });
+        const result = await Order.collection.insertMany(ordersWithIds, { ordered: true });
+        createdOrders = Object.values(result.insertedIds);
+      }
+      // else skip appending to avoid duplicates
+    }
+
     // Seed Annotations with required fields
     const annotationsWithIds = data.annotations.map((annotation) => ({
-  ...annotation,
-  userId: createdUsers[0]._id,
-  pdfData: Buffer.from('%PDF-1.4\n% Dummy PDF content\n'),
-  originalImageWidth: 800,
-  originalImageHeight: 1000,
-  isPaid: Math.random() < 0.5, // 50% chance to be true (paid) or false (free)
-}));
+      ...annotation,
+      userId: createdUsers[0]._id,
+      pdfData: Buffer.from('%PDF-1.4\n% Dummy PDF content\n'),
+      originalImageWidth: 800,
+      originalImageHeight: 1000,
+      isPaid: Math.random() < 0.5, // 50% chance to be true (paid) or false (free)
+    }));
 
-const createdAnnotations = await Annotation.insertMany(annotationsWithIds)
+    const createdAnnotations = await Annotation.insertMany(annotationsWithIds)
 
     res.send({
       createdProducts,
@@ -86,7 +141,14 @@ const createdAnnotations = await Annotation.insertMany(annotationsWithIds)
       createdEarnings,
       createdBlogs,
       createdNotifications,
+      createdOrders,
       createdAnnotations,
+      message:
+        ordersMode === 'reset'
+          ? 'Seeding completed (orders reset)'
+          : ordersMode === 'append'
+            ? 'Seeding completed (orders appended only if none existed)'
+            : 'Seeding completed (orders preserved; to seed orders use ?includeOrders=true or ?ordersMode=reset)',
     });
   } catch (error) {
     console.error('Error seeding data:', error);

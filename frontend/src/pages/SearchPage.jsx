@@ -309,17 +309,20 @@ export default function SearchPage() {
                   {products.length === 0 && (
                     <MessageBox>No Product Found</MessageBox>
                   )}
-                  <Col md={9}>
-                    <Row className="gy-3 row-cols-1 row-cols-md-2 row-cols-lg-3">
-                      {products.map((product) => (
-                        <Col key={product._id} className="d-flex">
-                          <div className="product-card w-100">
-                            <Product product={product} />
-                          </div>
-                        </Col>
-                      ))}
-                    </Row>
-                  </Col>
+                  <Row className="g-3 mx-0">
+                    {products.map((product) => (
+                      <Col
+                        key={product._id}
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        lg={3}
+                        className="p-2"
+                      >
+                        <Product product={product} />
+                      </Col>
+                    ))}
+                  </Row>
                   <div>
                     {[...Array(pages).keys()].map((x) => (
                       <NavLink

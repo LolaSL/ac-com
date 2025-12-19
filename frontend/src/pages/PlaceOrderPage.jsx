@@ -38,32 +38,32 @@ export default function PlaceOrderPage() {
 
   const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100;
 
-    cart.itemsPrice = cart.cartItems?.length
+  cart.itemsPrice = cart.cartItems?.length
     ? round2(
-        cart.cartItems.reduce((a, c) => a + c.quantity * (c.price * (1 - (c.discount || 0) / 100)), 0)
+        cart.cartItems.reduce(
+          (a, c) => a + c.quantity * (c.price * (1 - (c.discount || 0) / 100)),
+          0
+        )
       )
     : 0;
-    const getShippingPrice = (itemsPrice, items) => {
-      if (itemsPrice > 5000) return round2(100); 
-      if (itemsPrice > 2000) return round2(50);
-      if (itemsPrice > 500) return round2(25);
-      return round2(10);
-    };
-    
-    cart.shippingPrice = getShippingPrice(cart.itemsPrice, cart.cartItems);
-    cart.taxPrice = round2(0.15 * cart.itemsPrice);
-    cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
-    
-  
-  console.log("Cart Calculations:", { 
-    itemsPrice: cart.itemsPrice, 
-    shippingPrice: cart.shippingPrice, 
-    taxPrice: cart.taxPrice, 
-    totalPrice: cart.totalPrice 
-  });
-  
+  const getShippingPrice = (itemsPrice, items) => {
+    if (itemsPrice > 5000) return round2(100);
+    if (itemsPrice > 2000) return round2(50);
+    if (itemsPrice > 500) return round2(25);
+    return round2(10);
+  };
 
-  
+  cart.shippingPrice = getShippingPrice(cart.itemsPrice, cart.cartItems);
+  cart.taxPrice = round2(0.15 * cart.itemsPrice);
+  cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
+
+  console.log("Cart Calculations:", {
+    itemsPrice: cart.itemsPrice,
+    shippingPrice: cart.shippingPrice,
+    taxPrice: cart.taxPrice,
+    totalPrice: cart.totalPrice,
+  });
+
   const placeOrderHandler = async () => {
     try {
       dispatch({ type: "CREATE_REQUEST" });
@@ -101,8 +101,6 @@ export default function PlaceOrderPage() {
     }
   }, [cart.cartItems, cart.itemsPrice, cart.paymentMethod, navigate]);
 
-  
-
   return (
     <div>
       <CheckoutSteps step1 step2 step3 step4></CheckoutSteps>
@@ -111,12 +109,21 @@ export default function PlaceOrderPage() {
         <Col md={8}>
           <Card className="mb-3">
             <Card.Body>
-              <Card.Title>Shipping</Card.Title>
+              <Card.Title>Shipping Address</Card.Title>
               <Card.Text>
                 <strong>Name:</strong> {cart.shippingAddress.fullName} <br />
-                <strong>Address: </strong> {cart.shippingAddress.address},
-                {cart.shippingAddress.city}, {cart.shippingAddress.postalCode},
+                <strong>Address:</strong> {cart.shippingAddress.address},{" "}
+                {cart.shippingAddress.city}, {cart.shippingAddress.postalCode},{" "}
                 {cart.shippingAddress.country}
+                {cart.shippingAddress.location &&
+                  cart.shippingAddress.location.lat && (
+                    <>
+                      <br />
+                      <strong>Location:</strong> LAT:{" "}
+                      {cart.shippingAddress.location.lat}, LNG:{" "}
+                      {cart.shippingAddress.location.lng}
+                    </>
+                  )}
               </Card.Text>
               <Link to="/shipping" className="order-link">
                 Edit

@@ -20,11 +20,89 @@ orderRouter.get(
   expressAsyncHandler(async (req, res) => {
     const pageSize = 15;
     const page = Number(req.query.page) || 1;
-    const orders = await Order.find()
+    const { status, q, dateFrom, dateTo, sort } = req.query;
+
+    // Build filter
+    const filter = {};
+    if (status === 'paid') filter.isPaid = true;
+    if (status === 'pending') filter.isPaid = false;
+    if (status === 'delivered') filter.isDelivered = true;
+    if (status === 'not-delivered') filter.isDelivered = false;
+
+    if (dateFrom || dateTo) {
+      const parseDate = (s) => {
+        if (!s || typeof s !== 'string') return null;
+        const d = new Date(s);
+        return Number.isNaN(d.getTime()) ? null : d;
+      };
+      const fromDate = parseDate(dateFrom);
+      const toDate = parseDate(dateTo);
+      if (fromDate || toDate) {
+        filter.createdAt = {};
+        if (fromDate) {
+          fromDate.setHours(0, 0, 0, 0);
+          filter.createdAt.$gte = fromDate;
+        }
+        if (toDate) {
+          toDate.setHours(23, 59, 59, 999);
+          filter.createdAt.$lte = toDate;
+        }
+      }
+    }
+
+    // Text search on order id (string) or user name
+    if (q && q.trim()) {
+      const queryText = q.trim();
+      const userMatches = await User.find(
+        { name: { $regex: queryText, $options: 'i' } },
+        { _id: 1 }
+      );
+      const userIds = userMatches.map((u) => u._id);
+      const orClauses = [];
+      if (userIds.length) {
+        orClauses.push({ user: { $in: userIds } });
+      }
+      // Match order id
+      orClauses.push({
+        $expr: {
+          $regexMatch: {
+            input: { $toString: '$_id' },
+            regex: queryText,
+            options: 'i',
+          },
+        },
+      });
+      // Match totalPrice (supports inputs like "$953.63" or "953.63")
+      const numericCandidate = parseFloat(queryText.replace(/[^0-9.]/g, ''));
+      if (!Number.isNaN(numericCandidate)) {
+        const delta = 0.01;
+        orClauses.push({
+          totalPrice: { $gte: numericCandidate - delta, $lte: numericCandidate + delta },
+        });
+      }
+      filter.$or = orClauses;
+    }
+
+    // Sort
+    const sortMap = {
+      'createdAt:asc': { createdAt: 1 },
+      'createdAt:desc': { createdAt: -1 },
+      'totalPrice:asc': { totalPrice: 1 },
+      'totalPrice:desc': { totalPrice: -1 },
+      'paidAt:asc': { paidAt: 1 },
+      'paidAt:desc': { paidAt: -1 },
+      'deliveredAt:asc': { deliveredAt: 1 },
+      'deliveredAt:desc': { deliveredAt: -1 },
+    };
+    const sortKey = sort && sortMap[sort] ? sortMap[sort] : { createdAt: -1 };
+
+    const orders = await Order.find(filter)
+      .sort(sortKey)
       .populate('user', 'name')
       .skip(pageSize * (page - 1))
       .limit(pageSize);
-    const countOrders = await Order.countDocuments();
+
+    const countOrders = await Order.countDocuments(filter);
     const pages = Math.ceil(countOrders / pageSize);
     res.send({ orders, page, pages });
   })

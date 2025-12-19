@@ -1,13 +1,26 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import UsersProductSales from "../components/UsersProductSales.jsx";
 import ServiceProviders from "../components/ServiceProviders.jsx";
 import Notifications from "../components/Notifications.jsx";
 import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
+import { Store } from "../Store";
 function Dashboard() {
+  const navigate = useNavigate();
+  const { state } = useContext(Store);
+  const { userInfo, adminInfo } = state || {};
+
   const [activeComponent, setActiveComponent] = useState("Users Product Sales");
-  const [sidebarOpen, setSidebarOpen] = useState(false); 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const token = adminInfo?.token || userInfo?.token;
+    const isAdmin = adminInfo?.isAdmin || userInfo?.isAdmin;
+    if (!token || !isAdmin) {
+      navigate("/signin");
+    }
+  }, [adminInfo, userInfo, navigate]);
   function renderComponent() {
     switch (activeComponent) {
       case "Users Product Sales":
@@ -28,15 +41,21 @@ function Dashboard() {
         <Button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="toggle-button"
+          aria-expanded={sidebarOpen}
+          aria-controls="dashboard-sidebar"
         >
           ☰ Menu
         </Button>
         {sidebarOpen && (
-          <div className="sidebar-dropdown">{renderSidebarContent()}</div>
+          <div id="dashboard-sidebar" className="sidebar-dropdown">
+            {renderSidebarContent()}
+          </div>
         )}
       </div>
 
-      <div className="sidebar d-none d-md-flex">{renderSidebarContent()}</div>
+      <div className="sidebar d-none d-md-flex" id="dashboard-sidebar">
+        {renderSidebarContent()}
+      </div>
 
       <div className="main-content">{renderComponent()}</div>
     </div>

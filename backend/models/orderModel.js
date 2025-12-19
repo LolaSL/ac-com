@@ -54,6 +54,10 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
+// Helpful indexes for common admin queries and sorting
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ user: 1, createdAt: -1 });
+
 const Order = mongoose.model('Order', orderSchema);
 export default Order;
 

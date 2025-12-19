@@ -11,25 +11,27 @@ export default function AdminLoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
-    const envUrl = process.env.REACT_APP_API_BASE_URL;
-    const API_BASE_URL =
-      envUrl && envUrl.startsWith("http") ? envUrl : "http://localhost:5020";
+    if (submitting) return;
 
-    console.log("Using API_BASE_URL:", API_BASE_URL);
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      toast.error("Email and password are required");
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
-      const { data } = await axios.post(
-        `${API_BASE_URL}/api/users/admin/signin`,
-        {
-          email,
-          password,
-        }
-      );
-
-      console.log("Admin login successful:", data);
+      const { data } = await axios.post(`/api/users/admin/signin`, {
+        email: trimmedEmail,
+        password: trimmedPassword,
+      });
 
       ctxDispatch({ type: "ADMIN_LOGIN", payload: data });
       localStorage.setItem("adminInfo", JSON.stringify(data));
@@ -37,43 +39,53 @@ export default function AdminLoginPage() {
       toast.success("Welcome, Admin!");
       navigate("/admin/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
       toast.error(error.response?.data?.message || "Invalid admin credentials");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="container small-container">
-      <h1 className="my-3">Admin Login</h1>
-      <form onSubmit={handleAdminLogin}>
-        <div className="mb-3">
-          <label>Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="form-control"
-          />
-        </div>
+    <div className="admin-login-wrapper">
+      <div className="admin-login-container">
+        <div className="admin-login-card">
+          <h1 className="admin-login-title">Admin Portal</h1>
+          <p className="admin-login-subtitle">Secure Administration</p>
+          <form onSubmit={handleAdminLogin}>
+            <div className="mb-3">
+              <label>Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="form-control"
+              />
+            </div>
 
-        <div className="mb-3">
-          <label>Password</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="form-control"
-          />
-        </div>
+            <div className="mb-3">
+              <label>Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="form-control"
+              />
+            </div>
 
-        <div className="mb-3">
-          <Button type="submit" className="go-to-btn btn-text">
-            Login as Admin
-          </Button>
+            <div className="mb-3">
+              <Button
+                type="submit"
+                className="go-to-btn btn-text"
+                disabled={submitting}
+              >
+                {submitting ? "Signing in..." : "Login as Admin"}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

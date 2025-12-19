@@ -1,13 +1,23 @@
 import axios from "axios";
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { toast } from "react-toastify";
-import { Container, Table, Button } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Button,
+  Form,
+  InputGroup,
+  Row,
+  Col,
+  Badge,
+} from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { Link } from "react-router-dom";
+import { FaSearch, FaEye, FaTrash } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -41,7 +51,7 @@ const reducer = (state, action) => {
 };
 
 export default function OrderListPage() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const { search } = useLocation();
   const { state } = useContext(Store);
   const { userInfo, adminInfo } = state || {};
@@ -58,47 +68,105 @@ export default function OrderListPage() {
   const sp = new URLSearchParams(search);
   const currentPage = sp.get("page") || 1;
 
+  // Initialize filters from URL on first load
+  const initialSearchQuery = sp.get("q") || "";
+  const initialStatusFilter = (() => {
+    const s = sp.get("status");
+    return ["paid", "pending", "delivered", "not-delivered"].includes(s)
+      ? s
+      : "all";
+  })();
+  const sortParam = sp.get("sort") || "createdAt:desc";
+  let initialSortColumn = "createdAt";
+  let initialSortOrder = "desc";
+  if (sortParam.includes(":")) {
+    const [col, ord] = sortParam.split(":");
+    initialSortColumn = col || "createdAt";
+    initialSortOrder = ord === "asc" ? "asc" : "desc";
+  } else if (sortParam) {
+    initialSortColumn = sortParam;
+    initialSortOrder = "asc";
+  }
+  const initialDateFrom = sp.get("dateFrom") || "";
+  const initialDateTo = sp.get("dateTo") || "";
+
+  const buildQueryString = (pageValue) => {
+    const params = new URLSearchParams();
+    params.set("page", pageValue);
+
+    if (searchQuery.trim()) params.set("q", searchQuery.trim());
+
+    if (statusFilter === "paid") params.set("status", "paid");
+    else if (statusFilter === "pending") params.set("status", "pending");
+    else if (statusFilter === "delivered") params.set("status", "delivered");
+    else if (statusFilter === "not-delivered")
+      params.set("status", "not-delivered");
+
+    const isFullDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+    if (isFullDate(dateFrom)) params.set("dateFrom", dateFrom);
+    if (isFullDate(dateTo)) params.set("dateTo", dateTo);
+
+    const sortKey = `${sortColumn}:${sortOrder}`;
+    params.set("sort", sortKey);
+
+    return params.toString();
+  };
+
   const [sortedOrders, setSortedOrders] = useState([]);
-  const [sortColumn, setSortColumn] = useState("date");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortColumn, setSortColumn] = useState(initialSortColumn);
+  const [sortOrder, setSortOrder] = useState(initialSortOrder);
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [statusFilter, setStatusFilter] = useState(initialStatusFilter);
+  const [dateFrom, setDateFrom] = useState(initialDateFrom);
+  const [dateTo, setDateTo] = useState(initialDateTo);
 
-
-   useEffect(() => {
+  useEffect(() => {
     if (!token) {
-      navigate("/login");
+      navigate("/signin");
     }
   }, [token, navigate]);
 
   useEffect(() => {
-    if (!orders || orders.length === 0) return;
+    if (!orders) return;
+    setSortedOrders(orders);
+  }, [orders]);
 
-    const sorted = [...orders].sort((a, b) => {
-      let valueA = a[sortColumn];
-      let valueB = b[sortColumn];
-
-      if (valueA == null && valueB == null) return 0;
-      if (valueA == null) return 1;
-      if (valueB == null) return -1;
-      if (typeof valueA === "string" && typeof valueB === "string") {
-        return sortOrder === "asc"
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
-      }
-
-      return 0;
-    });
-    
-    setSortedOrders(sorted);
-  }, [orders, sortColumn, sortOrder]);
-
-
-   useEffect(() => {
+  // Keep URL in sync when filters/sort change
+  useEffect(() => {
+    const qs = buildQueryString(currentPage);
+    navigate(`/admin/orders/?${qs}`, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, statusFilter, dateFrom, dateTo, sortColumn, sortOrder]);
+  useEffect(() => {
     const fetchData = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
-        const { data } = await axios.get(`/api/orders/?page=${currentPage}`, {
+
+        const params = new URLSearchParams();
+        params.set("page", currentPage);
+
+        if (searchQuery.trim()) {
+          params.set("q", searchQuery.trim());
+        }
+
+        if (statusFilter === "paid") params.set("status", "paid");
+        else if (statusFilter === "pending") params.set("status", "pending");
+        else if (statusFilter === "delivered")
+          params.set("status", "delivered");
+        else if (statusFilter === "not-delivered")
+          params.set("status", "not-delivered");
+
+        const isFullDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+        if (isFullDate(dateFrom)) params.set("dateFrom", dateFrom);
+        if (isFullDate(dateTo)) params.set("dateTo", dateTo);
+
+        const sortKey = `${sortColumn}:${sortOrder}`;
+        params.set("sort", sortKey);
+
+        const { data } = await axios.get(`/api/orders/?${params.toString()}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
         dispatch({
@@ -113,7 +181,17 @@ export default function OrderListPage() {
     } else {
       fetchData();
     }
-  }, [token, successDelete, currentPage]);
+  }, [
+    token,
+    successDelete,
+    currentPage,
+    searchQuery,
+    statusFilter,
+    dateFrom,
+    dateTo,
+    sortColumn,
+    sortOrder,
+  ]);
 
   const deleteHandler = async (order) => {
     if (window.confirm("Are you sure to delete?")) {
@@ -142,9 +220,152 @@ export default function OrderListPage() {
     }
   };
 
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setDateFrom("");
+    setDateTo("");
+    setSortColumn("createdAt");
+    setSortOrder("desc");
+    const params = new URLSearchParams();
+    params.set("page", 1);
+    params.set("sort", "createdAt:desc");
+    navigate(`/admin/orders/?${params.toString()}`, { replace: true });
+  };
+
+  // Auto-format YYYY-MM-DD as user types in large-screen text inputs
+  const formatDateInput = (value) => {
+    const digits = (value || "").replace(/\D/g, "");
+    const y = digits.slice(0, 4);
+    const m = digits.slice(4, 6);
+    const d = digits.slice(6, 8);
+    if (digits.length <= 4) return y;
+    if (digits.length <= 6) return `${y}-${m}`;
+    return `${y}-${m}-${d}`;
+  };
+
+  const onDateFromTextChange = (e) => {
+    setDateFrom(formatDateInput(e.target.value).slice(0, 10));
+  };
+  const onDateToTextChange = (e) => {
+    setDateTo(formatDateInput(e.target.value).slice(0, 10));
+  };
+
+  const padDate = (s) => {
+    if (!s) return s;
+    const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (!m) return s;
+    const [, y, mo, d] = m;
+    const mm = mo.padStart(2, "0");
+    const dd = d.padStart(2, "0");
+    return `${y}-${mm}-${dd}`;
+  };
+
+  const onDateFromTextBlur = () => {
+    setDateFrom((prev) => padDate(prev));
+  };
+  const onDateToTextBlur = () => {
+    setDateTo((prev) => padDate(prev));
+  };
+
   return (
-    <Container className="provider-container">
-      <h1>Orders</h1>
+    <Container className="admin-page-container">
+      <h1 className="admin-page-title">Orders</h1>
+
+      <Row className="mb-4 g-2 admin-toolbar">
+        <Col md={5} lg={3}>
+          <InputGroup className="admin-search-box">
+            <InputGroup.Text className="admin-search-icon">
+              <FaSearch />
+            </InputGroup.Text>
+            <Form.Control
+              placeholder="Search by ID, customer, or total (e.g. $953.63)"
+              className="admin-search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        <Col md={2} lg={2}>
+          <Form.Select
+            className="admin-filter-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All Orders</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="delivered">Delivered</option>
+            <option value="not-delivered">Not Delivered</option>
+          </Form.Select>
+        </Col>
+        {/* Small/medium screens: native date picker */}
+        <Col md={2} className="d-lg-none">
+          <InputGroup className="admin-search-box">
+            <InputGroup.Text>From</InputGroup.Text>
+            <Form.Control
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        <Col md={2} className="d-lg-none">
+          <InputGroup className="admin-search-box">
+            <InputGroup.Text>To</InputGroup.Text>
+            <Form.Control
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        {/* Large screens: text inputs without calendar */}
+        <Col lg={3} className="d-none d-lg-block">
+          <InputGroup className="admin-search-box">
+            <InputGroup.Text>From</InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="YYYY-MM-DD"
+              inputMode="numeric"
+              pattern="\\d{4}-\\d{2}-\\d{2}"
+              title="Use YYYY-MM-DD format"
+              maxLength={10}
+              value={dateFrom}
+              onChange={onDateFromTextChange}
+              onBlur={onDateFromTextBlur}
+              style={{ minWidth: 160 }}
+            />
+          </InputGroup>
+        </Col>
+        <Col lg={3} className="d-none d-lg-block">
+          <InputGroup className="admin-search-box">
+            <InputGroup.Text>To</InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="YYYY-MM-DD"
+              inputMode="numeric"
+              pattern="\\d{4}-\\d{2}-\\d{2}"
+              title="Use YYYY-MM-DD format"
+              maxLength={10}
+              value={dateTo}
+              onChange={onDateToTextChange}
+              onBlur={onDateToTextBlur}
+              style={{ minWidth: 160 }}
+            />
+          </InputGroup>
+        </Col>
+        <Col md={1} lg={1}>
+          <Button
+            variant="outline-secondary"
+            className="w-100"
+            onClick={clearFilters}
+          >
+            Clear
+          </Button>
+        </Col>
+      </Row>
+
       {loadingDelete && <LoadingBox />}
       {loading ? (
         <LoadingBox />
@@ -152,61 +373,108 @@ export default function OrderListPage() {
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <div className="table-responsive">
-          <Table striped bordered hover>
-            <thead>
+          <Table className="admin-table">
+            <thead className="admin-table-header">
               <tr>
-                <th>
-                  <button type="button" onClick={() => handleSort("_id")}>
-                    ID{" "}
-                    {sortColumn === "_id" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </button>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("_id")}
+                >
+                  ID {sortColumn === "_id" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
-                <th>USER</th>
-                <th>DATE</th>
-                <th>TOTAL</th>
-                <th>PAID</th>
-                <th>DELIVERED</th>
+                <th>CUSTOMER</th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("createdAt")}
+                >
+                  DATE{" "}
+                  {sortColumn === "createdAt" &&
+                    (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("totalPrice")}
+                >
+                  TOTAL{" "}
+                  {sortColumn === "totalPrice" &&
+                    (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("paidAt")}
+                >
+                  PAID{" "}
+                  {sortColumn === "paidAt" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("deliveredAt")}
+                >
+                  DELIVERED{" "}
+                  {sortColumn === "deliveredAt" &&
+                    (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {sortedOrders.map((order) => ( 
-                <tr key={order._id}>
-                  <td data-label="ID">{order._id}</td>
-                  <td data-label="USER">{order.user ? order.user.name : "DELETED USER"}</td>
-                  <td data-label="DATE">{order.createdAt.substring(0, 10)}</td>
-                  <td data-label="Total">{order.totalPrice.toFixed(2)}</td>
-                  <td data-label="Paid">{order.isPaid ? order.paidAt.substring(0, 10) : "No"}</td>
-                  <td data-label="Delivered">
-                    {order.isDelivered
-                      ? order.deliveredAt.substring(0, 10)
-                      : "No"}
+              {sortedOrders.map((order) => (
+                <tr key={order._id} className="admin-table-row">
+                  <td className="small-text" data-label="ID">
+                    {order._id}
                   </td>
-                  <td>
+                  <td data-label="CUSTOMER">
+                    {order.user ? order.user.name : "DELETED USER"}
+                  </td>
+                  <td data-label="DATE">
+                    {order.createdAt && order.createdAt.substring(0, 10)}
+                  </td>
+                  <td data-label="TOTAL">
+                    ${(order.totalPrice ?? 0).toFixed(2)}
+                  </td>
+                  <td data-label="PAID">
+                    <Badge bg={order.isPaid ? "success" : "danger"}>
+                      {order.isPaid && order.paidAt
+                        ? order.paidAt.substring(0, 10)
+                        : "Pending"}
+                    </Badge>
+                  </td>
+                  <td data-label="DELIVERED">
+                    <Badge bg={order.isDelivered ? "success" : "warning"}>
+                      {order.isDelivered && order.deliveredAt
+                        ? order.deliveredAt.substring(0, 10)
+                        : "Not Delivered"}
+                    </Badge>
+                  </td>
+                  <td className="actions-cell" data-label="ACTIONS">
                     <Button
                       type="button"
-                      variant="light"
-                      className="details"
+                      className="btn-admin-edit"
+                      title="View Details"
                       onClick={() => {
                         navigate(`/order/${order._id}`);
                       }}
                     >
-                      Details
+                      <FaEye />
                     </Button>
-                    &nbsp;
                     <Button
                       type="button"
-                      variant="light"
-                         className="details"
+                      className="btn-admin-delete"
+                      title="Delete"
                       onClick={() => deleteHandler(order)}
                     >
-                      Delete
+                      <FaTrash />
                     </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </Table>
+          {sortedOrders.length === 0 && (
+            <div className="text-center py-4">
+              <p className="text-muted">No orders found.</p>
+            </div>
+          )}
           <div>
             <nav>
               <ul className="pagination">
@@ -215,7 +483,9 @@ export default function OrderListPage() {
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/orders/?page=${Number(currentPage) - 1}`}
+                    to={`/admin/orders/?${buildQueryString(
+                      Number(currentPage) - 1
+                    )}`}
                   >
                     &lt;
                   </Link>
@@ -229,7 +499,7 @@ export default function OrderListPage() {
                   >
                     <Link
                       className="page-link"
-                      to={`/admin/orders/?page=${x + 1}`}
+                      to={`/admin/orders/?${buildQueryString(x + 1)}`}
                     >
                       {x + 1}
                     </Link>
@@ -242,7 +512,9 @@ export default function OrderListPage() {
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/orders/?page=${Number(currentPage) + 1}`}
+                    to={`/admin/orders/?${buildQueryString(
+                      Number(currentPage) + 1
+                    )}`}
                   >
                     &gt;
                   </Link>

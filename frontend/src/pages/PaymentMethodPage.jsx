@@ -1,9 +1,9 @@
-import  { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import CheckoutSteps from '../components/CheckoutSteps.jsx';
-import { Store } from '../Store.js';
+import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import CheckoutSteps from "../components/CheckoutSteps.jsx";
+import { Store } from "../Store.js";
 
 export default function PaymentMethodScreen() {
   const navigate = useNavigate();
@@ -13,19 +13,19 @@ export default function PaymentMethodScreen() {
   } = state;
 
   const [paymentMethodName, setPaymentMethod] = useState(
-    paymentMethod || 'PayPal'
+    paymentMethod || "PayPal"
   );
 
   useEffect(() => {
     if (!shippingAddress.address) {
-      navigate('/shipping');
+      navigate("/shipping");
     }
   }, [shippingAddress, navigate]);
   const submitHandler = (e) => {
     e.preventDefault();
-    ctxDispatch({ type: 'SAVE_PAYMENT_METHOD', payload: paymentMethodName });
-    localStorage.setItem('paymentMethod', paymentMethodName);
-    navigate('/placeorder');
+    ctxDispatch({ type: "SAVE_PAYMENT_METHOD", payload: paymentMethodName });
+    localStorage.setItem("paymentMethod", paymentMethodName);
+    navigate("/placeorder");
   };
   return (
     <div>
@@ -39,12 +39,14 @@ export default function PaymentMethodScreen() {
               id="PayPal"
               label="PayPal"
               value="PayPal"
-              checked={paymentMethodName === 'PayPal'}
+              checked={paymentMethodName === "PayPal"}
               onChange={(e) => setPaymentMethod(e.target.value)}
             />
           </div>
           <div className="mt-4 mb-3">
-            <Button className=" go-to-btn btn-text" type="submit">Continue</Button>
+            <Button className=" go-to-btn btn-text" type="submit">
+              Continue
+            </Button>
           </div>
         </Form>
       </div>

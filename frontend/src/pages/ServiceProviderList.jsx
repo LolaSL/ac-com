@@ -1,12 +1,22 @@
 import axios from "axios";
-import React, { useContext, useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import { toast } from "react-toastify";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { Container, Table, Button } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Button,
+  Form,
+  InputGroup,
+  Row,
+  Col,
+  Badge,
+} from "react-bootstrap";
+import { FaSearch, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
@@ -64,6 +74,8 @@ export default function ServiceProviderList() {
 
   const navigate = useNavigate();
   const { state } = useContext(Store);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const { userInfo, adminInfo } = state;
   const token = userInfo?.token || adminInfo?.token;
@@ -148,18 +160,49 @@ export default function ServiceProviderList() {
   };
 
   return (
-    <Container className="provider-container">
-      <div className="mb-3 d-flex justify-content-between align-items-center">
-        <h1>Service Providers</h1>
-        <Button
-          type="button"
-          className="details"
-          onClick={createHandler}
-          disabled={loadingCreate}
-        >
-          {loadingCreate ? "Creating..." : "Create Service Provider"}
-        </Button>
-      </div>
+    <Container className="admin-page-container">
+      <Row className="align-items-center mb-4">
+        <Col>
+          <h1 className="admin-page-title">Service Providers</h1>
+        </Col>
+        <Col xs="auto">
+          <Button
+            type="button"
+            className="btn-admin-action"
+            onClick={createHandler}
+            disabled={loadingCreate}
+          >
+            <FaPlus /> {loadingCreate ? "Creating..." : "Create"}
+          </Button>
+        </Col>
+      </Row>
+
+      <Row className="mb-4 g-2">
+        <Col md={6}>
+          <InputGroup className="admin-search-box">
+            <InputGroup.Text className="admin-search-icon">
+              <FaSearch />
+            </InputGroup.Text>
+            <Form.Control
+              placeholder="Search by name or email..."
+              className="admin-search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        <Col md={3}>
+          <Form.Select
+            className="admin-filter-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </Form.Select>
+        </Col>
+      </Row>
 
       {loadingDelete && <LoadingBox />}
       {loading ? (
@@ -168,56 +211,98 @@ export default function ServiceProviderList() {
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <div className="table-responsive">
-          <Table striped bordered hover>
-            <thead>
+          <Table className="admin-table">
+            <thead className="admin-table-header">
               <tr>
                 <th>ID</th>
                 <th>NAME</th>
                 <th>EMAIL</th>
-                <th>IS ADMIN</th>
-                <th>IS ACTIVE</th>
+                <th>PHONE</th>
+                <th>STATUS</th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {serviceProviders.map((serviceProvider) => (
-                <tr key={serviceProvider._id}>
-                  <td data-label="ID">{serviceProvider._id}</td>
-                  <td data-label="Name">{serviceProvider.name}</td>
-                  <td data-label="Email">{serviceProvider.email}</td>
-                  <td data-label="Is Admin">
-                    {serviceProvider.isAdmin ? "YES" : "NO"}
-                  </td>
-                  <td data-label="Is Active">
-                    {serviceProvider.isActive ? "YES" : "NO"}
-                  </td>
-                  <td>
-                    <Button
-                      type="button"
-                      variant="light"
-                      className="details"
-                      onClick={() =>
-                        navigate(
-                          `/admin/manage-service-providers/${serviceProvider._id}`
-                        )
-                      }
-                    >
-                      Edit
-                    </Button>
-                    &nbsp;
-                    <Button
-                      type="button"
-                      variant="light"
-                      className="details"
-                      onClick={() => deleteHandler(serviceProvider)}
-                    >
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {serviceProviders
+                .filter((provider) => {
+                  const matchesSearch =
+                    provider.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()) ||
+                    provider.email
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()) ||
+                    (provider.phone &&
+                      provider.phone
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()));
+                  const matchesStatus =
+                    statusFilter === "all" ||
+                    (statusFilter === "active" && provider.isActive) ||
+                    (statusFilter === "inactive" && !provider.isActive);
+                  return matchesSearch && matchesStatus;
+                })
+                .map((serviceProvider) => (
+                  <tr key={serviceProvider._id} className="admin-table-row">
+                    <td className="small-text">
+                      {serviceProvider._id.substring(0, 8)}
+                    </td>
+                    <td>{serviceProvider.name}</td>
+                    <td>{serviceProvider.email}</td>
+                    <td>{serviceProvider.phone || "N/A"}</td>
+                    <td>
+                      <Badge
+                        bg={serviceProvider.isActive ? "success" : "secondary"}
+                      >
+                        {serviceProvider.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </td>
+                    <td className="actions-cell">
+                      <Button
+                        type="button"
+                        className="btn-admin-edit"
+                        title="Edit"
+                        onClick={() =>
+                          navigate(
+                            `/admin/manage-service-providers/${serviceProvider._id}`
+                          )
+                        }
+                      >
+                        <FaEdit />
+                      </Button>
+                      <Button
+                        type="button"
+                        className="btn-admin-delete"
+                        title="Delete"
+                        onClick={() => deleteHandler(serviceProvider)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </Table>
+          {serviceProviders.filter((provider) => {
+            const matchesSearch =
+              provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              provider.email
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+              (provider.phone &&
+                provider.phone
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()));
+            const matchesStatus =
+              statusFilter === "all" ||
+              (statusFilter === "active" && provider.isActive) ||
+              (statusFilter === "inactive" && !provider.isActive);
+            return matchesSearch && matchesStatus;
+          }).length === 0 && (
+            <div className="text-center py-4">
+              <p className="text-muted">No service providers found.</p>
+            </div>
+          )}
           <div>
             <nav>
               <ul className="pagination">

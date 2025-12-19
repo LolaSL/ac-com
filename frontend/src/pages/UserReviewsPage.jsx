@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState, useCallback } from 'react';
 import { Container, Row, Col, Card, Badge, Spinner, Alert, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -38,25 +38,27 @@ function UserReviewsPage() {
       sellerReviews: [],
     });
 
-  const fetchReviews = async () => {
-    try {
-      dispatch({ type: 'FETCH_REQUEST' });
-      const { data } = await axios.get('/api/user-reviews', {
-        headers: { Authorization: `Bearer ${userInfo.token}` },
-      });
-      dispatch({ type: 'FETCH_SUCCESS', payload: data });
-    } catch (err) {
-      dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
-    }
-  };
+const fetchReviews = useCallback(async () => {
+  try {
+    dispatch({ type: 'FETCH_REQUEST' });
+    const { data } = await axios.get('/api/user-reviews', {
+      headers: { Authorization: `Bearer ${userInfo.token}` },
+    });
+    dispatch({ type: 'FETCH_SUCCESS', payload: data });
+  } catch (err) {
+    dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
+  }
+}, [userInfo?.token]); // depends only on userInfo.token
 
-  useEffect(() => {
-    if (userInfo) {
-      fetchReviews();
-    } else {
-      navigate('/signin');
-    }
-  }, [userInfo, navigate]);
+
+useEffect(() => {
+  if (userInfo) {
+    fetchReviews();
+  } else {
+    navigate('/signin');
+  }
+}, [userInfo, navigate, fetchReviews]);
+
 
   const undoToast = (message, onUndo) => {
     toast(({ closeToast }) => (
@@ -168,7 +170,7 @@ function UserReviewsPage() {
                       <div className="d-flex align-items-center gap-2">
                         <Badge bg="primary">{r.rating} ★</Badge>
                         <Button size="sm" variant="outline-danger" onClick={() => deleteProductReview(r.productId)} disabled={actionLoading}>
-                          Remove
+                         Clear
                         </Button>
                       </div>
                     </div>

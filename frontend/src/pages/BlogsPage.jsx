@@ -1,16 +1,19 @@
-import React, { useContext, useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
 import { toast } from "react-toastify";
 import { Store } from "../Store.js";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
 import { getError } from "../utils.js";
 import { Table } from "react-bootstrap";
+import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -77,8 +80,9 @@ export default function BlogsPage() {
   const currentPage = sp.get("page") || 1;
 
   const { state } = useContext(Store);
-const { userInfo, adminInfo } = state;
-const token = userInfo?.token || adminInfo?.token;
+  const { userInfo, adminInfo } = state;
+  const token = userInfo?.token || adminInfo?.token;
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -138,35 +142,46 @@ const token = userInfo?.token || adminInfo?.token;
   };
 
   return (
-    <Container className="provider-container">
-      <Row>
+    <Container className="admin-page-container">
+      <Row className="align-items-center mb-4">
         <Col>
-          <h1>Blogs</h1>
+          <h1 className="admin-page-title">Blogs Management</h1>
         </Col>
-        <Col className="col text-end">
-          <div>
-            <Button
-              type="button"
-               className="details"
-              onClick={createHandler}
-            >
-              Create Blog
-            </Button>
-          </div>
+        <Col className="text-end">
+          <Button
+            className="btn-admin-action"
+            onClick={createHandler}
+            disabled={loadingCreate}
+          >
+            <FaPlus className="me-2" />
+            {loadingCreate ? "Creating..." : "Create Blog"}
+          </Button>
         </Col>
       </Row>
 
-      {loadingCreate && <LoadingBox></LoadingBox>}
-      {loadingDelete && <LoadingBox></LoadingBox>}
+      <InputGroup className="mb-4 admin-search-box">
+        <InputGroup.Text className="admin-search-icon">
+          <FaSearch />
+        </InputGroup.Text>
+        <Form.Control
+          placeholder="Search by title..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="admin-search-input"
+        />
+      </InputGroup>
+
+      {loadingCreate && <LoadingBox />}
+      {loadingDelete && <LoadingBox />}
 
       {loading ? (
         <LoadingBox></LoadingBox>
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
-        <div className="table-responsive">
-          <Table striped bordered hover>
-            <thead>
+        <div className="table-responsive admin-table-wrapper">
+          <Table striped bordered hover className="admin-table">
+            <thead className="admin-table-header">
               <tr>
                 <th>ID</th>
                 <th>TITLE</th>
@@ -175,78 +190,44 @@ const token = userInfo?.token || adminInfo?.token;
               </tr>
             </thead>
             <tbody>
-              {blogs.map((blog) => (
-                <tr key={blog._id}>
-                  <td data-label="ID">{blog._id}</td>
-                  <td data-label="Title">{blog.title}</td>
-                  <td data-label="Description">{blog.shortDescription}</td>
-
-                  <td>
-                    <Button
-                      type="button"
-                      variant="light"
-                          className="details"
-                      onClick={() => navigate(`/admin/blog/${blog._id}`)}
-                    >
-                      Edit
-                    </Button>
-                    &nbsp;
-                    <Button
-                      type="button"
-                      variant="light"
-                          className="details"
-                      onClick={() => deleteHandler(blog)}
-                    >
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {blogs
+                .filter((blog) =>
+                  blog.title.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((blog) => (
+                  <tr key={blog._id} className="admin-table-row">
+                    <td data-label="ID" className="small-text">
+                      {blog._id.substring(0, 8)}...
+                    </td>
+                    <td data-label="Title" className="title-cell">
+                      {blog.title}
+                    </td>
+                    <td data-label="Description" className="desc-cell">
+                      {blog.shortDescription?.substring(0, 60)}
+                      {blog.shortDescription?.length > 60 ? "..." : ""}
+                    </td>
+                    <td className="actions-cell">
+                      <Button
+                        variant="sm"
+                        className="btn-admin-edit"
+                        onClick={() => navigate(`/admin/blog/${blog._id}`)}
+                        title="Edit blog"
+                      >
+                        <FaEdit />
+                      </Button>
+                      <Button
+                        variant="sm"
+                        className="btn-admin-delete ms-2"
+                        onClick={() => deleteHandler(blog)}
+                        title="Delete blog"
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </Table>
-          <div>
-            <nav>
-              <ul className="pagination">
-                <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-                >
-                  <Link
-                    className="page-link"
-                    to={`/admin/blogs?page=${Number(currentPage) - 1}`}
-                  >
-                    &lt;
-                  </Link>
-                </li>
-                {[...Array(pages).keys()].map((x) => (
-                  <li
-                    key={x + 1}
-                    className={`page-item ${
-                      x + 1 === Number(currentPage) ? "active" : ""
-                    }`}
-                  >
-                    <Link
-                      className="page-link"
-                      to={`/admin/blogs?page=${x + 1}`}
-                    >
-                      {x + 1}
-                    </Link>
-                  </li>
-                ))}
-                <li
-                  className={`page-item ${
-                    currentPage === pages ? "disabled" : ""
-                  }`}
-                >
-                  <Link
-                    className="page-link"
-                    to={`/admin/blogs?page=${Number(currentPage) + 1}`}
-                  >
-                    &gt;
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
         </div>
       )}
     </Container>

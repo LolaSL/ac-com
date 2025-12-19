@@ -1,17 +1,26 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
-import { Container, Row, Col, Card, Button, Badge, Spinner, Alert } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Store } from '../Store';
-import { getError } from '../utils';
-import { FaTrash, FaArrowDown, FaEye, FaClock } from 'react-icons/fa';
-import { toast } from 'react-toastify';
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Badge,
+  Spinner,
+  Alert,
+} from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Store } from "../Store";
+import { getError } from "../utils";
+import { FaTrash, FaArrowDown, FaEye, FaClock } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'FETCH_REQUEST':
+    case "FETCH_REQUEST":
       return { ...state, loading: true };
-    case 'FETCH_SUCCESS':
+    case "FETCH_SUCCESS":
       return {
         ...state,
         browsingHistory: action.payload.browsingHistory,
@@ -19,13 +28,13 @@ const reducer = (state, action) => {
         pages: action.payload.pages,
         loading: false,
       };
-    case 'FETCH_FAIL':
+    case "FETCH_FAIL":
       return { ...state, loading: false, error: action.payload };
-    case 'DELETE_REQUEST':
+    case "DELETE_REQUEST":
       return { ...state, loadingDelete: true };
-    case 'DELETE_SUCCESS':
+    case "DELETE_SUCCESS":
       return { ...state, loadingDelete: false };
-    case 'DELETE_FAIL':
+    case "DELETE_FAIL":
       return { ...state, loadingDelete: false };
     default:
       return state;
@@ -37,11 +46,11 @@ function BrowsingHistoryPage() {
   const { state } = useContext(Store);
   const { userInfo } = state;
 
-  const [{ loading, error, browsingHistory,  loadingDelete }, dispatch] =
+  const [{ loading, error, browsingHistory, loadingDelete }, dispatch] =
     useReducer(reducer, {
       browsingHistory: [],
       loading: true,
-      error: '',
+      error: "",
     });
 
   const [filterPriceDrops, setFilterPriceDrops] = useState(false);
@@ -49,57 +58,68 @@ function BrowsingHistoryPage() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get('/api/browsing-history', {
+        dispatch({ type: "FETCH_REQUEST" });
+        const { data } = await axios.get("/api/browsing-history", {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
-        dispatch({ type: 'FETCH_SUCCESS', payload: data });
+        dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
-        dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
+        dispatch({ type: "FETCH_FAIL", payload: getError(err) });
       }
     };
 
     if (userInfo) {
       fetchHistory();
     } else {
-      navigate('/signin');
+      navigate("/signin");
     }
   }, [userInfo, navigate]);
 
   const deleteHandler = async (id) => {
-    if (window.confirm('Are you sure you want to remove this item from your browsing history?')) {
+    if (
+      window.confirm(
+        "Are you sure you want to remove this item from your browsing history?"
+      )
+    ) {
       try {
-        dispatch({ type: 'DELETE_REQUEST' });
+        dispatch({ type: "DELETE_REQUEST" });
         await axios.delete(`/api/browsing-history/${id}`, {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
-        dispatch({ type: 'DELETE_SUCCESS' });
-        toast.success('Item removed from history');
+        dispatch({ type: "DELETE_SUCCESS" });
+        toast.success("Item removed from history");
         // Refresh the list
-        const { data } = await axios.get('/api/browsing-history', {
+        const { data } = await axios.get("/api/browsing-history", {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
-        dispatch({ type: 'FETCH_SUCCESS', payload: data });
+        dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
         toast.error(getError(err));
-        dispatch({ type: 'DELETE_FAIL' });
+        dispatch({ type: "DELETE_FAIL" });
       }
     }
   };
 
   const clearAllHistory = async () => {
-    if (window.confirm('Are you sure you want to clear all your browsing history?')) {
+    if (
+      window.confirm(
+        "Are you sure you want to clear all your browsing history?"
+      )
+    ) {
       try {
-        dispatch({ type: 'DELETE_REQUEST' });
-        await axios.delete('/api/browsing-history', {
+        dispatch({ type: "DELETE_REQUEST" });
+        await axios.delete("/api/browsing-history", {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
-        dispatch({ type: 'DELETE_SUCCESS' });
-        toast.success('Browsing history cleared');
-        dispatch({ type: 'FETCH_SUCCESS', payload: { browsingHistory: [], page: 1, pages: 1 } });
+        dispatch({ type: "DELETE_SUCCESS" });
+        toast.success("Browsing history cleared");
+        dispatch({
+          type: "FETCH_SUCCESS",
+          payload: { browsingHistory: [], page: 1, pages: 1 },
+        });
       } catch (err) {
         toast.error(getError(err));
-        dispatch({ type: 'DELETE_FAIL' });
+        dispatch({ type: "DELETE_FAIL" });
       }
     }
   };
@@ -113,11 +133,11 @@ function BrowsingHistoryPage() {
     const diffMinutes = Math.floor(diffTime / (1000 * 60));
 
     if (diffMinutes < 60) {
-      return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+      return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
     } else if (diffHours < 24) {
-      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+      return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
     } else if (diffDays === 1) {
-      return 'Yesterday';
+      return "Yesterday";
     } else if (diffDays < 7) {
       return `${diffDays} days ago`;
     } else {
@@ -136,18 +156,18 @@ function BrowsingHistoryPage() {
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 >
+        <h1>
           <FaEye className="me-2" />
           Browsing History
         </h1>
         <div>
           <Button
-            variant={filterPriceDrops ? 'primary' : 'outline-primary'}
+            variant={filterPriceDrops ? "primary" : "outline-primary"}
             onClick={() => setFilterPriceDrops(!filterPriceDrops)}
             className="me-2"
           >
             <FaArrowDown className="me-1" />
-            {filterPriceDrops ? 'Show All' : 'Price Drops Only'}
+            {filterPriceDrops ? "Show All" : "Price Drops Only"}
           </Button>
           {browsingHistory.length > 0 && (
             <Button variant="outline-danger" onClick={clearAllHistory}>
@@ -169,13 +189,13 @@ function BrowsingHistoryPage() {
       ) : filteredHistory.length === 0 ? (
         <Alert variant="info">
           {filterPriceDrops
-            ? 'No price drops found in your browsing history.'
-            : 'Your browsing history is empty. Start exploring products!'}
+            ? "No price drops found in your browsing history."
+            : "Your browsing history is empty. Start exploring products!"}
         </Alert>
       ) : (
-        <Row>
+        <Row className="g-3 mx-0">
           {filteredHistory.map((item) => (
-            <Col key={item._id} sm={6} md={4} lg={3} className="mb-4">
+            <Col key={item._id} xs={12} sm={6} md={4} lg={3} className="p-2">
               <Card className="h-100 shadow-sm position-relative">
                 {item.priceDropped && (
                   <Badge
@@ -184,16 +204,17 @@ function BrowsingHistoryPage() {
                     style={{ zIndex: 1 }}
                   >
                     <FaArrowDown className="me-1" />
-                    {calculateDiscount(item.priceAtView, item.currentPrice)}% OFF
+                    {calculateDiscount(item.priceAtView, item.currentPrice)}%
+                    OFF
                   </Badge>
                 )}
-                
+
                 <Link to={`/product/${item.product?.slug}`}>
                   <Card.Img
                     variant="top"
                     src={item.product?.image}
                     alt={item.product?.name}
-                    style={{ height: '200px', objectFit: 'cover' }}
+                    style={{ height: "200px", objectFit: "cover" }}
                   />
                 </Link>
 
@@ -202,7 +223,7 @@ function BrowsingHistoryPage() {
                     to={`/product/${item.product?.slug}`}
                     className="text-decoration-none text-dark"
                   >
-                    <Card.Title className="fs-6" style={{ minHeight: '48px' }}>
+                    <Card.Title className="fs-6" style={{ minHeight: "48px" }}>
                       {item.product?.name}
                     </Card.Title>
                   </Link>
