@@ -8,7 +8,12 @@ import {
   useMemo,
   useCallback,
 } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
@@ -84,6 +89,8 @@ function ProductPage() {
   const navigate = useNavigate();
   const params = useParams();
   const { slug } = params;
+  const [searchParams] = useSearchParams();
+  const ref = searchParams.get("ref");
 
   const [{ loading, error, product, loadingCreateReview }, dispatch] =
     useReducer(reducer, {
@@ -125,6 +132,13 @@ function ProductPage() {
     };
     fetchData();
   }, [slug]);
+
+  useEffect(() => {
+    if (ref) {
+      localStorage.setItem("referralCode", ref);
+      console.log("Referral code captured:", ref);
+    }
+  }, [ref]);
 
   // Handle screen resize for responsive modal
   useEffect(() => {
@@ -326,6 +340,11 @@ function ProductPage() {
             <h1 className="product-title">
               <strong>{product.name}</strong>
             </h1>
+            {ref && (
+              <Badge bg="info" className="ms-2">
+                Referred by: {ref}
+              </Badge>
+            )}
           </ListGroup.Item>
 
           <div style={{ position: "relative" }}>

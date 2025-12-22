@@ -1197,7 +1197,8 @@ const data = {
       companyLink: "https://www.lg.com/global/business/hvac",
       numReviews: 39,
       isAdmin: false,
-      logo: "/images/lg-logo.png"
+      logo: "/images/lg-logo.png",
+      referralCode: "LGREF"
     },
     {
       name: 'Samsung',
@@ -1208,7 +1209,8 @@ const data = {
       companyLink: "https://www.samsung.com/levant/business/system-air-conditioner-solutions/home/",
       numReviews: 38,
       isAdmin: false,
-      logo: "/images/samsung-logo.png"
+      logo: "/images/samsung-logo.png",
+      referralCode: "SAMSUNGREF"
     },
     {
       name: 'Lennox',
@@ -1219,7 +1221,8 @@ const data = {
       companyLink: "https://www.lennox.com/residential/",
       numReviews: 15,
       isAdmin: false,
-      logo: "/images/lennox-logo.png"
+      logo: "/images/lennox-logo.png",
+      referralCode: "LENNOXREF"
     },
     {
       name: 'Haier',
@@ -1230,7 +1233,8 @@ const data = {
       companyLink: "https://www.haier.com/global/about-haier/",
       numReviews: 25,
       isAdmin: false,
-      logo: "/images/haier-logo.png"
+      logo: "/images/haier-logo.png",
+      referralCode: "HAIERREF"
     },
     {
       name: 'Daikin',
@@ -1241,7 +1245,8 @@ const data = {
       companyLink: "https://www.daikin.com/",
       numReviews: 19,
       isAdmin: false,
-      logo: "/images/daikin-logo.png"
+      logo: "/images/daikin-logo.png",
+      referralCode: "DAIKINREF"
     },
     {
       name: 'Mitsubishi Electric Corporation',
@@ -1252,7 +1257,8 @@ const data = {
       companyLink: "https://www.mitsubishielectric.com/en/",
       numReviews: 45,
       isAdmin: false,
-      logo: "/images/mitsubishi-logo.png"
+      logo: "/images/mitsubishi-logo.png",
+      referralCode: "MITSUBISHIREF"
     },
     {
       name: 'Fujitsu General',
@@ -1263,7 +1269,8 @@ const data = {
       companyLink: "https://www.fujitsu-general.com/global/products/vrf/",
       numReviews: 40,
       isAdmin: false,
-      logo: "/images/fujitsu-logo.png"
+      logo: "/images/fujitsu-logo.png",
+      referralCode: "FUJITSUREF"
     },
     {
       name: 'Electra CP',
@@ -1274,7 +1281,8 @@ const data = {
       companyLink: "https://www.electra.co.il/en",
       numReviews: 55,
       isAdmin: false,
-      logo: "/images/electra-logo.png"
+      logo: "/images/electra-logo.png",
+      referralCode: "ELECTRAREF"
     }
 
   ],

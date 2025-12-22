@@ -253,9 +253,11 @@ export default function OrderPage() {
   }
 
   function createOrder(data, actions) {
+    // Round to 2 decimal places to avoid PayPal DECIMAL_PRECISION error
+    const roundedTotal = Math.round(order.totalPrice * 100) / 100;
     return actions.order
       .create({
-        purchase_units: [{ amount: { value: order.totalPrice } }],
+        purchase_units: [{ amount: { value: roundedTotal.toFixed(2) } }],
       })
       .then((orderID) => orderID);
   }

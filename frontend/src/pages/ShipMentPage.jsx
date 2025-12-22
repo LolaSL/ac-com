@@ -4,7 +4,7 @@ import { Container } from "react-bootstrap";
 const ShipMentPage = () => {
   return (
     <Container className="my-5">
-      <h2 className="mb-4">Shipping, Tax & Delivery</h2>
+       <h1 className="mb-4 fs-1">Shipping, Tax & Delivery</h1>
 
       <p className="fs-5">
         We’ve made shipping simple for all our air conditioners, outdoor units,

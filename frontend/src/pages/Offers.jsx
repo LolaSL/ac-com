@@ -23,7 +23,7 @@ export default function Offers() {
       linkText: "Learn More",
     },
     {
-      title: "Happy Hanukkah",
+      title: "New Year deal!",
       description: "Save energy!",
       imageSrc: "/images/offer-crist4.jpg",
       linkTo:

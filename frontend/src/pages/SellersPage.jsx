@@ -51,11 +51,11 @@ export default function SellersPage() {
   return (
     <>
       <Container className="seller-container">
-        <h1 className="sellers-title">Suppliers</h1>
+        <h1 className="sellers-title fs-1">Suppliers</h1>
         <h2>Air Conditioning Products and VRF Systems</h2>
         {loading ? (
           <LoadingBox></LoadingBox>
-        ) : error ? (
+        ) : error ? ( 
           <MessageBox variant="danger">{error}</MessageBox>
         ) : (
           <div>

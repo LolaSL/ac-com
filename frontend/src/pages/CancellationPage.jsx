@@ -4,7 +4,7 @@ import { Container } from "react-bootstrap";
 const CancellationPage = () => {
   return (
     <Container className="my-5">
-      <h2 className="mb-4">Cancellation Policy</h2>
+      <h1 className="mb-4 fs-1">Cancellation Policy</h1>
 
       <p className="fs-5">
         At AC Com Home Supply, we understand that sometimes plans change. Any order that has <strong>not yet been loaded onto a truck or shipped</strong> can be cancelled. Please contact us immediately if you need to cancel, as we process and ship orders quickly to ensure timely delivery of air conditioners, outdoor units, and ventilation equipment.

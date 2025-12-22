@@ -20,15 +20,32 @@ blogRouter.get(
     '/',
     expressAsyncHandler(async (req, res) => {
         const pageSize = 10;
-    const page = Number(req.query.page) || 1;
-      const blogs = await Blog.find({})
-      .skip(pageSize * (page - 1))
-      .limit(pageSize);  
-      const countBlogs = await Blog.countDocuments();
-    const pages = Math.ceil(countBlogs / pageSize);
-    res.send({ blogs, page, pages }); 
+        const page = Number(req.query.page) || 1;
+        const q = (req.query.q || '').toString().trim();
 
-  })
+        const filter = {};
+        if (q) {
+            // Split query into words and require that each word appears in title, shortDescription or content (AND semantics)
+            const words = q.split(/\s+/).filter(Boolean);
+            if (words.length) {
+                filter.$and = words.map((word) => ({
+                    $or: [
+                        { title: { $regex: word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } },
+                        { shortDescription: { $regex: word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } },
+                        { content: { $regex: word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } },
+                    ],
+                }));
+            }
+        }
+
+        const blogs = await Blog.find(filter)
+            .skip(pageSize * (page - 1))
+            .limit(pageSize);
+        const countBlogs = await Blog.countDocuments(filter);
+        const pages = Math.ceil(countBlogs / pageSize);
+        res.send({ blogs, page, pages });
+
+    })
 );
 
 
@@ -107,19 +124,19 @@ blogRouter.delete(
 
 
 blogRouter.get('/admin/blogs-list', async (req, res) => {
-    const page = parseInt(req.query.page) || 1; 
+    const page = parseInt(req.query.page) || 1;
     const limit = 10;
-    const skip = (page - 1) * limit; 
+    const skip = (page - 1) * limit;
 
     try {
-        const totalBlogs = await Blog.countDocuments(); 
-        const blogs = await Blog.find().skip(skip).limit(limit); 
+        const totalBlogs = await Blog.countDocuments();
+        const blogs = await Blog.find().skip(skip).limit(limit);
 
         res.json({
             totalBlogs,
             blogs,
             currentPage: page,
-            totalPages: Math.ceil(totalBlogs / limit), 
+            totalPages: Math.ceil(totalBlogs / limit),
         });
     } catch (error) {
         console.error(error);

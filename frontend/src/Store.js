@@ -5,9 +5,9 @@ export const Store = createContext();
 const initialState = {
   fullBox: false,
 
-adminInfo: localStorage.getItem('adminInfo')
-  ? JSON.parse(localStorage.getItem('adminInfo'))
-  : null,
+  adminInfo: localStorage.getItem('adminInfo')
+    ? JSON.parse(localStorage.getItem('adminInfo'))
+    : null,
 
   userInfo: localStorage.getItem('userInfo')
     ? JSON.parse(localStorage.getItem('userInfo'))
@@ -47,8 +47,8 @@ function reducer(state, action) {
       );
       const cartItems = existItem
         ? state.cart.cartItems.map((item) =>
-            item._id === existItem._id ? newItem : item
-          )
+          item._id === existItem._id ? newItem : item
+        )
         : [...state.cart.cartItems, newItem];
 
       localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -80,14 +80,20 @@ function reducer(state, action) {
       const shippingPrice = itemsPrice > 100 ? 0 : 10;
       const totalPrice = itemsPrice + taxPrice + shippingPrice;
 
+      // Round to 2 decimal places to avoid precision issues
+      const roundedItemsPrice = Math.round(itemsPrice * 100) / 100;
+      const roundedTaxPrice = Math.round(taxPrice * 100) / 100;
+      const roundedShippingPrice = Math.round(shippingPrice * 100) / 100;
+      const roundedTotalPrice = Math.round(totalPrice * 100) / 100;
+
       return {
         ...state,
         cart: {
           ...state.cart,
-          itemsPrice: itemsPrice.toFixed(2),
-          taxPrice: taxPrice.toFixed(2),
-          shippingPrice: shippingPrice.toFixed(2),
-          totalPrice: totalPrice.toFixed(2),
+          itemsPrice: roundedItemsPrice.toFixed(2),
+          taxPrice: roundedTaxPrice.toFixed(2),
+          shippingPrice: roundedShippingPrice.toFixed(2),
+          totalPrice: roundedTotalPrice.toFixed(2),
         },
       };
     }
@@ -104,8 +110,8 @@ function reducer(state, action) {
         'serviceProviderInfo',
         JSON.stringify(action.payload)
       );
-      return { 
-        ...state, 
+      return {
+        ...state,
         serviceProviderInfo: action.payload,
         userInfo: null,
         adminInfo: null
@@ -123,8 +129,8 @@ function reducer(state, action) {
       localStorage.removeItem('userInfo');
       localStorage.removeItem('serviceProviderInfo');
       localStorage.setItem('adminInfo', JSON.stringify(action.payload));
-      return { 
-        ...state, 
+      return {
+        ...state,
         adminInfo: action.payload,
         userInfo: null,
         serviceProviderInfo: null
@@ -139,8 +145,8 @@ function reducer(state, action) {
       localStorage.removeItem('adminInfo');
       localStorage.removeItem('serviceProviderInfo');
       localStorage.setItem('userInfo', JSON.stringify(action.payload));
-      return { 
-        ...state, 
+      return {
+        ...state,
         userInfo: action.payload,
         adminInfo: null,
         serviceProviderInfo: null

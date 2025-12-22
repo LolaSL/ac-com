@@ -55,14 +55,33 @@ export default function SignUpPage() {
     }
     setLoading(true);
     try {
-      const { data } = await Axios.post("/api/users/signup", {
-        name,
-        email,
-        password,
-      });
+      let ref = new URLSearchParams(search).get("ref"); // Get referral code from URL
+      if (!ref) {
+        ref = localStorage.getItem("referralCode"); // Fallback to localStorage
+      }
+      console.log(
+        "Signup ref from URL:",
+        new URLSearchParams(search).get("ref")
+      );
+      console.log(
+        "Signup ref from localStorage:",
+        localStorage.getItem("referralCode")
+      );
+      console.log("Final ref used:", ref);
+      const { data } = await Axios.post(
+        `/api/users/signup${ref ? `?ref=${ref}` : ""}`,
+        {
+          name,
+          email,
+          password,
+        }
+      );
 
       ctxDispatch({ type: "USER_SIGNIN", payload: data });
       localStorage.setItem("userInfo", JSON.stringify(data));
+      if (ref) {
+        localStorage.removeItem("referralCode"); // Clear after use
+      }
       toast.success("Account created successfully!");
       navigate(redirect || "/");
     } catch (err) {

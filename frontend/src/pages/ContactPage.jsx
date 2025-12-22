@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Form, Button, Alert, Image } from "react-bootstrap";
 import axios from "axios";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 const ContactPage = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -71,12 +71,19 @@ const ContactPage = () => {
 
   return (
     <Container>
-      <h1 className="contacts-title mt-4 mb-2">Contact Us</h1>
+      <h1 className="contacts-title mt-4 mb-2 fs-1">Contact Us</h1>
 
-      <p className="lead mb-4 fs-4">
-        Have questions about our products or services? Need help with your
-        order? Our team is here to assist you. Fill out the form below, and
-        we’ll get back to you as soon as possible.
+      <p
+        className="lead mb-4 fs-4 text-break ps-5"
+        style={{ lineHeight: 1.7, maxWidth: 700 }}
+      >
+        Have questions about our products or services?
+        <br />
+        Need help with your order?
+        <br />
+        <span className="fw-semibold">Our team is here to assist you.</span>
+        <br />
+        Fill out the form below and we’ll get back to you as soon as possible.
       </p>
 
       <div>

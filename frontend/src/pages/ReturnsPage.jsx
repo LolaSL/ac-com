@@ -4,7 +4,7 @@ import { Container } from "react-bootstrap";
 const ReturnsPage = () => {
   return (
     <Container className="my-5">
-      <h2 className="mb-4">Returns</h2>
+      <h1 className="mb-4 fs-1">Returns</h1>
 
       <p className="fs-5">
         At Total Home Supply, your satisfaction is our top priority. We offer a

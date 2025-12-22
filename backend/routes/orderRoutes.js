@@ -132,13 +132,17 @@ orderRouter.post(
       ? (itemsPrice + shippingPrice + taxPrice)
       : parseFloat(req.body.totalPrice);
 
-    if (Number.isNaN(totalPrice)) {
+    // Round to 2 decimal places to avoid PayPal DECIMAL_PRECISION error
+    const roundedTotalPrice = Math.round(totalPrice * 100) / 100;
+
+    if (Number.isNaN(roundedTotalPrice)) {
       return res.status(400).send({ message: 'Calculation error with total price' });
     }
 
 
     console.log('Order Items:', req.body.orderItems);
-    console.log('Parsed Prices:', { itemsPrice, shippingPrice, taxPrice, totalPrice });
+    console.log('Parsed Prices:', { itemsPrice, shippingPrice, taxPrice, totalPrice, roundedTotalPrice });
+    console.log('User referredBy:', req.user.referredBy);
 
 
     const newOrder = new Order({
@@ -149,8 +153,9 @@ orderRouter.post(
       itemsPrice,
       shippingPrice,
       taxPrice,
-      totalPrice,
+      totalPrice: roundedTotalPrice,
       user: req.user._id,
+      referredBy: req.user.referredBy,
     });
 
 
@@ -159,7 +164,7 @@ orderRouter.post(
     // Create notification for user
     await Notification.create({
       title: 'Order Confirmed',
-      message: `Your order #${order._id.toString().slice(-6)} has been placed successfully. Total: $${totalPrice.toFixed(2)}`,
+      message: `Your order #${order._id.toString().slice(-6)} has been placed successfully. Total: $${roundedTotalPrice.toFixed(2)}`,
       type: 'info',
       recipientType: 'user',
       userId: req.user._id,
@@ -168,7 +173,7 @@ orderRouter.post(
     // Create notification for admin
     await Notification.create({
       title: 'New Order Received',
-      message: `New order #${order._id.toString().slice(-6)} from ${req.user.name}. Total: $${totalPrice.toFixed(2)}`,
+      message: `New order #${order._id.toString().slice(-6)} from ${req.user.name}. Total: $${roundedTotalPrice.toFixed(2)}`,
       type: 'urgent',
       recipientType: 'admin',
     });

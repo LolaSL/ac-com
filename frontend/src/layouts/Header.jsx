@@ -156,6 +156,15 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/my-reviews" className="dropdown-item">
                     My Reviews
                   </Link>
+                  {userInfo.referredBy && (
+                    <Link
+                      to={`/seller/dashboard/${userInfo.referredBy}`}
+                      className="dropdown-item"
+                    >
+                      <i className="fas fa-chart-line me-2"></i>
+                      Referral Dashboard
+                    </Link>
+                  )}
                   <NavDropdown.Divider />
                   <Link
                     className="dropdown-item"
@@ -166,7 +175,12 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </Link>
                 </NavDropdown>
               ) : (
-                <Link className="nav-link" to="/signin">
+                <Link
+                  className="nav-link"
+                  to={`/signin?redirect=${encodeURIComponent(
+                    window.location.pathname + window.location.search
+                  )}`}
+                >
                   User Login
                 </Link>
               )}
@@ -238,6 +252,13 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </Link>
                   <Link to="/admin/sellers" className="dropdown-item">
                     Sellers
+                  </Link>
+                  <Link
+                    to="/admin/sellers/total-dashboard"
+                    className="dropdown-item"
+                  >
+                    <i className="fas fa-chart-bar me-2"></i>
+                    Seller Referral Dashboard
                   </Link>
                   <Link to="/admin/blogs-list" className="dropdown-item">
                     Blogs

@@ -14,6 +14,7 @@ import MessageEditPage from "../pages/MessageEditPage.jsx";
 import Users from "../components/UsersProductSales.jsx";
 import ServiceProviders from "../components/ServiceProviders.jsx";
 import Notifications from "../components/Notifications.jsx";
+import TotalSellerDashboard from "../pages/TotalSellerDashboard.jsx";
 import AdminRoute from "../components/AdminRoute.js";
 
 export const adminRoutes = [
@@ -78,6 +79,14 @@ export const adminRoutes = [
     element: (
       <AdminRoute>
         <SellerEditPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/sellers/total-dashboard",
+    element: (
+      <AdminRoute>
+        <TotalSellerDashboard />
       </AdminRoute>
     ),
   },

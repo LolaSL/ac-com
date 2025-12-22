@@ -31,7 +31,8 @@ export const generateToken = (user) => {
       isAdmin: user.isAdmin,
       isServiceProvider: user.isServiceProvider,
       type: user.isServiceProvider ? 'serviceProvider' : 'user',
-     isPaid: user.isPaid,
+      isPaid: user.isPaid,
+      referredBy: user.referredBy,
     },
     process.env.JWT_SECRET,
     {
@@ -44,12 +45,12 @@ export const generateToken = (user) => {
 export const isAuth = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (authorization) {
-    const token = authorization.slice(7); 
+    const token = authorization.slice(7);
     jwt.verify(token, process.env.JWT_SECRET, (err, decode) => {
       if (err) {
         res.status(401).send({ message: 'Invalid token' });
       } else {
-        req.user = decode; 
+        req.user = decode;
         next();
       }
     });

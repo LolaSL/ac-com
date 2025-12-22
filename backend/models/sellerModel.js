@@ -26,6 +26,7 @@ const sellerSchema = new mongoose.Schema(
     numReviews: { type: Number, default: 0 },
     reviews: [reviewSchema],
     logo: { type: String, default: "" },
+    referralCode: { type: String, required: true, unique: true },
   },
   {
     timestamps: true,

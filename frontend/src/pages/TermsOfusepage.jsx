@@ -4,7 +4,7 @@ import { Container } from "react-bootstrap";
 const TermsOfusePage = () => {
   return (
     <Container className="my-5">
-      <h2 className="mb-4">Terms of Use / Terms & Conditions</h2>
+     <h1 className="mb-4 fs-1">Terms of Use / Terms & Conditions</h1>
 
       <p className="fs-5">
         PLEASE READ THESE TERMS AND CONDITIONS CAREFULLY BEFORE USING THIS

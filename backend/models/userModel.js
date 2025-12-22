@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     resetToken: { type: String },
     isAdmin: { type: Boolean, default: false, required: true },
     isPaid: { type: Boolean, default: false, required: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller' },
   },
   {
     timestamps: true,

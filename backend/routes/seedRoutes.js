@@ -74,27 +74,8 @@ seedRouter.get('/', async (req, res) => {
 
     // Seed Orders with proper user and product references
     let createdOrders = [];
-    if (ordersMode === 'reset') {
-      await Order.deleteMany({});
-      const ordersWithIds = data.orders.map((order, index) => {
-        const userId = createdUsers[index % createdUsers.length]._id;
-        const orderItemsWithProductIds = order.orderItems.map((item) => {
-          const product = createdProducts.find(p => p.slug === item.slug);
-          return {
-            ...item,
-            product: product ? product._id : createdProducts[0]._id,
-          };
-        });
-        return {
-          ...order,
-          user: userId,
-          orderItems: orderItemsWithProductIds,
-        };
-      });
-      // Use raw insert to preserve createdAt/updatedAt from seed data
-      const result = await Order.collection.insertMany(ordersWithIds, { ordered: true });
-      createdOrders = Object.values(result.insertedIds);
-    } else if (ordersMode === 'append') {
+    if (ordersMode === 'seedIfNone') {
+      // Only seed orders if none exist in DB
       const existingCount = await Order.countDocuments();
       if (existingCount === 0) {
         const ordersWithIds = data.orders.map((order, index) => {
@@ -114,8 +95,68 @@ seedRouter.get('/', async (req, res) => {
         });
         const result = await Order.collection.insertMany(ordersWithIds, { ordered: true });
         createdOrders = Object.values(result.insertedIds);
+      } else {
+        createdOrders = [];
       }
-      // else skip appending to avoid duplicates
+    } else if (ordersMode === 'reset' || ordersMode === 'append') {
+      // Always preserve manual orders, only add new seed orders that don't exist
+      const ordersWithIds = data.orders.map((order, index) => {
+        const userId = createdUsers[index % createdUsers.length]._id;
+        const orderItemsWithProductIds = order.orderItems.map((item) => {
+          const product = createdProducts.find(p => p.slug === item.slug);
+          return {
+            ...item,
+            product: product ? product._id : createdProducts[0]._id,
+          };
+        });
+        return {
+          ...order,
+          user: userId,
+          orderItems: orderItemsWithProductIds,
+        };
+      });
+      // Deduplicate seed orders and avoid inserting orders that already exist in DB
+      const payIds = ordersWithIds
+        .map(o => (o.paymentResult && o.paymentResult.id ? o.paymentResult.id : null))
+        .filter(Boolean);
+      const createdDates = ordersWithIds
+        .map(o => (o.createdAt ? new Date(o.createdAt) : null))
+        .filter(Boolean);
+
+      const existingQuery = [];
+      if (payIds.length) existingQuery.push({ 'paymentResult.id': { $in: payIds } });
+      if (createdDates.length) existingQuery.push({ createdAt: { $in: createdDates } });
+
+      let existingOrders = [];
+      if (existingQuery.length) {
+        existingOrders = await Order.find({ $or: existingQuery });
+      }
+
+      const existingPayIds = new Set(existingOrders.map(o => (o.paymentResult && o.paymentResult.id ? o.paymentResult.id : null)).filter(Boolean));
+      const existingCreatedKeys = new Set(existingOrders.map(o => (o.createdAt ? new Date(o.createdAt).toISOString() : null)).filter(Boolean));
+
+      const seen = new Set();
+      const uniqueOrders = [];
+      for (const ord of ordersWithIds) {
+        const payId = ord.paymentResult && ord.paymentResult.id ? ord.paymentResult.id : null;
+        const createdKey = ord.createdAt ? new Date(ord.createdAt).toISOString() : null;
+        const key = payId || createdKey || JSON.stringify({ items: ord.orderItems.map(i => ({ slug: i.slug, qty: i.quantity })), total: ord.totalPrice });
+        if (existingPayIds.has(payId) || existingCreatedKeys.has(createdKey)) {
+          // skip this order because it already exists in DB
+          continue;
+        }
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueOrders.push(ord);
+        }
+      }
+
+      if (uniqueOrders.length) {
+        const result = await Order.collection.insertMany(uniqueOrders, { ordered: true });
+        createdOrders = Object.values(result.insertedIds);
+      } else {
+        createdOrders = [];
+      }
     }
 
     // Seed Annotations with required fields

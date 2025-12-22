@@ -11,6 +11,8 @@ import BrowsingHistoryPage from "../pages/BrowsingHistoryPage.jsx";
 import UserReviewsPage from "../pages/UserReviewsPage.jsx";
 import UserMessagesPage from "../pages/UserMessagesPage.jsx";
 import WishlistPage from "../pages/WishlistPage.jsx";
+import SellerDashboard from "../pages/SellerDashboard.jsx";
+import TotalSellerDashboard from "../pages/TotalSellerDashboard.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.js";
 
 export const protectedRoutes = [
@@ -115,6 +117,22 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <WishlistPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/seller/dashboard/:id",
+    element: (
+      <ProtectedRoute>
+        <SellerDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/seller/total-dashboard",
+    element: (
+      <ProtectedRoute>
+        <TotalSellerDashboard />
       </ProtectedRoute>
     ),
   },

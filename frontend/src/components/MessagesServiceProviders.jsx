@@ -4,7 +4,7 @@ import { Store } from "../Store";
 import { getError } from "../utils";
 import { Container, Table, Button } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { FaEdit, FaTrash } from "react-icons/fa";
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
@@ -241,16 +241,20 @@ const MessagesServiceProviders = () => {
                   </td>
                   <td>
                     <Button
-                      className="details me-2 mb-2"
+                       type="button"
+                     className="btn-admin-edit"
+                        title="Edit"
                       onClick={() => editHandler(message._id)}
                     >
-                      Edit
+                   <FaEdit />
                     </Button>
                     <Button
-                      className="details me-2 mb-2 "
+                       type="button"
+                    className="btn-admin-delete"
+                        title="Delete"
                       onClick={() => deleteHandler(message._id)}
                     >
-                      Delete
+                          <FaTrash />
                     </Button>
                   </td>
                 </tr>

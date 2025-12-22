@@ -1,6 +1,8 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import Seller from '../models/sellerModel.js';
+import Order from '../models/orderModel.js';
+import User from '../models/userModel.js';
 import { isAuth, isAdmin } from '../utils.js';
 import multer from 'multer';
 const upload = multer()
@@ -53,6 +55,18 @@ sellerRouter.get(
     const count = await Seller.countDocuments();
     const totalPages = Math.ceil(count / limit);
     res.json({ page, totalPages, sellers });
+  })
+);
+
+sellerRouter.get(
+  '/:id/referral-link',
+  expressAsyncHandler(async (req, res) => {
+    const seller = await Seller.findById(req.params.id);
+    if (!seller) {
+      return res.status(404).send({ message: 'Seller not found' });
+    }
+    const link = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/products?ref=${seller.referralCode}`;
+    res.send({ referralLink: link });
   })
 );
 
@@ -115,6 +129,50 @@ sellerRouter.put(
 );
 
 sellerRouter.get(
+  '/all-referral-stats',
+  expressAsyncHandler(async (req, res) => {
+    const sellers = await Seller.find({});
+    const allStats = [];
+
+    for (const seller of sellers) {
+      // Get referred users count
+      const referredUsersCount = await User.countDocuments({ referredBy: seller._id });
+
+      // Get referred orders
+      const referredOrders = await Order.find({ referredBy: seller._id }).populate('user', 'name');
+      const totalReferredOrders = referredOrders.length;
+
+      // Calculate total sales and commission
+      const totalReferredSales = referredOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+      const commissionRate = 0.10; // 10%
+      const totalCommission = totalReferredSales * commissionRate;
+
+      allStats.push({
+        seller: {
+          _id: seller._id,
+          name: seller.name,
+          brand: seller.brand,
+          logo: seller.logo,
+          referralCode: seller.referralCode,
+        },
+        stats: {
+          referredUsersCount,
+          totalReferredOrders,
+          totalReferredSales,
+          totalCommission,
+          commissionRate,
+        },
+      });
+    }
+
+    res.json({
+      totalSellers: sellers.length,
+      sellers: allStats,
+    });
+  })
+);
+
+sellerRouter.get(
   '/:id',
   expressAsyncHandler(async (req, res) => {
     const seller = await Seller.findById(req.params.id);
@@ -173,6 +231,100 @@ sellerRouter.delete(
     } else {
       res.status(404).send({ message: 'Seller Not Found' });
     }
+  })
+);
+
+// Get seller referral statistics
+sellerRouter.get(
+  '/:id/referral-stats',
+  expressAsyncHandler(async (req, res) => {
+    const sellerId = req.params.id;
+
+    // Count referred users
+    const referredUsersCount = await User.countDocuments({ referredBy: sellerId });
+
+    // Get referred orders
+    const referredOrders = await Order.find({ referredBy: sellerId })
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 });
+
+    // Calculate total referred sales
+    const totalReferredSales = referredOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+    // Calculate commission (10% of referred sales)
+    const commissionRate = 0.10;
+    const totalCommission = totalReferredSales * commissionRate;
+
+    // Get recent referred orders (last 10)
+    const recentReferredOrders = referredOrders.slice(0, 10);
+
+    res.json({
+      sellerId,
+      referredUsersCount,
+      totalReferredOrders: referredOrders.length,
+      totalReferredSales,
+      commissionRate,
+      totalCommission,
+      recentReferredOrders,
+    });
+  })
+);
+
+// Get seller's referred users
+sellerRouter.get(
+  '/:id/referred-users',
+  expressAsyncHandler(async (req, res) => {
+    const sellerId = req.params.id;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const referredUsers = await User.find({ referredBy: sellerId })
+      .select('name email createdAt')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalCount = await User.countDocuments({ referredBy: sellerId });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.json({
+      page,
+      totalPages,
+      totalCount,
+      users: referredUsers,
+    });
+  })
+);
+
+// Get seller's referred orders
+sellerRouter.get(
+  '/:id/referred-orders',
+  expressAsyncHandler(async (req, res) => {
+    const sellerId = req.params.id;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const referredOrders = await Order.find({ referredBy: sellerId })
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalCount = await Order.countDocuments({ referredBy: sellerId });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Calculate total sales for these orders
+    const totalSales = referredOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+    res.json({
+      page,
+      totalPages,
+      totalCount,
+      totalSales,
+      orders: referredOrders,
+    });
   })
 );
 

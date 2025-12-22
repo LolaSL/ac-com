@@ -10,7 +10,7 @@ import {
   Col,
   Badge,
 } from "react-bootstrap";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
@@ -57,7 +57,7 @@ export default function UserListPage() {
   const token = userInfo?.token || adminInfo?.token;
 
   const [
-    { loading, error, users = [], loadingDelete, successDelete, pages },
+    { loading, error, users = [], loadingDelete, successDelete },
     dispatch,
   ] = useReducer(reducer, {
     loading: true,

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useReducer, useState } from "react";
 import axios from "axios";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {  useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
@@ -50,7 +50,6 @@ const SellersListPage = () => {
       loading,
       error,
       sellers,
-      totalPages,
       loadingCreate,
       loadingDelete,
       successDelete,
