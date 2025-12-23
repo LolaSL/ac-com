@@ -11,6 +11,7 @@ import Blog from '../models/blogModel.js';
 import Notification from '../models/notificationModel.js';
 import Annotation from '../models/annotationModel.js';
 import Order from '../models/orderModel.js';
+import Payment from '../models/paymentModel.js';
 import data from '../data.js';
 
 const seedRouter = express.Router();
@@ -31,6 +32,7 @@ seedRouter.get('/', async (req, res) => {
     await Blog.deleteMany({});
     await Notification.deleteMany({});
     await Annotation.deleteMany({});
+    await Payment.deleteMany({});
 
     // Seed ServiceProviders
     const createdServiceProviders = await ServiceProvider.insertMany(data.serviceProviders);
@@ -58,6 +60,13 @@ seedRouter.get('/', async (req, res) => {
       projectName: projectIds[index % projectIds.length],
     }));
     const createdEarnings = await Earnings.insertMany(earningsWithIds);
+
+    // Seed Payments
+    const paymentsWithIds = data.payments.map((payment, index) => ({
+      ...payment,
+      serviceProvider: serviceProviderIds[index % serviceProviderIds.length],
+    }));
+    const createdPayments = await Payment.insertMany(paymentsWithIds);
 
     // Seed other collections
     const createdProducts = await Product.insertMany(data.products);

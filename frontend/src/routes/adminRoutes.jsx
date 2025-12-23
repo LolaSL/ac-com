@@ -15,6 +15,7 @@ import Users from "../components/UsersProductSales.jsx";
 import ServiceProviders from "../components/ServiceProviders.jsx";
 import Notifications from "../components/Notifications.jsx";
 import TotalSellerDashboard from "../pages/TotalSellerDashboard.jsx";
+import PaymentsPage from "../pages/PaymentsPage.jsx";
 import AdminRoute from "../components/AdminRoute.js";
 
 export const adminRoutes = [
@@ -23,6 +24,14 @@ export const adminRoutes = [
     element: (
       <AdminRoute>
         <DashboardPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/payments",
+    element: (
+      <AdminRoute>
+        <PaymentsPage />
       </AdminRoute>
     ),
   },

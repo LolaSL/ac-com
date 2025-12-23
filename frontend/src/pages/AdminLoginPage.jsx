@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import Button from "react-bootstrap/Button";
+import Container from "react-bootstrap/Container";
+import Card from "react-bootstrap/Card";
+import Form from "react-bootstrap/Form";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -46,46 +49,61 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="admin-login-wrapper">
-      <div className="admin-login-container">
-        <div className="admin-login-card">
-          <h1 className="admin-login-title">Admin Portal</h1>
-          <p className="admin-login-subtitle">Secure Administration</p>
-          <form onSubmit={handleAdminLogin}>
-            <div className="mb-3">
-              <label>Email</label>
-              <input
+    <Container
+      className="d-flex justify-content-center align-items-center min-vh-100"
+      style={{
+        background: "linear-gradient(135deg, #00008B 0%, #000033 100%)",
+      }}
+    >
+      <Card
+        className="shadow-lg p-4 text-white"
+        style={{
+          maxWidth: "400px",
+          width: "100%",
+          backgroundColor: "#00008B",
+        }}
+      >
+        <Card.Body>
+          <h1 className="text-center mb-4 fw-bold text-danger">Admin Portal</h1>
+          <p className="text-center mb-4 text-white">
+            Secure Administration Access
+          </p>
+          <Form onSubmit={handleAdminLogin}>
+            <Form.Group controlId="email" className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
                 type="email"
-                required
+                placeholder="Enter admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="form-control"
-              />
-            </div>
-
-            <div className="mb-3">
-              <label>Password</label>
-              <input
-                type="password"
                 required
+              />
+            </Form.Group>
+
+            <Form.Group controlId="password" className="mb-3">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="form-control"
+                required
               />
-            </div>
-
-            <div className="mb-3">
+            </Form.Group>
+            <div className="d-grid mb-3">
               <Button
                 type="submit"
-                className="go-to-btn btn-text"
+                className="go-to-btn btn-lg"
+                variant="primary"
+                style={{ color: "red !important" }}
                 disabled={submitting}
               >
                 {submitting ? "Signing in..." : "Login as Admin"}
               </Button>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          </Form>
+        </Card.Body>
+      </Card>
+    </Container>
   );
 }

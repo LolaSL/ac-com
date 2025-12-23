@@ -1452,6 +1452,46 @@ const data = {
       serviceProvider: "test-company4@example.com",
       hoursWorked: 90,
     },
+    {
+      name: "Modern Office Design",
+      client: "TechCorp Inc",
+      dueDate: "2025-03-10",
+      status: "In Progress",
+      serviceProvider: "test-company1@example.com",
+      hoursWorked: 15,
+    },
+    {
+      name: "Residential HVAC Upgrade",
+      client: "HomeOwners LLC",
+      dueDate: "2025-04-05",
+      status: "Completed",
+      serviceProvider: "test-company2@example.com",
+      hoursWorked: 50,
+    },
+    {
+      name: "Commercial Building Plan",
+      client: "BuildIt Corp",
+      dueDate: "2025-05-20",
+      status: "In Progress",
+      serviceProvider: "test-company3@example.com",
+      hoursWorked: 25,
+    },
+    {
+      name: "Ventilation System Design",
+      client: "AirFlow Ltd",
+      dueDate: "2025-06-15",
+      status: "Completed",
+      serviceProvider: "test-company4@example.com",
+      hoursWorked: 35,
+    },
+    {
+      name: "Green Building Consultation",
+      client: "EcoBuild Inc",
+      dueDate: "2025-07-01",
+      status: "In Progress",
+      serviceProvider: "test-company5@example.com",
+      hoursWorked: 10,
+    },
   ],
   messages: [
     {
@@ -1996,6 +2036,31 @@ const data = {
       updatedAt: new Date("2024-12-16T09:15:00Z"),
     },
   ],
+  payments: [
+    {
+      serviceProvider: "test-company1@example.com",
+      amount: 500,
+      status: "completed",
+      paymentMethod: "bank transfer",
+      transactionId: "TXN123456",
+      description: "Payment for residential house design project"
+    },
+    {
+      serviceProvider: "test-company2@example.com",
+      amount: 750,
+      status: "pending",
+      paymentMethod: "paypal",
+      description: "Payment for loft renovation project"
+    },
+    {
+      serviceProvider: "test-company3@example.com",
+      amount: 600,
+      status: "completed",
+      paymentMethod: "bank transfer",
+      transactionId: "TXN789012",
+      description: "Payment for office interior renovation"
+    }
+  ]
 
 
 }

@@ -235,6 +235,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/admin/dashboard" className="dropdown-item">
                     Dashboard
                   </Link>
+                  <Link to="/admin/payments" className="dropdown-item">
+                    Payments
+                  </Link>
                   <Link to="/admin/products" className="dropdown-item">
                     Products
                   </Link>

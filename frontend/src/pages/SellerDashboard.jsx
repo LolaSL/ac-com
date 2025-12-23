@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
@@ -39,7 +38,6 @@ const reducer = (state, action) => {
 
 export default function SellerDashboard() {
   const { id } = useParams();
-  const { state } = useContext(Store);
 
   const [
     {

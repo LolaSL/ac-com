@@ -4,6 +4,8 @@ import expressAsyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 import Seller from '../models/sellerModel.js';
+import ServiceProvider from '../models/serviceProviderModel.js';
+import Payment from '../models/paymentModel.js';
 import {
   isAuth, isAdmin, generateToken, baseUrl,
   mailgun
@@ -276,5 +278,88 @@ userRouter.post(
       token: generateToken(user),
     });
   }));
+
+// Payment routes for admins
+userRouter.get(
+  '/admin/payments',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const payments = await Payment.find({})
+      .populate('serviceProvider', 'name email')
+      .populate('order', 'totalPrice')
+      .populate('project', 'title')
+      .sort({ createdAt: -1 });
+    res.send(payments);
+  })
+);
+
+userRouter.post(
+  '/admin/payments',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const { serviceProvider: spEmail, amount, currency, paymentMethod, order, project, description } = req.body;
+
+    // Find service provider by email
+    let serviceProviderId = null;
+    if (spEmail) {
+      const sp = await ServiceProvider.findOne({ email: spEmail });
+      if (sp) {
+        serviceProviderId = sp._id;
+      } else {
+        return res.status(400).send({ message: 'Service Provider not found' });
+      }
+    }
+
+    const payment = new Payment({
+      serviceProvider: serviceProviderId,
+      amount,
+      currency: currency || 'USD',
+      paymentMethod: paymentMethod || 'bank transfer',
+      order,
+      project,
+      description,
+    });
+    const createdPayment = await payment.save();
+    res.status(201).send(createdPayment);
+  })
+);
+
+userRouter.put(
+  '/admin/payments/:id',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const payment = await Payment.findById(req.params.id);
+    if (payment) {
+      payment.status = req.body.status || payment.status;
+      payment.transactionId = req.body.transactionId || payment.transactionId;
+      if (req.body.status === 'completed') {
+        payment.paidAt = Date.now();
+      }
+      payment.updatedAt = Date.now();
+      const updatedPayment = await payment.save();
+      res.send(updatedPayment);
+    } else {
+      res.status(404).send({ message: 'Payment not found' });
+    }
+  })
+);
+
+userRouter.delete(
+  '/admin/payments/:id',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const payment = await Payment.findById(req.params.id);
+    if (payment) {
+      await payment.remove();
+      res.send({ message: 'Payment deleted' });
+    } else {
+      res.status(404).send({ message: 'Payment not found' });
+    }
+  })
+);
 
 export default userRouter;

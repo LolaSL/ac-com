@@ -185,7 +185,7 @@ serviceProviderRouter.get(
       const projects = await Project.find({ serviceProvider: serviceProviderId });
 
       if (projects.length === 0) {
-        return res.status(404).send({ message: 'No projects available' });
+        return res.status(200).send([]);
       }
 
       res.status(200).send(projects);
@@ -340,8 +340,7 @@ serviceProviderRouter.get(
         .populate('serviceProvider', 'name');
 
       if (earnings.length === 0) {
-        res.status(404).send({ message: 'No earnings found for this service provider' });
-        return;
+        return res.status(200).send([]);
       }
 
       const totalEarnings = earnings.reduce(
@@ -453,7 +452,7 @@ serviceProviderRouter.post(
   expressAsyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const serviceProvider = await ServiceProvider.findOne({ email });
-    
+
     if (serviceProvider && (await serviceProvider.matchPassword(password))) {
       res.send({
         _id: serviceProvider._id,

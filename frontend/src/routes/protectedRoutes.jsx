@@ -6,7 +6,7 @@ import ServiceProviderProfile from "../pages/ServiceProviderProfile.jsx";
 import EarningsPage from "../pages/EarningsPage.jsx";
 import HoursPage from "../pages/HoursPage.jsx";
 import ProjectsPage from "../pages/ProjectsPage.jsx";
-import MessagesPage from "../pages/MessagesPage.jsx";
+import ServiceProviderMessages from "../components/ServiceProviderMessages.jsx";
 import BrowsingHistoryPage from "../pages/BrowsingHistoryPage.jsx";
 import UserReviewsPage from "../pages/UserReviewsPage.jsx";
 import UserMessagesPage from "../pages/UserMessagesPage.jsx";
@@ -84,7 +84,7 @@ export const protectedRoutes = [
     path: "/serviceprovider/messages",
     element: (
       <ProtectedRoute>
-        <MessagesPage />
+        <ServiceProviderMessages />
       </ProtectedRoute>
     ),
   },

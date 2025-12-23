@@ -4,6 +4,7 @@ import NotificationPopUp from "../components/NotificationPopUp";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Carousel from "react-bootstrap/Carousel";
 
 export default function HomeBannerPage() {
   const [fetchedNotifications, setFetchedNotifications] = useState([]);
@@ -16,24 +17,32 @@ export default function HomeBannerPage() {
   const banners = [
     {
       title: "Welcome To AC Commerce",
+      description:
+        "Your trusted partner in advanced air conditioning solutions. Experience innovation and reliability in every system.",
       imageSrc: "/images/header2.jpg",
       linkText: "Save Time. Cut Costs. Stay Ahead",
       linkTo: "/advanced-ac",
     },
     {
       title: "Elevate your comfort",
+      description:
+        "Explore our comprehensive blog for expert tips, product reviews, and the latest trends in HVAC technology.",
       imageSrc: "/images/banner.jpg",
       linkText: "Discover the perfect fit for your needs",
       linkTo: "/blogs",
     },
     {
       title: "Stay with AC Commerce",
+      description:
+        "Upload your designs and get professional annotations, quotes, and certifications for your projects.",
       imageSrc: "/images/banner1.jpg",
       linkText: "Redefining Air Conditioning Design — Smart. Fast. Certified",
       linkTo: "/uploadfile",
     },
     {
       title: "Featured Products",
+      description:
+        "Browse our curated selection of high-quality air conditioning products designed for optimal performance.",
       imageSrc: "/images/hero.jpg",
       linkText:
         "Maximize the comfort of your property with our advanced air systems",
@@ -106,7 +115,7 @@ export default function HomeBannerPage() {
   };
 
   return (
-    <div className="container">
+    <div className="home-banner-container">
       {currentNotification && (
         <NotificationPopUp
           notification={currentNotification}
@@ -120,31 +129,41 @@ export default function HomeBannerPage() {
         />
       )}
 
-      {banners.map((banner, index) => {
-        const requiresLogin =
-          banner.linkText ===
-          "Redefining Air Conditioning Design — Smart. Fast. Certified";
+      <Carousel
+        interval={5000}
+        pause={false}
+        controls={false}
+        indicators={false}
+        className="home-carousel"
+      >
+        {banners.map((banner, index) => {
+          const requiresLogin =
+            banner.linkText ===
+            "Redefining Air Conditioning Design — Smart. Fast. Certified";
 
-        const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
+          const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
 
-        const handleClick = () => {
-          if (requiresLogin && !isLoggedIn) {
-            navigate("/signin?redirect=/uploadfile");
-          } else {
-            navigate(banner.linkTo);
-          }
-        };
+          const handleClick = () => {
+            if (requiresLogin && !isLoggedIn) {
+              navigate("/signin?redirect=/uploadfile");
+            } else {
+              navigate(banner.linkTo);
+            }
+          };
 
-        return (
-          <Banner
-            key={index}
-            title={banner.title}
-            imageSrc={banner.imageSrc}
-            linkText={banner.linkText}
-            onClick={handleClick}
-          />
-        );
-      })}
+          return (
+            <Carousel.Item key={index}>
+              <Banner
+                title={banner.title}
+                description={banner.description}
+                imageSrc={banner.imageSrc}
+                linkText={banner.linkText}
+                onClick={handleClick}
+              />
+            </Carousel.Item>
+          );
+        })}
+      </Carousel>
     </div>
   );
 }
