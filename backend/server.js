@@ -63,7 +63,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 const upload = multer({
-  limits: { fileSize: 10 * 1024 * 1024 }, 
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -115,7 +115,7 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
 });
 
-const port = process.env.PORT || 5050;
+const port = process.env.PORT || 5020;
 const server = app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
 });

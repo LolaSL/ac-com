@@ -78,6 +78,32 @@ seedRouter.get('/', async (req, res) => {
     }
     const createdSellers = await Seller.insertMany(data.sellers);
     const createdContacts = await Contact.insertMany(data.contacts);
+
+    // Assign referrals to some users
+    if (createdUsers.length > 0 && createdSellers.length > 0) {
+      // Assign first 3 users to be referred by first seller
+      await User.findByIdAndUpdate(createdUsers[0]._id, { referredBy: createdSellers[0]._id });
+      await User.findByIdAndUpdate(createdUsers[1]._id, { referredBy: createdSellers[0]._id });
+      await User.findByIdAndUpdate(createdUsers[2]._id, { referredBy: createdSellers[0]._id });
+
+      // Assign next 2 users to be referred by second seller
+      if (createdSellers.length > 1) {
+        await User.findByIdAndUpdate(createdUsers[3]._id, { referredBy: createdSellers[1]._id });
+        await User.findByIdAndUpdate(createdUsers[4]._id, { referredBy: createdSellers[1]._id });
+      }
+    }
+
+    // Refresh users data after referral assignments
+    createdUsers = await User.find({});
+
+    // Update existing orders with referredBy based on user's referredBy
+    const existingOrders = await Order.find({ referredBy: { $exists: false } }).populate('user');
+    for (const order of existingOrders) {
+      if (order.user && order.user.referredBy) {
+        await Order.findByIdAndUpdate(order._id, { referredBy: order.user.referredBy });
+      }
+    }
+
     const createdBlogs = await Blog.insertMany(data.blogs);
     const createdNotifications = await Notification.insertMany(data.notifications);
 
@@ -89,6 +115,7 @@ seedRouter.get('/', async (req, res) => {
       if (existingCount === 0) {
         const ordersWithIds = data.orders.map((order, index) => {
           const userId = createdUsers[index % createdUsers.length]._id;
+          const user = createdUsers[index % createdUsers.length];
           const orderItemsWithProductIds = order.orderItems.map((item) => {
             const product = createdProducts.find(p => p.slug === item.slug);
             return {
@@ -100,6 +127,7 @@ seedRouter.get('/', async (req, res) => {
             ...order,
             user: userId,
             orderItems: orderItemsWithProductIds,
+            referredBy: user.referredBy || null,
           };
         });
         const result = await Order.collection.insertMany(ordersWithIds, { ordered: true });
@@ -111,6 +139,7 @@ seedRouter.get('/', async (req, res) => {
       // Always preserve manual orders, only add new seed orders that don't exist
       const ordersWithIds = data.orders.map((order, index) => {
         const userId = createdUsers[index % createdUsers.length]._id;
+        const user = createdUsers[index % createdUsers.length];
         const orderItemsWithProductIds = order.orderItems.map((item) => {
           const product = createdProducts.find(p => p.slug === item.slug);
           return {
@@ -122,6 +151,7 @@ seedRouter.get('/', async (req, res) => {
           ...order,
           user: userId,
           orderItems: orderItemsWithProductIds,
+          referredBy: user.referredBy || null,
         };
       });
       // Deduplicate seed orders and avoid inserting orders that already exist in DB
