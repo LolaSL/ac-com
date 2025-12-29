@@ -22,7 +22,6 @@ seedRouter.get('/', async (req, res) => {
     const ordersMode = req.query.ordersMode || (includeOrders ? 'append' : 'skip');
 
     await Product.deleteMany({});
-    // Preserve users and orders; do not delete to keep manual data
     await Seller.deleteMany({});
     await Contact.deleteMany({});
     await ServiceProvider.deleteMany({});

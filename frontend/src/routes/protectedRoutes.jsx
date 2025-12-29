@@ -13,9 +13,18 @@ import UserMessagesPage from "../pages/UserMessagesPage.jsx";
 import WishlistPage from "../pages/WishlistPage.jsx";
 import SellerDashboard from "../pages/SellerDashboard.jsx";
 import TotalSellerDashboard from "../pages/TotalSellerDashboard.jsx";
+import AdminAllAnnotationsPage from "../pages/AdminAllAnnotationsPage.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.js";
 
 export const protectedRoutes = [
+  {
+    path: "/admin/all-annotations",
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <AdminAllAnnotationsPage />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "/profile",
     element: (

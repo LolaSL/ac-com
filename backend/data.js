@@ -1110,7 +1110,7 @@ const data = {
       price: 7200,
       discount: 10,
       countInStock: 10,
-      brand: "Haier ",
+      brand: "Haier",
       rating: 4.9,
       numReviews: 148,
       description: "Suited to larger and multi-storey buildings, the MRV-S outdoor unit delivers effective heating and cooling, with multiple indoor unit choices. Heating and cooling, with an operational range from -20°C to 48°C Outdoor unit powers up to 19 indoor units. High-efficiency DC fan motor. Long total piping length of 300m with 175m lift height",
@@ -1757,52 +1757,72 @@ const data = {
     },
   ],
 
-  annotations: [
-    {
-      filename: 'example.pdf',
-      pdfId: 'demo-pdf-123',
-      annotations: {
-        rectangles: [
-          {
-            id: 'rect-1',
-            x: 100,
-            y: 150,
-            width: 200,
-            height: 100,
-            fill: 'rgba(20, 205, 230, 0.5)',
-            rotation: 0,
-            xPercent: 0.2,
-            yPercent: 0.3,
-            widthPercent: 0.4,
-            heightPercent: 0.2,
-          },
-        ],
-        comments: [
-          {
-            id: 'comment-1',
-            rectId: 'rect-1',
-            text: 'This is a comment',
-            x: 110,
-            y: 160,
-            fill: 'rgba(226, 218, 228, 0.3)',
-            xPercent: 0.22,
-            yPercent: 0.32,
-          },
-        ],
-        lines: [
-          {
-            id: 'line-1',
-            rectId: 'rect-1',
-            commentId: 'comment-1',
-            points: [110, 160, 150, 200],
-            stroke: 'black',
-            strokeWidth: 2,
-          },
-        ],
-      },
-
+annotations: [
+  {
+    filename: 'example.pdf',
+    pdfId: 'demo-pdf-123',
+    annotations: {
+      rectangles: [
+        {
+          id: 'rect-1',
+          x: 100,
+          y: 150,
+          width: 200,
+          height: 100,
+          fill: 'rgba(20, 205, 230, 0.5)',
+          rotation: 0,
+          xPercent: 0.2,
+          yPercent: 0.3,
+          widthPercent: 0.4,
+          heightPercent: 0.2,
+        },
+      ],
+      comments: [
+        {
+          id: 'comment-1',
+          rectId: 'rect-1',
+          text: 'This is a comment',
+          x: 110,
+          y: 160,
+          fill: 'rgba(226, 218, 228, 0.3)',
+          xPercent: 0.22,
+          yPercent: 0.32,
+        },
+      ],
+      lines: [
+        {
+          id: 'line-1',
+          rectId: 'rect-1',
+          commentId: 'comment-1',
+          points: [110, 160, 150, 200],
+          stroke: 'black',
+          strokeWidth: 2,
+        },
+      ],
+      hvac: [
+        {
+          id: 'hvac-1',
+          xPercent: 0.5,
+          yPercent: 0.2,
+          widthPercent: 0.3,
+          heightPercent: 0.05,
+          fill: 'rgba(255, 0, 0, 0.4)',
+          stroke: 'red',
+        },
+        {
+          id: 'hvac-2',
+          xPercent: 0.1,
+          yPercent: 0.6,
+          widthPercent: 0.4,
+          heightPercent: 0.05,
+          fill: 'rgba(255, 100, 0, 0.4)',
+          stroke: 'orange',
+        },
+      ],
     },
-  ],
+  },
+],
+
   orders: [
     {
       orderItems: [

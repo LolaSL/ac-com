@@ -134,6 +134,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/profile" className="dropdown-item ">
                     User Profile
                   </Link>
+                  <Link to="/uploadfile" className="dropdown-item">
+                    Get A Quote
+                  </Link>
                   <Link to="/orderhistory" className="dropdown-item">
                     Order History
                   </Link>
@@ -265,6 +268,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </Link>
                   <Link to="/admin/blogs-list" className="dropdown-item">
                     Blogs
+                  </Link>
+                  <Link to="/admin/all-annotations" className="dropdown-item">
+                    All Annotated PDFs
                   </Link>
                   <NavDropdown.Divider />
                   <Link

@@ -253,7 +253,6 @@ export default function OrderPage() {
   }
 
   function createOrder(data, actions) {
-    // Round to 2 decimal places to avoid PayPal DECIMAL_PRECISION error
     const roundedTotal = Math.round(order.totalPrice * 100) / 100;
     return actions.order
       .create({
@@ -304,7 +303,7 @@ export default function OrderPage() {
     <div>
       <Container id="order-container">
         <div className="d-flex justify-space-between align-items-center my-3 fs-1">
-          <h1 className="my-3">Order: #{orderId} </h1>
+          <h1 className="my-3 text-primary">Order: #{orderId} </h1>
           <div>
             {order.isPaid ? (
               <span
@@ -342,7 +341,7 @@ export default function OrderPage() {
           <Col md={8}>
             <Card className="mb-3">
               <Card.Body>
-                <Card.Title>Shipping</Card.Title>
+                <Card.Title className="text-primary">Shipping</Card.Title>
                 <Card.Text>
                   <strong>Name:</strong> {order.shippingAddress.fullName} <br />
                   <strong>Address:</strong> {order.shippingAddress.address},{" "}
@@ -382,7 +381,7 @@ export default function OrderPage() {
             </Card>
             <Card className="mb-3">
               <Card.Body>
-                <Card.Title>Payment</Card.Title>
+                <Card.Title className="text-primary">Payment</Card.Title>
                 <Card.Text>
                   <strong>Method:</strong> {order.paymentMethod}
                 </Card.Text>
@@ -405,7 +404,9 @@ export default function OrderPage() {
 
             <Card className="mb-3">
               <Card.Body>
-                <Card.Title>Items ({order.orderItems.length})</Card.Title>
+                <Card.Title className="text-primary">
+                  Items ({order.orderItems.length})
+                </Card.Title>
                 <ListGroup variant="flush">
                   {order.orderItems.map((item) => (
                     <ListGroup.Item key={item._id}>
@@ -427,10 +428,12 @@ export default function OrderPage() {
                           </Link>
                         </Col>
                         <Col md={3}>
-                          <strong>Quantity:</strong> {item.quantity}
+                          <strong className="text-primary">Quantity:</strong>{" "}
+                          {item.quantity}
                         </Col>
                         <Col md={3}>
-                          <strong>Price:</strong> ${item.price.toFixed(2)}
+                          <strong className="text-primary">Price:</strong> $
+                          {item.price.toFixed(2)}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -442,7 +445,7 @@ export default function OrderPage() {
           <Col md={4}>
             <Card className="mb-3">
               <Card.Body>
-                <Card.Title>Order Summary</Card.Title>
+                <Card.Title className="text-primary">Order Summary</Card.Title>
                 <ListGroup variant="flush">
                   <ListGroup.Item>
                     <Row>

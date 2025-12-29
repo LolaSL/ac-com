@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
@@ -47,6 +47,12 @@ const FaTrash = () => (
   </svg>
 );
 
+/**
+ * Draws HVAC elements (ducts and diffusers) on the canvas context.
+ * @param {CanvasRenderingContext2D} context - Canvas 2D context to draw on.
+ * @param {Object} hvacAnnotations - Object with ducts and diffusers arrays.
+ */
+
 const Sidebar = () => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
@@ -56,131 +62,214 @@ const Sidebar = () => {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [selectedPdfFile, setSelectedPdfFile] = useState(null);
   const [selectedAnnotations, setSelectedAnnotations] = useState(null);
+  const [showHVAC,
+    // setShowHVAC
+  ] = useState(false);
 
-  const fetchSavedPdfs = async () => {
-    if (!token) return setError("User not authenticated.");
+
+  // Determine user role
+  const isAdmin = !!state?.adminInfo && !!state?.adminInfo.token;
+ 
+  // const isUser = !!state?.userInfo && !!state?.userInfo.token;
+
+  const fetchSavedPdfs = useCallback(async () => {
+    if (!token) {
+      setError("User not authenticated.");
+      return;
+    }
+
     try {
       setError(null);
-      const response = await fetch("/api/user-annotations", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      let response;
+      if (isAdmin) {
+        response = await fetch("/api/all-annotations", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        response = await fetch("/api/user-annotations", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch saved PDFs");
       }
       const data = await response.json();
       const enhancedData = data.map((item) => ({
         ...item,
-        pdfUrl: `/api/annotations/pdf/${item._id}`,
+        pdfUrl: `/annotated-pdf/${item._id}`,
         isPaid: item.isPaid ?? false,
       }));
       setSavedPdfs(enhancedData);
       console.log("Saved PDFs:", enhancedData);
     } catch (err) {
-      console.error(err);
-      setError("Error fetching saved PDFs. Please try again.");
+      console.error("Error fetching PDFs:", err);
+      setError(err.message || "Error fetching saved PDFs. Please try again.");
     }
-  };
-
+  }, [token, isAdmin]);
   useEffect(() => {
-    if (isOpen) fetchSavedPdfs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
     if (isOpen) {
+      fetchSavedPdfs();
+    } else {
+      // reset selected PDF and errors when sidebar is closed
       setSelectedPdf(null);
       setSelectedPdfFile(null);
       setSelectedAnnotations(null);
       setError(null);
     }
+  }, [isOpen, fetchSavedPdfs]);
+
+  const toggleSidebar = () => {
+    setIsOpen((prev) => !prev);
   };
+
   const overlayAnnotations = (context, annotations) => {
     const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
 
-    if (annotations?.rectangles) {
-      annotations.rectangles.forEach((rect) => {
-        const x = rect.xPercent * canvasWidth;
-        const y = rect.yPercent * canvasHeight;
-        const width = rect.widthPercent * canvasWidth;
-        const height = rect.heightPercent * canvasHeight;
-        const angle = (rect.rotation || 0) * (Math.PI / 180);
+    // rectangles
+    annotations?.rectangles?.forEach((rect) => {
+      const x = rect.xPercent * canvasWidth;
+      const y = rect.yPercent * canvasHeight;
+      const width = rect.widthPercent * canvasWidth;
+      const height = rect.heightPercent * canvasHeight;
+      const angle = (rect.rotation || 0) * (Math.PI / 180);
 
-        context.save();
-        context.translate(x, y);
-        context.rotate(angle);
-        context.beginPath();
-        context.rect(0, 0, width, height);
-        context.fillStyle = rect.fill || "rgba(20, 205, 230, 0.4)";
-        context.fill();
-        context.lineWidth = 2;
-        context.strokeStyle = rect.stroke || "black";
-        context.stroke();
-        context.restore();
-      });
-    }
+      context.save();
+      context.translate(x, y);
+      context.rotate(angle);
+      context.beginPath();
+      context.rect(0, 0, width, height);
+      context.fillStyle = rect.fill || "rgba(20, 205, 230, 0.4)";
+      context.fill();
+      context.lineWidth = 2;
+      context.strokeStyle = rect.stroke || "black";
+      context.stroke();
+      context.restore();
+    });
 
-    if (annotations?.lines) {
+    // lines
+    annotations?.lines?.forEach((line) => {
       const lineReductionFactor = 0.985;
-      annotations.lines.forEach((line) => {
-        context.beginPath();
-        const points = line.points.map((val, idx) =>
-          idx % 2 === 0
-            ? val * canvasWidth * lineReductionFactor
-            : val * canvasHeight * lineReductionFactor
-        );
-        context.moveTo(points[0], points[1]);
-        for (let i = 2; i < points.length; i += 2) {
-          context.lineTo(points[i], points[i + 1]);
-        }
-        context.lineWidth = line.strokeWidth || 2;
-        context.strokeStyle = line.stroke || "black";
-        context.stroke();
-      });
-    }
+      context.beginPath();
+      const points = line.points.map((val, idx) =>
+        idx % 2 === 0
+          ? val * canvasWidth * lineReductionFactor
+          : val * canvasHeight * lineReductionFactor
+      );
+      context.moveTo(points[0], points[1]);
+      for (let i = 2; i < points.length; i += 2) {
+        context.lineTo(points[i], points[i + 1]);
+      }
+      context.lineWidth = line.strokeWidth || 2;
+      context.strokeStyle = line.stroke || "black";
+      context.stroke();
+    });
 
-    if (annotations?.comments) {
-      annotations.comments.forEach((comment) => {
-        const x = comment.xPercent * canvasWidth;
-        const y = comment.yPercent * canvasHeight;
-        const padding = 10;
-        const fontSize = 17;
-        const text = comment.text;
+    // comments
+    annotations?.comments?.forEach((comment) => {
+      const x = comment.xPercent * canvasWidth;
+      const y = comment.yPercent * canvasHeight;
+      const padding = 10;
+      const fontSize = 17;
+      const text = comment.text;
 
-        context.font = `bold ${fontSize}px Arial`;
-        const textWidth = context.measureText(text).width;
-        const textHeight = fontSize;
+      context.font = `bold ${fontSize}px Arial`;
+      const textWidth = context.measureText(text).width;
+      const textHeight = fontSize;
 
-        context.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
-        context.fillRect(
-          x - padding,
-          y - textHeight - padding,
-          textWidth + padding * 2,
-          textHeight + padding * 2
-        );
+      context.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
+      context.fillRect(
+        x - padding,
+        y - textHeight - padding,
+        textWidth + padding * 2,
+        textHeight + padding * 2
+      );
 
-        context.strokeStyle = "black";
-        context.lineWidth = 1;
-        context.strokeRect(
-          x - padding,
-          y - textHeight - padding,
-          textWidth + padding * 2,
-          textHeight + padding * 2
-        );
+      context.strokeStyle = "black";
+      context.lineWidth = 1;
+      context.strokeRect(
+        x - padding,
+        y - textHeight - padding,
+        textWidth + padding * 2,
+        textHeight + padding * 2
+      );
 
-        context.fillStyle = comment.textColor || "#FF1493";
-        context.fillText(text, x, y);
-      });
-    }
+      context.fillStyle = comment.textColor || "#FF1493";
+      context.fillText(text, x, y);
+    });
   };
+
+  const overlayHVAC = (context, hvacAnnotations) => {
+    const canvasWidth = context.canvas.width;
+    const canvasHeight = context.canvas.height;
+
+    // ducts
+    hvacAnnotations?.ducts?.forEach((duct) => {
+      const x = duct.xPercent * canvasWidth;
+      const y = duct.yPercent * canvasHeight;
+      const width = duct.widthPercent * canvasWidth;
+      const height = duct.heightPercent * canvasHeight;
+      const angle = (duct.rotation || 0) * (Math.PI / 180);
+
+      context.save();
+      context.translate(x, y);
+      context.rotate(angle);
+      context.beginPath();
+      context.rect(0, 0, width, height);
+      context.fillStyle = "rgba(255, 255, 0, 0.5)"; // semi-transparent yellow
+      context.fill();
+      context.lineWidth = 2;
+      context.strokeStyle = "orange";
+      context.stroke();
+      context.restore();
+    });
+
+    // diffusers
+    hvacAnnotations?.diffusers?.forEach((diffuser) => {
+      const x = diffuser.xPercent * canvasWidth;
+      const y = diffuser.yPercent * canvasHeight;
+      const size = diffuser.sizePercent * canvasWidth; // assuming circular diffusers
+
+      context.beginPath();
+      context.arc(x, y, size / 2, 0, 2 * Math.PI);
+      context.fillStyle = "rgba(0, 255, 0, 0.5)"; // semi-transparent green
+      context.fill();
+      context.lineWidth = 2;
+      context.strokeStyle = "lime";
+      context.stroke();
+    });
+  };
+
+  // Remove HVAC overlay from rendering
+  useEffect(() => {
+    if (!selectedAnnotations || !selectedPdfFile) return;
+
+    const container = document.getElementById("pdf-container");
+    if (!container) return;
+
+    const overlayCanvas = container.querySelector("canvas:nth-child(2)"); // overlay canvas
+    if (!overlayCanvas) return;
+
+    const context = overlayCanvas.getContext("2d");
+    context.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+    // redraw normal annotations
+    overlayAnnotations(context, selectedAnnotations);
+
+    // draw HVAC layer if toggled
+    if (showHVAC) {
+      overlayHVAC(
+        context,
+        selectedAnnotations.hvac || { ducts: [], diffusers: [] }
+      );
+    }
+  }, [showHVAC, selectedAnnotations, selectedPdfFile]);
 
   const viewPdfWithAnnotations = async (pdf) => {
     if (!token) return setError("User not authenticated.");
     try {
       if (pdf.isPaid) {
-        //alert if isPaid===true annotated pdf file renders
         alert("You need to pay to view this PDF with annotations.");
         return;
       }
@@ -189,9 +278,8 @@ const Sidebar = () => {
       const pdfResponse = await fetch(`/api/annotated-pdf/${pdf._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!pdfResponse.ok) {
+      if (!pdfResponse.ok)
         throw new Error(`Failed to fetch PDF: ${pdfResponse.status}`);
-      }
       const pdfBlob = await pdfResponse.blob();
       const pdfFile = new File([pdfBlob], pdf.filename || "untitled.pdf", {
         type: "application/pdf",
@@ -202,16 +290,17 @@ const Sidebar = () => {
       const annotationsResponse = await fetch(`/api/annotations/${pdf._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!annotationsResponse.ok) {
+      if (!annotationsResponse.ok)
         throw new Error(
           `Failed to fetch annotations: ${annotationsResponse.status}`
         );
-      }
       const annotationsData = await annotationsResponse.json();
       setSelectedAnnotations(annotationsData);
+
       const container = document.getElementById("pdf-container");
       if (!container) return;
       container.innerHTML = "";
+
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
       const page = await pdfDoc.getPage(1);
@@ -222,24 +311,31 @@ const Sidebar = () => {
       canvas.height = viewport.height;
       const context = canvas.getContext("2d");
       container.appendChild(canvas);
+
       await page.render({ canvasContext: context, viewport }).promise;
 
-      page.render({ canvasContext: context, viewport }).promise.then(() => {
-        if (annotationsData) {
-          const overlayCanvas = document.createElement("canvas");
-          overlayCanvas.width = viewport.width;
-          overlayCanvas.height = viewport.height;
-          overlayCanvas.style.position = "absolute";
-          overlayCanvas.style.top = "0";
-          overlayCanvas.style.left = "0";
-          overlayCanvas.style.pointerEvents = "none";
-          container.style.position = "relative";
-          container.appendChild(overlayCanvas);
+      // overlay annotations
+      if (annotationsData) {
+        const overlayCanvas = document.createElement("canvas");
+        overlayCanvas.width = viewport.width;
+        overlayCanvas.height = viewport.height;
+        overlayCanvas.style.position = "absolute";
+        overlayCanvas.style.top = "0";
+        overlayCanvas.style.left = "0";
+        overlayCanvas.style.pointerEvents = "none";
+        container.style.position = "relative";
+        container.appendChild(overlayCanvas);
 
-          const overlayContext = overlayCanvas.getContext("2d");
-          overlayAnnotations(overlayContext, annotationsData);
+        const overlayContext = overlayCanvas.getContext("2d");
+        overlayAnnotations(overlayContext, annotationsData);
+        // HVAC overlay if enabled
+        if (showHVAC) {
+          overlayHVAC(
+            overlayContext,
+            annotationsData.hvac || { ducts: [], diffusers: [] }
+          );
         }
-      });
+      }
     } catch (err) {
       console.error(err);
       setError("Failed to load PDF. See console for details.");
@@ -249,6 +345,7 @@ const Sidebar = () => {
   const handleDeletePdf = async (pdfId, filename) => {
     if (!window.confirm(`Delete "${filename}"?`)) return;
     if (!token) return setError("User not authenticated.");
+
     try {
       const response = await fetch(`/api/annotations/${pdfId}`, {
         method: "DELETE",
@@ -287,16 +384,13 @@ const Sidebar = () => {
         onHide={toggleSidebar}
         dialogClassName="custom-modal-width"
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Saved Documents</Modal.Title>
-        </Modal.Header>
+
         <Modal.Body>
           {error && <p className="text-danger">{error}</p>}
           <div
             style={{
               width: "100%",
               height: "80vh",
-
               border: "1px solid #ccc",
               overflow: "auto",
               marginTop: "1rem",
@@ -316,14 +410,14 @@ const Sidebar = () => {
                       variant="btn-outline w-auto"
                       size="sm"
                       onClick={() => viewPdfWithAnnotations(pdf)}
-                      disabled={pdf.isPaid} // disable if not paid
+                      disabled={pdf.isPaid}
                       className="p-2 text-left go-to-btn btn-text d-flex align-items-center"
                     >
                       <FaFilePdf />
                       {pdf.filename || "Untitled Document"}
                       {pdf.isPaid && <FaLock />}
                     </Button>
-                    <small className=" text-muted">
+                    <small className="text-muted">
                       Saved: {new Date(pdf.createdAt).toLocaleString()}
                     </small>
                     <div className="d-flex align-items-center">
@@ -353,6 +447,17 @@ const Sidebar = () => {
                 annotations={selectedAnnotations}
               />
             )}
+
+            {/* {isUser && selectedPdfFile && mode === "engineer" && (
+              <Button
+                variant="outline-primary"
+                size="sm"
+                className="mb-2"
+                onClick={() => setShowHVAC((prev) => !prev)}
+              >
+                {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
+              </Button>
+            )} */}
 
             <div
               id="pdf-container"

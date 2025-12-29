@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
     <Container
       className="d-flex justify-content-center align-items-center min-vh-100"
       style={{
-        background: "linear-gradient(135deg, #00008B 0%, #000033 100%)",
+        background: "linear-gradient(135deg, #052742 0%, #000033 100%)",
       }}
     >
       <Card
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
         style={{
           maxWidth: "400px",
           width: "100%",
-          backgroundColor: "#00008B",
+          backgroundColor: "#052742",
         }}
       >
         <Card.Body>
@@ -95,7 +95,7 @@ export default function AdminLoginPage() {
                 type="submit"
                 className="go-to-btn btn-lg"
                 variant="primary"
-                style={{ color: "red !important" }}
+                style={{ color: "red" }}
                 disabled={submitting}
               >
                 {submitting ? "Signing in..." : "Login as Admin"}

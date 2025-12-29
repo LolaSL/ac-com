@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
@@ -6,14 +6,17 @@ import { toast } from "react-toastify";
 import { getError } from "../utils.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Store } from "../Store.js";
 
 function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
+  const { state } = useContext(Store);
+  const isAdmin = !!state?.adminInfo && !!state?.adminInfo.token;
 
   const [categories, setCategories] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
-  
+
   const handleNavigation = (e) => {
     e.preventDefault();
     navigate("/signin?redirect=/uploadfile");
@@ -44,6 +47,9 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
     { path: "/cancellation-policy", label: "Cancellation Policy" },
     { path: "/blogs", label: "Blogs" },
     { path: "/contact", label: "Contact Us" },
+    ...(isAdmin
+      ? [] // Removed admin-only All Annotated PDFs link from Sidebar
+      : []),
   ];
 
   const handleNavClick = () => {

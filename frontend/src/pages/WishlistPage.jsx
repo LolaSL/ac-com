@@ -24,7 +24,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         wishlistItems: state.wishlistItems.filter(
-          (item) => item.product._id !== action.payload
+          (item) => item.product && item.product._id !== action.payload
         ),
       };
     default:
@@ -42,6 +42,9 @@ export default function WishlistPage() {
     error: "",
     wishlistItems: [],
   });
+
+  // Only items with a valid product
+  const validWishlistItems = wishlistItems.filter((item) => item.product);
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -104,7 +107,7 @@ export default function WishlistPage() {
         </MessageBox>
       ) : (
         <Row className="g-3 mx-0">
-          {wishlistItems.map((item) => (
+          {validWishlistItems.map((item) => (
             <Col key={item._id} xs={12} sm={6} md={4} lg={3} className="p-2">
               <Card className="h-100">
                 <div style={{ position: "relative" }}>
@@ -208,12 +211,12 @@ export default function WishlistPage() {
         </Row>
       )}
 
-      {wishlistItems.length > 0 && (
+      {validWishlistItems.length > 0 && (
         <div className="mt-4">
           <p className="text-muted">
             <i className="fas fa-info-circle me-2"></i>
-            You have {wishlistItems.length} product
-            {wishlistItems.length !== 1 ? "s" : ""} in your wishlist
+            You have {validWishlistItems.length} product
+            {validWishlistItems.length !== 1 ? "s" : ""} in your wishlist
           </p>
         </div>
       )}

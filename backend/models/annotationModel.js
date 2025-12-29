@@ -44,6 +44,28 @@ const annotationSchema = new Schema(
           strokeWidth: { type: Number },
         },
       ],
+       hvac: {
+    ducts: [
+      {
+        id: String,
+        type: String, // "supply", "return", "exhaust"
+        pointsPercent: [Number], // x1, y1, x2, y2, ...
+        width: Number, // thickness in px for now
+        color: String // optional, e.g., "#ff4500"
+      }
+    ],
+    diffusers: [
+      {
+        id: String,
+        shape: String, // "circle", "square"
+        xPercent: Number,
+        yPercent: Number,
+        sizePercent: Number,
+        airflow: Number // optional CFM
+      }
+    ]
+  }
+
     },
     createdAt: {
       type: Date,

@@ -9,6 +9,26 @@ import path from 'path';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+router.get('/all-annotations', isAuth, async (req, res) => {
+  try {
+    // Only allow admin users
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).json({ message: 'Admin access only.' });
+    }
+    const annotations = await AnnotationModel.find({});
+    const data = annotations.map((a) => ({
+      _id: a._id,
+      filename: a.filename,
+      pdfId: a.pdfId,
+      createdAt: a.createdAt,
+      isPaid: a.isPaid,
+      userId: a.userId,
+    }));
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch all annotations', error: error.message });
+  }
+});
 router.post(
   "/upload-annotate",
   isAuth,

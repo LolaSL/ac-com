@@ -149,8 +149,13 @@ function BrowsingHistoryPage() {
     return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
   };
 
+  // Show only products with a price drop or a discount if filter is enabled
   const filteredHistory = filterPriceDrops
-    ? browsingHistory.filter((item) => item.priceDropped)
+    ? browsingHistory.filter(
+        (item) =>
+          item.priceAtView > item.currentPrice ||
+          (item.product && item.product.discount > 0)
+      )
     : browsingHistory;
 
   return (
@@ -238,7 +243,25 @@ function BrowsingHistoryPage() {
 
                     <div className="d-flex justify-content-between align-items-center mb-2">
                       <div>
-                        {item.priceDropped ? (
+                        {/* Show price drop or discount visually */}
+                        {item.product && item.product.discount > 0 ? (
+                          <>
+                            <div className="text-muted text-decoration-line-through small">
+                              ${item.product.price.toFixed(2)}
+                            </div>
+                            <div className="fw-bold text-success fs-5">
+                              $
+                              {(
+                                (item.product.price *
+                                  (100 - item.product.discount)) /
+                                100
+                              ).toFixed(2)}
+                            </div>
+                            <span className="ms-2 discount-text fw-bold text-danger">
+                              Save {item.product.discount}%
+                            </span>
+                          </>
+                        ) : item.priceAtView > item.currentPrice ? (
                           <>
                             <div className="text-muted text-decoration-line-through small">
                               ${item.priceAtView.toFixed(2)}
