@@ -5,6 +5,7 @@ import { isAuth } from '../utils.js';
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
+import expressAsyncHandler from 'express-async-handler';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -120,174 +121,373 @@ router.post(
   }
 );
 
-router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
-  console.log('--- Starting PDF generation for annotation ID:', req.params.id);
+// router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
+//   console.log('--- Starting PDF generation for annotation ID:', req.params.id);
 
-  try {
-    const annotation = await AnnotationModel.findById(req.params.id);
-    if (!annotation || !annotation.pdfData) {
-      console.error('Annotated PDF not found or missing pdfData.');
-      return res.status(404).json({ message: 'Annotated PDF not found.' });
-    }
+//   try {
+//     const annotation = await AnnotationModel.findById(req.params.id);
+//     if (!annotation || !annotation.pdfData) {
+//       console.error('Annotated PDF not found or missing pdfData.');
+//       return res.status(404).json({ message: 'Annotated PDF not found.' });
+//     }
 
-    const { isPaid, email } = req.user;
-    console.log(`User isPaid: ${isPaid}, User Email: ${email}`);
+//     const { isPaid, email } = req.user;
+//     console.log(`User isPaid: ${isPaid}, User Email: ${email}`);
 
-    const pdfDoc = await PDFDocument.load(annotation.pdfData);
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
+//     const pdfDoc = await PDFDocument.load(annotation.pdfData);
+//     const pages = pdfDoc.getPages();
+//     const firstPage = pages[0];
 
-    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+//     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    const isPaidTemp = true; // ← TEMP for testing
+//     const isPaidTemp = true; // ← TEMP for testing
 
-    if (isPaidTemp) {
-      console.log('User is a paid member. Applying premium content.');
+//     if (isPaidTemp) {
+//       console.log('User is a paid member. Applying premium content.');
 
-      if (annotation.annotations && Array.isArray(annotation.annotations)) {
-        console.log(`Found ${annotation.annotations.length} annotations. Rendering...`);
+//       if (annotation.annotations && Array.isArray(annotation.annotations)) {
+//         console.log(`Found ${annotation.annotations.length} annotations. Rendering...`);
 
-        annotation.annotations.forEach((ann) => {
-          const page = pages[ann.pageIndex] || firstPage;
+//         annotation.annotations.forEach((ann) => {
+//           const page = pages[ann.pageIndex] || firstPage;
 
-          switch (ann.type) {
-            case 'text':
-              page.drawText(ann.text, {
-                x: ann.x,
-                y: ann.y,
-                size: ann.size,
-                color: rgb(ann.color.r, ann.color.g, ann.color.b),
-              });
-              break;
+//           switch (ann.type) {
+//             case 'text':
+//               page.drawText(ann.text, {
+//                 x: ann.x,
+//                 y: ann.y,
+//                 size: ann.size,
+//                 color: rgb(ann.color.r, ann.color.g, ann.color.b),
+//               });
+//               break;
 
-            case 'rectangle':
-              page.drawRectangle({
-                x: ann.x,
-                y: ann.y,
-                width: ann.width,
-                height: ann.height,
-                borderColor: rgb(ann.borderColor.r, ann.borderColor.g, ann.borderColor.b),
-                borderWidth: ann.borderWidth,
-              });
-              break;
+//             case 'rectangle':
+//               page.drawRectangle({
+//                 x: ann.x,
+//                 y: ann.y,
+//                 width: ann.width,
+//                 height: ann.height,
+//                 borderColor: rgb(ann.borderColor.r, ann.borderColor.g, ann.borderColor.b),
+//                 borderWidth: ann.borderWidth,
+//               });
+//               break;
 
-            default:
-              console.warn(`Unknown annotation type: ${ann.type}`);
-          }
+//             default:
+//               console.warn(`Unknown annotation type: ${ann.type}`);
+//           }
+//         });
+//       } else {
+//         console.log('No annotations found.');
+//       }
+
+//       // Use annotation's createdAt date for the watermark
+//       let createdAtDate = annotation.createdAt;
+//       let formattedDate = createdAtDate
+//         ? new Date(createdAtDate).toLocaleString()
+//         : 'Unknown Date';
+//       const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${formattedDate}`;
+
+//       if (annotation.annotatedImageUrl) {
+//         console.log('Found annotatedImageUrl – using image + centered text watermark.');
+
+//         const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) =>
+//           res.arrayBuffer()
+//         );
+//         const embeddedImage = await pdfDoc.embedPng(imageBytes);
+
+//         pages.forEach((page) => {
+//           const fontSize = 18;
+//           const { width, height } = page.getSize();
+
+//           const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+
+//           const xPos = (width - textWidth) / 2;
+//           const yPos = height / 2 - fontSize / 2;
+
+//           page.drawText(watermarkText, {
+//             x: xPos,
+//             y: yPos,
+//             size: fontSize,
+//             font: helveticaFont,
+//             color: rgb(0.6, 0.6, 0.6),
+//             opacity: 0.15,
+//           });
+
+//         });
+//       } else {
+//         console.log('No annotatedImageUrl – drawing only centered text watermark.');
+
+//         pages.forEach((page) => {
+//           const { width, height } = page.getSize();
+//           const fontSize = 14;
+
+//           const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+//           const xPos = (width - textWidth) / 2;
+//           const yPos = 30; // ← bottom padding
+
+//           page.drawText(watermarkText, {
+//             x: xPos,
+//             y: yPos,
+//             size: fontSize,
+//             font: helveticaFont,
+//             opacity: 0.4,
+//             color: rgb(0.5, 0.5, 0.5),
+//           });
+//         });
+
+//       }
+
+//       console.log('Drawing APPROVAL stamp.');
+//       const { width, height } = firstPage.getSize();
+
+//       const stampMarginX = 50;
+//       const stampMarginY = height - 100;
+//       const boxWidth = 140;
+//       const boxHeight = 60;
+
+//       firstPage.drawRectangle({
+//         x: stampMarginX - 10,
+//         y: stampMarginY - 10,
+//         width: boxWidth,
+//         height: boxHeight,
+//         borderColor: rgb(0, 0.6, 0),
+//         borderWidth: 2,
+//       });
+
+//       firstPage.drawText('APPROVED', {
+//         x: stampMarginX,
+//         y: stampMarginY + 30,
+//         size: 20,
+//         font: helveticaFont,
+//         color: rgb(0, 0.6, 0),
+//         opacity: 0.85,
+//       });
+
+//       firstPage.drawText('AC COMMERCE', {
+//         x: stampMarginX,
+//         y: stampMarginY + 10,
+//         size: 10,
+//         font: helveticaFont,
+//         color: rgb(0, 0.6, 0),
+//       });
+//     }
+
+//     // ------------------------------------------------------------
+//     // SAVE + SEND PDF
+//     // ------------------------------------------------------------
+//     const pdfBytes = await pdfDoc.save();
+//     console.log('PDF generation successful. Sending response.');
+
+//     res.set({
+//       'Content-Type': 'application/pdf',
+//       'Content-Disposition': `attachment; filename="${annotation.filename || 'annotated.pdf'}"`,
+//       'Content-Length': pdfBytes.length,
+//     });
+
+//     return res.send(Buffer.from(pdfBytes));
+//   } catch (error) {
+//     console.error('Error generating annotated PDF:', error);
+//     if (!res.headersSent) {
+//       return res.status(500).json({ message: 'Failed to generate annotated PDF.' });
+//     }
+//   }
+// });
+
+/* ---------------------------------------------------
+   Helpers
+--------------------------------------------------- */
+
+// Convert top-left (React/Konva) → bottom-left (PDF)
+const normalizeY = (y, pageHeight, elementHeight = 0) => {
+  return pageHeight - y - elementHeight;
+};
+
+// Normalize colors (0–255 → 0–1)
+const normalizeColor = (v) => (v > 1 ? v / 255 : v);
+
+// Draw annotations (multi-page safe)
+const drawAnnotations = ({ pages, annotations, font }) => {
+  if (!Array.isArray(annotations)) return;
+
+  annotations.forEach((ann) => {
+    const page = pages[ann.pageIndex] || pages[0];
+    const { height } = page.getSize();
+
+    switch (ann.type) {
+      case 'text':
+        page.drawText(ann.text || '', {
+          x: ann.x,
+          y: normalizeY(ann.y, height),
+          size: ann.size || 12,
+          font,
+          color: ann.color
+            ? rgb(
+                normalizeColor(ann.color.r),
+                normalizeColor(ann.color.g),
+                normalizeColor(ann.color.b)
+              )
+            : rgb(0, 0, 0),
         });
-      } else {
-        console.log('No annotations found.');
+        break;
+
+      case 'rectangle':
+        page.drawRectangle({
+          x: ann.x,
+          y: normalizeY(ann.y, height, ann.height),
+          width: ann.width,
+          height: ann.height,
+          borderWidth: ann.borderWidth || 1,
+          borderColor: ann.borderColor
+            ? rgb(
+                normalizeColor(ann.borderColor.r),
+                normalizeColor(ann.borderColor.g),
+                normalizeColor(ann.borderColor.b)
+              )
+            : rgb(1, 0, 0),
+        });
+        break;
+
+      default:
+        console.warn('Unknown annotation type:', ann.type);
+    }
+  });
+};
+
+// Draw watermark (paid vs free)
+const drawWatermark = ({ pages, font, text, isPaid }) => {
+  pages.forEach((page) => {
+    const { width, height } = page.getSize();
+
+    if (isPaid) {
+      const fontSize = 12;
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+      page.drawText(text, {
+        x: (width - textWidth) / 2,
+        y: 25,
+        size: fontSize,
+        font,
+        opacity: 0.35,
+        color: rgb(0.5, 0.5, 0.5),
+      });
+    } else {
+      page.drawText('UNPAID PREVIEW', {
+        x: width / 4,
+        y: height / 2,
+        size: 40,
+        font,
+        rotate: { type: 'degrees', angle: -30 },
+        opacity: 0.15,
+        color: rgb(1, 0, 0),
+      });
+    }
+  });
+};
+
+
+// Draw approval stamp (paid only)
+const drawApprovalStamp = ({ page, font }) => {
+  const { height } = page.getSize();
+
+  const x = 40;
+  const y = height - 90;
+
+  page.drawRectangle({
+    x: x - 10,
+    y: y - 10,
+    width: 150,
+    height: 60,
+    borderWidth: 2,
+    borderColor: rgb(0, 0.6, 0),
+  });
+
+  page.drawText('APPROVED', {
+    x,
+    y: y + 25,
+    size: 20,
+    font,
+    color: rgb(0, 0.6, 0),
+    opacity: 0.85,
+  });
+
+  page.drawText('AC COMMERCE', {
+    x,
+    y: y + 8,
+    size: 10,
+    font,
+    color: rgb(0, 0.6, 0),
+  });
+};
+
+/* ---------------------------------------------------
+   ROUTE
+--------------------------------------------------- */
+
+router.get(
+  '/annotated-pdf/:id',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    console.log('Generating annotated PDF:', req.params.id);
+
+    try {
+      const annotation = await AnnotationModel.findById(req.params.id);
+      if (!annotation?.pdfData) {
+        return res.status(404).json({ message: 'Annotated PDF not found' });
       }
 
-      const date = new Date().toLocaleDateString();
-      const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Created at ${date}`;
+      const { isPaid, email } = req.user;
 
-      if (annotation.annotatedImageUrl) {
-        console.log('Found annotatedImageUrl – using image + centered text watermark.');
+      const pdfDoc = await PDFDocument.load(annotation.pdfData);
+      const pages = pdfDoc.getPages();
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-        const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) =>
-          res.arrayBuffer()
-        );
-        const embeddedImage = await pdfDoc.embedPng(imageBytes);
+      // 1️⃣ Draw annotations
+      drawAnnotations({
+        pages,
+        annotations: annotation.annotations,
+        font,
+      });
 
-        pages.forEach((page) => {
-          const fontSize = 18;
-          const { width, height } = page.getSize();
+      // 2️⃣ Watermark
+      const formattedDate = annotation.createdAt
+        ? new Date(annotation.createdAt).toLocaleString()
+        : 'Unknown date';
 
-          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+      drawWatermark({
+        pages,
+        font,
+        isPaid,
+        text: `AC Commerce — ${email || 'User'} — ${formattedDate}`,
+      });
 
-          const xPos = (width - textWidth) / 2;
-          const yPos = height / 2 - fontSize / 2;
-
-          page.drawText(watermarkText, {
-            x: xPos,
-            y: yPos,
-            size: fontSize,
-            font: helveticaFont,
-            color: rgb(0.6, 0.6, 0.6),
-            opacity: 0.15,
-          });
-
+      // 3️⃣ Approval stamp (PAID ONLY)
+      if (isPaid) {
+        drawApprovalStamp({
+          page: pages[0],
+          font,
         });
-      } else {
-        console.log('No annotatedImageUrl – drawing only centered text watermark.');
-
-        pages.forEach((page) => {
-          const { width, height } = page.getSize();
-          const fontSize = 14;
-
-          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-          const xPos = (width - textWidth) / 2;
-          const yPos = 30; // ← bottom padding
-
-          page.drawText(watermarkText, {
-            x: xPos,
-            y: yPos,
-            size: fontSize,
-            font: helveticaFont,
-            opacity: 0.4,
-            color: rgb(0.5, 0.5, 0.5),
-          });
-        });
-
       }
 
-      console.log('Drawing APPROVAL stamp.');
-      const { width, height } = firstPage.getSize();
+      // 4️⃣ Save + send
+      const pdfBytes = await pdfDoc.save();
 
-      const stampMarginX = 50; 
-      const stampMarginY = height - 100; 
-      const boxWidth = 140;
-      const boxHeight = 60;
-
-      firstPage.drawRectangle({
-        x: stampMarginX - 10,
-        y: stampMarginY - 10,
-        width: boxWidth,
-        height: boxHeight,
-        borderColor: rgb(0, 0.6, 0),
-        borderWidth: 2,
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(
+          annotation.filename || 'annotated.pdf'
+        )}`,
+        'Content-Length': pdfBytes.length,
       });
 
-      firstPage.drawText('APPROVED', {
-        x: stampMarginX,
-        y: stampMarginY + 30,
-        size: 20,
-        font: helveticaFont,
-        color: rgb(0, 0.6, 0),
-        opacity: 0.85,
-      });
-
-      firstPage.drawText('AC COMMERCE', {
-        x: stampMarginX,
-        y: stampMarginY + 10,
-        size: 10,
-        font: helveticaFont,
-        color: rgb(0, 0.6, 0),
-      });
+      res.send(Buffer.from(pdfBytes));
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Failed to generate annotated PDF' });
+      }
     }
-
-    // ------------------------------------------------------------
-    // SAVE + SEND PDF
-    // ------------------------------------------------------------
-    const pdfBytes = await pdfDoc.save();
-    console.log('PDF generation successful. Sending response.');
-
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${annotation.filename || 'annotated.pdf'}"`,
-      'Content-Length': pdfBytes.length,
-    });
-
-    return res.send(Buffer.from(pdfBytes));
-  } catch (error) {
-    console.error('Error generating annotated PDF:', error);
-    if (!res.headersSent) {
-      return res.status(500).json({ message: 'Failed to generate annotated PDF.' });
-    }
-  }
-});
-
+  })
+);
 
 router.get('/annotations/:id', isAuth, async (req, res) => {
   try {
@@ -297,7 +497,9 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
     }
 
     const tokenUserId = req.user._id?.toString() || req.user.id?.toString() || req.user.userId?.toString();
-    if (!tokenUserId || annotation.userId.toString() !== tokenUserId) {
+    const isAdmin = req.user.isAdmin;
+    // Allow access if admin, or if user owns the annotation
+    if (!isAdmin && (!tokenUserId || annotation.userId.toString() !== tokenUserId)) {
       return res.status(403).json({ message: 'Unauthorized to access these annotations.' });
     }
 

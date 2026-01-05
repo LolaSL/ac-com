@@ -8,7 +8,9 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Table from "react-bootstrap/Table";
 import Badge from "react-bootstrap/Badge";
-import { Link } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import { FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -27,8 +29,9 @@ export default function TotalSellerDashboard() {
   const [{ loading, error, data }, dispatch] = useReducer(reducer, {
     loading: true,
     error: "",
-    data: null,
+    data: { totalSellers: 0, sellers: [] },
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +48,20 @@ export default function TotalSellerDashboard() {
     fetchData();
   }, []);
 
+  // Safely calculate totals
+  const totalReferredUsers = data.sellers?.reduce(
+    (sum, item) => sum + (item.stats?.referredUsersCount || 0),
+    0
+  );
+  const totalReferralSales = data.sellers?.reduce(
+    (sum, item) => sum + (item.stats?.totalReferredSales || 0),
+    0
+  );
+  const totalCommissions = data.sellers?.reduce(
+    (sum, item) => sum + (item.stats?.totalCommission || 0),
+    0
+  );
+
   return (
     <div className="container mt-4">
       <h1 className="mb-4">Total Seller Referral Dashboard</h1>
@@ -53,7 +70,7 @@ export default function TotalSellerDashboard() {
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
-      ) : data ? (
+      ) : (
         <>
           {/* Summary Cards */}
           <Row className="mb-4">
@@ -71,10 +88,7 @@ export default function TotalSellerDashboard() {
               <Card className="text-center">
                 <Card.Body>
                   <Card.Title className="text-success">
-                    {data.sellers.reduce(
-                      (sum, item) => sum + item.stats.referredUsersCount,
-                      0
-                    )}
+                    {totalReferredUsers}
                   </Card.Title>
                   <Card.Text>Total Referred Users</Card.Text>
                 </Card.Body>
@@ -84,13 +98,7 @@ export default function TotalSellerDashboard() {
               <Card className="text-center">
                 <Card.Body>
                   <Card.Title className="text-info">
-                    $
-                    {data.sellers
-                      .reduce(
-                        (sum, item) => sum + item.stats.totalReferredSales,
-                        0
-                      )
-                      .toFixed(2)}
+                    ${totalReferralSales?.toFixed(2) || "0.00"}
                   </Card.Title>
                   <Card.Text>Total Referral Sales</Card.Text>
                 </Card.Body>
@@ -100,13 +108,7 @@ export default function TotalSellerDashboard() {
               <Card className="text-center">
                 <Card.Body>
                   <Card.Title className="text-warning">
-                    $
-                    {data.sellers
-                      .reduce(
-                        (sum, item) => sum + item.stats.totalCommission,
-                        0
-                      )
-                      .toFixed(2)}
+                    ${totalCommissions?.toFixed(2) || "0.00"}
                   </Card.Title>
                   <Card.Text>Total Commissions</Card.Text>
                 </Card.Body>
@@ -134,7 +136,7 @@ export default function TotalSellerDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.sellers.map((item) => (
+                  {data.sellers?.map((item) => (
                     <tr key={item.seller._id}>
                       <td>
                         <div className="d-flex align-items-center">
@@ -161,31 +163,33 @@ export default function TotalSellerDashboard() {
                       </td>
                       <td className="text-center">
                         <Badge bg="primary">
-                          {item.stats.referredUsersCount}
+                          {item.stats?.referredUsersCount || 0}
                         </Badge>
                       </td>
                       <td className="text-center">
                         <Badge bg="success">
-                          {item.stats.totalReferredOrders}
+                          {item.stats?.totalReferredOrders || 0}
                         </Badge>
                       </td>
                       <td className="text-end">
                         <strong>
-                          ${item.stats.totalReferredSales.toFixed(2)}
+                          ${item.stats?.totalReferredSales?.toFixed(2) || "0.00"}
                         </strong>
                       </td>
                       <td className="text-end">
                         <strong className="text-warning">
-                          ${item.stats.totalCommission.toFixed(2)}
+                          ${item.stats?.totalCommission?.toFixed(2) || "0.00"}
                         </strong>
                       </td>
                       <td>
-                        <Link
-                          to={`/seller/dashboard/${item.seller._id}`}
-                          className="btn btn-sm btn-outline-primary"
+                        <Button
+                          type="button"
+                          className="btn-admin-edit"
+                          title="View Details"
+                          onClick={() => navigate(`/seller/dashboard/${item.seller._id}`)}
                         >
-                          View Details
-                        </Link>
+                          <FaEye />
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -194,7 +198,7 @@ export default function TotalSellerDashboard() {
             </Card.Body>
           </Card>
         </>
-      ) : null}
+      )}
     </div>
   );
 }

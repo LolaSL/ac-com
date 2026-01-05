@@ -1,4 +1,5 @@
 import ProfilePage from "../pages/ProfilePage.jsx";
+import EngineerViewPage from "../pages/EngineerViewPage.jsx";
 import OrderHistoryPage from "../pages/OrderHistoryPage.jsx";
 import OrderPage from "../pages/OrderPage.jsx";
 import MapPage from "../pages/MapPage.jsx";
@@ -17,6 +18,14 @@ import AdminAllAnnotationsPage from "../pages/AdminAllAnnotationsPage.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.js";
 
 export const protectedRoutes = [
+  {
+    path: "/admin/engineer-view/:id",
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <EngineerViewPage />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "/admin/all-annotations",
     element: (

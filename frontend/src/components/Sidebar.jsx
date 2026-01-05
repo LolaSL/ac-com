@@ -62,14 +62,11 @@ const Sidebar = () => {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [selectedPdfFile, setSelectedPdfFile] = useState(null);
   const [selectedAnnotations, setSelectedAnnotations] = useState(null);
-  const [showHVAC,
-    // setShowHVAC
-  ] = useState(false);
-
+  const [showHVAC, setShowHVAC] = useState(false);
 
   // Determine user role
   const isAdmin = !!state?.adminInfo && !!state?.adminInfo.token;
- 
+
   // const isUser = !!state?.userInfo && !!state?.userInfo.token;
 
   const fetchSavedPdfs = useCallback(async () => {
@@ -384,7 +381,6 @@ const Sidebar = () => {
         onHide={toggleSidebar}
         dialogClassName="custom-modal-width"
       >
-
         <Modal.Body>
           {error && <p className="text-danger">{error}</p>}
           <div
@@ -448,7 +444,8 @@ const Sidebar = () => {
               />
             )}
 
-            {/* {isUser && selectedPdfFile && mode === "engineer" && (
+            {/* HVAC toggle button and legend for admins/engineers only */}
+            {isAdmin && selectedPdfFile && (
               <Button
                 variant="outline-primary"
                 size="sm"
@@ -457,7 +454,18 @@ const Sidebar = () => {
               >
                 {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
               </Button>
-            )} */}
+            )}
+            {isAdmin && selectedPdfFile && (
+              <div className="mb-2">
+                <strong>Legend:</strong>
+                <span className="ms-2" style={{ color: "orange" }}>
+                  ■ Ducts (Yellow/Orange)
+                </span>
+                <span className="ms-3" style={{ color: "lime" }}>
+                  ● Diffusers (Green/Lime)
+                </span>
+              </div>
+            )}
 
             <div
               id="pdf-container"

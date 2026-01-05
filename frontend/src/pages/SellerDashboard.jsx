@@ -37,6 +37,62 @@ const reducer = (state, action) => {
 };
 
 export default function SellerDashboard() {
+  // Filter state
+  const [showFilters, setShowFilters] = React.useState(false);
+  const [filterStatus, setFilterStatus] = React.useState("");
+  const [filterCustomer, setFilterCustomer] = React.useState("");
+  const [filterDateFrom, setFilterDateFrom] = React.useState("");
+  const [filterDateTo, setFilterDateTo] = React.useState("");
+
+  // Filtered orders
+  const getFilteredOrders = () => {
+    if (!referredOrders) return [];
+    return referredOrders.orders.filter((order) => {
+      let statusMatch = true;
+      let customerMatch = true;
+      let dateMatch = true;
+      if (filterStatus) {
+        statusMatch = filterStatus === "Paid" ? order.isPaid : !order.isPaid;
+      }
+      if (filterCustomer) {
+        customerMatch = order.user.name
+          .toLowerCase()
+          .includes(filterCustomer.toLowerCase());
+      }
+      if (filterDateFrom) {
+        dateMatch = new Date(order.createdAt) >= new Date(filterDateFrom);
+      }
+      if (filterDateTo) {
+        dateMatch =
+          dateMatch && new Date(order.createdAt) <= new Date(filterDateTo);
+      }
+      return statusMatch && customerMatch && dateMatch;
+    });
+  };
+  // Manual refresh handler
+  const handleRefresh = () => {
+    // Re-run the stats fetch
+    dispatch({ type: "FETCH_REQUEST" });
+    axios
+      .get(`/api/sellers/${id}/dashboard`)
+      .then(({ data }) => {
+        dispatch({ type: "FETCH_SUCCESS", payload: data.stats });
+        dispatch({
+          type: "ORDERS_SUCCESS",
+          payload: {
+            totalCount: data.referredOrders.length,
+            totalSales: data.referredOrders.reduce(
+              (sum, o) => sum + Number(o.totalPrice || 0),
+              0
+            ),
+            orders: data.referredOrders,
+          },
+        });
+      })
+      .catch((err) => {
+        dispatch({ type: "FETCH_FAIL", payload: getError(err) });
+      });
+  };
   const { id } = useParams();
 
   const [
@@ -47,7 +103,6 @@ export default function SellerDashboard() {
       loadingUsers,
       referredUsers,
       errorUsers,
-      loadingOrders,
       referredOrders,
       errorOrders,
     },
@@ -68,8 +123,20 @@ export default function SellerDashboard() {
     const fetchStats = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
-        const { data } = await axios.get(`/api/sellers/${id}/referral-stats`);
-        dispatch({ type: "FETCH_SUCCESS", payload: data });
+        const { data } = await axios.get(`/api/sellers/${id}/dashboard`);
+        // Set stats and referredOrders from the dashboard response
+        dispatch({ type: "FETCH_SUCCESS", payload: data.stats });
+        dispatch({
+          type: "ORDERS_SUCCESS",
+          payload: {
+            totalCount: data.referredOrders.length,
+            totalSales: data.referredOrders.reduce(
+              (sum, o) => sum + Number(o.totalPrice || 0),
+              0
+            ),
+            orders: data.referredOrders,
+          },
+        });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
       }
@@ -87,15 +154,7 @@ export default function SellerDashboard() {
     }
   };
 
-  const fetchReferredOrders = async () => {
-    try {
-      dispatch({ type: "ORDERS_REQUEST" });
-      const { data } = await axios.get(`/api/sellers/${id}/referred-orders`);
-      dispatch({ type: "ORDERS_SUCCESS", payload: data });
-    } catch (err) {
-      dispatch({ type: "ORDERS_FAIL", payload: getError(err) });
-    }
-  };
+  // Remove fetchReferredOrders, as orders are loaded with stats
 
   return (
     <div className="container mt-4">
@@ -166,12 +225,14 @@ export default function SellerDashboard() {
                   {loadingUsers ? "Loading..." : "View Referred Users"}
                 </Button>
                 <Button
-                  variant="outline-success"
-                  onClick={fetchReferredOrders}
-                  disabled={loadingOrders}
+                  variant="outline-secondary"
+                  onClick={handleRefresh}
+                  className="me-2"
+                  disabled={loading}
                 >
-                  {loadingOrders ? "Loading..." : "View Referred Orders"}
+                  {loading ? "Refreshing..." : "Refresh"}
                 </Button>
+                {/* Removed 'View Referred Orders' button as orders are loaded with stats */}
               </Col>
             </Row>
 
@@ -211,10 +272,67 @@ export default function SellerDashboard() {
               <Card>
                 <Card.Header>
                   <h5>
-                    Referred Orders ({referredOrders.totalCount}) - Total Sales:
-                    ${referredOrders.totalSales.toFixed(2)}
+                    Referred Orders ({getFilteredOrders().length}) - Total
+                    Sales: $
+                    {getFilteredOrders()
+                      .reduce((sum, o) => sum + Number(o.totalPrice || 0), 0)
+                      .toFixed(2)}
                   </h5>
+                  <Button
+                    variant="outline-info"
+                    size="sm"
+                    className="ms-2"
+                    onClick={() => setShowFilters((prev) => !prev)}
+                  >
+                    {showFilters ? "Hide Filters" : "Show Filters"}
+                  </Button>
                 </Card.Header>
+                {showFilters && (
+                  <div className="p-3 border-bottom bg-light">
+                    <Row className="g-2">
+                      <Col md={3}>
+                        <label>Status</label>
+                        <select
+                          className="form-select"
+                          value={filterStatus}
+                          onChange={(e) => setFilterStatus(e.target.value)}
+                        >
+                          <option value="">All</option>
+                          <option value="Paid">Paid</option>
+                          <option value="Pending">Pending</option>
+                        </select>
+                      </Col>
+                      <Col md={3}>
+                        <label>Customer</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Customer name"
+                          value={filterCustomer}
+                          onChange={(e) => setFilterCustomer(e.target.value)}
+                        />
+                      </Col>
+                      <Col md={3}>
+                        <label>Date From</label>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={filterDateFrom}
+                          onChange={(e) => setFilterDateFrom(e.target.value)}
+                        />
+                      </Col>
+                      <Col md={3}>
+                        <label>Date To</label>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={filterDateTo}
+                          onChange={(e) => setFilterDateTo(e.target.value)}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                )}
                 <Card.Body>
                   <Table striped bordered hover responsive>
                     <thead>
@@ -227,7 +345,7 @@ export default function SellerDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {referredOrders.orders.map((order) => (
+                      {getFilteredOrders().map((order) => (
                         <tr key={order._id}>
                           <td>
                             <Link to={`/order/${order._id}`}>

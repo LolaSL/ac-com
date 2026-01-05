@@ -382,6 +382,7 @@ export default function OrderListPage() {
                 >
                   ID {sortColumn === "_id" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
+                <th>TRANSACTION ID</th>
                 <th>CUSTOMER</th>
                 <th
                   style={{ cursor: "pointer" }}
@@ -422,6 +423,9 @@ export default function OrderListPage() {
                 <tr key={order._id} className="admin-table-row">
                   <td className="small-text" data-label="ID">
                     {order._id}
+                  </td>
+                  <td data-label="TRANSACTION ID">
+                    {order.transactionId || "-"}
                   </td>
                   <td data-label="CUSTOMER">
                     {order.user ? order.user.name : "DELETED USER"}

@@ -41,73 +41,124 @@ function printOrder() {
           print-color-adjust: exact;
         }
         body {
-          font-family: Arial, sans-serif;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 20px;
+          background: white;
+        }
+        .container {
+          max-width: none;
+          background: white;
           padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         h1 {
-          font-size: 24px;
-          font-weight: bold;
+          color: #007bff;
+          text-align: center;
+          font-size: 2.5em;
           margin-bottom: 20px;
-          border-bottom: 2px solid #333;
-          padding-bottom: 10px;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .badge {
+          display: inline-block;
+          padding: 4px 8px;
+          font-size: 0.75em;
+          font-weight: bold;
+          border-radius: 4px;
+          margin: 2px;
+        }
+        .bg-success {
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+        }
+        .bg-warning {
+          background: linear-gradient(135deg, #ffc107, #fd7e14);
+          color: white;
+        }
+        .bg-secondary {
+          background: linear-gradient(135deg, #6c757d, #495057);
+          color: white;
         }
         .card {
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          padding: 15px;
+          border: none;
+          border-radius: 10px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
           margin-bottom: 20px;
           page-break-inside: avoid;
         }
         .card-title {
-          font-size: 18px;
+          color: #007bff;
           font-weight: bold;
+          font-size: 1.2em;
           margin-bottom: 15px;
-          color: #333;
         }
         .card-text {
           line-height: 1.6;
-          margin-bottom: 10px;
         }
-        img {
-          max-width: 80px;
-          height: auto;
-          display: block;
+        .list-group-item {
+          border: none;
+          border-bottom: 1px solid #eee;
+          padding: 10px 0;
+        }
+        .list-group-item:last-child {
+          border-bottom: none;
         }
         .row {
           display: flex;
-          margin-bottom: 10px;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .col-md-8, .col-md-4, .col-md-2, .col-md-3 {
+          flex: 1;
+          padding: 0 10px;
         }
         .col-md-8 {
-          width: 66%;
+          flex: 2;
         }
         .col-md-4 {
-          width: 33%;
+          flex: 1;
         }
-        .list-group-item {
-          border: 1px solid #eee;
-          padding: 10px;
-          margin-bottom: 5px;
+        .col-md-2 {
+          flex: 0.5;
+        }
+        .col-md-3 {
+          flex: 0.75;
+        }
+        img {
+          width: 60px;
+          height: 60px;
+          object-fit: cover;
+          border: 2px solid #ddd;
+          border-radius: 5px;
         }
         strong {
           font-weight: bold;
+          color: #333;
         }
         .alert {
+          border-radius: 5px;
           padding: 10px;
           margin: 10px 0;
-          border-radius: 4px;
         }
         .alert-success {
-          background-color: #d4edda;
+          background: linear-gradient(135deg, #d4edda, #c3e6cb);
           color: #155724;
           border: 1px solid #c3e6cb;
         }
         .alert-warning {
-          background-color: #fff3cd;
+          background: linear-gradient(135deg, #fff3cd, #ffeeba);
           color: #856404;
           border: 1px solid #ffeeba;
         }
-        a {
-          display: none;
+        .text-primary {
+          color: #007bff !important;
+        }
+        .order-link {
+          color: #007bff;
+          text-decoration: none;
+        }
+        .order-link:hover {
+          text-decoration: underline;
         }
       }
     `,
@@ -416,7 +467,13 @@ export default function OrderPage() {
                             src={item.image}
                             alt={item.name}
                             className="img-fluid rounded"
-                            style={{ maxHeight: "80px", objectFit: "contain" }}
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              objectFit: "cover",
+                              border: "2px solid #ddd",
+                              borderRadius: "5px",
+                            }}
                           />
                         </Col>
                         <Col md={4}>

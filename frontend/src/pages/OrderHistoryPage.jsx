@@ -76,6 +76,7 @@ export default function OrderHistoryPage() {
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Transaction ID</th>
                   <th>DATE</th>
                   <th>TOTAL</th>
                   <th>PAID</th>
@@ -87,12 +88,17 @@ export default function OrderHistoryPage() {
                 {orders.map((order) => (
                   <tr key={order._id}>
                     <td data-label="ID">{order._id}</td>
+                    <td data-label="Transaction ID">
+                      {order.transactionId || "-"}
+                    </td>
                     <td data-label="Date">
                       {order.createdAt.substring(0, 10)}
                     </td>
                     <td data-label="Total">${order.totalPrice.toFixed(2)}</td>
                     <td data-label="Paid">
-                      {order.isPaid ? order.paidAt.substring(0, 10) : "No"}
+                      {order.isPaid
+                        ? new Date(order.paidAt).toLocaleString()
+                        : "No"}
                     </td>
                     <td data-label="Delivered">
                       {order.isDelivered

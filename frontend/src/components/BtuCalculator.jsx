@@ -22,7 +22,7 @@ function BtuCalculator({ roomData }) {
         name: room.name,
         size: room.size,
         btu: 0,
-        unit: "meters", // Track that Annotator data is in meters
+        unit: "meters",
       }));
       setRooms(formattedRooms);
     }
@@ -46,61 +46,59 @@ function BtuCalculator({ roomData }) {
     const optimalProductCount = products.filter((p) => p.model).length;
 
     let tableHtml = `
-    <table>
-      <thead>
-        <tr>
-          <th>Room</th>
-          <th>Room BTU</th>
-          <th>Optimal Product</th>
-          <th>Product BTU</th>
-          <th>Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${btuResults
-          .map(
-            (btu, i) => `
+    <div class="print-container">
+      <h1>Products Quote</h1>
+      <table class="quote-table">
+        <thead>
           <tr>
-            <td>${rooms[i]?.name || ""}</td>
-            <td>${btu}</td>
-            <td>${products[i]?.model || ""}</td>
-            <td>${products[i]?.btu || ""}</td>
-            <td>${products[i]?.price || ""}</td>
+            <th>Room</th>
+            <th>Room BTU</th>
+            <th>Optimal Product</th>
+            <th>Product BTU</th>
+            <th>Price</th>
           </tr>
-        `
-          )
-          .join("")}
-        <tr class="total-results ">
-          <td><strong>Total</strong></td>
-          <td><strong>${totalBTU}</strong></td>
-          <td><strong>${
-            optimalProductCount || "No optimal product available"
-          }</strong></td>
-          <td><strong>${totalProductBTU.toFixed(0)}</strong></td>
-          <td><strong>${
-            products.length > 0 ? totalPrice.toFixed(2) : "No price available"
-          }</strong></td>
-        </tr>
-        <tr>
-        <td
-          <td
-                  colSpan="5"
-                  className="total-results text-center"
-                  style={{ color: "red", fontWeight: "bold" }}
-                >
-                  Total Cooling Load: ${displayValue} ${selectedUnit}
-                </td>
-              </tr>
-              <tr>
-      </tbody>
-    </table>
+        </thead>
+        <tr class="cooling-load-row">
+        <tbody>
+          ${btuResults
+            .map(
+              (btu, i) => `
+            <tr>
+              <td>${rooms[i]?.name || ""}</td>
+              <td>${btu}</td>
+              <td>${products[i]?.model || ""}</td>
+              <td>${products[i]?.btu || ""}</td>
+              <td>${products[i]?.price || ""}</td>
+            </tr>
+          `
+            )
+            .join("")}
+          <tr class="total-row">
+            <td><strong>Total</strong></td>
+            <td><strong>${totalBTU}</strong></td>
+            <td><strong>${
+              optimalProductCount || "No optimal product available"
+            }</strong></td>
+            <td><strong>${totalProductBTU.toFixed(0)}</strong></td>
+            <td><strong>${
+              products.length > 0 ? totalPrice.toFixed(2) : "No price available"
+            }</strong></td>
+          </tr>
+          <tr class="cooling-load-row">
+            <td colspan="5" style="color: #007bff; font-weight: bold; text-align: center;">
+              Total Cooling Load: ${displayValue} ${selectedUnit}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   `;
 
     if (showCondenser) {
       const recommendedCondenserBTU = (totalProductBTU * 0.8).toFixed(0);
       const condenserRow = `
       <tr class="text-center bg-info">
-        <td colspan="5"><strong>Recommended Condenser: ${recommendedCondenserBTU} BTU</strong></td>
+        <td colspan="5" style="color: #007bff;"><strong>Recommended Condenser: ${recommendedCondenserBTU} BTU</strong></td>
       </tr>
     `;
       tableHtml = tableHtml.replace("</tbody>", `${condenserRow}</tbody>`);
@@ -113,13 +111,65 @@ function BtuCalculator({ roomData }) {
       header: "<h2>Product List</h2>",
       css: "../index.css",
       style: `
-      table { width: 100%; border-collapse: collapse; }
-      th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-      thead { background: #eee; }
-      .bg-light { background: #f8f9fa; }
-      .bg-info { background: #cce5ff; }
-      .total-results { font-weight: bold; }
-    `,
+        .print-container {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 20px;
+          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          border-radius: 10px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+          text-align: center;
+          color: #007bff;
+          margin-bottom: 20px;
+          font-size: 2.5em;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .quote-table {
+          width: 100%;
+          border-collapse: collapse;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          margin: 0 auto;
+        }
+        th {
+          background: linear-gradient(135deg, #007bff, #0056b3);
+          color: white;
+          padding: 15px;
+          font-weight: bold;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        td {
+          padding: 12px;
+          text-align: center;
+          border-bottom: 1px solid #ddd;
+        }
+        tbody tr:nth-child(even) {
+          background: #f8f9fa;
+        }
+        tbody tr:hover {
+          background: #e9ecef;
+        }
+        .total-row {
+          background: linear-gradient(135deg, #dc3545, #c82333);
+          color: teal;
+          font-weight: bold;
+        }
+        .cooling-load-row {
+          background: #fff3cd;
+          border-top: 2px solid #ffc107;
+        }
+        .bg-info {
+          background: #cce5ff !important;
+        }
+        .total-results {
+          font-weight: bold;
+        }
+      `,
     });
   };
 
@@ -313,7 +363,6 @@ function BtuCalculator({ roomData }) {
       [category]: { ...prev[category], [name]: !prev[category][name] },
     }));
   };
-  
 
   const handleOutdoorUnitLocationChange = (e) =>
     handleOptionChange("OutdoorUnitLocation", e.target.name);
@@ -905,7 +954,7 @@ function BtuCalculator({ roomData }) {
                   <td
                     colSpan="5"
                     className="total-results text-center"
-                    style={{ color: "red", fontWeight: "bold" }}
+                    style={{ color: "#007bff !important", fontWeight: "bold" }}
                   >
                     Total Cooling Load: {displayValue} {selectedUnit}
                   </td>

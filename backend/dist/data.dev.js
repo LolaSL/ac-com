@@ -1376,23 +1376,54 @@ var data = {
         stroke: 'black',
         strokeWidth: 2
       }],
-      hvac: [{
-        id: 'hvac-1',
-        xPercent: 0.5,
-        yPercent: 0.2,
-        widthPercent: 0.3,
-        heightPercent: 0.05,
-        fill: 'rgba(255, 0, 0, 0.4)',
-        stroke: 'red'
-      }, {
-        id: 'hvac-2',
-        xPercent: 0.1,
-        yPercent: 0.6,
-        widthPercent: 0.4,
-        heightPercent: 0.05,
-        fill: 'rgba(255, 100, 0, 0.4)',
-        stroke: 'orange'
-      }]
+      hvac: {
+        ducts: [{
+          id: 'duct-1',
+          xPercent: 0.25,
+          // 25% from left
+          yPercent: 0.35,
+          // 35% from top
+          width: 0.3,
+          // 30% of canvas width
+          height: 0.04,
+          // 4% of canvas height
+          fill: 'rgba(0, 120, 255, 0.3)',
+          stroke: 'blue'
+        }, {
+          id: 'duct-2',
+          xPercent: 0.65,
+          // 65% from left
+          yPercent: 0.55,
+          // 55% from top
+          width: 0.2,
+          // 20% of canvas width
+          height: 0.04,
+          // 4% of canvas height
+          fill: 'rgba(255, 200, 0, 0.3)',
+          stroke: 'orange'
+        }],
+        diffusers: [{
+          id: 'diffuser-1',
+          xPercent: 0.3,
+          // 30% from left
+          yPercent: 0.4,
+          // 40% from top
+          sizePercent: 0.07,
+          // 7% of canvas width
+          shape: 'circle',
+          airflow: 120
+        }, {
+          id: 'diffuser-2',
+          xPercent: 0.75,
+          // 75% from left
+          yPercent: 0.6,
+          // 60% from top
+          sizePercent: 0.09,
+          // 9% of canvas width
+          shape: 'square',
+          airflow: 90
+        }]
+      }
     }
   }],
   orders: [{

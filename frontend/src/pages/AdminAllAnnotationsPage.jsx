@@ -1,10 +1,13 @@
 import { useEffect, useState, useContext } from "react";
-import { Table, Spinner, Alert } from "react-bootstrap";
+import { Table, Spinner, Alert, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { Store } from "../Store.js";
+import { FaEye } from "react-icons/fa";
 
 const AdminAllAnnotationsPage = () => {
   const { state } = useContext(Store);
   const token = state?.adminInfo?.token;
+  const navigate = useNavigate();
   const [annotations, setAnnotations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -50,6 +53,7 @@ const AdminAllAnnotationsPage = () => {
               <th>PDF ID</th>
               <th>Created At</th>
               <th>Paid</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -60,6 +64,15 @@ const AdminAllAnnotationsPage = () => {
                 <td>{a.pdfId}</td>
                 <td>{new Date(a.createdAt).toLocaleString()}</td>
                 <td>{a.isPaid ? "Yes" : "No"}</td>
+                <td>
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => navigate(`/admin/engineer-view/${a._id}`)}
+                  >
+                    <FaEye />
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>

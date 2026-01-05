@@ -125,24 +125,57 @@ var annotationSchema = new _mongoose.Schema({
     }],
     hvac: {
       ducts: [{
-        id: String,
-        type: String,
-        // "supply", "return", "exhaust"
-        pointsPercent: [Number],
-        // x1, y1, x2, y2, ...
-        width: Number,
-        // thickness in px for now
-        color: String // optional, e.g., "#ff4500"
-
+        id: {
+          type: String,
+          required: true
+        },
+        xPercent: {
+          type: Number,
+          required: true
+        },
+        yPercent: {
+          type: Number,
+          required: true
+        },
+        width: {
+          type: Number,
+          required: true
+        },
+        height: {
+          type: Number
+        },
+        fill: {
+          type: String
+        },
+        stroke: {
+          type: String
+        }
       }],
       diffusers: [{
-        id: String,
-        shape: String,
+        id: {
+          type: String,
+          required: true
+        },
+        shape: {
+          type: String,
+          required: true
+        },
         // "circle", "square"
-        xPercent: Number,
-        yPercent: Number,
-        sizePercent: Number,
-        airflow: Number // optional CFM
+        xPercent: {
+          type: Number,
+          required: true
+        },
+        yPercent: {
+          type: Number,
+          required: true
+        },
+        sizePercent: {
+          type: Number,
+          required: true
+        },
+        airflow: {
+          type: Number
+        } // optional CFM
 
       }]
     }
