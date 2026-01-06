@@ -49,61 +49,135 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <Container
-      className="d-flex justify-content-center align-items-center min-vh-100"
-      style={{
-        background: "linear-gradient(135deg, #052742 0%, #000033 100%)",
-      }}
-    >
-      <Card
-        className="shadow-lg p-4 text-white"
-        style={{
-          maxWidth: "400px",
-          width: "100%",
-          backgroundColor: "#052742",
-        }}
+    <div className="dashboard-container">
+      <div
+        className="sidebar d-none d-md-flex"
+        style={{ backgroundColor: "#f8f9fa", borderRight: "1px solid #ddd" }}
       >
-        <Card.Body>
-          <h1 className="text-center mb-4 fw-bold text-danger">Admin Portal</h1>
-          <p className="text-center mb-4 text-white">
-            Secure Administration Access
-          </p>
-          <Form onSubmit={handleAdminLogin}>
-            <Form.Group controlId="email" className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter admin email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </Form.Group>
+        <div style={{ padding: "1rem" }}>
+          <h3
+            style={{
+              marginBottom: "2rem",
+              color: "#343a40",
+              fontWeight: "bold",
+            }}
+          >
+            Admin Portal
+          </h3>
+          <div style={{ marginBottom: "1rem" }}>
+            <i
+              className="fas fa-shield-alt"
+              style={{ marginRight: "0.5rem", color: "#007bff" }}
+            ></i>
+            Secure Access
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
+            <i
+              className="fas fa-user-cog"
+              style={{ marginRight: "0.5rem", color: "#007bff" }}
+            ></i>
+            Administration
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
+            <i
+              className="fas fa-chart-line"
+              style={{ marginRight: "0.5rem", color: "#007bff" }}
+            ></i>
+            Dashboard
+          </div>
+        </div>
+      </div>
 
-            <Form.Group controlId="password" className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </Form.Group>
-            <div className="d-grid mb-3">
-              <Button
-                type="submit"
-                className="go-to-btn btn-lg"
-                variant="primary"
-                style={{ color: "red" }}
-                disabled={submitting}
-              >
-                {submitting ? "Signing in..." : "Login as Admin"}
-              </Button>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+      <div className="main-content" style={{ backgroundColor: "#ffffff" }}>
+        <Container className="d-flex justify-content-center align-items-center min-vh-100">
+          <Card
+            className="shadow-sm"
+            style={{
+              maxWidth: "450px",
+              width: "100%",
+              border: "1px solid #e9ecef",
+            }}
+          >
+            <Card.Body style={{ padding: "2rem" }}>
+              <div className="text-center mb-4">
+                <i className="fas fa-user-shield fa-3x text-primary mb-3"></i>
+                <h2 className="fw-bold text-dark">Admin Login</h2>
+                <p className="text-muted">
+                  Access the administration dashboard
+                </p>
+              </div>
+
+              <Form onSubmit={handleAdminLogin}>
+                <Form.Group controlId="email" className="mb-3">
+                  <Form.Label className="fw-semibold">
+                    <i className="fas fa-envelope me-2 text-primary"></i>
+                    Email Address
+                  </Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="xxxxxx@xxxxxx.xxx"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="form-control-lg"
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="password" className="mb-4">
+                  <Form.Label className="fw-semibold">
+                    <i className="fas fa-lock me-2 text-primary"></i>
+                    Password
+                  </Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="form-control-lg"
+                  />
+                </Form.Group>
+
+                <div className="d-grid">
+                  <Button
+                    type="submit"
+                    className="btn btn-primary btn-lg fw-semibold"
+                    disabled={submitting}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
+                      border: "none",
+                      padding: "0.75rem 1.5rem",
+                    }}
+                  >
+                    {submitting ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                        ></span>
+                        Signing in...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-sign-in-alt me-2"></i>
+                        Login as Admin
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Form>
+
+              <div className="text-center mt-4">
+                <small className="text-muted">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Authorized personnel only
+                </small>
+              </div>
+            </Card.Body>
+          </Card>
+        </Container>
+      </div>
+    </div>
   );
 }

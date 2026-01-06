@@ -24,6 +24,7 @@ import ReturnsPage from "../pages/ReturnsPage.jsx";
 import CancellationPage from "../pages/CancellationPage.jsx";
 import PrivacyPolicyPage from "../pages/PrivacyPolicyPage.jsx";
 import TermsOfUsePage from "../pages/TermsOfusepage.jsx";
+import PartnersPage from "../pages/PartnersPage.jsx";
 
 export const publicRoutes = [
   { path: "/", element: <HomeBannerPage /> },
@@ -41,6 +42,7 @@ export const publicRoutes = [
   { path: "/sellers", element: <SellersPage /> },
   { path: "/sellers/:id", element: <SellerPage /> },
   { path: "/about-us", element: <AboutUs /> },
+  { path: "/partners", element: <PartnersPage /> },
   { path: "/uploadfile", element: <Measurement /> },
   { path: "/contact", element: <ContactPage /> },
   { path: "/blogs", element: <BlogList /> },

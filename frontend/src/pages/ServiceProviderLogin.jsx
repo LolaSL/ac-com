@@ -45,10 +45,10 @@ const ServiceProviderLogin = () => {
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
       <Card
         className="shadow-lg p-4"
-        style={{ maxWidth: "400px", width: "100%" }}
+        style={{ maxWidth: "500px", width: "100%" }}
       >
         <Card.Body>
-          <h1 className="text-center mb-4 fw-bold text-primary">
+          <h1 className="text-center mb-4 fw-bold text-primary fs-1">
             Service Provider Login
           </h1>
           <Form onSubmit={submitHandler}>

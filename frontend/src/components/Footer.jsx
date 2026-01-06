@@ -14,7 +14,13 @@ const Footer = () => {
 
   return (
     <>
-      <footer className="container-fluid footer ">
+      <footer
+        className="container-fluid footer"
+        style={{
+          background: "#868d9c",
+          color: "white",
+        }}
+      >
         <Row className="text-white p-4 g-4">
           <Col xs={12} lg={2} className="ft-1">
             <h4>AC Commerce</h4>
@@ -92,6 +98,9 @@ const Footer = () => {
             <NavLink className="text-white d-block" href="/about-us">
               About Us
             </NavLink>
+            <NavLink className="text-white d-block" href="/partners">
+              Our Partners
+            </NavLink>
             <NavLink className="text-white d-block" href="/blogs">
               Blogs
             </NavLink>
@@ -132,7 +141,10 @@ const Footer = () => {
               <i className="fa-solid fa-paper-plane"></i> City, State, Zip Code
             </p>
           </Col>
-          <Row className="d-flex justify-content-center mt-4">
+          <Row
+            className="d-flex justify-content-center mt-4"
+            style={{ background: "#868d9c" }}
+          >
             <div className="last-footer text-center">
               &copy; {new Date().getFullYear()} AC Commerce. All rights reserved
             </div>

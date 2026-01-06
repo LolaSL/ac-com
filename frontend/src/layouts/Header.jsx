@@ -34,7 +34,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   };
 
   return (
-    <header className="header-nav">
+    <header
+      className="header-nav"
+      style={{ background: "#868d9c", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}
+    >
       <Navbar className="navbar" expand="lg">
         <Container fluid className="header-container">
           <Button
@@ -238,9 +241,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/admin/dashboard" className="dropdown-item">
                     Dashboard
                   </Link>
-                  <Link to="/admin/payments" className="dropdown-item">
-                    Payments
-                  </Link>
+
                   <Link to="/admin/products" className="dropdown-item">
                     Products
                   </Link>
@@ -255,6 +256,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     className="dropdown-item"
                   >
                     Service Providers
+                  </Link>
+                  <Link to="/admin/payments" className="dropdown-item">
+                    <i className="fas fa-chart-bar me-2"></i>
+                    Service Providers Dashboard
                   </Link>
                   <Link to="/admin/sellers" className="dropdown-item">
                     Sellers

@@ -47,7 +47,7 @@ export default function SellerPage() {
 
   const [{ loading, error, seller, loadingCreateReview }, dispatch] =
     useReducer(reducer, {
-      seller: [],
+      seller: { reviews: [] },
       loading: true,
       error: "",
     });
@@ -110,50 +110,72 @@ export default function SellerPage() {
           <div className="seller">
             <div className="logo-container p-4">
               <img
-                src={`${seller.logo}`}
-                alt={`${seller.name} logo`}
-                className="seller-logo"
+                src={seller.logo}
+                alt="logo"
+                width="100"
+                height="100"
+                style={{ objectFit: "contain", borderRadius: "4px" }}
               />
             </div>
-            <h2 className="p-4">{seller.name}</h2>
-            <p>Brand: {seller.brand}</p>
+            <h2 className="p-4">{seller.name || "Seller Name"}</h2>
+            <p>Brand: {seller.brand || "Not specified"}</p>
             <p>
               Company website:{" "}
-              <a
-                href={seller.companyLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Visit {seller.name}'s Website
-              </a>
+              {seller.companyLink ? (
+                <a
+                  href={seller.companyLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Visit {seller.name || "Seller"}'s Website
+                </a>
+              ) : (
+                <span className="text-muted">Website not available</span>
+              )}
             </p>
-            <p>Information: {seller.info}</p>
+            <p>
+              Information:{" "}
+              {seller.info || "No additional information available"}
+            </p>
           </div>
           <div className="iframe-container">
             <p>
               <strong>VIDEO:</strong>
             </p>
-            <iframe
-              className="rounded"
-              src={seller.link}
-              title={`${seller.name} Product Video`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            ></iframe>
+            {seller.link ? (
+              <iframe
+                className="rounded"
+                src={seller.link}
+                title={`${seller.name} Product Video`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            ) : (
+              <div className="text-center py-4">
+                <i className="fas fa-video-slash fa-3x text-muted mb-3"></i>
+                <p className="text-muted">Video not available</p>
+              </div>
+            )}
           </div>
           <div>
             <h2 className="mt-2 mb-2 p-2" ref={reviewsRef}>
               Reviews
             </h2>
             <ListGroup>
-              {seller.reviews.map((review) => (
-                <ListGroup.Item key={review._id}>
-                  <strong>{review.name}</strong>
-                  <Rating rating={review.rating} caption=" "></Rating>
-                  <p>{review.createdAt.substring(0, 10)}</p>
-                  <p>{review.comment}</p>
+              {seller.reviews && seller.reviews.length > 0 ? (
+                seller.reviews.map((review) => (
+                  <ListGroup.Item key={review._id}>
+                    <strong>{review.name}</strong>
+                    <Rating rating={review.rating} caption=" "></Rating>
+                    <p>{review.createdAt.substring(0, 10)}</p>
+                    <p>{review.comment}</p>
+                  </ListGroup.Item>
+                ))
+              ) : (
+                <ListGroup.Item>
+                  <p className="text-muted">No reviews yet.</p>
                 </ListGroup.Item>
-              ))}
+              )}
             </ListGroup>
             <div>
               {userInfo ? (

@@ -140,18 +140,21 @@ export default function TotalSellerDashboard() {
                     <tr key={item.seller._id}>
                       <td>
                         <div className="d-flex align-items-center">
-                          {item.seller.logo && (
-                            <img
-                              src={item.seller.logo}
-                              alt={`${item.seller.name} logo`}
-                              style={{
-                                width: "40px",
-                                height: "40px",
-                                marginRight: "10px",
-                                objectFit: "contain",
-                              }}
-                            />
-                          )}
+                          {item.seller.logo &&
+                            item.seller.logo !== "undefined" &&
+                            item.seller.logo !== "" &&
+                            item.seller.logo.startsWith("/images/") && (
+                              <img
+                                src={item.seller.logo}
+                                alt={`${item.seller.name} logo`}
+                                style={{
+                                  width: "40px",
+                                  height: "40px",
+                                  marginRight: "10px",
+                                  objectFit: "contain",
+                                }}
+                              />
+                            )}
                           <div>
                             <strong>{item.seller.name}</strong>
                           </div>
@@ -173,7 +176,8 @@ export default function TotalSellerDashboard() {
                       </td>
                       <td className="text-end">
                         <strong>
-                          ${item.stats?.totalReferredSales?.toFixed(2) || "0.00"}
+                          $
+                          {item.stats?.totalReferredSales?.toFixed(2) || "0.00"}
                         </strong>
                       </td>
                       <td className="text-end">
@@ -186,7 +190,9 @@ export default function TotalSellerDashboard() {
                           type="button"
                           className="btn-admin-edit"
                           title="View Details"
-                          onClick={() => navigate(`/seller/dashboard/${item.seller._id}`)}
+                          onClick={() =>
+                            navigate(`/seller/dashboard/${item.seller._id}`)
+                          }
                         >
                           <FaEye />
                         </Button>

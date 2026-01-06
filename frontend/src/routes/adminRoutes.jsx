@@ -28,14 +28,6 @@ export const adminRoutes = [
     ),
   },
   {
-    path: "/admin/payments",
-    element: (
-      <AdminRoute>
-        <PaymentsPage />
-      </AdminRoute>
-    ),
-  },
-  {
     path: "/admin/products",
     element: (
       <AdminRoute>
@@ -112,6 +104,14 @@ export const adminRoutes = [
     element: (
       <AdminRoute>
         <ServiceProviderEditPage />
+      </AdminRoute>
+    ),
+  },
+    {
+    path: "/admin/payments",
+    element: (
+      <AdminRoute>
+        <PaymentsPage />
       </AdminRoute>
     ),
   },

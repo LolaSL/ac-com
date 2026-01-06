@@ -89,7 +89,7 @@ export default function OrderHistoryPage() {
                   <tr key={order._id}>
                     <td data-label="ID">{order._id}</td>
                     <td data-label="Transaction ID">
-                      {order.transactionId || "-"}
+                      {order.paymentResult?.id || "-"}
                     </td>
                     <td data-label="Date">
                       {order.createdAt.substring(0, 10)}

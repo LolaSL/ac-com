@@ -10,9 +10,11 @@ node_modules
 
 # production
 build
+dist
 
 # misc
 .history/
+.dist/
 .DS_Store
 .env.local
 .env.development.local

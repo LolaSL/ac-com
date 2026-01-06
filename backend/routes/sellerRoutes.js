@@ -255,21 +255,24 @@ sellerRouter.get('/:id', expressAsyncHandler(async (req, res) => {
   const totalCommission = totalReferredSales * commissionRate;
 
   res.send({
-    seller: {
-      _id: seller._id,
-      name: seller.name,
-      brand: seller.brand,
-      logo: seller.logo,
-      referralCode: seller.referralCode,
-    },
+    _id: seller._id,
+    name: seller.name,
+    brand: seller.brand,
+    logo: seller.logo && seller.logo !== "undefined" && seller.logo.startsWith('/images/') ? seller.logo : "",
+    info: seller.info,
+    link: seller.link,
+    companyLink: seller.companyLink,
+    rating: seller.rating,
+    numReviews: seller.numReviews,
+    reviews: seller.reviews,
+    referralCode: seller.referralCode,
     stats: {
       referredUsersCount: referredUsers.length,
       totalReferredOrders,
       totalReferredSales: Number(totalReferredSales.toFixed(2)),
       totalCommission: Number(totalCommission.toFixed(2)),
       commissionRate,
-    },
-    referredOrders, // optional: for table rendering
+    }
   });
 }));
 

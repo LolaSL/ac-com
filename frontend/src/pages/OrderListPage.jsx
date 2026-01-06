@@ -425,7 +425,7 @@ export default function OrderListPage() {
                     {order._id}
                   </td>
                   <td data-label="TRANSACTION ID">
-                    {order.transactionId || "-"}
+                    {order.paymentResult?.id || "-"}
                   </td>
                   <td data-label="CUSTOMER">
                     {order.user ? order.user.name : "DELETED USER"}

@@ -103,6 +103,7 @@ export default function UserMessagesPage() {
               <thead className="table-dark">
                 <tr>
                   <th>ORDER ID</th>
+                  <th>TRANSACTION ID</th>
                   <th>DATE</th>
                   <th>TOTAL</th>
                   <th>STATUS</th>
@@ -121,6 +122,9 @@ export default function UserMessagesPage() {
                       style={{ wordBreak: "break-all" }}
                     >
                       {order._id}
+                    </td>
+                    <td data-label="Transaction ID">
+                      {order.paymentResult?.id || "-"}
                     </td>
                     <td data-label="Date">
                       {new Date(order.createdAt).toLocaleDateString()}

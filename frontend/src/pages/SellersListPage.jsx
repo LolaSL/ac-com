@@ -1,6 +1,6 @@
 import { useContext, useEffect, useReducer, useState } from "react";
 import axios from "axios";
-import {  useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
@@ -46,14 +46,7 @@ const reducer = (state, action) => {
 
 const SellersListPage = () => {
   const [
-    {
-      loading,
-      error,
-      sellers,
-      loadingCreate,
-      loadingDelete,
-      successDelete,
-    },
+    { loading, error, sellers, loadingCreate, loadingDelete, successDelete },
     dispatch,
   ] = useReducer(reducer, {
     loading: true,
@@ -189,8 +182,12 @@ const SellersListPage = () => {
               {sellers
                 .filter(
                   (seller) =>
-                    seller.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    seller.brand.toLowerCase().includes(searchQuery.toLowerCase())
+                    seller.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()) ||
+                    seller.brand
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase())
                 )
                 .map((seller) => (
                   <tr key={seller._id} className="admin-table-row">
@@ -198,13 +195,29 @@ const SellersListPage = () => {
                       {seller._id.substring(0, 8)}...
                     </td>
                     <td data-label="Logo" className="logo-cell">
-                      <img
-                        src={seller.logo}
-                        alt="logo"
-                        width="40"
-                        height="40"
-                        style={{ objectFit: "contain", borderRadius: "4px" }}
-                      />
+                      {seller.logo &&
+                      seller.logo !== "undefined" &&
+                      seller.logo !== "" &&
+                      seller.logo.startsWith("/images/") ? (
+                        <img
+                          src={seller.logo}
+                          alt="logo"
+                          width="40"
+                          height="40"
+                          style={{ objectFit: "contain", borderRadius: "4px" }}
+                        />
+                      ) : (
+                        <div
+                          className="d-flex align-items-center justify-content-center bg-light"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          <i className="fas fa-building fa-sm text-muted"></i>
+                        </div>
+                      )}
                     </td>
                     <td data-label="Name">{seller.name}</td>
                     <td data-label="Brand">{seller.brand}</td>

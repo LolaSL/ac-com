@@ -121,268 +121,268 @@ router.post(
   }
 );
 
-// router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
-//   console.log('--- Starting PDF generation for annotation ID:', req.params.id);
+router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
+  console.log('--- Starting PDF generation for annotation ID:', req.params.id);
 
-//   try {
-//     const annotation = await AnnotationModel.findById(req.params.id);
-//     if (!annotation || !annotation.pdfData) {
-//       console.error('Annotated PDF not found or missing pdfData.');
-//       return res.status(404).json({ message: 'Annotated PDF not found.' });
-//     }
+  try {
+    const annotation = await AnnotationModel.findById(req.params.id);
+    if (!annotation || !annotation.pdfData) {
+      console.error('Annotated PDF not found or missing pdfData.');
+      return res.status(404).json({ message: 'Annotated PDF not found.' });
+    }
 
-//     const { isPaid, email } = req.user;
-//     console.log(`User isPaid: ${isPaid}, User Email: ${email}`);
+    const { isPaid, email } = req.user;
+    console.log(`User isPaid: ${isPaid}, User Email: ${email}`);
 
-//     const pdfDoc = await PDFDocument.load(annotation.pdfData);
-//     const pages = pdfDoc.getPages();
-//     const firstPage = pages[0];
+    const pdfDoc = await PDFDocument.load(annotation.pdfData);
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
 
-//     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-//     const isPaidTemp = true; // ← TEMP for testing
+    const isPaidTemp = true; // ← TEMP for testing
 
-//     if (isPaidTemp) {
-//       console.log('User is a paid member. Applying premium content.');
+    if (isPaidTemp) {
+      console.log('User is a paid member. Applying premium content.');
 
-//       if (annotation.annotations && Array.isArray(annotation.annotations)) {
-//         console.log(`Found ${annotation.annotations.length} annotations. Rendering...`);
+      if (annotation.annotations && Array.isArray(annotation.annotations)) {
+        console.log(`Found ${annotation.annotations.length} annotations. Rendering...`);
 
-//         annotation.annotations.forEach((ann) => {
-//           const page = pages[ann.pageIndex] || firstPage;
+        annotation.annotations.forEach((ann) => {
+          const page = pages[ann.pageIndex] || firstPage;
 
-//           switch (ann.type) {
-//             case 'text':
-//               page.drawText(ann.text, {
-//                 x: ann.x,
-//                 y: ann.y,
-//                 size: ann.size,
-//                 color: rgb(ann.color.r, ann.color.g, ann.color.b),
-//               });
-//               break;
+          switch (ann.type) {
+            case 'text':
+              page.drawText(ann.text, {
+                x: ann.x,
+                y: ann.y,
+                size: ann.size,
+                color: rgb(ann.color.r, ann.color.g, ann.color.b),
+              });
+              break;
 
-//             case 'rectangle':
-//               page.drawRectangle({
-//                 x: ann.x,
-//                 y: ann.y,
-//                 width: ann.width,
-//                 height: ann.height,
-//                 borderColor: rgb(ann.borderColor.r, ann.borderColor.g, ann.borderColor.b),
-//                 borderWidth: ann.borderWidth,
-//               });
-//               break;
+            case 'rectangle':
+              page.drawRectangle({
+                x: ann.x,
+                y: ann.y,
+                width: ann.width,
+                height: ann.height,
+                borderColor: rgb(ann.borderColor.r, ann.borderColor.g, ann.borderColor.b),
+                borderWidth: ann.borderWidth,
+              });
+              break;
 
-//             default:
-//               console.warn(`Unknown annotation type: ${ann.type}`);
-//           }
-//         });
-//       } else {
-//         console.log('No annotations found.');
-//       }
+            default:
+              console.warn(`Unknown annotation type: ${ann.type}`);
+          }
+        });
+      } else {
+        console.log('No annotations found.');
+      }
 
-//       // Use annotation's createdAt date for the watermark
-//       let createdAtDate = annotation.createdAt;
-//       let formattedDate = createdAtDate
-//         ? new Date(createdAtDate).toLocaleString()
-//         : 'Unknown Date';
-//       const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${formattedDate}`;
+      // Use annotation's createdAt date for the watermark
+      let createdAtDate = annotation.createdAt;
+      let formattedDate = createdAtDate
+        ? new Date(createdAtDate).toLocaleString()
+        : 'Unknown Date';
+      const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${formattedDate}`;
 
-//       if (annotation.annotatedImageUrl) {
-//         console.log('Found annotatedImageUrl – using image + centered text watermark.');
+      if (annotation.annotatedImageUrl) {
+        console.log('Found annotatedImageUrl – using image + centered text watermark.');
 
-//         const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) =>
-//           res.arrayBuffer()
-//         );
-//         const embeddedImage = await pdfDoc.embedPng(imageBytes);
+        const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) =>
+          res.arrayBuffer()
+        );
+        const embeddedImage = await pdfDoc.embedPng(imageBytes);
 
-//         pages.forEach((page) => {
-//           const fontSize = 18;
-//           const { width, height } = page.getSize();
+        pages.forEach((page) => {
+          const fontSize = 18;
+          const { width, height } = page.getSize();
 
-//           const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
 
-//           const xPos = (width - textWidth) / 2;
-//           const yPos = height / 2 - fontSize / 2;
+          const xPos = (width - textWidth) / 2;
+          const yPos = height / 2 - fontSize / 2;
 
-//           page.drawText(watermarkText, {
-//             x: xPos,
-//             y: yPos,
-//             size: fontSize,
-//             font: helveticaFont,
-//             color: rgb(0.6, 0.6, 0.6),
-//             opacity: 0.15,
-//           });
+          page.drawText(watermarkText, {
+            x: xPos,
+            y: yPos,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(0.6, 0.6, 0.6),
+            opacity: 0.15,
+          });
 
-//         });
-//       } else {
-//         console.log('No annotatedImageUrl – drawing only centered text watermark.');
+        });
+      } else {
+        console.log('No annotatedImageUrl – drawing only centered text watermark.');
 
-//         pages.forEach((page) => {
-//           const { width, height } = page.getSize();
-//           const fontSize = 14;
+        pages.forEach((page) => {
+          const { width, height } = page.getSize();
+          const fontSize = 14;
 
-//           const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-//           const xPos = (width - textWidth) / 2;
-//           const yPos = 30; // ← bottom padding
+          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+          const xPos = (width - textWidth) / 2;
+          const yPos = 30; // ← bottom padding
 
-//           page.drawText(watermarkText, {
-//             x: xPos,
-//             y: yPos,
-//             size: fontSize,
-//             font: helveticaFont,
-//             opacity: 0.4,
-//             color: rgb(0.5, 0.5, 0.5),
-//           });
-//         });
+          page.drawText(watermarkText, {
+            x: xPos,
+            y: yPos,
+            size: fontSize,
+            font: helveticaFont,
+            opacity: 0.4,
+            color: rgb(0.5, 0.5, 0.5),
+          });
+        });
 
-//       }
+      }
 
-//       console.log('Drawing APPROVAL stamp.');
-//       const { width, height } = firstPage.getSize();
+      console.log('Drawing APPROVAL stamp.');
+      const { width, height } = firstPage.getSize();
 
-//       const stampMarginX = 50;
-//       const stampMarginY = height - 100;
-//       const boxWidth = 140;
-//       const boxHeight = 60;
+      const stampMarginX = 50;
+      const stampMarginY = height - 100;
+      const boxWidth = 140;
+      const boxHeight = 60;
 
-//       firstPage.drawRectangle({
-//         x: stampMarginX - 10,
-//         y: stampMarginY - 10,
-//         width: boxWidth,
-//         height: boxHeight,
-//         borderColor: rgb(0, 0.6, 0),
-//         borderWidth: 2,
-//       });
+      firstPage.drawRectangle({
+        x: stampMarginX - 10,
+        y: stampMarginY - 10,
+        width: boxWidth,
+        height: boxHeight,
+        borderColor: rgb(0, 0.6, 0),
+        borderWidth: 2,
+      });
 
-//       firstPage.drawText('APPROVED', {
-//         x: stampMarginX,
-//         y: stampMarginY + 30,
-//         size: 20,
-//         font: helveticaFont,
-//         color: rgb(0, 0.6, 0),
-//         opacity: 0.85,
-//       });
+      firstPage.drawText('APPROVED', {
+        x: stampMarginX,
+        y: stampMarginY + 30,
+        size: 20,
+        font: helveticaFont,
+        color: rgb(0, 0.6, 0),
+        opacity: 0.85,
+      });
 
-//       firstPage.drawText('AC COMMERCE', {
-//         x: stampMarginX,
-//         y: stampMarginY + 10,
-//         size: 10,
-//         font: helveticaFont,
-//         color: rgb(0, 0.6, 0),
-//       });
-//     }
+      firstPage.drawText('AC COMMERCE', {
+        x: stampMarginX,
+        y: stampMarginY + 10,
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0.6, 0),
+      });
+    }
 
-//     // ------------------------------------------------------------
-//     // SAVE + SEND PDF
-//     // ------------------------------------------------------------
-//     const pdfBytes = await pdfDoc.save();
-//     console.log('PDF generation successful. Sending response.');
+    // ------------------------------------------------------------
+    // SAVE + SEND PDF
+    // ------------------------------------------------------------
+    const pdfBytes = await pdfDoc.save();
+    console.log('PDF generation successful. Sending response.');
 
-//     res.set({
-//       'Content-Type': 'application/pdf',
-//       'Content-Disposition': `attachment; filename="${annotation.filename || 'annotated.pdf'}"`,
-//       'Content-Length': pdfBytes.length,
-//     });
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${annotation.filename || 'annotated.pdf'}"`,
+      'Content-Length': pdfBytes.length,
+    });
 
-//     return res.send(Buffer.from(pdfBytes));
-//   } catch (error) {
-//     console.error('Error generating annotated PDF:', error);
-//     if (!res.headersSent) {
-//       return res.status(500).json({ message: 'Failed to generate annotated PDF.' });
-//     }
-//   }
-// });
+    return res.send(Buffer.from(pdfBytes));
+  } catch (error) {
+    console.error('Error generating annotated PDF:', error);
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Failed to generate annotated PDF.' });
+    }
+  }
+});
 
 /* ---------------------------------------------------
    Helpers
 --------------------------------------------------- */
 
-// Convert top-left (React/Konva) → bottom-left (PDF)
-const normalizeY = (y, pageHeight, elementHeight = 0) => {
-  return pageHeight - y - elementHeight;
-};
+// // Convert top-left (React/Konva) → bottom-left (PDF)
+// const normalizeY = (y, pageHeight, elementHeight = 0) => {
+//   return pageHeight - y - elementHeight;
+// };
 
-// Normalize colors (0–255 → 0–1)
-const normalizeColor = (v) => (v > 1 ? v / 255 : v);
+// // Normalize colors (0–255 → 0–1)
+// const normalizeColor = (v) => (v > 1 ? v / 255 : v);
 
-// Draw annotations (multi-page safe)
-const drawAnnotations = ({ pages, annotations, font }) => {
-  if (!Array.isArray(annotations)) return;
+// // Draw annotations (multi-page safe)
+// const drawAnnotations = ({ pages, annotations, font }) => {
+//   if (!Array.isArray(annotations)) return;
 
-  annotations.forEach((ann) => {
-    const page = pages[ann.pageIndex] || pages[0];
-    const { height } = page.getSize();
+//   annotations.forEach((ann) => {
+//     const page = pages[ann.pageIndex] || pages[0];
+//     const { height } = page.getSize();
 
-    switch (ann.type) {
-      case 'text':
-        page.drawText(ann.text || '', {
-          x: ann.x,
-          y: normalizeY(ann.y, height),
-          size: ann.size || 12,
-          font,
-          color: ann.color
-            ? rgb(
-                normalizeColor(ann.color.r),
-                normalizeColor(ann.color.g),
-                normalizeColor(ann.color.b)
-              )
-            : rgb(0, 0, 0),
-        });
-        break;
+//     switch (ann.type) {
+//       case 'text':
+//         page.drawText(ann.text || '', {
+//           x: ann.x,
+//           y: normalizeY(ann.y, height),
+//           size: ann.size || 12,
+//           font,
+//           color: ann.color
+//             ? rgb(
+//                 normalizeColor(ann.color.r),
+//                 normalizeColor(ann.color.g),
+//                 normalizeColor(ann.color.b)
+//               )
+//             : rgb(0, 0, 0),
+//         });
+//         break;
 
-      case 'rectangle':
-        page.drawRectangle({
-          x: ann.x,
-          y: normalizeY(ann.y, height, ann.height),
-          width: ann.width,
-          height: ann.height,
-          borderWidth: ann.borderWidth || 1,
-          borderColor: ann.borderColor
-            ? rgb(
-                normalizeColor(ann.borderColor.r),
-                normalizeColor(ann.borderColor.g),
-                normalizeColor(ann.borderColor.b)
-              )
-            : rgb(1, 0, 0),
-        });
-        break;
+//       case 'rectangle':
+//         page.drawRectangle({
+//           x: ann.x,
+//           y: normalizeY(ann.y, height, ann.height),
+//           width: ann.width,
+//           height: ann.height,
+//           borderWidth: ann.borderWidth || 1,
+//           borderColor: ann.borderColor
+//             ? rgb(
+//                 normalizeColor(ann.borderColor.r),
+//                 normalizeColor(ann.borderColor.g),
+//                 normalizeColor(ann.borderColor.b)
+//               )
+//             : rgb(1, 0, 0),
+//         });
+//         break;
 
-      default:
-        console.warn('Unknown annotation type:', ann.type);
-    }
-  });
-};
+//       default:
+//         console.warn('Unknown annotation type:', ann.type);
+//     }
+//   });
+// };
 
-// Draw watermark (paid vs free)
-const drawWatermark = ({ pages, font, text, isPaid }) => {
-  pages.forEach((page) => {
-    const { width, height } = page.getSize();
+// // Draw watermark (paid vs free)
+// const drawWatermark = ({ pages, font, text, isPaid }) => {
+//   pages.forEach((page) => {
+//     const { width, height } = page.getSize();
 
-    if (isPaid) {
-      const fontSize = 12;
-      const textWidth = font.widthOfTextAtSize(text, fontSize);
+//     if (isPaid) {
+//       const fontSize = 12;
+//       const textWidth = font.widthOfTextAtSize(text, fontSize);
 
-      page.drawText(text, {
-        x: (width - textWidth) / 2,
-        y: 25,
-        size: fontSize,
-        font,
-        opacity: 0.35,
-        color: rgb(0.5, 0.5, 0.5),
-      });
-    } else {
-      page.drawText('UNPAID PREVIEW', {
-        x: width / 4,
-        y: height / 2,
-        size: 40,
-        font,
-        rotate: { type: 'degrees', angle: -30 },
-        opacity: 0.15,
-        color: rgb(1, 0, 0),
-      });
-    }
-  });
-};
+//       page.drawText(text, {
+//         x: (width - textWidth) / 2,
+//         y: 25,
+//         size: fontSize,
+//         font,
+//         opacity: 0.35,
+//         color: rgb(0.5, 0.5, 0.5),
+//       });
+//     } else {
+//       page.drawText('UNPAID PREVIEW', {
+//         x: width / 4,
+//         y: height / 2,
+//         size: 40,
+//         font,
+//         rotate: { type: 'degrees', angle: -30 },
+//         opacity: 0.15,
+//         color: rgb(1, 0, 0),
+//       });
+//     }
+//   });
+// };
 
 
 // Draw approval stamp (paid only)

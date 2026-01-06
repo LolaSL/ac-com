@@ -553,22 +553,24 @@ sellerRouter.get('/:id', (0, _expressAsyncHandler["default"])(function _callee9(
           commissionRate = 0.1;
           totalCommission = totalReferredSales * commissionRate;
           res.send({
-            seller: {
-              _id: seller._id,
-              name: seller.name,
-              brand: seller.brand,
-              logo: seller.logo,
-              referralCode: seller.referralCode
-            },
+            _id: seller._id,
+            name: seller.name,
+            brand: seller.brand,
+            logo: seller.logo && seller.logo !== "undefined" && seller.logo.startsWith('/images/') ? seller.logo : "",
+            info: seller.info,
+            link: seller.link,
+            companyLink: seller.companyLink,
+            rating: seller.rating,
+            numReviews: seller.numReviews,
+            reviews: seller.reviews,
+            referralCode: seller.referralCode,
             stats: {
               referredUsersCount: referredUsers.length,
               totalReferredOrders: totalReferredOrders,
               totalReferredSales: Number(totalReferredSales.toFixed(2)),
               totalCommission: Number(totalCommission.toFixed(2)),
               commissionRate: commissionRate
-            },
-            referredOrders: referredOrders // optional: for table rendering
-
+            }
           });
 
         case 17:

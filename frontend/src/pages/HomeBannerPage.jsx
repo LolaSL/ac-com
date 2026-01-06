@@ -16,37 +16,36 @@ export default function HomeBannerPage() {
 
   const banners = [
     {
-      title: "Welcome To AC Commerce",
+      title: "AC Commerce Platform",
       description:
-        "Your trusted partner in advanced air conditioning solutions. Experience innovation and reliability in every system.",
-      imageSrc: "/images/header2.jpg",
-      linkText: "Save Time. Cut Costs. Stay Ahead",
-      linkTo: "/advanced-ac",
+        "Revolutionizing HVAC procurement with integrated design tools, AI-powered annotations, and comprehensive marketplace solutions.",
+      imageSrc: "/images/hero.jpg",
+      linkText: "Explore Our Technology",
+      linkTo: "/products",
     },
     {
-      title: "Elevate your comfort",
+      title: "Professional Installation Services",
       description:
-        "Explore our comprehensive blog for expert tips, product reviews, and the latest trends in HVAC technology.",
-      imageSrc: "/images/banner.jpg",
-      linkText: "Discover the perfect fit for your needs",
-      linkTo: "/blogs",
+        "Connect with certified HVAC technicians and service providers through our verified network and project management platform.",
+      imageSrc: "/images/intallation.jpg",
+      linkText: "Find Service Providers",
+      linkTo: "/sellers",
     },
     {
-      title: "Stay with AC Commerce",
+      title: "Advanced Design Technology",
       description:
-        "Upload your designs and get professional annotations, quotes, and certifications for your projects.",
-      imageSrc: "/images/banner1.jpg",
-      linkText: "Redefining Air Conditioning Design — Smart. Fast. Certified",
+        "Upload floor plans and receive professional AC unit annotations, BTU calculations, and installation specifications instantly.",
+      imageSrc: "/images/floor-plan.jpg",
+      linkText: "Try Design Tools",
       linkTo: "/uploadfile",
     },
     {
-      title: "Featured Products",
+      title: "Industry-Leading Partnerships",
       description:
-        "Browse our curated selection of high-quality air conditioning products designed for optimal performance.",
-      imageSrc: "/images/hero.jpg",
-      linkText:
-        "Maximize the comfort of your property with our advanced air systems",
-      linkTo: "/products",
+        "Trusted by leading HVAC manufacturers including Daikin, LG, Samsung, and Mitsubishi for comprehensive equipment solutions.",
+      imageSrc: "/images/about-us.jpg",
+      linkText: "View Our Partners",
+      linkTo: "/partners",
     },
   ];
 
