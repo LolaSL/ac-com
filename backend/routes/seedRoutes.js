@@ -12,6 +12,7 @@ import Notification from '../models/notificationModel.js';
 import Annotation from '../models/annotationModel.js';
 import Order from '../models/orderModel.js';
 import Payment from '../models/paymentModel.js';
+import BrowsingHistory from '../models/browsingHistoryModel.js';
 import data from '../data.js';
 
 const seedRouter = express.Router();
@@ -32,6 +33,7 @@ seedRouter.get('/', async (req, res) => {
     await Notification.deleteMany({});
     await Annotation.deleteMany({});
     await Payment.deleteMany({});
+    await BrowsingHistory.deleteMany({});
 
     // Seed ServiceProviders
     const createdServiceProviders = await ServiceProvider.insertMany(data.serviceProviders);

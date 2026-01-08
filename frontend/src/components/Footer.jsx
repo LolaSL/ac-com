@@ -67,9 +67,6 @@ const Footer = () => {
             <NavLink className="text-white d-block" href="/offers">
               Offers
             </NavLink>
-            <NavLink className="text-white d-block" href="/sellers">
-              Explore Suppliers
-            </NavLink>
           </Col>
           <Col xs={12} lg={2} className="ft-2">
             <h5>Policies</h5>
@@ -98,8 +95,8 @@ const Footer = () => {
             <NavLink className="text-white d-block" href="/about-us">
               About Us
             </NavLink>
-            <NavLink className="text-white d-block" href="/partners">
-              Our Partners
+            <NavLink className="text-white d-block" href="/sellers">
+              Our Network
             </NavLink>
             <NavLink className="text-white d-block" href="/blogs">
               Blogs

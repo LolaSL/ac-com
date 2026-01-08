@@ -66,8 +66,9 @@ const AdminAllAnnotationsPage = () => {
                 <td>{a.isPaid ? "Yes" : "No"}</td>
                 <td>
                   <Button
-                    size="sm"
-                    variant="outline-primary"
+                  type="button"
+                      className="btn-admin-edit"
+                      title="View Details"
                     onClick={() => navigate(`/admin/engineer-view/${a._id}`)}
                   >
                     <FaEye />

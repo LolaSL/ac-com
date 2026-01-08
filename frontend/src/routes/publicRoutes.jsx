@@ -6,7 +6,6 @@ import SignInPage from "../pages/SignInPage.jsx";
 import SignUpPage from "../pages/SignUpPage.jsx";
 import ForgetPasswordPage from "../pages/ForgetPasswordPage.jsx";
 import ResetPasswordPage from "../pages/ResetPasswordPage.jsx";
-import SellersPage from "../pages/SellersPage.jsx";
 import SellerPage from "../pages/SellerPage.jsx";
 import FeaturedPage from "../pages/FeaturedPage.jsx";
 import ContactPage from "../pages/ContactPage.jsx";
@@ -24,7 +23,7 @@ import ReturnsPage from "../pages/ReturnsPage.jsx";
 import CancellationPage from "../pages/CancellationPage.jsx";
 import PrivacyPolicyPage from "../pages/PrivacyPolicyPage.jsx";
 import TermsOfUsePage from "../pages/TermsOfusepage.jsx";
-import PartnersPage from "../pages/PartnersPage.jsx";
+import OurNetworkPage from "../pages/OurNetworkPage.jsx";
 
 export const publicRoutes = [
   { path: "/", element: <HomeBannerPage /> },
@@ -39,10 +38,9 @@ export const publicRoutes = [
   { path: "/reset-password/:token", element: <ResetPasswordPage /> },
   { path: "/serviceprovider/login", element: <ServiceProviderLogin /> },
   { path: "/serviceprovider/register", element: <ServiceProviderRegister /> },
-  { path: "/sellers", element: <SellersPage /> },
+  { path: "/sellers", element: <OurNetworkPage /> },
   { path: "/sellers/:id", element: <SellerPage /> },
   { path: "/about-us", element: <AboutUs /> },
-  { path: "/partners", element: <PartnersPage /> },
   { path: "/uploadfile", element: <Measurement /> },
   { path: "/contact", element: <ContactPage /> },
   { path: "/blogs", element: <BlogList /> },

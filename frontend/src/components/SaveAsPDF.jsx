@@ -1,4 +1,4 @@
-import  { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 import { PDFDocument, rgb } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
@@ -7,12 +7,20 @@ import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
 // This component now receives the 'annotations' object as a prop
-function SaveAsPDF({ file, isPaid, pdfId, token, annotations }) {
+function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
   const canvasRef = useRef(null);
   const [error, setError] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
 
-  const drawAnnotations = (context, annotations, viewport) => {
+  // Filter annotations based on payment status
+  const filteredAnnotations = isPaid
+    ? annotations
+    : {
+        ...annotations,
+        hvac: null, // Exclude engineer/admin HVAC annotations for non-paid users
+      };
+
+  const drawAnnotations = (context, annotations, viewport, acType) => {
     const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
 
@@ -89,6 +97,161 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations }) {
         context.fillText(text, x, y);
       });
     }
+
+    // For ductless systems, draw refrigerant lines connecting all rectangles to the condenser
+    if (
+      acType === "ductless" &&
+      annotations?.rectangles &&
+      annotations.rectangles.length > 1
+    ) {
+      // Find the condenser: first, check for comments containing "condenser" or "outdoor"
+      let condenser = null;
+      if (annotations.comments) {
+        for (const comment of annotations.comments) {
+          if (
+            comment.text.toLowerCase().includes("condenser") ||
+            comment.text.toLowerCase().includes("outdoor")
+          ) {
+            // Find the closest rectangle to this comment
+            let closestRect = null;
+            let minDist = Infinity;
+            annotations.rectangles.forEach((rect) => {
+              const rectCenterX =
+                rect.xPercent * canvasWidth +
+                (rect.widthPercent * canvasWidth) / 2;
+              const rectCenterY =
+                rect.yPercent * canvasHeight +
+                (rect.heightPercent * canvasHeight) / 2;
+              const dist = Math.sqrt(
+                (comment.xPercent * canvasWidth - rectCenterX) ** 2 +
+                  (comment.yPercent * canvasHeight - rectCenterY) ** 2
+              );
+              if (dist < minDist) {
+                minDist = dist;
+                closestRect = rect;
+              }
+            });
+            if (closestRect) {
+              condenser = closestRect;
+              break;
+            }
+          }
+        }
+      }
+      // If no labeled condenser, assume the largest area
+      if (!condenser) {
+        let maxArea = -Infinity;
+        annotations.rectangles.forEach((rect) => {
+          const area = rect.widthPercent * rect.heightPercent;
+          if (area > maxArea) {
+            maxArea = area;
+            condenser = rect;
+          }
+        });
+      }
+      if (condenser) {
+        const cx =
+          condenser.xPercent * canvasWidth +
+          (condenser.widthPercent * canvasWidth) / 2;
+        const cy =
+          condenser.yPercent * canvasHeight +
+          (condenser.heightPercent * canvasHeight) / 2;
+        annotations.rectangles.forEach((rect) => {
+          if (rect !== condenser) {
+            const rx =
+              rect.xPercent * canvasWidth +
+              (rect.widthPercent * canvasWidth) / 2;
+            const ry =
+              rect.yPercent * canvasHeight +
+              (rect.heightPercent * canvasHeight) / 2;
+            context.save();
+            context.setLineDash([5, 5]);
+            context.lineWidth = 2;
+            context.strokeStyle = "blue"; // refrigerant line color
+            context.beginPath();
+            context.moveTo(rx, ry);
+            context.lineTo(cx, cy);
+            context.stroke();
+            context.restore();
+          }
+        });
+      }
+    }
+
+    // Draw HVAC annotations
+    if (annotations?.hvac?.ducts) {
+      annotations.hvac.ducts.forEach((duct) => {
+        const x = duct.xPercent * canvasWidth;
+        const y = duct.yPercent * canvasHeight;
+        const width = (duct.width || 0.2) * canvasWidth;
+        const height = (duct.height || 0.04) * canvasHeight;
+        context.save();
+        context.translate(x, y);
+        context.beginPath();
+        context.rect(0, 0, width, height);
+        context.fillStyle = duct.fill || "rgba(0,120,255,0.3)";
+        context.fill();
+        context.lineWidth = 2;
+        context.strokeStyle = duct.stroke || "blue";
+        context.stroke();
+        context.restore();
+      });
+    }
+
+    if (annotations?.hvac?.diffusers) {
+      annotations.hvac.diffusers.forEach((diffuser) => {
+        const x = diffuser.xPercent * canvasWidth;
+        const y = diffuser.yPercent * canvasHeight;
+        const size = (diffuser.sizePercent || 0.08) * canvasWidth;
+        context.beginPath();
+        if (diffuser.shape === "square") {
+          context.rect(x - size / 2, y - size / 2, size, size);
+        } else {
+          context.arc(x, y, size / 2, 0, 2 * Math.PI);
+        }
+        context.fillStyle = "rgba(0, 255, 0, 0.5)";
+        context.fill();
+        context.lineWidth = 2;
+        context.strokeStyle = "lime";
+        context.stroke();
+      });
+    }
+
+    // Draw dotted connection lines from diffusers to nearest ducts
+    if (annotations?.hvac?.ducts && annotations?.hvac?.diffusers) {
+      annotations.hvac.diffusers.forEach((diffuser) => {
+        const dx = diffuser.xPercent * canvasWidth;
+        const dy = diffuser.yPercent * canvasHeight;
+        let nearestDuct = null;
+        let minDist = Infinity;
+        annotations.hvac.ducts.forEach((duct) => {
+          const ductCenterX =
+            duct.xPercent * canvasWidth +
+            ((duct.width || 0.2) * canvasWidth) / 2;
+          const ductCenterY =
+            duct.yPercent * canvasHeight +
+            ((duct.height || 0.04) * canvasHeight) / 2;
+          const dist = Math.sqrt(
+            (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+          );
+          if (dist < minDist) {
+            minDist = dist;
+            nearestDuct = { x: ductCenterX, y: ductCenterY };
+          }
+        });
+        if (nearestDuct) {
+          context.save();
+          context.setLineDash([5, 5]); // dotted line
+          context.lineWidth = 2;
+          context.strokeStyle = "gray"; // relevant color for routes
+          context.beginPath();
+          context.moveTo(dx, dy);
+          context.lineTo(nearestDuct.x, nearestDuct.y);
+          context.stroke();
+          context.restore();
+        }
+      });
+    }
   };
 
   const saveAsPDF = async () => {
@@ -124,7 +287,7 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations }) {
       const loadingTask = pdfjsLib.getDocument(arrayBuffer);
       const pdf = await loadingTask.promise;
       const page = await pdf.getPage(1);
-      const scale = 1.5;
+      const scale = 1.0; // Reduced scale to avoid large canvas issues
       const viewport = page.getViewport({ scale });
       const canvas = canvasRef.current;
       const context = canvas.getContext("2d");
@@ -138,10 +301,14 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations }) {
       }).promise;
 
       if (annotations) {
-        drawAnnotations(context, annotations, viewport);
+        drawAnnotations(context, filteredAnnotations, viewport, acType);
       }
 
       const imageData = canvas.toDataURL("image/png");
+      if (!imageData || imageData === "data:," || imageData.length < 100) {
+        throw new Error("Failed to generate image from canvas");
+      }
+
       const pngImage = await pdfDoc.embedPng(imageData);
 
       const newPdfPage = pdfDoc.getPages()[0];
@@ -186,13 +353,24 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations }) {
 
       const pdfBytes = await pdfDoc.save();
       const downloadBlob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(downloadBlob);
+
+      // Generate filename based on payment status
+      const baseName = file?.name?.replace(/\.[^/.]+$/, "") || "annotated_pdf";
+      const filename = isPaid
+        ? `${baseName}_with_engineer.pdf`
+        : `${baseName}.pdf`;
+
+      // Create a temporary link to trigger download with filename
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(downloadBlob);
-      link.download = file?.name || "annotated-pdf.pdf";
+      link.href = url;
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
+
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
 
       setIsSaved(true);
     } catch (err) {
@@ -205,9 +383,8 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations }) {
     <div>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
       <Button
-        className="go-to-btn btn-text w-auto p-1"
-        variant="btn-outline"
-        size="sm"
+      variant="primary" className="ms-3"
+        size="md"
         onClick={saveAsPDF}
       >
         💾 Save as PDF

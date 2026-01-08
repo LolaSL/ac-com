@@ -153,10 +153,11 @@ function BrowsingHistoryPage() {
   const filteredHistory = filterPriceDrops
     ? browsingHistory.filter(
         (item) =>
-          item.priceAtView > item.currentPrice ||
-          (item.product && item.product.discount > 0)
+          item.product &&
+          (item.priceAtView > item.currentPrice ||
+            (item.product && item.product.discount > 0))
       )
-    : browsingHistory;
+    : browsingHistory.filter((item) => item.product);
 
   return (
     <Container className="my-5">

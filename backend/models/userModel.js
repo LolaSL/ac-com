@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String },
     resetToken: { type: String },
     isAdmin: { type: Boolean, default: false, required: true },
-    isPaid: { type: Boolean, default: false, required: true },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller' },
   },
   {

@@ -36,11 +36,10 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
   const sidebarItems = [
     { path: "/", label: "Home" },
     { path: "/about-us", label: "About Us" },
-    { path: "/partners", label: "Our Partners" },
+    { path: "/sellers", label: "Our Network" },
     { type: "categories", label: "Categories" }, // Categories marker
     { path: "/uploadfile", label: "Get A Quote" },
     { path: "/offers", label: "Offers" },
-    { path: "/sellers", label: "Explore Suppliers" },
     { path: "/shipment", label: "Shipment & Delivery" },
     { path: "/returns", label: "Returns" },
     { path: "/privacy-policy", label: "Privacy Policy" },

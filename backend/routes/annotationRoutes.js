@@ -503,7 +503,19 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized to access these annotations.' });
     }
 
-    return res.json(annotation.annotations);
+    // Filter annotations based on user's payment status
+    const isPaid = req.user.isPaid;
+    let filteredAnnotations = annotation.annotations;
+
+    if (!isPaid) {
+      // For unpaid users, exclude engineer/admin HVAC annotations
+      filteredAnnotations = {
+        ...annotation.annotations,
+        hvac: null,
+      };
+    }
+
+    return res.json(filteredAnnotations);
   } catch (error) {
     console.error('Error fetching annotations:', error);
     if (!res.headersSent) {

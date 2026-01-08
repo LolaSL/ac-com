@@ -44,8 +44,8 @@ export default function HomeBannerPage() {
       description:
         "Trusted by leading HVAC manufacturers including Daikin, LG, Samsung, and Mitsubishi for comprehensive equipment solutions.",
       imageSrc: "/images/about-us.jpg",
-      linkText: "View Our Partners",
-      linkTo: "/partners",
+      linkText: "View Our Network",
+      linkTo: "/sellers",
     },
   ];
 

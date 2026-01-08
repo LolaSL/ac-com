@@ -1761,6 +1761,7 @@ const data = {
     {
       filename: 'example.pdf',
       pdfId: 'demo-pdf-123',
+      isPaid: false,
       annotations: {
         rectangles: [
           {
