@@ -23,9 +23,25 @@ const hvacSymbols = {
   thermostat: thermostatSVG,
 };
 
-const overlayHVAC = (context, hvacAnnotations, symbolImages) => {
+const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
+
+  const getNearestCommentText = (x, y, comments) => {
+    if (!comments) return null;
+    let nearest = null;
+    let minDist = Infinity;
+    comments.forEach((comment) => {
+      const cx = comment.xPercent * canvasWidth;
+      const cy = comment.yPercent * canvasHeight;
+      const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = comment;
+      }
+    });
+    return nearest ? nearest.text.toLowerCase() : null;
+  };
   // ducts
   hvacAnnotations?.ducts?.forEach((duct) => {
     const x = duct.xPercent * canvasWidth;
@@ -83,45 +99,71 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages) => {
     }
   });
 
-  // Draw dotted connection lines from diffusers to the bottom duct
+  // Draw dotted connection lines from diffusers to nearest ducts, preferring matching groups
   if (hvacAnnotations?.ducts && hvacAnnotations?.diffusers) {
-    // Find the duct with the highest y-center (bottom)
-    let mainDuct = null;
-    let maxY = -Infinity;
-    hvacAnnotations.ducts.forEach((duct) => {
-      const ductCenterY =
-        duct.yPercent * canvasHeight +
-        ((duct.height || 0.04) * canvasHeight) / 2;
-      if (ductCenterY > maxY) {
-        maxY = ductCenterY;
-        mainDuct = duct;
+    hvacAnnotations.diffusers.forEach((diffuser) => {
+      const dx = diffuser.xPercent * canvasWidth;
+      const dy = diffuser.yPercent * canvasHeight;
+      const diffuserGroup = getNearestCommentText(dx, dy, comments);
+      let nearestDuct = null;
+      let minDist = Infinity;
+      // First, try to find a duct with matching group
+      hvacAnnotations.ducts.forEach((duct) => {
+        const ductCenterX =
+          duct.xPercent * canvasWidth + ((duct.width || 0.2) * canvasWidth) / 2;
+        const ductCenterY =
+          duct.yPercent * canvasHeight +
+          ((duct.height || 0.04) * canvasHeight) / 2;
+        const ductGroup = getNearestCommentText(
+          ductCenterX,
+          ductCenterY,
+          comments
+        );
+        if (diffuserGroup && ductGroup === diffuserGroup) {
+          const dist = Math.sqrt(
+            (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+          );
+          if (dist < minDist) {
+            minDist = dist;
+            nearestDuct = { x: ductCenterX, y: ductCenterY };
+          }
+        }
+      });
+      // If no matching group duct, find nearest overall
+      if (!nearestDuct) {
+        hvacAnnotations.ducts.forEach((duct) => {
+          const ductCenterX =
+            duct.xPercent * canvasWidth +
+            ((duct.width || 0.2) * canvasWidth) / 2;
+          const ductCenterY =
+            duct.yPercent * canvasHeight +
+            ((duct.height || 0.04) * canvasHeight) / 2;
+          const dist = Math.sqrt(
+            (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+          );
+          if (dist < minDist) {
+            minDist = dist;
+            nearestDuct = { x: ductCenterX, y: ductCenterY };
+          }
+        });
       }
-    });
-    if (mainDuct) {
-      const ductCenterX =
-        mainDuct.xPercent * canvasWidth +
-        ((mainDuct.width || 0.2) * canvasWidth) / 2;
-      const ductCenterY =
-        mainDuct.yPercent * canvasHeight +
-        ((mainDuct.height || 0.04) * canvasHeight) / 2;
-      hvacAnnotations.diffusers.forEach((diffuser) => {
-        const dx = diffuser.xPercent * canvasWidth;
-        const dy = diffuser.yPercent * canvasHeight;
+      if (nearestDuct) {
         context.save();
         context.setLineDash([5, 5]); // dotted line
         context.lineWidth = 2;
-        context.strokeStyle = "gray"; // route color for ducts
+        context.strokeStyle = "gray"; // relevant color for routes
         context.beginPath();
         context.moveTo(dx, dy);
-        context.lineTo(ductCenterX, ductCenterY);
+        context.lineTo(nearestDuct.x, nearestDuct.y);
         context.stroke();
         context.restore();
-      });
-    }
+      }
+    });
   }
 };
 
 const overlayAnnotations = (context, annotations, acType) => {
+  console.log("overlayAnnotations called with annotations:", annotations);
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
   // rectangles
@@ -189,16 +231,16 @@ const overlayAnnotations = (context, annotations, acType) => {
     context.fillText(text, x, y);
   });
 
-  // For ductless systems, draw refrigerant lines connecting all rectangles to the condenser
+  // For ductless systems, draw refrigerant lines connecting rectangles to their nearest condenser
   if (
     acType === "ductless" &&
     annotations?.rectangles &&
     annotations.rectangles.length > 1
   ) {
-    // Find the condenser: first, check for comments containing "condenser" or "outdoor"
-    let condenser = null;
+    // Find condensers: rectangles with nearby comments containing "condenser" or "outdoor"
+    let condensers = [];
     if (annotations.comments) {
-      for (const comment of annotations.comments) {
+      annotations.comments.forEach((comment) => {
         if (
           comment.text.toLowerCase().includes("condenser") ||
           comment.text.toLowerCase().includes("outdoor")
@@ -222,33 +264,56 @@ const overlayAnnotations = (context, annotations, acType) => {
               closestRect = rect;
             }
           });
-          if (closestRect) {
-            condenser = closestRect;
-            break;
+          if (closestRect && !condensers.includes(closestRect)) {
+            condensers.push(closestRect);
           }
         }
-      }
+      });
     }
-    // If no labeled condenser, assume the largest area
-    if (!condenser) {
+    // If no labeled condensers, assume the largest area rectangle is the condenser
+    if (condensers.length === 0) {
       let maxArea = -Infinity;
+      let largestRect = null;
       annotations.rectangles.forEach((rect) => {
         const area = rect.widthPercent * rect.heightPercent;
         if (area > maxArea) {
           maxArea = area;
-          condenser = rect;
+          largestRect = rect;
         }
       });
+      if (largestRect) {
+        condensers.push(largestRect);
+      }
     }
-    if (condenser) {
-      const cx =
-        condenser.xPercent * canvasWidth +
-        (condenser.widthPercent * canvasWidth) / 2;
-      const cy =
-        condenser.yPercent * canvasHeight +
-        (condenser.heightPercent * canvasHeight) / 2;
-      annotations.rectangles.forEach((rect) => {
-        if (rect !== condenser) {
+    // Now, for each rectangle not a condenser, connect to the nearest condenser
+    annotations.rectangles.forEach((rect) => {
+      if (!condensers.includes(rect)) {
+        let nearestCondenser = null;
+        let minDist = Infinity;
+        condensers.forEach((cond) => {
+          const cx =
+            cond.xPercent * canvasWidth + (cond.widthPercent * canvasWidth) / 2;
+          const cy =
+            cond.yPercent * canvasHeight +
+            (cond.heightPercent * canvasHeight) / 2;
+          const rx =
+            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
+          const ry =
+            rect.yPercent * canvasHeight +
+            (rect.heightPercent * canvasHeight) / 2;
+          const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestCondenser = cond;
+          }
+        });
+        if (nearestCondenser) {
+          const cx =
+            nearestCondenser.xPercent * canvasWidth +
+            (nearestCondenser.widthPercent * canvasWidth) / 2;
+          const cy =
+            nearestCondenser.yPercent * canvasHeight +
+            (nearestCondenser.heightPercent * canvasHeight) / 2;
           const rx =
             rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
           const ry =
@@ -264,8 +329,8 @@ const overlayAnnotations = (context, annotations, acType) => {
           context.stroke();
           context.restore();
         }
-      });
-    }
+      }
+    });
   }
 };
 
@@ -300,7 +365,9 @@ const EngineerViewPage = () => {
         });
         if (!response.ok) throw new Error("Failed to fetch annotation");
         const data = await response.json();
+        console.log("Fetched annotation data:", data);
         setAnnotation(data);
+        setAcType(data.acType || "ducted");
         // Fetch PDF file
         const pdfResponse = await fetch(`/api/annotated-pdf/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -352,9 +419,14 @@ const EngineerViewPage = () => {
       container.style.position = "relative";
       container.appendChild(overlayCanvas);
       const overlayContext = overlayCanvas.getContext("2d");
-      overlayAnnotations(overlayContext, annotation, acType);
-      if (showHVAC && annotation.hvac && acType === "ducted") {
-        overlayHVAC(overlayContext, annotation.hvac, hvacSymbols);
+      overlayAnnotations(overlayContext, annotation.annotations, acType);
+      if (showHVAC && annotation.annotations.hvac && acType === "ducted") {
+        overlayHVAC(
+          overlayContext,
+          annotation.annotations.hvac,
+          hvacSymbols,
+          annotation.annotations.comments
+        );
       }
       // Add click handler for interactive placement
       overlayCanvas.onclick = (e) => {
@@ -380,10 +452,13 @@ const EngineerViewPage = () => {
 
           setAnnotation((prev) => ({
             ...prev,
-            hvac: {
-              ...(prev?.hvac || { ducts: [], diffusers: [] }),
-              ducts: [...(prev?.hvac?.ducts || []), newDuct],
-              diffusers: prev?.hvac?.diffusers || [],
+            annotations: {
+              ...(prev.annotations || {}),
+              hvac: {
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [] }),
+                ducts: [...(prev.annotations?.hvac?.ducts || []), newDuct],
+                diffusers: prev.annotations?.hvac?.diffusers || [],
+              },
             },
           }));
         }
@@ -400,12 +475,40 @@ const EngineerViewPage = () => {
 
           setAnnotation((prev) => ({
             ...prev,
-            hvac: {
-              ...(prev?.hvac || { ducts: [], diffusers: [] }),
-              ducts: prev?.hvac?.ducts || [],
-              diffusers: [...(prev?.hvac?.diffusers || []), newDiffuser],
+            annotations: {
+              ...(prev.annotations || {}),
+              hvac: {
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [] }),
+                ducts: prev.annotations?.hvac?.ducts || [],
+                diffusers: [
+                  ...(prev.annotations?.hvac?.diffusers || []),
+                  newDiffuser,
+                ],
+              },
             },
           }));
+        }
+
+        if (addMode === "comment") {
+          const text = prompt("Enter comment text:");
+          if (text) {
+            const newComment = {
+              id: `comment-${Date.now()}`,
+              xPercent: x,
+              yPercent: y,
+              text: text,
+              fill: "rgba(252, 252, 243, 0.2)",
+              textColor: "#FF1493",
+            };
+
+            setAnnotation((prev) => ({
+              ...prev,
+              annotations: {
+                ...(prev.annotations || {}),
+                comments: [...(prev.annotations?.comments || []), newComment],
+              },
+            }));
+          }
         }
 
         setAddMode(null);
@@ -423,156 +526,168 @@ const EngineerViewPage = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(annotation),
+      body: JSON.stringify({ ...annotation, acType }),
     });
     alert("Annotation (including HVAC) saved!");
   };
 
   return (
     <div className="container mt-4">
-      <h2>Engineer View: Annotated Drawing</h2>
+      <h2 className="mt-4 mb-4">Engineer View: Annotated Drawing</h2>
       {loading && <Spinner animation="border" />}
       {error && <Alert variant="danger">{error}</Alert>}
-      <div className="mb-2">
-        <label className="me-2">AC Type:</label>
+      <div className="mb-2 mt-4 d-flex align-items-center gap-2">
+        <label className="me-2 mb-4">AC Type:</label>
         <select value={acType} onChange={(e) => setAcType(e.target.value)}>
           <option value="ducted">Ducted</option>
           <option value="ductless">Ductless</option>
         </select>
       </div>
-  <div className="mb-2 d-flex flex-wrap align-items-center gap-2">
-        <div className="d-flex flex-wrap align-items-center gap-2">
+      <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
         {acType === "ducted" && (
           <>
             <Button
-              onClick={() => setAddMode("duct")}
-              variant="info"
-              className="me-2"
+              className="btn btn-outline-primary me-2"
+              onClick={() => setShowHVAC((prev) => !prev)}
             >
-              Add Duct
+              {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
             </Button>
-            <Button
-              onClick={() => setAddMode("diffuser")}
-              variant="success"
-              className="me-2"
-            >
-              Add Diffuser
-            </Button>
+            {showHVAC && (
+              <div className="mb-2">
+                <strong>Legend:</strong>
+                <span className="ms-2" style={{ color: "orange" }}>
+                  ■ Ducts (Yellow/Orange)
+                </span>
+                <span className="ms-3" style={{ color: "lime" }}>
+                  ● Diffusers (Green/Lime)
+                </span>
+              </div>
+            )}
           </>
         )}
-        {acType === "ductless" && (
-          <p className="text-muted">
-            Ductless system: No ducts or diffusers needed. Use separate units
-            per room.
-          </p>
-          
-        )}
-{acType !== "ductless" && (
-  <Button
-    variant="secondary"
-    onClick={() => {
-      if (!annotation?.hvac) {
-        setAddMode(null);
-        return;
-      }
-
-      setAnnotation((prev) => {
-        if (!prev?.hvac) return prev;
-
-        const ducts = [...(prev.hvac.ducts || [])];
-        const diffusers = [...(prev.hvac.diffusers || [])];
-
-        const allItems = [
-          ...ducts.map((d) => ({ ...d, type: "duct" })),
-          ...diffusers.map((d) => ({ ...d, type: "diffuser" })),
-        ];
-
-        if (allItems.length === 0) return prev;
-
-        const mostRecent = allItems.reduce((max, item) => {
-          const maxTime = parseInt(max.id.split("-")[1]);
-          const itemTime = parseInt(item.id.split("-")[1]);
-          return itemTime > maxTime ? item : max;
-        });
-
-        if (mostRecent.type === "duct") {
-          const index = ducts.findIndex((d) => d.id === mostRecent.id);
-          if (index !== -1) ducts.splice(index, 1);
-        }
-
-        if (mostRecent.type === "diffuser") {
-          const index = diffusers.findIndex(
-            (d) => d.id === mostRecent.id
-          );
-          if (index !== -1) diffusers.splice(index, 1);
-        }
-
-        return {
-          ...prev,
-          hvac: {
-            ...prev.hvac,
-            ducts,
-            diffusers,
-          },
-        };
-      });
-
-      setAddMode(null);
-    }}
-  >
-    Cancel
-  </Button>
-)}
-
-
-        <Button onClick={handleSave} variant="primary" className="ms-3">
-          Save HVAC Items
-          </Button>
-          
-      {acType === "ducted" && (
-        <>
-          <Button
-         variant="primary" className="ms-3"
-            onClick={() => setShowHVAC((prev) => !prev)}
-          >
-            {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
-          </Button>
-          {showHVAC && (
-            <div className="mb-2">
-              <strong>Legend:</strong>
-              <span className="ms-2" style={{ color: "orange" }}>
-                ■ Ducts (Yellow/Orange)
-              </span>
-              <span className="ms-3" style={{ color: "lime" }}>
-                ● Diffusers (Green/Lime)
-              </span>
-            </div>
-          )}
-        </>
-      )}
-      <div
-        ref={pdfContainerRef}
-        id="pdf-container"
-        style={{
-          width: "100%",
-          minHeight: 400,
-          margin: "2rem 0",
-          position: "relative",
-        }}
-      ></div>
-{annotation && pdfFile && (
-          <div >
-            <SaveAsPDF
-              file={pdfFile}
-              isPaid={annotation.isPaid}
-              pdfId={id}
-              token={token}
-              annotations={annotation}
-              acType={acType}
-            />
-          </div>
-        )}
       </div>
+      <div className="mb-2 d-flex flex-wrap align-items-center gap-2">
+        <div className="d-flex flex-wrap align-items-center gap-2">
+          {acType === "ducted" && (
+            <>
+              <Button
+                onClick={() => setAddMode("duct")}
+                variant="info"
+                className="me-2"
+              >
+                Add Duct
+              </Button>
+              <Button
+                onClick={() => setAddMode("diffuser")}
+                variant="success"
+                className="me-2"
+              >
+                Add Diffuser
+              </Button>
+              <Button
+                onClick={() => setAddMode("comment")}
+                variant="warning"
+                className="me-2"
+              >
+                Add Comment
+              </Button>
+            </>
+          )}
+          {acType === "ductless" && (
+            <p className="text-muted">
+              Ductless system: No ducts or diffusers needed. Use separate units
+              per room.
+            </p>
+          )}
+          {acType !== "ductless" && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (!annotation?.annotations?.hvac) {
+                  setAddMode(null);
+                  return;
+                }
+
+                setAnnotation((prev) => {
+                  if (!prev?.annotations?.hvac) return prev;
+
+                  const ducts = [...(prev.annotations.hvac.ducts || [])];
+                  const diffusers = [
+                    ...(prev.annotations.hvac.diffusers || []),
+                  ];
+
+                  const allItems = [
+                    ...ducts.map((d) => ({ ...d, type: "duct" })),
+                    ...diffusers.map((d) => ({ ...d, type: "diffuser" })),
+                  ];
+
+                  if (allItems.length === 0) return prev;
+
+                  const mostRecent = allItems.reduce((max, item) => {
+                    const maxTime = parseInt(max.id.split("-")[1]);
+                    const itemTime = parseInt(item.id.split("-")[1]);
+                    return itemTime > maxTime ? item : max;
+                  });
+
+                  if (mostRecent.type === "duct") {
+                    const index = ducts.findIndex(
+                      (d) => d.id === mostRecent.id
+                    );
+                    if (index !== -1) ducts.splice(index, 1);
+                  }
+
+                  if (mostRecent.type === "diffuser") {
+                    const index = diffusers.findIndex(
+                      (d) => d.id === mostRecent.id
+                    );
+                    if (index !== -1) diffusers.splice(index, 1);
+                  }
+
+                  return {
+                    ...prev,
+                    annotations: {
+                      ...(prev.annotations || {}),
+                      hvac: {
+                        ...(prev.annotations.hvac || {}),
+                        ducts,
+                        diffusers,
+                      },
+                    },
+                  };
+                });
+
+                setAddMode(null);
+              }}
+            >
+              Cancel
+            </Button>
+          )}
+
+          <Button onClick={handleSave} variant="primary" className="me-2">
+            Save HVAC Items
+          </Button>
+        </div>
+
+        <div
+          ref={pdfContainerRef}
+          id="pdf-container"
+          style={{
+            width: "100%",
+            minHeight: 400,
+            margin: "2rem 0",
+            position: "relative",
+          }}
+        ></div>
+        {annotation && pdfFile && (
+          <SaveAsPDF
+            file={pdfFile}
+            isPaid={annotation.isPaid}
+            pdfId={id}
+            token={token}
+            annotations={annotation.annotations}
+            acType={annotation.acType}
+          />
+        )}
       </div>
     </div>
   );

@@ -6,7 +6,6 @@ const annotationSchema = new Schema(
     pdfData: { type: Buffer, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     pdfId: { type: String, required: true },
-    isPaid: { type: Boolean, default: false },
 
     originalImageWidth: { type: Number, required: true },
     originalImageHeight: { type: Number, required: true },
@@ -70,6 +69,8 @@ const annotationSchema = new Schema(
       },
 
     },
+    isPaid: { type: Boolean, default: false },
+    acType: { type: String, enum: ['ducted', 'ductless'], default: 'ducted' },
     createdAt: {
       type: Date,
       default: Date.now,

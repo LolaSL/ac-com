@@ -12,17 +12,25 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
   const [error, setError] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
 
-  // Filter annotations based on payment status
-  const filteredAnnotations = isPaid
-    ? annotations
-    : {
-        ...annotations,
-        hvac: null, // Exclude engineer/admin HVAC annotations for non-paid users
-      };
-
   const drawAnnotations = (context, annotations, viewport, acType) => {
     const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
+
+    const getNearestCommentText = (x, y, comments) => {
+      if (!comments) return null;
+      let nearest = null;
+      let minDist = Infinity;
+      comments.forEach((comment) => {
+        const cx = comment.xPercent * canvasWidth;
+        const cy = comment.yPercent * canvasHeight;
+        const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = comment;
+        }
+      });
+      return nearest ? nearest.text.toLowerCase() : null;
+    };
 
     if (annotations?.rectangles) {
       annotations.rectangles.forEach((rect) => {
@@ -98,16 +106,16 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
     }
 
-    // For ductless systems, draw refrigerant lines connecting all rectangles to the condenser
+    // For ductless systems, draw refrigerant lines connecting rectangles to their nearest condenser
     if (
       acType === "ductless" &&
       annotations?.rectangles &&
       annotations.rectangles.length > 1
     ) {
-      // Find the condenser: first, check for comments containing "condenser" or "outdoor"
-      let condenser = null;
+      // Find condensers: rectangles with nearby comments containing "condenser" or "outdoor"
+      let condensers = [];
       if (annotations.comments) {
-        for (const comment of annotations.comments) {
+        annotations.comments.forEach((comment) => {
           if (
             comment.text.toLowerCase().includes("condenser") ||
             comment.text.toLowerCase().includes("outdoor")
@@ -131,33 +139,58 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
                 closestRect = rect;
               }
             });
-            if (closestRect) {
-              condenser = closestRect;
-              break;
+            if (closestRect && !condensers.includes(closestRect)) {
+              condensers.push(closestRect);
             }
           }
-        }
+        });
       }
-      // If no labeled condenser, assume the largest area
-      if (!condenser) {
+      // If no labeled condensers, assume the largest area rectangle is the condenser
+      if (condensers.length === 0) {
         let maxArea = -Infinity;
+        let largestRect = null;
         annotations.rectangles.forEach((rect) => {
           const area = rect.widthPercent * rect.heightPercent;
           if (area > maxArea) {
             maxArea = area;
-            condenser = rect;
+            largestRect = rect;
           }
         });
+        if (largestRect) {
+          condensers.push(largestRect);
+        }
       }
-      if (condenser) {
-        const cx =
-          condenser.xPercent * canvasWidth +
-          (condenser.widthPercent * canvasWidth) / 2;
-        const cy =
-          condenser.yPercent * canvasHeight +
-          (condenser.heightPercent * canvasHeight) / 2;
-        annotations.rectangles.forEach((rect) => {
-          if (rect !== condenser) {
+      // Now, for each rectangle not a condenser, connect to the nearest condenser
+      annotations.rectangles.forEach((rect) => {
+        if (!condensers.includes(rect)) {
+          let nearestCondenser = null;
+          let minDist = Infinity;
+          condensers.forEach((cond) => {
+            const cx =
+              cond.xPercent * canvasWidth +
+              (cond.widthPercent * canvasWidth) / 2;
+            const cy =
+              cond.yPercent * canvasHeight +
+              (cond.heightPercent * canvasHeight) / 2;
+            const rx =
+              rect.xPercent * canvasWidth +
+              (rect.widthPercent * canvasWidth) / 2;
+            const ry =
+              rect.yPercent * canvasHeight +
+              (rect.heightPercent * canvasHeight) / 2;
+            const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestCondenser = cond;
+            }
+          });
+          if (nearestCondenser) {
+            const cx =
+              nearestCondenser.xPercent * canvasWidth +
+              (nearestCondenser.widthPercent * canvasWidth) / 2;
+            const cy =
+              nearestCondenser.yPercent * canvasHeight +
+              (nearestCondenser.heightPercent * canvasHeight) / 2;
             const rx =
               rect.xPercent * canvasWidth +
               (rect.widthPercent * canvasWidth) / 2;
@@ -174,12 +207,12 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
             context.stroke();
             context.restore();
           }
-        });
-      }
+        }
+      });
     }
 
     // Draw HVAC annotations
-    if (annotations?.hvac?.ducts) {
+    if (acType === "ducted" && annotations?.hvac?.ducts) {
       annotations.hvac.ducts.forEach((duct) => {
         const x = duct.xPercent * canvasWidth;
         const y = duct.yPercent * canvasHeight;
@@ -198,7 +231,7 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
     }
 
-    if (annotations?.hvac?.diffusers) {
+    if (acType === "ducted" && annotations?.hvac?.diffusers) {
       annotations.hvac.diffusers.forEach((diffuser) => {
         const x = diffuser.xPercent * canvasWidth;
         const y = diffuser.yPercent * canvasHeight;
@@ -217,13 +250,23 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
     }
 
-    // Draw dotted connection lines from diffusers to nearest ducts
-    if (annotations?.hvac?.ducts && annotations?.hvac?.diffusers) {
+    // Draw dotted connection lines from diffusers to nearest ducts, preferring matching groups
+    if (
+      acType === "ducted" &&
+      annotations?.hvac?.ducts &&
+      annotations?.hvac?.diffusers
+    ) {
       annotations.hvac.diffusers.forEach((diffuser) => {
         const dx = diffuser.xPercent * canvasWidth;
         const dy = diffuser.yPercent * canvasHeight;
+        const diffuserGroup = getNearestCommentText(
+          dx,
+          dy,
+          annotations.comments
+        );
         let nearestDuct = null;
         let minDist = Infinity;
+        // First, try to find a duct with matching group
         annotations.hvac.ducts.forEach((duct) => {
           const ductCenterX =
             duct.xPercent * canvasWidth +
@@ -231,14 +274,39 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
           const ductCenterY =
             duct.yPercent * canvasHeight +
             ((duct.height || 0.04) * canvasHeight) / 2;
-          const dist = Math.sqrt(
-            (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+          const ductGroup = getNearestCommentText(
+            ductCenterX,
+            ductCenterY,
+            annotations.comments
           );
-          if (dist < minDist) {
-            minDist = dist;
-            nearestDuct = { x: ductCenterX, y: ductCenterY };
+          if (diffuserGroup && ductGroup === diffuserGroup) {
+            const dist = Math.sqrt(
+              (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+            );
+            if (dist < minDist) {
+              minDist = dist;
+              nearestDuct = { x: ductCenterX, y: ductCenterY };
+            }
           }
         });
+        // If no matching group duct, find nearest overall
+        if (!nearestDuct) {
+          annotations.hvac.ducts.forEach((duct) => {
+            const ductCenterX =
+              duct.xPercent * canvasWidth +
+              ((duct.width || 0.2) * canvasWidth) / 2;
+            const ductCenterY =
+              duct.yPercent * canvasHeight +
+              ((duct.height || 0.04) * canvasHeight) / 2;
+            const dist = Math.sqrt(
+              (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+            );
+            if (dist < minDist) {
+              minDist = dist;
+              nearestDuct = { x: ductCenterX, y: ductCenterY };
+            }
+          });
+        }
         if (nearestDuct) {
           context.save();
           context.setLineDash([5, 5]); // dotted line
@@ -300,8 +368,34 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
         viewport: viewport,
       }).promise;
 
-      if (annotations) {
-        drawAnnotations(context, filteredAnnotations, viewport, acType);
+      // Normalize annotations: backend sometimes returns a wrapper { annotations, acType, isPaid }
+      let normalizedAnnotations =
+        annotations && annotations.annotations
+          ? annotations.annotations
+          : annotations;
+      let finalAcType = acType;
+      // If annotations are missing or HVAC data isn't present, try fetching the latest annotations from the server
+      if (
+        !normalizedAnnotations ||
+        Object.keys(normalizedAnnotations).length === 0 ||
+        !normalizedAnnotations.hvac
+      ) {
+        try {
+          const annRes = await fetch(`/api/annotations/${pdfId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (annRes.ok) {
+            const annData = await annRes.json();
+            normalizedAnnotations = annData.annotations || annData;
+            finalAcType = finalAcType || annData.acType;
+          }
+        } catch (e) {
+          console.warn("Failed to fetch annotations for PDF:", e);
+        }
+      }
+
+      if (normalizedAnnotations) {
+        drawAnnotations(context, normalizedAnnotations, viewport, finalAcType);
       }
 
       const imageData = canvas.toDataURL("image/png");
@@ -355,19 +449,8 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       const downloadBlob = new Blob([pdfBytes], { type: "application/pdf" });
       const url = URL.createObjectURL(downloadBlob);
 
-      // Generate filename based on payment status
-      const baseName = file?.name?.replace(/\.[^/.]+$/, "") || "annotated_pdf";
-      const filename = isPaid
-        ? `${baseName}_with_engineer.pdf`
-        : `${baseName}.pdf`;
-
-      // Create a temporary link to trigger download with filename
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Open in new tab as workaround for download issues (includes unique filename in URL, but user can save manually)
+      window.open(url, "_blank");
 
       // Clean up
       setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -383,8 +466,9 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
     <div>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
       <Button
-      variant="primary" className="ms-3"
-        size="md"
+        className="go-to-btn btn-text w-auto p-1"
+        variant="btn-outline"
+        size="sm"
         onClick={saveAsPDF}
       >
         💾 Save as PDF

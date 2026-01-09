@@ -78,15 +78,9 @@ const Sidebar = () => {
     try {
       setError(null);
       let response;
-      if (isAdmin) {
-        response = await fetch("/api/all-annotations", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } else {
-        response = await fetch("/api/user-annotations", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+      response = await fetch("/api/user-annotations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch saved PDFs");
@@ -103,7 +97,7 @@ const Sidebar = () => {
       console.error("Error fetching PDFs:", err);
       setError(err.message || "Error fetching saved PDFs. Please try again.");
     }
-  }, [token, isAdmin]);
+  }, [token]);
   useEffect(() => {
     if (isOpen) {
       fetchSavedPdfs();
@@ -264,6 +258,7 @@ const Sidebar = () => {
   }, [showHVAC, selectedAnnotations, selectedPdfFile]);
 
   const viewPdfWithAnnotations = async (pdf) => {
+    console.log("Viewing PDF:", pdf);
     if (!token) return setError("User not authenticated.");
     try {
       if (pdf.isPaid) {
@@ -292,7 +287,14 @@ const Sidebar = () => {
           `Failed to fetch annotations: ${annotationsResponse.status}`
         );
       const annotationsData = await annotationsResponse.json();
-      setSelectedAnnotations(annotationsData);
+      // Backend may return either the annotations object directly or a wrapper
+      // like { annotations, isPaid, acType }. Normalize to annotations object.
+      const normalizedAnnotations =
+        annotationsData && annotationsData.annotations
+          ? annotationsData.annotations
+          : annotationsData;
+      console.log("Fetched annotations for", pdf._id, normalizedAnnotations);
+      setSelectedAnnotations(normalizedAnnotations);
 
       const container = document.getElementById("pdf-container");
       if (!container) return;
@@ -311,8 +313,9 @@ const Sidebar = () => {
 
       await page.render({ canvasContext: context, viewport }).promise;
 
-      // overlay annotations
-      if (annotationsData) {
+      // overlay annotations (use normalizedAnnotations so we always pass
+      // the actual annotations object — not a wrapper returned by backend)
+      if (normalizedAnnotations) {
         const overlayCanvas = document.createElement("canvas");
         overlayCanvas.width = viewport.width;
         overlayCanvas.height = viewport.height;
@@ -324,12 +327,13 @@ const Sidebar = () => {
         container.appendChild(overlayCanvas);
 
         const overlayContext = overlayCanvas.getContext("2d");
-        overlayAnnotations(overlayContext, annotationsData);
+        // draw the normalized annotations immediately
+        overlayAnnotations(overlayContext, normalizedAnnotations);
         // HVAC overlay if enabled
         if (showHVAC) {
           overlayHVAC(
             overlayContext,
-            annotationsData.hvac || { ducts: [], diffusers: [] }
+            normalizedAnnotations.hvac || { ducts: [], diffusers: [] }
           );
         }
       }
@@ -368,12 +372,12 @@ const Sidebar = () => {
   return (
     <>
       <Button
-        className="go-to-btn btn-text w-auto"
+        variant="primary"
         size="sm"
-        variant="btn-outline"
         onClick={toggleSidebar}
+        className="mb-2"
       >
-        {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
+        <FaFilePdf /> {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
       </Button>
 
       <Modal
