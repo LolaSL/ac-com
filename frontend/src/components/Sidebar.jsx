@@ -375,7 +375,7 @@ const Sidebar = () => {
         variant="primary"
         size="sm"
         onClick={toggleSidebar}
-        className="mb-2"
+        className="go-to-btn btn-text w-auto "
       >
         <FaFilePdf /> {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
       </Button>

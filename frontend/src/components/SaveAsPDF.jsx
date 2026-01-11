@@ -112,40 +112,66 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       annotations?.rectangles &&
       annotations.rectangles.length > 1
     ) {
-      // Find condensers: rectangles with nearby comments containing "condenser" or "outdoor"
+      // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
       let condensers = [];
-      if (annotations.comments) {
+
+      // 1) explicit flags
+      annotations.rectangles.forEach((rect) => {
+        if (rect.isCondenser) condensers.push(rect);
+      });
+
+      // 2) comment-based matching using synonyms
+      const synonyms = [
+        "condenser",
+        "outdoor",
+        "outdoor unit",
+        "outdoor-unit",
+        "compressor",
+        "outside unit",
+        "heat pump",
+      ];
+      const normalizeText = (s) =>
+        (s || "")
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, " ")
+          .trim();
+      if (condensers.length === 0 && annotations.comments) {
         annotations.comments.forEach((comment) => {
-          if (
-            comment.text.toLowerCase().includes("condenser") ||
-            comment.text.toLowerCase().includes("outdoor")
-          ) {
-            // Find the closest rectangle to this comment
-            let closestRect = null;
-            let minDist = Infinity;
-            annotations.rectangles.forEach((rect) => {
-              const rectCenterX =
-                rect.xPercent * canvasWidth +
-                (rect.widthPercent * canvasWidth) / 2;
-              const rectCenterY =
-                rect.yPercent * canvasHeight +
-                (rect.heightPercent * canvasHeight) / 2;
-              const dist = Math.sqrt(
-                (comment.xPercent * canvasWidth - rectCenterX) ** 2 +
-                  (comment.yPercent * canvasHeight - rectCenterY) ** 2
-              );
-              if (dist < minDist) {
-                minDist = dist;
-                closestRect = rect;
+          const t = normalizeText(comment.text);
+          for (const syn of synonyms) {
+            const re = new RegExp(
+              "\\b" + syn.replace(/[-]/g, "\\-") + "\\b",
+              "i"
+            );
+            if (re.test(t)) {
+              let closestRect = null;
+              let minDist = Infinity;
+              annotations.rectangles.forEach((rect) => {
+                const rectCenterX =
+                  rect.xPercent * canvasWidth +
+                  (rect.widthPercent * canvasWidth) / 2;
+                const rectCenterY =
+                  rect.yPercent * canvasHeight +
+                  (rect.heightPercent * canvasHeight) / 2;
+                const dist = Math.sqrt(
+                  (comment.xPercent * canvasWidth - rectCenterX) ** 2 +
+                    (comment.yPercent * canvasHeight - rectCenterY) ** 2
+                );
+                if (dist < minDist) {
+                  minDist = dist;
+                  closestRect = rect;
+                }
+              });
+              if (closestRect && !condensers.includes(closestRect)) {
+                condensers.push(closestRect);
               }
-            });
-            if (closestRect && !condensers.includes(closestRect)) {
-              condensers.push(closestRect);
+              break;
             }
           }
         });
       }
-      // If no labeled condensers, assume the largest area rectangle is the condenser
+
+      // 3) largest rectangle fallback
       if (condensers.length === 0) {
         let maxArea = -Infinity;
         let largestRect = null;
@@ -156,10 +182,65 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
             largestRect = rect;
           }
         });
-        if (largestRect) {
-          condensers.push(largestRect);
-        }
+        if (largestRect) condensers.push(largestRect);
       }
+
+      // Draw visible label for condensers on the PDF canvas — skip if a matching user comment is nearby
+      const isCondenserComment = (text) => {
+        const syns = [
+          "condenser",
+          "outdoor",
+          "outdoor unit",
+          "outdoor-unit",
+          "compressor",
+          "outside unit",
+          "heat pump",
+        ];
+        const t = (text || "").toLowerCase();
+        return syns.some((syn) =>
+          new RegExp("\\b" + syn.replace(/[-]/g, "\\-") + "\\b", "i").test(t)
+        );
+      };
+
+      const findNearbyCondenserComment = (cond) => {
+        if (!annotations.comments) return null;
+        const cx =
+          cond.xPercent * canvasWidth + (cond.widthPercent * canvasWidth) / 2;
+        const cy =
+          cond.yPercent * canvasHeight +
+          (cond.heightPercent * canvasHeight) / 2;
+        const pxThreshold = 40;
+        let best = null;
+        let bestDist = Infinity;
+        annotations.comments.forEach((c) => {
+          if (!isCondenserComment(c.text)) return;
+          const x = c.xPercent * canvasWidth;
+          const y = c.yPercent * canvasHeight;
+          const dx = x - cx;
+          const dy = y - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < bestDist && dist <= pxThreshold) {
+            bestDist = dist;
+            best = c;
+          }
+        });
+        return best;
+      };
+
+      condensers.forEach((cond) => {
+        const matchingComment = findNearbyCondenserComment(cond);
+        const cx =
+          cond.xPercent * canvasWidth + (cond.widthPercent * canvasWidth) / 2;
+        const cy =
+          cond.yPercent * canvasHeight +
+          (cond.heightPercent * canvasHeight) / 2;
+        context.save();
+        context.fillStyle = "black";
+        context.font = "bold 14px Arial";
+        const labelText = matchingComment ? matchingComment.text : "";
+        context.fillText(labelText, cx + 8, cy - 8);
+        context.restore();
+      });
       // Now, for each rectangle not a condenser, connect to the nearest condenser
       annotations.rectangles.forEach((rect) => {
         if (!condensers.includes(rect)) {

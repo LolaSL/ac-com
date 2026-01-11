@@ -2762,6 +2762,49 @@ iframe {
   height: 100%;
   width: 100%;
 }
+
+/* Hero styles for HomeBannerPage */
+.hero-hero {
+  /* Use a gradient-only background to avoid bundler errors when an image is missing */
+  background: linear-gradient(
+    110deg,
+    rgba(6, 27, 45, 0.86) 0%,
+    rgba(10, 70, 95, 0.78) 60%
+  );
+  padding: 36px 0;
+}
+.hero-title {
+  text-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+.hero-subtitle {
+  max-width: 60ch;
+  opacity: 0.95;
+}
+.hero-search .form-control {
+  min-width: 320px;
+}
+.hero-illustration {
+  transform: translateY(-10px);
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.45));
+}
+.quick-actions {
+  margin-top: 18px;
+}
+.action-card {
+  min-width: 160px;
+  max-width: 220px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 992px) {
+  .hero-subtitle {
+    max-width: 100%;
+  }
+  .hero-search .form-control {
+    min-width: 180px;
+  }
+}
 .home-carousel .carousel-caption {
   bottom: 20px;
   left: 50%;
@@ -2826,7 +2869,7 @@ iframe {
   right: 20px;
   width: 350px;
   padding: 20px;
-  background-color: rgba(12, 13, 15, 0.95);
+  background-color: rgba(12, 13, 15, 0.6);
   text-shadow: 1px 1px 5px white;
   color: white;
   z-index: 9999;
