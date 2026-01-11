@@ -685,7 +685,7 @@ const EngineerViewPage = () => {
             pdfId={id}
             token={token}
             annotations={annotation.annotations}
-            acType={annotation.acType}
+            acType={acType}
           />
         )}
       </div>

@@ -357,16 +357,22 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       const page = await pdf.getPage(1);
       const scale = 1.0; // Reduced scale to avoid large canvas issues
       const viewport = page.getViewport({ scale });
+
+      // Prepare first canvas (current mode)
       const canvas = canvasRef.current;
       const context = canvas.getContext("2d");
-
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
-      await page.render({
-        canvasContext: context,
-        viewport: viewport,
-      }).promise;
+      // Prepare second canvas (alternate mode)
+      const canvas2 = document.createElement("canvas");
+      const context2 = canvas2.getContext("2d");
+      canvas2.width = viewport.width;
+      canvas2.height = viewport.height;
+
+      // Render base PDF page to both canvases
+      await page.render({ canvasContext: context, viewport }).promise;
+      await page.render({ canvasContext: context2, viewport }).promise;
 
       // Normalize annotations: backend sometimes returns a wrapper { annotations, acType, isPaid }
       let normalizedAnnotations =
@@ -394,21 +400,67 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
         }
       }
 
+      // Determine alternate mode (the other system view)
+      const alternateAcType = finalAcType === "ducted" ? "ductless" : "ducted";
+
+      // Draw annotations for page 1 (current mode)
       if (normalizedAnnotations) {
         drawAnnotations(context, normalizedAnnotations, viewport, finalAcType);
       }
 
-      const imageData = canvas.toDataURL("image/png");
-      if (!imageData || imageData === "data:," || imageData.length < 100) {
-        throw new Error("Failed to generate image from canvas");
+      // Draw annotations for page 2 (alternate mode)
+      if (normalizedAnnotations) {
+        drawAnnotations(
+          context2,
+          normalizedAnnotations,
+          viewport,
+          alternateAcType
+        );
       }
 
-      const pngImage = await pdfDoc.embedPng(imageData);
+      // Add small labels so each page is clear
+      const drawLabel = (ctx, label) => {
+        try {
+          ctx.save();
+          ctx.fillStyle = "rgba(0,0,0,0.8)";
+          ctx.font = "16px Arial";
+          ctx.fillText(label, 10, 22);
+          ctx.restore();
+        } catch (e) {
+          // ignore font issues in some environments
+        }
+      };
+
+      drawLabel(
+        context,
+        `${finalAcType === "ducted" ? "Ducted" : "Ductless"} View`
+      );
+      drawLabel(
+        context2,
+        `${alternateAcType === "ducted" ? "Ducted" : "Ductless"} View`
+      );
+
+      const imageData1 = canvas.toDataURL("image/png");
+      const imageData2 = canvas2.toDataURL("image/png");
+
+      if (!imageData1 || imageData1 === "data:," || imageData1.length < 100) {
+        throw new Error("Failed to generate image from first canvas");
+      }
+      if (!imageData2 || imageData2 === "data:," || imageData2.length < 100) {
+        throw new Error("Failed to generate image from second canvas");
+      }
+
+      const pngImage1 = await pdfDoc.embedPng(imageData1);
+      const pngImage2 = await pdfDoc.embedPng(imageData2);
 
       const newPdfPage = pdfDoc.getPages()[0];
       const { width, height } = newPdfPage.getSize();
 
-      newPdfPage.drawImage(pngImage, { x: 0, y: 0, width, height });
+      newPdfPage.drawImage(pngImage1, { x: 0, y: 0, width, height });
+
+      // Add second page and draw the alternate-mode image
+      const secondPage = pdfDoc.addPage([width, height]);
+      secondPage.drawImage(pngImage2, { x: 0, y: 0, width, height });
 
       if (isPaid) {
         const { width } = newPdfPage.getSize();
