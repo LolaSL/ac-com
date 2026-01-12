@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Modal, Button } from "react-bootstrap";
+import React, { useState, useMemo } from "react";
+import { Modal, Button, Badge } from "react-bootstrap";
 
-const ModalWindow = ({ show, onHide, products, addToCart }) => {
+const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
 
   const nextProduct = () => {
@@ -9,7 +9,6 @@ const ModalWindow = ({ show, onHide, products, addToCart }) => {
       setCurrentProductIndex(currentProductIndex + 1);
     }
   };
-
 
   const prevProduct = () => {
     if (currentProductIndex > 0) {
@@ -19,29 +18,194 @@ const ModalWindow = ({ show, onHide, products, addToCart }) => {
 
   const product = products[currentProductIndex];
 
+  // Calculate sizing status for this product
+  const sizingStatus = useMemo(() => {
+    if (!product || !recommendedBTU) return "";
+
+    const minAcceptable = recommendedBTU * 0.9;
+    const maxAcceptable = recommendedBTU * 1.2;
+
+    if (product.btu < minAcceptable || product.btu > maxAcceptable) {
+      return "out-of-range";
+    }
+
+    const percentage = (product.btu / recommendedBTU) * 100;
+    if (percentage >= 98 && percentage <= 102) {
+      return "perfect";
+    } else if (percentage > 102) {
+      return "oversized";
+    } else {
+      return "undersized";
+    }
+  }, [product, recommendedBTU]);
+
+  const getSizingBadge = () => {
+    switch (sizingStatus) {
+      case "perfect":
+        return (
+          <Badge bg="success" className="ms-2">
+            ✓ Perfect Match
+          </Badge>
+        );
+      case "oversized":
+        return (
+          <Badge bg="info" className="ms-2">
+            📈 Oversized
+          </Badge>
+        );
+      case "undersized":
+        return (
+          <Badge bg="warning" text="dark" className="ms-2">
+            ⚠️ Undersized
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const discountedPrice = product
+    ? (product.price - (product.price * (product.discount || 0)) / 100).toFixed(
+        2
+      )
+    : 0;
+
   return (
     <Modal show={show} onHide={onHide} className="custom-modal">
       <Modal.Header closeButton>
-        <Modal.Title>{product ? product.name : "No Product"}</Modal.Title>
+        <Modal.Title>
+          {product ? product.name : "No Product"}
+          {product && getSizingBadge()}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {product ? (
           <div className="product-item">
-            <div className="product-image">
+            <div className="product-image" style={{ marginBottom: "15px" }}>
               <img
                 src={product.image}
                 alt={product.name}
                 className="img-fluid"
+                style={{ maxHeight: "250px", objectFit: "cover" }}
               />
             </div>
+
             <h5>{product.name}</h5>
-            <p>BTU: {product.btu}</p>
+
+            {/* System Type */}
+            {product.category && (
+              <p className="mb-2">
+                <strong>System Type:</strong>{" "}
+                <span style={{ color: "#007bff" }}>
+                  {product.category.includes("VRF")
+                    ? "VRF Heat Recovery"
+                    : "Minisplit"}
+                </span>
+              </p>
+            )}
+
+            {/* BTU and Sizing Info */}
+            <p className="mb-2">
+              <strong>Capacity:</strong> {product.btu} BTU
+              {recommendedBTU && (
+                <>
+                  <br />
+                  <small className="text-muted">
+                    Recommended: {recommendedBTU} BTU
+                    {sizingStatus !== "out-of-range" && (
+                      <>
+                        {" "}
+                        ({((product.btu / recommendedBTU) * 100).toFixed(0)}%)
+                      </>
+                    )}
+                  </small>
+                </>
+              )}
+            </p>
+
+            {/* Coverage Area */}
+            {product.areaCoverage && (
+              <p className="mb-2">
+                <strong>Coverage Area:</strong> {product.areaCoverage} m²
+              </p>
+            )}
+
+            {/* Energy Efficiency */}
+            {product.energyEfficiency && (
+              <p className="mb-2">
+                <strong>Energy Efficiency:</strong> {product.energyEfficiency}{" "}
+                EER
+              </p>
+            )}
+
+            {/* Brand */}
+            {product.brand && (
+              <p className="mb-2">
+                <strong>Brand:</strong> {product.brand}
+              </p>
+            )}
+
+            {/* Price */}
+            <div className="mb-3 p-2 bg-light rounded">
+              <strong>Price:</strong>
+              <br />
+              {product.discount > 0 ? (
+                <>
+                  <span style={{ textDecoration: "line-through" }}>
+                    ${product.price.toFixed(2)}
+                  </span>
+                  {" → "}
+                  <span style={{ color: "green", fontSize: "1.1em" }}>
+                    ${discountedPrice}
+                  </span>
+                  <br />
+                  <small className="text-muted">Save {product.discount}%</small>
+                </>
+              ) : (
+                <span style={{ fontSize: "1.1em" }}>
+                  ${product.price.toFixed(2)}
+                </span>
+              )}
+            </div>
+
+            {/* Sizing Status Message */}
+            {recommendedBTU && sizingStatus === "perfect" && (
+              <div className="alert alert-success" role="alert">
+                <small>
+                  ✓ <strong>Ideal choice</strong> - This condenser matches your
+                  requirement perfectly
+                </small>
+              </div>
+            )}
+            {recommendedBTU && sizingStatus === "oversized" && (
+              <div className="alert alert-info" role="alert">
+                <small>
+                  ℹ️{" "}
+                  <strong>
+                    Oversized by{" "}
+                    {((product.btu / recommendedBTU - 1) * 100).toFixed(0)}%
+                  </strong>{" "}
+                  - Provides extra capacity, good for extreme weather
+                </small>
+              </div>
+            )}
+            {recommendedBTU && sizingStatus === "undersized" && (
+              <div className="alert alert-warning" role="alert">
+                <small>
+                  ⚠️{" "}
+                  <strong>
+                    Undersized by{" "}
+                    {((1 - product.btu / recommendedBTU) * 100).toFixed(0)}%
+                  </strong>{" "}
+                  - May not perform optimally in extreme heat
+                </small>
+              </div>
+            )}
+
             <Button
-              className="go-to-btn btn-text"
-               
-            variant="btn-outline"
+              className="go-to-btn btn-text w-100"
+              variant="btn-outline"
               onClick={() => addToCart(product)}
-             
             >
               Add to Cart
             </Button>
@@ -51,17 +215,24 @@ const ModalWindow = ({ show, onHide, products, addToCart }) => {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button      className="go-to-btn btn-text"
-            variant="btn-outline" onClick={onHide}>
+        <Button
+          className="go-to-btn btn-text"
+          variant="btn-outline"
+          onClick={onHide}
+        >
           Close
         </Button>
-        <Button      className="go-to-btn btn-text"
-            variant="btn-outline" onClick={prevProduct} disabled={currentProductIndex === 0}>
+        <Button
+          className="go-to-btn btn-text"
+          variant="btn-outline"
+          onClick={prevProduct}
+          disabled={currentProductIndex === 0}
+        >
           Previous
         </Button>
         <Button
-            className="go-to-btn btn-text"
-            variant="btn-outline"
+          className="go-to-btn btn-text"
+          variant="btn-outline"
           onClick={nextProduct}
           disabled={currentProductIndex === products.length - 1}
         >

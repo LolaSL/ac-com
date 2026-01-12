@@ -6,6 +6,182 @@ import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
+/**
+ * Draw VRF System annotations on PDF canvas
+ * @param {CanvasRenderingContext2D} context - Canvas context
+ * @param {Object} vrfAnnotations - VRF system data (outdoor/indoor units)
+ * @param {number} canvasWidth - Canvas width
+ * @param {number} canvasHeight - Canvas height
+ * @param {string} acType - System type ('vrf-ducted' or 'vrf-ductless')
+ *
+ * Line Visualization:
+ * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed)
+ * - VRF-Ductless: Single solid teal line (direct refrigerant connection)
+ */
+const drawVRFAnnotations = (
+  context,
+  vrfAnnotations,
+  canvasWidth,
+  canvasHeight,
+  acType
+) => {
+  // Draw outdoor condenser units
+  vrfAnnotations?.outdoorUnits?.forEach((unit) => {
+    const x = unit.xPercent * canvasWidth;
+    const y = unit.yPercent * canvasHeight;
+    const size = (unit.sizePercent || 0.12) * canvasWidth;
+
+    // Draw outdoor unit as larger rectangle
+    context.save();
+    context.translate(x, y);
+    context.beginPath();
+    context.rect(-size / 2, -size / 2, size, size);
+    context.fillStyle = "rgba(200, 100, 100, 0.4)"; // reddish for outdoor
+    context.fill();
+    context.lineWidth = 3;
+    context.strokeStyle = "red";
+    context.stroke();
+    context.font = "bold 12px Arial";
+    context.fillStyle = "black";
+    context.textAlign = "center";
+    context.fillText("Condenser", 0, 5);
+    context.restore();
+
+    // Draw capacity label if available
+    if (unit.capacity) {
+      context.save();
+      context.font = "10px Arial";
+      context.fillStyle = "darkred";
+      context.fillText(`${unit.capacity} BTU`, x, y + size / 2 + 15);
+      context.restore();
+    }
+  });
+
+  // Draw indoor units (for VRF systems)
+  vrfAnnotations?.indoorUnits?.forEach((unit) => {
+    const x = unit.xPercent * canvasWidth;
+    const y = unit.yPercent * canvasHeight;
+    const size = (unit.sizePercent || 0.08) * canvasWidth;
+
+    context.save();
+    context.translate(x, y);
+    context.beginPath();
+    context.rect(-size / 2, -size / 2, size, size);
+    context.fillStyle = "rgba(100, 150, 255, 0.4)"; // bluish for indoor
+    context.fill();
+    context.lineWidth = 2;
+    context.strokeStyle = "blue";
+    context.stroke();
+    context.font = "10px Arial";
+    context.fillStyle = "black";
+    context.textAlign = "center";
+    context.fillText(unit.roomName || "Unit", 0, 3);
+    context.restore();
+  });
+
+  // Draw refrigerant lines connecting outdoor to indoor units
+  if (vrfAnnotations?.outdoorUnits && vrfAnnotations?.indoorUnits) {
+    vrfAnnotations.outdoorUnits.forEach((outdoor) => {
+      const outX = outdoor.xPercent * canvasWidth;
+      const outY = outdoor.yPercent * canvasHeight;
+
+      if (acType === "vrf-ductless") {
+        // VRF-Ductless: Star topology - direct connection from outdoor to each indoor
+        vrfAnnotations.indoorUnits.forEach((indoor) => {
+          const inX = indoor.xPercent * canvasWidth;
+          const inY = indoor.yPercent * canvasHeight;
+
+          context.save();
+          context.setLineDash([]); // solid line
+          context.lineWidth = 2.5;
+          context.strokeStyle = "#008B8B"; // teal/dark cyan
+          context.beginPath();
+          context.moveTo(outX, outY);
+          context.lineTo(inX, inY);
+          context.stroke();
+          context.restore();
+        });
+      } else {
+        // VRF-Ducted: Sequential chain - AC1→AC2→AC3→...→Outdoor
+        const indoorUnits = vrfAnnotations.indoorUnits;
+
+        // Draw chain connections between indoor units
+        for (let i = 0; i < indoorUnits.length - 1; i++) {
+          const x1 = indoorUnits[i].xPercent * canvasWidth;
+          const y1 = indoorUnits[i].yPercent * canvasHeight;
+          const x2 = indoorUnits[i + 1].xPercent * canvasWidth;
+          const y2 = indoorUnits[i + 1].yPercent * canvasHeight;
+
+          const offset = 3;
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const perpX = (-dy / length) * offset;
+          const perpY = (dx / length) * offset;
+
+          // Supply line (red, dashed)
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "red";
+          context.beginPath();
+          context.moveTo(x1 + perpX, y1 + perpY);
+          context.lineTo(x2 + perpX, y2 + perpY);
+          context.stroke();
+          context.restore();
+
+          // Return line (blue, dashed)
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "#0066FF";
+          context.beginPath();
+          context.moveTo(x1 - perpX, y1 - perpY);
+          context.lineTo(x2 - perpX, y2 - perpY);
+          context.stroke();
+          context.restore();
+        }
+
+        // Connect last indoor unit to outdoor condenser
+        if (indoorUnits.length > 0) {
+          const lastIndoor = indoorUnits[indoorUnits.length - 1];
+          const lastX = lastIndoor.xPercent * canvasWidth;
+          const lastY = lastIndoor.yPercent * canvasHeight;
+
+          const offset = 3;
+          const dx = outX - lastX;
+          const dy = outY - lastY;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const perpX = (-dy / length) * offset;
+          const perpY = (dx / length) * offset;
+
+          // Supply line to outdoor
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "red";
+          context.beginPath();
+          context.moveTo(lastX + perpX, lastY + perpY);
+          context.lineTo(outX + perpX, outY + perpY);
+          context.stroke();
+          context.restore();
+
+          // Return line from outdoor
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "#0066FF";
+          context.beginPath();
+          context.moveTo(lastX - perpX, lastY - perpY);
+          context.lineTo(outX - perpX, outY - perpY);
+          context.stroke();
+          context.restore();
+        }
+      }
+    });
+  }
+};
+
 // This component now receives the 'annotations' object as a prop
 function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
   const canvasRef = useRef(null);
@@ -401,6 +577,22 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
         }
       });
     }
+
+    // Draw VRF system annotations (outdoor condenser + indoor units + refrigerant lines)
+    // VRF systems are standalone - do NOT render minisplit ducts/diffusers
+    if (acType.startsWith("vrf") && annotations?.vrf) {
+      drawVRFAnnotations(
+        context,
+        annotations.vrf,
+        canvasWidth,
+        canvasHeight,
+        acType
+      );
+
+      // NOTE: VRF systems use their own indoor units, not minisplit ductwork
+      // Indoor units handle air distribution internally (ducted) or directly (ductless)
+      // Ductwork visualization is NOT needed in PDF as it's internal to each unit
+    }
   };
 
   const saveAsPDF = async () => {
@@ -482,7 +674,20 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       }
 
       // Determine alternate mode (the other system view)
-      const alternateAcType = finalAcType === "ducted" ? "ductless" : "ducted";
+      // For VRF systems: only switch between vrf-ducted and vrf-ductless
+      // For minisplit: switch between ducted and ductless
+      let alternateAcType;
+      if (finalAcType === "ducted") {
+        alternateAcType = "ductless";
+      } else if (finalAcType === "ductless") {
+        alternateAcType = "ducted";
+      } else if (finalAcType === "vrf-ducted") {
+        alternateAcType = "vrf-ductless"; // VRF stays VRF
+      } else if (finalAcType === "vrf-ductless") {
+        alternateAcType = "vrf-ducted"; // VRF stays VRF
+      } else {
+        alternateAcType = finalAcType;
+      }
 
       // Draw annotations for page 1 (current mode)
       if (normalizedAnnotations) {
@@ -500,6 +705,21 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       }
 
       // Add small labels so each page is clear
+      const getSystemLabel = (type) => {
+        switch (type) {
+          case "ducted":
+            return "Minisplit - Ducted View";
+          case "ductless":
+            return "Minisplit - Ductless View";
+          case "vrf-ducted":
+            return "VRF System - Ducted Indoor Units";
+          case "vrf-ductless":
+            return "VRF System - Ductless Indoor Units";
+          default:
+            return `${type} View`;
+        }
+      };
+
       const drawLabel = (ctx, label) => {
         try {
           ctx.save();
@@ -512,14 +732,8 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
         }
       };
 
-      drawLabel(
-        context,
-        `${finalAcType === "ducted" ? "Ducted" : "Ductless"} View`
-      );
-      drawLabel(
-        context2,
-        `${alternateAcType === "ducted" ? "Ducted" : "Ductless"} View`
-      );
+      drawLabel(context, getSystemLabel(finalAcType));
+      drawLabel(context2, getSystemLabel(alternateAcType));
 
       const imageData1 = canvas.toDataURL("image/png");
       const imageData2 = canvas2.toDataURL("image/png");

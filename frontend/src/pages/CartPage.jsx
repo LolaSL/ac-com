@@ -24,20 +24,115 @@ export default function CartPage() {
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [totalBTU, setTotalBTU] = useState(0);
+  const [recommendedCondenser, setRecommendedCondenser] = useState(null);
+  const [condenserSizingStatus, setCondenserSizingStatus] = useState("");
+  const [allProducts, setAllProducts] = useState([]);
 
   useEffect(() => {
     const airConditionerBTU = cartItems
-      .filter((item) => item.category !== "Outdoor Condenser")
+      .filter(
+        (item) =>
+          item.category &&
+          !item.category.toLowerCase().includes("condenser") &&
+          !item.category.toLowerCase().includes("vrf heat recovery") &&
+          !item.category.toLowerCase().includes("mrv-s outdoor")
+      )
       .reduce((sum, item) => sum + item.quantity * (item.btu || 0), 0);
 
     setTotalBTU(airConditionerBTU);
   }, [cartItems]);
-  const recommendedCondenser = totalBTU ? (totalBTU * 0.8).toFixed(0) : 0;
+
+  // Smart condenser recommendation with tolerance range
+  useEffect(() => {
+    if (totalBTU < 10000 || allProducts.length === 0) return;
+
+    // Check if a condenser is already in the cart
+    const condenserAlreadyInCart = cartItems.some(
+      (item) =>
+        item.category &&
+        (item.category.toLowerCase().includes("condenser") ||
+          item.category.toLowerCase().includes("vrf heat recovery") ||
+          item.category.toLowerCase().includes("mrv-s outdoor"))
+    );
+
+    // If condenser already in cart, don't show recommendation
+    if (condenserAlreadyInCart) {
+      setRecommendedCondenser(null);
+      setCondenserSizingStatus("already_added");
+      return;
+    }
+
+    // Detect if system is VRF or minisplit
+    const isVRFSystem = cartItems.some(
+      (item) => item.category && item.category.toLowerCase().includes("vrf")
+    );
+    const multiplier = isVRFSystem ? 1.0 : 0.8;
+    const requiredBTU = totalBTU * multiplier;
+
+    // Define acceptable range: 90-120%
+    const minAcceptable = requiredBTU * 0.9;
+    const maxAcceptable = requiredBTU * 1.2;
+
+    // Get all available condensers
+    const availableCondensers = allProducts.filter(
+      (p) =>
+        (p.category && p.category.toLowerCase().includes("condenser")) ||
+        (p.category && p.category.toLowerCase().includes("vrf"))
+    );
+
+    const suitableCondensers = availableCondensers.filter(
+      (c) => c.btu >= minAcceptable && c.btu <= maxAcceptable
+    );
+
+    let condenser = null;
+    let status = "";
+
+    if (suitableCondensers.length > 0) {
+      // Find closest match
+      condenser = suitableCondensers.reduce((closest, current) => {
+        const closestDiff = Math.abs(closest.btu - requiredBTU);
+        const currentDiff = Math.abs(current.btu - requiredBTU);
+        return currentDiff < closestDiff ? current : closest;
+      });
+
+      const percentage = (condenser.btu / requiredBTU) * 100;
+      if (percentage >= 98 && percentage <= 102) {
+        status = "perfect";
+      } else if (percentage > 102) {
+        status = "oversized";
+      } else {
+        status = "undersized";
+      }
+    } else {
+      status = "custom";
+      condenser = {
+        _id: "custom",
+        name: "Custom Condenser Required",
+        btu: Math.round(requiredBTU),
+      };
+    }
+
+    setRecommendedCondenser(condenser);
+    setCondenserSizingStatus(status);
+  }, [totalBTU, cartItems, allProducts]);
+
+  // Fetch all products on mount for condenser matching
+  useEffect(() => {
+    const fetchAllProducts = async () => {
+      try {
+        const { data } = await axios.get("/api/products");
+        setAllProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchAllProducts();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowAlert(false);
-    }, 6000);
+    }, 12000);
 
     return () => clearTimeout(timer);
   }, [showAlert, totalBTU]);
@@ -196,13 +291,85 @@ export default function CartPage() {
     <div className="p-4">
       <h1>Shopping Cart</h1>
       <div className="p-4">
-        {showAlert && (
-          <div className="bg-light p-3 mb-3 text-center">
-            <strong className="text-primary fs-5">
-              Recommended Condenser: {recommendedCondenser}
-            </strong>
+        {showAlert && condenserSizingStatus === "already_added" && (
+          <div
+            className="p-3 mb-3 text-center rounded"
+            style={{
+              backgroundColor: "#d4edda",
+            }}
+          >
+            <span className="badge bg-success">✓ Condenser Already Added</span>
+            <p className="small text-muted mb-0 mt-1">
+              You have a condenser in your cart. No additional recommendation
+              needed.
+            </p>
           </div>
         )}
+        {showAlert &&
+          recommendedCondenser &&
+          totalBTU >= 10000 &&
+          condenserSizingStatus !== "already_added" && (
+            <div
+              className="p-3 mb-3 text-center rounded"
+              style={{
+                backgroundColor:
+                  condenserSizingStatus === "custom" ? "#fff3cd" : "#f0f8ff",
+              }}
+            >
+              <strong className="text-primary fs-5">
+                Recommended Condenser: {recommendedCondenser.btu} BTU
+              </strong>
+              {condenserSizingStatus === "perfect" && (
+                <div className="mt-2">
+                  <span className="badge bg-success">✓ Perfect Match</span>
+                  <p className="small text-muted mb-0 mt-1">
+                    {recommendedCondenser.name} - {recommendedCondenser.btu} BTU
+                  </p>
+                </div>
+              )}
+              {condenserSizingStatus === "oversized" && (
+                <div className="mt-2">
+                  <span className="badge bg-info">📈 Slightly Oversized</span>
+                  <p className="small text-muted mb-0 mt-1">
+                    {recommendedCondenser.name} - {recommendedCondenser.btu} BTU
+                    <br />
+                    <em>
+                      Provides extra capacity - good for extreme weather
+                      conditions
+                    </em>
+                  </p>
+                </div>
+              )}
+              {condenserSizingStatus === "undersized" && (
+                <div className="mt-2">
+                  <span className="badge bg-warning text-dark">
+                    ⚠️ Slightly Undersized
+                  </span>
+                  <p className="small text-muted mb-0 mt-1">
+                    {recommendedCondenser.name} - {recommendedCondenser.btu} BTU
+                    <br />
+                    <em>
+                      May not cool effectively in extreme heat - consider next
+                      size up if available
+                    </em>
+                  </p>
+                </div>
+              )}
+              {condenserSizingStatus === "custom" && (
+                <div className="mt-2">
+                  <span className="badge bg-warning text-dark">
+                    📞 Custom Order Required
+                  </span>
+                  <p className="small text-muted mb-0 mt-1">
+                    No stock product matches your {recommendedCondenser.btu} BTU
+                    requirement
+                    <br />
+                    <em>Please contact us for a custom solution</em>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
       </div>
       <Button
         variant="primary"
@@ -216,6 +383,7 @@ export default function CartPage() {
         onHide={() => setShowModal(false)}
         products={recommendedProducts}
         addToCart={addToCart}
+        recommendedBTU={recommendedCondenser?.btu}
       />
       <Row>
         <Col md={8}>

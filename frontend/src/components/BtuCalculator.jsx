@@ -18,13 +18,19 @@ function BtuCalculator({ roomData }) {
 
   useEffect(() => {
     if (roomData?.length) {
-      const formattedRooms = roomData.map((room) => ({
-        name: room.name,
-        size: room.size,
-        btu: 0,
-        unit: "meters",
-      }));
-      setRooms(formattedRooms);
+      // Filter out invalid rooms (those without name or size)
+      const validRooms = roomData.filter((room) => room.name && room.size);
+
+      if (validRooms.length > 0) {
+        const formattedRooms = validRooms.map((room) => ({
+          name: room.name,
+          size: room.size,
+          btu: 0,
+          unit: "meters",
+        }));
+        console.log("BtuCalculator received rooms:", formattedRooms);
+        setRooms(formattedRooms);
+      }
     }
   }, [roomData]);
 
@@ -95,10 +101,13 @@ function BtuCalculator({ roomData }) {
   `;
 
     if (showCondenser) {
-      const recommendedCondenserBTU = (totalProductBTU * 0.8).toFixed(0);
+      // Minisplit: 0.8x (diversity factor), VRF: 1.0x (full capacity)
+      const multiplier = hvacSystemType === "vrf" ? 1.0 : 0.8;
+      const recommendedCondenserBTU = (totalProductBTU * multiplier).toFixed(0);
+      const systemLabel = hvacSystemType === "vrf" ? "VRF" : "Minisplit";
       const condenserRow = `
       <tr class="text-center bg-info">
-        <td colspan="5" style="color: #007bff;"><strong>Recommended Condenser: ${recommendedCondenserBTU} BTU</strong></td>
+        <td colspan="5" style="color: #007bff;"><strong>Recommended ${systemLabel} Condenser: ${recommendedCondenserBTU} BTU</strong></td>
       </tr>
     `;
       tableHtml = tableHtml.replace("</tbody>", `${condenserRow}</tbody>`);
@@ -187,6 +196,7 @@ function BtuCalculator({ roomData }) {
   const [error, setError] = useState("");
   const [totalBTU, setTotalBTU] = useState(0);
   const [condenser, setCondenser] = useState(null);
+  const [condenserSizingStatus, setCondenserSizingStatus] = useState(""); // 'perfect', 'oversized', 'undersized', 'custom'
   // eslint-disable-next-line no-unused-vars
   const [showTable, setShowTable] = useState(false);
   const [optimalProductCount, setOptimalProductCount] = useState(0);
@@ -255,6 +265,13 @@ function BtuCalculator({ roomData }) {
 
   const [btuResults, setBtuResults] = useState([]);
   const [products, setProducts] = useState([]);
+
+  // Auto-detect system type from products
+  const isVRFSystem = products.some(
+    (product) =>
+      product.category && product.category.toLowerCase().includes("vrf")
+  );
+  const hvacSystemType = isVRFSystem ? "vrf" : "minisplit";
 
   const selectedUnit = "kW";
 
@@ -542,23 +559,65 @@ function BtuCalculator({ roomData }) {
     });
 
     let condenser = condenserCandidates[0] || null;
+    let sizingStatus = "";
 
     if (!condenser) {
-      const candidate = products
-        .filter((p) => !/mini split/i.test(p.name || p.title))
-        .sort((a, b) => a.btu - b.btu)
-        .find((p) => p.btu >= totalBTU);
+      // Calculate required condenser BTU based on system type
+      const isVRF = acProducts.some(
+        (p) => p.category && p.category.toLowerCase().includes("vrf")
+      );
+      const multiplier = isVRF ? 1.0 : 0.8;
+      const requiredBTU = totalBTU * multiplier;
 
-      condenser = candidate || {
-        _id: `condenser-placeholder`,
-        name: "Recommended Condenser",
-        btu: totalBTU,
-        price: 0,
-        slug: null,
-      };
+      // Define acceptable range: 90-120% of required BTU
+      const minAcceptable = requiredBTU * 0.9;
+      const maxAcceptable = requiredBTU * 1.2;
+
+      // Find all condensers in acceptable range
+      const availableCondensers = products.filter(
+        (p) =>
+          (p.category && p.category.toLowerCase().includes("condenser")) ||
+          (p.category && p.category.toLowerCase().includes("vrf"))
+      );
+
+      const suitableCondensers = availableCondensers.filter(
+        (c) => c.btu >= minAcceptable && c.btu <= maxAcceptable
+      );
+
+      if (suitableCondensers.length > 0) {
+        // Find closest match to required BTU
+        condenser = suitableCondensers.reduce((closest, current) => {
+          const closestDiff = Math.abs(closest.btu - requiredBTU);
+          const currentDiff = Math.abs(current.btu - requiredBTU);
+          return currentDiff < closestDiff ? current : closest;
+        });
+
+        // Determine sizing status
+        const percentage = (condenser.btu / requiredBTU) * 100;
+        if (percentage >= 98 && percentage <= 102) {
+          sizingStatus = "perfect";
+        } else if (percentage > 102) {
+          sizingStatus = "oversized";
+        } else {
+          sizingStatus = "undersized";
+        }
+      } else {
+        // No suitable product found - create custom recommendation
+        sizingStatus = "custom";
+        condenser = {
+          _id: `condenser-placeholder`,
+          name: "Custom Condenser Required",
+          btu: Math.round(requiredBTU),
+          price: 0,
+          slug: null,
+        };
+      }
+    } else {
+      sizingStatus = "perfect";
     }
 
     setCondenser(condenser);
+    setCondenserSizingStatus(sizingStatus);
     setBtuResults(results);
     setError("");
     setProducts(acProducts);
@@ -734,6 +793,20 @@ function BtuCalculator({ roomData }) {
             <option value="feet">Feet (ft²)</option>
           </Form.Control>
         </Form.Group>
+        {products.length > 0 && (
+          <div className="alert alert-info mb-4">
+            <strong>📊 System Type Detected:</strong>{" "}
+            {isVRFSystem
+              ? "VRF Heat Recovery System"
+              : "Traditional Minisplit System"}
+            <br />
+            <small className="text-muted">
+              {isVRFSystem
+                ? "Condenser sizing: 100% of total indoor capacity (1.0x ratio)"
+                : "Condenser sizing: 80% of total indoor capacity (0.8x diversity factor)"}
+            </small>
+          </div>
+        )}
 
         <Row>
           <Col xs={12} md={6} lg={4} className="my-4">
@@ -1022,17 +1095,73 @@ function BtuCalculator({ roomData }) {
             </Button>
           </div>
           {condenser && showCondenser && (
-            <div className="text-center bg-light mt-2 p-2 rounded">
+            <div
+              className="text-center mt-2 p-3 rounded"
+              style={{
+                backgroundColor:
+                  condenserSizingStatus === "custom" ? "#fff3cd" : "#f0f8ff",
+              }}
+            >
               <strong className="text-primary fs-5">
-                Recommended Condenser:{" "}
+                Recommended {hvacSystemType === "vrf" ? "VRF" : "Minisplit"}{" "}
+                Condenser:{" "}
                 {(
                   products.reduce(
                     (total, product) => total + (product.btu || 0),
                     0
-                  ) * 0.8
+                  ) * (hvacSystemType === "vrf" ? 1.0 : 0.8)
                 ).toFixed(0)}{" "}
                 BTU
               </strong>
+              {condenserSizingStatus === "perfect" && (
+                <div className="mt-2">
+                  <span className="badge bg-success">✓ Perfect Match</span>
+                  <p className="small text-muted mb-0 mt-1">
+                    {condenser.name} - {condenser.btu} BTU
+                  </p>
+                </div>
+              )}
+              {condenserSizingStatus === "oversized" && (
+                <div className="mt-2">
+                  <span className="badge bg-info">📈 Slightly Oversized</span>
+                  <p className="small text-muted mb-0 mt-1">
+                    {condenser.name} - {condenser.btu} BTU
+                    <br />
+                    <em>
+                      Provides extra capacity - good for extreme weather
+                      conditions
+                    </em>
+                  </p>
+                </div>
+              )}
+              {condenserSizingStatus === "undersized" && (
+                <div className="mt-2">
+                  <span className="badge bg-warning text-dark">
+                    ⚠️ Slightly Undersized
+                  </span>
+                  <p className="small text-muted mb-0 mt-1">
+                    {condenser.name} - {condenser.btu} BTU
+                    <br />
+                    <em>
+                      May not cool effectively in extreme heat - consider next
+                      size up if available
+                    </em>
+                  </p>
+                </div>
+              )}
+              {condenserSizingStatus === "custom" && (
+                <div className="mt-2">
+                  <span className="badge bg-warning text-dark">
+                    📞 Custom Order Required
+                  </span>
+                  <p className="small text-muted mb-0 mt-1">
+                    No stock product matches your {condenser.btu} BTU
+                    requirement
+                    <br />
+                    <em>Please contact us for a custom solution</em>
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

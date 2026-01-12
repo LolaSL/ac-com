@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import AnnotatorErrorBoundary from "../components/AnnotatorErrorBoundary.js";
@@ -28,6 +34,7 @@ const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
   const [roomData, setRoomData] = useState([]);
   const [error, setError] = useState(null);
+  const btuCalculatorRef = useRef(null);
 
   const token = useMemo(() => getToken(), []);
 
@@ -64,32 +71,51 @@ const Measurement = () => {
     console.log("ROOM DATA UPDATED:", roomData);
   }, [roomData]);
 
+  const handleScrollToBtuCalculator = () => {
+    if (btuCalculatorRef.current) {
+      setTimeout(() => {
+        btuCalculatorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    }
+  };
+
   return (
     <Container>
       {error && <div className="alert alert-danger">{error}</div>}
-      <h1 className="mt-4 mb-4 title-measurement">Measurement Service System</h1>
+      <h1 className="mt-4 mb-4 title-measurement">
+        Measurement Service System
+      </h1>
       <div className="row row-cols-2 row-cols-md-4 g-3 pt-4 mt-4">
-        <GridItem><PdfHelpVideo /></GridItem>
-        <GridItem><ArchSymbolsModal /></GridItem>
         <GridItem>
-          <Sidebar
-            savedPdfs={savedPdfs}
-            fetchSavedPdfs={fetchSavedPdfs}
-          />
+          <PdfHelpVideo />
         </GridItem>
-        <br/>
-     
-        <GridItem><BtuModalWindow /></GridItem>
+        <GridItem>
+          <ArchSymbolsModal />
+        </GridItem>
+        <GridItem>
+          <Sidebar savedPdfs={savedPdfs} fetchSavedPdfs={fetchSavedPdfs} />
+        </GridItem>
+        <br />
+
+        <GridItem>
+          <BtuModalWindow />
+        </GridItem>
       </div>
-     
+
       <AnnotatorErrorBoundary>
-        <Annotator 
-          fetchSavedPdfs={fetchSavedPdfs} 
+        <Annotator
+          fetchSavedPdfs={fetchSavedPdfs}
           setRoomData={setRoomData}
+          onExportToBtuCalculator={handleScrollToBtuCalculator}
         />
       </AnnotatorErrorBoundary>
-         {roomData && roomData.length > 0 && (
-        <BtuCalculator roomData={roomData} />
+      {roomData && roomData.length > 0 && (
+        <div ref={btuCalculatorRef}>
+          <BtuCalculator roomData={roomData} />
+        </div>
       )}
 
       <div className="mt-4 mb-4">

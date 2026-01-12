@@ -743,7 +743,11 @@ const parseRoomDataFromText = (rawText, fileName) => {
   return { apartmentType, rooms: table, totalSf, fileName };
 };
 
-const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
+const Annotator = ({
+  fetchSavedPdfs,
+  setRoomData,
+  onExportToBtuCalculator,
+}) => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
@@ -778,6 +782,7 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
   const [editingFileIdx, setEditingFileIdx] = useState(null);
   const [editingRoomIdx, setEditingRoomIdx] = useState(null);
   const filteredRoomsRef = useRef([]);
+  const [filteredRoomsTrigger, setFilteredRoomsTrigger] = useState(0);
   const [newRoom, setNewRoom] = useState({
     roomType: "",
     width: "",
@@ -916,16 +921,45 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
           return roomsWithIds;
         })
       );
+      // Trigger BTU Calculator update when new results arrive
+      setFilteredRoomsTrigger((prev) => prev + 1);
     }
   }, [results]);
 
+  // Auto-update BTU Calculator whenever filtered rooms change
   useEffect(() => {
-    if (setRoomData && allRooms.length > 0) {
-      // Flatten and pass all rooms to parent
-      const flattenedRooms = allRooms.flat().filter(Boolean);
-      setRoomData(flattenedRooms);
+    // Get filtered rooms from the table (from filteredRoomsRef)
+    const filteredRooms = filteredRoomsRef.current.flat().filter(Boolean);
+
+    if (setRoomData && filteredRooms.length > 0) {
+      // Filter out rooms without valid roomType and areaSqM
+      const validRooms = filteredRooms.filter(
+        (room) => room.roomType && room.areaSqM
+      );
+
+      if (validRooms.length > 0) {
+        // Format rooms for BTU Calculator
+        const formattedRooms = validRooms.map((room) => ({
+          name: room.roomType || "Room",
+          size:
+            parseFloat(
+              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+            ) || 0,
+          btu: 0,
+          unit: "meters",
+        }));
+
+        console.log("Sending to BTU Calculator:", formattedRooms);
+        // Send formatted data to BTU Calculator
+        setRoomData(formattedRooms);
+      }
     }
-  }, [allRooms, setRoomData]);
+  }, [filteredRoomsTrigger, setRoomData]);
+
+  // Trigger update when filter text changes
+  useEffect(() => {
+    setFilteredRoomsTrigger((prev) => prev + 1);
+  }, [filterText]);
 
   const handleAddRoom = (fileIdx) => {
     setAllRooms((prev) => {
@@ -957,6 +991,8 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
       areaSqFt: "",
       areaSqM: "",
     });
+    // Trigger BTU Calculator update
+    setFilteredRoomsTrigger((prev) => prev + 1);
   };
 
   const handleEditClick = (room, roomIdx, fileIdx) => {
@@ -1026,6 +1062,8 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
     setEditingRoomIdx(null);
     setEditingFileIdx(null);
     setEditingRoomId(null);
+    // Trigger BTU Calculator update
+    setFilteredRoomsTrigger((prev) => prev + 1);
   };
 
   const handleDeleteRoom = (roomId, fileIdx) => {
@@ -1039,6 +1077,8 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
       }
       return updated;
     });
+    // Trigger BTU Calculator update
+    setFilteredRoomsTrigger((prev) => prev + 1);
   };
   const handleStageClick = (event) => {
     if (event.target === event.target.getStage() && !isRotating) {
@@ -1665,6 +1705,10 @@ const Annotator = ({ fetchSavedPdfs, setRoomData }) => {
 
     if (typeof setRoomData === "function") {
       setRoomData(formattedRooms);
+      // Scroll to BTU Calculator after setting room data
+      if (typeof onExportToBtuCalculator === "function") {
+        onExportToBtuCalculator();
+      }
     }
   };
 

@@ -1019,6 +1019,46 @@ const data = {
         },
       ],
     },
+    {
+      name: "80000 BTU Multi-System Condenser",
+      model: "LMU801HV",
+      slug: "80000-mini-split-outdoor-condensing-unit",
+      category: "Outdoor Condenser",
+      image: "/images/p21.jpg",
+      price: 7200,
+      discount: 40,
+      countInStock: 10,
+      brand: "LG",
+      rating: 4.5,
+      numReviews: 22,
+      description: "LG Electronics LMU801HV Multi F MAX Air Conditioner/Inverter Heat Pump BTU (Cooling/Heating) 80,000/90,000 - Outdoor Unit. High efficiency multi-zone system for up to 8 indoor units. Advanced inverter technology with smart energy management.",
+      features: "Energy Saving",
+      btu: 80000,
+      areaCoverage: 180,
+      energyEfficiency: 11.0,
+      dimension: {
+        width: 98.5,
+        height: 142.5,
+        depth: 35.0,
+      },
+      documents: [
+        {
+          url: "https://www.appliancefactoryparts.com/content/pdfs/212528-1.pdf",
+          type: "PDF",
+          description: "User Manual for 80000 BTU Multi-System Condenser",
+        },
+        {
+          url: "https://refripartes.com/uploads/LMU540HV.pdf",
+          type: "PDF",
+          description: "Technical Specifications for 80000 BTU Multi-System Condenser",
+        },
+        {
+          url: "https://s1.img-b.com/build.com/mediabase/specifications/lg/1964733/lg-lmu601hv-installation-sheet.pdf",
+          type: "Image",
+          description: "Installation Guide Image",
+        },
+      ],
+    },
 
 
     {
