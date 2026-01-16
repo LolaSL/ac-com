@@ -362,7 +362,9 @@ const overlayAnnotations = (context, annotations, acType) => {
   console.log("overlayAnnotations called with annotations:", annotations);
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
-  // rectangles
+
+  // rectangles - ALWAYS render user-drawn rectangles (engineer annotations)
+  // These represent condenser, AC units, and other system components
   annotations?.rectangles?.forEach((rect) => {
     const x = rect.xPercent * canvasWidth;
     const y = rect.yPercent * canvasHeight;
@@ -381,25 +383,33 @@ const overlayAnnotations = (context, annotations, acType) => {
     context.stroke();
     context.restore();
   });
-  // lines
-  annotations?.lines?.forEach((line) => {
-    const lineReductionFactor = 0.985;
-    context.beginPath();
-    const points = line.points.map((val, idx) =>
-      idx % 2 === 0
-        ? val * canvasWidth * lineReductionFactor
-        : val * canvasHeight * lineReductionFactor
-    );
-    context.moveTo(points[0], points[1]);
-    for (let i = 2; i < points.length; i += 2) {
-      context.lineTo(points[i], points[i + 1]);
-    }
-    context.lineWidth = line.strokeWidth || 2;
-    context.strokeStyle = line.stroke || "black";
-    context.stroke();
-  });
-  // comments
+  // lines - skip in ducted modes since we auto-generate refrigerant lines
+  // (to avoid rendering old daisy-chain lines that interfere with star topology)
+  if (acType !== "ducted" && acType !== "vrf-ducted") {
+    annotations?.lines?.forEach((line) => {
+      const lineReductionFactor = 0.985;
+      context.beginPath();
+      const points = line.points.map((val, idx) =>
+        idx % 2 === 0
+          ? val * canvasWidth * lineReductionFactor
+          : val * canvasHeight * lineReductionFactor
+      );
+      context.moveTo(points[0], points[1]);
+      for (let i = 2; i < points.length; i += 2) {
+        context.lineTo(points[i], points[i + 1]);
+      }
+      context.lineWidth = line.strokeWidth || 2;
+      context.strokeStyle = line.stroke || "black";
+      context.stroke();
+    });
+  }
+  // comments - filter by acType to show only comments created in current mode
   annotations?.comments?.forEach((comment) => {
+    // Only render comment if it matches current acType or has no acType (legacy comments)
+    if (comment.acType && comment.acType !== acType) {
+      return; // Skip this comment
+    }
+
     const x = comment.xPercent * canvasWidth;
     const y = comment.yPercent * canvasHeight;
     const padding = 10;
@@ -426,6 +436,100 @@ const overlayAnnotations = (context, annotations, acType) => {
     context.fillStyle = comment.textColor || "#FF1493";
     context.fillText(text, x, y);
   });
+
+  // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
+  // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
+  if (
+    acType === "ducted" &&
+    annotations?.rectangles &&
+    annotations.rectangles.length > 1
+  ) {
+    // Find condenser: prefer explicit flag, then look for smallest rectangle (outdoor condenser is typically small)
+    let condenser = null;
+
+    // 1) explicit flag
+    annotations.rectangles.forEach((rect) => {
+      if (rect.isCondenser) condenser = rect;
+    });
+
+    // 2) find by comment if marked as "condenser"
+    if (!condenser && annotations.comments) {
+      const condenserComments = annotations.comments.filter((c) =>
+        c.text.toLowerCase().includes("condenser")
+      );
+      if (condenserComments.length > 0) {
+        const condenserComment = condenserComments[0];
+        const closestRect = annotations.rectangles.reduce((closest, rect) => {
+          const rectCx =
+            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
+          const rectCy =
+            rect.yPercent * canvasHeight +
+            (rect.heightPercent * canvasHeight) / 2;
+          const dist = Math.sqrt(
+            (condenserComment.xPercent * canvasWidth - rectCx) ** 2 +
+              (condenserComment.yPercent * canvasHeight - rectCy) ** 2
+          );
+          const closestDist = Math.sqrt(
+            (condenserComment.xPercent * canvasWidth -
+              (closest.xPercent * canvasWidth +
+                (closest.widthPercent * canvasWidth) / 2)) **
+              2 +
+              (condenserComment.yPercent * canvasHeight -
+                (closest.yPercent * canvasHeight +
+                  (closest.heightPercent * canvasHeight) / 2)) **
+                2
+          );
+          return dist < closestDist ? rect : closest;
+        });
+        condenser = closestRect;
+      }
+    }
+
+    // 3) smallest rectangle fallback (outdoor condenser is typically compact)
+    if (!condenser) {
+      let minArea = Infinity;
+      annotations.rectangles.forEach((rect) => {
+        const area = rect.widthPercent * rect.heightPercent;
+        if (area > 0 && area < minArea) {
+          minArea = area;
+          condenser = rect;
+        }
+      });
+    }
+
+    if (condenser) {
+      // Get all non-condenser rectangles (indoor AC units)
+      const indoorUnits = annotations.rectangles.filter(
+        (rect) => rect !== condenser && !rect.isCondenser
+      );
+
+      // Draw blue dashed refrigerant lines from condenser to each indoor unit (star topology)
+      const condX =
+        condenser.xPercent * canvasWidth +
+        (condenser.widthPercent * canvasWidth) / 2;
+      const condY =
+        condenser.yPercent * canvasHeight +
+        (condenser.heightPercent * canvasHeight) / 2;
+
+      indoorUnits.forEach((unit) => {
+        const unitX =
+          unit.xPercent * canvasWidth + (unit.widthPercent * canvasWidth) / 2;
+        const unitY =
+          unit.yPercent * canvasHeight +
+          (unit.heightPercent * canvasHeight) / 2;
+
+        context.save();
+        context.setLineDash([5, 5]); // dashed line
+        context.lineWidth = 2;
+        context.strokeStyle = "blue"; // blue refrigerant line
+        context.beginPath();
+        context.moveTo(condX, condY);
+        context.lineTo(unitX, unitY);
+        context.stroke();
+        context.restore();
+      });
+    }
+  }
 
   // For ductless systems, draw refrigerant lines connecting rectangles to their nearest condenser
   if (
@@ -556,9 +660,9 @@ const overlayAnnotations = (context, annotations, acType) => {
             rect.yPercent * canvasHeight +
             (rect.heightPercent * canvasHeight) / 2;
           context.save();
-          context.setLineDash([5, 5]);
+          context.setLineDash([5, 5]); // dotted line for minisplit ductless
           context.lineWidth = 2;
-          context.strokeStyle = "blue"; // refrigerant line color
+          context.strokeStyle = "blue"; // blue refrigerant line for minisplit ductless
           context.beginPath();
           context.moveTo(rx, ry);
           context.lineTo(cx, cy);
@@ -567,6 +671,254 @@ const overlayAnnotations = (context, annotations, acType) => {
         }
       }
     });
+  }
+
+  // For VRF ductless systems, draw teal refrigerant lines connecting rectangles to their nearest condenser
+  if (
+    acType === "vrf-ductless" &&
+    annotations?.rectangles &&
+    annotations.rectangles.length > 1
+  ) {
+    // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
+    let condensers = [];
+
+    // 1) explicit flag
+    annotations.rectangles.forEach((rect) => {
+      if (rect.isCondenser) condensers.push(rect);
+    });
+
+    // 2) comment-based matching using simple synonyms if no explicit flags
+    const synonyms = [
+      "condenser",
+      "outdoor",
+      "outdoor unit",
+      "outdoor-unit",
+      "compressor",
+      "outside unit",
+      "heat pump",
+    ];
+    const normalizeText = (s) =>
+      (s || "")
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, " ")
+        .trim();
+
+    if (condensers.length === 0 && annotations.comments) {
+      annotations.comments.forEach((comment) => {
+        const t = normalizeText(comment.text);
+        for (const syn of synonyms) {
+          const re = new RegExp(
+            "\\b" + syn.replace(/[-]/g, "\\-") + "\\b",
+            "i"
+          );
+          if (re.test(t)) {
+            // Find the closest rectangle to this comment
+            let closestRect = null;
+            let minDist = Infinity;
+            annotations.rectangles.forEach((rect) => {
+              const rectCenterX =
+                rect.xPercent * canvasWidth +
+                (rect.widthPercent * canvasWidth) / 2;
+              const rectCenterY =
+                rect.yPercent * canvasHeight +
+                (rect.heightPercent * canvasHeight) / 2;
+              const dist = Math.sqrt(
+                (comment.xPercent * canvasWidth - rectCenterX) ** 2 +
+                  (comment.yPercent * canvasHeight - rectCenterY) ** 2
+              );
+              if (dist < minDist) {
+                minDist = dist;
+                closestRect = rect;
+              }
+            });
+            if (closestRect && !condensers.includes(closestRect)) {
+              condensers.push(closestRect);
+            }
+            break;
+          }
+        }
+      });
+    }
+
+    // 3) largest rectangle fallback
+    if (condensers.length === 0) {
+      let maxArea = -Infinity;
+      let largestRect = null;
+      annotations.rectangles.forEach((rect) => {
+        const area = rect.widthPercent * rect.heightPercent;
+        if (area > maxArea) {
+          maxArea = area;
+          largestRect = rect;
+        }
+      });
+      if (largestRect) {
+        condensers.push(largestRect);
+      }
+    }
+
+    // Now, for each rectangle not a condenser, connect to the nearest condenser with teal refrigerant line
+    annotations.rectangles.forEach((rect) => {
+      if (!condensers.includes(rect)) {
+        let nearestCondenser = null;
+        let minDist = Infinity;
+        condensers.forEach((cond) => {
+          const cx =
+            cond.xPercent * canvasWidth + (cond.widthPercent * canvasWidth) / 2;
+          const cy =
+            cond.yPercent * canvasHeight +
+            (cond.heightPercent * canvasHeight) / 2;
+          const rx =
+            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
+          const ry =
+            rect.yPercent * canvasHeight +
+            (rect.heightPercent * canvasHeight) / 2;
+          const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestCondenser = cond;
+          }
+        });
+        if (nearestCondenser) {
+          const cx =
+            nearestCondenser.xPercent * canvasWidth +
+            (nearestCondenser.widthPercent * canvasWidth) / 2;
+          const cy =
+            nearestCondenser.yPercent * canvasHeight +
+            (nearestCondenser.heightPercent * canvasHeight) / 2;
+          const rx =
+            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
+          const ry =
+            rect.yPercent * canvasHeight +
+            (rect.heightPercent * canvasHeight) / 2;
+          context.save();
+          context.setLineDash([]); // solid line for VRF ductless
+          context.lineWidth = 2.5;
+          context.strokeStyle = "#008B8B"; // teal/dark cyan for VRF ductless refrigerant
+          context.beginPath();
+          context.moveTo(rx, ry);
+          context.lineTo(cx, cy);
+          context.stroke();
+          context.restore();
+        }
+      }
+    });
+  }
+
+  // For VRF ducted systems, draw red/blue dashed supply/return lines between user rectangles
+  // Uses sequential chain topology: Rect1→Rect2→Rect3→...→Condenser (largest rectangle)
+  if (
+    acType === "vrf-ducted" &&
+    annotations?.rectangles &&
+    annotations.rectangles.length > 1
+  ) {
+    // Find condenser (largest rectangle or marked with isCondenser flag)
+    let condenser = null;
+
+    // 1) explicit flag
+    annotations.rectangles.forEach((rect) => {
+      if (rect.isCondenser) condenser = rect;
+    });
+
+    // 2) largest rectangle fallback
+    if (!condenser) {
+      let maxArea = -Infinity;
+      annotations.rectangles.forEach((rect) => {
+        const area = rect.widthPercent * rect.heightPercent;
+        if (area > maxArea) {
+          maxArea = area;
+          condenser = rect;
+        }
+      });
+    }
+
+    if (condenser) {
+      // Get all non-condenser rectangles and sort by position (left to right, top to bottom)
+      const indoorRects = annotations.rectangles
+        .filter((rect) => rect !== condenser && !rect.isCondenser)
+        .sort((a, b) => {
+          // Sort primarily by x position (left to right)
+          if (Math.abs(a.xPercent - b.xPercent) > 0.05) {
+            return a.xPercent - b.xPercent;
+          }
+          // If x positions are similar, sort by y position (top to bottom)
+          return a.yPercent - b.yPercent;
+        });
+
+      // Draw chain connections between rectangles
+      for (let i = 0; i < indoorRects.length - 1; i++) {
+        const x1 = indoorRects[i].xPercent * canvasWidth;
+        const y1 = indoorRects[i].yPercent * canvasHeight;
+        const x2 = indoorRects[i + 1].xPercent * canvasWidth;
+        const y2 = indoorRects[i + 1].yPercent * canvasHeight;
+
+        const offset = 3;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const perpX = (-dy / length) * offset;
+        const perpY = (dx / length) * offset;
+
+        // Supply line (red, dashed)
+        context.save();
+        context.setLineDash([8, 4]);
+        context.lineWidth = 2;
+        context.strokeStyle = "red";
+        context.beginPath();
+        context.moveTo(x1 + perpX, y1 + perpY);
+        context.lineTo(x2 + perpX, y2 + perpY);
+        context.stroke();
+        context.restore();
+
+        // Return line (blue, dashed)
+        context.save();
+        context.setLineDash([8, 4]);
+        context.lineWidth = 2;
+        context.strokeStyle = "#0066FF";
+        context.beginPath();
+        context.moveTo(x1 - perpX, y1 - perpY);
+        context.lineTo(x2 - perpX, y2 - perpY);
+        context.stroke();
+        context.restore();
+      }
+
+      // Connect last rectangle to condenser
+      if (indoorRects.length > 0) {
+        const lastIndoor = indoorRects[indoorRects.length - 1];
+        const lastX = lastIndoor.xPercent * canvasWidth;
+        const lastY = lastIndoor.yPercent * canvasHeight;
+        const condX = condenser.xPercent * canvasWidth;
+        const condY = condenser.yPercent * canvasHeight;
+
+        const offset = 3;
+        const dx = condX - lastX;
+        const dy = condY - lastY;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const perpX = (-dy / length) * offset;
+        const perpY = (dx / length) * offset;
+
+        // Supply line to condenser
+        context.save();
+        context.setLineDash([8, 4]);
+        context.lineWidth = 2;
+        context.strokeStyle = "red";
+        context.beginPath();
+        context.moveTo(lastX + perpX, lastY + perpY);
+        context.lineTo(condX + perpX, condY + perpY);
+        context.stroke();
+        context.restore();
+
+        // Return line from condenser
+        context.save();
+        context.setLineDash([8, 4]);
+        context.lineWidth = 2;
+        context.strokeStyle = "#0066FF";
+        context.beginPath();
+        context.moveTo(lastX - perpX, lastY - perpY);
+        context.lineTo(condX - perpX, condY - perpY);
+        context.stroke();
+        context.restore();
+      }
+    }
   }
 };
 
@@ -743,6 +1095,7 @@ const EngineerViewPage = () => {
               text: text,
               fill: "rgba(252, 252, 243, 0.2)",
               textColor: "#FF1493",
+              acType: acType, // Store which mode this comment was created in
             };
 
             setAnnotation((prev) => ({
@@ -750,70 +1103,6 @@ const EngineerViewPage = () => {
               annotations: {
                 ...(prev.annotations || {}),
                 comments: [...(prev.annotations?.comments || []), newComment],
-              },
-            }));
-          }
-        }
-
-        if (addMode === "outdoor") {
-          const capacity = prompt("Enter outdoor unit capacity (e.g., 48000):");
-          if (capacity) {
-            const newOutdoorUnit = {
-              id: `outdoor-${Date.now()}`,
-              xPercent: x,
-              yPercent: y,
-              sizePercent: 0.12,
-              capacity: parseInt(capacity) || 48000,
-              unitsConnected: 0,
-            };
-
-            setAnnotation((prev) => ({
-              ...prev,
-              annotations: {
-                ...(prev.annotations || {}),
-                vrf: {
-                  ...(prev.annotations?.vrf || {
-                    outdoorUnits: [],
-                    indoorUnits: [],
-                  }),
-                  outdoorUnits: [
-                    ...(prev.annotations?.vrf?.outdoorUnits || []),
-                    newOutdoorUnit,
-                  ],
-                  indoorUnits: prev.annotations?.vrf?.indoorUnits || [],
-                },
-              },
-            }));
-          }
-        }
-
-        if (addMode === "indoor") {
-          const roomName = prompt("Enter room/zone name (e.g., Living Room):");
-          if (roomName) {
-            const newIndoorUnit = {
-              id: `indoor-${Date.now()}`,
-              xPercent: x,
-              yPercent: y,
-              sizePercent: 0.08,
-              roomName: roomName,
-              capacity: 12000,
-            };
-
-            setAnnotation((prev) => ({
-              ...prev,
-              annotations: {
-                ...(prev.annotations || {}),
-                vrf: {
-                  ...(prev.annotations?.vrf || {
-                    outdoorUnits: [],
-                    indoorUnits: [],
-                  }),
-                  outdoorUnits: prev.annotations?.vrf?.outdoorUnits || [],
-                  indoorUnits: [
-                    ...(prev.annotations?.vrf?.indoorUnits || []),
-                    newIndoorUnit,
-                  ],
-                },
               },
             }));
           }
@@ -896,6 +1185,142 @@ const EngineerViewPage = () => {
           <option value="vrf-ductless">VRF System - Ductless</option>
         </select>
       </div>
+
+      {/* Refrigerant Lines Legend - Always Visible */}
+      <div
+        className="mb-4 p-3 border rounded"
+        style={{ backgroundColor: "#f8f9fa" }}
+      >
+        <strong className="d-block mb-2">
+          📋 Refrigerant Line Types (Current Mode:{" "}
+          {acType === "ducted"
+            ? "Minisplit - Ducted"
+            : acType === "ductless"
+            ? "Minisplit - Ductless"
+            : acType === "vrf-ducted"
+            ? "VRF System - Ducted"
+            : "VRF System - Ductless"}
+          )
+        </strong>
+        {acType === "ducted" && (
+          <div className="d-flex flex-wrap gap-3 flex-column">
+            <span>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "40px",
+                  height: "2px",
+                  backgroundColor: "blue",
+                  position: "relative",
+                  top: "2px",
+                }}
+              />
+              <span style={{ marginLeft: "8px" }}>
+                Blue Dashed: Refrigerant Lines (Star Topology - Each AC unit
+                directly to Condenser)
+              </span>
+            </span>
+            <span>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "40px",
+                  height: "2px",
+                  position: "relative",
+                  top: "2px",
+                  borderTop: "2px dashed grey",
+                  backgroundColor: "transparent",
+                }}
+              />
+              <span style={{ marginLeft: "8px" }}>
+                Grey Dashed: Ducts & Diffusers
+              </span>
+            </span>
+          </div>
+        )}
+        {acType === "ductless" && (
+          <div className="d-flex flex-wrap gap-3">
+            <span>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "40px",
+                  height: "2px",
+                  position: "relative",
+                  top: "2px",
+                  borderTop: "2px dotted blue",
+                  backgroundColor: "transparent",
+                }}
+              />
+              <span style={{ marginLeft: "8px" }}>
+                Blue Dotted: Refrigerant Lines (Star Topology - Each AC unit to
+                nearest Condenser)
+              </span>
+            </span>
+          </div>
+        )}
+        {acType === "vrf-ducted" && (
+          <div>
+            <div className="d-flex flex-wrap gap-3 mb-2">
+              <span>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "40px",
+                    height: "2px",
+                    backgroundColor: "red",
+                    position: "relative",
+                    top: "2px",
+                    borderTop: "2px dashed red",
+                  }}
+                />
+                <span style={{ marginLeft: "8px", color: "red" }}>
+                  Red Dashed: Supply Line (Sequential Chain)
+                </span>
+              </span>
+            </div>
+            <div className="d-flex flex-wrap gap-3">
+              <span>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "40px",
+                    height: "2px",
+                    backgroundColor: "#0066FF",
+                    position: "relative",
+                    top: "2px",
+                    borderTop: "2px dashed #0066FF",
+                  }}
+                />
+                <span style={{ marginLeft: "8px", color: "#0066FF" }}>
+                  Blue Dashed: Return Line (Sequential Chain)
+                </span>
+              </span>
+            </div>
+          </div>
+        )}
+        {acType === "vrf-ductless" && (
+          <div className="d-flex flex-wrap gap-3">
+            <span>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "40px",
+                  height: "2px",
+                  backgroundColor: "#008B8B",
+                  position: "relative",
+                  top: "2px",
+                }}
+              />
+              <span style={{ marginLeft: "8px", color: "#008B8B" }}>
+                Teal Solid: Refrigerant Lines (Star Topology - Each AC unit to
+                Condenser)
+              </span>
+            </span>
+          </div>
+        )}
+      </div>
+
       <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
         {(acType === "ducted" || acType === "vrf-ducted") && (
           <>
@@ -907,7 +1332,7 @@ const EngineerViewPage = () => {
             </Button>
             {showHVAC && acType === "ducted" && (
               <div className="mb-2">
-                <strong>Legend (Minisplit):</strong>
+                <strong>Legend (Minisplit HVAC):</strong>
                 <span className="ms-2" style={{ color: "orange" }}>
                   ■ Ducts (Yellow/Orange)
                 </span>
@@ -918,32 +1343,12 @@ const EngineerViewPage = () => {
             )}
             {showHVAC && acType === "vrf-ducted" && (
               <div className="mb-2">
-                <strong>Legend (VRF Ducted):</strong>
-                <span className="ms-2" style={{ color: "red" }}>
-                  ■ Outdoor Condenser (Red)
+                <strong>Legend (VRF Ducted HVAC):</strong>
+                <span className="ms-2" style={{ color: "orange" }}>
+                  ■ Ducts (Yellow/Orange)
                 </span>
-                <span className="ms-3" style={{ color: "blue" }}>
-                  ■ Indoor Units (Blue) - Ducted
-                </span>
-                <span className="ms-3" style={{ color: "red" }}>
-                  ── Supply Line (Red Dashed)
-                </span>
-                <span className="ms-3" style={{ color: "#0066FF" }}>
-                  ── Return Line (Blue Dashed)
-                </span>
-              </div>
-            )}
-            {showHVAC && acType === "vrf-ductless" && (
-              <div className="mb-2">
-                <strong>Legend (VRF Ductless):</strong>
-                <span className="ms-2" style={{ color: "red" }}>
-                  ■ Outdoor Condenser (Red)
-                </span>
-                <span className="ms-3" style={{ color: "blue" }}>
-                  ■ Indoor Units (Blue) - Ductless/Mini-split
-                </span>
-                <span className="ms-3" style={{ color: "#008B8B" }}>
-                  ━━ Refrigerant Line (Teal Solid)
+                <span className="ms-3" style={{ color: "lime" }}>
+                  ● Diffusers (Green/Lime)
                 </span>
               </div>
             )}
@@ -980,20 +1385,6 @@ const EngineerViewPage = () => {
           {acType === "vrf-ducted" && (
             <>
               <Button
-                onClick={() => setAddMode("outdoor")}
-                variant="danger"
-                className="me-2"
-              >
-                Add VRF Condenser (Outdoor)
-              </Button>
-              <Button
-                onClick={() => setAddMode("indoor")}
-                variant="primary"
-                className="me-2"
-              >
-                Add VRF Indoor Unit (Ducted)
-              </Button>
-              <Button
                 onClick={() => setAddMode("comment")}
                 variant="warning"
                 className="me-2"
@@ -1005,25 +1396,102 @@ const EngineerViewPage = () => {
           {acType === "vrf-ductless" && (
             <>
               <Button
-                onClick={() => setAddMode("outdoor")}
-                variant="danger"
-                className="me-2"
-              >
-                Add VRF Condenser (Outdoor)
-              </Button>
-              <Button
-                onClick={() => setAddMode("indoor")}
-                variant="info"
-                className="me-2"
-              >
-                Add VRF Indoor Unit (Ductless)
-              </Button>
-              <Button
                 onClick={() => setAddMode("comment")}
                 variant="warning"
                 className="me-2"
               >
                 Add Comment
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setAnnotation((prev) => {
+                    let allItems = [];
+
+                    // Handle VRF units
+                    if (prev?.annotations?.vrf) {
+                      const outdoorUnits = [
+                        ...(prev.annotations.vrf.outdoorUnits || []),
+                      ];
+                      const indoorUnits = [
+                        ...(prev.annotations.vrf.indoorUnits || []),
+                      ];
+                      allItems.push(
+                        ...outdoorUnits.map((d) => ({
+                          ...d,
+                          type: "outdoor",
+                          subType: "vrf",
+                        })),
+                        ...indoorUnits.map((d) => ({
+                          ...d,
+                          type: "indoor",
+                          subType: "vrf",
+                        }))
+                      );
+                    }
+
+                    // Handle comments
+                    if (prev?.annotations?.comments) {
+                      const comments = [...(prev.annotations.comments || [])];
+                      allItems.push(
+                        ...comments.map((c) => ({
+                          ...c,
+                          type: "comment",
+                          subType: "annotation",
+                        }))
+                      );
+                    }
+
+                    if (allItems.length === 0) return prev;
+
+                    const mostRecent = allItems.reduce((max, item) => {
+                      const maxTime = parseInt(max.id.split("-")[1]);
+                      const itemTime = parseInt(item.id.split("-")[1]);
+                      return itemTime > maxTime ? item : max;
+                    });
+
+                    // Remove comments
+                    if (mostRecent.subType === "annotation") {
+                      return {
+                        ...prev,
+                        annotations: {
+                          ...(prev.annotations || {}),
+                          comments: (prev.annotations?.comments || []).filter(
+                            (c) => c.id !== mostRecent.id
+                          ),
+                        },
+                      };
+                    }
+
+                    // Remove VRF units
+                    if (mostRecent.subType === "vrf") {
+                      const vrf = { ...prev.annotations.vrf };
+                      if (mostRecent.type === "outdoor") {
+                        vrf.outdoorUnits = vrf.outdoorUnits.filter(
+                          (d) => d.id !== mostRecent.id
+                        );
+                      }
+                      if (mostRecent.type === "indoor") {
+                        vrf.indoorUnits = vrf.indoorUnits.filter(
+                          (d) => d.id !== mostRecent.id
+                        );
+                      }
+                      return {
+                        ...prev,
+                        annotations: {
+                          ...(prev.annotations || {}),
+                          vrf,
+                        },
+                      };
+                    }
+
+                    return prev;
+                  });
+
+                  setAddMode(null);
+                }}
+              >
+                Undo Last
               </Button>
             </>
           )}
@@ -1037,14 +1505,6 @@ const EngineerViewPage = () => {
             <Button
               variant="secondary"
               onClick={() => {
-                if (
-                  !annotation?.annotations?.hvac &&
-                  !annotation?.annotations?.vrf
-                ) {
-                  setAddMode(null);
-                  return;
-                }
-
                 setAnnotation((prev) => {
                   let allItems = [];
 
@@ -1090,6 +1550,18 @@ const EngineerViewPage = () => {
                     );
                   }
 
+                  // Handle comments
+                  if (prev?.annotations?.comments) {
+                    const comments = [...(prev.annotations.comments || [])];
+                    allItems.push(
+                      ...comments.map((c) => ({
+                        ...c,
+                        type: "comment",
+                        subType: "annotation",
+                      }))
+                    );
+                  }
+
                   if (allItems.length === 0) return prev;
 
                   const mostRecent = allItems.reduce((max, item) => {
@@ -1097,6 +1569,19 @@ const EngineerViewPage = () => {
                     const itemTime = parseInt(item.id.split("-")[1]);
                     return itemTime > maxTime ? item : max;
                   });
+
+                  // Remove comments
+                  if (mostRecent.subType === "annotation") {
+                    return {
+                      ...prev,
+                      annotations: {
+                        ...(prev.annotations || {}),
+                        comments: (prev.annotations?.comments || []).filter(
+                          (c) => c.id !== mostRecent.id
+                        ),
+                      },
+                    };
+                  }
 
                   // Remove minisplit ducts/diffusers
                   if (mostRecent.subType === "hvac") {

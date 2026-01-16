@@ -208,6 +208,9 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       return nearest ? nearest.text.toLowerCase() : null;
     };
 
+    // Draw user annotations (rectangles, lines, comments) - these are always shown
+    // as they contain engineer/admin notes and system descriptions
+    // Rectangles: condenser, AC units, and other system components
     if (annotations?.rectangles) {
       annotations.rectangles.forEach((rect) => {
         const x = rect.xPercent * canvasWidth;
@@ -229,7 +232,9 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
     }
 
-    if (annotations?.lines) {
+    // Skip lines in ducted modes since we auto-generate refrigerant lines
+    // (to avoid rendering old daisy-chain lines that interfere with star topology)
+    if (acType !== "ducted" && acType !== "vrf-ducted" && annotations?.lines) {
       const lineReductionFactor = 0.985;
       annotations.lines.forEach((line) => {
         context.beginPath();
@@ -248,8 +253,14 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
     }
 
+    // Draw all user comments (engineer/admin annotations) - filter by acType
     if (annotations?.comments) {
       annotations.comments.forEach((comment) => {
+        // Only render comment if it matches current acType or has no acType (legacy comments)
+        if (comment.acType && comment.acType !== acType) {
+          return; // Skip this comment
+        }
+
         const x = comment.xPercent * canvasWidth;
         const y = comment.yPercent * canvasHeight;
         const padding = 10;
@@ -280,6 +291,101 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
         context.fillStyle = comment.textColor || "#FF1493";
         context.fillText(text, x, y);
       });
+    }
+
+    // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
+    // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
+    if (
+      acType === "ducted" &&
+      annotations?.rectangles &&
+      annotations.rectangles.length > 1
+    ) {
+      // Find condenser: prefer explicit flag, then look for smallest rectangle (outdoor condenser is typically small)
+      let condenser = null;
+
+      // 1) explicit flag
+      annotations.rectangles.forEach((rect) => {
+        if (rect.isCondenser) condenser = rect;
+      });
+
+      // 2) find by comment if marked as "condenser"
+      if (!condenser && annotations.comments) {
+        const condenserComments = annotations.comments.filter((c) =>
+          c.text.toLowerCase().includes("condenser")
+        );
+        if (condenserComments.length > 0) {
+          const condenserComment = condenserComments[0];
+          const closestRect = annotations.rectangles.reduce((closest, rect) => {
+            const rectCx =
+              rect.xPercent * canvasWidth +
+              (rect.widthPercent * canvasWidth) / 2;
+            const rectCy =
+              rect.yPercent * canvasHeight +
+              (rect.heightPercent * canvasHeight) / 2;
+            const dist = Math.sqrt(
+              (condenserComment.xPercent * canvasWidth - rectCx) ** 2 +
+                (condenserComment.yPercent * canvasHeight - rectCy) ** 2
+            );
+            const closestDist = Math.sqrt(
+              (condenserComment.xPercent * canvasWidth -
+                (closest.xPercent * canvasWidth +
+                  (closest.widthPercent * canvasWidth) / 2)) **
+                2 +
+                (condenserComment.yPercent * canvasHeight -
+                  (closest.yPercent * canvasHeight +
+                    (closest.heightPercent * canvasHeight) / 2)) **
+                  2
+            );
+            return dist < closestDist ? rect : closest;
+          });
+          condenser = closestRect;
+        }
+      }
+
+      // 3) smallest rectangle fallback (outdoor condenser is typically compact)
+      if (!condenser) {
+        let minArea = Infinity;
+        annotations.rectangles.forEach((rect) => {
+          const area = rect.widthPercent * rect.heightPercent;
+          if (area > 0 && area < minArea) {
+            minArea = area;
+            condenser = rect;
+          }
+        });
+      }
+
+      if (condenser) {
+        // Get all non-condenser rectangles (indoor AC units)
+        const indoorUnits = annotations.rectangles.filter(
+          (rect) => rect !== condenser && !rect.isCondenser
+        );
+
+        // Draw blue dashed refrigerant lines from condenser to each indoor unit (star topology)
+        const condX =
+          condenser.xPercent * canvasWidth +
+          (condenser.widthPercent * canvasWidth) / 2;
+        const condY =
+          condenser.yPercent * canvasHeight +
+          (condenser.heightPercent * canvasHeight) / 2;
+
+        indoorUnits.forEach((unit) => {
+          const unitX =
+            unit.xPercent * canvasWidth + (unit.widthPercent * canvasWidth) / 2;
+          const unitY =
+            unit.yPercent * canvasHeight +
+            (unit.heightPercent * canvasHeight) / 2;
+
+          context.save();
+          context.setLineDash([5, 5]); // dashed line
+          context.lineWidth = 2;
+          context.strokeStyle = "blue"; // blue refrigerant line
+          context.beginPath();
+          context.moveTo(condX, condY);
+          context.lineTo(unitX, unitY);
+          context.stroke();
+          context.restore();
+        });
+      }
     }
 
     // For ductless systems, draw refrigerant lines connecting rectangles to their nearest condenser
@@ -455,9 +561,9 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
               rect.yPercent * canvasHeight +
               (rect.heightPercent * canvasHeight) / 2;
             context.save();
-            context.setLineDash([5, 5]);
+            context.setLineDash([5, 5]); // dotted line for minisplit ductless
             context.lineWidth = 2;
-            context.strokeStyle = "blue"; // refrigerant line color
+            context.strokeStyle = "blue"; // blue refrigerant line for minisplit ductless
             context.beginPath();
             context.moveTo(rx, ry);
             context.lineTo(cx, cy);
@@ -468,7 +574,256 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
     }
 
-    // Draw HVAC annotations
+    // For VRF ductless systems, draw teal refrigerant lines connecting rectangles to their nearest condenser
+    if (
+      acType === "vrf-ductless" &&
+      annotations?.rectangles &&
+      annotations.rectangles.length > 1
+    ) {
+      // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
+      let condensers = [];
+
+      // 1) explicit flag
+      annotations.rectangles.forEach((rect) => {
+        if (rect.isCondenser) condensers.push(rect);
+      });
+
+      // 2) comment-based matching using simple synonyms if no explicit flags
+      const synonyms = [
+        "condenser",
+        "outdoor",
+        "outdoor unit",
+        "outdoor-unit",
+        "compressor",
+        "outside unit",
+        "heat pump",
+      ];
+      const normalizeText = (s) =>
+        (s || "")
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, " ")
+          .trim();
+
+      if (condensers.length === 0 && annotations.comments) {
+        annotations.comments.forEach((comment) => {
+          const t = normalizeText(comment.text);
+          for (const syn of synonyms) {
+            const re = new RegExp(
+              "\\b" + syn.replace(/[-]/g, "\\-") + "\\b",
+              "i"
+            );
+            if (re.test(t)) {
+              let closestRect = null;
+              let minDist = Infinity;
+              annotations.rectangles.forEach((rect) => {
+                const rectCenterX =
+                  rect.xPercent * canvasWidth +
+                  (rect.widthPercent * canvasWidth) / 2;
+                const rectCenterY =
+                  rect.yPercent * canvasHeight +
+                  (rect.heightPercent * canvasHeight) / 2;
+                const dist = Math.sqrt(
+                  (comment.xPercent * canvasWidth - rectCenterX) ** 2 +
+                    (comment.yPercent * canvasHeight - rectCenterY) ** 2
+                );
+                if (dist < minDist) {
+                  minDist = dist;
+                  closestRect = rect;
+                }
+              });
+              if (closestRect && !condensers.includes(closestRect)) {
+                condensers.push(closestRect);
+              }
+              break;
+            }
+          }
+        });
+      }
+
+      // 3) largest rectangle fallback
+      if (condensers.length === 0) {
+        let maxArea = -Infinity;
+        let largestRect = null;
+        annotations.rectangles.forEach((rect) => {
+          const area = rect.widthPercent * rect.heightPercent;
+          if (area > maxArea) {
+            maxArea = area;
+            largestRect = rect;
+          }
+        });
+        if (largestRect) condensers.push(largestRect);
+      }
+
+      // Now, for each rectangle not a condenser, connect to the nearest condenser with teal refrigerant line
+      annotations.rectangles.forEach((rect) => {
+        if (!condensers.includes(rect)) {
+          let nearestCondenser = null;
+          let minDist = Infinity;
+          condensers.forEach((cond) => {
+            const cx =
+              cond.xPercent * canvasWidth +
+              (cond.widthPercent * canvasWidth) / 2;
+            const cy =
+              cond.yPercent * canvasHeight +
+              (cond.heightPercent * canvasHeight) / 2;
+            const rx =
+              rect.xPercent * canvasWidth +
+              (rect.widthPercent * canvasWidth) / 2;
+            const ry =
+              rect.yPercent * canvasHeight +
+              (rect.heightPercent * canvasHeight) / 2;
+            const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestCondenser = cond;
+            }
+          });
+          if (nearestCondenser) {
+            const cx =
+              nearestCondenser.xPercent * canvasWidth +
+              (nearestCondenser.widthPercent * canvasWidth) / 2;
+            const cy =
+              nearestCondenser.yPercent * canvasHeight +
+              (nearestCondenser.heightPercent * canvasHeight) / 2;
+            const rx =
+              rect.xPercent * canvasWidth +
+              (rect.widthPercent * canvasWidth) / 2;
+            const ry =
+              rect.yPercent * canvasHeight +
+              (rect.heightPercent * canvasHeight) / 2;
+            context.save();
+            context.setLineDash([]); // solid line for VRF ductless
+            context.lineWidth = 2.5;
+            context.strokeStyle = "#008B8B"; // teal/dark cyan for VRF ductless refrigerant
+            context.beginPath();
+            context.moveTo(rx, ry);
+            context.lineTo(cx, cy);
+            context.stroke();
+            context.restore();
+          }
+        }
+      });
+    }
+
+    // For VRF ducted systems, draw red/blue dashed supply/return lines between user rectangles
+    // Uses sequential chain topology: Rect1→Rect2→Rect3→...→Condenser (largest rectangle)
+    if (
+      acType === "vrf-ducted" &&
+      annotations?.rectangles &&
+      annotations.rectangles.length > 1
+    ) {
+      // Find condenser (largest rectangle or marked with isCondenser flag)
+      let condenser = null;
+
+      // 1) explicit flag
+      annotations.rectangles.forEach((rect) => {
+        if (rect.isCondenser) condenser = rect;
+      });
+
+      // 2) largest rectangle fallback
+      if (!condenser) {
+        let maxArea = -Infinity;
+        annotations.rectangles.forEach((rect) => {
+          const area = rect.widthPercent * rect.heightPercent;
+          if (area > maxArea) {
+            maxArea = area;
+            condenser = rect;
+          }
+        });
+      }
+
+      if (condenser) {
+        // Get all non-condenser rectangles and sort by position (left to right, top to bottom)
+        const indoorRects = annotations.rectangles
+          .filter((rect) => rect !== condenser && !rect.isCondenser)
+          .sort((a, b) => {
+            // Sort primarily by x position (left to right)
+            if (Math.abs(a.xPercent - b.xPercent) > 0.05) {
+              return a.xPercent - b.xPercent;
+            }
+            // If x positions are similar, sort by y position (top to bottom)
+            return a.yPercent - b.yPercent;
+          });
+
+        // Draw chain connections between rectangles
+        for (let i = 0; i < indoorRects.length - 1; i++) {
+          const x1 = indoorRects[i].xPercent * canvasWidth;
+          const y1 = indoorRects[i].yPercent * canvasHeight;
+          const x2 = indoorRects[i + 1].xPercent * canvasWidth;
+          const y2 = indoorRects[i + 1].yPercent * canvasHeight;
+
+          const offset = 3;
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const perpX = (-dy / length) * offset;
+          const perpY = (dx / length) * offset;
+
+          // Supply line (red, dashed)
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "red";
+          context.beginPath();
+          context.moveTo(x1 + perpX, y1 + perpY);
+          context.lineTo(x2 + perpX, y2 + perpY);
+          context.stroke();
+          context.restore();
+
+          // Return line (blue, dashed)
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "#0066FF";
+          context.beginPath();
+          context.moveTo(x1 - perpX, y1 - perpY);
+          context.lineTo(x2 - perpX, y2 - perpY);
+          context.stroke();
+          context.restore();
+        }
+
+        // Connect last rectangle to condenser
+        if (indoorRects.length > 0) {
+          const lastIndoor = indoorRects[indoorRects.length - 1];
+          const lastX = lastIndoor.xPercent * canvasWidth;
+          const lastY = lastIndoor.yPercent * canvasHeight;
+          const condX = condenser.xPercent * canvasWidth;
+          const condY = condenser.yPercent * canvasHeight;
+
+          const offset = 3;
+          const dx = condX - lastX;
+          const dy = condY - lastY;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const perpX = (-dy / length) * offset;
+          const perpY = (dx / length) * offset;
+
+          // Supply line to condenser
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "red";
+          context.beginPath();
+          context.moveTo(lastX + perpX, lastY + perpY);
+          context.lineTo(condX + perpX, condY + perpY);
+          context.stroke();
+          context.restore();
+
+          // Return line from condenser
+          context.save();
+          context.setLineDash([8, 4]);
+          context.lineWidth = 2;
+          context.strokeStyle = "#0066FF";
+          context.beginPath();
+          context.moveTo(lastX - perpX, lastY - perpY);
+          context.lineTo(condX - perpX, condY - perpY);
+          context.stroke();
+          context.restore();
+        }
+      }
+    }
+
+    // Draw HVAC annotations - ONLY for ducted minisplit systems
+    // VRF and ductless systems should NOT show ducts/diffusers
     if (acType === "ducted" && annotations?.hvac?.ducts) {
       annotations.hvac.ducts.forEach((duct) => {
         const x = duct.xPercent * canvasWidth;
@@ -488,6 +843,7 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
     }
 
+    // Only show diffusers in ducted minisplit mode, NOT in ductless or VRF modes
     if (acType === "ducted" && annotations?.hvac?.diffusers) {
       annotations.hvac.diffusers.forEach((diffuser) => {
         const x = diffuser.xPercent * canvasWidth;
@@ -631,21 +987,45 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       const scale = 1.0; // Reduced scale to avoid large canvas issues
       const viewport = page.getViewport({ scale });
 
-      // Prepare first canvas (current mode)
+      // Prepare canvases for all 4 modes: minisplit-ducted, minisplit-ductless, vrf-ducted, vrf-ductless
       const canvas = canvasRef.current;
       const context = canvas.getContext("2d");
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
-      // Prepare second canvas (alternate mode)
-      const canvas2 = document.createElement("canvas");
-      const context2 = canvas2.getContext("2d");
-      canvas2.width = viewport.width;
-      canvas2.height = viewport.height;
+      const canvases = {
+        ducted: { canvas: canvas, context: context, drawn: false },
+        ductless: {
+          canvas: document.createElement("canvas"),
+          context: null,
+          drawn: false,
+        },
+        "vrf-ducted": {
+          canvas: document.createElement("canvas"),
+          context: null,
+          drawn: false,
+        },
+        "vrf-ductless": {
+          canvas: document.createElement("canvas"),
+          context: null,
+          drawn: false,
+        },
+      };
 
-      // Render base PDF page to both canvases
-      await page.render({ canvasContext: context, viewport }).promise;
-      await page.render({ canvasContext: context2, viewport }).promise;
+      // Initialize all canvases
+      Object.keys(canvases).forEach((mode) => {
+        if (mode !== "ducted") {
+          canvases[mode].context = canvases[mode].canvas.getContext("2d");
+        }
+        canvases[mode].canvas.width = viewport.width;
+        canvases[mode].canvas.height = viewport.height;
+      });
+
+      // Render base PDF page to all canvases
+      for (const mode of Object.keys(canvases)) {
+        await page.render({ canvasContext: canvases[mode].context, viewport })
+          .promise;
+      }
 
       // Normalize annotations: backend sometimes returns a wrapper { annotations, acType, isPaid }
       let normalizedAnnotations =
@@ -654,11 +1034,13 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
           : annotations;
       let finalAcType = acType;
       // If annotations are missing or HVAC data isn't present, try fetching the latest annotations from the server
-      if (
-        !normalizedAnnotations ||
-        Object.keys(normalizedAnnotations).length === 0 ||
-        !normalizedAnnotations.hvac
-      ) {
+      // For VRF systems, check for vrf data; for minisplit, check for hvac data
+      const hasRequiredData =
+        normalizedAnnotations &&
+        Object.keys(normalizedAnnotations).length > 0 &&
+        (normalizedAnnotations.hvac || normalizedAnnotations.vrf);
+
+      if (!hasRequiredData) {
         try {
           const annRes = await fetch(`/api/annotations/${pdfId}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -689,19 +1071,16 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
         alternateAcType = finalAcType;
       }
 
-      // Draw annotations for page 1 (current mode)
+      // Draw annotations for all 4 modes
       if (normalizedAnnotations) {
-        drawAnnotations(context, normalizedAnnotations, viewport, finalAcType);
-      }
-
-      // Draw annotations for page 2 (alternate mode)
-      if (normalizedAnnotations) {
-        drawAnnotations(
-          context2,
-          normalizedAnnotations,
-          viewport,
-          alternateAcType
-        );
+        Object.keys(canvases).forEach((mode) => {
+          drawAnnotations(
+            canvases[mode].context,
+            normalizedAnnotations,
+            viewport,
+            mode
+          );
+        });
       }
 
       // Add small labels so each page is clear
@@ -732,30 +1111,135 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
         }
       };
 
-      drawLabel(context, getSystemLabel(finalAcType));
-      drawLabel(context2, getSystemLabel(alternateAcType));
+      const drawLegend = (ctx, mode) => {
+        try {
+          ctx.save();
+          ctx.fillStyle = "rgba(0,0,0,0.8)";
+          ctx.font = "12px Arial";
 
-      const imageData1 = canvas.toDataURL("image/png");
-      const imageData2 = canvas2.toDataURL("image/png");
+          let legendY = ctx.canvas.height - 120;
+          let legendX = 10;
 
-      if (!imageData1 || imageData1 === "data:," || imageData1.length < 100) {
-        throw new Error("Failed to generate image from first canvas");
+          // Background box for legend
+          ctx.fillStyle = "rgba(248, 249, 250, 0.9)";
+          ctx.strokeStyle = "rgba(0,0,0,0.3)";
+          ctx.lineWidth = 1;
+          ctx.fillRect(legendX, legendY - 5, 350, 115);
+          ctx.strokeRect(legendX, legendY - 5, 350, 115);
+
+          ctx.fillStyle = "rgba(0,0,0,0.8)";
+          ctx.font = "bold 12px Arial";
+          ctx.fillText(
+            "Legend - Refrigerant Lines:",
+            legendX + 5,
+            legendY + 12
+          );
+
+          ctx.font = "11px Arial";
+
+          if (mode === "ducted") {
+            ctx.fillText(
+              "━ ━ Blue Dashed: Star Topology (Refrigerant)",
+              legendX + 5,
+              legendY + 30
+            );
+            ctx.fillText(
+              "- - - Grey Dashed: Ducts & Diffusers",
+              legendX + 5,
+              legendY + 45
+            );
+            ctx.fillText(
+              "(Each AC unit directly to Condenser)",
+              legendX + 15,
+              legendY + 60
+            );
+          } else if (mode === "ductless") {
+            ctx.fillText(
+              "· · · Blue Dotted: Star Topology",
+              legendX + 5,
+              legendY + 30
+            );
+            ctx.fillText(
+              "(Each AC unit to nearest Condenser)",
+              legendX + 15,
+              legendY + 45
+            );
+          } else if (mode === "vrf-ducted") {
+            ctx.fillText(
+              "━ ━ Red Dashed: Supply Line (Sequential)",
+              legendX + 5,
+              legendY + 30
+            );
+            ctx.fillText(
+              "━ ━ Blue Dashed: Return Line (Sequential)",
+              legendX + 5,
+              legendY + 45
+            );
+          } else if (mode === "vrf-ductless") {
+            ctx.fillText(
+              "━ ━ Teal Solid: Star Topology",
+              legendX + 5,
+              legendY + 30
+            );
+            ctx.fillText(
+              "(Each AC unit directly to Condenser)",
+              legendX + 15,
+              legendY + 45
+            );
+          }
+
+          ctx.restore();
+        } catch (e) {
+          // ignore font issues in some environments
+        }
+      };
+
+      // Draw labels and legends on all 4 canvases
+      Object.keys(canvases).forEach((mode) => {
+        drawLabel(canvases[mode].context, getSystemLabel(mode));
+        drawLegend(canvases[mode].context, mode);
+      });
+
+      // Convert all canvases to images and embed in PDF
+      const imageDataMap = {};
+      const pngImageMap = {};
+
+      for (const mode of Object.keys(canvases)) {
+        const imageData = canvases[mode].canvas.toDataURL("image/png");
+        if (!imageData || imageData === "data:," || imageData.length < 100) {
+          throw new Error(`Failed to generate image for ${mode} mode`);
+        }
+        imageDataMap[mode] = imageData;
+        pngImageMap[mode] = await pdfDoc.embedPng(imageData);
       }
-      if (!imageData2 || imageData2 === "data:," || imageData2.length < 100) {
-        throw new Error("Failed to generate image from second canvas");
-      }
-
-      const pngImage1 = await pdfDoc.embedPng(imageData1);
-      const pngImage2 = await pdfDoc.embedPng(imageData2);
 
       const newPdfPage = pdfDoc.getPages()[0];
       const { width, height } = newPdfPage.getSize();
 
-      newPdfPage.drawImage(pngImage1, { x: 0, y: 0, width, height });
+      // Page 1: Minisplit - Ducted
+      newPdfPage.drawImage(pngImageMap["ducted"], {
+        x: 0,
+        y: 0,
+        width,
+        height,
+      });
 
-      // Add second page and draw the alternate-mode image
-      const secondPage = pdfDoc.addPage([width, height]);
-      secondPage.drawImage(pngImage2, { x: 0, y: 0, width, height });
+      // Page 2: Minisplit - Ductless
+      const page2 = pdfDoc.addPage([width, height]);
+      page2.drawImage(pngImageMap["ductless"], { x: 0, y: 0, width, height });
+
+      // Page 3: VRF - Ducted
+      const page3 = pdfDoc.addPage([width, height]);
+      page3.drawImage(pngImageMap["vrf-ducted"], { x: 0, y: 0, width, height });
+
+      // Page 4: VRF - Ductless
+      const page4 = pdfDoc.addPage([width, height]);
+      page4.drawImage(pngImageMap["vrf-ductless"], {
+        x: 0,
+        y: 0,
+        width,
+        height,
+      });
 
       if (isPaid) {
         const { width } = newPdfPage.getSize();
