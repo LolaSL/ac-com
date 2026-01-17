@@ -133,6 +133,7 @@ sellerRouter.get(
   expressAsyncHandler(async (req, res) => {
     try {
       const sellers = await Seller.find({});
+      console.log(`[DEBUG] Total sellers found in DB: ${sellers.length}`);
       const allStats = [];
 
       for (const seller of sellers) {
@@ -154,6 +155,7 @@ sellerRouter.get(
         const commissionRate = 0.1; // 10%
         const totalCommission = totalReferredSales * commissionRate;
 
+        console.log(`[DEBUG] Processing seller: ${seller.name} (${seller._id})`);
         allStats.push({
           seller: {
             _id: seller._id,
@@ -172,6 +174,7 @@ sellerRouter.get(
         });
       }
 
+      console.log(`[DEBUG] Returning ${allStats.length} sellers in response`);
       res.json({
         totalSellers: sellers.length,
         sellers: allStats,

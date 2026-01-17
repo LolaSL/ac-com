@@ -1,10 +1,18 @@
 import { useState, useEffect, useContext } from "react";
-import Banner from "../components/Banner.jsx";
+import PremiumCarousel from "../components/PremiumCarousel.jsx";
 import NotificationPopUp from "../components/NotificationPopUp";
+import TrustSection from "../components/TrustSection";
+import ValuePropositionSection from "../components/ValuePropositionSection";
+import HowItWorksSection from "../components/HowItWorksSection";
+import TestimonialsSection from "../components/TestimonialsSection";
+import ROICalculatorSection from "../components/ROICalculatorSection";
+import SuccessStoriesSection from "../components/SuccessStoriesSection";
+import PricingTiersSection from "../components/PricingTiersSection";
+import NewsletterSignup from "../components/NewsletterSignup";
+import DemoRequestForm from "../components/DemoRequestForm";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Carousel from "react-bootstrap/Carousel";
 
 export default function HomeBannerPage() {
   const [fetchedNotifications, setFetchedNotifications] = useState([]);
@@ -113,8 +121,24 @@ export default function HomeBannerPage() {
     setCurrentNotification(null);
   };
 
+  const handleSlideClick = (index) => {
+    const banner = banners[index];
+    const requiresLogin =
+      banner.linkText ===
+      "Redefining Air Conditioning Design — Smart. Fast. Certified";
+
+    const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
+
+    if (requiresLogin && !isLoggedIn) {
+      navigate("/signin?redirect=/uploadfile");
+    } else {
+      navigate(banner.linkTo);
+    }
+  };
+
   return (
-    <div className="home-banner-container">
+    <div className="home-banner-page">
+      {/* Notification Popup */}
       {currentNotification && (
         <NotificationPopUp
           notification={currentNotification}
@@ -128,41 +152,19 @@ export default function HomeBannerPage() {
         />
       )}
 
-      <Carousel
-        interval={5000}
-        pause={false}
-        controls={false}
-        indicators={false}
-        className="home-carousel"
-      >
-        {banners.map((banner, index) => {
-          const requiresLogin =
-            banner.linkText ===
-            "Redefining Air Conditioning Design — Smart. Fast. Certified";
+      {/* Premium Hero Carousel */}
+      <PremiumCarousel banners={banners} onSlideClick={handleSlideClick} />
 
-          const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
-
-          const handleClick = () => {
-            if (requiresLogin && !isLoggedIn) {
-              navigate("/signin?redirect=/uploadfile");
-            } else {
-              navigate(banner.linkTo);
-            }
-          };
-
-          return (
-            <Carousel.Item key={index}>
-              <Banner
-                title={banner.title}
-                description={banner.description}
-                imageSrc={banner.imageSrc}
-                linkText={banner.linkText}
-                onClick={handleClick}
-              />
-            </Carousel.Item>
-          );
-        })}
-      </Carousel>
+      {/* Investor-Ready Sections */}
+      <TrustSection />
+      <ValuePropositionSection />
+      <HowItWorksSection />
+      <ROICalculatorSection />
+      <SuccessStoriesSection />
+      <PricingTiersSection />
+      <TestimonialsSection />
+      <DemoRequestForm />
+      <NewsletterSignup />
     </div>
   );
 }

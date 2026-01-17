@@ -11,15 +11,20 @@ import { Store } from "../Store.js";
 function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
   const { state } = useContext(Store);
   const isAdmin = !!state?.adminInfo && !!state?.adminInfo.token;
+  const userInfo = state?.userInfo;
 
   const [categories, setCategories] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleNavigation = (e) => {
+  const handleNavigation = (e, redirectPath) => {
     e.preventDefault();
-    navigate("/signin?redirect=/uploadfile");
+    if (!userInfo) {
+      navigate(`/signin?redirect=${redirectPath}`);
+    } else {
+      setSidebarIsOpen(false);
+    }
   };
   useEffect(() => {
     const fetchCategories = async () => {
@@ -39,6 +44,7 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
     { path: "/sellers", label: "Our Network" },
     { type: "categories", label: "Categories" }, // Categories marker
     { path: "/uploadfile", label: "Get A Quote" },
+    { path: "/roi-calculator", label: "ROI Calculator" },
     { path: "/offers", label: "Offers" },
     { path: "/shipment", label: "Shipment & Delivery" },
     { path: "/returns", label: "Returns" },
@@ -131,13 +137,20 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
                 </NavDropdown>
               ) : (
                 <Link
-                  to={item.path}
+                  to={item.path === "/roi-calculator" ? "#" : item.path}
                   className="nav-link-side fw-bold"
-                  onClick={
-                    item.path === "/uploadfile"
-                      ? handleNavigation
-                      : handleNavClick
-                  }
+                  onClick={(e) => {
+                    if (item.path === "/uploadfile") {
+                      handleNavigation(e, "/uploadfile");
+                    } else if (item.path === "/roi-calculator") {
+                      handleNavigation(e, "/roi-calculator");
+                    } else {
+                      handleNavClick();
+                      if (item.path !== "#") {
+                        navigate(item.path);
+                      }
+                    }
+                  }}
                 >
                   {item.label}
                 </Link>

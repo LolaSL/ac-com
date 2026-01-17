@@ -16,6 +16,7 @@ import annotationRoutes from './routes/annotationRoutes.js'
 import browsingHistoryRouter from './routes/browsingHistoryRoutes.js';
 import userReviewsRouter from './routes/userReviewsRoutes.js';
 import wishlistRouter from './routes/wishlistRoutes.js';
+import roiRouter from './routes/roiCalculationRoutes.js';
 import path from "path";
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -98,6 +99,7 @@ app.use('/api', annotationRoutes);
 app.use('/api/browsing-history', browsingHistoryRouter);
 app.use('/api/user-reviews', userReviewsRouter);
 app.use('/api/wishlist', wishlistRouter);
+app.use('/api/roi-calculations', roiRouter);
 
 
 

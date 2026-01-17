@@ -40,6 +40,8 @@ export default function TotalSellerDashboard() {
         const { data: statsData } = await axios.get(
           "/api/sellers/all-referral-stats"
         );
+        console.log("Total Seller Dashboard - API Response:", statsData);
+        console.log("Number of sellers:", statsData.sellers?.length);
         dispatch({ type: "FETCH_SUCCESS", payload: statsData });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
@@ -136,69 +138,75 @@ export default function TotalSellerDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.sellers?.map((item) => (
-                    <tr key={item.seller._id}>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          {item.seller.logo &&
-                            item.seller.logo !== "undefined" &&
-                            item.seller.logo !== "" &&
-                            item.seller.logo.startsWith("/images/") && (
-                              <img
-                                src={item.seller.logo}
-                                alt={`${item.seller.name} logo`}
-                                style={{
-                                  width: "40px",
-                                  height: "40px",
-                                  marginRight: "10px",
-                                  objectFit: "contain",
-                                }}
-                              />
-                            )}
-                          <div>
-                            <strong>{item.seller.name}</strong>
+                  {data.sellers?.map((item) => {
+                    console.log("Rendering seller:", item.seller.name);
+                    return (
+                      <tr key={item.seller._id}>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            {item.seller.logo &&
+                              item.seller.logo !== "undefined" &&
+                              item.seller.logo !== "" &&
+                              item.seller.logo.startsWith("/images/") && (
+                                <img
+                                  src={item.seller.logo}
+                                  alt={`${item.seller.name} logo`}
+                                  style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    marginRight: "10px",
+                                    objectFit: "contain",
+                                  }}
+                                />
+                              )}
+                            <div>
+                              <strong>{item.seller.name}</strong>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>{item.seller.brand}</td>
-                      <td>
-                        <Badge bg="secondary">{item.seller.referralCode}</Badge>
-                      </td>
-                      <td className="text-center">
-                        <Badge bg="primary">
-                          {item.stats?.referredUsersCount || 0}
-                        </Badge>
-                      </td>
-                      <td className="text-center">
-                        <Badge bg="success">
-                          {item.stats?.totalReferredOrders || 0}
-                        </Badge>
-                      </td>
-                      <td className="text-end">
-                        <strong>
-                          $
-                          {item.stats?.totalReferredSales?.toFixed(2) || "0.00"}
-                        </strong>
-                      </td>
-                      <td className="text-end">
-                        <strong className="text-warning">
-                          ${item.stats?.totalCommission?.toFixed(2) || "0.00"}
-                        </strong>
-                      </td>
-                      <td>
-                        <Button
-                          type="button"
-                          className="btn-admin-edit"
-                          title="View Details"
-                          onClick={() =>
-                            navigate(`/seller/dashboard/${item.seller._id}`)
-                          }
-                        >
-                          <FaEye />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td>{item.seller.brand}</td>
+                        <td>
+                          <Badge bg="secondary">
+                            {item.seller.referralCode}
+                          </Badge>
+                        </td>
+                        <td className="text-center">
+                          <Badge bg="primary">
+                            {item.stats?.referredUsersCount || 0}
+                          </Badge>
+                        </td>
+                        <td className="text-center">
+                          <Badge bg="success">
+                            {item.stats?.totalReferredOrders || 0}
+                          </Badge>
+                        </td>
+                        <td className="text-end">
+                          <strong>
+                            $
+                            {item.stats?.totalReferredSales?.toFixed(2) ||
+                              "0.00"}
+                          </strong>
+                        </td>
+                        <td className="text-end">
+                          <strong className="text-warning">
+                            ${item.stats?.totalCommission?.toFixed(2) || "0.00"}
+                          </strong>
+                        </td>
+                        <td>
+                          <Button
+                            type="button"
+                            className="btn-admin-edit"
+                            title="View Details"
+                            onClick={() =>
+                              navigate(`/seller/dashboard/${item.seller._id}`)
+                            }
+                          >
+                            <FaEye />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </Table>
             </Card.Body>

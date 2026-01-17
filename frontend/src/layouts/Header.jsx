@@ -140,6 +140,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/uploadfile" className="dropdown-item">
                     Get A Quote
                   </Link>
+                    <Link to="/roi-calculator" className="dropdown-item">
+                    ROI Calculator
+                  </Link>
                   <Link to="/orderhistory" className="dropdown-item">
                     Order History
                   </Link>

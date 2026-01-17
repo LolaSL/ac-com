@@ -175,7 +175,7 @@ export default function OurNetworkPage() {
                           padding: "0.35rem 0.75rem",
                         }}
                       >
-                        View Profile
+                        View Seller
                       </Link>
                     </Card.Body>
                   </Card>

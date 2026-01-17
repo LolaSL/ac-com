@@ -1,0 +1,155 @@
+/* Global Scroll Animations */
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade In Up Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade In Left Animation */
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Fade In Right Animation */
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale In Animation */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Bounce In Animation */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Animation Classes */
+.scroll-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.scroll-fade-in-up {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.scroll-fade-in-left {
+  animation: fadeInLeft 0.8s ease-out;
+}
+
+.scroll-fade-in-right {
+  animation: fadeInRight 0.8s ease-out;
+}
+
+.scroll-scale-in {
+  animation: scaleIn 0.8s ease-out;
+}
+
+.scroll-bounce-in {
+  animation: bounceIn 0.8s ease-out;
+}
+
+/* Staggered animation for children */
+.scroll-stagger > * {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.scroll-stagger > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.scroll-stagger > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.scroll-stagger > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.scroll-stagger > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.scroll-stagger > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.scroll-stagger > *:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+/* Parallax effect for backgrounds */
+.parallax-bg {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .parallax-bg {
+    background-attachment: scroll;
+  }
+}

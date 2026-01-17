@@ -1066,9 +1066,9 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       } else if (finalAcType === "vrf-ducted") {
         alternateAcType = "vrf-ductless"; // VRF stays VRF
       } else if (finalAcType === "vrf-ductless") {
-        alternateAcType = "vrf-ducted"; // VRF stays VRF
+        // VRF stays VRF
       } else {
-        alternateAcType = finalAcType;
+        // No alternate type needed
       }
 
       // Draw annotations for all 4 modes

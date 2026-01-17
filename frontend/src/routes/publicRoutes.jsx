@@ -24,6 +24,7 @@ import CancellationPage from "../pages/CancellationPage.jsx";
 import PrivacyPolicyPage from "../pages/PrivacyPolicyPage.jsx";
 import TermsOfUsePage from "../pages/TermsOfusepage.jsx";
 import OurNetworkPage from "../pages/OurNetworkPage.jsx";
+import ROICalculatorExperimental from "../pages/ROICalculatorExperimental.jsx";
 
 export const publicRoutes = [
   { path: "/", element: <HomeBannerPage /> },
@@ -47,6 +48,7 @@ export const publicRoutes = [
   { path: "/blogs/:id", element: <BlogDetails /> },
   { path: "/advanced-ac", element: <AdvancedAC /> },
   { path: "/offers", element: <Offers /> },
+  { path: "/roi-calculator", element: <ROICalculatorExperimental /> },
   { path: "/shipment", element: <ShipMentPage /> },
   { path: "/returns", element: <ReturnsPage /> },
   { path: "/cancellation-policy", element: <CancellationPage /> },

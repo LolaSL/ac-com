@@ -1,15 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 import NavLink from "react-bootstrap/NavLink";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { useNavigate } from "react-router-dom";
+import { Store } from "../Store";
 
 const Footer = () => {
   const navigate = useNavigate();
+  const { state } = useContext(Store);
+  const userInfo = state?.userInfo;
 
-  const handleNavigation = (e) => {
+  const handleNavigation = (e, redirectPath) => {
     e.preventDefault();
-    navigate("/signin?redirect=/uploadfile");
+    if (!userInfo) {
+      navigate(`/signin?redirect=${redirectPath}`);
+    } else {
+      navigate(redirectPath);
+    }
   };
 
   return (
@@ -60,9 +67,16 @@ const Footer = () => {
             <NavLink
               className="text-white d-block"
               href="/uploadfile"
-              onClick={handleNavigation}
+              onClick={(e) => handleNavigation(e, "/uploadfile")}
             >
               Get A Quote
+            </NavLink>
+            <NavLink
+              className="text-white d-block"
+              href="#"
+              onClick={(e) => handleNavigation(e, "/roi-calculator")}
+            >
+              ROI Calculator
             </NavLink>
             <NavLink className="text-white d-block" href="/offers">
               Offers

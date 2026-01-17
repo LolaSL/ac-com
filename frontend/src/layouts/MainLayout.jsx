@@ -23,7 +23,7 @@ function MainLayout({ children, sidebarIsOpen, setSidebarIsOpen, fullBox }) {
         sidebarIsOpen={sidebarIsOpen}
         setSidebarIsOpen={setSidebarIsOpen}
       />
-      <main className="main-content">{children}</main>
+      <main className="main-content-container">{children}</main>
     </div>
   );
 }

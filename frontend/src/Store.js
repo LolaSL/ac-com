@@ -30,6 +30,20 @@ const initialState = {
       ? JSON.parse(localStorage.getItem('cartItems'))
       : [],
   },
+
+  // ROI Calculator state
+  roiData: {
+    currentCalculation: null,
+    savedCalculations: [],
+    isLoading: false,
+    error: null,
+  },
+
+  // Linked BTU Calculator data
+  btuData: {
+    currentProject: null,
+    products: [],
+  },
 };
 
 function reducer(state, action) {
@@ -192,6 +206,95 @@ function reducer(state, action) {
       return {
         ...state,
         cart: { ...state.cart, paymentMethod: action.payload },
+      };
+
+    // ROI Calculator Actions
+    case 'ROI_SET_LOADING':
+      return {
+        ...state,
+        roiData: { ...state.roiData, isLoading: action.payload },
+      };
+
+    case 'ROI_SET_ERROR':
+      return {
+        ...state,
+        roiData: { ...state.roiData, error: action.payload },
+      };
+
+    case 'ROI_SET_CURRENT_CALCULATION':
+      return {
+        ...state,
+        roiData: { ...state.roiData, currentCalculation: action.payload, error: null },
+      };
+
+    case 'ROI_SET_SAVED_CALCULATIONS':
+      return {
+        ...state,
+        roiData: { ...state.roiData, savedCalculations: action.payload, error: null },
+      };
+
+    case 'ROI_ADD_CALCULATION':
+      return {
+        ...state,
+        roiData: {
+          ...state.roiData,
+          savedCalculations: [action.payload, ...state.roiData.savedCalculations],
+        },
+      };
+
+    case 'ROI_UPDATE_CALCULATION':
+      return {
+        ...state,
+        roiData: {
+          ...state.roiData,
+          savedCalculations: state.roiData.savedCalculations.map((calc) =>
+            calc._id === action.payload._id ? action.payload : calc
+          ),
+        },
+      };
+
+    case 'ROI_DELETE_CALCULATION':
+      return {
+        ...state,
+        roiData: {
+          ...state.roiData,
+          savedCalculations: state.roiData.savedCalculations.filter(
+            (calc) => calc._id !== action.payload
+          ),
+        },
+      };
+
+    case 'ROI_CLEAR':
+      return {
+        ...state,
+        roiData: {
+          currentCalculation: null,
+          savedCalculations: [],
+          isLoading: false,
+          error: null,
+        },
+      };
+
+    // BTU Data Actions (for linking)
+    case 'BTU_SET_CURRENT_PROJECT':
+      return {
+        ...state,
+        btuData: { ...state.btuData, currentProject: action.payload },
+      };
+
+    case 'BTU_SET_PRODUCTS':
+      return {
+        ...state,
+        btuData: { ...state.btuData, products: action.payload },
+      };
+
+    case 'BTU_CLEAR':
+      return {
+        ...state,
+        btuData: {
+          currentProject: null,
+          products: [],
+        },
       };
 
     default:

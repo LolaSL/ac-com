@@ -1,0 +1,217 @@
+/* Newsletter Signup Section Styles */
+
+.newsletter-signup-section {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  padding: clamp(2.5rem, 5vh, 4rem);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-top: clamp(1.5rem, 3vh, 2.5rem);
+  margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
+  border-radius: clamp(16px, 4vw, 24px);
+}
+
+/* Background decoration */
+.newsletter-signup-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.newsletter-signup-section::after {
+  content: "";
+  position: absolute;
+  bottom: -50px;
+  left: -50px;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.newsletter-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.newsletter-title {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: white;
+  margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+}
+
+.newsletter-description {
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: clamp(1.5rem, 3vh, 2rem);
+  line-height: 1.6;
+}
+
+/* Form Styles */
+.newsletter-form {
+  margin-bottom: clamp(1rem, 2vh, 1.5rem);
+}
+
+.newsletter-input-group {
+  margin-bottom: clamp(0.75rem, 1.5vh, 1rem);
+}
+
+.input-wrapper {
+  display: flex;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.newsletter-input {
+  flex: 1;
+  min-width: clamp(200px, 80%, 400px);
+  padding: clamp(0.75rem, 1.5vh, 1rem) clamp(1rem, 2vw, 1.5rem);
+  border: none;
+  border-radius: clamp(8px, 2vw, 12px);
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  background: white;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.newsletter-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.newsletter-input::placeholder {
+  color: #999;
+}
+
+.newsletter-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.newsletter-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: clamp(0.75rem, 1.5vh, 1rem) clamp(1.5rem, 3vw, 2.5rem);
+  border-radius: clamp(8px, 2vw, 12px);
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  min-width: clamp(120px, 20%, auto);
+}
+
+.newsletter-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.newsletter-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.newsletter-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Alert Styles */
+.newsletter-alert {
+  margin-top: clamp(1rem, 2vh, 1.5rem);
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: clamp(8px, 2vw, 12px);
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+}
+
+.newsletter-alert-success {
+  color: #28a745;
+}
+
+.newsletter-alert-danger {
+  color: #dc3545;
+}
+
+/* Note Text */
+.newsletter-note {
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: clamp(0.75rem, 1.5vh, 1rem);
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .newsletter-signup-section {
+    padding: clamp(1.5rem, 4vh, 2.5rem) 0;
+  }
+
+  .input-wrapper {
+    flex-direction: column;
+  }
+
+  .newsletter-input {
+    width: 90%;
+    min-width: 90%;
+  }
+
+  .newsletter-btn {
+    width: 90%;
+    min-width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  .newsletter-signup-section {
+    padding: clamp(1rem, 3vh, 1.5rem) 0;
+  }
+
+  .newsletter-signup-section::before,
+  .newsletter-signup-section::after {
+    display: none;
+  }
+
+  .newsletter-title {
+    font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+  }
+
+  .newsletter-description {
+    font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+  }
+
+  .input-wrapper {
+    gap: clamp(0.4rem, 0.8vw, 0.6rem);
+  }
+
+  .newsletter-input,
+  .newsletter-btn {
+    padding: clamp(0.6rem, 1.2vh, 0.85rem) clamp(0.75rem, 1.5vw, 1rem);
+  }
+
+  .newsletter-btn {
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .newsletter-input,
+  .newsletter-btn {
+    transition: none;
+  }
+}

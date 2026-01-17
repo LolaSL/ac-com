@@ -36,3 +36,64 @@
     transform: rotate(360deg);
   }
 }
+
+/* Import animations globally */
+@import "./styles/animations.css";
+
+/* Global Container Centering */
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: clamp(0.75rem, 3vw, 1.5rem) !important;
+  padding-right: clamp(0.75rem, 3vw, 1.5rem) !important;
+  width: 100%;
+  max-width: none !important;
+}
+
+/* Override Bootstrap container max-widths for proper centering */
+@media (min-width: 576px) {
+  .container,
+  .container-sm {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .container,
+  .container-md {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .container,
+  .container-lg {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container,
+  .container-xl {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container,
+  .container-xxl {
+    max-width: 100% !important;
+  }
+}
+
+/* Ensure sections are full width and content is centered */
+section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}

@@ -1,0 +1,385 @@
+/* TrustSection Responsive Styles */
+
+.trust-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  padding: clamp(2rem, 5vh, 4rem) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Metrics Section */
+.metrics-container {
+  margin-bottom: clamp(2rem, 5vh, 3rem);
+}
+
+.metric-card {
+  background: white;
+  border-radius: clamp(8px, 2vw, 12px);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  box-shadow: 0 2px clamp(4px, 1vw, 8px) rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.metric-value {
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  font-weight: 800;
+  color: #007bff;
+  line-height: 1;
+  margin-bottom: clamp(0.5rem, 1vh, 1rem);
+}
+
+.metric-label {
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  color: #6c757d;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Partner Logos Section */
+.partners-section {
+  margin-top: clamp(2rem, 5vh, 3rem);
+}
+
+.section-title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
+  line-height: 1.3;
+}
+
+.section-title span {
+  color: #007bff;
+}
+
+.partner-logo-container {
+  background: white;
+  border-radius: clamp(8px, 2vw, 12px);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  min-height: clamp(100px, 15vw, 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px clamp(4px, 1vw, 8px) rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.partner-logo-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.partner-logo-img {
+  max-width: 100%;
+  max-height: clamp(60px, 12vw, 80px);
+  object-fit: contain;
+}
+
+.partner-brand-name {
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+  font-weight: 600;
+  margin-top: clamp(0.5rem, 1vw, 0.75rem);
+  color: #333;
+}
+
+/* Certification Badges Section */
+.certifications-section {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  padding-top: clamp(1.5rem, 3vh, 2.5rem);
+  border-top: 2px solid #e9ecef;
+}
+
+.badge-item {
+  padding: clamp(1rem, 2vh, 1.5rem);
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: clamp(8px, 2vw, 12px);
+  transition: all 0.3s ease;
+}
+
+.badge-item:hover {
+  background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+  transform: translateY(-2px);
+}
+
+.badge-icon {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin-bottom: clamp(0.5rem, 1vh, 1rem);
+  display: inline-block;
+}
+
+.badge-title {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-weight: 700;
+  margin-bottom: clamp(0.3rem, 0.5vh, 0.5rem);
+  color: #333;
+}
+
+.badge-description {
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Responsive Breakpoints */
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  .trust-section {
+    padding: 5rem 0;
+  }
+
+  .metric-value {
+    font-size: 3rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .partner-logo-container {
+    min-height: 180px;
+  }
+}
+
+/* Medium to large screens (1024px - 1439px) */
+@media (max-width: 1439px) and (min-width: 1025px) {
+  .metric-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .partner-logo-container {
+    min-height: 140px;
+  }
+}
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .trust-section {
+    padding: 3rem 0;
+  }
+
+  .metric-card {
+    padding: 1.5rem;
+  }
+
+  .metric-value {
+    font-size: 2rem;
+  }
+
+  .metric-label {
+    font-size: 0.95rem;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .partner-logo-container {
+    min-height: 120px;
+  }
+
+  .partner-brand-name {
+    font-size: 0.85rem;
+  }
+
+  .badge-icon {
+    font-size: 2rem;
+  }
+
+  .badge-title {
+    font-size: 1.1rem;
+  }
+
+  .badge-description {
+    font-size: 0.85rem;
+  }
+}
+
+/* Medium devices (481px - 768px) */
+@media (max-width: 768px) and (min-width: 481px) {
+  .trust-section {
+    padding: 2.5rem 0;
+  }
+
+  .metric-card {
+    padding: 1.25rem;
+  }
+
+  .metric-value {
+    font-size: 1.8rem;
+  }
+
+  .metric-label {
+    font-size: 0.9rem;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .partner-logo-container {
+    min-height: 110px;
+  }
+
+  .partner-logo-img {
+    max-height: 70px;
+  }
+
+  .partner-brand-name {
+    font-size: 0.8rem;
+  }
+
+  .badge-icon {
+    font-size: 1.8rem;
+  }
+
+  .badge-title {
+    font-size: 1rem;
+  }
+
+  .badge-description {
+    font-size: 0.8rem;
+  }
+}
+
+/* Small devices (320px - 480px) */
+@media (max-width: 480px) {
+  .trust-section {
+    padding: 2rem 1rem;
+  }
+
+  .metrics-container {
+    margin-bottom: 1.5rem;
+  }
+
+  .metric-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+  }
+
+  .metric-label {
+    font-size: 0.85rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .partner-logo-container {
+    min-height: 100px;
+    padding: 1rem 0.75rem;
+  }
+
+  .partner-logo-img {
+    max-height: 60px;
+  }
+
+  .partner-brand-name {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .certifications-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .badge-item {
+    padding: 1rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .badge-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .badge-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .badge-description {
+    font-size: 0.75rem;
+  }
+}
+
+/* Extra small devices (< 320px) */
+@media (max-width: 319px) {
+  .trust-section {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .metric-card {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .metric-value {
+    font-size: 1.3rem;
+  }
+
+  .metric-label {
+    font-size: 0.8rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .partner-logo-container {
+    min-height: 90px;
+    padding: 0.75rem;
+  }
+
+  .badge-item {
+    padding: 0.75rem;
+  }
+
+  .badge-icon {
+    font-size: 1.4rem;
+  }
+
+  .badge-title {
+    font-size: 0.9rem;
+  }
+
+  .badge-description {
+    font-size: 0.7rem;
+  }
+}
+
+/* Loading Spinner */
+.trust-section .spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(2rem, 5vh, 4rem);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .metric-card,
+  .partner-logo-container,
+  .badge-item {
+    transition: none;
+  }
+}

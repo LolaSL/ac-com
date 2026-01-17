@@ -1,0 +1,278 @@
+/* Demo Request Form Styles */
+
+/* Demo CTA Section */
+.demo-request-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  padding: clamp(2rem, 5vh, 4rem) 0;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-top: clamp(1.5rem, 3vh, 2.5rem);
+  margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
+}
+
+.demo-content {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  border-radius: clamp(16px, 4vw, 24px);
+  padding: clamp(2rem, 4vh, 3.5rem);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(2rem, 4vw, 4rem);
+  flex-wrap: wrap;
+}
+
+.demo-text {
+  flex: 1;
+  min-width: clamp(280px, 100%, 450px);
+}
+
+.demo-title {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  margin-bottom: clamp(0.75rem, 1.5vh, 1rem);
+  line-height: 1.2;
+}
+
+.demo-description {
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: clamp(1.5rem, 3vh, 2rem);
+  line-height: 1.6;
+}
+
+.demo-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 2vh, 1.5rem);
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 1.5vw, 1rem);
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+}
+
+.feature-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: clamp(28px, 6vw, 36px);
+  height: clamp(28px, 6vw, 36px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.demo-btn-primary {
+  background: white;
+  color: #0066ff;
+  border: none;
+  padding: clamp(0.85rem, 1.8vh, 1.1rem) clamp(1.5rem, 3vw, 2.5rem);
+  border-radius: clamp(8px, 2vw, 12px);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.demo-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.demo-btn-primary:active {
+  transform: translateY(-1px);
+}
+
+/* Modal Styles */
+.demo-modal .modal-content {
+  border: none;
+  border-radius: clamp(12px, 3vw, 16px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.demo-modal-header {
+  border-bottom: 2px solid #e9ecef;
+  padding: clamp(1.5rem, 3vh, 2rem);
+}
+
+.demo-modal-title {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.demo-modal-body {
+  padding: clamp(1.5rem, 3vh, 2.5rem);
+}
+
+/* Status Message */
+.status-message {
+  text-align: center;
+  padding: clamp(2rem, 4vh, 3rem);
+  border-radius: clamp(12px, 3vw, 16px);
+}
+
+.status-message.success {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+}
+
+.status-message.error {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
+}
+
+.status-icon {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: clamp(0.75rem, 1.5vh, 1rem);
+}
+
+.status-message p {
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Form Styles */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  margin-bottom: clamp(1rem, 2vh, 1.5rem);
+}
+
+.form-col {
+  margin-bottom: 0;
+}
+
+.demo-label {
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  font-weight: 600;
+  color: #333;
+  margin-bottom: clamp(0.4rem, 0.8vh, 0.6rem);
+}
+
+.demo-input {
+  border: 2px solid #e9ecef;
+  border-radius: clamp(8px, 2vw, 10px);
+  padding: clamp(0.7rem, 1.4vh, 0.9rem) clamp(1rem, 2vw, 1.2rem);
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  color: #333;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.demo-input:focus {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  outline: none;
+}
+
+.demo-input:disabled {
+  background: #f8f9fa;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.demo-input::placeholder {
+  color: #999;
+}
+
+.demo-submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  color: white;
+  border: none;
+  padding: clamp(0.85rem, 1.8vh, 1.1rem);
+  border-radius: clamp(8px, 2vw, 10px);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.demo-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 102, 255, 0.3);
+}
+
+.demo-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .demo-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .demo-features {
+    margin: 0 auto;
+    max-width: 400px;
+  }
+
+  .demo-btn-primary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .demo-request-section {
+    padding: clamp(1.5rem, 4vh, 2.5rem) 0;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: clamp(0.75rem, 1.5vh, 1rem);
+  }
+
+  .demo-features {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-request-section {
+    padding: clamp(1rem, 3vh, 1.5rem) 0;
+  }
+
+  .demo-content {
+    padding: clamp(1.5rem, 3vh, 2rem);
+    border-radius: clamp(12px, 3vw, 16px);
+  }
+
+  .demo-modal-body {
+    padding: clamp(1rem, 2vh, 1.5rem);
+  }
+
+  .demo-input {
+    padding: clamp(0.6rem, 1.2vh, 0.8rem) clamp(0.8rem, 1.5vw, 1rem);
+  }
+
+  .demo-btn-primary {
+    font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+    padding: clamp(0.7rem, 1.4vh, 0.9rem) clamp(1rem, 2vw, 1.5rem);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .demo-btn-primary,
+  .demo-input,
+  .demo-submit-btn {
+    transition: none;
+  }
+}

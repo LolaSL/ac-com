@@ -1,0 +1,317 @@
+/* Pricing Tiers Section Styles */
+
+.pricing-tiers-section {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+  padding: clamp(2rem, 5vh, 4rem) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-header {
+  margin-bottom: clamp(2rem, 5vh, 3rem);
+}
+
+.pricing-title {
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+}
+
+.pricing-subtitle {
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Billing Toggle */
+.billing-toggle {
+  display: flex;
+  gap: clamp(0.5rem, 1vw, 1rem);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.toggle-btn {
+  background: white;
+  border: 2px solid #e9ecef;
+  padding: clamp(0.6rem, 1.5vh, 0.85rem) clamp(1.2rem, 2vw, 1.8rem);
+  border-radius: clamp(8px, 2vw, 12px);
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+  position: relative;
+}
+
+.toggle-btn:hover {
+  border-color: #0066ff;
+  color: #0066ff;
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  color: white;
+  border-color: #0052cc;
+}
+
+.save-badge {
+  display: inline-block;
+  background: #28a745;
+  color: white;
+  padding: clamp(0.25rem, 0.5vh, 0.4rem) clamp(0.5rem, 1vw, 0.75rem);
+  border-radius: 4px;
+  font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+  margin-left: clamp(0.3rem, 0.5vw, 0.5rem);
+  font-weight: 700;
+}
+
+/* Pricing Cards */
+.pricing-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: clamp(12px, 3vw, 16px);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 100%;
+  height: 100%;
+}
+
+.pricing-card:hover {
+  border-color: #0066ff;
+  box-shadow: 0 10px 30px rgba(0, 102, 255, 0.15);
+  transform: translateY(-4px);
+}
+
+.pricing-card.highlighted {
+  border-color: #0066ff;
+  box-shadow: 0 15px 40px rgba(0, 102, 255, 0.2);
+  transform: scale(1.02);
+  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+}
+
+.badge-ribbon {
+  position: absolute;
+  top: clamp(1rem, 2vh, 1.5rem);
+  right: clamp(1rem, 2vh, 1.5rem);
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: #fff;
+  padding: clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
+  border-radius: 20px;
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Pricing Header */
+.pricing-header-card {
+  text-align: center;
+  margin-bottom: clamp(1.5rem, 3vh, 2rem);
+  padding-bottom: clamp(1rem, 2vh, 1.5rem);
+  border-bottom: 2px solid #e9ecef;
+}
+
+.pricing-icon {
+  font-size: clamp(2.5rem, 5vw, 3rem);
+  margin-bottom: clamp(0.5rem, 1vh, 1rem);
+  display: inline-block;
+}
+
+.pricing-name {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: clamp(0.5rem, 1vh, 0.75rem);
+}
+
+.pricing-description {
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Pricing Display */
+.pricing-display {
+  text-align: center;
+  margin-bottom: clamp(1.5rem, 3vh, 2rem);
+  padding: clamp(1rem, 2vh, 1.5rem) 0;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.price-amount {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 800;
+  color: #0066ff;
+  line-height: 1.1;
+}
+
+.price-period {
+  font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+  color: #999;
+  font-weight: 500;
+  display: block;
+}
+
+.custom-price {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 700;
+  color: #0066ff;
+}
+
+.saving-text {
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+  color: #28a745;
+  font-weight: 600;
+  margin-top: clamp(0.5rem, 1vh, 0.75rem);
+}
+
+/* CTA Button */
+.pricing-cta {
+  background: white;
+  color: #0066ff;
+  border: 2px solid #0066ff;
+  padding: clamp(0.75rem, 1.5vh, 1rem) clamp(1rem, 2vw, 1.5rem);
+  border-radius: clamp(8px, 2vw, 12px);
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: clamp(1.5rem, 3vh, 2rem);
+}
+
+.pricing-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 102, 255, 0.2);
+}
+
+.pricing-cta.primary {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  color: white;
+  border-color: #0052cc;
+}
+
+.pricing-cta.primary:hover {
+  box-shadow: 0 10px 30px rgba(0, 102, 255, 0.3);
+}
+
+/* Features List */
+.features-list {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1.5vh, 1rem);
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(0.5rem, 1vw, 1rem);
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+  color: #666;
+}
+
+.feature-icon {
+  color: #28a745;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.feature-text {
+  line-height: 1.5;
+}
+
+/* Footer */
+.pricing-footer {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  padding-top: clamp(2rem, 5vh, 3rem);
+  border-top: 2px solid #e9ecef;
+}
+
+.pricing-footer-title {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: clamp(1rem, 2vh, 1.5rem);
+}
+
+.included-item {
+  text-align: center;
+}
+
+.included-icon {
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
+  margin-bottom: clamp(0.5rem, 1vh, 0.75rem);
+  display: inline-block;
+}
+
+.included-text {
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  color: #666;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .pricing-card.highlighted {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .pricing-tiers-section {
+    padding: clamp(1.5rem, 4vh, 3rem) 0;
+  }
+
+  .pricing-card {
+    border-radius: clamp(8px, 2vw, 12px);
+  }
+
+  .badge-ribbon {
+    top: clamp(0.75rem, 1.5vh, 1rem);
+    right: clamp(0.75rem, 1.5vh, 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .pricing-tiers-section {
+    padding: clamp(1rem, 3vh, 1.5rem) 0;
+  }
+
+  .billing-toggle {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .toggle-btn {
+    width: 100%;
+  }
+
+  .pricing-card {
+    padding: clamp(1rem, 2vh, 1.5rem);
+  }
+
+  .features-list {
+    gap: 0.5rem;
+  }
+
+  .feature-item {
+    gap: 0.5rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .pricing-card,
+  .toggle-btn,
+  .pricing-cta {
+    transition: none;
+  }
+}
