@@ -5,7 +5,7 @@ import TrustSection from "../components/TrustSection";
 import ValuePropositionSection from "../components/ValuePropositionSection";
 import HowItWorksSection from "../components/HowItWorksSection";
 import TestimonialsSection from "../components/TestimonialsSection";
-import ROICalculatorSection from "../components/ROICalculatorSection";
+import ROICalculatorPreview from "../components/ROICalculatorPreview";
 import SuccessStoriesSection from "../components/SuccessStoriesSection";
 import PricingTiersSection from "../components/PricingTiersSection";
 import NewsletterSignup from "../components/NewsletterSignup";
@@ -159,7 +159,7 @@ export default function HomeBannerPage() {
       <TrustSection />
       <ValuePropositionSection />
       <HowItWorksSection />
-      <ROICalculatorSection />
+      <ROICalculatorPreview />
       <SuccessStoriesSection />
       <PricingTiersSection />
       <TestimonialsSection />

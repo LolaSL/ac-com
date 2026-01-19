@@ -73,6 +73,36 @@ const roiCalculationSchema = new mongoose.Schema(
             min: 1,
             max: 36,
         },
+        // Property Type Information (for BTU integration)
+        propertyType: {
+            type: String,
+            enum: ['residential-single', 'residential-multi', 'industrial-commercial'],
+            default: 'residential-single',
+        },
+        numberOfUnits: {
+            type: Number,
+            min: 1,
+            max: 500,
+        },
+        maintenanceFrequency: {
+            type: Number,
+            min: 1,
+            max: 52,
+        },
+        // BTU Project Data (when linked from BTU Calculator)
+        btuProjectData: {
+            totalBTU: Number,
+            totalSquareFootage: Number,
+            numberOfRooms: Number,
+            estimatedProjectCost: Number,
+            estimatedInstallationDays: Number,
+            recommendedUnits: [{
+                name: String,
+                btu: Number,
+                price: Number,
+                quantity: Number,
+            }],
+        },
         // Calculated Results
         savingsPerProject: {
             type: Number,

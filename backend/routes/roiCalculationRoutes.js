@@ -67,11 +67,17 @@ roiRouter.post(
         const {
             name,
             description,
+            serviceType,
+            equipmentAge,
             projectSize,
             installationTime,
             teamSize,
             projectsPerMonth,
             monthsToAnalyze,
+            propertyType,
+            numberOfUnits,
+            maintenanceFrequency,
+            btuProjectData,
             savingsPerProject,
             savingsPercentage,
             annualSavings,
@@ -99,11 +105,17 @@ roiRouter.post(
             userId: req.user._id,
             name: name || 'ROI Calculation',
             description,
+            serviceType: serviceType || 'AC Installation',
+            equipmentAge,
             projectSize,
             installationTime,
             teamSize,
             projectsPerMonth,
             monthsToAnalyze,
+            propertyType: propertyType || 'residential-single',
+            numberOfUnits,
+            maintenanceFrequency,
+            btuProjectData,
             savingsPerProject,
             savingsPercentage,
             annualSavings,
@@ -138,6 +150,8 @@ roiRouter.put(
         // Update fields
         calculation.name = req.body.name || calculation.name;
         calculation.description = req.body.description || calculation.description;
+        calculation.serviceType = req.body.serviceType || calculation.serviceType;
+        calculation.equipmentAge = req.body.equipmentAge !== undefined ? req.body.equipmentAge : calculation.equipmentAge;
         calculation.projectSize = req.body.projectSize || calculation.projectSize;
         calculation.installationTime =
             req.body.installationTime || calculation.installationTime;
@@ -146,6 +160,10 @@ roiRouter.put(
             req.body.projectsPerMonth || calculation.projectsPerMonth;
         calculation.monthsToAnalyze =
             req.body.monthsToAnalyze || calculation.monthsToAnalyze;
+        calculation.propertyType = req.body.propertyType || calculation.propertyType;
+        calculation.numberOfUnits = req.body.numberOfUnits !== undefined ? req.body.numberOfUnits : calculation.numberOfUnits;
+        calculation.maintenanceFrequency = req.body.maintenanceFrequency !== undefined ? req.body.maintenanceFrequency : calculation.maintenanceFrequency;
+        calculation.btuProjectData = req.body.btuProjectData || calculation.btuProjectData;
         calculation.savingsPerProject =
             req.body.savingsPerProject || calculation.savingsPerProject;
         calculation.savingsPercentage =

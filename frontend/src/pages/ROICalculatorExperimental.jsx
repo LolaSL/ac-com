@@ -31,12 +31,15 @@ import jsPDF from "jspdf";
 import axios from "axios";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 import "./ROICalculatorExperimental.css";
 import { FaFileUpload, FaTrash, FaFilePdf } from "react-icons/fa";
 
 export default function ROICalculatorExperimental() {
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
+  const location = useLocation();
+  const btuData = location.state?.btuData;
 
   // UI State
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -50,12 +53,54 @@ export default function ROICalculatorExperimental() {
   // Calculator Parameters
   const [serviceType, setServiceType] = useState("AC Installation");
   const [equipmentAge, setEquipmentAge] = useState("");
+  const [propertyType, setPropertyType] = useState("residential-single");
   const [projectSize, setProjectSize] = useState(5000);
   const [installationTime, setInstallationTime] = useState(7);
   const [teamSize, setTeamSize] = useState(3);
+  const [numberOfUnits, setNumberOfUnits] = useState(1);
+  const [maintenanceFrequency, setMaintenanceFrequency] = useState(1);
   const [projectsPerMonth, setProjectsPerMonth] = useState(10);
   const [monthsToAnalyze, setMonthsToAnalyze] = useState(12);
   const [tags, setTags] = useState("");
+
+  // Property type configurations
+  const propertyConfigs = {
+    "residential-single": {
+      label: "Residential (Single Unit)",
+      description: "Apartment, villa, or individual property",
+      costMultiplier: { traditional: 0.15, acCommerce: 0.08 },
+      laborCost: { traditional: 500, acCommerce: 300 },
+      timeReductionFactor: 0.6,
+      minProjectSize: 1000,
+      maxProjectSize: 50000,
+      minInstallationTime: 1,
+      maxInstallationTime: 30,
+    },
+    "residential-multi": {
+      label: "Residential (Multi-Unit)",
+      description: "Multi-flat development with bulk pricing",
+      costMultiplier: { traditional: 0.12, acCommerce: 0.05 },
+      laborCost: { traditional: 400, acCommerce: 200 },
+      timeReductionFactor: 0.65,
+      minProjectSize: 10000,
+      maxProjectSize: 500000,
+      minInstallationTime: 14,
+      maxInstallationTime: 180,
+    },
+    "industrial-commercial": {
+      label: "Industrial/Commercial Property",
+      description: "Large-scale buildings with complex systems",
+      costMultiplier: { traditional: 0.18, acCommerce: 0.09 },
+      laborCost: { traditional: 800, acCommerce: 400 },
+      timeReductionFactor: 0.7,
+      minProjectSize: 50000,
+      maxProjectSize: 1000000,
+      minInstallationTime: 30,
+      maxInstallationTime: 365,
+    },
+  };
+
+  const config = propertyConfigs[propertyType];
 
   // Service type cost multipliers
   const serviceTypeMultipliers = {
@@ -77,6 +122,47 @@ export default function ROICalculatorExperimental() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfo?.token]);
+
+  // Auto-populate from BTU Calculator data
+  useEffect(() => {
+    if (btuData && location.state?.fromBTU) {
+      // Set property type based on BTU data
+      if (btuData.propertyType) {
+        setPropertyType(btuData.propertyType);
+      }
+
+      // Set project size from estimated cost
+      if (btuData.estimatedProjectCost) {
+        setProjectSize(Math.round(btuData.estimatedProjectCost));
+      }
+
+      // Set installation time from estimate
+      if (btuData.estimatedInstallationDays) {
+        setInstallationTime(btuData.estimatedInstallationDays);
+      }
+
+      // Set number of units for multi-unit properties
+      if (
+        btuData.numberOfRooms &&
+        btuData.propertyType === "residential-multi"
+      ) {
+        setNumberOfUnits(btuData.numberOfRooms);
+      }
+
+      // Set description with BTU details
+      setSaveCalculationDescription(
+        `BTU Project: ${btuData.totalBTU} BTU, ${
+          btuData.numberOfRooms
+        } rooms, ${btuData.totalSquareFootage.toFixed(0)} sq ft`
+      );
+
+      // Show success message
+      toast.success("BTU Calculator data loaded successfully!");
+
+      // Clear the state to prevent re-population on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [btuData, location.state]);
 
   // Fetch saved calculations from backend
   const fetchSavedCalculations = async () => {
@@ -126,11 +212,34 @@ export default function ROICalculatorExperimental() {
         teamSize,
         projectsPerMonth,
         monthsToAnalyze,
+        propertyType,
+        numberOfUnits:
+          propertyType === "residential-multi" ? numberOfUnits : undefined,
+        maintenanceFrequency:
+          propertyType === "industrial-commercial"
+            ? maintenanceFrequency
+            : undefined,
         savingsPerProject: parseFloat(savingsPerProject),
         savingsPercentage: parseFloat(savingsPercentage),
         annualSavings: parseFloat(annualSavings),
         roi: parseFloat(roi),
         paybackMonths,
+        // Include BTU data if this calculation was generated from BTU Calculator
+        btuProjectData: btuData
+          ? {
+              totalBTU: btuData.totalBTU,
+              totalSquareFootage: btuData.totalSquareFootage,
+              numberOfRooms: btuData.numberOfRooms,
+              estimatedProjectCost: btuData.estimatedProjectCost,
+              estimatedInstallationDays: btuData.estimatedInstallationDays,
+              recommendedUnits: btuData.recommendedUnits?.map((unit) => ({
+                name: unit.name,
+                btu: unit.btu,
+                price: unit.price,
+                quantity: unit.quantity || 1,
+              })),
+            }
+          : undefined,
         tags: tags
           .split(",")
           .map((tag) => tag.trim())
@@ -182,6 +291,7 @@ export default function ROICalculatorExperimental() {
 
       setServiceType(freshCalculation.serviceType || "AC Installation");
       setEquipmentAge(freshCalculation.equipmentAge || "");
+      setPropertyType(freshCalculation.propertyType || "residential-single");
       setProjectSize(Number(freshCalculation.projectSize ?? projectSize));
       setInstallationTime(
         Number(freshCalculation.installationTime ?? installationTime)
@@ -193,6 +303,20 @@ export default function ROICalculatorExperimental() {
       setMonthsToAnalyze(
         Number(freshCalculation.monthsToAnalyze ?? monthsToAnalyze)
       );
+
+      // Load property-specific fields
+      if (
+        freshCalculation.propertyType === "residential-multi" &&
+        freshCalculation.numberOfUnits
+      ) {
+        setNumberOfUnits(Number(freshCalculation.numberOfUnits));
+      }
+      if (
+        freshCalculation.propertyType === "industrial-commercial" &&
+        freshCalculation.maintenanceFrequency
+      ) {
+        setMaintenanceFrequency(Number(freshCalculation.maintenanceFrequency));
+      }
 
       setTags(
         Array.isArray(freshCalculation.tags)
@@ -480,15 +604,117 @@ export default function ROICalculatorExperimental() {
     }
   };
 
-  // Calculation logic with service type multipliers
+  // Clear all form inputs
+  const handleClearForm = () => {
+    // Keep current property type, only reset numeric values
+    const currentConfig = propertyConfigs[propertyType];
+
+    setServiceType("AC Installation");
+    setEquipmentAge("");
+    // Don't reset propertyType - keep the current selection
+    setProjectSize(currentConfig.minProjectSize);
+    setInstallationTime(currentConfig.minInstallationTime);
+    setTeamSize(1);
+    setNumberOfUnits(1);
+    setMaintenanceFrequency(1);
+    setProjectsPerMonth(1);
+    setMonthsToAnalyze(1);
+    setSaveCalculationName("");
+    setSaveCalculationDescription("");
+    setTags("");
+    toast.info("Form inputs cleared");
+  };
+
+  // Calculation logic with service type and property type multipliers
   const multiplier =
     serviceTypeMultipliers[serviceType] ||
     serviceTypeMultipliers["AC Installation"];
 
-  const traditionalCostPerProject =
-    (projectSize * 0.15 + installationTime * 500 * teamSize) * multiplier.cost;
-  const acCommerceCostPerProject =
-    (projectSize * 0.08 + installationTime * 300 * teamSize) * multiplier.cost;
+  // Check if this calculation is based on BTU Calculator data
+  const isFromBTU = btuData && btuData.equipmentCost;
+
+  // Base calculation using property type config (per single unit/project)
+  let baseEquipmentTradCost, baseEquipmentAccCost;
+
+  if (isFromBTU) {
+    // Use actual equipment cost from BTU Calculator with markup/discount
+    // Traditional: Add 15% contractor markup
+    // AC Commerce: Platform provides 8% discount
+    baseEquipmentTradCost = btuData.equipmentCost * 1.15;
+    baseEquipmentAccCost = btuData.equipmentCost * 0.92;
+  } else {
+    // Use project size multiplier for manual calculations
+    baseEquipmentTradCost = projectSize * config.costMultiplier.traditional;
+    baseEquipmentAccCost = projectSize * config.costMultiplier.acCommerce;
+  }
+
+  const baseLaborTradCost =
+    installationTime * config.laborCost.traditional * teamSize;
+  const baseMaintenanceTradCost =
+    propertyType === "industrial-commercial"
+      ? (isFromBTU ? btuData.equipmentCost : projectSize) *
+        0.05 *
+        maintenanceFrequency
+      : 0;
+
+  const baseLaborAccCost =
+    installationTime * config.laborCost.acCommerce * teamSize;
+  const baseMaintenanceAccCost =
+    propertyType === "industrial-commercial"
+      ? (isFromBTU ? btuData.equipmentCost : projectSize) *
+        0.02 *
+        maintenanceFrequency
+      : 0;
+
+  // Calculate per-project costs before multi-unit scaling
+  let baseUnitTradCost =
+    baseEquipmentTradCost + baseLaborTradCost + baseMaintenanceTradCost;
+  let baseUnitAccCost =
+    baseEquipmentAccCost + baseLaborAccCost + baseMaintenanceAccCost;
+
+  // Apply multi-unit adjustments if needed
+  let traditionalCostPerProject = baseUnitTradCost;
+  let acCommerceCostPerProject = baseUnitAccCost;
+
+  if (propertyType === "residential-multi") {
+    const coordinationOverhead = 1.05;
+    traditionalCostPerProject =
+      baseUnitTradCost * numberOfUnits * coordinationOverhead;
+    acCommerceCostPerProject =
+      baseUnitAccCost * numberOfUnits * coordinationOverhead * 0.9;
+  }
+
+  // Apply service type multiplier to final per-project costs
+  traditionalCostPerProject = traditionalCostPerProject * multiplier.cost;
+  acCommerceCostPerProject = acCommerceCostPerProject * multiplier.cost;
+
+  // For display: breakdown costs should match the final costs shown in comparison
+  // Apply same multipliers to component costs for consistency
+  const equipmentTradCost =
+    baseEquipmentTradCost *
+    (propertyType === "residential-multi" ? numberOfUnits * 1.05 : 1) *
+    multiplier.cost;
+  const laborTradCost =
+    baseLaborTradCost *
+    (propertyType === "residential-multi" ? numberOfUnits * 1.05 : 1) *
+    multiplier.cost;
+  const maintenanceTradCost =
+    baseMaintenanceTradCost *
+    (propertyType === "residential-multi" ? numberOfUnits * 1.05 : 1) *
+    multiplier.cost;
+  const equipmentAccCost =
+    baseEquipmentAccCost *
+    (propertyType === "residential-multi" ? numberOfUnits * 1.05 * 0.9 : 1) *
+    multiplier.cost;
+  const laborAccCost =
+    baseLaborAccCost *
+    (propertyType === "residential-multi" ? numberOfUnits * 1.05 * 0.9 : 1) *
+    multiplier.cost;
+  const maintenanceAccCost =
+    baseMaintenanceAccCost *
+    (propertyType === "residential-multi" ? numberOfUnits * 1.05 * 0.9 : 1) *
+    multiplier.cost;
+
   const savingsPerProject =
     traditionalCostPerProject - acCommerceCostPerProject;
   const savingsPercentage = (
@@ -505,6 +731,10 @@ export default function ROICalculatorExperimental() {
   const annualAcCommerceCost = acCommerceCostPerProject * projectsPerYear;
   const annualSavings = annualTraditionalCost - annualAcCommerceCost;
   const roi = ((annualSavings / annualAcCommerceCost) * 100).toFixed(1);
+  const timeReduction = (
+    (1 - (installationTime * config.timeReductionFactor) / installationTime) *
+    100
+  ).toFixed(0);
 
   // Monthly breakdown data
   const monthlyData = Array.from({ length: monthsToAnalyze }, (_, i) => ({
@@ -513,19 +743,23 @@ export default function ROICalculatorExperimental() {
     acCommerce: acCommerceCostPerProject * adjustedProjectsPerMonth * (i + 1),
   }));
 
-  // Cost distribution data
+  // Cost distribution data using property type config
   const costDistribution = [
-    { name: "Materials", value: projectSize * 0.6 },
-    { name: "Labor", value: installationTime * 500 * teamSize },
-    { name: "Overhead", value: projectSize * 0.15 },
-    { name: "Other", value: projectSize * 0.15 },
+    { name: "Equipment", value: equipmentTradCost },
+    { name: "Labor", value: laborTradCost },
+    { name: "Overhead", value: projectSize * 0.1 },
+    ...(propertyType === "industrial-commercial"
+      ? [{ name: "Maintenance", value: maintenanceTradCost }]
+      : [{ name: "Other", value: projectSize * 0.05 }]),
   ];
 
   const acCommerceCostDistribution = [
-    { name: "Materials", value: projectSize * 0.6 },
-    { name: "Labor", value: installationTime * 300 * teamSize },
-    { name: "Platform Fee", value: projectSize * 0.08 },
-    { name: "Other", value: projectSize * 0.08 },
+    { name: "Equipment", value: equipmentAccCost },
+    { name: "Labor", value: laborAccCost },
+    { name: "Platform Fee", value: projectSize * 0.03 },
+    ...(propertyType === "industrial-commercial"
+      ? [{ name: "Maintenance", value: maintenanceAccCost }]
+      : [{ name: "Other", value: projectSize * 0.03 }]),
   ];
 
   const COLORS = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A"];
@@ -972,40 +1206,73 @@ export default function ROICalculatorExperimental() {
                       </small>
                     </Form.Group>
 
+                    {/* Property Type */}
+                    <Form.Group className="mb-4">
+                      <Form.Label className="param-label">
+                        <strong>Property Type</strong>
+                      </Form.Label>
+                      <Form.Select
+                        value={propertyType}
+                        onChange={(e) => setPropertyType(e.target.value)}
+                        className="mb-2"
+                      >
+                        <option value="residential-single">
+                          Residential (Single Unit)
+                        </option>
+                        <option value="residential-multi">
+                          Residential (Multi-Unit)
+                        </option>
+                        <option value="industrial-commercial">
+                          Industrial/Commercial Property
+                        </option>
+                      </Form.Select>
+                      <small className="text-muted">{config.description}</small>
+                    </Form.Group>
+
                     {/* Project Size */}
                     <Form.Group className="mb-4">
                       <Form.Label className="param-label">
-                        Average Project Value: ${projectSize.toLocaleString()}
+                        {propertyType === "industrial-commercial"
+                          ? "Total Project Value"
+                          : "Average Project Value"}
+                        : ${projectSize.toLocaleString()}
                       </Form.Label>
                       <Form.Range
                         value={projectSize}
                         onChange={(e) => setProjectSize(Number(e.target.value))}
-                        min={1000}
-                        max={50000}
+                        min={config.minProjectSize}
+                        max={config.maxProjectSize}
                         step={1000}
                         className="param-slider"
                       />
                       <small className="text-muted">
-                        Range: $1,000 - $50,000
+                        Range: ${config.minProjectSize.toLocaleString()} - $
+                        {config.maxProjectSize.toLocaleString()}
                       </small>
                     </Form.Group>
 
                     {/* Installation Time */}
                     <Form.Group className="mb-4">
                       <Form.Label className="param-label">
-                        Installation Time: {installationTime} days
+                        {propertyType === "industrial-commercial"
+                          ? "Implementation Time"
+                          : "Installation Time"}
+                        : {installationTime} days
                       </Form.Label>
                       <Form.Range
                         value={installationTime}
                         onChange={(e) =>
                           setInstallationTime(Number(e.target.value))
                         }
-                        min={1}
-                        max={30}
+                        min={config.minInstallationTime}
+                        max={config.maxInstallationTime}
                         step={1}
                         className="param-slider"
                       />
-                      <small className="text-muted">Range: 1 - 30 days</small>
+                      <small className="text-muted">
+                        Range: {config.minInstallationTime} -{" "}
+                        {config.maxInstallationTime} days
+                      </small>
                     </Form.Group>
 
                     {/* Team Size */}
@@ -1023,6 +1290,50 @@ export default function ROICalculatorExperimental() {
                       />
                       <small className="text-muted">Range: 1 - 20 people</small>
                     </Form.Group>
+
+                    {/* Multi-Unit Selector (for residential-multi) */}
+                    {propertyType === "residential-multi" && (
+                      <Form.Group className="mb-4">
+                        <Form.Label className="param-label">
+                          Number of Units: {numberOfUnits}
+                        </Form.Label>
+                        <Form.Range
+                          value={numberOfUnits}
+                          onChange={(e) =>
+                            setNumberOfUnits(Number(e.target.value))
+                          }
+                          min={2}
+                          max={100}
+                          step={1}
+                          className="param-slider"
+                        />
+                        <small className="text-muted">
+                          Range: 2 - 100 units
+                        </small>
+                      </Form.Group>
+                    )}
+
+                    {/* Maintenance Frequency (for industrial-commercial) */}
+                    {propertyType === "industrial-commercial" && (
+                      <Form.Group className="mb-4">
+                        <Form.Label className="param-label">
+                          Annual Maintenance Cycles: {maintenanceFrequency}x
+                        </Form.Label>
+                        <Form.Range
+                          value={maintenanceFrequency}
+                          onChange={(e) =>
+                            setMaintenanceFrequency(Number(e.target.value))
+                          }
+                          min={1}
+                          max={12}
+                          step={1}
+                          className="param-slider"
+                        />
+                        <small className="text-muted">
+                          Range: 1 - 12 cycles per year
+                        </small>
+                      </Form.Group>
+                    )}
 
                     {/* Projects Per Month */}
                     <Form.Group className="mb-4">
@@ -1061,6 +1372,16 @@ export default function ROICalculatorExperimental() {
                       />
                       <small className="text-muted">Range: 1 - 36 months</small>
                     </Form.Group>
+
+                    {/* Clear Button */}
+                    <Button
+                      variant="outline-secondary"
+                      size="lg"
+                      className="w-100 mb-3"
+                      onClick={handleClearForm}
+                    >
+                      🗑️ Clear All Inputs
+                    </Button>
                   </Col>
 
                   {/* Results */}
@@ -1140,6 +1461,122 @@ export default function ROICalculatorExperimental() {
                         <strong>Cost Breakdown (Per Project)</strong>
                       </Card.Header>
                       <Card.Body>
+                        <Row>
+                          <Col md={6}>
+                            <div className="breakdown-section">
+                              <h6 className="breakdown-subtitle">
+                                Traditional Method
+                              </h6>
+                              <div className="breakdown-item">
+                                <span>Equipment Cost:</span>
+                                <span className="cost">
+                                  $
+                                  {equipmentTradCost.toLocaleString("en-US", {
+                                    maximumFractionDigits: 0,
+                                  })}
+                                </span>
+                              </div>
+                              <div className="breakdown-item">
+                                <span>Labor Cost:</span>
+                                <span className="cost">
+                                  $
+                                  {laborTradCost.toLocaleString("en-US", {
+                                    maximumFractionDigits: 0,
+                                  })}
+                                </span>
+                              </div>
+                              {propertyType === "industrial-commercial" && (
+                                <div className="breakdown-item">
+                                  <span>Maintenance/Cycle:</span>
+                                  <span className="cost">
+                                    $
+                                    {maintenanceTradCost.toLocaleString(
+                                      "en-US",
+                                      {
+                                        maximumFractionDigits: 0,
+                                      }
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="breakdown-item breakdown-total">
+                                <span>
+                                  <strong>Total:</strong>
+                                </span>
+                                <span className="cost traditional">
+                                  <strong>
+                                    $
+                                    {(
+                                      equipmentTradCost +
+                                      laborTradCost +
+                                      maintenanceTradCost
+                                    ).toLocaleString("en-US", {
+                                      maximumFractionDigits: 0,
+                                    })}
+                                  </strong>
+                                </span>
+                              </div>
+                            </div>
+                          </Col>
+                          <Col md={6}>
+                            <div className="breakdown-section">
+                              <h6 className="breakdown-subtitle">
+                                AC Commerce Platform
+                              </h6>
+                              <div className="breakdown-item">
+                                <span>Equipment Cost:</span>
+                                <span className="cost highlight-green">
+                                  $
+                                  {equipmentAccCost.toLocaleString("en-US", {
+                                    maximumFractionDigits: 0,
+                                  })}
+                                </span>
+                              </div>
+                              <div className="breakdown-item">
+                                <span>Labor Cost:</span>
+                                <span className="cost highlight-green">
+                                  $
+                                  {laborAccCost.toLocaleString("en-US", {
+                                    maximumFractionDigits: 0,
+                                  })}
+                                </span>
+                              </div>
+                              {propertyType === "industrial-commercial" && (
+                                <div className="breakdown-item">
+                                  <span>Maintenance/Cycle:</span>
+                                  <span className="cost highlight-green">
+                                    $
+                                    {maintenanceAccCost.toLocaleString(
+                                      "en-US",
+                                      {
+                                        maximumFractionDigits: 0,
+                                      }
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="breakdown-item breakdown-total">
+                                <span>
+                                  <strong>Total:</strong>
+                                </span>
+                                <span className="cost highlight-green">
+                                  <strong>
+                                    $
+                                    {(
+                                      equipmentAccCost +
+                                      laborAccCost +
+                                      maintenanceAccCost
+                                    ).toLocaleString("en-US", {
+                                      maximumFractionDigits: 0,
+                                    })}
+                                  </strong>
+                                </span>
+                              </div>
+                            </div>
+                          </Col>
+                        </Row>
+                        <hr />
+                        <h6 className="breakdown-subtitle">Cost Comparison</h6>
                         <div className="breakdown-item">
                           <span>Traditional Method:</span>
                           <span className="cost traditional">

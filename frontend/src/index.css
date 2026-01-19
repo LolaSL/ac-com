@@ -2291,6 +2291,24 @@ hr {
   color: red;
   font-weight: bold;
 }
+
+.btu-error.alert-warning {
+  color: #856404;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 10px 0;
+}
+
+.btu-error.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 10px 0;
+}
 /* .btu-results .table {
   background-color: #ffffff;
   border-radius: 5px;
