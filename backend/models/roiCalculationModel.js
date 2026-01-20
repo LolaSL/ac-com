@@ -102,6 +102,28 @@ const roiCalculationSchema = new mongoose.Schema(
                 price: Number,
                 quantity: Number,
             }],
+            // Preserve original BTU Calculator input parameters and selected condensers
+            inputParams: {
+                measurementSystem: String,
+                ceilingHeight: mongoose.Schema.Types.Mixed,
+                numPeople: Number,
+                options: mongoose.Schema.Types.Mixed,
+                isMultiFlatProperty: Boolean,
+                detectedFlats: [String],
+                acAnnotations: [mongoose.Schema.Types.Mixed],
+                isVRFSystem: Boolean,
+                condenserSizingStatus: String,
+                condensers: [
+                    {
+                        _id: String,
+                        name: String,
+                        model: String,
+                        btu: Number,
+                        price: Number,
+                        flatName: String,
+                    },
+                ],
+            },
         },
         // Calculated Results
         savingsPerProject: {

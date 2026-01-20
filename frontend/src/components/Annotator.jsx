@@ -954,7 +954,9 @@ const Annotator = ({
         setRoomData(formattedRooms);
       }
     }
-  }, [filteredRoomsTrigger, setRoomData]);
+    // Intentionally exclude `setRoomData` from deps to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredRoomsTrigger]);
 
   // Trigger update when filter text changes
   useEffect(() => {
@@ -1662,7 +1664,10 @@ const Annotator = ({
         originalImageHeight
       );
     };
-  }, [results, images, setRoomData]);
+    // `setRoomData` may be an inline prop from parent and change identity each render.
+    // Exclude it from deps to avoid retriggering this effect repeatedly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [results, images]);
 
   useEffect(() => {
     if (setRoomData && allRooms.length > 0) {
@@ -1670,7 +1675,10 @@ const Annotator = ({
       console.log("Syncing rooms to parent:", flattenedRooms);
       setRoomData(flattenedRooms);
     }
-  }, [allRooms, setRoomData]);
+    // Avoid including `setRoomData` in deps to prevent update loops when parent
+    // passes a non-memoized function. We still call it conditionally inside.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allRooms]);
 
   useEffect(() => {
     if (isSaved) {
@@ -1701,10 +1709,24 @@ const Annotator = ({
       unit: "meters",
     }));
 
+    // Extract AC annotations (ac-1.1, condenser-1, etc.)
+    const acAnnotations = comments
+      .filter(
+        (comment) =>
+          comment.text &&
+          (comment.text.toLowerCase().match(/^ac-\d+\.\d+/) ||
+            comment.text.toLowerCase().match(/^condenser-\d+/))
+      )
+      .map((comment) => ({
+        label: comment.text,
+        coordinates: { x: comment.x, y: comment.y },
+      }));
+
     console.log("Formatted rooms:", formattedRooms);
+    console.log("AC annotations:", acAnnotations);
 
     if (typeof setRoomData === "function") {
-      setRoomData(formattedRooms);
+      setRoomData(formattedRooms, acAnnotations);
       // Scroll to BTU Calculator after setting room data
       if (typeof onExportToBtuCalculator === "function") {
         onExportToBtuCalculator();

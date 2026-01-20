@@ -32,9 +32,18 @@ const GridItem = ({ children }) => (
 
 const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
-  const [roomData, setRoomData] = useState([]);
+  const [roomData, setRoomDataState] = useState([]);
+  const [acAnnotations, setAcAnnotations] = useState([]);
   const [error, setError] = useState(null);
   const btuCalculatorRef = useRef(null);
+
+  // Wrapper for setRoomData that also accepts annotations
+  const setRoomData = (rooms, annotations = []) => {
+    setRoomDataState(rooms);
+    if (annotations && annotations.length > 0) {
+      setAcAnnotations(annotations);
+    }
+  };
 
   const token = useMemo(() => getToken(), []);
 
@@ -69,7 +78,8 @@ const Measurement = () => {
 
   useEffect(() => {
     console.log("ROOM DATA UPDATED:", roomData);
-  }, [roomData]);
+    console.log("AC ANNOTATIONS:", acAnnotations);
+  }, [roomData, acAnnotations]);
 
   const handleScrollToBtuCalculator = () => {
     if (btuCalculatorRef.current) {
@@ -114,7 +124,7 @@ const Measurement = () => {
       </AnnotatorErrorBoundary>
       {roomData && roomData.length > 0 && (
         <div ref={btuCalculatorRef}>
-          <BtuCalculator roomData={roomData} />
+          <BtuCalculator roomData={roomData} acAnnotations={acAnnotations} />
         </div>
       )}
 

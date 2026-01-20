@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -10,11 +10,69 @@ import CheckboxGroup from "./CheckboxGroup.jsx";
 import printJS from "print-js";
 import TableBody from "./TableBody";
 import { ShoppingCart } from "lucide-react";
+import { toast } from "react-toastify";
 
-function BtuCalculator({ roomData }) {
+function BtuCalculator({ roomData, acAnnotations = [] }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
   const componentRef = useRef();
+  const cartItems = state?.cart?.cartItems || [];
+
+  // Parse AC annotations (e.g., "ac-1.1", "ac-1.2", "condenser-1")
+  const parseAcAnnotations = useCallback((annotations) => {
+    const acUnits = [];
+    const condensers = {};
+
+    annotations.forEach((annotation) => {
+      const label = annotation.label?.toLowerCase() || "";
+
+      // Match patterns: ac-1.1, ac-2.1, etc.
+      const acMatch = label.match(/ac-(\d+)\.(\d+)/);
+      if (acMatch) {
+        const flatNumber = acMatch[1];
+        const unitNumber = acMatch[2];
+        acUnits.push({
+          label: annotation.label,
+          flatNumber: parseInt(flatNumber),
+          unitNumber: parseInt(unitNumber),
+          coordinates: annotation.coordinates,
+        });
+      }
+
+      // Match patterns: condenser-1, condenser-2, etc.
+      const condenserMatch = label.match(/condenser-(\d+)/);
+      if (condenserMatch) {
+        const flatNumber = condenserMatch[1];
+        condensers[flatNumber] = {
+          label: annotation.label,
+          flatNumber: parseInt(flatNumber),
+          coordinates: annotation.coordinates,
+        };
+      }
+    });
+
+    return { acUnits, condensers };
+  }, []);
+
+  // Group flats based on parsed annotations
+  const groupFlatsByAnnotations = useCallback(
+    (annotations) => {
+      const { acUnits, condensers } = parseAcAnnotations(annotations);
+      const flats = {};
+
+      // Create flat structure based on condensers found
+      Object.keys(condensers).forEach((flatNum) => {
+        flats[`Flat ${flatNum}`] = {
+          flatNumber: parseInt(flatNum),
+          acUnits: acUnits.filter((ac) => ac.flatNumber === parseInt(flatNum)),
+          condenser: condensers[flatNum],
+        };
+      });
+
+      return { flats, acUnits, condensers };
+    },
+    [parseAcAnnotations]
+  );
 
   useEffect(() => {
     if (roomData?.length) {
@@ -31,17 +89,25 @@ function BtuCalculator({ roomData }) {
         console.log("BtuCalculator received rooms:", formattedRooms);
         setRooms(formattedRooms);
       }
-    }
-  }, [roomData]);
 
+      // Parse AC annotations if provided
+      if (acAnnotations?.length > 0) {
+        const { flats } = groupFlatsByAnnotations(acAnnotations);
+        const flatNames = Object.keys(flats);
+        console.log("Detected flats from annotations:", flatNames);
+
+        if (flatNames.length > 1) {
+          setIsMultiFlatProperty(true);
+          setDetectedFlats(flatNames);
+        }
+      }
+    }
+  }, [roomData, acAnnotations, groupFlatsByAnnotations]);
   const handlePrint = () => {
     if (!rooms?.length || !btuResults?.length) return;
 
     // Ensure condenser calculation has completed
-    if (
-      showCondenser &&
-      (!selectedCondensers || selectedCondensers.length === 0)
-    ) {
+    if (showCondenser && condensersForDisplay.length === 0) {
       alert("Please wait for calculations to complete before printing.");
       return;
     }
@@ -63,26 +129,24 @@ function BtuCalculator({ roomData }) {
           0
         )
       : 0;
-    const condenserTotalBTU = selectedCondensers
-      ? selectedCondensers.reduce((sum, cond) => sum + (cond.btu || 0), 0)
-      : 0;
-    const condenserTotalPrice = selectedCondensers
-      ? selectedCondensers.reduce(
-          (sum, cond) =>
-            sum +
-            (cond.price
-              ? cond.discount
-                ? cond.price - (cond.price * cond.discount) / 100
-                : cond.price
-              : 0),
-          0
-        )
-      : 0;
+    // Treat condenser as a single aggregated condenser in print/export
+    const condenserTotalBTU = condensersForDisplay.reduce(
+      (sum, c) => sum + (c?.btu || 0),
+      0
+    );
+    const condenserTotalPrice = condensersForDisplay.reduce((sum, c) => {
+      if (!c) return sum;
+      const price = c.price
+        ? c.discount
+          ? c.price - (c.price * c.discount) / 100
+          : c.price
+        : 0;
+      return sum + price;
+    }, 0);
 
-    // Calculate totals including condensers
+    // Calculate totals including condensers (may be multiple)
     const totalItemCount =
-      products.length +
-      (selectedCondensers && showCondenser ? selectedCondensers.length : 0);
+      products.length + (showCondenser ? condensersForDisplay.length : 0);
     const totalAllBTU = totalProductBTU + condenserTotalBTU;
     const totalAllPrice = totalPrice + condenserTotalPrice;
 
@@ -124,13 +188,15 @@ function BtuCalculator({ roomData }) {
             )
             .join("")}
           ${
-            selectedCondensers && selectedCondensers.length > 0 && showCondenser
-              ? selectedCondensers
+            condensersForDisplay &&
+            condensersForDisplay.length > 0 &&
+            showCondenser
+              ? condensersForDisplay
                   .map(
                     (cond, index) => `
             <tr style="background-color: #f0f8ff;">
               <td style="font-weight: bold; color: #007bff;">${
-                selectedCondensers.length > 1
+                condensersForDisplay.length > 1
                   ? `Condenser ${index + 1}`
                   : "Condenser"
               }</td>
@@ -143,20 +209,20 @@ function BtuCalculator({ roomData }) {
                   : ""
               }</td>
               <td style="font-weight: bold; color: #007bff;">${
-                cond.name || ""
+                cond?.name || ""
               }</td>
               <td style="font-weight: bold;">${
-                cond.model ||
-                `${cond.btu} BTU ${
+                cond?.model ||
+                `${cond?.btu} BTU ${
                   isVRFSystem ? "VRF" : "Multi-System"
                 } Condenser`
               }</td>
               <td style="font-weight: bold; color: ${
                 condenserSizingStatus === "custom" ? "#ff8c00" : "#007bff"
               };">${
-                      cond.price > 0
+                      cond?.price > 0
                         ? `$${
-                            cond.discount
+                            cond?.discount
                               ? (
                                   cond.price -
                                   (cond.price * cond.discount) / 100
@@ -217,9 +283,11 @@ function BtuCalculator({ roomData }) {
       <tr class="text-center" style="background-color: #f8f9fa;">
         <td colspan="5" style="color: ${statusColor}; font-weight: bold;">
           <strong>Condenser Status: ${statusText}</strong><br/>
-          <small>${selectedCondensers
-            .map((cond) => `${cond.name} - ${cond.btu} BTU`)
-            .join(", ")}</small>
+          <small>${
+            condenser
+              ? `${condenser.name} - ${condenser.btu} BTU`
+              : "Estimated condenser"
+          }</small>
         </td>
       </tr>
     `;
@@ -298,12 +366,6 @@ function BtuCalculator({ roomData }) {
     });
   };
 
-  const cartItems = state?.cart?.cartItems || [];
-  cartItems.map((item) => (
-    <div key={item.id}>
-      {item.name} - {item.quantity}
-    </div>
-  ));
   const [measurementSystem, setMeasurementSystem] = useState("meters");
   const [rooms, setRooms] = useState([{ name: "Bedroom 1", size: "", btu: 0 }]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
@@ -383,8 +445,10 @@ function BtuCalculator({ roomData }) {
   const [btuResults, setBtuResults] = useState([]);
   const [products, setProducts] = useState([]);
   const [isVRFSystem, setIsVRFSystem] = useState(false);
+  const [isMultiFlatProperty, setIsMultiFlatProperty] = useState(false);
+  const [detectedFlats, setDetectedFlats] = useState([]);
 
-  const hvacSystemType = isVRFSystem ? "vrf" : "minisplit";
+  // hvacSystemType was removed to avoid unused variable; use `isVRFSystem` directly
 
   // VRF system limits and validations
   const MAX_VRF_INDOOR_UNITS = 64;
@@ -620,6 +684,32 @@ function BtuCalculator({ roomData }) {
 
     return { btu: Math.round(btu), error: null };
   };
+
+  // Detect and group rooms by flat
+  const detectFlatGroupings = (roomList) => {
+    const flats = {};
+    if (!Array.isArray(roomList)) {
+      return flats;
+    }
+    roomList.forEach((room) => {
+      // Skip if room or room.name is undefined
+      if (!room || !room.name || typeof room.name !== "string") {
+        return;
+      }
+      // Check if room name includes flat identifier (e.g., "Flat 1: Bedroom" or "Unit A: Living Room")
+      const flatMatch = room.name.match(
+        /^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)[\s:]/i
+      );
+      const flatId = flatMatch ? flatMatch[1].toUpperCase() : "Flat 1";
+
+      if (!flats[flatId]) {
+        flats[flatId] = [];
+      }
+      flats[flatId].push(room);
+    });
+    return flats;
+  };
+
   const handleCalculate = async () => {
     setError("");
     const results = [];
@@ -724,86 +814,140 @@ function BtuCalculator({ roomData }) {
     if (!condenser) {
       // Calculate required condenser BTU based on system type
       const multiplier = isVRF ? 1.0 : 0.8;
-      const requiredBTU = totalBTU * multiplier;
 
-      // For large systems, use wider acceptable range
-      // Note: Current logic uses dynamic selection based on remaining capacity
-      // minAcceptable and maxAcceptable ranges calculated but not currently used
+      // Helper function to find suitable condenser for a given BTU
+      const findSuitableCondenser = async (requiredBTU, label = "") => {
+        let availableCondensers =
+          condenserCandidates.length > 0 ? condenserCandidates : [];
 
-      // Use condenserCandidates if available, otherwise fetch from API
-      // This ensures we search from actual condenser products in the system
-      let availableCondensers =
-        condenserCandidates.length > 0 ? condenserCandidates : [];
-
-      // If no condensers found in candidates, try fetching from database
-      if (availableCondensers.length === 0) {
-        try {
-          // Fetch all available condensers from the /condensers/:btu endpoint
-          // This endpoint returns condensers for a given BTU requirement
-          const { data: condenserList } = await axios.get(
-            `/api/products/condensers/${Math.round(requiredBTU)}`
-          );
-          if (Array.isArray(condenserList)) {
-            availableCondensers = condenserList;
+        if (availableCondensers.length === 0) {
+          try {
+            const { data: condenserList } = await axios.get(
+              `/api/products/condensers/${Math.round(requiredBTU)}`
+            );
+            if (Array.isArray(condenserList)) {
+              availableCondensers = condenserList;
+            }
+          } catch (err) {
+            console.log(
+              `Could not fetch condensers for ${label}, will use estimate`
+            );
           }
-        } catch (err) {
-          console.log(
-            "Could not fetch condensers from database, will use estimate"
+        }
+
+        availableCondensers.sort((a, b) => a.btu - b.btu);
+
+        let suitableCondenser = null;
+        let minDiff = Infinity;
+        for (const cond of availableCondensers) {
+          const diff = Math.abs(cond.btu - requiredBTU);
+          if (diff < minDiff) {
+            minDiff = diff;
+            suitableCondenser = cond;
+          }
+        }
+
+        if (suitableCondenser && suitableCondenser.btu < requiredBTU * 0.9) {
+          const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
+          return {
+            _id: `condenser-custom-${label}-${requiredBTU}`,
+            name: label ? `${label} Condenser` : "Custom Condenser Required",
+            model: `${Math.round(requiredBTU)} BTU ${
+              isVRFSystem ? "VRF" : "Multi-System"
+            } Condenser`,
+            btu: Math.round(requiredBTU),
+            price: estimatedPrice,
+            discount: 0,
+            slug: null,
+            flatName: label || undefined,
+          };
+        } else if (suitableCondenser) {
+          return {
+            ...suitableCondenser,
+            flatName: label || undefined,
+            name: label
+              ? `${label} Condenser - ${suitableCondenser.name}`
+              : suitableCondenser.name,
+          };
+        } else {
+          const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
+          return {
+            _id: `condenser-custom-${label}-${requiredBTU}`,
+            name: label ? `${label} Condenser` : "Custom Condenser Required",
+            model: `${Math.round(requiredBTU)} BTU ${
+              isVRFSystem ? "VRF" : "Multi-System"
+            } Condenser`,
+            btu: Math.round(requiredBTU),
+            price: estimatedPrice,
+            discount: 0,
+            slug: null,
+            flatName: label || undefined,
+          };
+        }
+      };
+
+      // Check if this is a multi-flat property with separate condensers
+      if (
+        isMultiFlatProperty &&
+        detectedFlats.length > 1 &&
+        acAnnotations?.length > 0
+      ) {
+        // Multi-flat property: calculate separate condensers per flat
+        console.log(
+          "Multi-flat property detected - calculating per-flat condensers"
+        );
+
+        const { flats, acUnits } = groupFlatsByAnnotations(acAnnotations);
+
+        // Calculate BTU per flat based on AC annotations
+        const flatBTUs = {};
+        const flatRooms = detectFlatGroupings(rooms);
+
+        // For each detected flat, sum the BTU from associated rooms
+        detectedFlats.forEach((flatName) => {
+          const flatNum = flatName.match(/\d+/)?.[0];
+          if (flatNum && flats[flatName]) {
+            // Sum BTU from all rooms for this flat (if room naming includes flat identifier)
+            let flatTotalBTU = 0;
+            if (flatRooms[flatName]) {
+              flatRooms[flatName].forEach((room) => {
+                const roomBtu = room.btu || 0;
+                flatTotalBTU += roomBtu;
+              });
+            } else {
+              // If rooms don't have flat identifiers, estimate based on AC unit count
+              const acUnitCount = flats[flatName].acUnits.length;
+              const avgBtuPerUnit = totalBTU / (acUnits.length || 1);
+              flatTotalBTU = avgBtuPerUnit * acUnitCount;
+            }
+            flatBTUs[flatName] = flatTotalBTU;
+          }
+        });
+
+        // If flatBTUs calculation didn't work, use equal distribution
+        if (Object.keys(flatBTUs).length === 0) {
+          const btuPerFlat = totalBTU / detectedFlats.length;
+          detectedFlats.forEach((flatName) => {
+            flatBTUs[flatName] = btuPerFlat;
+          });
+        }
+
+        // Create separate condenser for each flat
+        selectedCondensers = [];
+
+        for (const [flatName, flatBTU] of Object.entries(flatBTUs)) {
+          const flatRequiredBTU = flatBTU * multiplier;
+          const condResult = await findSuitableCondenser(
+            flatRequiredBTU,
+            flatName
           );
+          selectedCondensers.push(condResult);
         }
-      }
-
-      // Sort condensers by BTU ascending to find the smallest suitable condenser
-      availableCondensers.sort((a, b) => a.btu - b.btu);
-
-      // Find the condenser closest to the required capacity
-      let suitableCondenser = null;
-      let minDiff = Infinity;
-      for (const cond of availableCondensers) {
-        const diff = Math.abs(cond.btu - requiredBTU);
-        if (diff < minDiff) {
-          minDiff = diff;
-          suitableCondenser = cond;
-        }
-      }
-
-      // If the closest is more than 10% undersized, create custom
-      if (suitableCondenser && suitableCondenser.btu < requiredBTU * 0.9) {
-        // Create custom
-        const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
-        selectedCondensers = [
-          {
-            _id: `condenser-custom-${requiredBTU}`,
-            name: "Custom Condenser Required",
-            model: `${Math.round(requiredBTU)} BTU ${
-              isVRFSystem ? "VRF" : "Multi-System"
-            } Condenser`,
-            btu: Math.round(requiredBTU),
-            price: estimatedPrice,
-            discount: 0,
-            slug: null,
-          },
-        ];
-        sizingStatus = "custom";
-      } else if (suitableCondenser) {
-        selectedCondensers = [suitableCondenser];
       } else {
-        // No condensers available, create custom
-        const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
-        selectedCondensers = [
-          {
-            _id: `condenser-custom-${requiredBTU}`,
-            name: "Custom Condenser Required",
-            model: `${Math.round(requiredBTU)} BTU ${
-              isVRFSystem ? "VRF" : "Multi-System"
-            } Condenser`,
-            btu: Math.round(requiredBTU),
-            price: estimatedPrice,
-            discount: 0,
-            slug: null,
-          },
-        ];
-        sizingStatus = "custom";
+        // Single flat or no annotations: use existing logic
+        const requiredBTU = totalBTU * multiplier;
+        const condResult = await findSuitableCondenser(requiredBTU);
+        selectedCondensers = [condResult];
       }
 
       // Calculate total BTU provided by selected condensers
@@ -812,8 +956,9 @@ function BtuCalculator({ roomData }) {
         0
       );
 
-      // Determine sizing status
-      const percentage = (totalCondenserBTU / requiredBTU) * 100;
+      // Determine sizing status based on scenario
+      let comparisonBTU = totalBTU * multiplier;
+      const percentage = (totalCondenserBTU / comparisonBTU) * 100;
       if (percentage >= 98 && percentage <= 102) {
         sizingStatus = "perfect";
       } else if (percentage > 102) {
@@ -853,12 +998,23 @@ function BtuCalculator({ roomData }) {
     maximumFractionDigits: 2,
   });
 
-  const saveResultsToCart = () => {
+  // Helper: prefer the detailed selectedCondensers array when present (multi-flat),
+  // otherwise fall back to the single `condenser` object if available.
+  const condensersForDisplay =
+    selectedCondensers && selectedCondensers.length > 0
+      ? selectedCondensers
+      : condenser
+      ? [condenser]
+      : [];
+
+  const saveResultsToCart = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     // Ensure condenser calculation has completed if condensers should be shown
-    if (
-      showCondenser &&
-      (!selectedCondensers || selectedCondensers.length === 0)
-    ) {
+    if (showCondenser && condensersForDisplay.length === 0) {
       alert("Please wait for calculations to complete before saving to cart.");
       return;
     }
@@ -912,18 +1068,22 @@ function BtuCalculator({ roomData }) {
       addItemToCart(product, quantity);
     });
 
-    // Add all selected condensers to cart if available
-    if (selectedCondensers && selectedCondensers.length > 0 && showCondenser) {
-      selectedCondensers.forEach((condenser) => {
-        addItemToCart(condenser, 1);
-      });
+    // Add all condensers (supports multi-flat) to cart if available
+    if (showCondenser && condensersForDisplay.length > 0) {
+      condensersForDisplay.forEach((c) => addItemToCart(c, 1));
     }
 
+    toast.success("Products added to cart successfully!");
     navigate("/cart");
   };
 
   // Navigate to ROI Calculator with BTU data
-  const handleCalculateROI = () => {
+  const handleCalculateROI = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     // Calculate total equipment cost from products (indoor units)
     const totalIndoorUnitsCost =
       products.length > 0
@@ -934,20 +1094,25 @@ function BtuCalculator({ roomData }) {
           }, 0)
         : 0;
 
-    // Add condenser cost based on total BTU
-    // For multi-split systems, one condenser is needed for all indoor units
-    // Condenser cost: $4058.40 for 60000 BTU Multi-System Condenser
-    const condenserCost = totalBTU > 0 ? 4058.4 : 0;
-
-    // Total equipment cost = indoor units + condenser
+    // Add condenser cost based on selected condensers (supports multi-flat)
+    const condenserCost = showCondenser
+      ? condensersForDisplay.reduce((sum, c) => {
+          if (!c) return sum;
+          const price = c.price
+            ? c.discount
+              ? c.price - (c.price * c.discount) / 100
+              : c.price
+            : 0;
+          return sum + price;
+        }, 0)
+      : 0;
     const totalEquipmentCost = totalIndoorUnitsCost + condenserCost;
 
     // Determine property type based on number of rooms
     let propertyType = "residential-single";
-    if (rooms.length >= 10) {
+    if (isMultiFlatProperty || detectedFlats.length > 1 || rooms.length >= 10) {
       propertyType = "residential-multi";
     } else if (rooms.length >= 3) {
-      // 3+ rooms = multi-unit (multiple AC units in same property)
       propertyType = "residential-multi";
     }
 
@@ -957,27 +1122,19 @@ function BtuCalculator({ roomData }) {
       Math.ceil(rooms.length * 0.7 + totalBTU / 10000)
     );
 
-    // Calculate realistic project size for ROI calculator
-    // Project size should represent the total scope value including labor and overhead
-    // Formula: equipment cost / typical equipment percentage (20-30% of total project)
-    // For residential-single: equipment is ~20% of total project value
-    // For residential-multi: equipment is ~25% of total project value
+    // Calculate realistic project size
     let estimatedProjectSize = totalEquipmentCost;
-
     if (propertyType === "residential-single") {
-      // Equipment typically 20% of total project, so total = equipment / 0.20
       estimatedProjectSize = Math.max(
         1000,
         Math.round(totalEquipmentCost / 0.2)
       );
     } else if (propertyType === "residential-multi") {
-      // Equipment typically 25% of total project, so total = equipment / 0.25
       estimatedProjectSize = Math.max(
         10000,
         Math.round(totalEquipmentCost / 0.25)
       );
     } else {
-      // Industrial/commercial: equipment typically 30% of total project
       estimatedProjectSize = Math.max(
         50000,
         Math.round(totalEquipmentCost / 0.3)
@@ -985,6 +1142,188 @@ function BtuCalculator({ roomData }) {
     }
 
     // Prepare BTU data to pass to ROI Calculator
+    let recommendedUnits = products
+      .filter((p) => p.model)
+      .map((p) => ({
+        type: p.model || "Split System",
+        btu: p.btu || 0,
+        estimatedCost: p.price || 0,
+      }));
+
+    // Append condensers to recommendedUnits when present
+    if (showCondenser && condensersForDisplay.length > 0) {
+      recommendedUnits = recommendedUnits.concat(
+        condensersForDisplay.map((c) => ({
+          type: c.model || c.name || "Condenser",
+          btu: c.btu || 0,
+          estimatedCost: c.price || 0,
+          flatName: c.flatName || undefined,
+        }))
+      );
+    }
+
+    const btuData = {
+      totalBTU,
+      totalSquareFootage: rooms.reduce(
+        (sum, room) => sum + (parseFloat(room.size) || 0),
+        0
+      ),
+      numberOfRooms: rooms.length,
+      recommendedUnits,
+      propertyType,
+      condenserCost,
+      equipmentCost: totalEquipmentCost,
+      estimatedProjectCost: estimatedProjectSize,
+      estimatedInstallationDays: estimatedDays,
+      rooms: rooms.map((room, index) => ({
+        name: room.name,
+        size: room.size,
+        btu: btuResults[index],
+        product: products[index],
+      })),
+      // Include original input parameters so ROI can save/display full calculation context
+      inputParams: {
+        measurementSystem,
+        ceilingHeight,
+        numPeople,
+        options,
+        isMultiFlatProperty,
+        detectedFlats,
+        acAnnotations,
+        isVRFSystem,
+        condenserSizingStatus,
+        condensers: condensersForDisplay.map((c) => ({
+          _id: c._id,
+          name: c.name,
+          model: c.model,
+          btu: c.btu,
+          price: c.price,
+          flatName: c.flatName,
+        })),
+      },
+    };
+
+    // Navigate directly to ROI Calculator
+    navigate("/roi-calculator", {
+      state: {
+        btuData: btuData,
+        fromBTU: true,
+      },
+    });
+  };
+
+  // Handle "Do Both" - save to cart AND navigate to ROI
+  const handleDoBoth = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Ensure condenser calculation has completed if condensers should be shown
+    if (showCondenser && condensersForDisplay.length === 0) {
+      alert("Please wait for calculations to complete before proceeding.");
+      return;
+    }
+
+    const addItemToCart = (product, quantity = 1) => {
+      if (!product) return;
+
+      const existingItem = cartItems.find((item) => item.btu === product.btu);
+      if (existingItem) {
+        ctxDispatch({
+          type: "CART_ADD_ITEM",
+          payload: {
+            ...existingItem,
+            quantity: existingItem.quantity + quantity,
+          },
+        });
+      } else {
+        ctxDispatch({
+          type: "CART_ADD_ITEM",
+          payload: { ...product, quantity },
+        });
+      }
+    };
+
+    // Add all items to cart
+    const productCount = {};
+    rooms.forEach((room, index) => {
+      let product = products[index];
+      if (!product || !product._id || !product.price) {
+        product = {
+          _id: `placeholder-${index}`,
+          name: room.name,
+          btu: 0,
+          price: 0,
+          slug: null,
+          displayName: "No product available",
+        };
+      }
+
+      if (!productCount[product.btu]) {
+        productCount[product.btu] = { product, quantity: 0 };
+      }
+      productCount[product.btu].quantity += 1;
+    });
+
+    Object.values(productCount).forEach(({ product, quantity }) => {
+      addItemToCart(product, quantity);
+    });
+
+    // Add all condensers (supports multi-flat)
+    if (showCondenser && condensersForDisplay.length > 0) {
+      condensersForDisplay.forEach((c) => addItemToCart(c, 1));
+    }
+
+    console.log("handleDoBoth: products and condensers added to cart", {
+      productCount,
+      condensers: condensersForDisplay,
+    });
+    toast.success("Products added to cart! Navigating to ROI Calculator...");
+
+    // Calculate total equipment cost for ROI data
+    const totalIndoorUnitsCost =
+      products.length > 0
+        ? products.reduce((total, product) => {
+            const price =
+              product.price - (product.price * (product.discount || 0)) / 100;
+            return total + price;
+          }, 0)
+        : 0;
+
+    const condenserCost = totalBTU > 0 ? 4058.4 : 0;
+    const totalEquipmentCost = totalIndoorUnitsCost + condenserCost;
+
+    let propertyType = "residential-single";
+    if (rooms.length >= 10) {
+      propertyType = "residential-multi";
+    } else if (rooms.length >= 3) {
+      propertyType = "residential-multi";
+    }
+
+    const estimatedDays = Math.max(
+      1,
+      Math.ceil(rooms.length * 0.7 + totalBTU / 10000)
+    );
+
+    let estimatedProjectSize = totalEquipmentCost;
+    if (propertyType === "residential-single") {
+      estimatedProjectSize = Math.max(
+        1000,
+        Math.round(totalEquipmentCost / 0.2)
+      );
+    } else if (propertyType === "residential-multi") {
+      estimatedProjectSize = Math.max(
+        10000,
+        Math.round(totalEquipmentCost / 0.25)
+      );
+    } else {
+      estimatedProjectSize = Math.max(
+        50000,
+        Math.round(totalEquipmentCost / 0.3)
+      );
+    }
+
     const btuData = {
       totalBTU,
       totalSquareFootage: rooms.reduce(
@@ -1012,21 +1351,38 @@ function BtuCalculator({ roomData }) {
       })),
     };
 
-    // Navigate to ROI Calculator with state
-    navigate("/roi-calculator", {
-      state: {
-        btuData,
-        fromBTU: true,
-      },
-    });
-  };
+    // Append input params to DoBoth btuData so ROI save includes full calculation context
+    btuData.inputParams = {
+      measurementSystem,
+      ceilingHeight,
+      numPeople,
+      options,
+      isMultiFlatProperty,
+      detectedFlats,
+      acAnnotations,
+      isVRFSystem,
+      condenserSizingStatus,
+      condensers: condensersForDisplay.map((c) => ({
+        _id: c._id,
+        name: c.name,
+        model: c.model,
+        btu: c.btu,
+        price: c.price,
+        flatName: c.flatName,
+      })),
+    };
 
-  useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
-    if (savedCart.length > 0) {
-      ctxDispatch({ type: "CART_RESTORE", payload: savedCart });
-    }
-  }, [ctxDispatch]);
+    // Navigate to ROI with cart already updated. Use next-tick guard to ensure state updates.
+    setTimeout(() => {
+      console.log("Navigating to ROI with btuData", btuData);
+      navigate("/roi-calculator", {
+        state: {
+          btuData: btuData,
+          fromBTU: true,
+        },
+      });
+    }, 50);
+  };
 
   const handleClear = () => {
     setRooms([{ name: "Bedroom 1", size: "", btu: 0, unit: "meters" }]);
@@ -1118,6 +1474,41 @@ function BtuCalculator({ roomData }) {
             <option value="feet">Feet (ft²)</option>
           </Form.Control>
         </Form.Group>
+
+        <Form.Group className="mb-4">
+          <Form.Check
+            type="checkbox"
+            id="multiFlat"
+            label="Multi-flat/Multi-unit property (separate condenser for each flat)"
+            checked={isMultiFlatProperty}
+            onChange={(e) => {
+              setIsMultiFlatProperty(e.target.checked);
+              if (e.target.checked) {
+                const flats = detectFlatGroupings(rooms);
+                setDetectedFlats(Object.keys(flats));
+              }
+            }}
+          />
+          {isMultiFlatProperty && detectedFlats.length > 0 && (
+            <small className="text-muted d-block mt-2">
+              ✓ Detected {detectedFlats.length} flat(s):{" "}
+              {detectedFlats.join(", ")}
+              <br />
+              <em>Each flat will get its own condenser sized separately</em>
+            </small>
+          )}
+          {acAnnotations?.length > 0 && (
+            <small className="text-success d-block mt-2">
+              ✓ AC annotations found: {acAnnotations.length} label(s) detected
+              <br />
+              <em>
+                Flats auto-detected from condenser labels (e.g., condenser-1,
+                condenser-2)
+              </em>
+            </small>
+          )}
+        </Form.Group>
+
         {products.length > 0 && (
           <div className="alert alert-info mb-4">
             <strong>📊 System Type Detected:</strong>{" "}
@@ -1291,10 +1682,7 @@ function BtuCalculator({ roomData }) {
               size="sm"
               className="go-to-btn btn-text w-auto pt-2"
               onClick={handlePrint}
-              disabled={
-                showCondenser &&
-                (!selectedCondensers || selectedCondensers.length === 0)
-              }
+              disabled={showCondenser && condensersForDisplay.length === 0}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1313,10 +1701,9 @@ function BtuCalculator({ roomData }) {
                 <rect width="12" height="8" x="6" y="14" />
               </svg>
               Print Table
-              {showCondenser &&
-                (!selectedCondensers || selectedCondensers.length === 0) && (
-                  <small className="d-block text-muted">Calculating...</small>
-                )}
+              {showCondenser && !condenser && (
+                <small className="d-block text-muted">Calculating...</small>
+              )}
             </Button>
             <Table bordered hover className="mt-3 text-center">
               <thead>
@@ -1375,13 +1762,13 @@ function BtuCalculator({ roomData }) {
                 }}
               />
               <tbody>
-                {/* Add condenser rows if available */}
-                {selectedCondensers &&
-                  selectedCondensers.length > 0 &&
-                  showCondenser &&
-                  selectedCondensers.map((cond, index) => (
+                {/* Add condenser rows if available (support multi-flat) */}
+                {showCondenser &&
+                  condensersForDisplay &&
+                  condensersForDisplay.length > 0 &&
+                  condensersForDisplay.map((cond, idx) => (
                     <tr
-                      key={`condenser-${index}`}
+                      key={`cond-${idx}-${cond?._id || cond?.flatName || idx}`}
                       className="condenser-row"
                       style={{ backgroundColor: "#f0f8ff" }}
                     >
@@ -1389,39 +1776,23 @@ function BtuCalculator({ roomData }) {
                         data-label="Room"
                         style={{ fontWeight: "bold", color: "#007bff" }}
                       >
-                        {selectedCondensers.length > 1
-                          ? `Condenser ${index + 1}`
-                          : "Condenser"}
+                        {cond?.name || `Condenser ${idx + 1}`}
                       </td>
                       <td
                         data-label="Room BTU"
                         style={{ fontWeight: "bold", color: "#007bff" }}
                       >
-                        {index === 0 ? (
-                          <>
-                            {(() => {
-                              const roomBtuSum = btuResults.reduce(
+                        {idx === 0
+                          ? `${Math.round(
+                              btuResults.reduce(
                                 (sum, btu) => sum + (btu || 0),
                                 0
-                              );
-                              const multiplier =
-                                hvacSystemType === "vrf" ? 1.0 : 0.8;
-                              const condenserBtu = roomBtuSum * multiplier;
-                              console.log("Condenser calculation:", {
-                                roomBtuSum,
-                                multiplier,
-                                condenserBtu,
-                                selectedCondenserBTU: cond.btu,
-                              });
-                              return `${condenserBtu.toLocaleString()} BTU`;
-                            })()}
-                          </>
-                        ) : (
-                          ""
-                        )}
+                              ) * (isVRFSystem ? 1.0 : 0.8)
+                            ).toLocaleString()} BTU`
+                          : ""}
                       </td>
                       <td data-label="Product">
-                        {cond.slug ? (
+                        {cond?.slug ? (
                           <Link
                             to={`/product/${cond.slug}`}
                             style={{ fontWeight: "bold", color: "#007bff" }}
@@ -1430,7 +1801,7 @@ function BtuCalculator({ roomData }) {
                           </Link>
                         ) : (
                           <span style={{ fontWeight: "bold" }}>
-                            {cond.name}
+                            {cond?.name}
                           </span>
                         )}
                       </td>
@@ -1439,9 +1810,9 @@ function BtuCalculator({ roomData }) {
                         data-label="Product BTU"
                         style={{ fontWeight: "bold" }}
                       >
-                        {cond.model ||
-                          `${cond.btu} BTU ${
-                            hvacSystemType === "vrf" ? "VRF" : "Multi-System"
+                        {cond?.model ||
+                          `${cond?.btu} BTU ${
+                            isVRFSystem ? "VRF" : "Multi-System"
                           } Condenser`}
                       </td>
                       <td
@@ -1455,7 +1826,7 @@ function BtuCalculator({ roomData }) {
                               : "#007bff",
                         }}
                       >
-                        {cond.price > 0
+                        {cond?.price > 0
                           ? `$${(cond.discount > 0
                               ? cond.price - (cond.price * cond.discount) / 100
                               : cond.price
@@ -1498,9 +1869,8 @@ function BtuCalculator({ roomData }) {
                     style={{ color: "red", fontWeight: "bold" }}
                   >
                     {(optimalProductCount || 0) +
-                      (selectedCondensers && showCondenser
-                        ? selectedCondensers.length
-                        : 0) || "No products available"}
+                      (showCondenser ? condensersForDisplay.length : 0) ||
+                      "No products available"}
                   </td>
                   <td
                     data-label="Total Product BTU"
@@ -1512,13 +1882,12 @@ function BtuCalculator({ roomData }) {
                         (total, product) => total + (product.btu || 0),
                         0
                       );
-                      const condensersBTU =
-                        selectedCondensers && showCondenser
-                          ? selectedCondensers.reduce(
-                              (total, cond) => total + (cond.btu || 0),
-                              0
-                            )
-                          : 0;
+                      const condensersBTU = showCondenser
+                        ? condensersForDisplay.reduce(
+                            (sum, c) => sum + (c?.btu || 0),
+                            0
+                          )
+                        : 0;
                       return (productsBTU + condensersBTU).toFixed(0);
                     })()}
                   </td>
@@ -1527,10 +1896,7 @@ function BtuCalculator({ roomData }) {
                     className="total-results"
                     style={{ color: "red", fontWeight: "bold" }}
                   >
-                    {products.length > 0 ||
-                    (selectedCondensers &&
-                      selectedCondensers.length > 0 &&
-                      showCondenser)
+                    {products.length > 0 || (condenser && showCondenser)
                       ? (() => {
                           const indoorUnitsTotal = products.reduce(
                             (total, product) => {
@@ -1542,15 +1908,16 @@ function BtuCalculator({ roomData }) {
                             0
                           );
 
-                          const condensersTotal =
-                            selectedCondensers && showCondenser
-                              ? selectedCondensers.reduce((total, cond) => {
-                                  const price =
-                                    cond.price -
-                                    (cond.price * (cond.discount || 0)) / 100;
-                                  return total + price;
-                                }, 0)
-                              : 0;
+                          const condensersTotal = showCondenser
+                            ? condensersForDisplay.reduce((sum, c) => {
+                                const price = c?.price
+                                  ? c.discount
+                                    ? c.price - (c.price * c.discount) / 100
+                                    : c.price
+                                  : 0;
+                                return sum + price;
+                              }, 0)
+                            : 0;
 
                           return (indoorUnitsTotal + condensersTotal).toFixed(
                             2
@@ -1568,17 +1935,13 @@ function BtuCalculator({ roomData }) {
               variant="light"
               size="sm"
               className="go-to-btn btn-text w-auto py-2"
-              disabled={
-                showCondenser &&
-                (!selectedCondensers || selectedCondensers.length === 0)
-              }
+              disabled={showCondenser && condensersForDisplay.length === 0}
             >
               <ShoppingCart size={20} />
               <span> Save to Cart</span>
-              {showCondenser &&
-                (!selectedCondensers || selectedCondensers.length === 0) && (
-                  <small className="d-block text-muted">Calculating...</small>
-                )}
+              {showCondenser && !condenser && (
+                <small className="d-block text-muted">Calculating...</small>
+              )}
             </Button>
 
             <Button
@@ -1604,10 +1967,34 @@ function BtuCalculator({ roomData }) {
               </svg>
               <span>Calculate ROI for this Project</span>
             </Button>
+
+            <Button
+              onClick={handleDoBoth}
+              variant="info"
+              size="sm"
+              className="go-to-btn btn-text w-auto py-2"
+              disabled={showCondenser && condensersForDisplay.length === 0}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="me-1"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Do Both</span>
+            </Button>
           </div>
-          {selectedCondensers &&
-            selectedCondensers.length > 0 &&
-            showCondenser && (
+          {showCondenser &&
+            condensersForDisplay &&
+            condensersForDisplay.length > 0 && (
               <div
                 className="text-center mt-2 p-3 rounded"
                 style={{
@@ -1617,61 +2004,65 @@ function BtuCalculator({ roomData }) {
               >
                 <strong className="text-primary fs-5">
                   Recommended {isVRFSystem ? "VRF" : "Minisplit"} Condenser:{" "}
-                  {(
-                    btuResults.reduce((total, btu) => total + (btu || 0), 0) *
-                    (isVRFSystem ? 1.0 : 0.8)
-                  ).toFixed(0)}{" "}
+                  {(() => {
+                    const recommended = Math.round(
+                      btuResults.reduce((total, btu) => total + (btu || 0), 0) *
+                        (isVRFSystem ? 1.0 : 0.8)
+                    );
+                    return recommended.toLocaleString();
+                  })()}{" "}
                   BTU
                 </strong>
-                {selectedCondensers.length > 1 && (
+
+                <div className="mt-2">
+                  <span className="badge bg-primary">Condenser Selected</span>
+                  <ul className="small text-muted mb-0 mt-2 list-unstyled">
+                    {condensersForDisplay.map((c, i) => (
+                      <li key={`selected-cond-${i}`}>
+                        {c?.name || `Condenser ${i + 1}`} - {c?.btu || "N/A"}{" "}
+                        BTU
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {condenserSizingStatus === "perfect" && (
                   <div className="mt-2">
-                    <span className="badge bg-primary">
-                      Multiple Condensers Selected
-                    </span>
+                    <span className="badge bg-success">✓ Perfect Match</span>
+                  </div>
+                )}
+
+                {condenserSizingStatus === "oversized" && (
+                  <div className="mt-2">
+                    <span className="badge bg-info">📈 Slightly Oversized</span>
                     <p className="small text-muted mb-0 mt-1">
-                      {selectedCondensers.map(
-                        (cond, index) =>
-                          `${cond.name} - ${cond.btu} BTU${
-                            index < selectedCondensers.length - 1 ? ", " : ""
-                          }`
-                      )}
+                      {condensersForDisplay.map((c, idx) => (
+                        <span key={`ov-${idx}`}>
+                          {c.name} - {c.btu} BTU
+                          {idx < condensersForDisplay.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
+                      <br />
+                      <em>
+                        Provides extra capacity - good for extreme weather
+                        conditions
+                      </em>
                     </p>
                   </div>
                 )}
-                {condenserSizingStatus === "perfect" &&
-                  selectedCondensers.length === 1 && (
-                    <div className="mt-2">
-                      <span className="badge bg-success">✓ Perfect Match</span>
-                      <p className="small text-muted mb-0 mt-1">
-                        {condenser.name} - {condenser.btu} BTU
-                      </p>
-                    </div>
-                  )}
-                {condenserSizingStatus === "oversized" &&
-                  selectedCondensers.length === 1 && (
-                    <div className="mt-2">
-                      <span className="badge bg-info">
-                        📈 Slightly Oversized
-                      </span>
-                      <p className="small text-muted mb-0 mt-1">
-                        {condenser.name} - {condenser.btu} BTU
-                        <br />
-                        <em>
-                          Provides extra capacity - good for extreme weather
-                          conditions
-                        </em>
-                      </p>
-                    </div>
-                  )}
+
                 {condenserSizingStatus === "undersized" && (
                   <div className="mt-2">
                     <span className="badge bg-warning text-dark">
                       ⚠️ Slightly Undersized
                     </span>
                     <p className="small text-muted mb-0 mt-1">
-                      {selectedCondensers
-                        .map((cond) => `${cond.name} - ${cond.btu} BTU`)
-                        .join(", ")}
+                      {condensersForDisplay.map((c, idx) => (
+                        <span key={`ud-${idx}`}>
+                          {c.name} - {c.btu} BTU
+                          {idx < condensersForDisplay.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
                       <br />
                       <em>
                         May not cool effectively in extreme heat - consider next
@@ -1680,18 +2071,14 @@ function BtuCalculator({ roomData }) {
                     </p>
                   </div>
                 )}
+
                 {condenserSizingStatus === "custom" && (
                   <div className="mt-2">
                     <span className="badge bg-warning text-dark">
                       📞 Custom Order Required
                     </span>
                     <p className="small text-muted mb-0 mt-1">
-                      No stock product matches your{" "}
-                      {selectedCondensers.reduce(
-                        (sum, cond) => sum + cond.btu,
-                        0
-                      )}{" "}
-                      BTU requirement
+                      No stock product matches your requirement
                       <br />
                       <em>Please contact us for a custom solution</em>
                     </p>

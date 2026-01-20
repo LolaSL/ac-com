@@ -151,9 +151,11 @@ export default function ROICalculatorExperimental() {
 
       // Set description with BTU details
       setSaveCalculationDescription(
-        `BTU Project: ${btuData.totalBTU} BTU, ${
-          btuData.numberOfRooms
-        } rooms, ${btuData.totalSquareFootage.toFixed(0)} sq ft`
+        `BTU Project: ${btuData.numberOfRooms} room(s), ${
+          btuData.totalSquareFootage
+        } m², ${btuData.totalBTU.toLocaleString()} BTU total. Estimated project cost: $${
+          btuData.estimatedProjectCost?.toLocaleString() || 0
+        }. Installation: ${btuData.estimatedInstallationDays} day(s).`
       );
 
       // Show success message
@@ -185,6 +187,20 @@ export default function ROICalculatorExperimental() {
     } finally {
       setIsLoadingSavedCalcs(false);
     }
+  };
+
+  // Handle opening save modal with auto-generated description from BTU data
+  const handleOpenSaveModal = () => {
+    // Auto-generate description from BTU parameters if available
+    if (btuData && !saveCalculationDescription) {
+      const description = `BTU Project: ${btuData.numberOfRooms} room(s), ${
+        btuData.totalSquareFootage
+      } m², ${btuData.totalBTU.toLocaleString()} BTU total. Estimated project cost: $${
+        btuData.estimatedProjectCost?.toLocaleString() || 0
+      }. Installation: ${btuData.estimatedInstallationDays} day(s).`;
+      setSaveCalculationDescription(description);
+    }
+    setShowSaveModal(true);
   };
 
   // Save calculation to backend
@@ -238,6 +254,8 @@ export default function ROICalculatorExperimental() {
                 price: unit.price,
                 quantity: unit.quantity || 1,
               })),
+              // Preserve full BTU input parameters (measurement, options, condensers)
+              inputParams: btuData.inputParams || undefined,
             }
           : undefined,
         tags: tags
@@ -358,32 +376,46 @@ export default function ROICalculatorExperimental() {
     const margin = 15;
     const maxWidth = pageWidth - margin * 2;
 
-    // Header
-    doc.setFillColor(0, 102, 255);
+    // Add gradient background header
+    doc.setFillColor(0, 102, 255); // Blue background
     doc.rect(0, 0, pageWidth, 50, "F");
+
+    // White text on blue background
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont(undefined, "bold");
     doc.text("AC COMMERCE", margin, 20);
+
     doc.setFontSize(14);
     doc.setFont(undefined, "normal");
     doc.text("ROI Calculator Report", margin, 30);
+
+    // Date line
     doc.setFontSize(10);
     doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 40);
     doc.text(`Saved Calculation: ${calculation.name}`, margin, 47);
 
+    // Reset text color to black
     doc.setTextColor(0, 0, 0);
+
+    // Add decorative line
     doc.setDrawColor(0, 102, 255);
     doc.setLineWidth(1);
     doc.line(margin, 52, pageWidth - margin, 52);
 
     yPosition = 60;
 
+    // Helper function to add section headers with background
     const addSectionHeader = (title) => {
-      doc.setFillColor(240, 247, 255);
+      if (yPosition > pageHeight - 30) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      doc.setFillColor(240, 247, 255); // Light blue background
       doc.rect(margin - 2, yPosition - 5, maxWidth + 4, 12, "F");
       doc.setDrawColor(0, 102, 255);
       doc.rect(margin - 2, yPosition - 5, maxWidth + 4, 12);
+
       doc.setFont(undefined, "bold");
       doc.setFontSize(12);
       doc.setTextColor(0, 102, 255);
@@ -392,40 +424,65 @@ export default function ROICalculatorExperimental() {
       yPosition += 18;
     };
 
-    const addKeyValue = (key, value) => {
+    // Helper function to add table
+    const addTable = (headers, rows) => {
+      if (yPosition > pageHeight - 40) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      const colWidth = maxWidth / headers.length;
       doc.setFont(undefined, "bold");
-      doc.setFontSize(10);
-      doc.text(key + ":", margin + 5, yPosition);
-      doc.setFont(undefined, "normal");
-      doc.text(value, margin + 65, yPosition);
+      doc.setFontSize(9);
+      doc.setFillColor(0, 102, 255);
+      doc.setTextColor(255, 255, 255);
+
+      // Header row
+      headers.forEach((header, index) => {
+        doc.text(header, margin + index * colWidth + 2, yPosition);
+      });
+
       yPosition += lineHeight + 1;
+
+      // Data rows
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, "normal");
+      rows.forEach((row, rowIndex) => {
+        if (yPosition > pageHeight - 15) {
+          doc.addPage();
+          yPosition = 20;
+          // Repeat header
+          doc.setFont(undefined, "bold");
+          doc.setFillColor(0, 102, 255);
+          doc.setTextColor(255, 255, 255);
+          headers.forEach((header, index) => {
+            doc.text(header, margin + index * colWidth + 2, yPosition);
+          });
+          yPosition += lineHeight + 1;
+          doc.setTextColor(0, 0, 0);
+          doc.setFont(undefined, "normal");
+        }
+
+        const bgColor = rowIndex % 2 === 0 ? [245, 245, 245] : [255, 255, 255];
+        doc.setFillColor(...bgColor);
+        doc.rect(margin, yPosition - 5, maxWidth, lineHeight + 1, "F");
+
+        row.forEach((cell, index) => {
+          doc.text(cell.toString(), margin + index * colWidth + 2, yPosition);
+        });
+
+        yPosition += lineHeight + 2;
+      });
+
+      yPosition += 3;
     };
 
-    // INPUT PARAMETERS
-    addSectionHeader("INPUT PARAMETERS");
-    if (calculation.serviceType) {
-      addKeyValue("Service Type", calculation.serviceType);
-    }
-    if (calculation.equipmentAge) {
-      addKeyValue("Equipment Age", calculation.equipmentAge);
-    }
-    addKeyValue(
-      "Project Value",
-      `$${calculation.projectSize.toLocaleString()}`
-    );
-    addKeyValue("Installation Time", `${calculation.installationTime} days`);
-    addKeyValue("Team Size", `${calculation.teamSize} people`);
-    addKeyValue("Projects/Month", `${calculation.projectsPerMonth}`);
-    addKeyValue("Analysis Period", `${calculation.monthsToAnalyze} months`);
+    // ===== PAGE 1: EXECUTIVE SUMMARY & INPUT PARAMETERS =====
 
-    yPosition += 5;
-    if (yPosition > pageHeight - 50) {
-      doc.addPage();
-      yPosition = 20;
-    }
+    // FINANCIAL SUMMARY - Highlighted boxes
+    addSectionHeader("EXECUTIVE SUMMARY");
 
-    // FINANCIAL SUMMARY
-    addSectionHeader("FINANCIAL SUMMARY");
+    // Create colored boxes for key metrics
     const metrics = [
       {
         label: "Per Project Savings",
@@ -433,7 +490,7 @@ export default function ROICalculatorExperimental() {
           maximumFractionDigits: 0,
         })}`,
         subtext: `(${calculation.savingsPercentage}% reduction)`,
-        color: [76, 205, 196],
+        color: [76, 205, 196], // Teal
       },
       {
         label: "Total Period Savings",
@@ -441,22 +498,23 @@ export default function ROICalculatorExperimental() {
           maximumFractionDigits: 0,
         })}`,
         subtext: `${calculation.monthsToAnalyze} months`,
-        color: [255, 107, 107],
+        color: [255, 107, 107], // Red
       },
       {
         label: "Annual ROI",
         value: `${calculation.roi}%`,
         subtext: "Return on Investment",
-        color: [69, 183, 209],
+        color: [69, 183, 209], // Cyan
       },
       {
         label: "Payback Period",
         value: `${calculation.paybackMonths} months`,
         subtext: "To break even",
-        color: [255, 160, 122],
+        color: [255, 160, 122], // Light Salmon
       },
     ];
 
+    // Draw metric boxes in a 2x2 grid
     let metricsPerRow = 2;
     let boxWidth = (maxWidth - 4) / metricsPerRow;
     let boxHeight = 28;
@@ -465,83 +523,312 @@ export default function ROICalculatorExperimental() {
     for (let row = 0; row < 2; row++) {
       for (let col = 0; col < metricsPerRow; col++) {
         if (metricIndex >= metrics.length) break;
+
         const metric = metrics[metricIndex];
         const xPos = margin + col * (boxWidth + 2);
         const boxY = yPosition;
+
+        // Draw box background
         doc.setFillColor(...metric.color);
         doc.rect(xPos, boxY, boxWidth, boxHeight, "F");
+
+        // Add white text
         doc.setTextColor(255, 255, 255);
         doc.setFont(undefined, "normal");
-        doc.setFontSize(9);
-        doc.text(metric.label, xPos + 3, boxY + 6);
-        doc.setFont(undefined, "bold");
-        doc.setFontSize(14);
-        doc.text(metric.value, xPos + 3, boxY + 15);
-        doc.setFont(undefined, "normal");
         doc.setFontSize(8);
-        doc.text(metric.subtext, xPos + 3, boxY + 23);
+        doc.text(metric.label, xPos + 3, boxY + 5);
+
+        doc.setFont(undefined, "bold");
+        doc.setFontSize(13);
+        doc.text(metric.value, xPos + 3, boxY + 14);
+
+        doc.setFont(undefined, "normal");
+        doc.setFontSize(7);
+        doc.text(metric.subtext, xPos + 3, boxY + 22);
+
         metricIndex++;
       }
       yPosition += boxHeight + 3;
     }
 
     doc.setTextColor(0, 0, 0);
+    yPosition += 8;
+
+    // INPUT PARAMETERS TABLE
+    addSectionHeader("INPUT PARAMETERS SUMMARY");
+
+    const paramRows = [
+      ["Service Type", calculation.serviceType],
+      ["Equipment Age", calculation.equipmentAge || "N/A"],
+      ["Project Value", `$${calculation.projectSize.toLocaleString()}`],
+      ["Installation Time", `${calculation.installationTime} days`],
+      ["Team Size", `${calculation.teamSize} people`],
+      ["Projects/Month", calculation.projectsPerMonth.toString()],
+      ["Analysis Period", `${calculation.monthsToAnalyze} months`],
+    ];
+
+    addTable(["Parameter", "Value"], paramRows);
+
     yPosition += 5;
 
-    if (yPosition > pageHeight - 60) {
-      doc.addPage();
-      yPosition = 20;
-    }
+    // ===== PAGE 2: COST BREAKDOWN ANALYSIS =====
 
-    // DETAILED ANALYSIS
-    addSectionHeader("DETAILED ANALYSIS");
-    const projectsPerYear =
-      calculation.projectsPerMonth * calculation.monthsToAnalyze;
+    // DETAILED COST BREAKDOWN TABLE
+    addSectionHeader("COST BREAKDOWN - DETAILED COMPARISON");
+
     const traditionalCostPerProject =
       calculation.projectSize * 0.15 +
       calculation.installationTime * 500 * calculation.teamSize;
     const acCommerceCostPerProject =
       calculation.projectSize * 0.08 +
       calculation.installationTime * 300 * calculation.teamSize;
-    const annualTraditionalCost = traditionalCostPerProject * projectsPerYear;
-    const annualAcCommerceCost = acCommerceCostPerProject * projectsPerYear;
 
-    const analysisItems = [
-      { label: "Total Projects", value: projectsPerYear },
-      {
-        label: "Total Traditional Cost",
-        value: `$${annualTraditionalCost.toLocaleString("en-US", {
+    const costBreakdownRows = [
+      [
+        "Equipment Cost",
+        `$${(calculation.projectSize * 0.15).toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })}`,
-      },
-      {
-        label: "Total AC Commerce Cost",
-        value: `$${annualAcCommerceCost.toLocaleString("en-US", {
+        `$${(calculation.projectSize * 0.08).toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })}`,
-      },
-      {
-        label: "Total Period Savings",
-        value: `$${calculation.annualSavings.toLocaleString("en-US", {
+        `$${(
+          calculation.projectSize * 0.15 -
+          calculation.projectSize * 0.08
+        ).toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })}`,
-      },
+      ],
+      [
+        "Labor Cost",
+        `$${(
+          calculation.installationTime *
+          500 *
+          calculation.teamSize
+        ).toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${(
+          calculation.installationTime *
+          300 *
+          calculation.teamSize
+        ).toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${(
+          calculation.installationTime * 500 * calculation.teamSize -
+          calculation.installationTime * 300 * calculation.teamSize
+        ).toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
+      ],
+      [
+        "TOTAL PER PROJECT",
+        `$${traditionalCostPerProject.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${acCommerceCostPerProject.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${calculation.savingsPerProject.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
     ];
 
-    analysisItems.forEach((item) => {
-      if (yPosition > pageHeight - 30) {
+    addTable(
+      ["Cost Item", "Traditional", "AC Commerce", "Savings"],
+      costBreakdownRows
+    );
+
+    yPosition += 5;
+
+    // SERVICE-SPECIFIC COST ANALYSIS
+    addSectionHeader("SERVICE-SPECIFIC COST ANALYSIS");
+
+    const serviceMultipliers = {
+      "AC Installation": 1.0,
+      "AC Repair": 0.6,
+      "AC Maintenance": 0.3,
+      "Gas Ducted Heating": 1.1,
+      "Indoor Air Quality": 0.8,
+      "Smart Control Automation": 0.5,
+      "Electrical Service": 0.7,
+    };
+
+    const serviceMultiplier =
+      serviceMultipliers[calculation.serviceType] || 1.0;
+    const serviceAdjustedTraditional =
+      traditionalCostPerProject * serviceMultiplier;
+    const serviceAdjustedAcCommerce =
+      acCommerceCostPerProject * serviceMultiplier;
+    const serviceAdjustedSavings =
+      serviceAdjustedTraditional - serviceAdjustedAcCommerce;
+
+    const serviceRows = [
+      ["Service Type", calculation.serviceType],
+      ["Cost Multiplier", `${(serviceMultiplier * 100).toFixed(0)}%`],
+      [
+        "Traditional Method",
+        `$${serviceAdjustedTraditional.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
+      [
+        "AC Commerce Method",
+        `$${serviceAdjustedAcCommerce.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
+      [
+        "Savings",
+        `$${serviceAdjustedSavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
+    ];
+
+    addTable(["Metric", "Amount"], serviceRows);
+
+    yPosition += 5;
+
+    // ===== PAGE 3: PROJECTIONS & TIMELINE =====
+
+    // MONTHLY SAVINGS PROJECTION TABLE
+    addSectionHeader("12-MONTH SAVINGS PROJECTION");
+
+    const monthlyProjectionRows = [];
+    let cumulativeSavings = 0;
+
+    for (
+      let month = 1;
+      month <= Math.min(12, calculation.monthsToAnalyze);
+      month++
+    ) {
+      const monthlySavings =
+        calculation.savingsPerProject * calculation.projectsPerMonth;
+      cumulativeSavings += monthlySavings;
+      monthlyProjectionRows.push([
+        `Month ${month}`,
+        calculation.projectsPerMonth.toString(),
+        `$${monthlySavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${cumulativeSavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ]);
+    }
+
+    addTable(
+      ["Month", "Projects", "Monthly Savings", "Cumulative Savings"],
+      monthlyProjectionRows
+    );
+
+    yPosition += 5;
+
+    // ROI TIMELINE TABLE
+    addSectionHeader("ROI BREAKEVEN & PAYBACK ANALYSIS");
+
+    const roiTimelineRows = [
+      ["Initial Investment", "$0", "Platform setup"],
+      [
+        "Monthly Burn Rate",
+        `$${(
+          calculation.savingsPerProject * calculation.projectsPerMonth
+        ).toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        "Savings/month",
+      ],
+      [
+        "Breakeven Month",
+        `Month ${calculation.paybackMonths}`,
+        "100% ROI achieved",
+      ],
+      [
+        `${calculation.monthsToAnalyze}-Month ROI`,
+        `${calculation.roi}%`,
+        "Projected return",
+      ],
+      [
+        `${calculation.monthsToAnalyze}-Month Savings`,
+        `$${calculation.annualSavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        "Total savings",
+      ],
+    ];
+
+    addTable(["Metric", "Value", "Description"], roiTimelineRows);
+
+    yPosition += 8;
+
+    // ===== LINKED DATA SECTION =====
+    if (calculation.linkedBtuProjectId) {
+      addSectionHeader("LINKED BTU PROJECT DATA");
+
+      doc.setFont(undefined, "bold");
+      doc.setFontSize(10);
+      doc.text("BTU Calculator Integration:", margin + 5, yPosition);
+      yPosition += lineHeight + 2;
+
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(9);
+      doc.text(
+        `Project ID: ${calculation.linkedBtuProjectId}`,
+        margin + 10,
+        yPosition
+      );
+      yPosition += lineHeight;
+    }
+
+    yPosition += 8;
+
+    // RECOMMENDATIONS & INSIGHTS
+    addSectionHeader("RECOMMENDATIONS & KEY INSIGHTS");
+
+    const insights = [
+      `Cost per project will be reduced by ${calculation.savingsPercentage}%`,
+      `Total period savings: $${calculation.annualSavings.toLocaleString(
+        "en-US",
+        {
+          maximumFractionDigits: 0,
+        }
+      )}`,
+      `Platform ROI: ${calculation.roi}% over ${calculation.monthsToAnalyze} months`,
+      `Payback period: ${calculation.paybackMonths} months to recover investment`,
+      `Service type: ${calculation.serviceType} (${(
+        serviceMultiplier * 100
+      ).toFixed(0)}% cost factor)`,
+      "",
+      `RECOMMENDATIONS:`,
+      `  1. Implement AC Commerce platform immediately for cost savings`,
+      `  2. Scale operations to increase project volume and maximize ROI`,
+      `  3. Monitor metrics monthly to track actual vs. projected performance`,
+      `  4. Leverage linked BTU/Product data for enhanced analysis`,
+      `  5. Schedule quarterly reviews to adjust parameters based on actuals`,
+      `  6. Explore advanced features and integrations after initial implementation`,
+    ];
+
+    insights.forEach((insight) => {
+      if (yPosition > pageHeight - 20) {
         doc.addPage();
         yPosition = 20;
       }
-      doc.setFont(undefined, "normal");
-      doc.setFontSize(10);
-      doc.text(`${item.label}:`, margin + 5, yPosition);
-      doc.setFont(undefined, "bold");
-      doc.text(item.value.toString(), pageWidth - margin - 35, yPosition);
-      yPosition += lineHeight + 2;
+
+      if (insight === "") {
+        yPosition += 3;
+      } else {
+        const wrappedText = doc.splitTextToSize(insight, maxWidth - 10);
+        doc.setFont(undefined, insight.includes("→") ? "bold" : "normal");
+        doc.setFontSize(9);
+        doc.text(wrappedText, margin + 5, yPosition);
+        yPosition += wrappedText.length * (lineHeight - 0.5) + 2;
+      }
     });
 
-    // Footer
+    yPosition += 8;
+
+    // Add footer on last page
     doc.setTextColor(100, 100, 100);
     doc.setFontSize(8);
     doc.setFont(undefined, "italic");
@@ -556,7 +843,7 @@ export default function ROICalculatorExperimental() {
       pageHeight - 10
     );
 
-    // Page numbers
+    // Page number
     const totalPages = doc.getNumberOfPages();
     doc.setTextColor(150, 150, 150);
     doc.setFontSize(8);
@@ -731,10 +1018,6 @@ export default function ROICalculatorExperimental() {
   const annualAcCommerceCost = acCommerceCostPerProject * projectsPerYear;
   const annualSavings = annualTraditionalCost - annualAcCommerceCost;
   const roi = ((annualSavings / annualAcCommerceCost) * 100).toFixed(1);
-  const timeReduction = (
-    (1 - (installationTime * config.timeReductionFactor) / installationTime) *
-    100
-  ).toFixed(0);
 
   // Monthly breakdown data
   const monthlyData = Array.from({ length: monthsToAnalyze }, (_, i) => ({
@@ -815,6 +1098,10 @@ export default function ROICalculatorExperimental() {
 
     // Helper function to add section headers with background
     const addSectionHeader = (title) => {
+      if (yPosition > pageHeight - 30) {
+        doc.addPage();
+        yPosition = 20;
+      }
       doc.setFillColor(240, 247, 255); // Light blue background
       doc.rect(margin - 2, yPosition - 5, maxWidth + 4, 12, "F");
       doc.setDrawColor(0, 102, 255);
@@ -828,42 +1115,63 @@ export default function ROICalculatorExperimental() {
       yPosition += 18;
     };
 
-    // Helper function to add key-value pairs
-    const addKeyValue = (key, value) => {
+    // Helper function to add table
+    const addTable = (headers, rows) => {
+      if (yPosition > pageHeight - 40) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      const colWidth = maxWidth / headers.length;
       doc.setFont(undefined, "bold");
-      doc.setFontSize(10);
-      doc.text(key + ":", margin + 5, yPosition);
-      doc.setFont(undefined, "normal");
-      doc.setFontSize(10);
-      doc.text(value, margin + 65, yPosition);
+      doc.setFontSize(9);
+      doc.setFillColor(0, 102, 255);
+      doc.setTextColor(255, 255, 255);
+
+      // Header row
+      headers.forEach((header, index) => {
+        doc.text(header, margin + index * colWidth + 2, yPosition);
+      });
+
       yPosition += lineHeight + 1;
+
+      // Data rows
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, "normal");
+      rows.forEach((row, rowIndex) => {
+        if (yPosition > pageHeight - 15) {
+          doc.addPage();
+          yPosition = 20;
+          // Repeat header
+          doc.setFont(undefined, "bold");
+          doc.setFillColor(0, 102, 255);
+          doc.setTextColor(255, 255, 255);
+          headers.forEach((header, index) => {
+            doc.text(header, margin + index * colWidth + 2, yPosition);
+          });
+          yPosition += lineHeight + 1;
+          doc.setTextColor(0, 0, 0);
+          doc.setFont(undefined, "normal");
+        }
+
+        const bgColor = rowIndex % 2 === 0 ? [245, 245, 245] : [255, 255, 255];
+        doc.setFillColor(...bgColor);
+        doc.rect(margin, yPosition - 5, maxWidth, lineHeight + 1, "F");
+
+        row.forEach((cell, index) => {
+          doc.text(cell.toString(), margin + index * colWidth + 2, yPosition);
+        });
+
+        yPosition += lineHeight + 2;
+      });
+
+      yPosition += 3;
     };
 
-    // INPUT PARAMETERS
-    addSectionHeader("INPUT PARAMETERS");
-    addKeyValue("Service Type", serviceType);
-    if (equipmentAge) {
-      addKeyValue("Equipment Age", equipmentAge);
-    }
-    addKeyValue("Project Value", `$${projectSize.toLocaleString()}`);
-    addKeyValue("Installation Time", `${installationTime} days`);
-    addKeyValue("Team Size", `${teamSize} people`);
-    addKeyValue("Projects/Month", `${projectsPerMonth}`);
-    addKeyValue("Adjusted Projects/Month", `${adjustedProjectsPerMonth}`);
-    addKeyValue("Analysis Period", `${monthsToAnalyze} months`);
-
-    yPosition += 5;
-
-    // Check for page break
-    if (yPosition > pageHeight - 50) {
-      doc.addPage();
-      doc.setFillColor(0, 102, 255);
-      doc.rect(0, 0, pageWidth, 10, "F");
-      yPosition = 20;
-    }
+    // ===== PAGE 1: EXECUTIVE SUMMARY & INPUT PARAMETERS =====
 
     // FINANCIAL SUMMARY - Highlighted boxes
-    addSectionHeader("FINANCIAL SUMMARY");
+    addSectionHeader("EXECUTIVE SUMMARY");
 
     // Create colored boxes for key metrics
     const metrics = [
@@ -918,16 +1226,16 @@ export default function ROICalculatorExperimental() {
         // Add white text
         doc.setTextColor(255, 255, 255);
         doc.setFont(undefined, "normal");
-        doc.setFontSize(9);
-        doc.text(metric.label, xPos + 3, boxY + 6);
+        doc.setFontSize(8);
+        doc.text(metric.label, xPos + 3, boxY + 5);
 
         doc.setFont(undefined, "bold");
-        doc.setFontSize(14);
-        doc.text(metric.value, xPos + 3, boxY + 15);
+        doc.setFontSize(13);
+        doc.text(metric.value, xPos + 3, boxY + 14);
 
         doc.setFont(undefined, "normal");
-        doc.setFontSize(8);
-        doc.text(metric.subtext, xPos + 3, boxY + 23);
+        doc.setFontSize(7);
+        doc.text(metric.subtext, xPos + 3, boxY + 22);
 
         metricIndex++;
       }
@@ -935,125 +1243,299 @@ export default function ROICalculatorExperimental() {
     }
 
     doc.setTextColor(0, 0, 0);
-    yPosition += 5;
+    yPosition += 8;
 
-    // Check for page break
-    if (yPosition > pageHeight - 60) {
-      doc.addPage();
-      yPosition = 20;
-    }
+    // INPUT PARAMETERS TABLE
+    addSectionHeader("INPUT PARAMETERS SUMMARY");
 
-    // COST BREAKDOWN
-    addSectionHeader("COST BREAKDOWN (Per Project)");
-
-    const costItems = [
-      {
-        label: "Traditional Method",
-        value: traditionalCostPerProject.toLocaleString("en-US", {
-          maximumFractionDigits: 0,
-        }),
-      },
-      {
-        label: "AC Commerce Platform",
-        value: acCommerceCostPerProject.toLocaleString("en-US", {
-          maximumFractionDigits: 0,
-        }),
-      },
-      {
-        label: "Monthly Savings",
-        value: (savingsPerProject * projectsPerMonth).toLocaleString("en-US", {
-          maximumFractionDigits: 0,
-        }),
-      },
+    const paramRows = [
+      ["Service Type", serviceType],
+      ["Equipment Age", equipmentAge || "N/A"],
+      ["Project Value", `$${projectSize.toLocaleString()}`],
+      ["Installation Time", `${installationTime} days`],
+      ["Team Size", `${teamSize} people`],
+      ["Projects/Month", projectsPerMonth.toString()],
+      ["Analysis Period", `${monthsToAnalyze} months`],
     ];
 
-    costItems.forEach((item, index) => {
-      doc.setFillColor(245, 245, 245);
-      doc.rect(margin, yPosition - 4, maxWidth, 8, "F");
-      doc.setDrawColor(200, 200, 200);
-      doc.rect(margin, yPosition - 4, maxWidth, 8);
-
-      doc.setFont(undefined, "normal");
-      doc.setFontSize(10);
-      doc.text(item.label, margin + 3, yPosition);
-
-      doc.setFont(undefined, "bold");
-      doc.text(`$${item.value}`, pageWidth - margin - 20, yPosition);
-
-      yPosition += 11;
-    });
+    addTable(["Parameter", "Value"], paramRows);
 
     yPosition += 5;
 
-    // Check for page break
-    if (yPosition > pageHeight - 50) {
-      doc.addPage();
-      yPosition = 20;
-    }
+    // ===== PAGE 2: COST BREAKDOWN ANALYSIS =====
 
-    // DETAILED ANALYSIS
-    addSectionHeader("DETAILED ANALYSIS");
+    // DETAILED COST BREAKDOWN TABLE
+    addSectionHeader("COST BREAKDOWN - DETAILED COMPARISON");
 
-    const analysisItems = [
-      { label: "Total Projects", value: projectsPerYear },
-      {
-        label: "Total Traditional Cost",
-        value: `$${annualTraditionalCost.toLocaleString("en-US", {
+    const costBreakdownRows = [
+      [
+        "Equipment Cost",
+        `$${(projectSize * 0.15).toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })}`,
-      },
-      {
-        label: "Total AC Commerce Cost",
-        value: `$${annualAcCommerceCost.toLocaleString("en-US", {
+        `$${(projectSize * 0.08).toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })}`,
-      },
-      {
-        label: "Total Period Savings",
-        value: `$${annualSavings.toLocaleString("en-US", {
+        `$${(projectSize * 0.15 - projectSize * 0.08).toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })}`,
-      },
+      ],
+      [
+        "Labor Cost",
+        `$${(installationTime * 500 * teamSize).toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${(installationTime * 300 * teamSize).toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${(
+          installationTime * 500 * teamSize -
+          installationTime * 300 * teamSize
+        ).toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
+      ],
+      [
+        "TOTAL PER PROJECT",
+        `$${traditionalCostPerProject.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${acCommerceCostPerProject.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${savingsPerProject.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
     ];
 
-    analysisItems.forEach((item) => {
-      if (yPosition > pageHeight - 30) {
-        doc.addPage();
-        yPosition = 20;
-      }
+    addTable(
+      ["Cost Item", "Traditional", "AC Commerce", "Savings"],
+      costBreakdownRows
+    );
 
-      doc.setFont(undefined, "normal");
-      doc.setFontSize(10);
-      doc.text(`${item.label}:`, margin + 5, yPosition);
+    yPosition += 5;
 
-      doc.setFont(undefined, "bold");
-      doc.text(item.value.toString(), pageWidth - margin - 35, yPosition);
+    // SERVICE-SPECIFIC COST ANALYSIS
+    addSectionHeader("SERVICE-SPECIFIC COST ANALYSIS");
 
-      yPosition += lineHeight + 2;
-    });
+    const serviceMultipliers = {
+      "AC Installation": 1.0,
+      "AC Repair": 0.6,
+      "AC Maintenance": 0.3,
+      "Gas Ducted Heating": 1.1,
+      "Indoor Air Quality": 0.8,
+      "Smart Control Automation": 0.5,
+      "Electrical Service": 0.7,
+    };
+
+    const serviceMultiplier = serviceMultipliers[serviceType] || 1.0;
+    const serviceAdjustedTraditional =
+      traditionalCostPerProject * serviceMultiplier;
+    const serviceAdjustedAcCommerce =
+      acCommerceCostPerProject * serviceMultiplier;
+    const serviceAdjustedSavings =
+      serviceAdjustedTraditional - serviceAdjustedAcCommerce;
+
+    const serviceRows = [
+      ["Service Type", serviceType],
+      ["Cost Multiplier", `${(serviceMultiplier * 100).toFixed(0)}%`],
+      [
+        "Traditional Method",
+        `$${serviceAdjustedTraditional.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
+      [
+        "AC Commerce Method",
+        `$${serviceAdjustedAcCommerce.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
+      [
+        "Savings",
+        `$${serviceAdjustedSavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ],
+    ];
+
+    addTable(["Metric", "Amount"], serviceRows);
+
+    yPosition += 5;
+
+    // ===== PAGE 3: PROJECTIONS & TIMELINE =====
+
+    // MONTHLY SAVINGS PROJECTION TABLE
+    addSectionHeader("12-MONTH SAVINGS PROJECTION");
+
+    const monthlyProjectionRows = [];
+    let cumulativeSavings = 0;
+
+    for (let month = 1; month <= Math.min(12, monthsToAnalyze); month++) {
+      const monthlySavings = savingsPerProject * projectsPerMonth;
+      cumulativeSavings += monthlySavings;
+      monthlyProjectionRows.push([
+        `Month ${month}`,
+        projectsPerMonth.toString(),
+        `$${monthlySavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        `$${cumulativeSavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+      ]);
+    }
+
+    addTable(
+      ["Month", "Projects", "Monthly Savings", "Cumulative Savings"],
+      monthlyProjectionRows
+    );
+
+    yPosition += 5;
+
+    // ROI TIMELINE TABLE
+    addSectionHeader("ROI BREAKEVEN & PAYBACK ANALYSIS");
+
+    const roiTimelineRows = [
+      ["Initial Investment", "$0", "Platform setup"],
+      [
+        "Monthly Burn Rate",
+        `$${(savingsPerProject * projectsPerMonth).toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        "Savings/month",
+      ],
+      ["Breakeven Month", `Month ${paybackMonths}`, "100% ROI achieved"],
+      [`${monthsToAnalyze}-Month ROI`, `${roi}%`, "Projected return"],
+      [
+        `${monthsToAnalyze}-Month Savings`,
+        `$${annualSavings.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+        })}`,
+        "Total savings",
+      ],
+    ];
+
+    addTable(["Metric", "Value", "Description"], roiTimelineRows);
 
     yPosition += 8;
 
-    // Check for page break
-    if (yPosition > pageHeight - 50) {
-      doc.addPage();
-      yPosition = 20;
+    // ===== LINKED DATA SECTION =====
+    if (btuData) {
+      addSectionHeader("LINKED BTU PROJECT DATA");
+
+      doc.setFont(undefined, "bold");
+      doc.setFontSize(10);
+      doc.text("BTU Calculator Integration:", margin + 5, yPosition);
+      yPosition += lineHeight + 2;
+
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(9);
+
+      if (btuData.projectName) {
+        doc.text(
+          `Project Name: ${btuData.projectName}`,
+          margin + 10,
+          yPosition
+        );
+        yPosition += lineHeight;
+      }
+
+      if (btuData.totalBTU) {
+        doc.text(
+          `Total BTU Required: ${btuData.totalBTU.toLocaleString()} BTU`,
+          margin + 10,
+          yPosition
+        );
+        yPosition += lineHeight;
+      }
+
+      if (btuData.numberOfRooms) {
+        doc.text(
+          `Number of Rooms: ${btuData.numberOfRooms}`,
+          margin + 10,
+          yPosition
+        );
+        yPosition += lineHeight;
+      }
+
+      if (btuData.totalSquareFootage) {
+        doc.text(
+          `Total Square Footage: ${btuData.totalSquareFootage.toLocaleString()} sq ft`,
+          margin + 10,
+          yPosition
+        );
+        yPosition += lineHeight;
+      }
+
+      if (btuData.estimatedProjectCost) {
+        doc.text(
+          `Estimated Project Cost: $${btuData.estimatedProjectCost.toLocaleString(
+            "en-US",
+            { maximumFractionDigits: 0 }
+          )}`,
+          margin + 10,
+          yPosition
+        );
+        yPosition += lineHeight;
+      }
+
+      if (btuData.recommendedUnits && btuData.recommendedUnits.length > 0) {
+        yPosition += 2;
+        doc.setFont(undefined, "bold");
+        doc.setFontSize(9);
+        doc.text("Recommended Equipment Units:", margin + 10, yPosition);
+        yPosition += lineHeight;
+
+        doc.setFont(undefined, "normal");
+        doc.setFontSize(8);
+        btuData.recommendedUnits.slice(0, 5).forEach((unit, index) => {
+          if (yPosition > pageHeight - 15) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          doc.text(
+            `${index + 1}. ${unit.name || "Unit"} - ${unit.btu || 0} BTU`,
+            margin + 15,
+            yPosition
+          );
+          yPosition += lineHeight;
+        });
+
+        if (btuData.recommendedUnits.length > 5) {
+          doc.text(
+            `... and ${btuData.recommendedUnits.length - 5} more units`,
+            margin + 15,
+            yPosition
+          );
+          yPosition += lineHeight;
+        }
+      }
+
+      yPosition += 5;
     }
 
-    // KEY INSIGHTS & RECOMMENDATIONS
+    // ===== FINAL PAGE: INSIGHTS & RECOMMENDATIONS =====
+
     addSectionHeader("KEY INSIGHTS & RECOMMENDATIONS");
 
     const insights = [
-      `• Cost per project will be reduced by ${savingsPercentage}%`,
-      `• Annual savings potential: $${annualSavings.toLocaleString("en-US", {
+      `Cost per project will be reduced by ${savingsPercentage}%`,
+      `Total period savings: $${annualSavings.toLocaleString("en-US", {
         maximumFractionDigits: 0,
       })}`,
-      `• Platform will pay for itself in approximately ${paybackMonths} months`,
-      `• Projected ROI of ${roi}% based on current parameters`,
-      `- Implement AC Commerce platform for immediate cost savings`,
-      `- Scale operations to increase project volume and ROI`,
-      `- Monitor metrics monthly to track actual vs. projected savings`,
-      `- Schedule a demo to explore advanced features and integrations`,
+      `Platform ROI: ${roi}% over ${monthsToAnalyze} months`,
+      `Payback period: ${paybackMonths} months to recover investment`,
+      `Service type: ${serviceType} (${(serviceMultiplier * 100).toFixed(
+        0
+      )}% cost factor)`,
+      "",
+      `RECOMMENDATIONS:`,
+      `  1. Implement AC Commerce platform immediately for cost savings`,
+      `  2. Scale operations to increase project volume and maximize ROI`,
+      `  3. Monitor metrics monthly to track actual vs. projected performance`,
+      `  4. Leverage linked BTU/Product data for enhanced analysis`,
+      `  5. Schedule quarterly reviews to adjust parameters based on actuals`,
+      `  6. Explore advanced features and integrations after initial implementation`,
     ];
 
     insights.forEach((insight) => {
@@ -1062,12 +1544,18 @@ export default function ROICalculatorExperimental() {
         yPosition = 20;
       }
 
-      const wrappedText = doc.splitTextToSize(insight, maxWidth - 10);
-      doc.setFont(undefined, "normal");
-      doc.setFontSize(10);
-      doc.text(wrappedText, margin + 5, yPosition);
-      yPosition += wrappedText.length * (lineHeight - 1) + 2;
+      if (insight === "") {
+        yPosition += 3;
+      } else {
+        const wrappedText = doc.splitTextToSize(insight, maxWidth - 10);
+        doc.setFont(undefined, insight.includes("→") ? "bold" : "normal");
+        doc.setFontSize(9);
+        doc.text(wrappedText, margin + 5, yPosition);
+        yPosition += wrappedText.length * (lineHeight - 0.5) + 2;
+      }
     });
+
+    yPosition += 8;
 
     // Add footer on last page
     doc.setTextColor(100, 100, 100);
@@ -1105,6 +1593,7 @@ export default function ROICalculatorExperimental() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
+    toast.success(`Report generated: ${filename}`);
   };
 
   // Schedule Demo Function
@@ -1934,7 +2423,7 @@ export default function ROICalculatorExperimental() {
                 variant="success"
                 size="lg"
                 className="me-3"
-                onClick={() => setShowSaveModal(true)}
+                onClick={handleOpenSaveModal}
               >
                 💾 Save Calculation
               </Button>
