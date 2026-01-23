@@ -9,8 +9,11 @@ import Image from "react-bootstrap/Image";
 import { toast } from "react-toastify";
 import Spinner from "react-bootstrap/Spinner";
 
-const Product = memo(function Product(props) {
-  const { product } = props;
+// Unified regex for condenser/VRF detection
+const CONDENSER_REGEX =
+  /\b(?:vrf(?:\s+system)?|condens(?:er|ing)|outdoor unit|outdoor|heat recovery|heat pump)\b/i;
+
+const Product = memo(({ product }) => {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const {
     cart: { cartItems },

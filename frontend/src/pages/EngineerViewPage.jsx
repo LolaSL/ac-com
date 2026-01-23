@@ -951,7 +951,21 @@ const EngineerViewPage = () => {
         const response = await fetch(`/api/annotations/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error("Failed to fetch annotation");
+        if (!response.ok) {
+          let body = null;
+          try {
+            body = await response.json();
+          } catch (e) {
+            try {
+              body = await response.text();
+            } catch (e2) {
+              body = null;
+            }
+          }
+          const serverMsg =
+            body && body.message ? body.message : body || response.statusText;
+          throw new Error(`Failed to fetch annotation: ${serverMsg}`);
+        }
         const data = await response.json();
         console.log("Fetched annotation data:", data);
         setAnnotation(data);
@@ -960,8 +974,30 @@ const EngineerViewPage = () => {
         const pdfResponse = await fetch(`/api/annotated-pdf/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!pdfResponse.ok) throw new Error("Failed to fetch PDF");
-        const pdfBlob = await pdfResponse.blob();
+        if (!pdfResponse.ok) {
+          let body = null;
+          try {
+            body = await pdfResponse.json();
+          } catch (e) {
+            try {
+              body = await pdfResponse.text();
+            } catch (e2) {
+              body = null;
+            }
+          }
+          const serverMsg =
+            body && body.message
+              ? body.message
+              : body || pdfResponse.statusText;
+          throw new Error(`Failed to fetch PDF: ${serverMsg}`);
+        }
+        let pdfBlob;
+        try {
+          pdfBlob = await pdfResponse.blob();
+        } catch (e) {
+          console.error("Error reading PDF blob:", e);
+          throw new Error("Failed to read PDF data from response");
+        }
         setPdfFile(
           new File([pdfBlob], data.filename || "untitled.pdf", {
             type: "application/pdf",

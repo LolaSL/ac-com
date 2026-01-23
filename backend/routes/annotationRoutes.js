@@ -137,9 +137,51 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
     console.log(`Annotation isPaid: ${isPaid}, User Email: ${email}`);
     console.log('Annotation object:', annotation);
 
-    const pdfDoc = await PDFDocument.load(annotation.pdfData);
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
+    // Ensure pdf data is a Buffer/Uint8Array for pdf-lib
+    let pdfDataForLoad = annotation.pdfData;
+    let pdfDoc;
+    let pages;
+    let firstPage;
+    try {
+      if (!pdfDataForLoad) {
+        throw new Error('annotation.pdfData is empty');
+      }
+      // If returned as a BSON Binary (has 'buffer' or 'sub_type'), coerce to Buffer
+      if (typeof Buffer !== 'undefined' && !Buffer.isBuffer(pdfDataForLoad)) {
+        if (pdfDataForLoad.buffer) {
+          // Node BSON Binary exposes .buffer which may be an ArrayBuffer or Buffer
+          pdfDataForLoad = Buffer.from(pdfDataForLoad.buffer);
+        } else if (pdfDataForLoad._bsontype === 'Binary' && pdfDataForLoad.value) {
+          pdfDataForLoad = Buffer.from(pdfDataForLoad.value());
+        } else {
+          // Fallback: try Buffer.from directly
+          try {
+            pdfDataForLoad = Buffer.from(pdfDataForLoad);
+          } catch (e) {
+            // leave as-is and let pdf-lib throw a helpful error
+            console.warn('Could not coerce annotation.pdfData to Buffer directly:', e.message);
+          }
+        }
+      }
+
+      pdfDoc = await PDFDocument.load(pdfDataForLoad);
+      // continue with existing flow
+      pages = pdfDoc.getPages();
+      firstPage = pages[0];
+    } catch (loadError) {
+      console.error('Error loading PDF with pdf-lib. pdfData type:', Object.prototype.toString.call(annotation.pdfData), 'coerced type:', Object.prototype.toString.call(pdfDataForLoad));
+      console.error(loadError);
+      if (!res.headersSent) {
+        return res.status(500).json({ message: `Failed to generate annotated PDF: ${loadError.message}` });
+      }
+    }
+    if (!pdfDoc) {
+      // Defensive: if pdfDoc wasn't created, ensure we don't continue
+      if (!res.headersSent) {
+        return res.status(500).json({ message: 'Failed to generate annotated PDF: pdf could not be loaded' });
+      }
+      return;
+    }
 
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 

@@ -25,8 +25,24 @@ const AdminAllAnnotationsPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Failed to fetch annotations");
+          // Try to parse JSON first, otherwise fallback to text for better diagnostics
+          let errorBody = null;
+          try {
+            errorBody = await response.json();
+          } catch (e) {
+            try {
+              errorBody = await response.text();
+            } catch (e2) {
+              errorBody = null;
+            }
+          }
+          const serverMsg =
+            errorBody && errorBody.message
+              ? errorBody.message
+              : errorBody || response.statusText;
+          throw new Error(
+            `Failed to fetch annotations (status ${response.status}): ${serverMsg}`
+          );
         }
         const data = await response.json();
         setAnnotations(data);
@@ -66,9 +82,9 @@ const AdminAllAnnotationsPage = () => {
                 <td>{a.isPaid ? "Yes" : "No"}</td>
                 <td>
                   <Button
-                  type="button"
-                      className="btn-admin-edit"
-                      title="View Details"
+                    type="button"
+                    className="btn-admin-edit"
+                    title="View Details"
                     onClick={() => navigate(`/admin/engineer-view/${a._id}`)}
                   >
                     <FaEye />

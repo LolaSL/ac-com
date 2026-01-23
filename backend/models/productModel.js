@@ -42,6 +42,7 @@ const productSchema = new mongoose.Schema(
     btu: { type: Number, required: true },
     areaCoverage: { type: Number },
     energyEfficiency: { type: Number },
+    numberOfMaximumIndoorUnits:{ type: Number },
     documents: [documentSchema],
     dimension: {
       width: { type: Number, required: true },

@@ -974,7 +974,19 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch PDF from server");
+        let body = null;
+        try {
+          body = await response.json();
+        } catch (e) {
+          try {
+            body = await response.text();
+          } catch (e2) {
+            body = null;
+          }
+        }
+        const serverMsg =
+          body && body.message ? body.message : body || response.statusText;
+        throw new Error(`Failed to fetch PDF from server: ${serverMsg}`);
       }
 
       const blob = await response.blob();

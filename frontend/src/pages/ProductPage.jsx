@@ -74,6 +74,10 @@ const modeIcons = {
   "Night Mode": <BsMoonStars className="mode-icon" />,
 };
 
+// Unified regex for condenser/VRF detection
+const CONDENSER_REGEX =
+  /\b(?:vrf(?:\s+system)?|condens(?:er|ing)|outdoor unit|outdoor|heat recovery|heat pump)\b/i;
+
 function ProductPage() {
   const reviewsRef = useRef();
 
@@ -490,37 +494,101 @@ function ProductPage() {
             <ListGroup.Item>
               <strong>BTU:</strong> {product.btu}BTU
             </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Area coverage:</strong> {product.areaCoverage}m2
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Energy eficiency:</strong> {product.energyEfficiency}
-            </ListGroup.Item>
+
+            {/* Conditional rendering based on product type */}
+            {(() => {
+              const name = (product.name || "").toString();
+              const category = (product.category || "").toString();
+
+              // Detect condenser/VRF via explicit field OR regex match
+              const hasMaxIndoor =
+                product.numberOfMaximumIndoorUnits !== undefined &&
+                product.numberOfMaximumIndoorUnits !== null &&
+                product.numberOfMaximumIndoorUnits !== "";
+              const isCondenser =
+                hasMaxIndoor ||
+                CONDENSER_REGEX.test(name) ||
+                CONDENSER_REGEX.test(category);
+
+              if (isCondenser) {
+                // For Condenser/VRF products: show Max Indoor Units
+                return (
+                  <>
+                    {hasMaxIndoor && (
+                      <ListGroup.Item>
+                        <strong>Max Indoor Units:</strong>{" "}
+                        {product.numberOfMaximumIndoorUnits}
+                      </ListGroup.Item>
+                    )}
+                  </>
+                );
+              } else {
+                // For AC/Indoor products: show Area Coverage, Energy Efficiency, Mode
+                return (
+                  <>
+                    {product.areaCoverage && (
+                      <ListGroup.Item>
+                        <strong>Area coverage:</strong> {product.areaCoverage}m2
+                      </ListGroup.Item>
+                    )}
+                    {product.energyEfficiency && (
+                      <ListGroup.Item>
+                        <strong>Energy eficiency:</strong>{" "}
+                        {product.energyEfficiency}
+                      </ListGroup.Item>
+                    )}
+                  </>
+                );
+              }
+            })()}
+
             <ListGroup.Item>
               <strong>Product Features:</strong> <br />
               {product.features?.join(", ")}
             </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Mode:</strong> <br />
-              {product.mode?.map((m, index) => {
-                const trimmedMode = m.trim();
-                const icon = modeIcons[trimmedMode];
 
-                return icon ? (
-                  <span
-                    key={index}
-                    style={{
-                      marginRight: "10px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    {icon}{" "}
-                    <span style={{ marginLeft: "5px" }}>{trimmedMode}</span>
-                  </span>
-                ) : null;
-              })}
-            </ListGroup.Item>
+            {/* Mode only for non-condenser products */}
+            {(() => {
+              const name = (product.name || "").toString();
+              const category = (product.category || "").toString();
+              const hasMaxIndoor =
+                product.numberOfMaximumIndoorUnits !== undefined &&
+                product.numberOfMaximumIndoorUnits !== null &&
+                product.numberOfMaximumIndoorUnits !== "";
+              const isCondenser =
+                hasMaxIndoor ||
+                CONDENSER_REGEX.test(name) ||
+                CONDENSER_REGEX.test(category);
+
+              if (!isCondenser && product.mode?.length > 0) {
+                return (
+                  <ListGroup.Item>
+                    <strong>Mode:</strong> <br />
+                    {product.mode?.map((m, index) => {
+                      const trimmedMode = m.trim();
+                      const icon = modeIcons[trimmedMode];
+
+                      return icon ? (
+                        <span
+                          key={index}
+                          style={{
+                            marginRight: "10px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          {icon}{" "}
+                          <span style={{ marginLeft: "5px" }}>
+                            {trimmedMode}
+                          </span>
+                        </span>
+                      ) : null;
+                    })}
+                  </ListGroup.Item>
+                );
+              }
+              return null;
+            })()}
 
             <ListGroup.Item>
               <strong>Product dimensions (WxHxD):</strong>{" "}

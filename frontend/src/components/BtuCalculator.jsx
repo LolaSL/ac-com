@@ -209,10 +209,10 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                   : ""
               }</td>
               <td style="font-weight: bold; color: #007bff;">${
-                cond?.name || ""
+                cond?.model || ""
               }</td>
               <td style="font-weight: bold;">${
-                cond?.model ||
+                cond?.name ||
                 `${cond?.btu} BTU ${
                   isVRFSystem ? "VRF" : "Multi-System"
                 } Condenser`
@@ -1792,12 +1792,13 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                           : ""}
                       </td>
                       <td data-label="Product">
-                        {cond?.slug ? (
+                        {cond?.model ? (
                           <Link
-                            to={`/product/${cond.slug}`}
+                            to={`/product/${cond.model}`}
+                            className="link-product-details"
                             style={{ fontWeight: "bold", color: "#007bff" }}
                           >
-                            {cond.name}
+                            {cond.model}
                           </Link>
                         ) : (
                           <span style={{ fontWeight: "bold" }}>
@@ -1810,7 +1811,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                         data-label="Product BTU"
                         style={{ fontWeight: "bold" }}
                       >
-                        {cond?.model ||
+                        {cond?.name ||
                           `${cond?.btu} BTU ${
                             isVRFSystem ? "VRF" : "Multi-System"
                           } Condenser`}
