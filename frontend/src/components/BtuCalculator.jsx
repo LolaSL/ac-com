@@ -18,10 +18,11 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
   const componentRef = useRef();
   const cartItems = state?.cart?.cartItems || [];
 
-  // Parse AC annotations (e.g., "ac-1.1", "ac-1.2", "condenser-1")
+  // Parse AC annotations (e.g., "ac-1.1", "ac-1.2", "condenser-1", "Flat 1", etc.)
   const parseAcAnnotations = useCallback((annotations) => {
     const acUnits = [];
     const condensers = {};
+    const flatKeywords = new Set();
 
     annotations.forEach((annotation) => {
       const label = annotation.label?.toLowerCase() || "";
@@ -37,6 +38,20 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
           unitNumber: parseInt(unitNumber),
           coordinates: annotation.coordinates,
         });
+        flatKeywords.add(parseInt(flatNumber));
+      }
+
+      // Also match simpler pattern: ac-1, ac-2 (without unit number)
+      const simpleAcMatch = label.match(/ac-?(\d+)(?:[,;\s]|$)/);
+      if (simpleAcMatch && !acMatch) {
+        const flatNumber = simpleAcMatch[1];
+        acUnits.push({
+          label: annotation.label,
+          flatNumber: parseInt(flatNumber),
+          unitNumber: 1,
+          coordinates: annotation.coordinates,
+        });
+        flatKeywords.add(parseInt(flatNumber));
       }
 
       // Match patterns: condenser-1, condenser-2, etc.
@@ -48,16 +63,40 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
           flatNumber: parseInt(flatNumber),
           coordinates: annotation.coordinates,
         };
+        flatKeywords.add(parseInt(flatNumber));
+      }
+
+      // Also match: "condenser 1", "condenser 2"
+      const simpleCondenserMatch = label.match(/condenser\s+(\d+)/);
+      if (simpleCondenserMatch && !condenserMatch) {
+        const flatNumber = simpleCondenserMatch[1];
+        condensers[flatNumber] = {
+          label: annotation.label,
+          flatNumber: parseInt(flatNumber),
+          coordinates: annotation.coordinates,
+        };
+        flatKeywords.add(parseInt(flatNumber));
+      }
+
+      // Match keywords: "Flat 1", "Flat 2", "Unit 1", "Unit 2"
+      const flatKeywordMatch = label.match(/(?:flat|unit)\s+(\d+)/);
+      if (flatKeywordMatch) {
+        flatKeywords.add(parseInt(flatKeywordMatch[1]));
       }
     });
 
-    return { acUnits, condensers };
+    return {
+      acUnits,
+      condensers,
+      flatKeywords: Array.from(flatKeywords).sort((a, b) => a - b),
+    };
   }, []);
 
   // Group flats based on parsed annotations
   const groupFlatsByAnnotations = useCallback(
     (annotations) => {
-      const { acUnits, condensers } = parseAcAnnotations(annotations);
+      const { acUnits, condensers, flatKeywords } =
+        parseAcAnnotations(annotations);
       const flats = {};
 
       // Create flat structure based on condensers found
@@ -69,7 +108,18 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
         };
       });
 
-      return { flats, acUnits, condensers };
+      // If condensers weren't explicitly found, use flat keywords to create flats
+      if (flatKeywords.length > 0 && Object.keys(condensers).length === 0) {
+        flatKeywords.forEach((flatNum) => {
+          flats[`Flat ${flatNum}`] = {
+            flatNumber: flatNum,
+            acUnits: acUnits.filter((ac) => ac.flatNumber === flatNum),
+            condenser: null,
+          };
+        });
+      }
+
+      return { flats, acUnits, condensers, flatKeywords };
     },
     [parseAcAnnotations]
   );
@@ -381,7 +431,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
   const [optimalProductCount, setOptimalProductCount] = useState(0);
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
-      PitchedRoof: false,
+     Roof: false,
       WallBrackets: false,
       HardGround: false,
     },
@@ -483,7 +533,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
     KITCHEN_BTU_ADDITION: 4000,
 
     OUTDOOR_LOCATION_BTU_ADJUSTMENTS: {
-      PitchedRoof: 1.1,
+    Roof: 1.1,
       WallBrackets: 1.05,
       HardGround: 1.0,
     },
@@ -1766,87 +1816,160 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                 {showCondenser &&
                   condensersForDisplay &&
                   condensersForDisplay.length > 0 &&
-                  condensersForDisplay.map((cond, idx) => (
-                    <tr
-                      key={`cond-${idx}-${cond?._id || cond?.flatName || idx}`}
-                      className="condenser-row"
-                      style={{ backgroundColor: "#f0f8ff" }}
-                    >
-                      <td
-                        data-label="Room"
-                        style={{ fontWeight: "bold", color: "#007bff" }}
+                  condensersForDisplay.map((cond, idx) => {
+                    // Calculate per-flat BTU total if flat name is present
+                    let condenserBtuRequirement = 0;
+                    if (cond?.flatName && isMultiFlatProperty) {
+                      // Extract flat number from condenser name (e.g., "Flat 1 Condenser" -> "1")
+                      const flatKeyword = cond.flatName.match(/\d+/)?.[0];
+                      if (flatKeyword) {
+                        condenserBtuRequirement = rooms.reduce(
+                          (sum, room, roomIdx) => {
+                            // Check if room belongs to this flat
+                            if (
+                              room.name
+                                .toLowerCase()
+                                .includes(`flat ${flatKeyword}:`)
+                            ) {
+                              return sum + (btuResults[roomIdx] || 0);
+                            }
+                            return sum;
+                          },
+                          0
+                        );
+                      }
+                    } else {
+                      // Single flat or no flat name: use total
+                      condenserBtuRequirement = btuResults.reduce(
+                        (sum, btu) => sum + (btu || 0),
+                        0
+                      );
+                    }
+
+                    const multiplier = isVRFSystem ? 1.0 : 0.8;
+                    const displayBtu = Math.round(
+                      condenserBtuRequirement * multiplier
+                    );
+
+                    return (
+                      <tr
+                        key={`cond-${idx}-${
+                          cond?._id || cond?.flatName || idx
+                        }`}
+                        className="condenser-row"
+                        style={{ backgroundColor: "#f0f8ff" }}
                       >
-                        {cond?.name || `Condenser ${idx + 1}`}
-                      </td>
-                      <td
-                        data-label="Room BTU"
-                        style={{ fontWeight: "bold", color: "#007bff" }}
-                      >
-                        {idx === 0
-                          ? `${Math.round(
-                              btuResults.reduce(
-                                (sum, btu) => sum + (btu || 0),
-                                0
-                              ) * (isVRFSystem ? 1.0 : 0.8)
-                            ).toLocaleString()} BTU`
-                          : ""}
-                      </td>
-                      <td data-label="Product">
-                        {cond?.model ? (
-                          <Link
-                            to={`/product/${cond.model}`}
-                            className="link-product-details"
-                            style={{ fontWeight: "bold", color: "#007bff" }}
-                          >
-                            {cond.model}
-                          </Link>
-                        ) : (
-                          <span style={{ fontWeight: "bold" }}>
-                            {cond?.name}
-                          </span>
-                        )}
-                      </td>
-                      <td
-                        className="product-btu table-fit-content"
-                        data-label="Product BTU"
-                        style={{ fontWeight: "bold" }}
-                      >
-                        {cond?.name ||
-                          `${cond?.btu} BTU ${
-                            isVRFSystem ? "VRF" : "Multi-System"
-                          } Condenser`}
-                      </td>
-                      <td
-                        data-label="Product Price"
-                        className="table-fit-content"
-                        style={{
-                          fontWeight: "bold",
-                          color:
-                            condenserSizingStatus === "custom"
-                              ? "#ff8c00"
-                              : "#007bff",
-                        }}
-                      >
-                        {cond?.price > 0
-                          ? `$${(cond.discount > 0
-                              ? cond.price - (cond.price * cond.discount) / 100
-                              : cond.price
-                            ).toFixed(2)}${
+                        <td
+                          data-label="Room"
+                          style={{ fontWeight: "bold", color: "#007bff" }}
+                        >
+                          {cond?.name || `Condenser ${idx + 1}`}
+                        </td>
+                        <td
+                          data-label="Room BTU"
+                          style={{ fontWeight: "bold", color: "#007bff" }}
+                        >
+                          {`${displayBtu.toLocaleString()} BTU`}
+                        </td>
+                        <td data-label="Product">
+                          {cond?.model ? (
+                            <Link
+                              to={`/product/${cond.model}`}
+                              className="link-product-details"
+                              style={{ fontWeight: "bold", color: "#007bff" }}
+                            >
+                              {cond.model}
+                            </Link>
+                          ) : (
+                            <span style={{ fontWeight: "bold" }}>
+                              {cond?.name}
+                            </span>
+                          )}
+                        </td>
+                        <td
+                          className="product-btu table-fit-content"
+                          data-label="Product BTU"
+                          style={{ fontWeight: "bold" }}
+                        >
+                          {cond?.name ||
+                            `${cond?.btu} BTU ${
+                              isVRFSystem ? "VRF" : "Multi-System"
+                            } Condenser`}
+                        </td>
+                        <td
+                          data-label="Product Price"
+                          className="table-fit-content"
+                          style={{
+                            fontWeight: "bold",
+                            color:
                               condenserSizingStatus === "custom"
-                                ? " (est.)"
-                                : ""
-                            }`
-                          : "Contact for price"}
-                      </td>
-                    </tr>
-                  ))}
+                                ? "#ff8c00"
+                                : "#007bff",
+                          }}
+                        >
+                          {cond?.price > 0
+                            ? `$${(cond.discount > 0
+                                ? cond.price -
+                                  (cond.price * cond.discount) / 100
+                                : cond.price
+                              ).toFixed(2)}${
+                                condenserSizingStatus === "custom"
+                                  ? " (est.)"
+                                  : ""
+                              }`
+                            : "Contact for price"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 <tr>
                   <td
                     colSpan="5"
                     className="total-results text-center"
                     style={{ color: "#007bff !important", fontWeight: "bold" }}
                   >
-                    Total Cooling Load: {displayValue} {selectedUnit}
+                    {isMultiFlatProperty && detectedFlats.length > 1
+                      ? (() => {
+                          // Extract unique flat numbers from room names
+                          const flatNumbersInRooms = new Set();
+                          rooms.forEach((room) => {
+                            const match = room.name.match(/flat\s+(\d+):/i);
+                            if (match) {
+                              flatNumbersInRooms.add(parseInt(match[1]));
+                            }
+                          });
+
+                          const flatNumbers = Array.from(
+                            flatNumbersInRooms
+                          ).sort((a, b) => a - b);
+
+                          if (flatNumbers.length > 0) {
+                            return `Per-Flat Cooling Load: ${flatNumbers
+                              .map((flatNum) => {
+                                const flatTotal = rooms.reduce(
+                                  (sum, room, idx) => {
+                                    if (
+                                      room.name
+                                        .toLowerCase()
+                                        .includes(`flat ${flatNum}:`)
+                                    ) {
+                                      return sum + (btuResults[idx] || 0);
+                                    }
+                                    return sum;
+                                  },
+                                  0
+                                );
+                                return `Flat ${flatNum}: ${(
+                                  flatTotal * outputUnitConversion[selectedUnit]
+                                ).toLocaleString(undefined, {
+                                  maximumFractionDigits: 2,
+                                })} ${selectedUnit}`;
+                              })
+                              .join(" | ")}`;
+                          }
+                          return `Total Cooling Load: ${displayValue} ${selectedUnit}`;
+                        })()
+                      : `Total Cooling Load: ${displayValue} ${selectedUnit}`}
                   </td>
                 </tr>
                 <tr>

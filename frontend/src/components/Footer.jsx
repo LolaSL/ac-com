@@ -22,7 +22,7 @@ const Footer = () => {
   return (
     <>
       <footer
-        className="container-fluid footer"
+        className="container-fluid footer mt-4"
         style={{
           background: "#868d9c",
           color: "white",

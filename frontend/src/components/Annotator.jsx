@@ -6,7 +6,13 @@ import React, {
   useCallback,
 } from "react";
 import { Stage, Layer, Rect, Line, Text } from "react-konva";
-import { Button, Form, Table } from "react-bootstrap";
+import {
+  Button,
+  Form,
+  Table,
+  ButtonToolbar,
+  ButtonGroup,
+} from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import TableBody from "./TableBody";
@@ -14,7 +20,7 @@ import ExcelJS from "exceljs";
 
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
-import ModalLegend from "./ModalLegend.jsx";
+import ModalLegend from "./ModalLegend_new.jsx";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
 let Tesseract;
@@ -792,6 +798,7 @@ const Annotator = ({
   });
 
   const [downloadedFiles, setDownloadedFiles] = useState([]);
+  const [pdfRotation, setPdfRotation] = useState(0); // Store rotation in degrees
 
   const clearResults = () => {
     setResults([]);
@@ -858,6 +865,7 @@ const Annotator = ({
     setError(null);
     setIconPositions([]);
     setComments([]);
+    setPdfRotation(0); // Reset rotation when new file is uploaded
 
     const output = [];
 
@@ -1367,7 +1375,13 @@ const Annotator = ({
       const page = await pdf.getPage(1);
 
       const scale = 1;
-      const viewport = page.getViewport({ scale });
+      let viewport = page.getViewport({ scale });
+
+      // Apply rotation to viewport
+      if (pdfRotation !== 0) {
+        viewport = page.getViewport({ scale, rotation: pdfRotation });
+      }
+
       setPdfSize({ width: viewport.width, height: viewport.height });
 
       canvas.width = viewport.width;
@@ -1409,6 +1423,7 @@ const Annotator = ({
       memoizedCallback,
       renderComments,
       setPdfSize,
+      pdfRotation,
     ]
   );
 
@@ -1700,7 +1715,80 @@ const Annotator = ({
 
     console.log("Exporting filtered rooms to BTU Calculator:", flatRooms);
 
-    const formattedRooms = flatRooms.map((room) => ({
+    // Extract AC annotations (ac-1.1, condenser-1, etc.)
+    const acAnnotations = comments
+      .filter(
+        (comment) =>
+          comment.text &&
+          (comment.text.toLowerCase().match(/ac-\d+/) ||
+            comment.text.toLowerCase().match(/condenser-\d+/) ||
+            comment.text.toLowerCase().match(/flat\s+\d+/i) ||
+            comment.text.toLowerCase().match(/unit\s+\d+/i))
+      )
+      .map((comment) => ({
+        label: comment.text,
+        coordinates: { x: comment.x, y: comment.y },
+      }));
+
+    console.log("Raw AC annotations:", acAnnotations);
+
+    // Parse annotations to detect flats - look for specific patterns
+    const flatNumbers = new Set();
+
+    acAnnotations.forEach((ann) => {
+      const text = ann.label.toLowerCase();
+
+      // Pattern 1: ac-1.1, ac-2.1 (first digit is flat number)
+      const acMatch = text.match(/ac-(\d+)\.\d+/);
+      if (acMatch) {
+        flatNumbers.add(parseInt(acMatch[1]));
+      }
+
+      // Pattern 2: condenser-1, condenser-2
+      const condenserMatch = text.match(/condenser-(\d+)/);
+      if (condenserMatch) {
+        flatNumbers.add(parseInt(condenserMatch[1]));
+      }
+
+      // Pattern 3: Flat 1, Unit 1
+      const flatMatch = text.match(/(?:flat|unit)\s+(\d+)/);
+      if (flatMatch) {
+        flatNumbers.add(parseInt(flatMatch[1]));
+      }
+    });
+
+    const flatArray = Array.from(flatNumbers).sort((a, b) => a - b);
+    console.log("Detected flat numbers:", flatArray);
+    console.log("Number of flats detected:", flatArray.length);
+
+    // Count room duplicates to detect multi-flat properties
+    const roomNameCounts = {};
+    flatRooms.forEach((room) => {
+      const roomName = room.roomType || "Room";
+      roomNameCounts[roomName] = (roomNameCounts[roomName] || 0) + 1;
+    });
+    const maxDuplicateCount = Math.max(...Object.values(roomNameCounts), 1);
+    console.log("Room duplicate counts:", roomNameCounts);
+    console.log("Max duplicates per room:", maxDuplicateCount);
+
+    // If no flats detected from annotations, but we have duplicates, infer multi-flat
+    let inferredFlatCount = flatArray.length;
+    if (flatArray.length <= 1 && maxDuplicateCount > 1) {
+      // We have duplicate room names - likely a 2-flat (or more) property
+      inferredFlatCount = maxDuplicateCount;
+      console.log(
+        `Inferring ${inferredFlatCount}-flat property from duplicate rooms (no annotations found)`
+      );
+      for (let i = 1; i <= inferredFlatCount; i++) {
+        if (!flatArray.includes(i)) {
+          flatArray.push(i);
+        }
+      }
+      flatArray.sort((a, b) => a - b);
+    }
+
+    // Format rooms with flat prefixes if multiple flats detected
+    let formattedRooms = flatRooms.map((room, idx) => ({
       name: room.roomType || "Room",
       size:
         parseFloat((room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")) ||
@@ -1709,21 +1797,50 @@ const Annotator = ({
       unit: "meters",
     }));
 
-    // Extract AC annotations (ac-1.1, condenser-1, etc.)
-    const acAnnotations = comments
-      .filter(
-        (comment) =>
-          comment.text &&
-          (comment.text.toLowerCase().match(/^ac-\d+\.\d+/) ||
-            comment.text.toLowerCase().match(/^condenser-\d+/))
-      )
-      .map((comment) => ({
-        label: comment.text,
-        coordinates: { x: comment.x, y: comment.y },
-      }));
+    // If we have multiple flats, distribute rooms among them
+    console.log("Checking if multi-flat:", flatArray.length, ">", 1);
+    if (flatArray.length > 1) {
+      console.log("Multi-flat property detected, assigning rooms to flats");
+
+      // Distribute rooms in alternating pattern across flats
+      // This handles the case where rooms are interleaved: Flat1Room1, Flat2Room1, Flat1Room2, Flat2Room2, etc.
+      formattedRooms = flatRooms.map((room, idx) => {
+        const flatIndex = idx % flatArray.length;
+        const flatNum = flatArray[flatIndex];
+        console.log(
+          `Room ${idx} (${room.roomType}) -> Flat ${flatNum} (alternating pattern)`
+        );
+        return {
+          name: `Flat ${flatNum}: ${room.roomType || "Room"}`,
+          size:
+            parseFloat(
+              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+            ) || 0,
+          btu: 0,
+          unit: "meters",
+          _flatNum: flatNum, // Store flat number for sorting
+        };
+      });
+
+      // Sort rooms by flat number to group them together
+      formattedRooms.sort((a, b) => a._flatNum - b._flatNum);
+      // Remove the temporary _flatNum property
+      formattedRooms = formattedRooms.map(({ _flatNum, ...room }) => room);
+    } // If still no flats detected but we inferred some, add synthetic annotations to help BtuCalculator
+    if (flatArray.length <= 1 && inferredFlatCount > 1) {
+      console.log(
+        "Adding synthetic annotations for BtuCalculator multi-flat detection"
+      );
+      for (let i = 1; i <= inferredFlatCount; i++) {
+        acAnnotations.push({
+          label: `condenser-${i}`,
+          coordinates: { x: 0, y: 0 },
+        });
+      }
+    }
 
     console.log("Formatted rooms:", formattedRooms);
-    console.log("AC annotations:", acAnnotations);
+    console.log("AC annotations for BTU:", acAnnotations);
 
     if (typeof setRoomData === "function") {
       setRoomData(formattedRooms, acAnnotations);
@@ -2316,75 +2433,127 @@ const Annotator = ({
             </div>
           );
         })}
-      <div className="d-flex">
+      <ButtonToolbar
+        className="mb-3 mt-3"
+        style={{ gap: "8px", flexWrap: "wrap" }}
+        aria-label="PDF controls"
+      >
         {file && file.type === "application/pdf" && (
           <>
-            <Button
-              variant="btn-outline"
-              size="sm"
-              className="mt-2 me-2 go-to-btn btn-text mb-3 w-auto"
-              onClick={() => {
-                // Collect ALL filtered rooms from ALL files
-                const allFilteredRooms = results
-                  .map((result, fileIdx) => {
-                    const rooms = allRooms[fileIdx] || [];
-                    return rooms.filter((room) => {
-                      const sqft = parseFloat(
-                        (room.areaSqFt || "").toString().replace(/[^\d.]/g, "")
-                      );
-                      const sqm = parseFloat(
-                        (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
-                      );
-                      return (
-                        sqft >= 64 &&
-                        sqm >= 5.94 &&
-                        room.roomType
-                          ?.toLowerCase()
-                          .includes(filterText.toLowerCase())
-                      );
-                    });
-                  })
-                  .flat();
+            <ButtonGroup size="sm" className="me-2">
+              <Button
+                variant="outline-primary"
+                onClick={() => {
+                  // Collect ALL filtered rooms from ALL files
+                  const allFilteredRooms = results
+                    .map((result, fileIdx) => {
+                      const rooms = allRooms[fileIdx] || [];
+                      return rooms.filter((room) => {
+                        const sqft = parseFloat(
+                          (room.areaSqFt || "")
+                            .toString()
+                            .replace(/[^\d.]/g, "")
+                        );
+                        const sqm = parseFloat(
+                          (room.areaSqM || "").toString().replace(/[^\d.]/g, "")
+                        );
+                        return (
+                          sqft >= 64 &&
+                          sqm >= 5.94 &&
+                          room.roomType
+                            ?.toLowerCase()
+                            .includes(filterText.toLowerCase())
+                        );
+                      });
+                    })
+                    .flat();
 
-                handleExportToBtuCalculator(allFilteredRooms);
-              }}
-              disabled={
-                filteredRoomsRef.current.flat().filter(Boolean).length === 0
-              }
-            >
-              Export to BTU Calculator (
-              {filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
-            </Button>
+                  handleExportToBtuCalculator(allFilteredRooms);
+                }}
+                disabled={
+                  filteredRoomsRef.current.flat().filter(Boolean).length === 0
+                }
+                title="Export rooms to BTU Calculator"
+              >
+                Export ({filteredRoomsRef.current.flat().filter(Boolean).length}
+                )
+              </Button>
 
-            <Button
-              variant="btn-outline"
-              size="sm"
-              onClick={saveToBackend}
-              disabled={isSaving}
-              className="mt-2 me-2 go-to-btn btn-text mb-3 w-auto"
-            >
-              {isSaving ? "Saving..." : "Save PDF File"}{" "}
-            </Button>
-            <Button
-              variant="btn-outline"
-              size="sm"
-              className="mt-2 mb-3 go-to-btn btn-text w-auto"
-              onClick={clearCanvas}
-            >
-              Clear
-            </Button>
+              <Button
+                variant="outline-primary"
+                onClick={saveToBackend}
+                disabled={isSaving}
+                title="Save PDF and annotations"
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+
+              <Button
+                variant="outline-secondary"
+                onClick={clearCanvas}
+                title="Clear canvas and data"
+              >
+                Clear
+              </Button>
+            </ButtonGroup>
+
+            {file && file.type === "application/pdf" && (
+              <ButtonGroup size="sm">
+                <Button
+                  variant="outline-secondary"
+                  onClick={() =>
+                    setPdfRotation((prev) => (prev - 90 + 360) % 360)
+                  }
+                  title="Rotate PDF counter-clockwise"
+                >
+                  ↶ Left
+                </Button>
+
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setPdfRotation((prev) => (prev + 90) % 360)}
+                  title="Rotate PDF clockwise"
+                >
+                  ↷ Right
+                </Button>
+
+                {pdfRotation !== 0 && (
+                  <Button
+                    variant="outline-warning"
+                    onClick={() => setPdfRotation(0)}
+                    title="Reset PDF to original orientation"
+                  >
+                    Reset ({pdfRotation}°)
+                  </Button>
+                )}
+              </ButtonGroup>
+            )}
           </>
         )}
-      </div>
+      </ButtonToolbar>
       {error && <p className="error-message mt-4">{error}</p>}
       {previewUrl && (
         <div className="text-center">
           {previewUrl && (
             <div
-              style={{ position: "relative", display: "inline-block" }}
+              style={{
+                position: "relative",
+                display: "inline-block",
+                maxWidth: "100%",
+                maxHeight: "80vh",
+                overflow: "auto",
+              }}
               className="container-main"
             >
-              <div className="canvas-wrapper">
+              <div
+                className="canvas-wrapper"
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                  width: "fit-content",
+                  height: "fit-content",
+                }}
+              >
                 <canvas
                   id="my-canvas"
                   ref={canvasRef}

@@ -1014,7 +1014,47 @@ const data = {
         },
       ],
     },
+    {
+      name: "72000 BTU VRF Heat Recovery Multi-Split DC Inverter Outdoor Unit",
+      model: "VRA072L4M-2Y",
+      slug: "72000-outdoor-condensing-unit",
+      category: "VRF Heat Recovery",
+      image: "/images/p24.jpg",
+      price: 6000,
+      discount: 50,
+      countInStock: 10,
+      brand: "Lennox",
+      rating: 5.0,
+      numReviews: 44,
+      description: "72000 BTU 'VRF' Heat Recovery Multi-Split DC Inverter Outdoor Unit, Zones: Up To 13, Volts: 208-230, Hertz: 60, Phase: 3, SEER: 13, EER: 11, Refrigerant: R-410A, Factory Charge: 22Lbs, Connection Size: 1/2'' X 7:8'', Connection Type: Sweat, Metering Device: EEV, Cooling BTUs: 72000, Heating BTUs: 77000",
+      features: "Energy Saving",
+      btu: 72000,
+      areaCoverage: 180,
+      energyEfficiency: 10.3,
+      dimension: {
+        width: 125.1,
+        height: 160.3,
+        depth: 76.5,
+      },
+      documents: [
         {
+          url: "https://surpluscityliquidators.com/cdn/shop/files/15Y50-SPEC-SHEET.pdf?v=15284594859896181523",
+          type: "PDF",
+          description: "User Manual for 72000 BTU Outdoor Condenser",
+        },
+        {
+          url: "https://surpluscityliquidators.com/cdn/shop/files/15Y50-SPEC-SHEET.pdf?v=15284594859896181523",
+          type: "PDF",
+          description: "Technical Specifications for 72000 BTU Outdoor Condenser",
+        },
+        {
+          url: "https://tech.lennoxintl.com/C03e7o14l/VIu12Ch2uV/507884-05.pdf",
+          type: "Image",
+          description: "Installation Guide Image",
+        },
+      ],
+    },
+    {
       name: "70000 BTU Multi V5 VRF Heat Recovery Outdoor Unit",
       model: "ARUM70LTE5",
       slug: "70000-vrf-lg-condensing-unit",
@@ -1028,7 +1068,7 @@ const data = {
       numReviews: 500,
       description: "MULTI V5 Heat RecoveryA Variable Refrigerant Flow (VRF) system is a single refrigerant circuit that connects many indoor units to one outdoor unit. VRF is a superior way to heat and cool any space, providing improved humidity control, individual set points per indoor unit, and a very quiet comfort experience. In the heat recovery configuration, VRF also allows for heating and cooling simultaneously in different zones, further enhancing energy savings and increasing occupant comfort. Energy efficient and easy to design, install, and maintain, a VRF system has low life cycle cost compared to other systems on the market today.",
       features: "Energy Saving, Ultimate Efficiency, Dual Sensing Control, Ultimate Inverter Compressor, Flexible Installation with Large Capacity.",
-      btu:70000,
+      btu: 70000,
       numberOfMaximumIndoorUnits: 13,
       dimension: {
         width: 90.3,
@@ -1053,7 +1093,7 @@ const data = {
         },
       ],
     },
-        {
+    {
       name: "76000 BTU Multi V5 VRF Heat Recovery Outdoor Unit",
       model: "ARUM76LTE5",
       slug: "76000-vrf-lg-condensing-unit",
@@ -1312,6 +1352,18 @@ const data = {
       isAdmin: false,
       logo: "/images/samsung-logo.png",
       referralCode: "SAMSUNGREF"
+    },
+    {
+      name: 'Lennox',
+      brand: "Lennox",
+      rating: 2.5,
+      info: "Lennox International Inc. is an American provider of climate control products for the heating, ventilation, and air conditioning (HVAC) and refrigeration markets.",
+      link: "https://www.youtube.com/embed/PYiNnQwo04w?si=ZWkYIzkpP4VSmVPZ",
+      companyLink: "https://www.lennox.com/residential/",
+      numReviews: 15,
+      isAdmin: false,
+      logo: "/images/lennox-logo.png",
+      referralCode: "LENNOXREF"
     },
     {
       name: 'Haier',

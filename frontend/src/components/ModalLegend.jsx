@@ -7,7 +7,7 @@ const ModalLegend = () => {
     setShow(true);
     setTimeout(() => {
       setShow(false);
-    }, 45000);
+    }, 60000);
   };
 
   return (
@@ -20,10 +20,10 @@ const ModalLegend = () => {
       >
         Legend / Instructions
       </Button>
-      <Modal show={show} onHide={() => setShow(false)} centered>
+      <Modal show={show} onHide={() => setShow(false)} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title className="text-danger text-bold">
-            Legend / Instructions
+            📋 Measurement System: How to Use
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -31,6 +31,11 @@ const ModalLegend = () => {
             <li>Supported: High-resolution PDF files (.pdf).</li>
             <li>
               PDFs should be flat/apartment drawings and without modifications.
+            </li>
+            <li>
+              <strong>Step 2: 🔄 Rotation Buttons:</strong> Dedicated to rotate
+              the uploaded PDF drawing (0°, 90°, 180°, 270°) before annotations
+              if PDF was uploaded with incorrect position.
             </li>
             <li>
               Recommended: Place the air conditioner (rectangle) above the door
@@ -83,7 +88,7 @@ const ModalLegend = () => {
             size="sm"
             onClick={() => setShow(false)}
           >
-            Close Now
+            Close
           </Button>
         </Modal.Footer>
       </Modal>
