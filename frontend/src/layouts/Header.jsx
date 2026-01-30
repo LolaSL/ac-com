@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
@@ -12,6 +12,10 @@ import SearchBox from "../components/SearchBox.jsx";
 function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo, serviceProviderInfo, adminInfo } = state;
+
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
+  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
 
   const userSignoutHandler = () => {
     ctxDispatch({ type: "USER_SIGNOUT" });
@@ -102,6 +106,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
               </div>
               {userInfo ? (
                 <NavDropdown
+                  show={userDropdownOpen}
+                  onToggle={setUserDropdownOpen}
+                  onMouseLeave={() => setUserDropdownOpen(false)}
                   title={
                     <span
                       style={{
@@ -140,7 +147,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/uploadfile" className="dropdown-item">
                     Get A Quote
                   </Link>
-                    <Link to="/roi-calculator" className="dropdown-item">
+                  <Link to="/roi-calculator" className="dropdown-item">
                     ROI Calculator
                   </Link>
                   <Link to="/orderhistory" className="dropdown-item">
@@ -195,6 +202,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
               )}
               {serviceProviderInfo ? (
                 <NavDropdown
+                  show={providerDropdownOpen}
+                  onToggle={setProviderDropdownOpen}
+                  onMouseLeave={() => setProviderDropdownOpen(false)}
                   title={serviceProviderInfo.name}
                   id="provider-nav-dropdown"
                 >
@@ -240,7 +250,13 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                 </Link>
               )}
               {adminInfo ? (
-                <NavDropdown title="Admin" id="admin-nav-dropdown">
+                <NavDropdown
+                  show={adminDropdownOpen}
+                  onToggle={setAdminDropdownOpen}
+                  onMouseLeave={() => setAdminDropdownOpen(false)}
+                  title="Admin"
+                  id="admin-nav-dropdown"
+                >
                   <Link to="/admin/dashboard" className="dropdown-item">
                     Dashboard
                   </Link>

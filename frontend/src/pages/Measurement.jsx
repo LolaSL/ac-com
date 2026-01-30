@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import AnnotatorErrorBoundary from "../components/AnnotatorErrorBoundary.js";
 import Annotator from "../components/Annotator.jsx";
 import Sidebar from "../components/Sidebar.jsx";
-import BtuModalWindow from "../components/BtuModalWindow.jsx";
+import ModalLegend from "../components/ModalLegend_new.jsx";
 import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
 import ArchSymbolsModal from "../components/ArchSymbolsModal.jsx";
 import BtuCalculator from "../components/BtuCalculator.jsx";
@@ -99,6 +99,9 @@ const Measurement = () => {
         Measurement Service System
       </h1>
       <div className="row row-cols-2 row-cols-md-4 g-3 pt-4 mt-4">
+          <GridItem>
+          <ModalLegend />
+        </GridItem>
         <GridItem>
           <PdfHelpVideo />
         </GridItem>
@@ -109,10 +112,7 @@ const Measurement = () => {
           <Sidebar savedPdfs={savedPdfs} fetchSavedPdfs={fetchSavedPdfs} />
         </GridItem>
         <br />
-
-        <GridItem>
-          <BtuModalWindow />
-        </GridItem>
+      
       </div>
 
       <AnnotatorErrorBoundary>

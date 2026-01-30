@@ -13,6 +13,7 @@ import serviceProviderRouter from './routes/serviceProviderRoutes.js'
 import blogRouter from './routes/blogRoutes.js'
 import notificationRouter from './routes/notificationRoutes.js';
 import annotationRoutes from './routes/annotationRoutes.js'
+import engineerAnnotationRoutes from './routes/engineerAnnotationRoutes.js';
 import browsingHistoryRouter from './routes/browsingHistoryRoutes.js';
 import userReviewsRouter from './routes/userReviewsRoutes.js';
 import wishlistRouter from './routes/wishlistRoutes.js';
@@ -96,6 +97,7 @@ app.use('/api/service-providers', serviceProviderRouter);
 app.use('/api/blogs', blogRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api', annotationRoutes);
+app.use('/api/engineer-annotations', engineerAnnotationRoutes);
 app.use('/api/browsing-history', browsingHistoryRouter);
 app.use('/api/user-reviews', userReviewsRouter);
 app.use('/api/wishlist', wishlistRouter);

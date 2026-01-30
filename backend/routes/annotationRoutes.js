@@ -31,6 +31,23 @@ router.get('/all-annotations', isAuth, async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch all annotations', error: error.message });
   }
 });
+
+router.get('/user-annotations', isAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const annotations = await AnnotationModel.find({ userId }).sort({ createdAt: -1 });
+    const data = annotations.map((a) => ({
+      _id: a._id,
+      filename: a.filename,
+      createdAt: a.createdAt,
+      isPaid: a.isPaid,
+    }));
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch user annotations', error: error.message });
+  }
+});
+
 router.post(
   "/upload-annotate",
   isAuth,

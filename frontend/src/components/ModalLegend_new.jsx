@@ -20,13 +20,19 @@ const ModalLegend = () => {
       >
         Legend / Instructions
       </Button>
-      <Modal show={show} onHide={() => setShow(false)} centered size="lg">
+      <Modal
+        show={show}
+        onHide={() => setShow(false)}
+        centered
+        size="lg"
+        fullscreen="sm"
+      >
         <Modal.Header closeButton>
           <Modal.Title className="text-danger text-bold">
             📋 Measurement System: How to Use
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
           <Tabs defaultActiveKey="annotator" id="legend-tabs" className="mb-3">
             {/* ANNOTATOR TAB */}
             <Tab eventKey="annotator" title="🖼️ PDF Annotator">
@@ -260,6 +266,69 @@ const ModalLegend = () => {
                   <li>Total cost includes all equipment for all flats</li>
                   <li>Per-flat cooling load shows individual requirements</li>
                 </ul>
+
+                <h6 className="mb-2 mt-3 text-primary">
+                  📖 Understanding BTU Calculations
+                </h6>
+                <p className="text-gray-700 mb-3 fs-6">
+                  BTU (British Thermal Unit) is a measure of heat. This
+                  calculator provides an estimation based on common factors:
+                </p>
+                <ul className="list-disc ml-4 space-y-1 fs-6">
+                  <li>
+                    <strong>Base Calculation:</strong> 600 BTU/m² used as a base
+                    rule.
+                  </li>
+                  <li>
+                    <strong>Outdoor Unit (Condenser) Location:</strong>
+                    Desired location of outdoor unit.
+                  </li>
+                  <li>
+                    <strong>Number of People:</strong> Each person adds ~600
+                    BTU.
+                  </li>
+                  <li>
+                    <strong>Wall Type:</strong> Materials and thickness affect
+                    BTU.
+                  </li>
+                  <li>
+                    <strong>Insulation Quality:</strong> Poor insulation
+                    increases BTU needs.
+                  </li>
+                  <li>
+                    <strong>Sun Exposure:</strong> More windows or
+                    south/west-facing rooms need more cooling.
+                  </li>
+                  <li>
+                    <strong>Window Type:</strong> Single-glazed windows allow
+                    more heat than triple-glazed.
+                  </li>
+                  <li>
+                    <strong>Apartment Orientation:</strong> South and west
+                    orientations receive more sunlight.
+                  </li>
+                  <li>
+                    <strong>Floor Type:</strong> Materials like marble or tile
+                    can retain or reflect heat differently.
+                  </li>
+                  <li>
+                    <strong>Roof Type:</strong> Flat roofs may increase heat
+                    load compared to pitched or insulated ones.
+                  </li>
+                  <li>
+                    <strong>Appliances:</strong> Kitchen and electronic devices
+                    contribute additional heat load.
+                  </li>
+                  <li>
+                    <strong>Climate Zone:</strong> BTU needs vary by temperature
+                    and humidity region.
+                  </li>
+                </ul>
+                <p className="fs-6 mt-3">
+                  <strong className="text-red-600">Important:</strong> This is a
+                  general estimate. Consult a licensed HVAC expert for precise
+                  system sizing.
+                </p>
               </div>
             </Tab>
 

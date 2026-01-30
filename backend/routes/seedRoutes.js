@@ -10,9 +10,11 @@ import Earnings from '../models/earningModel.js';
 import Blog from '../models/blogModel.js';
 import Notification from '../models/notificationModel.js';
 import Annotation from '../models/annotationModel.js';
+import EngineerAnnotation from '../models/engineerAnnotationModel.js';
 import Order from '../models/orderModel.js';
 import Payment from '../models/paymentModel.js';
 import BrowsingHistory from '../models/browsingHistoryModel.js';
+import { PDFDocument, rgb } from 'pdf-lib';
 import data from '../data.js';
 
 const seedRouter = express.Router();
@@ -32,6 +34,7 @@ seedRouter.get('/', async (req, res) => {
     await Blog.deleteMany({});
     await Notification.deleteMany({});
     await Annotation.deleteMany({});
+    await EngineerAnnotation.deleteMany({});
     await Payment.deleteMany({});
     await BrowsingHistory.deleteMany({});
 
@@ -211,6 +214,54 @@ seedRouter.get('/', async (req, res) => {
 
     const createdAnnotations = await Annotation.insertMany(annotationsWithIds)
 
+    // Seed EngineerAnnotations
+    const engineerAnnotationsWithIds = [];
+    for (const ea of data.engineerAnnotations) {
+      // Create a simple PDF with 4 pages for testing
+      const pdfDoc = await PDFDocument.create();
+      const pages = [];
+      for (let i = 0; i < 4; i++) {
+        const page = pdfDoc.addPage();
+        pages.push(page);
+      }
+      const { width, height } = pages[0].getSize();
+      const fontSize = 30;
+      pages.forEach((page, index) => {
+        page.drawText(`Engineer Review PDF - Page ${index + 1}`, {
+          x: 50,
+          y: height - 4 * fontSize,
+          size: fontSize,
+          color: rgb(0, 0.53, 0.71),
+        });
+        page.drawText(`System Type: ${ea.systemConfig.systemType}`, {
+          x: 50,
+          y: height - 6 * fontSize,
+          size: 20,
+          color: rgb(0, 0, 0),
+        });
+        page.drawText(`Engineer Notes: ${ea.engineerNotes}`, {
+          x: 50,
+          y: height - 8 * fontSize,
+          size: 20,
+          color: rgb(0, 0, 0),
+        });
+      });
+      const pdfBytes = await pdfDoc.save();
+      const pdfBuffer = Buffer.from(pdfBytes);
+
+      engineerAnnotationsWithIds.push({
+        ...ea,
+        userId: createdUsers[1]._id, // Jane (user)
+        engineerId: createdUsers[0]._id, // Admin (engineer)
+        userAnnotationId: createdAnnotations[0]._id,
+        pdfData: pdfBuffer,
+        originalImageWidth: 800,
+        originalImageHeight: 1000,
+      });
+    }
+
+    const createdEngineerAnnotations = await EngineerAnnotation.insertMany(engineerAnnotationsWithIds);
+
     res.send({
       createdProducts,
       createdUsers,
@@ -220,10 +271,12 @@ seedRouter.get('/', async (req, res) => {
       createdProjects,
       createdMessages,
       createdEarnings,
+      createdPayments,
       createdBlogs,
       createdNotifications,
       createdOrders,
       createdAnnotations,
+      createdEngineerAnnotations,
       message:
         ordersMode === 'reset'
           ? 'Seeding completed (orders reset)'

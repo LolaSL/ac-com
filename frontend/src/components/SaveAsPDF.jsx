@@ -183,7 +183,16 @@ const drawVRFAnnotations = (
 };
 
 // This component now receives the 'annotations' object as a prop
-function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
+function SaveAsPDF({
+  file,
+  isPaid,
+  pdfId,
+  token,
+  annotations,
+  acType,
+  annotationType = "user",
+  userId,
+}) {
   const canvasRef = useRef(null);
   const [error, setError] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
@@ -955,6 +964,12 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
     setError(null);
     setIsSaved(false);
 
+    // Only allow saving user-type or engineer-type annotations
+    if (annotationType !== "user" && annotationType !== "engineer") {
+      setError("Only user or engineer annotations can be saved.");
+      return;
+    }
+
     if (!pdfId || !token) {
       setError("Missing PDF ID or authentication token.");
       return;
@@ -1039,51 +1054,32 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
           .promise;
       }
 
-      // Normalize annotations: backend sometimes returns a wrapper { annotations, acType, isPaid }
-      let normalizedAnnotations =
-        annotations && annotations.annotations
-          ? annotations.annotations
-          : annotations;
-      let finalAcType = acType;
-      // If annotations are missing or HVAC data isn't present, try fetching the latest annotations from the server
-      // For VRF systems, check for vrf data; for minisplit, check for hvac data
-      const hasRequiredData =
-        normalizedAnnotations &&
-        Object.keys(normalizedAnnotations).length > 0 &&
-        (normalizedAnnotations.hvac || normalizedAnnotations.vrf);
-
-      if (!hasRequiredData) {
-        try {
-          const annRes = await fetch(`/api/annotations/${pdfId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (annRes.ok) {
-            const annData = await annRes.json();
-            normalizedAnnotations = annData.annotations || annData;
-            finalAcType = finalAcType || annData.acType;
-          }
-        } catch (e) {
-          console.warn("Failed to fetch annotations for PDF:", e);
+      // Always fetch authoritative user annotations from backend
+      let normalizedAnnotations = null;
+      try {
+        const annRes = await fetch(`/api/annotations/${pdfId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!annRes.ok) {
+          let body = null;
+          try {
+            body = await annRes.json();
+          } catch {}
+          const serverMsg =
+            body && body.message ? body.message : annRes.statusText;
+          throw new Error(`Failed to fetch user annotations: ${serverMsg}`);
         }
+        const annData = await annRes.json();
+        normalizedAnnotations = annData.annotations || annData;
+      } catch (e) {
+        console.warn("Failed to fetch annotations for PDF:", e);
+        setError("Could not load user annotations for saving.");
+        return;
       }
 
-      // Determine alternate mode (the other system view)
-      // For VRF systems: only switch between vrf-ducted and vrf-ductless
-      // For minisplit: switch between ducted and ductless
-      let alternateAcType;
-      if (finalAcType === "ducted") {
-        alternateAcType = "ductless";
-      } else if (finalAcType === "ductless") {
-        alternateAcType = "ducted";
-      } else if (finalAcType === "vrf-ducted") {
-        alternateAcType = "vrf-ductless"; // VRF stays VRF
-      } else if (finalAcType === "vrf-ductless") {
-        // VRF stays VRF
-      } else {
-        // No alternate type needed
-      }
+      // Determine system views are handled by canvases; no alternate type variable needed
 
-      // Draw annotations for all 4 modes
+      // Draw annotations for all 4 modes (user annotations only)
       if (normalizedAnnotations) {
         Object.keys(canvases).forEach((mode) => {
           drawAnnotations(
@@ -1289,16 +1285,80 @@ function SaveAsPDF({ file, isPaid, pdfId, token, annotations, acType }) {
       }
 
       const pdfBytes = await pdfDoc.save();
-      const downloadBlob = new Blob([pdfBytes], { type: "application/pdf" });
-      const url = URL.createObjectURL(downloadBlob);
 
-      // Open in new tab as workaround for download issues (includes unique filename in URL, but user can save manually)
-      window.open(url, "_blank");
+      if (annotationType === "engineer") {
+        // For engineer, save to server
+        const blob = new Blob([pdfBytes], { type: "application/pdf" });
 
-      // Clean up
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+        // Prepare form data for POST
+        const formData = new FormData();
+        formData.append("pdfFile", blob, file.name || "engineer-review.pdf"); // Use original filename
+        // Need userId, but since it's engineer, perhaps from context
+        // For now, hardcode or get from props
+        formData.append("userId", userId || "6947bb2b736e7aceca4ac627"); // Use prop or fallback
+        formData.append("userAnnotationId", pdfId);
+        const systemTypeMap = {
+          ducted: "minisplit-ducted",
+          ductless: "minisplit-ductless",
+          "vrf-ducted": "vrf-ducted",
+          "vrf-ductless": "vrf-ductless",
+        };
+        formData.append("systemType", systemTypeMap[acType] || acType);
+        formData.append("roomType", "living room");
+        formData.append("areaSqft", "400");
+        formData.append("btuRequired", "18000");
+        formData.append(
+          "rectangles",
+          JSON.stringify(normalizedAnnotations?.rectangles || [])
+        );
+        formData.append(
+          "comments",
+          JSON.stringify(normalizedAnnotations?.comments || [])
+        );
+        formData.append(
+          "lines",
+          JSON.stringify(normalizedAnnotations?.lines || [])
+        );
+        formData.append(
+          "hvac",
+          JSON.stringify(normalizedAnnotations?.hvac || {})
+        );
+        formData.append("refrigerantLinesAuto", "true");
+        formData.append(
+          "engineerNotes",
+          "System design looks good. Recommended for installation."
+        );
+        formData.append("imageWidth", viewport.width.toString());
+        formData.append("imageHeight", viewport.height.toString());
 
-      setIsSaved(true);
+        const saveResponse = await fetch("/api/engineer-annotations", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+
+        if (!saveResponse.ok) {
+          const errorData = await saveResponse.json().catch(() => ({}));
+          throw new Error(
+            errorData.message || "Failed to save engineer annotation"
+          );
+        }
+
+        setIsSaved(true);
+        alert("Engineer annotation saved successfully!");
+      } else {
+        // For user, download
+        const downloadBlob = new Blob([pdfBytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(downloadBlob);
+
+        // Open in new tab as workaround for download issues (includes unique filename in URL, but user can save manually)
+        window.open(url, "_blank");
+
+        // Clean up
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        setIsSaved(true);
+      }
     } catch (err) {
       console.error("Failed to save PDF:", err);
       setError("Failed to save PDF. Please try again.");

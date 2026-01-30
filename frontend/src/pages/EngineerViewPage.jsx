@@ -31,8 +31,8 @@ const hvacSymbols = {
  * @param {string} acType - System type ('vrf-ducted' or 'vrf-ductless')
  *
  * Line Visualization:
- * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed)
- * - VRF-Ductless: Single solid teal line (direct refrigerant connection)
+ * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed) in chain
+ * - VRF-Ductless: Single solid teal line (sequential chain connection)
  */
 const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) => {
   const canvasWidth = context.canvas.width;
@@ -123,21 +123,29 @@ const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) => {
       const outY = outdoor.yPercent * canvasHeight;
 
       if (acType === "vrf-ductless") {
-        // VRF-Ductless: Star topology - direct connection from outdoor to each indoor
-        vrfAnnotations.indoorUnits.forEach((indoor) => {
-          const inX = indoor.xPercent * canvasWidth;
-          const inY = indoor.yPercent * canvasHeight;
-
+        // VRF-Ductless: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
+        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
+          (a, b) => a.xPercent - b.xPercent
+        );
+        const points = [{ x: outX, y: outY }];
+        sortedIndoors.forEach((indoor) => {
+          points.push({
+            x: indoor.xPercent * canvasWidth,
+            y: indoor.yPercent * canvasHeight,
+          });
+        });
+        // Draw lines between consecutive points
+        for (let i = 0; i < points.length - 1; i++) {
           context.save();
           context.setLineDash([]); // solid line
           context.lineWidth = 2.5;
           context.strokeStyle = "#008B8B"; // teal/dark cyan
           context.beginPath();
-          context.moveTo(outX, outY);
-          context.lineTo(inX, inY);
+          context.moveTo(points[i].x, points[i].y);
+          context.lineTo(points[i + 1].x, points[i + 1].y);
           context.stroke();
           context.restore();
-        });
+        }
       } else {
         // VRF-Ducted: Sequential chain - AC1→AC2→AC3→...→Outdoor
         const indoorUnits = vrfAnnotations.indoorUnits;
@@ -1703,6 +1711,8 @@ const EngineerViewPage = () => {
             token={token}
             annotations={annotation.annotations}
             acType={acType}
+            annotationType="engineer"
+            userId={annotation.userId}
           />
         )}
       </div>

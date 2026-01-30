@@ -20,7 +20,6 @@ import ExcelJS from "exceljs";
 
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
-import ModalLegend from "./ModalLegend_new.jsx";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
 let Tesseract;
@@ -1982,7 +1981,6 @@ const Annotator = ({
     <div>
       <Form className="btu-calculation-measure mt-4">
         <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
-        <ModalLegend />
         <Form.Control
           className="my-4 form-control"
           id="file-upload"
