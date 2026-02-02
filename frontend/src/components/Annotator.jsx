@@ -2357,7 +2357,7 @@ const Annotator = ({
                                         variant="success"
                                         onClick={handleSaveEdit}
                                       >
-                                        Save
+                                        Save 
                                       </Button>
                                       <Button
                                         size="sm"
@@ -2473,8 +2473,8 @@ const Annotator = ({
                 }
                 title="Export rooms to BTU Calculator"
               >
-                Export ({filteredRoomsRef.current.flat().filter(Boolean).length}
-                )
+                Export rooms to BTU Calculator ({filteredRoomsRef.current.flat().filter(Boolean).length} {' '}
+                  rooms)
               </Button>
 
               <Button

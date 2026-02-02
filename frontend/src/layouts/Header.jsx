@@ -54,7 +54,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
 
           <Link to="/" className="navbar-brand me-4">
             <h3>AC Commerce</h3>
-            <p className="handwritten">Cooling Solutions For Every Space</p>
+            <p className="handwritten" >Cooling Solutions For Every Space</p>
           </Link>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" />

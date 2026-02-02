@@ -721,15 +721,19 @@ function SaveAsPDF({
       annotations?.rectangles &&
       annotations.rectangles.length > 1
     ) {
-      // Find condenser (largest rectangle or marked with isCondenser flag)
+      // Find condenser by comment text "condenser"
       let condenser = null;
-
-      // 1) explicit flag
-      annotations.rectangles.forEach((rect) => {
-        if (rect.isCondenser) condenser = rect;
-      });
-
-      // 2) largest rectangle fallback
+      if (annotations.comments) {
+        const condenserComment = annotations.comments.find((c) =>
+          c.text.toLowerCase().includes("condenser")
+        );
+        if (condenserComment) {
+          condenser = annotations.rectangles.find(
+            (r) => r.id === condenserComment.rectId
+          );
+        }
+      }
+      // Fallback to largest if no comment
       if (!condenser) {
         let maxArea = -Infinity;
         annotations.rectangles.forEach((rect) => {
@@ -742,16 +746,22 @@ function SaveAsPDF({
       }
 
       if (condenser) {
-        // Get all non-condenser rectangles and sort by position (left to right, top to bottom)
+        // Get all non-condenser rectangles and sort by comment text number (e.g., "ac-1" -> 1)
         const indoorRects = annotations.rectangles
           .filter((rect) => rect !== condenser && !rect.isCondenser)
           .sort((a, b) => {
-            // Sort primarily by x position (left to right)
-            if (Math.abs(a.xPercent - b.xPercent) > 0.05) {
-              return a.xPercent - b.xPercent;
-            }
-            // If x positions are similar, sort by y position (top to bottom)
-            return a.yPercent - b.yPercent;
+            const getNum = (rect) => {
+              if (!annotations.comments) return 0;
+              const comment = annotations.comments.find(
+                (c) => c.rectId === rect.id
+              );
+              if (comment) {
+                const match = comment.text.match(/ac-(\d+)/i);
+                return match ? parseInt(match[1]) : 0;
+              }
+              return 0;
+            };
+            return getNum(a) - getNum(b);
           });
 
         // Draw chain connections between rectangles
@@ -837,8 +847,8 @@ function SaveAsPDF({
       annotations.hvac.ducts.forEach((duct) => {
         const x = duct.xPercent * canvasWidth;
         const y = duct.yPercent * canvasHeight;
-        const width = (duct.width || 0.2) * canvasWidth;
-        const height = (duct.height || 0.04) * canvasHeight;
+        const width = (duct.width || 0.1) * canvasWidth;
+        const height = (duct.height || 0.02) * canvasHeight;
         context.save();
         context.translate(x, y);
         context.beginPath();
@@ -857,7 +867,7 @@ function SaveAsPDF({
       annotations.hvac.diffusers.forEach((diffuser) => {
         const x = diffuser.xPercent * canvasWidth;
         const y = diffuser.yPercent * canvasHeight;
-        const size = (diffuser.sizePercent || 0.08) * canvasWidth;
+        const size = (diffuser.sizePercent || 0.04) * canvasWidth;
         context.beginPath();
         if (diffuser.shape === "square") {
           context.rect(x - size / 2, y - size / 2, size, size);

@@ -93,7 +93,17 @@ export default function OurNetworkPage() {
   return (
     <Container className="py-5">
       <div className="text-center mb-5">
-        <h1 className="display-4 fw-bold text-primary mb-3">Our Network</h1>
+        <h1
+          className="display-4 fw-bold mb-3 sellers-title"
+          style={{
+            background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          Our Network
+        </h1>
         <p className="lead text-muted">
           Trusted suppliers, service providers, and manufacturer partnerships
         </p>
@@ -116,7 +126,17 @@ export default function OurNetworkPage() {
 
       {/* Sellers Section */}
       <div className="mb-5">
-        <h2 className="text-center mb-4 text-primary">Our Suppliers</h2>
+        <h2
+          className="text-center mb-4 "
+          style={{
+            background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          Our Suppliers
+        </h2>
         {loading ? (
           <LoadingBox />
         ) : error ? (
@@ -197,7 +217,15 @@ export default function OurNetworkPage() {
 
       {/* Partners Section */}
       <div className="mb-5">
-        <h2 className="text-center mb-4 text-primary">
+        <h2
+          className="text-center mb-4 "
+          style={{
+            background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
           Our Manufacturer Partners
         </h2>
         <Row className="g-4">

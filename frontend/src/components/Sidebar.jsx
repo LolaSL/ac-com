@@ -558,6 +558,7 @@ const Sidebar = () => {
               variant={
                 activeTab === "my-annotations" ? "primary" : "outline-primary"
               }
+              className="go-to-btn btn-text w-auto"
               size="sm"
               onClick={() => {
                 setActiveTab("my-annotations");
@@ -576,6 +577,7 @@ const Sidebar = () => {
                 activeTab === "engineer-reviews" ? "primary" : "outline-primary"
               }
               size="sm"
+              className="go-to-btn btn-text w-auto"
               onClick={() => {
                 setActiveTab("engineer-reviews");
                 setSelectedPdf(null);
@@ -593,7 +595,7 @@ const Sidebar = () => {
           <div
             style={{
               width: "100%",
-              height: "80vh",
+              maxHeight: "70vh",
               border: "1px solid #ccc",
               overflow: "auto",
               marginTop: "1rem",

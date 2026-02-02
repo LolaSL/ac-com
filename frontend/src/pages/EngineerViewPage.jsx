@@ -244,14 +244,15 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
         nearest = comment;
       }
     });
-    return nearest ? nearest.text.toLowerCase() : null;
+    // Only return text if comment is within 50 pixels
+    return (nearest && minDist <= 50) ? nearest.text.toLowerCase() : null;
   };
   // ducts
   hvacAnnotations?.ducts?.forEach((duct) => {
     const x = duct.xPercent * canvasWidth;
     const y = duct.yPercent * canvasHeight;
-    const width = (duct.width || 0.2) * canvasWidth;
-    const height = (duct.height || 0.04) * canvasHeight;
+    const width = 40;
+    const height = 20;
     context.save();
     context.translate(x, y);
     context.beginPath();
@@ -269,7 +270,7 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
       img.onload = () => {
         context.save();
         context.translate(x, y);
-        context.drawImage(img, -15, -15, 30, 30);
+        context.drawImage(img, -10, -10, 20, 20);
         context.restore();
       };
     }
@@ -278,7 +279,7 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
   hvacAnnotations?.diffusers?.forEach((diffuser) => {
     const x = diffuser.xPercent * canvasWidth;
     const y = diffuser.yPercent * canvasHeight;
-    const size = (diffuser.sizePercent || 0.08) * canvasWidth;
+    const size = (diffuser.sizePercent || 0.01) * canvasWidth;
     context.beginPath();
     if (diffuser.shape === "square") {
       context.rect(x - size / 2, y - size / 2, size, size);
@@ -303,73 +304,97 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
     }
   });
 
-  // Draw dotted connection lines from diffusers to nearest ducts, preferring matching groups
+  // Draw dotted connection lines from diffusers to ducts
+  // Logic: If equal number of ducts and diffusers, connect 1-to-1 (nearest)
+  // Else, connect based on matching comment groups (1-to-many)
   if (hvacAnnotations?.ducts && hvacAnnotations?.diffusers) {
-    hvacAnnotations.diffusers.forEach((diffuser) => {
-      const dx = diffuser.xPercent * canvasWidth;
-      const dy = diffuser.yPercent * canvasHeight;
-      const diffuserGroup = getNearestCommentText(dx, dy, comments);
-      let nearestDuct = null;
-      let minDist = Infinity;
-      // First, try to find a duct with matching group
-      hvacAnnotations.ducts.forEach((duct) => {
-        const ductCenterX =
-          duct.xPercent * canvasWidth + ((duct.width || 0.2) * canvasWidth) / 2;
-        const ductCenterY =
-          duct.yPercent * canvasHeight +
-          ((duct.height || 0.04) * canvasHeight) / 2;
-        const ductGroup = getNearestCommentText(
-          ductCenterX,
-          ductCenterY,
-          comments
-        );
-        if (diffuserGroup && ductGroup === diffuserGroup) {
-          const dist = Math.sqrt(
-            (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
-          );
-          if (dist < minDist) {
-            minDist = dist;
-            nearestDuct = { x: ductCenterX, y: ductCenterY };
-          }
+    const numDucts = hvacAnnotations.ducts.length;
+    const numDiffusers = hvacAnnotations.diffusers.length;
+    if (numDucts === numDiffusers) {
+      // 1-to-1: pair ducts and diffusers by sorted position (left to right)
+      const sortedDucts = [...hvacAnnotations.ducts].sort((a, b) => a.xPercent - b.xPercent);
+      const sortedDiffusers = [...hvacAnnotations.diffusers].sort((a, b) => a.xPercent - b.xPercent);
+      sortedDucts.forEach((duct, index) => {
+        const diffuser = sortedDiffusers[index];
+        if (diffuser) {
+          const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
+          const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
+          const dx = diffuser.xPercent * canvasWidth;
+          const dy = diffuser.yPercent * canvasHeight;
+          context.save();
+          context.setLineDash([5, 5]);
+          context.lineWidth = 2;
+          context.strokeStyle = "gray";
+          context.beginPath();
+          context.moveTo(ductCenterX, ductCenterY);
+          context.lineTo(dx, dy);
+          context.stroke();
+          context.restore();
         }
       });
-      // If no matching group duct, find nearest overall
-      if (!nearestDuct) {
+    } else {
+      // 1-to-many: connect diffusers to ducts with matching comment groups, fallback to nearest
+      hvacAnnotations.diffusers.forEach((diffuser) => {
+        const dx = diffuser.xPercent * canvasWidth;
+        const dy = diffuser.yPercent * canvasHeight;
+        const diffuserGroup = getNearestCommentText(dx, dy, comments);
+        let nearestDuct = null;
+        let minDist = Infinity;
         hvacAnnotations.ducts.forEach((duct) => {
-          const ductCenterX =
-            duct.xPercent * canvasWidth +
-            ((duct.width || 0.2) * canvasWidth) / 2;
-          const ductCenterY =
-            duct.yPercent * canvasHeight +
-            ((duct.height || 0.04) * canvasHeight) / 2;
-          const dist = Math.sqrt(
-            (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
-          );
-          if (dist < minDist) {
-            minDist = dist;
-            nearestDuct = { x: ductCenterX, y: ductCenterY };
+          const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
+          const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
+          const ductGroup = getNearestCommentText(ductCenterX, ductCenterY, comments);
+          if (diffuserGroup && ductGroup === diffuserGroup) {
+            const dist = Math.sqrt((dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestDuct = { x: ductCenterX, y: ductCenterY };
+            }
           }
         });
-      }
-      if (nearestDuct) {
-        context.save();
-        context.setLineDash([5, 5]); // dotted line
-        context.lineWidth = 2;
-        context.strokeStyle = "gray"; // relevant color for routes
-        context.beginPath();
-        context.moveTo(dx, dy);
-        context.lineTo(nearestDuct.x, nearestDuct.y);
-        context.stroke();
-        context.restore();
-      }
-    });
+        // Fallback to nearest duct if no matching group
+        if (!nearestDuct) {
+          hvacAnnotations.ducts.forEach((duct) => {
+            const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
+            const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
+            const dist = Math.sqrt((dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestDuct = { x: ductCenterX, y: ductCenterY };
+            }
+          });
+        }
+        if (nearestDuct) {
+          context.save();
+          context.setLineDash([5, 5]);
+          context.lineWidth = 2;
+          context.strokeStyle = "gray";
+          context.beginPath();
+          context.moveTo(dx, dy);
+          context.lineTo(nearestDuct.x, nearestDuct.y);
+          context.stroke();
+          context.restore();
+        }
+      });
+    }
   }
 };
 
 const overlayAnnotations = (context, annotations, acType) => {
-  console.log("overlayAnnotations called with annotations:", annotations);
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
+
+  // Helper function to get the center of a rotated rectangle
+  const getRotatedCenter = (x, y, width, height, angleDeg) => {
+    const angle = (angleDeg || 0) * (Math.PI / 180);
+    const cx = width / 2;
+    const cy = height / 2;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const rotatedCx = cx * cos - cy * sin;
+    const rotatedCy = cx * sin + cy * cos;
+    return { x: x + rotatedCx, y: y + rotatedCy };
+  };
 
   // rectangles - ALWAYS render user-drawn rectangles (engineer annotations)
   // These represent condenser, AC units, and other system components
@@ -445,6 +470,47 @@ const overlayAnnotations = (context, annotations, acType) => {
     context.fillText(text, x, y);
   });
 
+  // Draw lines from rectangles to nearest comments (callout style)
+  annotations?.rectangles?.forEach((rect) => {
+    const rectCenter = getRotatedCenter(
+      rect.xPercent * canvasWidth,
+      rect.yPercent * canvasHeight,
+      rect.widthPercent * canvasWidth,
+      rect.heightPercent * canvasHeight,
+      rect.rotation
+    );
+    const rx = rectCenter.x;
+    const ry = rectCenter.y;
+    let nearestComment = null;
+    let minDist = Infinity;
+    annotations.comments?.forEach((comment) => {
+      // Only consider comments that match the current acType
+      if (comment.acType && comment.acType !== acType) {
+        return;
+      }
+      const cx = comment.xPercent * canvasWidth;
+      const cy = comment.yPercent * canvasHeight;
+      const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+        nearestComment = comment;
+      }
+    });
+    if (nearestComment && minDist < 150) { // threshold in pixels for relevance
+      const cx = nearestComment.xPercent * canvasWidth;
+      const cy = nearestComment.yPercent * canvasHeight;
+      context.save();
+      context.setLineDash([5, 5]); // dotted line
+      context.lineWidth = 1;
+      context.strokeStyle = "gray";
+      context.beginPath();
+      context.moveTo(rx, ry);
+      context.lineTo(cx, cy);
+      context.stroke();
+      context.restore();
+    }
+  });
+
   // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
   // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
   if (
@@ -512,19 +578,26 @@ const overlayAnnotations = (context, annotations, acType) => {
       );
 
       // Draw blue dashed refrigerant lines from condenser to each indoor unit (star topology)
-      const condX =
-        condenser.xPercent * canvasWidth +
-        (condenser.widthPercent * canvasWidth) / 2;
-      const condY =
-        condenser.yPercent * canvasHeight +
-        (condenser.heightPercent * canvasHeight) / 2;
+      const condCenter = getRotatedCenter(
+        condenser.xPercent * canvasWidth,
+        condenser.yPercent * canvasHeight,
+        condenser.widthPercent * canvasWidth,
+        condenser.heightPercent * canvasHeight,
+        condenser.rotation
+      );
+      const condX = condCenter.x;
+      const condY = condCenter.y;
 
       indoorUnits.forEach((unit) => {
-        const unitX =
-          unit.xPercent * canvasWidth + (unit.widthPercent * canvasWidth) / 2;
-        const unitY =
-          unit.yPercent * canvasHeight +
-          (unit.heightPercent * canvasHeight) / 2;
+        const unitCenter = getRotatedCenter(
+          unit.xPercent * canvasWidth,
+          unit.yPercent * canvasHeight,
+          unit.widthPercent * canvasWidth,
+          unit.heightPercent * canvasHeight,
+          unit.rotation
+        );
+        const unitX = unitCenter.x;
+        const unitY = unitCenter.y;
 
         context.save();
         context.setLineDash([5, 5]); // dashed line
@@ -623,50 +696,52 @@ const overlayAnnotations = (context, annotations, acType) => {
     }
     // Draw visible label for condensers
     condensers.forEach((cond) => {
-      const cx =
-        cond.xPercent * canvasWidth + (cond.widthPercent * canvasWidth) / 2;
-      const cy =
-        cond.yPercent * canvasHeight + (cond.heightPercent * canvasHeight) / 2;
+      const condCenter = getRotatedCenter(
+        cond.xPercent * canvasWidth,
+        cond.yPercent * canvasHeight,
+        cond.widthPercent * canvasWidth,
+        cond.heightPercent * canvasHeight,
+        cond.rotation
+      );
       context.save();
       context.fillStyle = "black";
       context.font = "bold 14px Arial";
-      context.fillText("", cx + 8, cy - 8);
+      context.fillText("", condCenter.x + 8, condCenter.y - 8);
       context.restore();
     });
     // Now, for each rectangle not a condenser, connect to the nearest condenser
     annotations.rectangles.forEach((rect) => {
       if (!condensers.includes(rect)) {
+        const rectCenter = getRotatedCenter(
+          rect.xPercent * canvasWidth,
+          rect.yPercent * canvasHeight,
+          rect.widthPercent * canvasWidth,
+          rect.heightPercent * canvasHeight,
+          rect.rotation
+        );
+        const rx = rectCenter.x;
+        const ry = rectCenter.y;
         let nearestCondenser = null;
         let minDist = Infinity;
         condensers.forEach((cond) => {
-          const cx =
-            cond.xPercent * canvasWidth + (cond.widthPercent * canvasWidth) / 2;
-          const cy =
-            cond.yPercent * canvasHeight +
-            (cond.heightPercent * canvasHeight) / 2;
-          const rx =
-            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
-          const ry =
-            rect.yPercent * canvasHeight +
-            (rect.heightPercent * canvasHeight) / 2;
+          const condCenter = getRotatedCenter(
+            cond.xPercent * canvasWidth,
+            cond.yPercent * canvasHeight,
+            cond.widthPercent * canvasWidth,
+            cond.heightPercent * canvasHeight,
+            cond.rotation
+          );
+          const cx = condCenter.x;
+          const cy = condCenter.y;
           const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
           if (dist < minDist) {
             minDist = dist;
-            nearestCondenser = cond;
+            nearestCondenser = { cx, cy };
           }
         });
         if (nearestCondenser) {
-          const cx =
-            nearestCondenser.xPercent * canvasWidth +
-            (nearestCondenser.widthPercent * canvasWidth) / 2;
-          const cy =
-            nearestCondenser.yPercent * canvasHeight +
-            (nearestCondenser.heightPercent * canvasHeight) / 2;
-          const rx =
-            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
-          const ry =
-            rect.yPercent * canvasHeight +
-            (rect.heightPercent * canvasHeight) / 2;
+          const cx = nearestCondenser.cx;
+          const cy = nearestCondenser.cy;
           context.save();
           context.setLineDash([5, 5]); // dotted line for minisplit ductless
           context.lineWidth = 2;
@@ -767,37 +842,36 @@ const overlayAnnotations = (context, annotations, acType) => {
     // Now, for each rectangle not a condenser, connect to the nearest condenser with teal refrigerant line
     annotations.rectangles.forEach((rect) => {
       if (!condensers.includes(rect)) {
+        const rectCenter = getRotatedCenter(
+          rect.xPercent * canvasWidth,
+          rect.yPercent * canvasHeight,
+          rect.widthPercent * canvasWidth,
+          rect.heightPercent * canvasHeight,
+          rect.rotation
+        );
+        const rx = rectCenter.x;
+        const ry = rectCenter.y;
         let nearestCondenser = null;
         let minDist = Infinity;
         condensers.forEach((cond) => {
-          const cx =
-            cond.xPercent * canvasWidth + (cond.widthPercent * canvasWidth) / 2;
-          const cy =
-            cond.yPercent * canvasHeight +
-            (cond.heightPercent * canvasHeight) / 2;
-          const rx =
-            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
-          const ry =
-            rect.yPercent * canvasHeight +
-            (rect.heightPercent * canvasHeight) / 2;
+          const condCenter = getRotatedCenter(
+            cond.xPercent * canvasWidth,
+            cond.yPercent * canvasHeight,
+            cond.widthPercent * canvasWidth,
+            cond.heightPercent * canvasHeight,
+            cond.rotation
+          );
+          const cx = condCenter.x;
+          const cy = condCenter.y;
           const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
           if (dist < minDist) {
             minDist = dist;
-            nearestCondenser = cond;
+            nearestCondenser = { cx, cy };
           }
         });
         if (nearestCondenser) {
-          const cx =
-            nearestCondenser.xPercent * canvasWidth +
-            (nearestCondenser.widthPercent * canvasWidth) / 2;
-          const cy =
-            nearestCondenser.yPercent * canvasHeight +
-            (nearestCondenser.heightPercent * canvasHeight) / 2;
-          const rx =
-            rect.xPercent * canvasWidth + (rect.widthPercent * canvasWidth) / 2;
-          const ry =
-            rect.yPercent * canvasHeight +
-            (rect.heightPercent * canvasHeight) / 2;
+          const cx = nearestCondenser.cx;
+          const cy = nearestCondenser.cy;
           context.save();
           context.setLineDash([]); // solid line for VRF ductless
           context.lineWidth = 2.5;
@@ -819,45 +893,63 @@ const overlayAnnotations = (context, annotations, acType) => {
     annotations?.rectangles &&
     annotations.rectangles.length > 1
   ) {
-    // Find condenser (largest rectangle or marked with isCondenser flag)
+    // Find condenser by comment text "condenser"
     let condenser = null;
-
-    // 1) explicit flag
-    annotations.rectangles.forEach((rect) => {
-      if (rect.isCondenser) condenser = rect;
-    });
-
-    // 2) largest rectangle fallback
+    if (annotations.comments) {
+      const condenserComment = annotations.comments.find(c => c.text.toLowerCase().includes('condenser'));
+      if (condenserComment) {
+        condenser = annotations.rectangles.find(r => r.id === condenserComment.rectId);
+      }
+    }
+    // Fallback to highest id if no comment
     if (!condenser) {
-      let maxArea = -Infinity;
+      let maxIdNum = -1;
       annotations.rectangles.forEach((rect) => {
-        const area = rect.widthPercent * rect.heightPercent;
-        if (area > maxArea) {
-          maxArea = area;
+        const idNum = parseInt(rect.id) || 0;
+        if (idNum > maxIdNum) {
+          maxIdNum = idNum;
           condenser = rect;
         }
       });
     }
 
     if (condenser) {
-      // Get all non-condenser rectangles and sort by position (left to right, top to bottom)
+      // Get all non-condenser rectangles and sort by comment text number (e.g., "ac-1" -> 1)
       const indoorRects = annotations.rectangles
         .filter((rect) => rect !== condenser && !rect.isCondenser)
         .sort((a, b) => {
-          // Sort primarily by x position (left to right)
-          if (Math.abs(a.xPercent - b.xPercent) > 0.05) {
-            return a.xPercent - b.xPercent;
-          }
-          // If x positions are similar, sort by y position (top to bottom)
-          return a.yPercent - b.yPercent;
+          const getNum = (rect) => {
+            if (!annotations.comments) return 0;
+            const comment = annotations.comments.find(c => c.rectId === rect.id);
+            if (comment) {
+              const match = comment.text.match(/ac-(\d+)/i);
+              return match ? parseInt(match[1]) : 0;
+            }
+            return 0;
+          };
+          return getNum(a) - getNum(b);
         });
 
       // Draw chain connections between rectangles
       for (let i = 0; i < indoorRects.length - 1; i++) {
-        const x1 = indoorRects[i].xPercent * canvasWidth;
-        const y1 = indoorRects[i].yPercent * canvasHeight;
-        const x2 = indoorRects[i + 1].xPercent * canvasWidth;
-        const y2 = indoorRects[i + 1].yPercent * canvasHeight;
+        const rect1Center = getRotatedCenter(
+          indoorRects[i].xPercent * canvasWidth,
+          indoorRects[i].yPercent * canvasHeight,
+          indoorRects[i].widthPercent * canvasWidth,
+          indoorRects[i].heightPercent * canvasHeight,
+          indoorRects[i].rotation
+        );
+        const x1 = rect1Center.x;
+        const y1 = rect1Center.y;
+        const rect2Center = getRotatedCenter(
+          indoorRects[i + 1].xPercent * canvasWidth,
+          indoorRects[i + 1].yPercent * canvasHeight,
+          indoorRects[i + 1].widthPercent * canvasWidth,
+          indoorRects[i + 1].heightPercent * canvasHeight,
+          indoorRects[i + 1].rotation
+        );
+        const x2 = rect2Center.x;
+        const y2 = rect2Center.y;
 
         const offset = 3;
         const dx = x2 - x1;
@@ -891,11 +983,24 @@ const overlayAnnotations = (context, annotations, acType) => {
 
       // Connect last rectangle to condenser
       if (indoorRects.length > 0) {
-        const lastIndoor = indoorRects[indoorRects.length - 1];
-        const lastX = lastIndoor.xPercent * canvasWidth;
-        const lastY = lastIndoor.yPercent * canvasHeight;
-        const condX = condenser.xPercent * canvasWidth;
-        const condY = condenser.yPercent * canvasHeight;
+        const lastRectCenter = getRotatedCenter(
+          indoorRects[indoorRects.length - 1].xPercent * canvasWidth,
+          indoorRects[indoorRects.length - 1].yPercent * canvasHeight,
+          indoorRects[indoorRects.length - 1].widthPercent * canvasWidth,
+          indoorRects[indoorRects.length - 1].heightPercent * canvasHeight,
+          indoorRects[indoorRects.length - 1].rotation
+        );
+        const lastX = lastRectCenter.x;
+        const lastY = lastRectCenter.y;
+        const condCenter = getRotatedCenter(
+          condenser.xPercent * canvasWidth,
+          condenser.yPercent * canvasHeight,
+          condenser.widthPercent * canvasWidth,
+          condenser.heightPercent * canvasHeight,
+          condenser.rotation
+        );
+        const condX = condCenter.x;
+        const condY = condCenter.y;
 
         const offset = 3;
         const dx = condX - lastX;

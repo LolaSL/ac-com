@@ -336,14 +336,14 @@ body {
   text-align: relative;
   color: black;
 }
-.offers,
-.blogs-title,
-.sellers-title,
-.contacts-title,
-.featured-title,
-.advanced-title,
-.title-measurement,
-.about-us {
+h1.offers,
+h1.blogs-title,
+h1.sellers-title,
+h1.contacts-title,
+h1.featured-title,
+h1.advanced-title,
+h1.title-measurement,
+h1.about-us {
   position: relative;
   font-family: Roboto;
   text-transform: uppercase;
@@ -351,31 +351,30 @@ body {
   font-weight: 800;
   overflow: hidden;
   background: linear-gradient(
-    90deg,
-    #000,
-    rgb(17, 17, 17),
-    rgba(230, 183, 142, 1),
-    rgba(126, 139, 151, 1),
-    rgb(17, 17, 17),
-    rgba(201, 198, 198, 1),
-    rgb(2, 34, 65),
-    rgb(131, 140, 150),
-    rgba(230, 183, 142, 1),
-    #000
+    45deg,
+    #ff6b35,
+    #ff5722,
+    #e67e22,
+    #f39c12,
+    #ff6b35
   );
-  background-repeat: no-repeat;
-  background-size: 80%;
-  animation: animate 12s linear infinite;
+  background-size: 200% 200%;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: rgba(255, 255, 255, 0);
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5),
+    0 0 20px rgba(255, 107, 53, 0.3);
+  animation: glow 3s ease-in-out infinite alternate;
 }
 
-@keyframes animate {
-  0% {
-    background-position: -500%;
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.5),
+      0 0 20px rgba(255, 107, 53, 0.3);
   }
-  100% {
-    background-position: 500%;
+  to {
+    text-shadow: 0 0 15px rgba(255, 107, 53, 0.8),
+      0 0 30px rgba(255, 107, 53, 0.5);
   }
 }
 

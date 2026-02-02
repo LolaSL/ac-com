@@ -18,14 +18,6 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
 
   const navigate = useNavigate();
 
-  const handleNavigation = (e, redirectPath) => {
-    e.preventDefault();
-    if (!userInfo) {
-      navigate(`/signin?redirect=${redirectPath}`);
-    } else {
-      setSidebarIsOpen(false);
-    }
-  };
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -141,9 +133,21 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
                   className="nav-link-side fw-bold"
                   onClick={(e) => {
                     if (item.path === "/uploadfile") {
-                      handleNavigation(e, "/uploadfile");
+                      e.preventDefault();
+                      if (!userInfo) {
+                        navigate(`/signin?redirect=/uploadfile`);
+                      } else {
+                        navigate("/uploadfile");
+                      }
+                      setSidebarIsOpen(false);
                     } else if (item.path === "/roi-calculator") {
-                      handleNavigation(e, "/roi-calculator");
+                      e.preventDefault();
+                      if (!userInfo) {
+                        navigate(`/signin?redirect=/roi-calculator`);
+                      } else {
+                        navigate("/roi-calculator");
+                      }
+                      setSidebarIsOpen(false);
                     } else {
                       handleNavClick();
                       if (item.path !== "#") {
