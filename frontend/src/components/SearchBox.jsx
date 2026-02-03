@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -28,11 +28,7 @@ export default function SearchBox() {
           aria-label="Search Products"
           aria-describedby="button-search"
         ></FormControl>
-        <Button
-          variant="btn btn-search btn-text"
-          type="submit"
-          id="button-search"
-        >
+        <Button variant="btn btn-search" type="submit" id="button-search">
           <i className="fas fa-search"></i>
         </Button>
       </InputGroup>

@@ -17,6 +17,7 @@ import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import "./UserListPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {

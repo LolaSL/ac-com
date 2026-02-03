@@ -146,7 +146,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container small-container">
-      <h1 className="my-3">User Profile</h1>
+      <h1 className="my-3 fs-1">User Profile</h1>
       <form onSubmit={submitHandler}>
         {/* Avatar Section */}
         <div className="mb-4 text-center">

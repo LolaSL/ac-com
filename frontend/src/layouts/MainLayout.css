@@ -1,0 +1,31 @@
+.site-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.active-cont {
+  margin-left: 250px;
+  transition: all 0.3s ease;
+}
+
+.full-box {
+  width: 100%;
+}
+
+.full-box header,
+.full-box footer {
+  display: none;
+}
+
+.main-content {
+  flex-grow: 1;
+  min-height: calc(100vh - 40px);
+}
+
+@media (min-width: 992px) {
+  .main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

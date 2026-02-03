@@ -6,6 +6,7 @@ import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { Store } from "../Store";
+import "./DashboardPage.css";
 function Dashboard() {
   const navigate = useNavigate();
   const { state } = useContext(Store);

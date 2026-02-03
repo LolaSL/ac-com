@@ -1,6 +1,7 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import "./AboutUs.css";
 const AboutUs = () => {
   return (
     <Container className="site-container-about mt-4 p-4">

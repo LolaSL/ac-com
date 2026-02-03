@@ -8,6 +8,7 @@ import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
+import "./ServiceProviderLogin.css";
 
 const ServiceProviderLogin = () => {
   const [email, setEmail] = useState("");

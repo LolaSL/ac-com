@@ -13,6 +13,7 @@ import DemoRequestForm from "../components/DemoRequestForm";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./HomeBannerPage.css";
 
 export default function HomeBannerPage() {
   const [fetchedNotifications, setFetchedNotifications] = useState([]);

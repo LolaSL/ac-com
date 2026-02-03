@@ -10,6 +10,7 @@ import { Container, Table, Button, Form, InputGroup } from "react-bootstrap";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import "./SellersListPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { Container, Table } from "react-bootstrap";
+import "./MessagesPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -57,41 +58,41 @@ const MessagesPage = ({ messageId }) => {
 
   return (
     <Container className="provider-container">
-      <h1 className="mt-4 mb-4 fw-bold">Messages</h1>
+      <h1 className="mt-4 mb-4 fw-bold fs-1">Messages</h1>
       <div className="table-responsive">
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Client Name</th>
-            <th>Project Name</th>
-            <th>Message</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody> 
-          {messages && messages.length > 0 ? (
-            messages.map((message, index) => (
-              <tr key={index}>
-                 <td data-label="ID">{index + 1}</td>
-                 <td data-label="Client Name">{message.client}</td>
-                 <td data-label="Project Name">{message.projectName}</td>
-                 <td data-label="Message">{message.text}</td>
-                 <td data-label="Date">{new Date(message.date).toLocaleDateString()}</td>
-              </tr>
-            ))
-          ) : (
+        <Table striped bordered hover>
+          <thead>
             <tr>
-              <td colSpan="6">No messages data found</td>
+              <th>ID</th>
+              <th>Client Name</th>
+              <th>Project Name</th>
+              <th>Message</th>
+              <th>Date</th>
             </tr>
-          )}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {messages && messages.length > 0 ? (
+              messages.map((message, index) => (
+                <tr key={index}>
+                  <td data-label="ID">{index + 1}</td>
+                  <td data-label="Client Name">{message.client}</td>
+                  <td data-label="Project Name">{message.projectName}</td>
+                  <td data-label="Message">{message.text}</td>
+                  <td data-label="Date">
+                    {new Date(message.date).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6">No messages data found</td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
       </div>
     </Container>
   );
 };
 
 export default MessagesPage;
-
-

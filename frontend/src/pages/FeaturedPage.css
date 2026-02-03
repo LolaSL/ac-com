@@ -1,0 +1,151 @@
+/* FeaturedPage Styles */
+
+h1.featured-title {
+  position: relative;
+  font-family: var(--font-family);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-weight: var(--font-weight-bold);
+  overflow: hidden;
+  background: var(--gradient-secondary);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5),
+    0 0 20px rgba(255, 107, 53, 0.3);
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.5),
+      0 0 20px rgba(255, 107, 53, 0.3);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(255, 107, 53, 0.8),
+      0 0 30px rgba(255, 107, 53, 0.5);
+  }
+}
+
+.featured-products {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* FeaturedPage Layout */
+.featured-page-wrapper {
+  width: 100%;
+  max-width: 1200px; /* constrain width on large screens */
+  padding: 0 1rem;
+  margin: 0 auto;
+}
+
+.featured-products-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.featured-products-container .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Rely on Bootstrap grid sizing instead of overriding column widths */
+
+/* No custom overrides needed for lg/md/sm breakpoints */
+
+@media (max-width: 767px) {
+  .featured-page-wrapper {
+    padding: 0 0.5rem;
+  }
+
+  /* Keep default Bootstrap behavior at small screens */
+}
+
+@media (max-width: 1200px) {
+  .featured-title {
+    font-size: 2rem;
+  }
+
+  .featured-products {
+    font-size: 2.3rem;
+  }
+
+  .products {
+    margin-top: 1.5rem;
+  }
+
+  .product-card {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 992px) {
+  .featured-title {
+    font-size: 2.1rem;
+  }
+
+  .products {
+    justify-content: center;
+  }
+
+  .product-card {
+    padding: 10px;
+  }
+
+  .product-item {
+    flex: 1 1 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .featured-title {
+    font-size: 2rem;
+  }
+
+  .featured-products {
+    font-size: 0.9rem;
+  }
+
+  .products {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .product-card {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .product-item {
+    flex: 1 1 100%;
+    margin-bottom: 20px;
+  }
+
+  .featured-products-container .row {
+    justify-content: center;
+  }
+
+  .featured-products-container .row .col {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .featured-title {
+    font-size: 1.3rem;
+  }
+
+  .featured-products {
+    font-size: 0.8rem;
+  }
+
+  .btn-secondary {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}

@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store";
 import CheckoutSteps from "../components/CheckoutSteps";
+import "./ShippingAddressPage.css";
 
 export default function ShippingAddressPage() {
   const navigate = useNavigate();

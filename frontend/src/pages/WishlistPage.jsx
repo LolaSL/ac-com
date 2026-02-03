@@ -11,6 +11,7 @@ import Image from "react-bootstrap/Image";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import Rating from "../components/Rating";
+import "./WishlistPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -92,8 +93,8 @@ export default function WishlistPage() {
 
   return (
     <div className="container my-5">
-      <h1 className="mb-4">
-        <i className="fas fa-heart me-2" style={{ color: "#ff6b35" }}></i>
+      <h1 className="mb-4 fs-1">
+        <i className="fas fa-heart me-2 heart-icon"></i>
         My Wishlist
       </h1>
 
@@ -110,7 +111,7 @@ export default function WishlistPage() {
           {validWishlistItems.map((item) => (
             <Col key={item._id} xs={12} sm={6} md={4} lg={3} className="p-2">
               <Card className="h-100">
-                <div style={{ position: "relative" }}>
+                <div className="wishlist-card-relative">
                   <Link to={`/product/${item.product.slug}`}>
                     <Image
                       src={item.product.image}
@@ -120,26 +121,9 @@ export default function WishlistPage() {
                   </Link>
                   <button
                     onClick={() => removeFromWishlistHandler(item.product._id)}
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      right: "10px",
-                      background: "white",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: "40px",
-                      height: "40px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                    }}
+                    className="remove-wishlist-btn"
                   >
-                    <i
-                      className="fas fa-heart"
-                      style={{ color: "#ff6b35", fontSize: "1.2rem" }}
-                    />
+                    <i className="fas fa-heart remove-wishlist-icon" />
                   </button>
                 </div>
 

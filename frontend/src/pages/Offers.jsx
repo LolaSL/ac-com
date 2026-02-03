@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import "./Offers.css";
 
 export default function Offers() {
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,7 @@ export default function Offers() {
 
   return (
     <div className="container mt-5">
-      <h1 className="offers text-center mb-4">Special Offers</h1>
+      <h1 className="offers text-center mb-4 fs-1">Special Offers</h1>
       {loading ? (
         <div className="text-center">
           <Spinner animation="border" role="status">

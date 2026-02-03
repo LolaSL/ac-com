@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Form, Button, Alert, Image } from "react-bootstrap";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import "./ContactPage.css";
 const ContactPage = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

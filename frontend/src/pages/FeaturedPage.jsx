@@ -6,6 +6,7 @@ import Product from "../components/Product.jsx";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
 import { Link } from "react-router-dom";
+import "./FeaturedPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {

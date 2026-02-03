@@ -1,10 +1,11 @@
 import React from "react";
 import { Container } from "react-bootstrap";
+import "./ShipMentPage.css";
 
 const ShipMentPage = () => {
   return (
     <Container className="my-5">
-       <h1 className="mb-4 fs-1">Shipping, Tax & Delivery</h1>
+      <h1 className="mb-4 fs-1">Shipping, Tax & Delivery</h1>
 
       <p className="fs-5">
         We’ve made shipping simple for all our air conditioners, outdoor units,
@@ -21,8 +22,8 @@ const ShipMentPage = () => {
 
       <h4>Sales Tax</h4>
       <p className="fs-5">
-        All orders are subject to a flat <strong>15% sales tax</strong>, which is
-        calculated automatically at checkout based on your items subtotal.
+        All orders are subject to a flat <strong>15% sales tax</strong>, which
+        is calculated automatically at checkout based on your items subtotal.
         Tax is displayed separately and included in your final order total
         before payment is completed.
       </p>
@@ -36,10 +37,10 @@ const ShipMentPage = () => {
 
       <p className="fs-5">
         Each item includes an estimated processing time before leaving our
-        warehouse, which covers preparation and shipment. Once shipped,
-        delivery generally takes 1–10 business days depending on your location
-        and the warehouse the item ships from. On rare occasions, delivery may
-        take up to 20 business days.
+        warehouse, which covers preparation and shipment. Once shipped, delivery
+        generally takes 1–10 business days depending on your location and the
+        warehouse the item ships from. On rare occasions, delivery may take up
+        to 20 business days.
       </p>
 
       <h4>Small Items (Under 100 lbs.)</h4>
@@ -53,19 +54,20 @@ const ShipMentPage = () => {
       <h4>Large Items & Freight Shipments</h4>
       <p className="fs-5">
         Most large HVAC units, outdoor condensers, and ventilation equipment
-        ship via LTL (Less-Than-Truckload) freight carriers such as TForce, Estes,
-        R&L Carriers, Ward Trucking, or Daylight Transport. All freight shipments
-        are FOB Origin, and ownership transfers to the customer upon shipment.
-        Insurance is available at the buyer’s request before the order ships.
+        ship via LTL (Less-Than-Truckload) freight carriers such as TForce,
+        Estes, R&L Carriers, Ward Trucking, or Daylight Transport. All freight
+        shipments are FOB Origin, and ownership transfers to the customer upon
+        shipment. Insurance is available at the buyer’s request before the order
+        ships.
       </p>
 
       <p className="fs-5">
-        Freight shipments generally require a signature and delivery
-        appointment for residential addresses. Liftgate service is included
-        for items over 150 lbs. Deliveries are curbside by default; for in-home
-        delivery or special arrangements, please contact us before ordering.
-        Commercial deliveries occur during normal business hours without
-        liftgate service unless requested in the order notes.
+        Freight shipments generally require a signature and delivery appointment
+        for residential addresses. Liftgate service is included for items over
+        150 lbs. Deliveries are curbside by default; for in-home delivery or
+        special arrangements, please contact us before ordering. Commercial
+        deliveries occur during normal business hours without liftgate service
+        unless requested in the order notes.
       </p>
 
       <h4>Delivery & Inspection</h4>
@@ -98,8 +100,8 @@ const ShipMentPage = () => {
       <p className="fs-5">
         Alternate shipping addresses must match your credit card verification
         details. Standard delivery is curbside. White-glove delivery is
-        available by prior arrangement. Once an order has shipped, it cannot
-        be canceled.
+        available by prior arrangement. Once an order has shipped, it cannot be
+        canceled.
       </p>
     </Container>
   );

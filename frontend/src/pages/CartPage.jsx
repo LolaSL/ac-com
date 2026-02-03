@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Image from "react-bootstrap/Image";
 import ModalWindow from "../components/ModalWindow.jsx";
+import "./CartPage.css";
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -289,7 +290,7 @@ export default function CartPage() {
 
   return (
     <div className="p-4">
-      <h1>Shopping Cart</h1>
+      <h1 className="fs-1">Shopping Cart</h1>
       <div className="p-4">
         {showAlert && condenserSizingStatus === "already_added" && (
           <div
@@ -522,7 +523,7 @@ export default function CartPage() {
                           style={{
                             width: "100%",
                             height: 140,
-                            objectFit: "cover",
+                            objectFit: "contain",
                           }}
                         />
                       </Link>

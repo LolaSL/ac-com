@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "react-bootstrap/Image";
 import { Link } from "react-router-dom";
+import "./AdvancedAC.css";
 
 const AdvancedAC = () => {
   return (

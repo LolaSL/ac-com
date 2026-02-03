@@ -1,0 +1,36 @@
+.heart-icon {
+  color: #ff6b35;
+}
+
+.wishlist-card-relative {
+  position: relative;
+}
+
+.remove-wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.remove-wishlist-icon {
+  color: #ff6b35;
+  font-size: 1.2rem;
+}
+
+.wishlist-card-img {
+  width: 100%;
+  height: auto;
+  max-height: 100px;
+  object-fit: contain;
+  display: block;
+}

@@ -14,6 +14,7 @@ import ModalLegend from "../components/ModalLegend_new.jsx";
 import PdfHelpVideo from "../components/PdfHelpVideo.jsx";
 import ArchSymbolsModal from "../components/ArchSymbolsModal.jsx";
 import BtuCalculator from "../components/BtuCalculator.jsx";
+import "./Measurement.css";
 
 const getToken = () => {
   try {
@@ -99,7 +100,7 @@ const Measurement = () => {
         Measurement Service System
       </h1>
       <div className="row row-cols-2 row-cols-md-4 g-3 pt-4 mt-4">
-          <GridItem>
+        <GridItem>
           <ModalLegend />
         </GridItem>
         <GridItem>
@@ -112,7 +113,6 @@ const Measurement = () => {
           <Sidebar savedPdfs={savedPdfs} fetchSavedPdfs={fetchSavedPdfs} />
         </GridItem>
         <br />
-      
       </div>
 
       <AnnotatorErrorBoundary>

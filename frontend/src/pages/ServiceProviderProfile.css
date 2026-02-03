@@ -1,0 +1,21 @@
+.provider-update {
+  text-transform: uppercase;
+  color: grey;
+  font-weight: bold;
+}
+
+.profile-icons i {
+  padding: 0.4rem 0.5rem;
+  background: #e1e1e1;
+  color: rgb(236, 150, 45);
+  margin: 0 0.5rem;
+  border-radius: 50%;
+  display: inline;
+}
+
+.profile-icons i:hover {
+  background: #ec133e;
+  color: #fff;
+  transition: 0.6s;
+  cursor: pointer;
+}

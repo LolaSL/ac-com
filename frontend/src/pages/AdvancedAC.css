@@ -1,0 +1,11 @@
+/* AdvancedAC Page Styles */
+
+.ac-conditioning {
+  text-align: justify;
+  padding: 20px;
+}
+
+.responsive-image-advanced {
+  max-width: 100%;
+  height: auto;
+}

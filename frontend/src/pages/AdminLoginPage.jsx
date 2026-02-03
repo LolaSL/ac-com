@@ -7,6 +7,7 @@ import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
+import "./AdminLoginPage.css";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -50,67 +51,40 @@ export default function AdminLoginPage() {
 
   return (
     <div className="dashboard-container">
-      <div
-        className="sidebar d-none d-md-flex"
-        style={{ backgroundColor: "#f8f9fa", borderRight: "1px solid #ddd" }}
-      >
+      <div className="sidebar d-none d-md-flex">
         <div style={{ padding: "1rem" }}>
-          <h3
-            style={{
-              marginBottom: "2rem",
-              color: "#343a40",
-              fontWeight: "bold",
-            }}
-          >
-            Admin Portal
-          </h3>
-          <div style={{ marginBottom: "1rem" }}>
-            <i
-              className="fas fa-shield-alt"
-              style={{ marginRight: "0.5rem", color: "#007bff" }}
-            ></i>
+          <h3>Admin Portal</h3>
+          <div>
+            <i className="fas fa-shield-alt"></i>
             Secure Access
           </div>
-          <div style={{ marginBottom: "1rem" }}>
-            <i
-              className="fas fa-user-cog"
-              style={{ marginRight: "0.5rem", color: "#007bff" }}
-            ></i>
+          <div>
+            <i className="fas fa-user-cog"></i>
             Administration
           </div>
-          <div style={{ marginBottom: "1rem" }}>
-            <i
-              className="fas fa-chart-line"
-              style={{ marginRight: "0.5rem", color: "#007bff" }}
-            ></i>
+          <div>
+            <i className="fas fa-chart-line"></i>
             Dashboard
           </div>
         </div>
       </div>
 
-      <div className="main-content" style={{ backgroundColor: "#ffffff" }}>
+      <div className="main-content">
         <Container className="d-flex justify-content-center align-items-center min-vh-100">
-          <Card
-            className="shadow-sm"
-            style={{
-              maxWidth: "450px",
-              width: "100%",
-              border: "1px solid #e9ecef",
-            }}
-          >
-            <Card.Body style={{ padding: "2rem" }}>
+          <Card className="admin-card shadow-sm">
+            <Card.Body className="admin-card-body">
               <div className="text-center mb-4">
-                <i className="fas fa-user-shield fa-3x text-primary mb-3"></i>
-                <h2 className="fw-bold text-dark">Admin Login</h2>
-                <p className="text-muted">
+                <i className="fas fa-user-shield fa-3x admin-icon mb-3"></i>
+                <h2 className="fw-bold admin-title fs-1">Admin Login</h2>
+                <p className="admin-subtitle">
                   Access the administration dashboard
                 </p>
               </div>
 
               <Form onSubmit={handleAdminLogin}>
                 <Form.Group controlId="email" className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="fas fa-envelope me-2 text-primary"></i>
+                  <Form.Label className="form-label">
+                    <i className="fas fa-envelope"></i>
                     Email Address
                   </Form.Label>
                   <Form.Control
@@ -124,8 +98,8 @@ export default function AdminLoginPage() {
                 </Form.Group>
 
                 <Form.Group controlId="password" className="mb-4">
-                  <Form.Label className="fw-semibold">
-                    <i className="fas fa-lock me-2 text-primary"></i>
+                  <Form.Label className="form-label">
+                    <i className="fas fa-lock"></i>
                     Password
                   </Form.Label>
                   <Form.Control
@@ -141,14 +115,8 @@ export default function AdminLoginPage() {
                 <div className="d-grid">
                   <Button
                     type="submit"
-                    className="btn btn-primary btn-lg fw-semibold"
+                    className="btn btn-primary btn-lg fw-semibold btn-admin-login"
                     disabled={submitting}
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
-                      border: "none",
-                      padding: "0.75rem 1.5rem",
-                    }}
                   >
                     {submitting ? (
                       <>
@@ -168,9 +136,9 @@ export default function AdminLoginPage() {
                 </div>
               </Form>
 
-              <div className="text-center mt-4">
-                <small className="text-muted">
-                  <i className="fas fa-info-circle me-1"></i>
+              <div className="admin-footer">
+                <small>
+                  <i className="fas fa-info-circle"></i>
                   Authorized personnel only
                 </small>
               </div>

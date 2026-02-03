@@ -1,0 +1,22 @@
+/* SignInPage.css */
+
+.input-group .btn-outline-success {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.input-group .btn-outline-success:hover {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.input-group .btn-outline-success i {
+  color: inherit;
+}
+
+@media (max-width: 576px) {
+  .input-group .btn-outline-success {
+    padding: 0.375rem 0.5rem; /* smaller padding on small screens */
+  }
+}

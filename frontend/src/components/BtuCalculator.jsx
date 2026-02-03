@@ -11,6 +11,7 @@ import printJS from "print-js";
 import TableBody from "./TableBody";
 import { ShoppingCart } from "lucide-react";
 import { toast } from "react-toastify";
+import "./BtuCalculator.css";
 
 function BtuCalculator({ roomData, acAnnotations = [] }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -431,7 +432,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
   const [optimalProductCount, setOptimalProductCount] = useState(0);
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
-     Roof: false,
+      Roof: false,
       WallBrackets: false,
       HardGround: false,
     },
@@ -533,7 +534,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
     KITCHEN_BTU_ADDITION: 4000,
 
     OUTDOOR_LOCATION_BTU_ADJUSTMENTS: {
-    Roof: 1.1,
+      Roof: 1.1,
       WallBrackets: 1.05,
       HardGround: 1.0,
     },
@@ -1625,7 +1626,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
             </ul>
           </div>
         )}
-        <hr className="ms-2 mt-1 mb-5" style={{ width: "66%" }} />
+        <hr className="ms-2 mt-1 mb-5 btu-hr" />
         <Row className="g-6">
           <Col md={6}>
             <CheckboxGroup
@@ -1856,40 +1857,29 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                         key={`cond-${idx}-${
                           cond?._id || cond?.flatName || idx
                         }`}
-                        className="condenser-row"
-                        style={{ backgroundColor: "#f0f8ff" }}
+                        className="condenser-row condenser-row-bg"
                       >
-                        <td
-                          data-label="Room"
-                          style={{ fontWeight: "bold", color: "#007bff" }}
-                        >
+                        <td data-label="Room" className="condenser-cell">
                           {cond?.name || `Condenser ${idx + 1}`}
                         </td>
-                        <td
-                          data-label="Room BTU"
-                          style={{ fontWeight: "bold", color: "#007bff" }}
-                        >
+                        <td data-label="Room BTU" className="condenser-cell">
                           {`${displayBtu.toLocaleString()} BTU`}
                         </td>
                         <td data-label="Product">
                           {cond?.model ? (
                             <Link
                               to={`/product/${cond.model}`}
-                              className="link-product-details"
-                              style={{ fontWeight: "bold", color: "#007bff" }}
+                              className="link-product-details condenser-cell"
                             >
                               {cond.model}
                             </Link>
                           ) : (
-                            <span style={{ fontWeight: "bold" }}>
-                              {cond?.name}
-                            </span>
+                            <span className="condenser-cell">{cond?.name}</span>
                           )}
                         </td>
                         <td
-                          className="product-btu table-fit-content"
+                          className="product-btu table-fit-content condenser-cell"
                           data-label="Product BTU"
-                          style={{ fontWeight: "bold" }}
                         >
                           {cond?.name ||
                             `${cond?.btu} BTU ${
@@ -1898,14 +1888,11 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                         </td>
                         <td
                           data-label="Product Price"
-                          className="table-fit-content"
-                          style={{
-                            fontWeight: "bold",
-                            color:
-                              condenserSizingStatus === "custom"
-                                ? "#ff8c00"
-                                : "#007bff",
-                          }}
+                          className={`table-fit-content ${
+                            condenserSizingStatus === "custom"
+                              ? "condenser-price-custom"
+                              : "condenser-price-normal"
+                          }`}
                         >
                           {cond?.price > 0
                             ? `$${(cond.discount > 0
@@ -1925,8 +1912,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                 <tr>
                   <td
                     colSpan="5"
-                    className="total-results text-center"
-                    style={{ color: "#007bff !important", fontWeight: "bold" }}
+                    className="total-results text-center cooling-load-cell"
                   >
                     {isMultiFlatProperty && detectedFlats.length > 1
                       ? (() => {
@@ -1973,24 +1959,18 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                   </td>
                 </tr>
                 <tr>
-                  <td
-                    data-label="Total"
-                    className="total-results"
-                    style={{ color: "red", fontWeight: "bold" }}
-                  >
+                  <td data-label="Total" className="total-results total-cell">
                     Total
                   </td>
                   <td
                     data-label="Total Room Btu"
-                    className="total-results"
-                    style={{ color: "red", fontWeight: "bold" }}
+                    className="total-results total-cell"
                   >
                     {totalBTU}
                   </td>
                   <td
                     data-label="Total Optimal Products"
-                    className="total-results"
-                    style={{ color: "red", fontWeight: "bold" }}
+                    className="total-results total-cell"
                   >
                     {(optimalProductCount || 0) +
                       (showCondenser ? condensersForDisplay.length : 0) ||
@@ -1998,8 +1978,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                   </td>
                   <td
                     data-label="Total Product BTU"
-                    className="total-results"
-                    style={{ color: "red", fontWeight: "bold" }}
+                    className="total-results total-cell"
                   >
                     {(() => {
                       const productsBTU = products.reduce(
@@ -2017,8 +1996,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                   </td>
                   <td
                     data-label="Total Product Price"
-                    className="total-results"
-                    style={{ color: "red", fontWeight: "bold" }}
+                    className="total-results total-cell"
                   >
                     {products.length > 0 || (condenser && showCondenser)
                       ? (() => {
@@ -2053,16 +2031,29 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
               </tbody>
             </Table>
           </div>
-          <div className="d-flex justify-content-center gap-3 mt-3">
+          <div className="d-flex flex-column flex-md-row justify-content-center gap-3 mt-3">
             <Button
               onClick={saveResultsToCart}
-              variant="light"
-              size="sm"
-              className="go-to-btn btn-text w-auto py-2"
+              variant="info"
+              className="btn-outline-primary w-75 w-md-auto py-2"
               disabled={showCondenser && condensersForDisplay.length === 0}
             >
               <ShoppingCart size={20} />
               <span> Save to Cart</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="ms-1"
+              >
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
               {showCondenser && !condenser && (
                 <small className="d-block text-muted">Calculating...</small>
               )}
@@ -2070,9 +2061,8 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
 
             <Button
               onClick={handleCalculateROI}
-              variant="success"
-              size="sm"
-              className="go-to-btn btn-text w-auto py-2"
+              variant="primary"
+              className="btn-outline-primary w-75 w-md-auto py-2"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -2090,13 +2080,26 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
               </svg>
               <span>Calculate ROI for this Project</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="ms-1"
+              >
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
             </Button>
 
             <Button
               onClick={handleDoBoth}
               variant="info"
-              size="sm"
-              className="go-to-btn btn-text w-auto py-2"
+              className="btn-outline-primary w-75 w-md-auto py-2"
               disabled={showCondenser && condensersForDisplay.length === 0}
             >
               <svg
@@ -2114,6 +2117,20 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
               <span>Do Both</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="ms-1"
+              >
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
             </Button>
           </div>
           {showCondenser &&

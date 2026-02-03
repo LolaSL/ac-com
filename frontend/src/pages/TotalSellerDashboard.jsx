@@ -11,6 +11,7 @@ import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import { FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import "./TotalSellerDashboard.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -151,12 +152,7 @@ export default function TotalSellerDashboard() {
                                 <img
                                   src={item.seller.logo}
                                   alt={`${item.seller.name} logo`}
-                                  style={{
-                                    width: "40px",
-                                    height: "40px",
-                                    marginRight: "10px",
-                                    objectFit: "contain",
-                                  }}
+                                  className="seller-logo"
                                 />
                               )}
                             <div>

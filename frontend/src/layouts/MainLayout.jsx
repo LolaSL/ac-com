@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "./Header.jsx";
 import Sidebar from "./Sidebar.jsx";
+import "./MainLayout.css";
 
 function MainLayout({ children, sidebarIsOpen, setSidebarIsOpen, fullBox }) {
   return (
@@ -23,7 +24,7 @@ function MainLayout({ children, sidebarIsOpen, setSidebarIsOpen, fullBox }) {
         sidebarIsOpen={sidebarIsOpen}
         setSidebarIsOpen={setSidebarIsOpen}
       />
-      <main className="main-content-container">{children}</main>
+      <main className="main-content">{children}</main>
     </div>
   );
 }

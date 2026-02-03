@@ -1,0 +1,33 @@
+/* Payment Page Button Overrides */
+.payment-btn-success {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: white !important;
+}
+
+.payment-btn-success:hover {
+  background-color: #157347 !important;
+  border-color: #146c43 !important;
+}
+
+.payment-btn-warning {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.payment-btn-warning:hover {
+  background-color: #ffca2c !important;
+  border-color: #ffc720 !important;
+}
+
+.payment-btn-danger {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: white !important;
+}
+
+.payment-btn-danger:hover {
+  background-color: #bb2d3b !important;
+  border-color: #b02a37 !important;
+}

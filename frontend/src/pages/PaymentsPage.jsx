@@ -7,6 +7,7 @@ import { getError } from "../utils";
 import { Store } from "../Store.js";
 import { Modal, Button, Form } from "react-bootstrap";
 import { FaThumbsUp, FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import "./PaymentsPage.css";
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":

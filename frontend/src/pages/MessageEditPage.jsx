@@ -9,6 +9,7 @@ import Form from "react-bootstrap/Form";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import Button from "react-bootstrap/Button";
+import "./MessageEditPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -72,14 +73,19 @@ const MessageEditPage = () => {
     const fetchMessage = async () => {
       try {
         dispatch({ type: "FETCH_REQUEST" });
-        const { data } = await axios.get(`/api/service-providers/messages/${messageId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await axios.get(
+          `/api/service-providers/messages/${messageId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         setClient(data.client || "");
         setText(data.text || "");
         setDate(data.date ? data.date.substring(0, 10) : ""); // ISO date (yyyy-mm-dd)
-        setServiceProvider(data.serviceProvider?._id || data.serviceProvider || "");
+        setServiceProvider(
+          data.serviceProvider?._id || data.serviceProvider || ""
+        );
         setProjectName(data.projectName || "");
         dispatch({ type: "FETCH_SUCCESS" });
       } catch (err) {

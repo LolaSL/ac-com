@@ -8,6 +8,7 @@ import { getError } from "../utils";
 import Button from "react-bootstrap/esm/Button";
 import { Link, useLocation } from "react-router-dom";
 import { Container, Table } from "react-bootstrap";
+import "./OrderHistoryPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -64,7 +65,7 @@ export default function OrderHistoryPage() {
 
   return (
     <Container className="provider-container">
-      <h1>Order History</h1>
+      <h1 className="fs-1">Order History</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (

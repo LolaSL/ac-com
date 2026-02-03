@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import axios from "axios";
-import {  useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
@@ -14,6 +14,7 @@ import MessageBox from "../components/MessageBox.jsx";
 import { getError } from "../utils.js";
 import { Table } from "react-bootstrap";
 import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import "./BlogsPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -59,14 +60,7 @@ const reducer = (state, action) => {
 
 export default function BlogsPage() {
   const [
-    {
-      loading,
-      error,
-      blogs = [],
-      loadingCreate,
-      loadingDelete,
-      successDelete,
-    },
+    { loading, error, blogs = [], loadingCreate, loadingDelete, successDelete },
     dispatch,
   ] = useReducer(reducer, {
     loading: true,

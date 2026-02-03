@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
 import { getError } from "../utils";
+import "./ForgetPasswordPage.css";
 
 export default function ForgetPasswordPage() {
   const navigate = useNavigate();

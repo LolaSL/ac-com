@@ -1,0 +1,54 @@
+/* AboutUs Page Styles */
+
+.site-container-about {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.about-paragraph,
+.goals-paragraph {
+  text-align: center;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.responsive-image-about {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 992px) {
+  .about-paragraph,
+  .goals-paragraph {
+    font-size: 1.1rem;
+  }
+
+  .responsive-image-about {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-paragraph,
+  .goals-paragraph {
+    font-size: 1rem;
+    padding: 0 15px;
+  }
+
+  .responsive-image-about {
+    min-height: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .about-paragraph,
+  .goals-paragraph {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .responsive-image-about {
+    height: 100%;
+  }
+}

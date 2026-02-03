@@ -43,6 +43,7 @@ import {
   BsMoonStars,
   BsZoomIn,
 } from "react-icons/bs";
+import "./ProductPage.css";
 const reducer = (state, action) => {
   switch (action.type) {
     case "REFRESH_PRODUCT":

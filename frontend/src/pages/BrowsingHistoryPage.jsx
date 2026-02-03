@@ -15,6 +15,7 @@ import { Store } from "../Store";
 import { getError } from "../utils";
 import { FaTrash, FaArrowDown, FaEye, FaClock } from "react-icons/fa";
 import { toast } from "react-toastify";
+import "./BrowsingHistoryPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -162,7 +163,7 @@ function BrowsingHistoryPage() {
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>
+        <h1 className="fs-1">
           <FaEye className="me-2" />
           Browsing History
         </h1>

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { Container, Table } from "react-bootstrap";
+import "./EarningsPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -59,37 +60,41 @@ const EarningsPage = () => {
     <Container className="provider-container">
       <h1 className="mt-4 mb-4 fw-bold">Earnings</h1>
       <div className="table-responsive">
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Project Name</th>
-            <th>Time On Project</th>
-            <th>Amount Earned</th>
-            <th>Date</th>
-            <th>Status</th>
-          </tr>
-        </thead> 
-        <tbody>
-          {earnings && earnings.length > 0 ? (
-            earnings.map((earning, index) => (
-              <tr key={index}>
-               <td data-label="ID">{index + 1}</td>
-               <td data-label="Project name">{earning.projectName.name}</td>
-               <td data-label="Time On Project">{earning.projectName.hoursWorked}</td>
-               <td data-label="Amount Earned">{earning.amount}</td>
-               <td data-label="Date">{new Date(earning.date).toLocaleDateString()}</td>
-               <td data-label="Status">{earning.status}</td>
-              </tr>
-            ))
-          ) : (
+        <Table striped bordered hover>
+          <thead>
             <tr>
-              <td colSpan="6">No earnings data found</td>
+              <th>ID</th>
+              <th>Project Name</th>
+              <th>Time On Project</th>
+              <th>Amount Earned</th>
+              <th>Date</th>
+              <th>Status</th>
             </tr>
-          )}
-        </tbody>
+          </thead>
+          <tbody>
+            {earnings && earnings.length > 0 ? (
+              earnings.map((earning, index) => (
+                <tr key={index}>
+                  <td data-label="ID">{index + 1}</td>
+                  <td data-label="Project name">{earning.projectName.name}</td>
+                  <td data-label="Time On Project">
+                    {earning.projectName.hoursWorked}
+                  </td>
+                  <td data-label="Amount Earned">{earning.amount}</td>
+                  <td data-label="Date">
+                    {new Date(earning.date).toLocaleDateString()}
+                  </td>
+                  <td data-label="Status">{earning.status}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6">No earnings data found</td>
+              </tr>
+            )}
+          </tbody>
         </Table>
-        </div>
+      </div>
     </Container>
   );
 };

@@ -17,6 +17,7 @@ import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
+import "./Annotator.css";
 
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
@@ -2083,8 +2084,8 @@ const Annotator = ({
                       <li>Large Rooms (350-550 sq. ft.)</li>
                     </ol>
                   </div>
-                  <div className="mb-3 d-flex d-inline flex-sm-row gap-3 align-items-start align-sm-items-center">
-                    <div className="d-inline flex-sm-row gap-2 mt-2 mt-sm-0">
+                  <div className="mb-3 d-flex flex-column flex-md-row gap-3 align-items-start">
+                    <div className="d-flex flex-column flex-sm-row gap-2">
                       <input
                         type="text"
                         placeholder="Filter by room type"
@@ -2105,7 +2106,7 @@ const Annotator = ({
                         <option value="areaSqm">Area (sqm)</option>
                       </select>
                     </div>
-                    <div className="d-inline flex-sm-row gap-2 mt-2 mt-sm-0">
+                    <div className="d-flex flex-column flex-sm-row gap-2">
                       <Button
                         variant="light"
                         size="sm"
@@ -2142,65 +2143,34 @@ const Annotator = ({
                         )}
                       </Button>
                       {exportStatus === "success" && (
-                        <span style={{ color: "#28a745", marginLeft: "10px" }}>
+                        <span className="export-success">
                           <FaDownload /> Download Started!
                         </span>
                       )}
                     </div>
-                    <div
-                      style={{
-                        borderLeft: "1px solid #ccc",
-                        paddingLeft: "20px",
-                        minWidth: "300px",
-                      }}
-                    >
+                    <div className="recent-exports">
                       <h5>Recent Exports (Click to Re-download)</h5>
                       {downloadedFiles.length === 0 ? (
-                        <p style={{ color: "#6c757d" }}>
-                          No files exported in this session.
-                        </p>
+                        <p>No files exported in this session.</p>
                       ) : (
-                        <ul style={{ listStyle: "none", padding: 0 }}>
+                        <ul>
                           {downloadedFiles.map((file) => (
-                            <li
-                              key={file.id}
-                              style={{
-                                marginBottom: "10px",
-                                display: "flex",
-                                alignItems: "center",
-                              }}
-                            >
+                            <li key={file.id}>
                               <a
                                 href={file.url}
                                 download={file.name}
                                 title={`Click to download and open: ${file.name}`}
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  textDecoration: "none",
-                                  color: "#007bff",
-                                  flexGrow: 1,
-                                }}
                               >
                                 <FaFileExcel
-                                  className="excel-icon-button "
+                                  className="excel-icon-button excel-icon"
                                   size={20}
                                   color="#217346"
-                                  style={{ marginRight: "8px" }}
                                 />
-                                <span style={{ fontSize: "0.9em" }}>
-                                  {file.name}
-                                </span>
+                                <span>{file.name}</span>
                               </a>
                               <button
                                 onClick={() => handleRemoveFile(file)}
                                 title="Remove link from list (frees memory)"
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  marginLeft: "5px",
-                                }}
                               >
                                 <FaTimes size={14} color="#dc3545" />
                               </button>
@@ -2357,7 +2327,7 @@ const Annotator = ({
                                         variant="success"
                                         onClick={handleSaveEdit}
                                       >
-                                        Save 
+                                        Save
                                       </Button>
                                       <Button
                                         size="sm"
@@ -2432,8 +2402,7 @@ const Annotator = ({
           );
         })}
       <ButtonToolbar
-        className="mb-3 mt-3"
-        style={{ gap: "8px", flexWrap: "wrap" }}
+        className="mb-3 mt-3 button-toolbar-annotator"
         aria-label="PDF controls"
       >
         {file && file.type === "application/pdf" && (
@@ -2473,8 +2442,8 @@ const Annotator = ({
                 }
                 title="Export rooms to BTU Calculator"
               >
-                Export rooms to BTU Calculator ({filteredRoomsRef.current.flat().filter(Boolean).length} {' '}
-                  rooms)
+                Export rooms to BTU Calculator (
+                {filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
               </Button>
 
               <Button
@@ -2533,25 +2502,8 @@ const Annotator = ({
       {previewUrl && (
         <div className="text-center">
           {previewUrl && (
-            <div
-              style={{
-                position: "relative",
-                display: "inline-block",
-                maxWidth: "100%",
-                maxHeight: "80vh",
-                overflow: "auto",
-              }}
-              className="container-main"
-            >
-              <div
-                className="canvas-wrapper"
-                style={{
-                  position: "relative",
-                  display: "inline-block",
-                  width: "fit-content",
-                  height: "fit-content",
-                }}
-              >
+            <div className="container-main">
+              <div className="canvas-wrapper">
                 <canvas
                   id="my-canvas"
                   ref={canvasRef}
@@ -2566,11 +2518,7 @@ const Annotator = ({
                   height={pdfSize.height}
                   onClick={handleStageClick}
                   onContextMenu={handleRectangleRightClick}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
+                  className="konva-stage"
                 >
                   <Layer>
                     {lines.map((line) => (

@@ -1,0 +1,140 @@
+/* DashboardPage Styles */
+
+.dashboard-container {
+  flex: 1;
+  display: flex;
+}
+
+.dashboard-container .main-content {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar {
+  width: 250px;
+  min-width: 250px;
+  padding: 0.3rem;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin: 0;
+  height: 100%;
+}
+
+.sidebar h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar a {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  text-align: left;
+  width: 90%;
+  color: #007bff;
+  text-decoration: none;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.sidebar a:hover {
+  color: #0056b3;
+  text-decoration: none;
+}
+
+.sidebar li .active {
+  color: green;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.sidebar-toggle {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.toggle-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.toggle-button:hover {
+  background-color: #0056b3;
+}
+
+.sidebar-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  z-index: 1000;
+  padding: 0.5rem;
+}
+
+.sidebar-dropdown a,
+.sidebar-dropdown li a {
+  text-decoration: none !important;
+  color: #007bff;
+  display: inline-block;
+}
+
+.sidebar-dropdown a:hover {
+  text-decoration: none !important;
+  color: #0056b3;
+}
+
+.sidebar-dropdown li .active {
+  color: green;
+  font-weight: bold;
+  text-decoration: none !important;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 180px;
+    padding: 10px;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    height: 100%;
+    margin: 0;
+  }
+
+  .sidebar h3 {
+    font-size: 14px;
+  }
+
+  .sidebar ul {
+    padding-left: 0;
+  }
+
+  .sidebar .ul-link {
+    width: 100%;
+    text-decoration: none;
+  }
+}

@@ -8,6 +8,7 @@ import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import { Store } from "../Store.js";
 import SearchBox from "../components/SearchBox.jsx";
+import "./Header.css";
 
 function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -38,10 +39,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   };
 
   return (
-    <header
-      className="header-nav"
-      style={{ background: "#868d9c", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}
-    >
+    <header className="header-nav">
       <Navbar className="navbar" expand="lg">
         <Container fluid className="header-container">
           <Button
@@ -54,7 +52,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
 
           <Link to="/" className="navbar-brand me-4">
             <h3>AC Commerce</h3>
-            <p className="handwritten" >Cooling Solutions For Every Space</p>
+            <p className="handwritten">Cooling Solutions For Every Space</p>
           </Link>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -62,7 +60,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             id="basic-navbar-nav"
             className="justify-content-start"
           >
-            <div className="flex-grow-1 me-3">
+            <div className="flex-grow-1 me-3 search-wrapper">
               <SearchBox />
             </div>
             <Nav className=" align-items-center gap-3 ms-auto me-4">
@@ -121,22 +119,12 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                         <img
                           src={userInfo.avatar}
                           alt={userInfo.name}
-                          style={{
-                            width: "30px",
-                            height: "30px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "2px solid white",
-                            display: "block",
-                          }}
+                          className="user-avatar"
                         />
                       ) : (
-                        <i
-                          className="fas fa-user-circle"
-                          style={{ fontSize: "30px", lineHeight: "1" }}
-                        ></i>
+                        <i className="fas fa-user-circle user-icon"></i>
                       )}
-                      <span style={{ lineHeight: "1" }}>{userInfo.name}</span>
+                      <span className="user-name">{userInfo.name}</span>
                     </span>
                   }
                   id="basic-nav-dropdown"
@@ -154,10 +142,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     Order History
                   </Link>
                   <Link to="/wishlist" className="dropdown-item">
-                    <i
-                      className="fas fa-heart me-2"
-                      style={{ color: "#ff6b35" }}
-                    ></i>
+                    <i className="fas fa-heart me-2 heart-icon"></i>
                     My Wishlist
                   </Link>
                   <Link to="/order-messages" className="dropdown-item">

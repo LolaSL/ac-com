@@ -7,6 +7,7 @@ import { getError } from "../utils.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store.js";
+import "./Sidebar.css";
 
 function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
   const { state } = useContext(Store);
@@ -60,38 +61,15 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
         <div
           className="sidebar-overlay"
           onClick={() => setSidebarIsOpen(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 1040,
-            transition: "opacity 0.3s ease",
-          }}
         ></div>
       )}
       <div
         className={sidebarIsOpen ? "sidebar-modal active" : "sidebar-modal"}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: sidebarIsOpen ? 0 : "-300px",
-          width: "300px",
-          height: "100%",
-          backgroundColor: "#868d9c",
-          zIndex: 1050,
-          transition: "left 0.3s ease",
-          boxShadow: sidebarIsOpen ? "2px 0 10px rgba(0,0,0,0.3)" : "none",
-          overflowY: "auto",
-        }}
       >
         <div className="d-flex justify-content-end p-3">
           <button
-            className="btn btn-light btn-sm"
+            className="btn btn-light btn-sm sidebar-close-btn"
             onClick={() => setSidebarIsOpen(false)}
-            style={{ borderRadius: "50%", width: "40px", height: "40px" }}
           >
             ×
           </button>

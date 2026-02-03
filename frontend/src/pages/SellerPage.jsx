@@ -17,6 +17,7 @@ import ListGroup from "react-bootstrap/ListGroup";
 import Form from "react-bootstrap/Form";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Button from "react-bootstrap/Button";
+import "./SellerPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -100,7 +101,7 @@ export default function SellerPage() {
 
   return (
     <div>
-      <h1 className="mt-4 mb-4 p-4">Seller Details</h1>
+      <h1 className="mt-4 mb-4 p-4 fs-1">Seller Details</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -173,7 +174,16 @@ export default function SellerPage() {
                 ))
               ) : (
                 <ListGroup.Item>
-                  <p className="text-muted">No reviews yet.</p>
+                  <p className="text-muted mb-3">No reviews yet.</p>
+                  {!userInfo && (
+                    <MessageBox className="mt-3">
+                      Please{" "}
+                      <Link to={`/signin?redirect=/sellers/${id}`}>
+                        Sign In
+                      </Link>{" "}
+                      to write a review
+                    </MessageBox>
+                  )}
                 </ListGroup.Item>
               )}
             </ListGroup>
@@ -219,13 +229,15 @@ export default function SellerPage() {
                     {loadingCreateReview && <LoadingBox />}
                   </div>
                 </form>
-              ) : (
+              ) : seller.reviews && seller.reviews.length > 0 ? (
                 <MessageBox>
                   Please{" "}
-                  <Link to={`/signin?redirect=/seller/${id}`}>Sign In</Link> to
-                  write a review
+                  <Link to={`/signin?redirect=/sellers/${id}`} className="my-4">
+                    Sign In
+                  </Link>{" "}
+                  to write a review
                 </MessageBox>
-              )}
+              ) : null}
             </div>
           </div>
         </>

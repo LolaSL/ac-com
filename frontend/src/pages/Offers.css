@@ -1,0 +1,14 @@
+/* Offers.css */
+
+.offer-title {
+  color: hsl(0, 81.2%, 39.6%);
+  text-shadow: 1px 1px 2px grey;
+  font-weight: lighter;
+  font-family: "Cedarville Cursive", cursive;
+}
+
+.offer-desc {
+  color: rgb(33, 110, 90);
+  font-weight: lighter;
+  font-family: "Cedarville Cursive", cursive;
+}

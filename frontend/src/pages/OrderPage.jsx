@@ -15,6 +15,7 @@ import { getError } from "../utils";
 import { toast } from "react-toastify";
 import { Container } from "react-bootstrap";
 import printJS from "print-js";
+import "./OrderPage.css";
 
 function printOrder() {
   const orderContainer = document.querySelector("#order-container");

@@ -7,6 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
+import "./SignUpPage.css";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -126,16 +127,7 @@ export default function SignUpPage() {
             <Button
               variant="link"
               onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                padding: "0",
-                border: "none",
-                background: "none",
-                color: "#6c757d",
-              }}
+              className="password-toggle-btn"
             >
               <i
                 className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}
@@ -143,23 +135,15 @@ export default function SignUpPage() {
             </Button>
           </div>
           {password && (
-            <div className="mt-2">
+            <div className="password-strength-container">
               <div className="d-flex align-items-center gap-2">
-                <div
-                  style={{
-                    flex: 1,
-                    height: "8px",
-                    backgroundColor: "#e9ecef",
-                    borderRadius: "4px",
-                    overflow: "hidden",
-                  }}
-                >
+                <div className="password-strength-bar-container">
                   <div
+                    className="password-strength-bar"
                     style={{
                       width: `${
                         (getPasswordStrength(password).strength / 4) * 100
                       }%`,
-                      height: "100%",
                       backgroundColor:
                         getPasswordStrength(password).color === "danger"
                           ? "#dc3545"
@@ -168,13 +152,13 @@ export default function SignUpPage() {
                           : getPasswordStrength(password).color === "info"
                           ? "#0dcaf0"
                           : "#198754",
-                      transition: "width 0.3s ease",
                     }}
                   />
                 </div>
                 <small
-                  className={`text-${getPasswordStrength(password).color}`}
-                  style={{ minWidth: "60px" }}
+                  className={`text-${
+                    getPasswordStrength(password).color
+                  } password-strength-label`}
                 >
                   {getPasswordStrength(password).label}
                 </small>
@@ -198,16 +182,7 @@ export default function SignUpPage() {
             <Button
               variant="link"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                padding: "0",
-                border: "none",
-                background: "none",
-                color: "#6c757d",
-              }}
+              className="password-toggle-btn"
             >
               <i
                 className={

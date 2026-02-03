@@ -1,0 +1,60 @@
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-modal {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100%;
+  background-color: #868d9c;
+  z-index: 1050;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+}
+
+.sidebar-modal.active {
+  left: 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-close-btn {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.nav-link-side {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+  font-size: 18px;
+}
+
+.nav-link-side:hover {
+  color: #ec2222;
+  text-decoration: none;
+  transition: color 0.3s;
+  text-shadow: 1px 1px 1px black;
+}
+
+#categories-dropdown {
+  font-size: 18px;
+  padding: 0;
+  margin-left: 0;
+}
+
+#categories-dropdown:hover {
+  color: #ec2222;
+  text-decoration: none;
+  transition: color 0.3s;
+  text-shadow: 1px 1px 1px black;
+}

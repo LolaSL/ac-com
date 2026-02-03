@@ -5,6 +5,7 @@ import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { Link } from "react-router-dom";
 import { Container, Row, Col, Card, Badge } from "react-bootstrap";
+import "./OurNetworkPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {

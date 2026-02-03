@@ -5,6 +5,7 @@ import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
 import { Store } from "../Store.js";
 import { getError } from "../utils";
+import "./UserMessagesPage.css";
 import { Container, Table, Badge } from "react-bootstrap";
 
 const reducer = (state, action) => {
@@ -89,7 +90,7 @@ export default function UserMessagesPage() {
 
   return (
     <Container className="provider-container my-5">
-      <h1 className="mb-4">Order Status Messages</h1>
+      <h1 className="mb-4 fs-1">Order Status Messages</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -116,11 +117,7 @@ export default function UserMessagesPage() {
               <tbody>
                 {orders.map((order) => (
                   <tr key={order._id} className="align-middle">
-                    <td
-                      data-label="Order ID"
-                      className="fw-semibold"
-                      style={{ wordBreak: "break-all" }}
-                    >
+                    <td data-label="Order ID" className="fw-semibold order-id">
                       {order._id}
                     </td>
                     <td data-label="Transaction ID">

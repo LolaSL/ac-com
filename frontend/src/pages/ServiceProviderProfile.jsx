@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
+import "./ServiceProviderProfile.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Container } from "react-bootstrap";
@@ -173,7 +174,11 @@ export default function ServiceProviderProfile() {
           />
         </Form.Group>
         <div className="mb-3">
-          <Button type="submit" disabled={loadingUpdate} className="btn btn-secondary mt-3">
+          <Button
+            type="submit"
+            disabled={loadingUpdate}
+            className="btn btn-secondary mt-3"
+          >
             {loadingUpdate ? "Updating..." : "Update"}
           </Button>
         </div>
@@ -181,4 +186,3 @@ export default function ServiceProviderProfile() {
     </Container>
   );
 }
-

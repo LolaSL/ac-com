@@ -18,6 +18,7 @@ import { Store } from "../Store";
 import { getError } from "../utils";
 import { Link } from "react-router-dom";
 import { FaSearch, FaEye, FaTrash } from "react-icons/fa";
+import "./OrderListPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {

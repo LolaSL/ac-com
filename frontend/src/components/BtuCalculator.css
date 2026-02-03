@@ -1,0 +1,73 @@
+/* BtuCalculator.css */
+
+.btu-calculator-container {
+  /* Add any container styles if needed */
+}
+
+.btu-form {
+  /* Form styles */
+}
+
+.title {
+  /* Title styles */
+}
+
+.btu-hr {
+  width: 66%;
+}
+
+.condenser-row-bg {
+  background-color: #f0f8ff;
+}
+
+.condenser-cell {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.condenser-price-custom {
+  font-weight: bold;
+  color: #ff8c00;
+}
+
+.condenser-price-normal {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.total-results {
+  /* Existing class, add if needed */
+}
+
+.total-cell {
+  color: red;
+  font-weight: bold;
+}
+
+.cooling-load-cell {
+  color: #007bff !important;
+  font-weight: bold;
+}
+
+/* Responsive styles */
+@media (max-width: 767px) {
+  .btu-calculator-container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .btu-hr {
+    width: 100%;
+  }
+
+  /* Stack columns on small screens */
+  .g-6 .col-md-6 {
+    margin-bottom: 1rem;
+  }
+
+  /* Table responsiveness is handled by table-responsive class */
+}

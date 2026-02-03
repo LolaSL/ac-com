@@ -3,7 +3,7 @@ import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { Container, Table } from "react-bootstrap";
-
+import "./HoursPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -73,7 +73,9 @@ const HoursPage = () => {
               earnings.map((earning, index) => (
                 <tr key={earning._id}>
                   <td data-label="ID">{index + 1}</td>
-                  <td data-label="Project Name">{earning.projectName.name}</td>{" "}
+                  <td data-label="Project Name">
+                    {earning.projectName.name}
+                  </td>{" "}
                   <td data-label="Time On Project">
                     {earning.projectName.hoursWorked}
                   </td>{" "}

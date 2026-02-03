@@ -4,10 +4,12 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
+import InputGroup from "react-bootstrap/InputGroup";
 import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { getError } from "../utils.js";
+import "./SignInPage.css";
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -52,7 +54,7 @@ export default function SignInPage() {
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
       <Card
         className="shadow-lg p-4"
-        style={{ maxWidth: "500px", width: "100%" }}
+        style={{ maxWidth: "600px", width: "100%" }}
       >
         <Card.Body>
           <h1 className="text-center text-primary fs-1 pt-4 mb-4 fw-bold my-3">
@@ -65,44 +67,36 @@ export default function SignInPage() {
                 type="email"
                 placeholder="Enter email"
                 required
+                className="w-100"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="password">
               <Form.Label>Password</Form.Label>
-              <div className="position-relative">
+              <InputGroup>
                 <Form.Control
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
                   required
+                 className="w-auto"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <Button
-                  variant="link"
+                  // variant="outline-success"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    padding: "0",
-                    border: "none",
-                    background: "none",
-                    color: "#6c757d",
-                  }}
                 >
                   <i
                     className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}
                   ></i>
                 </Button>
-              </div>
+              </InputGroup>
             </Form.Group>
             <div className="d-grid mb-3">
               <Button
                 type="submit"
-                className="go-to-btn btn-lg"
+                className="go-to-btn btn-lg  btn-text"
                 disabled={loading}
               >
                 {loading ? (

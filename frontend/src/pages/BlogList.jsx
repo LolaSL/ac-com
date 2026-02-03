@@ -4,6 +4,7 @@ import axios from "axios";
 import Container from "react-bootstrap/Container";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
+import "./BlogList.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -65,7 +66,7 @@ function BlogList() {
   return (
     <>
       <Container fluid className="c-4">
-          <h1 className="blogs-title pt-4 mb-4 fs-1">Blogs</h1>
+        <h1 className="blogs-title pt-4 mb-4 fs-1">Blogs</h1>
         <div className="d-flex align-items-center mt-4 mb-3">
           <div style={{ flex: "1 1 auto", marginLeft: 16 }}>
             <input

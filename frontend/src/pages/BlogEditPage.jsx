@@ -9,6 +9,7 @@ import Form from "react-bootstrap/Form";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import Button from "react-bootstrap/Button";
+import "./BlogEditPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {

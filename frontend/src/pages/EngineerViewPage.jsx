@@ -11,6 +11,7 @@ import outdoorSVG from "../assets/hvac/outdoor.svg";
 import thermostatSVG from "../assets/hvac/thermostat.svg";
 import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
+import "./EngineerViewPage.css";
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
@@ -245,7 +246,7 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
       }
     });
     // Only return text if comment is within 50 pixels
-    return (nearest && minDist <= 50) ? nearest.text.toLowerCase() : null;
+    return nearest && minDist <= 50 ? nearest.text.toLowerCase() : null;
   };
   // ducts
   hvacAnnotations?.ducts?.forEach((duct) => {
@@ -312,8 +313,12 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
     const numDiffusers = hvacAnnotations.diffusers.length;
     if (numDucts === numDiffusers) {
       // 1-to-1: pair ducts and diffusers by sorted position (left to right)
-      const sortedDucts = [...hvacAnnotations.ducts].sort((a, b) => a.xPercent - b.xPercent);
-      const sortedDiffusers = [...hvacAnnotations.diffusers].sort((a, b) => a.xPercent - b.xPercent);
+      const sortedDucts = [...hvacAnnotations.ducts].sort(
+        (a, b) => a.xPercent - b.xPercent
+      );
+      const sortedDiffusers = [...hvacAnnotations.diffusers].sort(
+        (a, b) => a.xPercent - b.xPercent
+      );
       sortedDucts.forEach((duct, index) => {
         const diffuser = sortedDiffusers[index];
         if (diffuser) {
@@ -343,9 +348,15 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
         hvacAnnotations.ducts.forEach((duct) => {
           const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
           const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
-          const ductGroup = getNearestCommentText(ductCenterX, ductCenterY, comments);
+          const ductGroup = getNearestCommentText(
+            ductCenterX,
+            ductCenterY,
+            comments
+          );
           if (diffuserGroup && ductGroup === diffuserGroup) {
-            const dist = Math.sqrt((dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2);
+            const dist = Math.sqrt(
+              (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+            );
             if (dist < minDist) {
               minDist = dist;
               nearestDuct = { x: ductCenterX, y: ductCenterY };
@@ -357,7 +368,9 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
           hvacAnnotations.ducts.forEach((duct) => {
             const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
             const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
-            const dist = Math.sqrt((dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2);
+            const dist = Math.sqrt(
+              (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+            );
             if (dist < minDist) {
               minDist = dist;
               nearestDuct = { x: ductCenterX, y: ductCenterY };
@@ -496,7 +509,8 @@ const overlayAnnotations = (context, annotations, acType) => {
         nearestComment = comment;
       }
     });
-    if (nearestComment && minDist < 150) { // threshold in pixels for relevance
+    if (nearestComment && minDist < 150) {
+      // threshold in pixels for relevance
       const cx = nearestComment.xPercent * canvasWidth;
       const cy = nearestComment.yPercent * canvasHeight;
       context.save();
@@ -896,9 +910,13 @@ const overlayAnnotations = (context, annotations, acType) => {
     // Find condenser by comment text "condenser"
     let condenser = null;
     if (annotations.comments) {
-      const condenserComment = annotations.comments.find(c => c.text.toLowerCase().includes('condenser'));
+      const condenserComment = annotations.comments.find((c) =>
+        c.text.toLowerCase().includes("condenser")
+      );
       if (condenserComment) {
-        condenser = annotations.rectangles.find(r => r.id === condenserComment.rectId);
+        condenser = annotations.rectangles.find(
+          (r) => r.id === condenserComment.rectId
+        );
       }
     }
     // Fallback to highest id if no comment
@@ -920,7 +938,9 @@ const overlayAnnotations = (context, annotations, acType) => {
         .sort((a, b) => {
           const getNum = (rect) => {
             if (!annotations.comments) return 0;
-            const comment = annotations.comments.find(c => c.rectId === rect.id);
+            const comment = annotations.comments.find(
+              (c) => c.rectId === rect.id
+            );
             if (comment) {
               const match = comment.text.match(/ac-(\d+)/i);
               return match ? parseInt(match[1]) : 0;
