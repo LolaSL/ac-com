@@ -1,0 +1,19 @@
+/* LoadingBox.css */
+
+.loading-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  /* Additional custom styles if needed */
+}
+
+/* Responsive styles */
+@media (max-width: 767px) {
+  .loading-box {
+    padding: 1rem;
+  }
+}

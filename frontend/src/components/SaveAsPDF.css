@@ -1,0 +1,39 @@
+.save-as-pdf {
+  display: inline-block;
+}
+
+.save-as-pdf .save-button {
+  transition: all 0.2s ease;
+}
+
+.save-as-pdf .save-button:hover {
+  transform: scale(1.05);
+}
+
+.save-as-pdf .error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.save-as-pdf .success-message {
+  color: green;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.save-as-pdf canvas {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .save-as-pdf .save-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .save-as-pdf .error-message,
+  .save-as-pdf .success-message {
+    font-size: 0.8rem;
+  }
+}

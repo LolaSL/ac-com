@@ -1,0 +1,85 @@
+.users-product-sales {
+  padding: 2rem 0;
+}
+
+.users-product-sales .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+}
+
+.users-product-sales .dashboard-title {
+  margin-bottom: 0;
+}
+
+.users-product-sales .dashboard-subtitle {
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+.users-product-sales .refresh-button {
+  /* Inherits from .details class */
+}
+
+.users-product-sales .overview-section h3 {
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+}
+
+.users-product-sales .overview-cards .chart-card {
+  margin-bottom: 1rem;
+  margin-right: 1rem;
+}
+
+.users-product-sales .charts-row {
+  /* Inherits from index.css */
+}
+
+.users-product-sales .chart-col {
+  margin: 1.5rem 0;
+}
+
+.users-product-sales .chart-col h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.users-product-sales .pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+  gap: 1rem;
+}
+
+.users-product-sales .pagination-controls .page-info {
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .users-product-sales {
+    padding: 1rem 0;
+  }
+
+  .users-product-sales .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .users-product-sales .overview-cards {
+    flex-wrap: wrap;
+  }
+
+  .users-product-sales .overview-cards .chart-card {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .users-product-sales .pagination-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

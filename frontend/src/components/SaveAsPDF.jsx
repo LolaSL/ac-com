@@ -3,6 +3,7 @@ import { Button } from "react-bootstrap";
 import { PDFDocument, rgb } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
+import "./SaveAsPDF.css";
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
@@ -1376,18 +1377,18 @@ function SaveAsPDF({
   };
 
   return (
-    <div>
-      <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+    <div className="save-as-pdf">
+      <canvas ref={canvasRef}></canvas>
       <Button
-        className="go-to-btn btn-text w-auto p-1"
+        className="go-to-btn btn-text w-auto p-1 save-button"
         variant="btn-outline"
         size="sm"
         onClick={saveAsPDF}
       >
         💾 Save as PDF
       </Button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {isSaved && <p style={{ color: "green" }}>PDF saved successfully!</p>}
+      {error && <p className="error-message">{error}</p>}
+      {isSaved && <p className="success-message">PDF saved successfully!</p>}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Modal, Button, Badge } from "react-bootstrap";
+import "./ModalWindow.css";
 
 const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
@@ -71,7 +72,7 @@ const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
     : 0;
 
   return (
-    <Modal show={show} onHide={onHide} className="custom-modal">
+    <Modal show={show} onHide={onHide} className="custom-modal modal-window">
       <Modal.Header closeButton>
         <Modal.Title>
           {product ? product.name : "No Product"}
@@ -81,12 +82,11 @@ const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
       <Modal.Body>
         {product ? (
           <div className="product-item">
-            <div className="product-image" style={{ marginBottom: "15px" }}>
+            <div className="product-image">
               <img
                 src={product.image}
                 alt={product.name}
                 className="img-fluid"
-                style={{ maxHeight: "250px", objectFit: "cover" }}
               />
             </div>
 
@@ -96,7 +96,7 @@ const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
             {product.category && (
               <p className="mb-2">
                 <strong>System Type:</strong>{" "}
-                <span style={{ color: "#007bff" }}>
+                <span className="system-type">
                   {product.category.includes("VRF")
                     ? "VRF Heat Recovery"
                     : "Minisplit"}
@@ -146,23 +146,21 @@ const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
             )}
 
             {/* Price */}
-            <div className="mb-3 p-2 bg-light rounded">
+            <div className="price-section">
               <strong>Price:</strong>
               <br />
               {product.discount > 0 ? (
                 <>
-                  <span style={{ textDecoration: "line-through" }}>
+                  <span className="original-price">
                     ${product.price.toFixed(2)}
                   </span>
                   {" → "}
-                  <span style={{ color: "green", fontSize: "1.1em" }}>
-                    ${discountedPrice}
-                  </span>
+                  <span className="discounted-price">${discountedPrice}</span>
                   <br />
-                  <small className="text-muted">Save {product.discount}%</small>
+                  <small className="save-text">Save {product.discount}%</small>
                 </>
               ) : (
-                <span style={{ fontSize: "1.1em" }}>
+                <span className="current-price">
                   ${product.price.toFixed(2)}
                 </span>
               )}

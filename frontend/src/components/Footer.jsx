@@ -4,6 +4,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store";
+import "./Footer.css";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -21,13 +22,7 @@ const Footer = () => {
 
   return (
     <>
-      <footer
-        className="container-fluid footer mt-4"
-        style={{
-          background: "#868d9c",
-          color: "white",
-        }}
-      >
+      <footer className="container-fluid footer mt-4">
         <Row className="text-white p-4 g-4">
           <Col xs={12} lg={2} className="ft-1">
             <h4>AC Commerce</h4>
@@ -152,10 +147,7 @@ const Footer = () => {
               <i className="fa-solid fa-paper-plane"></i> City, State, Zip Code
             </p>
           </Col>
-          <Row
-            className="d-flex justify-content-center mt-4"
-            style={{ background: "#868d9c" }}
-          >
+          <Row className="d-flex justify-content-center mt-4">
             <div className="last-footer text-center">
               &copy; {new Date().getFullYear()} AC Commerce. All rights reserved
             </div>

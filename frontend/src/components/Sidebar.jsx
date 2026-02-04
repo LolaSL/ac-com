@@ -5,6 +5,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import { Store } from "../Store.js";
 // import SaveAsPDF from "./SaveAsPDF.jsx";
+import "./Sidebar.css";
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 

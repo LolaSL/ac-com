@@ -1,0 +1,59 @@
+.messages-service-providers {
+  padding: 2rem 0;
+}
+
+.messages-service-providers .header-section {
+  margin-bottom: 2rem;
+}
+
+.messages-service-providers .header-section h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.messages-service-providers .header-section p {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.messages-service-providers .header-section small {
+  font-size: 0.875rem;
+}
+
+.messages-service-providers .table-responsive {
+  margin-top: 1rem;
+}
+
+.messages-service-providers .messages {
+  margin-bottom: 0;
+}
+
+.messages-service-providers .btn-admin-edit,
+.messages-service-providers .btn-admin-delete {
+  margin-right: 0.5rem;
+}
+
+.messages-service-providers .btn-admin-edit:last-child,
+.messages-service-providers .btn-admin-delete:last-child {
+  margin-right: 0;
+}
+
+@media (max-width: 768px) {
+  .messages-service-providers {
+    padding: 1rem 0;
+  }
+
+  .messages-service-providers .header-section {
+    margin-bottom: 1rem;
+  }
+
+  .messages-service-providers .header-section h1 {
+    font-size: 1.5rem;
+  }
+
+  .messages-service-providers .btn-admin-edit,
+  .messages-service-providers .btn-admin-delete {
+    margin-right: 0.25rem;
+    padding: 0.25rem 0.5rem;
+  }
+}

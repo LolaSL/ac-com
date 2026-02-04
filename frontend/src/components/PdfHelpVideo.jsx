@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Modal, Button } from "react-bootstrap";
+import "./PdfHelpVideo.css";
 
 const PdfHelpVideoModal = () => {
   const [show, setShow] = useState(false);
@@ -11,14 +12,20 @@ const PdfHelpVideoModal = () => {
     <>
       <Button
         className="go-to-btn btn-text w-auto"
-              size="sm"
+        size="sm"
         variant="btn-outline"
         onClick={handleShow}
       >
         Learn with Video
       </Button>
 
-      <Modal show={show} onHide={handleClose} size="lg" centered>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        size="lg"
+        centered
+        className="pdf-help-video-modal"
+      >
         <Modal.Header closeButton>
           <Modal.Title className="text-primary text-bold">
             PDF Annotation Instruction Video
@@ -26,7 +33,8 @@ const PdfHelpVideoModal = () => {
         </Modal.Header>
         <Modal.Body>
           <p className="text-secondary text-bold fs-5">
-            Watch this short tutorial to learn how to annotate, edit, and download your PDF file.
+            Watch this short tutorial to learn how to annotate, edit, and
+            download your PDF file.
           </p>
           <div className="ratio ratio-16x9">
             <iframe
@@ -55,4 +63,3 @@ const PdfHelpVideoModal = () => {
 };
 
 export default PdfHelpVideoModal;
-

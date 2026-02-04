@@ -1,0 +1,49 @@
+.notification-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  padding: 20px;
+  background-color: rgba(12, 13, 15, 0.6);
+  text-shadow: 1px 1px 5px white;
+  color: white;
+  z-index: 9999;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: slideInRight 0.4s ease-out;
+  text-align: left;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-popup .text-danger {
+  text-shadow: 1px 1px 5px rgba(86, 6, 6, 0.7);
+}
+
+.notification-popup .notification-paragraph {
+  font-weight: bold;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
+}
+
+.notification-popup .notification-time {
+  color: #fff;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .notification-popup {
+    width: 90%;
+    right: 5%;
+    left: 5%;
+    top: 10px;
+  }
+}

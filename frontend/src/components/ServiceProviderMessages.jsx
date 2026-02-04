@@ -1,10 +1,11 @@
-import React, { useContext, useEffect, useReducer} from "react";
+import React, { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { Container, Table, Button } from "react-bootstrap";
-import {  useNavigate } from "react-router-dom";
-import {  FaTrash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaTrash } from "react-icons/fa";
+import "./ServiceProviderMessages.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -90,14 +91,14 @@ const ServiceProviderMessages = () => {
   };
 
   return (
-    <Container className="mt-4">
+    <Container className="service-provider-messages mt-4">
       <h2 className="mb-4">My Messages</h2>
       {loading ? (
-        <p>Loading messages...</p>
+        <p className="loading-message">Loading messages...</p>
       ) : error ? (
-        <p className="text-danger">Error loading messages: {error}</p>
+        <p className="error-message">Error loading messages: {error}</p>
       ) : messages.length === 0 ? (
-        <p>No messages data found</p>
+        <p className="no-messages">No messages data found</p>
       ) : (
         <Table striped bordered hover responsive>
           <thead>

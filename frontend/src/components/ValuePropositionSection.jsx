@@ -6,6 +6,7 @@ import {
   FaCheckCircle,
   FaChartLine,
 } from "react-icons/fa";
+import "./ValuePropositionSection.css";
 
 export default function ValuePropositionSection() {
   const values = [
@@ -66,23 +67,7 @@ export default function ValuePropositionSection() {
         <Row>
           {values.map((value, index) => (
             <Col md={4} sm={6} xs={12} key={index} className="mb-4">
-              <div
-                className="value-card p-4 rounded shadow-sm h-100 border-0 transition-all"
-                style={{
-                  backgroundColor: "#f8f9fa",
-                  transition: "transform 0.3s, box-shadow 0.3s",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-5px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 10px 25px rgba(0,0,0,0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-                }}
-              >
+              <div className="value-card p-4 rounded h-100 border-0">
                 <div className={`text-${value.color} mb-3`}>{value.icon}</div>
                 <h5 className="fw-bold mb-3">{value.title}</h5>
                 <p className="text-muted small">{value.description}</p>

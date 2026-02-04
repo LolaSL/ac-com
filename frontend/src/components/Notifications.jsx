@@ -7,6 +7,7 @@ import MessageBox from "./MessageBox.jsx";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { Button, Badge, Card, Container, Row, Col } from "react-bootstrap";
+import "./Notifications.css";
 
 const initialState = {
   loading: true,
@@ -61,7 +62,8 @@ export default function Notifications() {
   );
   const { state } = useContext(Store);
   const { userInfo, adminInfo, serviceProviderInfo } = state;
-  const token = userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
+  const token =
+    userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
   const isAdmin = adminInfo !== null;
 
   useEffect(() => {
@@ -149,7 +151,7 @@ export default function Notifications() {
   };
 
   return (
-    <Container className="py-4">
+    <Container className="notifications-container py-4">
       <Row>
         <Col>
           <h1 className="mb-4">Notifications</h1>
@@ -163,8 +165,13 @@ export default function Notifications() {
             <div>
               {notifications.map((notification) => (
                 <Card
-                  key={notification._id || `${notification.title}-${notification.createdAt}`}
-                  className="mb-3"
+                  key={
+                    notification._id ||
+                    `${notification.title}-${notification.createdAt}`
+                  }
+                  className={`mb-3 notification-card ${
+                    !notification.isRead ? "unread" : ""
+                  }`}
                   bg={notification.isRead ? "light" : "white"}
                   border={notification.isRead ? "secondary" : "primary"}
                 >
@@ -173,23 +180,30 @@ export default function Notifications() {
                       <Card.Title className="mb-0">
                         {notification.title}
                         {!notification.isRead && (
-                          <Badge bg="primary" className="ms-2">New</Badge>
+                          <Badge bg="primary" className="ms-2">
+                            New
+                          </Badge>
                         )}
                       </Card.Title>
                       <Badge bg={getNotificationBadge(notification.type)}>
                         {notification.type}
                       </Badge>
                     </div>
-                    <Card.Text className="mt-2">{notification.message}</Card.Text>
-                    <div className="text-muted small mb-3">
+                    <Card.Text className="mt-2">
+                      {notification.message}
+                    </Card.Text>
+                    <div className="text-muted small mb-3 notification-meta">
                       <div>
-                        <i className="bi bi-person-badge"></i> Recipient: <em>{notification.recipientType}</em>
+                        <i className="bi bi-person-badge"></i> Recipient:{" "}
+                        <em>{notification.recipientType}</em>
                       </div>
                       <div>
-                        <i className="bi bi-calendar"></i> {formatDate(notification.createdAt)} at {formatTime(notification.createdAt)}
+                        <i className="bi bi-calendar"></i>{" "}
+                        {formatDate(notification.createdAt)} at{" "}
+                        {formatTime(notification.createdAt)}
                       </div>
                     </div>
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-2 notification-actions">
                       {!notification.isRead && (
                         <Button
                           variant="primary"

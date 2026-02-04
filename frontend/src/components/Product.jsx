@@ -8,6 +8,7 @@ import { Store } from "../Store.js";
 import Image from "react-bootstrap/Image";
 import { toast } from "react-toastify";
 import Spinner from "react-bootstrap/Spinner";
+import "./Product.css";
 
 // Unified regex for condenser/VRF detection
 const CONDENSER_REGEX =
@@ -24,7 +25,6 @@ const Product = memo(({ product }) => {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
-  const [imageHover, setImageHover] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -132,85 +132,37 @@ const Product = memo(({ product }) => {
   );
 
   return (
-    <Card
-      className="h-100 product-card"
-      style={{
-        position: "relative",
-        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-      }}
-    >
-      <div style={{ position: "relative", overflow: "hidden" }}>
+    <Card className="h-100 product-card">
+      <div className="image-container">
         <Link to={`/product/${product.slug}`}>
           {imageLoading && (
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: 1,
-              }}
-            >
+            <div className="spinner-container">
               <Spinner animation="border" variant="primary" />
             </div>
           )}
           <Image
             src={product.image}
-            className="responsive"
+            className={`responsive product-image ${
+              !imageLoading ? "loaded" : ""
+            }`}
             alt={product.name}
             onLoad={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
-            onMouseEnter={() => setImageHover(true)}
-            onMouseLeave={() => setImageHover(false)}
-            style={{
-              transition: "transform 0.3s ease",
-              transform: imageHover ? "scale(1.05)" : "scale(1)",
-              opacity: imageLoading ? 0 : 1,
-            }}
           />
         </Link>
         <button
           onClick={toggleWishlistHandler}
           disabled={wishlistLoading}
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-          style={{
-            position: "absolute",
-            top: "10px",
-            right: "10px",
-            background: "white",
-            border: "none",
-            borderRadius: "50%",
-            width: "40px",
-            height: "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: wishlistLoading ? "wait" : "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-            transition: "transform 0.2s, box-shadow 0.2s",
-            zIndex: 10,
-            opacity: wishlistLoading ? 0.6 : 1,
-          }}
-          onMouseEnter={(e) => {
-            if (!wishlistLoading) {
-              e.currentTarget.style.transform = "scale(1.1)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.25)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
-          }}
+          className={`wishlist-btn ${wishlistLoading ? "loading" : ""}`}
         >
           {wishlistLoading ? (
             <Spinner animation="border" size="sm" />
           ) : (
             <i
-              className={inWishlist ? "fas fa-heart" : "far fa-heart"}
-              style={{
-                color: inWishlist ? "#ff6b35" : "#6c757d",
-                fontSize: "1.2rem",
-              }}
+              className={`${
+                inWishlist ? "fas fa-heart" : "far fa-heart"
+              } wishlist-icon ${inWishlist ? "in-wishlist" : ""}`}
             />
           )}
         </button>
@@ -218,32 +170,20 @@ const Product = memo(({ product }) => {
 
       <Card.Body>
         {product.discount > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              top: "10px",
-              left: "10px",
-              background: "linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)",
-              color: "white",
-              padding: "5px 12px",
-              borderRadius: "20px",
-              fontSize: "0.85rem",
-              fontWeight: "bold",
-              boxShadow: "0 2px 8px rgba(255,107,53,0.4)",
-              zIndex: 10,
-            }}
-          >
-            -{product.discount}% OFF
-          </div>
+          <div className="discount-badge">-{product.discount}% OFF</div>
         )}
 
         <Link
           to={`/product/${product.slug}`}
-          className="card-link text-secondary"
-          style={{ textDecoration: "none" }}
+          className="card-link text-secondary product-link"
         >
           <Card.Title className="text-truncate" title={product.name}>
-            <strong>Product:</strong> {product.name}
+            <strong>
+              {CONDENSER_REGEX.test(product.name || product.category || "")
+                ? "Condenser:"
+                : "Product:"}
+            </strong>{" "}
+            {product.name}
           </Card.Title>
 
           <div className="mb-1">

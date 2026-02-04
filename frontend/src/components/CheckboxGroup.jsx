@@ -1,13 +1,13 @@
 import React from "react";
 import { Form } from "react-bootstrap";
+import "./CheckboxGroup.css";
 
 const CheckboxGroup = ({ title, name, options, onChange }) => {
-
   const safeOptions = options || {};
 
   return (
-    <>
-      <h3 className="mb-4 mt-4">{title}</h3>
+    <div className="checkbox-group">
+      <h3>{title}</h3>
       {Object.keys(safeOptions).map((key) => (
         <Form.Check
           key={key}
@@ -18,8 +18,8 @@ const CheckboxGroup = ({ title, name, options, onChange }) => {
           onChange={onChange}
         />
       ))}
-      <hr className="ms-2 mt-1 mb-5" style={{ width: "66%" }} />
-    </>
+      <hr />
+    </div>
   );
 };
 

@@ -1,0 +1,85 @@
+.modal-window {
+  /* Additional styles for the modal if needed */
+}
+
+.modal-window .product-item {
+  /* Specific to modal product display */
+}
+
+.modal-window .product-image {
+  margin-bottom: 15px;
+}
+
+.modal-window .product-image img {
+  max-height: 250px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.modal-window .product-item h5 {
+  margin-bottom: 1rem;
+}
+
+.modal-window .product-item p {
+  margin-bottom: 0.5rem;
+}
+
+.modal-window .product-item .system-type {
+  color: #007bff;
+}
+
+.modal-window .product-item .price-section {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 0.375rem;
+}
+
+.modal-window .product-item .original-price {
+  text-decoration: line-through;
+}
+
+.modal-window .product-item .discounted-price {
+  color: green;
+  font-size: 1.1em;
+}
+
+.modal-window .product-item .save-text {
+  color: #6c757d;
+}
+
+.modal-window .product-item .current-price {
+  font-size: 1.1em;
+}
+
+.modal-window .alert {
+  margin-bottom: 1rem;
+}
+
+.modal-window .no-products {
+  text-align: center;
+  padding: 2rem;
+}
+
+.modal-window .modal-footer .btn {
+  margin-right: 0.5rem;
+}
+
+.modal-window .modal-footer .btn:last-child {
+  margin-right: 0;
+}
+
+@media (max-width: 768px) {
+  .modal-window .product-image img {
+    max-height: 200px;
+  }
+
+  .modal-window .product-item h5 {
+    font-size: 1.25rem;
+  }
+
+  .modal-window .modal-footer .btn {
+    margin-right: 0.25rem;
+    padding: 0.375rem 0.75rem;
+  }
+}

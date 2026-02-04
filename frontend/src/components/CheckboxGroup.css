@@ -1,0 +1,18 @@
+.checkbox-group h3 {
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.checkbox-group hr {
+  margin-left: 0.5rem;
+  margin-top: 0.25rem;
+  margin-bottom: 2rem;
+  width: 66%;
+}
+
+@media (max-width: 768px) {
+  .checkbox-group hr {
+    width: 100%;
+    margin-left: 0;
+  }
+}

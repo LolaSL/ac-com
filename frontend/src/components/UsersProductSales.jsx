@@ -12,8 +12,11 @@ import { getError } from "../utils.js";
 import LoadingBox from "./LoadingBox.jsx";
 import MessageBox from "./MessageBox.jsx";
 import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
+import { FaShoppingCart, FaUsers, FaBox, FaChartLine } from "react-icons/fa";
+import "./UsersProductSales.css";
 
 const initialState = {
   loading: true,
@@ -51,6 +54,12 @@ export default function UsersProductSales() {
 
   const [chartPage, setChartPage] = useState(0);
 
+  const totalSales = summary?.orders?.[0]?.totalSales || 0;
+  const totalUsers = summary?.users?.[0]?.numUsers || 0;
+  const totalProducts =
+    summary?.productCategories?.reduce((sum, x) => sum + x.count, 0) || 0;
+  const totalOrders = summary?.orders?.[0]?.numOrders || 0;
+
   const fetchData = useCallback(
     async (page = 1) => {
       dispatch({ type: "FETCH_REQUEST" });
@@ -69,15 +78,6 @@ export default function UsersProductSales() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const renderCard = (title, value) => (
-    <Card className="mb-3 chart-card me-2">
-      <Card.Body>
-        <Card.Title className="chart-card-title">{value || 0}</Card.Title>
-        <Card.Text>{title}</Card.Text>
-      </Card.Body>
-    </Card>
-  );
 
   const renderChart = (title, data, chartType, options = {}) => {
     const hasData = data && data.length > 1;
@@ -197,16 +197,16 @@ export default function UsersProductSales() {
   ];
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4 mt-4">
+    <div className="users-product-sales">
+      <div className="dashboard-header d-flex justify-content-between align-items-center mb-4 mt-4">
         <div>
-          <h1 className="mb-0">Admin Sales Dashboard</h1>
-          <p className="text-muted mb-0">
+          <h1 className="dashboard-title mb-0">Admin Sales Dashboard</h1>
+          <p className="dashboard-subtitle text-muted mb-0">
             Monitor platform performance and analytics
           </p>
         </div>
         <Button
-          className="details"
+          className="refresh-button details"
           onClick={() => fetchData()}
           disabled={loading}
         >
@@ -224,20 +224,56 @@ export default function UsersProductSales() {
         </MessageBox>
       ) : (
         <>
-          <h3 className="mb-4 mt-4">Overview</h3>
-          <Row>
-            {renderCard("Users", summary?.users?.[0]?.numUsers)}
-            {renderCard("Orders", summary?.orders?.[0]?.numOrders)}
-            {renderCard(
-              "Sales",
-              summary?.orders?.[0]?.totalSales
-                ? `$${summary.orders[0].totalSales.toFixed(2)}`
-                : "$0.00"
-            )}
+          <h3 className="overview-title mb-4 mt-4">Overview</h3>
+          <Row className="overview-section">
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon">
+                    <FaShoppingCart />
+                  </div>
+                  <h5 className="card-title">Total Sales</h5>
+                  <h3 className="card-value">${totalSales?.toFixed(2) || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon">
+                    <FaUsers />
+                  </div>
+                  <h5 className="card-title">Total Users</h5>
+                  <h3 className="card-value">{totalUsers || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon">
+                    <FaBox />
+                  </div>
+                  <h5 className="card-title">Total Products</h5>
+                  <h3 className="card-value">{totalProducts || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon">
+                    <FaChartLine />
+                  </div>
+                  <h5 className="card-title">Total Orders</h5>
+                  <h3 className="card-value">{totalOrders || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
           </Row>
 
           <div className="charts-row">{chartGroups[chartPage]}</div>
-          <div className="d-flex justify-content-center align-items-center my-4 gap-3">
+          <div className="pagination-controls d-flex justify-content-center align-items-center my-4 gap-3">
             <Button
               className="details"
               onClick={() => setChartPage((prev) => Math.max(prev - 1, 0))}

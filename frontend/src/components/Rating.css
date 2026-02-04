@@ -1,0 +1,34 @@
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rating span {
+  color: #ec2222;
+  font-size: 1rem;
+}
+
+.rating span i {
+  transition: color 0.2s ease;
+}
+
+.rating .rating-text {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+@media (max-width: 768px) {
+  .rating {
+    gap: 0.125rem;
+  }
+
+  .rating span {
+    font-size: 0.875rem;
+  }
+
+  .rating .rating-text {
+    font-size: 0.8rem;
+  }
+}

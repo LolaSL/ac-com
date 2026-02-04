@@ -5,6 +5,7 @@ import { getError } from "../utils";
 import { Container, Table, Button } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import "./MessagesServiceProviders.css";
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
@@ -175,8 +176,8 @@ const MessagesServiceProviders = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <Container>
-      <div className="mb-4 mt-4">
+    <Container className="messages-service-providers">
+      <div className="mb-4 mt-4 header-section">
         <h1 className="mb-2 fw-bold">Admin - Service Provider Messages</h1>
         <p className="text-muted mb-0">
           Monitor and moderate communications between clients and service
@@ -241,20 +242,20 @@ const MessagesServiceProviders = () => {
                   </td>
                   <td>
                     <Button
-                       type="button"
-                     className="btn-admin-edit"
-                        title="Edit"
+                      type="button"
+                      className="btn-admin-edit"
+                      title="Edit"
                       onClick={() => editHandler(message._id)}
                     >
-                   <FaEdit />
+                      <FaEdit />
                     </Button>
                     <Button
-                       type="button"
-                    className="btn-admin-delete"
-                        title="Delete"
+                      type="button"
+                      className="btn-admin-delete"
+                      title="Delete"
                       onClick={() => deleteHandler(message._id)}
                     >
-                          <FaTrash />
+                      <FaTrash />
                     </Button>
                   </td>
                 </tr>

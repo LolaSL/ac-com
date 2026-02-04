@@ -1,0 +1,76 @@
+.modal-legend {
+  /* No specific styles for the root, but can add if needed */
+}
+
+.modal-legend .modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-legend .modal-title {
+  font-weight: bold;
+}
+
+.modal-legend .tab-content {
+  padding-top: 1rem;
+}
+
+.modal-legend h6 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.modal-legend ul {
+  padding-left: 1.5rem;
+}
+
+.modal-legend li {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.modal-legend .fs-6 {
+  font-size: 0.875rem;
+}
+
+.modal-legend .text-primary {
+  color: #007bff !important;
+}
+
+.modal-legend .text-success {
+  color: #28a745 !important;
+}
+
+.modal-legend .text-danger {
+  color: #dc3545 !important;
+}
+
+.modal-legend .text-gray-700 {
+  color: #6c757d !important;
+}
+
+.modal-legend .text-red-600 {
+  color: #dc3545 !important;
+}
+
+.modal-legend .text-bold {
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .modal-legend .modal-body {
+    max-height: 60vh;
+  }
+
+  .modal-legend h6 {
+    font-size: 1rem;
+  }
+
+  .modal-legend .fs-6 {
+    font-size: 0.8rem;
+  }
+
+  .modal-legend ul {
+    padding-left: 1rem;
+  }
+}

@@ -1,5 +1,6 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
+import "./TestimonialsSection.css";
 
 export default function TestimonialsSection() {
   const testimonials = [
@@ -44,35 +45,27 @@ export default function TestimonialsSection() {
         <Row>
           {testimonials.map((testimonial, index) => (
             <Col md={4} sm={6} xs={12} key={index} className="mb-4">
-              <div
-                className="testimonial-card p-4 rounded shadow-sm bg-white h-100"
-                style={{
-                  borderLeft: "4px solid #007bff",
-                }}
-              >
+              <div className="testimonial-card">
                 {/* Rating */}
-                <div className="mb-3">{"⭐".repeat(testimonial.rating)}</div>
+                <div className="testimonial-rating">
+                  {"⭐".repeat(testimonial.rating)}
+                </div>
 
                 {/* Quote */}
-                <p className="text-muted mb-4" style={{ fontStyle: "italic" }}>
-                  "{testimonial.text}"
-                </p>
+                <p className="testimonial-quote">"{testimonial.text}"</p>
 
                 {/* Author */}
-                <div className="d-flex align-items-center mt-4">
-                  <div
-                    style={{
-                      fontSize: "2.5rem",
-                      marginRight: "12px",
-                    }}
-                  >
-                    {testimonial.image}
-                  </div>
+                <div className="testimonial-author">
+                  <div className="testimonial-avatar">{testimonial.image}</div>
                   <div>
-                    <h6 className="fw-bold mb-0">{testimonial.name}</h6>
-                    <small className="text-muted">{testimonial.role}</small>
+                    <h6 className="testimonial-name">{testimonial.name}</h6>
+                    <small className="testimonial-role">
+                      {testimonial.role}
+                    </small>
                     <br />
-                    <small className="text-muted">{testimonial.company}</small>
+                    <small className="testimonial-company">
+                      {testimonial.company}
+                    </small>
                   </div>
                 </div>
               </div>
@@ -81,18 +74,18 @@ export default function TestimonialsSection() {
         </Row>
 
         {/* Stats from testimonials */}
-        <Row className="mt-5 pt-5 border-top text-center">
+        <Row className="stats-section">
           <Col md={4} xs={12} className="mb-3">
-            <h4 className="fw-bold text-primary">60%</h4>
-            <p className="text-muted">Increase in Project Volume</p>
+            <h4 className="stat-number">60%</h4>
+            <p className="stat-description">Increase in Project Volume</p>
           </Col>
           <Col md={4} xs={12} className="mb-3">
-            <h4 className="fw-bold text-primary">50%</h4>
-            <p className="text-muted">Faster Quote Turnaround</p>
+            <h4 className="stat-number">50%</h4>
+            <p className="stat-description">Faster Quote Turnaround</p>
           </Col>
           <Col md={4} xs={12} className="mb-3">
-            <h4 className="fw-bold text-primary">4.8/5</h4>
-            <p className="text-muted">Average Customer Rating</p>
+            <h4 className="stat-number">4.8/5</h4>
+            <p className="stat-description">Average Customer Rating</p>
           </Col>
         </Row>
       </Container>

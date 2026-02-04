@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Modal, Button, Tabs, Tab } from "react-bootstrap";
+import "./ModalLegend_new.css";
 
 const ModalLegend = () => {
   const [show, setShow] = useState(false);
@@ -26,13 +27,14 @@ const ModalLegend = () => {
         centered
         size="lg"
         fullscreen="sm"
+        className="modal-legend"
       >
         <Modal.Header closeButton>
           <Modal.Title className="text-danger text-bold">
             📋 Measurement System: How to Use
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
+        <Modal.Body>
           <Tabs defaultActiveKey="annotator" id="legend-tabs" className="mb-3">
             {/* ANNOTATOR TAB */}
             <Tab eventKey="annotator" title="🖼️ PDF Annotator">

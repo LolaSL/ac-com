@@ -1,0 +1,25 @@
+.value-proposition-section {
+  padding: 3rem 0;
+}
+
+.value-card {
+  background-color: #f8f9fa;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.value-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .value-proposition-section {
+    padding: 2rem 0;
+  }
+
+  .value-card {
+    margin-bottom: 1rem;
+  }
+}
