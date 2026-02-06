@@ -2244,6 +2244,100 @@ const data = {
       transactionId: "TXN789012",
       description: "Payment for office interior renovation"
     }
+  ],
+
+  demoRequests: [
+    {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      company: "ABC Corp",
+      phone: "123-456-7890",
+      projectSize: "5000-10000 sq ft",
+      preferredDate: "2026-03-15",
+    },
+    {
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "jane.smith@example.com",
+      company: "XYZ Ltd",
+      phone: "987-654-3210",
+      projectSize: "10000-20000 sq ft",
+      preferredDate: "2026-04-01",
+    },
+    {
+      firstName: "Bob",
+      lastName: "Johnson",
+      email: "bob.johnson@example.com",
+      company: "Tech Solutions",
+      phone: "555-123-4567",
+      projectSize: "Under 5000 sq ft",
+      preferredDate: "2026-02-20",
+    }
+  ],
+
+  newsletter: [
+    {
+      email: 'john.doe@example.com',
+      preferences: {
+        newFeatures: true,
+        pricingUpdates: true,
+        industryInsights: true,
+        promotions: false
+      },
+      subscriptionStatus: 'active',
+      subscriptionDate: new Date('2024-01-15'),
+      source: 'website'
+    },
+    {
+      email: 'jane.smith@company.com',
+      preferences: {
+        newFeatures: true,
+        pricingUpdates: false,
+        industryInsights: true,
+        promotions: true
+      },
+      subscriptionStatus: 'active',
+      subscriptionDate: new Date('2024-02-01'),
+      source: 'website'
+    },
+    {
+      email: 'mike.wilson@techcorp.com',
+      preferences: {
+        newFeatures: true,
+        pricingUpdates: true,
+        industryInsights: true,
+        promotions: true
+      },
+      subscriptionStatus: 'active',
+      subscriptionDate: new Date('2024-01-28'),
+      source: 'website'
+    },
+    {
+      email: 'sarah.davis@startup.io',
+      preferences: {
+        newFeatures: true,
+        pricingUpdates: true,
+        industryInsights: false,
+        promotions: false
+      },
+      subscriptionStatus: 'active',
+      subscriptionDate: new Date('2024-02-10'),
+      source: 'website'
+    },
+    {
+      email: 'unsubscribed@example.com',
+      preferences: {
+        newFeatures: true,
+        pricingUpdates: true,
+        industryInsights: true,
+        promotions: false
+      },
+      subscriptionStatus: 'unsubscribed',
+      subscriptionDate: new Date('2024-01-05'),
+      unsubscribeDate: new Date('2024-01-20'),
+      source: 'website'
+    }
   ]
 
 

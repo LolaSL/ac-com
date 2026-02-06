@@ -184,7 +184,8 @@
 }
 
 .demo-input::placeholder {
-  color: #999;
+  color: #666;
+  opacity: 1;
 }
 
 .demo-submit-btn {
@@ -275,4 +276,23 @@
   .demo-submit-btn {
     transition: none;
   }
+}
+
+/* Small screens */
+@media (max-width: 767px) {
+  .demo-modal-body {
+    padding-bottom: 2rem;
+  }
+  .demo-submit-btn {
+    margin-bottom: 1rem;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Top modal positioning */
+.top-modal .modal-dialog {
+  top: 5%;
+  transform: translate(-50%, 0);
 }

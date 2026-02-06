@@ -1,24 +1,21 @@
 import jwt from 'jsonwebtoken';
-import Mailgun from 'mailgun.js';
+import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
-import formData from 'form-data';
 
 dotenv.config();
 
-const mailgunClient = new Mailgun(formData);
+// Configure SendGrid only if API key is provided
+if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
-export const mailgun = () =>
-  mailgunClient.client({
-    username: 'api',
-    key: process.env.MAILGUN_API_KEY,
-    url: 'https://api.mailgun.net',
-  });
+export const mailgun = () => sgMail;
 
 export const baseUrl = () =>
   process.env.BASE_URL
     ? process.env.BASE_URL
     : process.env.NODE_ENV !== 'production'
-      ? 'http://localhost:5050'
+      ? 'http://localhost:5020'
       : 'https://ac-commerce.onrender.com';
 
 

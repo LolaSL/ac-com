@@ -5,6 +5,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import InputGroup from "react-bootstrap/InputGroup";
+import Alert from "react-bootstrap/Alert";
 import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
@@ -21,6 +22,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { userInfo } = state;
@@ -28,6 +30,7 @@ export default function SignInPage() {
   const submitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
       const { data } = await Axios.post("/api/users/signin", {
         email,
@@ -38,6 +41,7 @@ export default function SignInPage() {
       navigate(redirect || "/");
       toast.success("Signed in successfully");
     } catch (err) {
+      setError(getError(err));
       toast.error(getError(err));
     } finally {
       setLoading(false);
@@ -68,23 +72,30 @@ export default function SignInPage() {
                 placeholder="Enter email"
                 required
                 className="w-100"
+                id="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError("");
+                }}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="password">
               <Form.Label>Password</Form.Label>
-              <InputGroup>
+              <InputGroup className="w-100">
                 <Form.Control
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
                   required
-                 className="w-auto"
+                  id="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError("");
+                  }}
                 />
                 <Button
-                  // variant="outline-success"
+                  variant="outline-secondary"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   <i
@@ -93,6 +104,7 @@ export default function SignInPage() {
                 </Button>
               </InputGroup>
             </Form.Group>
+            {error && <Alert variant="danger">{error}</Alert>}
             <div className="d-grid mb-3">
               <Button
                 type="submit"

@@ -13,10 +13,16 @@
 
 .input-group .btn-outline-success i {
   color: inherit;
+  cursor: pointer;
 }
 
 @media (max-width: 576px) {
   .input-group .btn-outline-success {
     padding: 0.375rem 0.5rem; /* smaller padding on small screens */
   }
+}
+
+.alert-danger {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }

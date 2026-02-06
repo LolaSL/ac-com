@@ -18,6 +18,8 @@ import browsingHistoryRouter from './routes/browsingHistoryRoutes.js';
 import userReviewsRouter from './routes/userReviewsRoutes.js';
 import wishlistRouter from './routes/wishlistRoutes.js';
 import roiRouter from './routes/roiCalculationRoutes.js';
+import demoRequestRouter from './routes/demoRequestRoutes.js';
+import newsletterRouter from './routes/newsletterRoutes.js';
 import path from "path";
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -102,6 +104,8 @@ app.use('/api/browsing-history', browsingHistoryRouter);
 app.use('/api/user-reviews', userReviewsRouter);
 app.use('/api/wishlist', wishlistRouter);
 app.use('/api/roi-calculations', roiRouter);
+app.use('/api/demo-requests', demoRequestRouter);
+app.use('/api/newsletter', newsletterRouter);
 
 
 

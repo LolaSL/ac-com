@@ -147,6 +147,10 @@
   color: #dc3545;
 }
 
+.newsletter-alert-info {
+  color: #0066ff;
+}
+
 /* Note Text */
 .newsletter-note {
   font-size: clamp(0.8rem, 1.5vw, 0.9rem);

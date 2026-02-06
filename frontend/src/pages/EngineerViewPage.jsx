@@ -280,7 +280,7 @@ const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
   hvacAnnotations?.diffusers?.forEach((diffuser) => {
     const x = diffuser.xPercent * canvasWidth;
     const y = diffuser.yPercent * canvasHeight;
-    const size = (diffuser.sizePercent || 0.01) * canvasWidth;
+    const size = (diffuser.sizePercent || 0.04) * canvasWidth;
     context.beginPath();
     if (diffuser.shape === "square") {
       context.rect(x - size / 2, y - size / 2, size, size);

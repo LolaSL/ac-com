@@ -1,8 +1,10 @@
-import React from "react";
-import { Container, Row, Col, Card } from "react-bootstrap";
+import React, { useState } from "react";
+import { Container, Row, Col, Card, Modal } from "react-bootstrap";
+import DemoRequestForm from "./DemoRequestForm";
 import "./SuccessStoriesSection.css";
 
 export default function SuccessStoriesSection() {
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const successStories = [
     {
       id: 1,
@@ -143,9 +145,28 @@ export default function SuccessStoriesSection() {
         {/* Call to Action */}
         <div className="stories-cta text-center mt-5">
           <h3 className="cta-text">Ready to Join Our Success Stories?</h3>
-          <button className="stories-button">Request a Case Study</button>
+          <button
+            className="stories-button"
+            onClick={() => setShowDemoModal(true)}
+          >
+            Schedule a Demo
+          </button>
         </div>
       </Container>
+
+      {/* Demo Request Modal */}
+      <Modal
+        show={showDemoModal}
+        onHide={() => setShowDemoModal(false)}
+        className="top-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Schedule a Demo</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <DemoRequestForm onClose={() => setShowDemoModal(false)} />
+        </Modal.Body>
+      </Modal>
     </section>
   );
 }

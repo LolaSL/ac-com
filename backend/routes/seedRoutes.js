@@ -14,6 +14,8 @@ import EngineerAnnotation from '../models/engineerAnnotationModel.js';
 import Order from '../models/orderModel.js';
 import Payment from '../models/paymentModel.js';
 import BrowsingHistory from '../models/browsingHistoryModel.js';
+import DemoRequest from '../models/demoRequestModel.js';
+import Newsletter from '../models/newsletterModel.js';
 import { PDFDocument, rgb } from 'pdf-lib';
 import data from '../data.js';
 
@@ -37,6 +39,8 @@ seedRouter.get('/', async (req, res) => {
     await EngineerAnnotation.deleteMany({});
     await Payment.deleteMany({});
     await BrowsingHistory.deleteMany({});
+    await DemoRequest.deleteMany({});
+    await Newsletter.deleteMany({});
 
     // Seed ServiceProviders
     const createdServiceProviders = await ServiceProvider.insertMany(data.serviceProviders);
@@ -72,8 +76,23 @@ seedRouter.get('/', async (req, res) => {
     }));
     const createdPayments = await Payment.insertMany(paymentsWithIds);
 
+    // Seed Demo Requests
+    const createdDemoRequests = await DemoRequest.insertMany(data.demoRequests);
+
+    // Seed Newsletter Subscribers
+    const createdNewsletters = await Newsletter.insertMany(data.newsletter);
+
     // Seed other collections
-    const createdProducts = await Product.insertMany(data.products);
+    // const createdProducts = await Product.insertMany(data.products);
+    const createdProducts = [];
+    for (const product of data.products) {
+      try {
+        const createdProduct = await Product.create(product);
+        createdProducts.push(createdProduct);
+      } catch (error) {
+        console.log(`Skipping product ${product.name}: ${error.message}`);
+      }
+    }
 
     // Preserve existing users; seed defaults only if none exist
     let createdUsers = await User.find({});
@@ -277,6 +296,7 @@ seedRouter.get('/', async (req, res) => {
       createdOrders,
       createdAnnotations,
       createdEngineerAnnotations,
+      createdNewsletters,
       message:
         ordersMode === 'reset'
           ? 'Seeding completed (orders reset)'

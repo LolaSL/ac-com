@@ -9,7 +9,6 @@ import ROICalculatorPreview from "../components/ROICalculatorPreview";
 import SuccessStoriesSection from "../components/SuccessStoriesSection";
 import PricingTiersSection from "../components/PricingTiersSection";
 import NewsletterSignup from "../components/NewsletterSignup";
-import DemoRequestForm from "../components/DemoRequestForm";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -164,7 +163,6 @@ export default function HomeBannerPage() {
       <SuccessStoriesSection />
       <PricingTiersSection />
       <TestimonialsSection />
-      <DemoRequestForm />
       <NewsletterSignup />
     </div>
   );

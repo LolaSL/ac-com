@@ -30,6 +30,7 @@ import {
 import jsPDF from "jspdf";
 import axios from "axios";
 import { Store } from "../Store";
+import DemoRequestForm from "../components/DemoRequestForm";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import "./ROICalculatorExperimental.css";
@@ -44,6 +45,7 @@ export default function ROICalculatorExperimental() {
   // UI State
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveCalculationName, setSaveCalculationName] = useState("");
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const [saveCalculationDescription, setSaveCalculationDescription] =
     useState("");
   const [savedCalculations, setSavedCalculations] = useState([]);
@@ -1598,19 +1600,7 @@ export default function ROICalculatorExperimental() {
 
   // Schedule Demo Function
   const handleScheduleDemo = () => {
-    // Scroll to demo form or navigate
-    const demoForm = document.getElementById("demo-request-form");
-    if (demoForm) {
-      demoForm.scrollIntoView({ behavior: "smooth" });
-      // Optionally focus on the form
-      const input = demoForm.querySelector("input");
-      if (input) input.focus();
-    } else {
-      // If demo form component not on page, show an alert
-      alert(
-        "Schedule a demo by filling out the form below or contact our sales team at sales@ac-commerce.com"
-      );
-    }
+    setShowDemoModal(true);
   };
 
   return (
@@ -2504,6 +2494,26 @@ export default function ROICalculatorExperimental() {
             Save Calculation
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Demo Request Modal */}
+      <Modal
+        show={showDemoModal}
+        onHide={() => setShowDemoModal(false)}
+        size="md"
+        className="top-modal"
+        key={showDemoModal ? "demo-modal-open" : "demo-modal-closed"}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Schedule a Demo</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="demo-modal-body">
+          <p>
+            Schedule a demo by filling out the form below or contact our sales
+            team at sales@ac-commerce.com
+          </p>
+          <DemoRequestForm onSuccess={() => setShowDemoModal(false)} />
+        </Modal.Body>
       </Modal>
     </div>
   );

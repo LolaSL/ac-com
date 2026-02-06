@@ -23,7 +23,7 @@ const Footer = () => {
   return (
     <>
       <footer className="container-fluid footer mt-4">
-        <Row className="text-white p-4 g-4">
+        <Row className="text-white p-4 g-4 justify-content-between">
           <Col xs={12} lg={2} className="ft-1">
             <h4>AC Commerce</h4>
             <hr />
@@ -147,12 +147,14 @@ const Footer = () => {
               <i className="fa-solid fa-paper-plane"></i> City, State, Zip Code
             </p>
           </Col>
-          <Row className="d-flex justify-content-center mt-4">
+        </Row>
+        <div className="mb-4 text-center">
+          <Row className="d-flex justify-content-center">
             <div className="last-footer text-center">
               &copy; {new Date().getFullYear()} AC Commerce. All rights reserved
             </div>
           </Row>
-        </Row>
+        </div>
       </footer>
     </>
   );

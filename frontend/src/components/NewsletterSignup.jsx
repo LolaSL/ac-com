@@ -23,19 +23,49 @@ export default function NewsletterSignup() {
     }
 
     try {
-      // In production, this would call your backend API
-      // For now, we'll simulate success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setStatus({
-        type: "success",
-        message:
-          "Thanks for subscribing! Check your email for exclusive offers.",
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          preferences: {
+            newFeatures: true,
+            pricingUpdates: true,
+            industryInsights: true,
+            promotions: false,
+          },
+        }),
       });
-      setEmail("");
 
-      // Clear success message after 5 seconds
-      setTimeout(() => setStatus(null), 5000);
+      const data = await response.json();
+
+      if (response.ok) {
+        // Success case
+        setStatus({
+          type: "success",
+          message:
+            data.message ||
+            "Thanks for subscribing! Check your email for exclusive offers.",
+        });
+        setEmail("");
+        // Clear success message after 5 seconds
+        setTimeout(() => setStatus(null), 5000);
+      } else {
+        // Handle different error cases
+        if (
+          response.status === 400 &&
+          data.message.includes("already subscribed")
+        ) {
+          setStatus({
+            type: "info",
+            message: data.message,
+          });
+        } else {
+          throw new Error(data.message || "Failed to subscribe");
+        }
+      }
     } catch (error) {
       setStatus({
         type: "error",
@@ -80,7 +110,13 @@ export default function NewsletterSignup() {
 
             {status && (
               <Alert
-                variant={status.type === "success" ? "success" : "danger"}
+                variant={
+                  status.type === "success"
+                    ? "success"
+                    : status.type === "info"
+                    ? "info"
+                    : "danger"
+                }
                 className="newsletter-alert"
                 dismissible
                 onClose={() => setStatus(null)}

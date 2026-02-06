@@ -225,8 +225,8 @@ const Sidebar = () => {
     annotations?.comments?.forEach((comment) => {
       const x = comment.xPercent * canvasWidth;
       const y = comment.yPercent * canvasHeight;
-      const padding = 10;
-      const fontSize = 17;
+      const padding = 6;
+      const fontSize = 12;
       const text = comment.text;
 
       context.font = `bold ${fontSize}px Arial`;
@@ -263,8 +263,8 @@ const Sidebar = () => {
     hvacAnnotations?.ducts?.forEach((duct) => {
       const x = duct.xPercent * canvasWidth;
       const y = duct.yPercent * canvasHeight;
-      const width = duct.widthPercent * canvasWidth;
-      const height = duct.heightPercent * canvasHeight;
+      const width = 40;
+      const height = 20;
       const angle = (duct.rotation || 0) * (Math.PI / 180);
 
       context.save();
@@ -284,7 +284,7 @@ const Sidebar = () => {
     hvacAnnotations?.diffusers?.forEach((diffuser) => {
       const x = diffuser.xPercent * canvasWidth;
       const y = diffuser.yPercent * canvasHeight;
-      const size = diffuser.sizePercent * canvasWidth; // assuming circular diffusers
+      const size = (diffuser.sizePercent || 0.04) * (canvasWidth / 1.5); // match SaveAsPDF default
 
       context.beginPath();
       context.arc(x, y, size / 2, 0, 2 * Math.PI);

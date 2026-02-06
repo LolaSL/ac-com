@@ -108,29 +108,35 @@ userRouter.post(
       console.log(resetLink);
       console.log('===================================');
 
-      // Only send email if Mailgun is configured
-      if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
+      // Only send email if SendGrid is configured
+      if (process.env.SENDGRID_API_KEY) {
         try {
-          mailgun()
-            .messages()
-            .send(
-              {
-                from: 'AC Commerce <me@mg.yourdomain.com>',
-                to: `${user.name} <${user.email}>`,
-                subject: `Reset Password`,
-                html: ` 
-                 <p>Please Click the following link to reset your password:</p> 
-               <a href="${resetLink}">Reset Password</a>
-                 `,
-              },
-              (error, body) => {
-                console.log(error);
-                console.log(body);
-              }
-            );
+          await mailgun().send({
+            to: user.email,
+            from: {
+              email: 'your-gmail@gmail.com', // Replace with your verified Gmail address
+              name: 'AC Commerce'
+            },
+            subject: 'Reset Password',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #0066ff;">Password Reset Request</h2>
+                <p>Hello ${user.name},</p>
+                <p>Please click the following link to reset your password:</p>
+                <p style="text-align: center; margin: 30px 0;">
+                  <a href="${resetLink}" style="background-color: #0066ff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+                </p>
+                <p>If you didn't request this password reset, please ignore this email.</p>
+                <p>This link will expire in 3 hours.</p>
+                <p>Best regards,<br>The AC Commerce Team</p>
+              </div>
+            `
+          });
         } catch (error) {
-          console.log('Email sending failed (Mailgun not configured):', error.message);
+          console.log('Email sending failed (SendGrid not configured):', error.message);
         }
+      } else {
+        console.log('SendGrid not configured - skipping password reset email');
       }
 
       res.send({ message: 'We sent reset password link to your email.' });

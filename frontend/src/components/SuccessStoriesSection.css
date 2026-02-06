@@ -234,6 +234,8 @@
 }
 
 .stories-button:hover {
+  background: #28a745;
+  color: white;
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
