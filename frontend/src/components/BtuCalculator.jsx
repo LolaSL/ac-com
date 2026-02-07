@@ -25,11 +25,14 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
     const condensers = {};
     const flatKeywords = new Set();
 
+    console.log("Parsing annotations:", annotations);
+
     annotations.forEach((annotation) => {
       const label = annotation.label?.toLowerCase() || "";
+      console.log("Processing annotation:", label);
 
-      // Match patterns: ac-1.1, ac-2.1, etc.
-      const acMatch = label.match(/ac-(\d+)\.(\d+)/);
+      // Match patterns: ac-1.1, ac-2.1, etc. (with or without dash)
+      const acMatch = label.match(/ac-?(\d+)\.(\d+)/);
       if (acMatch) {
         const flatNumber = acMatch[1];
         const unitNumber = acMatch[2];
@@ -42,7 +45,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
         flatKeywords.add(parseInt(flatNumber));
       }
 
-      // Also match simpler pattern: ac-1, ac-2 (without unit number)
+      // Also match simpler pattern: ac-1, ac-2, ac1, ac2 (without unit number)
       const simpleAcMatch = label.match(/ac-?(\d+)(?:[,;\s]|$)/);
       if (simpleAcMatch && !acMatch) {
         const flatNumber = simpleAcMatch[1];
@@ -55,8 +58,8 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
         flatKeywords.add(parseInt(flatNumber));
       }
 
-      // Match patterns: condenser-1, condenser-2, etc.
-      const condenserMatch = label.match(/condenser-(\d+)/);
+      // Match patterns: condenser-1, condenser-2, etc. (with or without dash)
+      const condenserMatch = label.match(/condenser-?(\d+)/);
       if (condenserMatch) {
         const flatNumber = condenserMatch[1];
         condensers[flatNumber] = {
@@ -84,6 +87,12 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
       if (flatKeywordMatch) {
         flatKeywords.add(parseInt(flatKeywordMatch[1]));
       }
+    });
+
+    console.log("Parsed results:", {
+      acUnits,
+      condensers,
+      flatKeywords: Array.from(flatKeywords),
     });
 
     return {
@@ -898,10 +907,12 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
           }
         }
 
+        console.log(`Suitable condenser found:`, suitableCondenser);
+
         if (suitableCondenser && suitableCondenser.btu < requiredBTU * 0.9) {
           const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
           return {
-            _id: `condenser-custom-${label}-${requiredBTU}`,
+            _id: `condenser-${Math.round(requiredBTU)}`, // Consistent _id for custom condensers of same BTU
             name: label ? `${label} Condenser` : "Custom Condenser Required",
             model: `${Math.round(requiredBTU)} BTU ${
               isVRFSystem ? "VRF" : "Multi-System"
@@ -913,17 +924,26 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
             flatName: label || undefined,
           };
         } else if (suitableCondenser) {
-          return {
+          console.log(`Found suitable condenser:`, suitableCondenser);
+          console.log(`Condenser BTU: ${suitableCondenser.btu}, type: ${typeof suitableCondenser.btu}`);
+          // Extract BTU from name since btu field may be corrupted
+          const btuFromName = suitableCondenser.name.match(/(\d+)\s*BTU/)?.[1];
+          const btuValue = btuFromName ? parseInt(btuFromName) : suitableCondenser.btu;
+          console.log(`Using BTU value: ${btuValue} (from name: ${btuFromName})`);
+          const result = {
             ...suitableCondenser,
+            _id: `condenser-${btuValue}`, // Use extracted BTU for grouping identical models
             flatName: label || undefined,
-            name: label
-              ? `${label} Condenser - ${suitableCondenser.name}`
-              : suitableCondenser.name,
+            // Keep original name for cart grouping
+            name: suitableCondenser.name,
+            btu: btuValue, // Ensure BTU is correct
           };
+          console.log(`Returning condenser result:`, result);
+          return result;
         } else {
           const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
           return {
-            _id: `condenser-custom-${label}-${requiredBTU}`,
+            _id: `condenser-${Math.round(requiredBTU)}`, // Consistent _id for custom condensers of same BTU
             name: label ? `${label} Condenser` : "Custom Condenser Required",
             model: `${Math.round(requiredBTU)} BTU ${
               isVRFSystem ? "VRF" : "Multi-System"
@@ -986,14 +1006,22 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
         // Create separate condenser for each flat
         selectedCondensers = [];
 
+        console.log("Creating condensers for flats:", Object.entries(flatBTUs));
+
         for (const [flatName, flatBTU] of Object.entries(flatBTUs)) {
           const flatRequiredBTU = flatBTU * multiplier;
+          console.log(
+            `Creating condenser for ${flatName}: ${flatBTU} BTU * ${multiplier} = ${flatRequiredBTU} BTU`
+          );
           const condResult = await findSuitableCondenser(
             flatRequiredBTU,
             flatName
           );
+          console.log(`Created condenser:`, condResult);
           selectedCondensers.push(condResult);
         }
+
+        console.log("Final selectedCondensers:", selectedCondensers);
       } else {
         // Single flat or no annotations: use existing logic
         const requiredBTU = totalBTU * multiplier;
@@ -1073,21 +1101,15 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
     const addItemToCart = (product, quantity = 1) => {
       if (!product) return;
 
-      const existingItem = cartItems.find((item) => item.btu === product.btu);
-      if (existingItem) {
-        ctxDispatch({
-          type: "CART_ADD_ITEM",
-          payload: {
-            ...existingItem,
-            quantity: existingItem.quantity + quantity,
-          },
-        });
-      } else {
-        ctxDispatch({
-          type: "CART_ADD_ITEM",
-          payload: { ...product, quantity },
-        });
-      }
+      console.log(`[handleAddToCart] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
+
+      const existItem = cartItems.find((x) => x._id === product._id);
+      const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+
+      ctxDispatch({
+        type: "CART_ADD_ITEM",
+        payload: { ...product, quantity: newQuantity },
+      });
     };
 
     if (!Array.isArray(rooms)) {
@@ -1279,21 +1301,15 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
     const addItemToCart = (product, quantity = 1) => {
       if (!product) return;
 
-      const existingItem = cartItems.find((item) => item.btu === product.btu);
-      if (existingItem) {
-        ctxDispatch({
-          type: "CART_ADD_ITEM",
-          payload: {
-            ...existingItem,
-            quantity: existingItem.quantity + quantity,
-          },
-        });
-      } else {
-        ctxDispatch({
-          type: "CART_ADD_ITEM",
-          payload: { ...product, quantity },
-        });
-      }
+      console.log(`[handleDoBoth] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
+
+      const existItem = cartItems.find((x) => x._id === product._id);
+      const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+
+      ctxDispatch({
+        type: "CART_ADD_ITEM",
+        payload: { ...product, quantity: newQuantity },
+      });
     };
 
     // Add all items to cart
@@ -1326,10 +1342,28 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
       condensersForDisplay.forEach((c) => addItemToCart(c, 1));
     }
 
-    console.log("handleDoBoth: products and condensers added to cart", {
-      productCount,
-      condensers: condensersForDisplay,
-    });
+    console.log("handleDoBoth: Adding to cart");
+    console.log("Products count:", Object.keys(productCount).length);
+    console.log(
+      "Condensers for display:",
+      condensersForDisplay.length,
+      condensersForDisplay.map((c) => ({
+        id: c._id,
+        name: c.name,
+        btu: c.btu,
+      }))
+    );
+    console.log(
+      "Selected condensers:",
+      selectedCondensers?.length,
+      selectedCondensers?.map((c) => ({
+        id: c._id,
+        name: c.name,
+        flatName: c.flatName,
+      }))
+    );
+    console.log("Detected flats:", detectedFlats);
+    console.log("Is multi-flat:", isMultiFlatProperty);
     toast.success("Products added to cart! Navigating to ROI Calculator...");
 
     // Calculate total equipment cost for ROI data

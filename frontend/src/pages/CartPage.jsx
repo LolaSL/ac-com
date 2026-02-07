@@ -230,6 +230,15 @@ export default function CartPage() {
         return;
       }
 
+      // For custom condensers created by BTU calculator, skip database validation
+      if (item._id.startsWith("condenser-")) {
+        ctxDispatch({
+          type: "CART_ADD_ITEM",
+          payload: { ...item, quantity },
+        });
+        return;
+      }
+
       const { data } = await axios.get(`/api/products/${item._id}`);
 
       if (!data || typeof data.countInStock !== "number") {
@@ -418,6 +427,7 @@ export default function CartPage() {
                           {item.name}
                         </Link>
                         {item.category && <p>{item.category}</p>}
+                        {item.btu && <p className="text-muted small">{item.btu} BTU</p>}
                       </Col>
                       <Col md={3}>
                         <Button
