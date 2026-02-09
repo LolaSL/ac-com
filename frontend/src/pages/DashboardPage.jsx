@@ -38,29 +38,33 @@ function Dashboard() {
   }
   return (
     <div className="dashboard-container">
-      <div className="sidebar-toggle d-md-none">
-        <Button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="toggle-button"
-          aria-expanded={sidebarOpen}
-          aria-controls="dashboard-sidebar"
+    <div className="sidebar-toggle d-md-none position-relative">
+      <Button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="toggle-button"
+        aria-expanded={sidebarOpen}
+        aria-controls="dashboard-sidebar"
+      >
+        ☰ Menu
+      </Button>
+      {sidebarOpen && (
+        <div
+          id="dashboard-sidebar"
+          className="sidebar-dropdown position-absolute top-100 start-0 w-100 bg-white border shadow-sm"
+          style={{ zIndex: 1050 }}
         >
-          ☰ Menu
-        </Button>
-        {sidebarOpen && (
-          <div id="dashboard-sidebar" className="sidebar-dropdown">
-            {renderSidebarContent()}
-          </div>
-        )}
-      </div>
-
-      <div className="sidebar d-none d-md-flex" id="dashboard-sidebar">
-        {renderSidebarContent()}
-      </div>
-
-      <div className="main-content">{renderComponent()}</div>
+          {renderSidebarContent()}
+        </div>
+      )}
     </div>
-  );
+
+    <div className="sidebar d-none d-md-flex" id="dashboard-sidebar">
+      {renderSidebarContent()}
+    </div>
+
+    <div className="main-content">{renderComponent()}</div>
+  </div>
+);
 
   function renderSidebarContent() {
     return (

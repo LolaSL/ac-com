@@ -13,6 +13,24 @@ import { ShoppingCart } from "lucide-react";
 import { toast } from "react-toastify";
 import "./BtuCalculator.css";
 
+const CONSTANTS = {
+  BASE_BTU_PER_SQ_METER: 600,
+  HEIGHT_ADDITIONAL_BTU: 1000,
+  BTU_PER_ADDITIONAL_PERSON: 600,
+  KITCHEN_BTU_ADDITION: 4000,
+  OUTDOOR_LOCATION_BTU_ADJUSTMENTS: {
+    Roof: 1.0,
+    WallBrackets: 1.0,
+    HardGround: 1.0,
+  },
+  apartmentOrientationMultipliers: {
+    North: 0.9,
+    East: 1.1,
+    South: 1.2,
+    West: 1.0,
+  },
+  CONVERT_FEET_TO_METERS: 0.3048,
+};
 function BtuCalculator({ roomData, acAnnotations = [] }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
@@ -134,35 +152,53 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
     [parseAcAnnotations]
   );
 
-  useEffect(() => {
-    if (roomData?.length) {
-      // Filter out invalid rooms (those without name or size)
-      const validRooms = roomData.filter((room) => room.name && room.size);
+useEffect(() => {
+  if (roomData?.length) {
+    // Filter out invalid rooms (those without name or size)
+    const validRooms = roomData.filter((room) => room.name && room.size);
 
-      if (validRooms.length > 0) {
-        const formattedRooms = validRooms.map((room) => ({
-          name: room.name,
-          size: room.size,
-          btu: 0,
-          unit: "meters",
-        }));
-        console.log("BtuCalculator received rooms:", formattedRooms);
-        setRooms(formattedRooms);
-      }
+    if (validRooms.length > 0) {
+      const formattedRooms = validRooms.map((room) => ({
+        name: room.name,
+        size: room.size,
+        btu: 0,
+        unit: "meters",
+      }));
 
-      // Parse AC annotations if provided
+      // Parse AC annotations first to determine if multi-flat
+      let isMultiFlat = false;
       if (acAnnotations?.length > 0) {
         const { flats } = groupFlatsByAnnotations(acAnnotations);
-        const flatNames = Object.keys(flats);
-        console.log("Detected flats from annotations:", flatNames);
+        isMultiFlat = Object.keys(flats).length > 1;
+      }
 
-        if (flatNames.length > 1) {
-          setIsMultiFlatProperty(true);
-          setDetectedFlats(flatNames);
-        }
+      // If not multi-flat, strip flat prefixes from room names to force grouping under "Flat 1"
+      if (!isMultiFlat) {
+        formattedRooms.forEach((room) => {
+          room.name = room.name.replace(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)[\s:]/i, '').trim();
+        });
+      }
+
+      console.log("BtuCalculator received rooms:", formattedRooms);
+      setRooms(formattedRooms);
+    }
+
+    // Set detected flats from annotations (but don't auto-check the box)
+    if (acAnnotations?.length > 0) {
+      const { flats } = groupFlatsByAnnotations(acAnnotations);
+      const flatNames = Object.keys(flats);
+      console.log("Detected flats from annotations:", flatNames);
+
+      if (flatNames.length > 1) {
+        setDetectedFlats(flatNames);
+      } else {
+        setDetectedFlats([]);
       }
     }
-  }, [roomData, acAnnotations, groupFlatsByAnnotations]);
+  }
+}, [roomData, acAnnotations, groupFlatsByAnnotations]);
+  
+  
   const handlePrint = () => {
     if (!rooms?.length || !btuResults?.length) return;
 
@@ -343,11 +379,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
       <tr class="text-center" style="background-color: #f8f9fa;">
         <td colspan="5" style="color: ${statusColor}; font-weight: bold;">
           <strong>Condenser Status: ${statusText}</strong><br/>
-          <small>${
-            condenser
-              ? `${condenser.name} - ${condenser.btu} BTU`
-              : "Estimated condenser"
-          }</small>
+          <small>${condenser ? `${condenser.name} - ${condenser.btu} BTU` : "Estimated condenser"}</small>
         </td>
       </tr>
     `;
@@ -533,60 +565,6 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
     BTU: 1,
     Watt: 0.29307107,
     kW: 0.00029307107,
-  };
-
-  const CONSTANTS = {
-    CONVERT_FEET_TO_METERS: 0.092903,
-    BASE_BTU_PER_SQ_METER: 600,
-    HEIGHT_ADDITIONAL_BTU: 1000,
-    BTU_PER_ADDITIONAL_PERSON: 600,
-    KITCHEN_BTU_ADDITION: 4000,
-
-    OUTDOOR_LOCATION_BTU_ADJUSTMENTS: {
-      Roof: 1.1,
-      WallBrackets: 1.05,
-      HardGround: 1.0,
-    },
-    windowMultipliers: {
-      SingleGlazed: 1.2,
-      DoubleGlazed: 1.0,
-      TripleGlazed: 0.8,
-      Louvered: 1.3,
-    },
-    roofTypeMultipliers: {
-      Roof: 1.0,
-      Flat: 1.2,
-      FlatRoof: 1.2,
-      PitchedRoof: 1.0,
-    },
-    roofMaterialMultipliers: {
-      Metal: 1.2,
-      Tile: 1.0,
-      Concrete: 1.1,
-      AsphaltShingle: 1.05,
-    },
-    roofInsulationMultipliers: {
-      Poor: 1.2,
-      Average: 1.0,
-      Good: 0.8,
-    },
-    floorTypeMultipliers: {
-      Marble: 1.08,
-      Timber: 1.05,
-      Concrete: 1.0,
-      Carpeted: 0.95,
-    },
-    apartmentOrientation: {
-      North: 0.9,
-      East: 1.0,
-      South: 1.2,
-      West: 1.3,
-    },
-    applianceBTUAdditions: {
-      Oven: 3000,
-      Television: 500,
-      Computer: 600,
-    },
   };
 
   const convertedValue = totalBTU * outputUnitConversion[selectedUnit];
@@ -1086,71 +1064,146 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
       ? [condenser]
       : [];
 
-  const saveResultsToCart = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  // const saveResultsToCart = (e) => {
+  //   if (e) {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //   }
 
-    // Ensure condenser calculation has completed if condensers should be shown
-    if (showCondenser && condensersForDisplay.length === 0) {
-      alert("Please wait for calculations to complete before saving to cart.");
-      return;
-    }
+  //   // Ensure condenser calculation has completed if condensers should be shown
+  //   if (showCondenser && condensersForDisplay.length === 0) {
+  //     alert("Please wait for calculations to complete before saving to cart.");
+  //     return;
+  //   }
 
-    const addItemToCart = (product, quantity = 1) => {
-      if (!product) return;
+  //   const addItemToCart = (product, quantity = 1) => {
+  //     if (!product) return;
 
-      console.log(`[handleAddToCart] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
+  //     console.log(`[handleAddToCart] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
 
-      const existItem = cartItems.find((x) => x._id === product._id);
-      const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+  //     const existItem = cartItems.find((x) => x._id === product._id);
+  //     const newQuantity = existItem ? existItem.quantity + quantity : quantity;
 
-      ctxDispatch({
-        type: "CART_ADD_ITEM",
-        payload: { ...product, quantity: newQuantity },
-      });
-    };
+  //     ctxDispatch({
+  //       type: "CART_ADD_ITEM",
+  //       payload: { ...product, quantity: newQuantity },
+  //     });
+  //   };
 
-    if (!Array.isArray(rooms)) {
-      console.error("'rooms' must be an array.");
-      return;
-    }
+  //   if (!Array.isArray(rooms)) {
+  //     console.error("'rooms' must be an array.");
+  //     return;
+  //   }
 
-    const productCount = {};
+  //   const productCount = {};
 
-    rooms.forEach((room, index) => {
-      let product = products[index];
-      if (!product || !product._id || !product.price) {
-        product = {
-          _id: `placeholder-${index}`,
-          name: room.name,
-          btu: 0,
-          price: 0,
-          slug: null,
-          displayName: "No product available",
-        };
-      }
+  //   rooms.forEach((room, index) => {
+  //     let product = products[index];
+  //     if (!product || !product._id || !product.price) {
+  //       product = {
+  //         _id: `placeholder-${index}`,
+  //         name: room.name,
+  //         btu: 0,
+  //         price: 0,
+  //         slug: null,
+  //         displayName: "No product available",
+  //       };
+  //     }
 
-      if (!productCount[product.btu]) {
-        productCount[product.btu] = { product, quantity: 0 };
-      }
-      productCount[product.btu].quantity += 1;
-    });
-    Object.values(productCount).forEach(({ product, quantity }) => {
-      addItemToCart(product, quantity);
-    });
+  //     if (!productCount[product.btu]) {
+  //       productCount[product.btu] = { product, quantity: 0 };
+  //     }
+  //     productCount[product.btu].quantity += 1;
+  //   });
+  //   Object.values(productCount).forEach(({ product, quantity }) => {
+  //     addItemToCart(product, quantity);
+  //   });
 
-    // Add all condensers (supports multi-flat) to cart if available
-    if (showCondenser && condensersForDisplay.length > 0) {
-      condensersForDisplay.forEach((c) => addItemToCart(c, 1));
-    }
+  //   // Add all condensers (supports multi-flat) to cart if available
+  //   if (showCondenser && condensersForDisplay.length > 0) {
+  //     condensersForDisplay.forEach((c) => addItemToCart(c, 1));
+  //   }
 
-    toast.success("Products added to cart successfully!");
-    navigate("/cart");
-  };
+  //   toast.success("Products added to cart successfully!");
+  //   navigate("/cart");
+  // };
 
   // Navigate to ROI Calculator with BTU data
+  
+  const saveResultsToCart = (e) => {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  // Ensure condenser calculation has completed
+  if (showCondenser && condensersForDisplay.length === 0) {
+    alert("Please wait for calculations to complete before saving to cart.");
+    return;
+  }
+
+  const addItemToCart = (product, quantity = 1) => {
+    if (!product) return;
+
+    console.log(`[handleAddToCart] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
+
+    const existItem = cartItems.find((x) => x._id === product._id);
+    const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+
+    ctxDispatch({
+      type: "CART_ADD_ITEM",
+      payload: { ...product, quantity: newQuantity },
+    });
+  };
+
+  if (!Array.isArray(rooms)) {
+    console.error("'rooms' must be an array.");
+    return;
+  }
+
+  const productCount = {};
+
+  rooms.forEach((room, index) => {
+    let product = products[index];
+    if (!product || !product._id || !product.price) {
+      product = {
+        _id: `placeholder-${index}`,
+        name: room.name,
+        btu: 0,
+        price: 0,
+        slug: null,
+        displayName: "No product available",
+      };
+    }
+
+    if (!productCount[product.btu]) {
+      productCount[product.btu] = { product, quantity: 0 };
+    }
+    productCount[product.btu].quantity += 1;
+  });
+  Object.values(productCount).forEach(({ product, quantity }) => {
+    addItemToCart(product, quantity);
+  });
+
+  // Add all condensers (supports multi-flat) to cart if available
+  if (showCondenser && condensersForDisplay.length > 0) {
+    condensersForDisplay.forEach((c) => {
+      // Make unique per flat if flatName exists
+      const uniqueCond = c.flatName
+        ? {
+            ...c,
+            _id: `${c._id}_${c.flatName.replace(/\s+/g, '_')}`, // e.g., "originalId_Flat_1"
+            name: `${c.flatName}: ${c.name}`, // e.g., "Flat 1: 28300 BTU Outdoor Condenser"
+          }
+        : c;
+      addItemToCart(uniqueCond, 1);
+    });
+  }
+
+  toast.success("Products added to cart successfully!");
+  navigate("/cart");
+};
+  
   const handleCalculateROI = (e) => {
     if (e) {
       e.preventDefault();
@@ -1286,85 +1339,86 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
   };
 
   // Handle "Do Both" - save to cart AND navigate to ROI
-  const handleDoBoth = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+ const handleDoBoth = (e) => {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
 
-    // Ensure condenser calculation has completed if condensers should be shown
-    if (showCondenser && condensersForDisplay.length === 0) {
-      alert("Please wait for calculations to complete before proceeding.");
-      return;
-    }
+  // Ensure condenser calculation has completed
+  if (showCondenser && condensersForDisplay.length === 0) {
+    alert("Please wait for calculations to complete before proceeding.");
+    return;
+  }
 
-    const addItemToCart = (product, quantity = 1) => {
-      if (!product) return;
+  const addItemToCart = (product, quantity = 1) => {
+    if (!product) return;
 
-      console.log(`[handleDoBoth] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
+    console.log(`[handleDoBoth] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
 
-      const existItem = cartItems.find((x) => x._id === product._id);
-      const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+    const existItem = cartItems.find((x) => x._id === product._id);
+    const newQuantity = existItem ? existItem.quantity + quantity : quantity;
 
-      ctxDispatch({
-        type: "CART_ADD_ITEM",
-        payload: { ...product, quantity: newQuantity },
-      });
-    };
-
-    // Add all items to cart
-    const productCount = {};
-    rooms.forEach((room, index) => {
-      let product = products[index];
-      if (!product || !product._id || !product.price) {
-        product = {
-          _id: `placeholder-${index}`,
-          name: room.name,
-          btu: 0,
-          price: 0,
-          slug: null,
-          displayName: "No product available",
-        };
-      }
-
-      if (!productCount[product.btu]) {
-        productCount[product.btu] = { product, quantity: 0 };
-      }
-      productCount[product.btu].quantity += 1;
+    ctxDispatch({
+      type: "CART_ADD_ITEM",
+      payload: { ...product, quantity: newQuantity },
     });
+  };
 
-    Object.values(productCount).forEach(({ product, quantity }) => {
-      addItemToCart(product, quantity);
-    });
-
-    // Add all condensers (supports multi-flat)
-    if (showCondenser && condensersForDisplay.length > 0) {
-      condensersForDisplay.forEach((c) => addItemToCart(c, 1));
+  // Add all items to cart
+  const productCount = {};
+  rooms.forEach((room, index) => {
+    let product = products[index];
+    if (!product || !product._id || !product.price) {
+      product = {
+        _id: `placeholder-${index}`,
+        name: room.name,
+        btu: 0,
+        price: 0,
+        slug: null,
+        displayName: "No product available",
+      };
     }
 
-    console.log("handleDoBoth: Adding to cart");
-    console.log("Products count:", Object.keys(productCount).length);
-    console.log(
-      "Condensers for display:",
-      condensersForDisplay.length,
-      condensersForDisplay.map((c) => ({
-        id: c._id,
-        name: c.name,
-        btu: c.btu,
-      }))
-    );
-    console.log(
-      "Selected condensers:",
-      selectedCondensers?.length,
-      selectedCondensers?.map((c) => ({
-        id: c._id,
-        name: c.name,
-        flatName: c.flatName,
-      }))
-    );
-    console.log("Detected flats:", detectedFlats);
-    console.log("Is multi-flat:", isMultiFlatProperty);
-    toast.success("Products added to cart! Navigating to ROI Calculator...");
+    if (!productCount[product.btu]) {
+      productCount[product.btu] = { product, quantity: 0 };
+    }
+    productCount[product.btu].quantity += 1;
+  });
+
+  Object.values(productCount).forEach(({ product, quantity }) => {
+    addItemToCart(product, quantity);
+  });
+
+  // Add all condensers (supports multi-flat) to cart if available
+  if (showCondenser && condensersForDisplay.length > 0) {
+    condensersForDisplay.forEach((c) => {
+      // Make unique per flat if flatName exists
+      const uniqueCond = c.flatName
+        ? {
+            ...c,
+            _id: `${c._id}_${c.flatName.replace(/\s+/g, '_')}`, // e.g., "originalId_Flat_1"
+            name: `${c.flatName}: ${c.name}`, // e.g., "Flat 1: 28300 BTU Outdoor Condenser"
+          }
+        : c;
+      addItemToCart(uniqueCond, 1);
+    });
+  }
+
+  console.log("handleDoBoth: Adding to cart");
+  console.log("Products count:", Object.keys(productCount).length);
+  console.log(
+    "Condensers for display:",
+    condensersForDisplay.length,
+    condensersForDisplay.map((c) => ({
+      id: c._id,
+      name: c.name,
+      btu: c.btu,
+    }))
+  );
+  console.log("Detected flats:", detectedFlats);
+  console.log("Is multi-flat:", isMultiFlatProperty);
+  toast.success("Products added to cart! Navigating to ROI Calculator...");
 
     // Calculate total equipment cost for ROI data
     const totalIndoorUnitsCost =
@@ -1561,38 +1615,45 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
         </Form.Group>
 
         <Form.Group className="mb-4">
-          <Form.Check
-            type="checkbox"
-            id="multiFlat"
-            label="Multi-flat/Multi-unit property (separate condenser for each flat)"
-            checked={isMultiFlatProperty}
-            onChange={(e) => {
-              setIsMultiFlatProperty(e.target.checked);
-              if (e.target.checked) {
-                const flats = detectFlatGroupings(rooms);
-                setDetectedFlats(Object.keys(flats));
-              }
-            }}
-          />
-          {isMultiFlatProperty && detectedFlats.length > 0 && (
-            <small className="text-muted d-block mt-2">
-              ✓ Detected {detectedFlats.length} flat(s):{" "}
-              {detectedFlats.join(", ")}
-              <br />
-              <em>Each flat will get its own condenser sized separately</em>
-            </small>
-          )}
-          {acAnnotations?.length > 0 && (
-            <small className="text-success d-block mt-2">
-              ✓ AC annotations found: {acAnnotations.length} label(s) detected
-              <br />
-              <em>
-                Flats auto-detected from condenser labels (e.g., condenser-1,
-                condenser-2)
-              </em>
-            </small>
-          )}
-        </Form.Group>
+  <Form.Check
+    type="checkbox"
+    id="multiFlat"
+    label="Multi-flat/Multi-unit property (separate condenser for each flat)"
+    checked={isMultiFlatProperty}
+    onChange={(e) => {
+      setIsMultiFlatProperty(e.target.checked);
+      if (e.target.checked) {
+        const flats = detectFlatGroupings(rooms);
+        setDetectedFlats(Object.keys(flats));
+      }
+    }}
+  />
+  {isMultiFlatProperty && detectedFlats.length > 0 && (
+    <small className="text-muted d-block mt-2">
+      ✓ Detected {detectedFlats.length} flat(s):{" "}
+      {detectedFlats.join(", ")}
+      <br />
+      <em>Each flat will get its own condenser sized separately</em>
+    </small>
+  )}
+  {detectedFlats.length > 1 && !isMultiFlatProperty && (
+    <small className="text-info d-block mt-2">
+      ✓ Multi-flat detected from annotations: {detectedFlats.join(", ")}
+      <br />
+      <em>Check the box above to enable separate condensers for each flat.</em>
+    </small>
+  )}
+  {acAnnotations?.length > 0 && (
+    <small className="text-success d-block mt-2">
+      ✓ AC annotations found: {acAnnotations.length} label(s) detected
+      <br />
+      <em>
+        Flats auto-detected from condenser labels (e.g., condenser-1,
+        condenser-2)
+      </em>
+    </small>
+  )}
+</Form.Group>
 
         {products.length > 0 && (
           <div className="alert alert-info mb-4">
@@ -1648,18 +1709,45 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
             </Form.Group>
           </Col>
         </Row>
-        {rooms.length > 0 && (
-          <div className="mb-4">
-            <h5>Rooms from Annotator:</h5>
+{rooms.length > 0 && (
+  <div className="mb-4">
+    <h5>Rooms from Annotator:</h5>
+    {(() => {
+      const groupedRooms = rooms.reduce((acc, room) => {
+        // Improved regex to handle variations like "Flat1:", "Flat 1:", "Flat 1 ", etc.
+        const match = room.name.match(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)\s*[:\s]/i);
+        const flat = match ? match[1].replace(/\s+/g, '') : "Flat1"; // Normalize flat name (e.g., "Flat 1" -> "Flat1")
+        const cleanName = room.name.replace(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)\s*[:\s]/i, '').trim();
+        if (!acc[flat]) acc[flat] = [];
+        acc[flat].push(`${cleanName} - ${room.size} m²`);
+        return acc;
+      }, {});
+      
+      // Sort rooms within each flat alphabetically
+      Object.keys(groupedRooms).forEach(flat => {
+        groupedRooms[flat].sort();
+      });
+      
+      // Sort flats numerically (e.g., Flat1, Flat2, Flat10)
+      return Object.entries(groupedRooms)
+        .sort(([a], [b]) => {
+          const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+          const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+          return numA - numB;
+        })
+        .map(([flat, roomList]) => (
+          <div key={flat} className="mb-3">
+            <h6>{flat.replace(/(\d+)/, ' $1')}:</h6> {/* Add space for display, e.g., "Flat 1:" */}
             <ul className="list-group">
-              {rooms.map((room, index) => (
-                <li key={index} className="list-group-item">
-                  <strong>{room.name}</strong> - {room.size} m²
-                </li>
+              {roomList.map((room, idx) => (
+                <li key={idx} className="list-group-item">{room}</li>
               ))}
             </ul>
           </div>
-        )}
+        ));
+    })()}
+  </div>
+)}
         <hr className="ms-2 mt-1 mb-5 btu-hr" />
         <Row className="g-6">
           <Col md={6}>
@@ -1888,9 +1976,7 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
 
                     return (
                       <tr
-                        key={`cond-${idx}-${
-                          cond?._id || cond?.flatName || idx
-                        }`}
+                        key={`cond-${idx}-${cond?._id || cond?.flatName || idx}`}
                         className="condenser-row condenser-row-bg"
                       >
                         <td data-label="Room" className="condenser-cell">
