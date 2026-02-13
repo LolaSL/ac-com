@@ -1738,19 +1738,13 @@ const Annotator = ({
     acAnnotations.forEach((ann) => {
       const text = ann.label.toLowerCase();
 
-      // Pattern 1: ac-1.1, ac-2.1 (first digit is flat number)
-      const acMatch = text.match(/ac-(\d+)\.\d+/);
-      if (acMatch) {
-        flatNumbers.add(parseInt(acMatch[1]));
-      }
-
-      // Pattern 2: condenser-1, condenser-2
+      // Pattern 1: condenser-1, condenser-2
       const condenserMatch = text.match(/condenser-(\d+)/);
       if (condenserMatch) {
         flatNumbers.add(parseInt(condenserMatch[1]));
       }
 
-      // Pattern 3: Flat 1, Unit 1
+      // Pattern 2: Flat 1, Unit 1
       const flatMatch = text.match(/(?:flat|unit)\s+(\d+)/);
       if (flatMatch) {
         flatNumbers.add(parseInt(flatMatch[1]));

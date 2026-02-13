@@ -60,7 +60,6 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
           unitNumber: parseInt(unitNumber),
           coordinates: annotation.coordinates,
         });
-        flatKeywords.add(parseInt(flatNumber));
       }
 
       // Also match simpler pattern: ac-1, ac-2, ac1, ac2 (without unit number)
@@ -73,7 +72,6 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
           unitNumber: 1,
           coordinates: annotation.coordinates,
         });
-        flatKeywords.add(parseInt(flatNumber));
       }
 
       // Match patterns: condenser-1, condenser-2, etc. (with or without dash)
@@ -854,7 +852,7 @@ useEffect(() => {
       const multiplier = isVRF ? 1.0 : 0.8;
 
       // Helper function to find suitable condenser for a given BTU
-      const findSuitableCondenser = async (requiredBTU, label = "") => {
+      const findSuitableCondenser = async (requiredBTU, label = "", isVRFSystem = false) => {
         let availableCondensers =
           condenserCandidates.length > 0 ? condenserCandidates : [];
 
@@ -871,6 +869,19 @@ useEffect(() => {
               `Could not fetch condensers for ${label}, will use estimate`
             );
           }
+        }
+
+        // Filter condensers based on system type
+        if (!isVRFSystem) {
+          availableCondensers = availableCondensers.filter(cond =>
+            !/vrf/i.test(cond.name) &&
+            !/vrf/i.test(cond.category || '')
+          );
+        } else {
+          availableCondensers = availableCondensers.filter(cond =>
+            /vrf/i.test(cond.name) ||
+            /vrf/i.test(cond.category || '')
+          );
         }
 
         availableCondensers.sort((a, b) => a.btu - b.btu);
@@ -993,7 +1004,8 @@ useEffect(() => {
           );
           const condResult = await findSuitableCondenser(
             flatRequiredBTU,
-            flatName
+            flatName,
+            isVRF
           );
           console.log(`Created condenser:`, condResult);
           selectedCondensers.push(condResult);
@@ -1003,7 +1015,7 @@ useEffect(() => {
       } else {
         // Single flat or no annotations: use existing logic
         const requiredBTU = totalBTU * multiplier;
-        const condResult = await findSuitableCondenser(requiredBTU);
+        const condResult = await findSuitableCondenser(requiredBTU, "", isVRF);
         selectedCondensers = [condResult];
       }
 
@@ -1883,7 +1895,7 @@ useEffect(() => {
                 <tr>
                   <th>Room</th>
                   <th>Room BTU</th>
-                  <th>Optimal Product, Model</th>
+                  <th>Optimal Product</th>
                   <th>Product BTU</th>
                   <th>Product Price, ($)</th>
                 </tr>
@@ -1905,7 +1917,7 @@ useEffect(() => {
                             to={`/product/${product.slug}`}
                             className="link-product-details"
                           >
-                            {product.model || "No product available"}
+                            {product.name || "No product available"}
                           </Link>
                         ) : (
                           "No product available"
@@ -1915,7 +1927,7 @@ useEffect(() => {
                         className="product-btu table-fit-content"
                         data-label="Product BTU"
                       >
-                        {product.name || "No product available"}
+                        {product.btu || "No product available"}
                       </td>
                       <td
                         data-label="Product Price"
@@ -1986,15 +1998,15 @@ useEffect(() => {
                           {`${displayBtu.toLocaleString()} BTU`}
                         </td>
                         <td data-label="Product">
-                          {cond?.model ? (
+                          {cond?.slug ? (
                             <Link
-                              to={`/product/${cond.model}`}
+                              to={`/product/${cond.slug}`}
                               className="link-product-details condenser-cell"
                             >
-                              {cond.model}
+                              {cond.name || cond.model}
                             </Link>
                           ) : (
-                            <span className="condenser-cell">{cond?.name}</span>
+                            <span className="condenser-cell">{cond?.name || cond?.model}</span>
                           )}
                         </td>
                         <td

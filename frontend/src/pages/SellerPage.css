@@ -17,10 +17,9 @@
 .iframe-container {
   position: relative;
   width: 100%;
-  max-width: 560px;
+  max-width: 100%;
   padding-top: 56.25%;
   overflow: hidden;
-  margin: 0 auto; /* Center the iframe */
   max-height: 315px; /* Cap the height to prevent too tall on large screens */
 }
 
@@ -35,19 +34,19 @@
 
 @media only screen and (max-width: 478px) {
   .iframe-container {
-    max-width: 90vw;
+    max-width: 100%;
   }
 }
 
 @media only screen and (min-width: 479px) and (max-width: 1024px) {
   .iframe-container {
-    max-width: 80vw;
+    max-width: 100%;
   }
 }
 
 @media only screen and (min-width: 1025px) {
   .iframe-container {
-    max-width: 900px; /* Slightly wider on large screens */
+    max-width: 100%; /* Full width on large screens */
     max-height: 506px; /* Adjusted height for 16:9 aspect ratio */
   }
 }

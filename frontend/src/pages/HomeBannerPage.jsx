@@ -152,6 +152,11 @@ export default function HomeBannerPage() {
         />
       )}
 
+      {/* Animated Cosmonaut */}
+      {/* <div className="floating-cosmonaut">
+        🚀
+      </div> */}
+
       {/* Premium Hero Carousel */}
       <PremiumCarousel banners={banners} onSlideClick={handleSlideClick} />
 

@@ -471,8 +471,15 @@ function ProductPage() {
                         type="button"
                         variant="light"
                         onClick={() => {
-                          setSelectedImage(x);
-                          setImageLoading(true);
+                          if (selectedImage !== x) {
+                            setSelectedImage(x);
+                            setImageLoading(true);
+                            // Fallback: set loading false after 3 seconds in case onLoad doesn't fire
+                            setTimeout(() => setImageLoading(false), 3000);
+                          }
+                          if (isSmallScreen) {
+                            setShowImageModal(true);
+                          }
                         }}
                         style={{ border: "none" }}
                       >
@@ -835,11 +842,31 @@ function ProductPage() {
           <Modal.Title>{product.name || "Product Image"}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-center">
+          {imageLoading && (
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 1,
+              }}
+            >
+              <Spinner animation="border" variant="primary" />
+            </div>
+          )}
           <Image
             src={selectedImage || product.image}
             alt={product.name}
             fluid
-            style={{ maxHeight: "70vh", objectFit: "contain" }}
+            onLoad={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
+            style={{
+              maxHeight: "70vh",
+              objectFit: "contain",
+              opacity: imageLoading ? 0 : 1,
+              transition: "opacity 0.3s",
+            }}
           />
         </Modal.Body>
         <Modal.Footer>

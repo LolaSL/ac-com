@@ -1,2 +1,24 @@
-/* HomeBannerPage.css */
+/* .floating-cosmonaut {
+  position: fixed;
+  top: 120px;
+  right: 60px;
+  z-index: 9999;
+
+  animation: drift 6s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.cosmonaut-inner {
+  font-size: 70px;
+  display: inline-block;
+
+  animation: spin 12s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(0, 191, 255, 0.6));
+}
+
+/* Pause BOTH animations */
+/* .floating-cosmonaut.paused,
+.floating-cosmonaut.paused .cosmonaut-inner {
+  animation-play-state: paused;
+} */
 /* No unique styles for HomeBannerPage. All styles are handled by imported components */
