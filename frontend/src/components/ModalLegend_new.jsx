@@ -36,6 +36,43 @@ const ModalLegend = () => {
         </Modal.Header>
         <Modal.Body>
           <Tabs defaultActiveKey="annotator" id="legend-tabs" className="mb-3">
+            {/* BUTTON LEGEND TAB */}
+            <Tab eventKey="buttons" title="🔘 Button Legend">
+              <div className="mt-3">
+                <h6 className="mb-2 text-primary">🖼️ PDF Annotator Buttons</h6>
+                <ul className="list-unstyled fs-6">
+                  <li><strong>📤 Upload PDF:</strong> Select and upload floor plan PDF</li>
+                  <li><strong>🔄 Rotate 0°/90°/180°/270°:</strong> Rotate PDF if uploaded incorrectly</li>
+                  <li><strong>➕ Add Rectangle:</strong> Place AC unit locations on drawing</li>
+                  <li><strong>💬 Add Comment:</strong> Label AC units (e.g., "ac-1", "ac-2")</li>
+                  <li><strong>🔄 Rotate Shape:</strong> Rotate selected rectangle</li>
+                  <li><strong>📌 Drag Shape:</strong> Move rectangle position</li>
+                  <li><strong>🗑️ Delete Shape:</strong> Right-click or tap & hold to remove</li>
+                  <li><strong>📊 Extract Rooms:</strong> Process drawing to identify rooms</li>
+                  <li><strong>🚀 Export (n):</strong> Send rooms to BTU Calculator</li>
+                  <li><strong>💾 Save PDF File:</strong> Download annotated PDF</li>
+                  <li><strong>🧹 Clear:</strong> Remove all annotations</li>
+                </ul>
+
+                <h6 className="mb-2 mt-3 text-primary">📐 BTU Calculator Buttons</h6>
+                <ul className="list-unstyled fs-6">
+                  <li><strong>⚙️ Settings:</strong> Adjust calculation parameters</li>
+                  <li><strong>🧮 Calculate BTU:</strong> Run BTU calculations</li>
+                  <li><strong>➕ Add to Cart:</strong> Save equipment to shopping cart</li>
+                  <li><strong>📈 Calculate ROI:</strong> Analyze cost savings</li>
+                  <li><strong>🖨️ Print/Export:</strong> Generate reports</li>
+                  <li><strong>🔄 Reset:</strong> Clear all inputs</li>
+                </ul>
+
+                <h6 className="mb-2 mt-3 text-primary">🎯 Interaction Notes</h6>
+                <ul className="list-disc ml-4 space-y-1 fs-6">
+                  <li><strong>Single Flat:</strong> Standard workflow - annotate one flat, calculate BTU</li>
+                  <li><strong>Multi-Flat:</strong> Label AC units with numbers (ac-1, ac-2), rename rooms with flat numbers, system auto-detects separate units</li>
+                  <li><strong>VRF System:</strong> All calculations use VRF technology with chain topology refrigerant connections</li>
+                </ul>
+              </div>
+            </Tab>
+
             {/* ANNOTATOR TAB */}
             <Tab eventKey="annotator" title="🖼️ PDF Annotator">
               <div className="mt-3">
@@ -67,12 +104,28 @@ const ModalLegend = () => {
                     <strong>➕ Add Rectangle:</strong> Click on empty area where
                     AC unit should go
                   </li>
+                    <li>
+                    <strong>💬 Add Comment:</strong> Enter AC label (e.g.,
+                    "ac-1", "ac-2" for single flat VRF systems)
+                  </li>
                   <li>
                     <strong>💬 Add Comment:</strong> Enter AC label (e.g.,
-                    "ac-1", "ac-2" for multi-flat)
+                    "ac-1.1", "ac-1.2" for flat 1, "ac-2.1", "ac-2.2" for flat 2 and etc. in multi-flat VRF systems)
+                  </li>
+                     <li>
+                    <strong>💬 Add Comment:</strong> Enter Condenser label (e.g.,
+                    "condenser-1" for single flat VRF systems)
+                  </li>
+                     <li>
+                    <strong>💬 Add Comment:</strong> Enter Condenser label (e.g.,
+                    "condenser-1" for flat 1, "condenser-2" for flat 2 and etc. in multi-flat VRF systems)
                   </li>
                   <li>
                     Recommended: Place AC rectangle above the door in the
+                    drawing
+                  </li>
+                    <li>
+                    Recommended: Place Condenser rectangle near flat/apartment in the
                     drawing
                   </li>
                 </ul>
@@ -118,14 +171,15 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Click <strong>"Export (n)"</strong> button to send rooms to
-                    BTU Calculator
+                    Click <strong>"Export rooms to BTU Calculator(n)"</strong> button to send rooms to
+                    VRF BTU Calculator
                   </li>
                   <li>
                     Multi-flat properties are automatically detected and
                     prefixed (Flat 1, Flat 2)
                   </li>
-                  <li>Page will scroll to BTU Calculator automatically</li>
+                  <li>Page will scroll to VRF BTU Calculator automatically</li>
+                  <li>System prepares chain topology refrigerant connections</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
@@ -209,9 +263,9 @@ const ModalLegend = () => {
                   <li>
                     Click <strong>"Calculate BTU"</strong> button
                   </li>
-                  <li>System calculates required BTU for each room</li>
-                  <li>Matches optimal AC units from product database</li>
-                  <li>For multi-flat: Sizes separate condensers per flat</li>
+                  <li>System calculates required BTU for each room using VRF technology</li>
+                  <li>Matches optimal VRF AC units from product database</li>
+                  <li>For multi-flat: Sizes separate VRF condensers per flat with chain connections</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
@@ -231,8 +285,7 @@ const ModalLegend = () => {
                     shows separate totals per flat
                   </li>
                   <li>
-                    <strong>System Type:</strong> VRF or Minisplit based on
-                    requirements
+                    <strong>System Type:</strong> VRF (Variable Refrigerant Flow) - advanced technology for efficient cooling
                   </li>
                 </ul>
 
@@ -255,18 +308,19 @@ const ModalLegend = () => {
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
-                  ⚡ Multi-Flat Properties
+                  ⚡ Multi-Flat Properties (VRF Systems)
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
                     System auto-detects 2+ flats from room duplicates or AC
-                    annotations
+                    annotations (ac-1, ac-2, etc.)
                   </li>
                   <li>
-                    Each flat gets <strong>separate condenser sizing</strong>
+                    Each flat gets <strong>separate VRF condenser sizing</strong> with chain topology
                   </li>
-                  <li>Total cost includes all equipment for all flats</li>
-                  <li>Per-flat cooling load shows individual requirements</li>
+                  <li>Refrigerant lines connect in chain: Condenser → AC1 → AC2 → ... per flat</li>
+                  <li>Total cost includes all VRF equipment for all flats</li>
+                  <li>Per-flat cooling load shows individual VRF requirements</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
@@ -350,13 +404,13 @@ const ModalLegend = () => {
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-success">
-                  🎯 Multi-Flat Workflow:
+                  🎯 Multi-Flat Workflow (VRF):
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>Upload PDF with both flats visible</li>
                   <li>
-                    Mark AC units with labels like "ac-1", "ac-2" (or system
-                    auto-detects)
+                    Mark AC units with labels like "ac-1", "ac-2" (system
+                    auto-detects separate flats)
                   </li>
                   <li>
                     Rename rooms: "Kitchen 1"/"Kitchen 2", "LivingRoom
@@ -366,7 +420,7 @@ const ModalLegend = () => {
                     Export to BTU Calculator (shows Flat 1, Flat 2 prefixes)
                   </li>
                   <li>
-                    Each flat gets separate equipment and condenser sizing
+                    Each flat gets separate VRF equipment and chain-connected refrigerant lines
                   </li>
                 </ul>
 

@@ -102,10 +102,12 @@ export default function WishlistPage() {
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
-      ) : wishlistItems.length === 0 ? (
-        <MessageBox>
-          Your wishlist is empty. <Link to="/search">Continue Shopping</Link>
-        </MessageBox>
+      ) : validWishlistItems.length === 0 ? (
+        <div className="text-center py-5">
+          <Button as={Link} to="/search" variant="primary" size="lg" className="go-to-btn btn-text w-auto fs-4">
+            Your wish list is empty. Check new arrivals
+          </Button>
+        </div>
       ) : (
         <Row className="g-3 mx-0">
           {validWishlistItems.map((item) => (
