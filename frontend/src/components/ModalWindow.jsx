@@ -99,7 +99,7 @@ const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
                 <span className="system-type">
                   {product.category.includes("VRF")
                     ? "VRF Heat Recovery"
-                    : "Minisplit"}
+                    : "VRF"}
                 </span>
               </p>
             )}

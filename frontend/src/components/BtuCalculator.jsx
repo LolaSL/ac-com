@@ -298,7 +298,7 @@ useEffect(() => {
                 index === 0
                   ? (
                       btuResults.reduce((sum, btu) => sum + (btu || 0), 0) *
-                      (isVRFSystem ? 1.0 : 0.8)
+                      1.0
                     ).toLocaleString() + " BTU"
                   : ""
               }</td>
@@ -307,9 +307,7 @@ useEffect(() => {
               }</td>
               <td style="font-weight: bold;">${
                 cond?.name ||
-                `${cond?.btu} BTU ${
-                  isVRFSystem ? "VRF" : "Multi-System"
-                } Condenser`
+                `${cond?.btu} BTU VRF Condenser`
               }</td>
               <td style="font-weight: bold; color: ${
                 condenserSizingStatus === "custom" ? "#ff8c00" : "#007bff"
@@ -534,7 +532,7 @@ useEffect(() => {
 
   const [btuResults, setBtuResults] = useState([]);
   const [products, setProducts] = useState([]);
-  const [isVRFSystem, setIsVRFSystem] = useState(false);
+  const isVRFSystem = true;
   const [isMultiFlatProperty, setIsMultiFlatProperty] = useState(false);
   const [detectedFlats, setDetectedFlats] = useState([]);
 
@@ -543,17 +541,11 @@ useEffect(() => {
   // VRF system limits and validations
   const MAX_VRF_INDOOR_UNITS = 64;
   const MAX_VRF_TOTAL_CAPACITY = 360000; // BTU
-  const MAX_MINISPLIT_UNITS = 12;
-  const MAX_MINISPLIT_CAPACITY = 96000; // BTU
 
   // Validate system capacity limits (warnings, not blocking)
   if (isVRFSystem && rooms.length > MAX_VRF_INDOOR_UNITS) {
     setError(
       `⚠️ Warning: VRF systems support maximum ${MAX_VRF_INDOOR_UNITS} indoor units. Current: ${rooms.length}. Consider splitting into multiple VRF systems.`
-    );
-  } else if (!isVRFSystem && rooms.length > MAX_MINISPLIT_UNITS) {
-    setError(
-      `⚠️ Warning: Minisplit systems support maximum ${MAX_MINISPLIT_UNITS} indoor units. Current: ${rooms.length}. Consider using VRF system for multi-zone applications.`
     );
   }
 
@@ -667,8 +659,7 @@ useEffect(() => {
     }
 
     // VRF efficiency adjustment (VRF systems use base calculation)
-    const vrfEfficiencyFactor = isVRFSystem ? 1.0 : 1.0;
-    btu *= vrfEfficiencyFactor;
+    // btu *= 1.0; // No adjustment needed
 
     const applyMultiplier = (category, multipliers) => {
       if (!multipliers || typeof multipliers !== "object") return;
@@ -823,36 +814,20 @@ useEffect(() => {
     let selectedCondensers = [];
 
     // Determine system type from fetched products
-    const isVRF =
-      acProducts.some(
-        (p) =>
-          p.category?.toLowerCase().includes("vrf") ||
-          p.name?.toLowerCase().includes("vrf") ||
-          p.tags?.includes("vrf") ||
-          p.systemType === "vrf"
-      ) || totalBTU > MAX_MINISPLIT_CAPACITY; // Assume VRF for large systems
-
     // VRF capacity validation (show warning but continue calculations)
-    if (isVRF && totalBTU > MAX_VRF_TOTAL_CAPACITY) {
+    if (totalBTU > MAX_VRF_TOTAL_CAPACITY) {
       setError(
         `⚠️ Warning: VRF system total capacity (${totalBTU.toLocaleString()} BTU) exceeds recommended ${MAX_VRF_TOTAL_CAPACITY.toLocaleString()} BTU limit. Consider splitting into multiple systems for optimal performance.`
       );
       // Continue with calculations despite warning
-    } else if (!isVRF && totalBTU > MAX_MINISPLIT_CAPACITY) {
-      setError(
-        `⚠️ Warning: Minisplit system total capacity (${totalBTU.toLocaleString()} BTU) exceeds recommended ${MAX_MINISPLIT_CAPACITY.toLocaleString()} BTU limit. Consider using VRF system for larger applications.`
-      );
-      // Continue with calculations despite warning
     }
-
-    setIsVRFSystem(isVRF);
 
     if (!condenser) {
       // Calculate required condenser BTU based on system type
-      const multiplier = isVRF ? 1.0 : 0.8;
+      const multiplier = 1.0;
 
       // Helper function to find suitable condenser for a given BTU
-      const findSuitableCondenser = async (requiredBTU, label = "", isVRFSystem = false) => {
+      const findSuitableCondenser = async (requiredBTU, label = "") => {
         let availableCondensers =
           condenserCandidates.length > 0 ? condenserCandidates : [];
 
@@ -871,18 +846,11 @@ useEffect(() => {
           }
         }
 
-        // Filter condensers based on system type
-        if (!isVRFSystem) {
-          availableCondensers = availableCondensers.filter(cond =>
-            !/vrf/i.test(cond.name) &&
-            !/vrf/i.test(cond.category || '')
-          );
-        } else {
-          availableCondensers = availableCondensers.filter(cond =>
-            /vrf/i.test(cond.name) ||
-            /vrf/i.test(cond.category || '')
-          );
-        }
+        // Filter condensers for VRF systems
+        availableCondensers = availableCondensers.filter(cond =>
+          /vrf/i.test(cond.name) ||
+          /vrf/i.test(cond.category || '')
+        );
 
         availableCondensers.sort((a, b) => a.btu - b.btu);
 
@@ -903,9 +871,7 @@ useEffect(() => {
           return {
             _id: `condenser-${Math.round(requiredBTU)}`, // Consistent _id for custom condensers of same BTU
             name: label ? `${label} Condenser` : "Custom Condenser Required",
-            model: `${Math.round(requiredBTU)} BTU ${
-              isVRFSystem ? "VRF" : "Multi-System"
-            } Condenser`,
+            model: `${Math.round(requiredBTU)} BTU VRF Condenser`,
             btu: Math.round(requiredBTU),
             price: estimatedPrice,
             discount: 0,
@@ -934,9 +900,7 @@ useEffect(() => {
           return {
             _id: `condenser-${Math.round(requiredBTU)}`, // Consistent _id for custom condensers of same BTU
             name: label ? `${label} Condenser` : "Custom Condenser Required",
-            model: `${Math.round(requiredBTU)} BTU ${
-              isVRFSystem ? "VRF" : "Multi-System"
-            } Condenser`,
+            model: `${Math.round(requiredBTU)} BTU VRF Condenser`,
             btu: Math.round(requiredBTU),
             price: estimatedPrice,
             discount: 0,
@@ -1004,8 +968,7 @@ useEffect(() => {
           );
           const condResult = await findSuitableCondenser(
             flatRequiredBTU,
-            flatName,
-            isVRF
+            flatName
           );
           console.log(`Created condenser:`, condResult);
           selectedCondensers.push(condResult);
@@ -1015,7 +978,7 @@ useEffect(() => {
       } else {
         // Single flat or no annotations: use existing logic
         const requiredBTU = totalBTU * multiplier;
-        const condResult = await findSuitableCondenser(requiredBTU, "", isVRF);
+        const condResult = await findSuitableCondenser(requiredBTU, "");
         selectedCondensers = [condResult];
       }
 
@@ -1670,21 +1633,16 @@ useEffect(() => {
         {products.length > 0 && (
           <div className="alert alert-info mb-4">
             <strong>📊 System Type Detected:</strong>{" "}
-            {isVRFSystem
-              ? `VRF Heat Recovery System (${rooms.length} Zones)`
-              : `Traditional Minisplit System (${rooms.length} Units)`}
+            VRF Heat Recovery System (${rooms.length} Zones)
             <br />
             <small className="text-muted">
-              {isVRFSystem
-                ? `Condenser sizing: 100% of total indoor capacity (1.0x ratio) - Supports up to ${MAX_VRF_INDOOR_UNITS} zones`
-                : `Condenser sizing: 80% of total indoor capacity (0.8x diversity factor) - Supports up to ${MAX_MINISPLIT_UNITS} units`}
+              Condenser sizing: 100% of total indoor capacity (1.0x ratio) - Supports up to ${MAX_VRF_INDOOR_UNITS} zones
             </small>
-            {isVRFSystem && (
-              <div className="mt-2">
-                <small className="text-success">
-                  ✨ <strong>VRF Advantages:</strong> Superior efficiency (SEER
-                  16-30+), simultaneous heating/cooling, longer piping runs,
-                  quieter operation
+            <div className="mt-2">
+              <small className="text-success">
+                ✨ <strong>VRF Advantages:</strong> Superior efficiency (SEER
+                16-30+), simultaneous heating/cooling, longer piping runs,
+                quieter operation
                 </small>
                 <br />
                 <small className="text-warning">
@@ -1693,7 +1651,6 @@ useEffect(() => {
                   through superior efficiency.
                 </small>
               </div>
-            )}
           </div>
         )}
 
@@ -1981,7 +1938,7 @@ useEffect(() => {
                       );
                     }
 
-                    const multiplier = isVRFSystem ? 1.0 : 0.8;
+                    const multiplier = 1.0;
                     const displayBtu = Math.round(
                       condenserBtuRequirement * multiplier
                     );
@@ -2014,9 +1971,7 @@ useEffect(() => {
                           data-label="Product BTU"
                         >
                           {cond?.name ||
-                            `${cond?.btu} BTU ${
-                              isVRFSystem ? "VRF" : "Multi-System"
-                            } Condenser`}
+                            `${cond?.btu} BTU VRF Condenser`}
                         </td>
                         <td
                           data-label="Product Price"
@@ -2276,11 +2231,11 @@ useEffect(() => {
                 }}
               >
                 <strong className="text-primary fs-5">
-                  Recommended {isVRFSystem ? "VRF" : "Minisplit"} Condenser:{" "}
+                  Recommended VRF Condenser:{" "}
                   {(() => {
                     const recommended = Math.round(
                       btuResults.reduce((total, btu) => total + (btu || 0), 0) *
-                        (isVRFSystem ? 1.0 : 0.8)
+                        1.0
                     );
                     return recommended.toLocaleString();
                   })()}{" "}

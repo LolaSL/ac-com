@@ -70,7 +70,7 @@ const annotationSchema = new Schema(
 
     },
     isPaid: { type: Boolean, default: false },
-    acType: { type: String, enum: ['ducted', 'ductless'], default: 'ducted' },
+    acType: { type: String, enum: ['ducted', 'ductless', 'vrf-ducted', 'vrf-ductless'], default: 'vrf-ducted' },
     createdAt: {
       type: Date,
       default: Date.now,

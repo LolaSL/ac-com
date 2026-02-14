@@ -58,11 +58,11 @@ export default function CartPage() {
     )
     .reduce((sum, item) => sum + item.quantity * (item.btu || 0), 0);
 
-  // Detect if system is VRF or minisplit
+  // Detect if system is VRF
   const isVRFSystem = cartItems.some(
     (item) => item.category && item.category.toLowerCase().includes("vrf")
   );
-  const multiplier = isVRFSystem ? 1.0 : 0.8;
+  const multiplier = isVRFSystem ? 1.0 : 1.0;
   const requiredBTU = totalBTU * multiplier;
 
   // If total condenser BTU in cart meets or exceeds 90% of required, don't show recommendation

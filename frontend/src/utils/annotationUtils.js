@@ -137,79 +137,51 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
           context.stroke();
           context.restore();
         }
-      } else {
-        // VRF-Ducted: Sequential chain - AC1→AC2→AC3→...→Outdoor
-        const indoorUnits = vrfAnnotations.indoorUnits;
-
-        // Draw chain connections between indoor units
-        for (let i = 0; i < indoorUnits.length - 1; i++) {
-          const x1 = indoorUnits[i].xPercent * canvasWidth;
-          const y1 = indoorUnits[i].yPercent * canvasHeight;
-          const x2 = indoorUnits[i + 1].xPercent * canvasWidth;
-          const y2 = indoorUnits[i + 1].yPercent * canvasHeight;
+      } else if (acType === "vrf-ducted") {
+        // VRF-Ducted: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
+        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
+          (a, b) => a.xPercent - b.xPercent
+        );
+        const points = [{ x: outX, y: outY }];
+        sortedIndoors.forEach((indoor) => {
+          points.push({
+            x: indoor.xPercent * canvasWidth,
+            y: indoor.yPercent * canvasHeight,
+          });
+        });
+        // Draw dual parallel lines (red supply + blue return, dashed) between consecutive points
+        for (let i = 0; i < points.length - 1; i++) {
+          const startX = points[i].x;
+          const startY = points[i].y;
+          const endX = points[i + 1].x;
+          const endY = points[i + 1].y;
 
           const offset = 3;
-          const dx = x2 - x1;
-          const dy = y2 - y1;
+          const dx = endX - startX;
+          const dy = endY - startY;
           const length = Math.sqrt(dx * dx + dy * dy);
           const perpX = (-dy / length) * offset;
           const perpY = (dx / length) * offset;
 
-          // Supply line (red, dashed)
+          // Supply line (red, dashed) - from start to end
           context.save();
           context.setLineDash([8, 4]);
           context.lineWidth = 2;
           context.strokeStyle = "red";
           context.beginPath();
-          context.moveTo(x1 + perpX, y1 + perpY);
-          context.lineTo(x2 + perpX, y2 + perpY);
+          context.moveTo(startX + perpX, startY + perpY);
+          context.lineTo(endX + perpX, endY + perpY);
           context.stroke();
           context.restore();
 
-          // Return line (blue, dashed)
+          // Return line (blue, dashed) - from end to start
           context.save();
           context.setLineDash([8, 4]);
           context.lineWidth = 2;
           context.strokeStyle = "#0066FF";
           context.beginPath();
-          context.moveTo(x1 - perpX, y1 - perpY);
-          context.lineTo(x2 - perpX, y2 - perpY);
-          context.stroke();
-          context.restore();
-        }
-
-        // Connect last indoor unit to outdoor condenser
-        if (indoorUnits.length > 0) {
-          const lastIndoor = indoorUnits[indoorUnits.length - 1];
-          const lastX = lastIndoor.xPercent * canvasWidth;
-          const lastY = lastIndoor.yPercent * canvasHeight;
-
-          const offset = 3;
-          const dx = outX - lastX;
-          const dy = outY - lastY;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = (-dy / length) * offset;
-          const perpY = (dx / length) * offset;
-
-          // Supply line to outdoor
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "red";
-          context.beginPath();
-          context.moveTo(lastX + perpX, lastY + perpY);
-          context.lineTo(outX + perpX, outY + perpY);
-          context.stroke();
-          context.restore();
-
-          // Return line from outdoor
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "#0066FF";
-          context.beginPath();
-          context.moveTo(lastX - perpX, lastY - perpY);
-          context.lineTo(outX - perpX, outY - perpY);
+          context.moveTo(endX - perpX, endY - perpY);
+          context.lineTo(startX - perpX, startY - perpY);
           context.stroke();
           context.restore();
         }
@@ -218,7 +190,7 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
   }
 };
 
-export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) => {
+export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, acType = null) => {
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
 
@@ -298,7 +270,8 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments) =>
   // Draw dotted connection lines from diffusers to ducts
   // Logic: If equal number of ducts and diffusers, connect 1-to-1 (nearest)
   // Else, connect based on matching comment groups (1-to-many)
-  if (hvacAnnotations?.ducts && hvacAnnotations?.diffusers) {
+  // Skip for VRF-ductless mode only - VRF-ducted still needs duct connections
+  if (hvacAnnotations?.ducts && hvacAnnotations?.diffusers && (!acType || acType !== "vrf-ductless")) {
     const numDucts = hvacAnnotations.ducts.length;
     const numDiffusers = hvacAnnotations.diffusers.length;
     if (numDucts === numDiffusers) {
@@ -517,9 +490,11 @@ export const overlayAnnotations = (context, annotations, acType) => {
 
   // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
   // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
+  // Skip for VRF systems which have their own topology logic
 
 if (
   acType === "ducted" &&
+  !acType.startsWith("vrf") &&
   annotations?.rectangles &&
   annotations.rectangles.length > 1
 ) {
@@ -629,6 +604,7 @@ if (
   // For ductless systems, draw refrigerant lines connecting rectangles to their nearest condenser
   if (
     acType === "ductless" &&
+    !acType.startsWith("vrf") &&
     annotations?.rectangles &&
     annotations.rectangles.length > 1
   ) {
@@ -757,9 +733,9 @@ if (
           const cx = nearestCondenser.cx;
           const cy = nearestCondenser.cy;
           context.save();
-          context.setLineDash([5, 5]); // dotted line for minisplit ductless
+          context.setLineDash([5, 5]); // dotted line for VRF ductless
           context.lineWidth = 2;
-          context.strokeStyle = "blue"; // blue refrigerant line for minisplit ductless
+          context.strokeStyle = "blue"; // blue refrigerant line for VRF ductless
           context.beginPath();
           context.moveTo(rx, ry);
           context.lineTo(cx, cy);
@@ -771,10 +747,9 @@ if (
   }
 
   // For VRF ductless systems, draw teal refrigerant lines connecting rectangles to their nearest condenser
+  // DISABLED: VRF systems use chain topology in overlayVRFSystem, not star topology here
   if (
-    acType === "vrf-ductless" &&
-    annotations?.rectangles &&
-    annotations.rectangles.length > 1
+    false // disabled for all VRF to prevent conflicting lines
   ) {
     // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
     let condensers = [];

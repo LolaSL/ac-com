@@ -6,25 +6,25 @@ export default function HowItWorksSection() {
     {
       number: "1",
       title: "Upload Floor Plan",
-      description: "Submit your residential or commercial floor plan in PDF or image format",
+      description: "Submit your residential or commercial floor plan in PDF format only in high resolution and create your air conditioner system design",
       icon: "📄",
     },
     {
       number: "2",
-      title: "AI Analysis",
-      description: "Our advanced AI analyzes the space and generates AC unit recommendations",
+      title: "Engineer Analysis",
+      description: "In case of purchasing, our advanced Engineers analyze the space and generate AC unit recommendations ",
       icon: "🤖",
     },
     {
       number: "3",
       title: "Get Instant Quote",
-      description: "Receive detailed quotes with BTU calculations and installation specs",
+      description: "Receive detailed quotes with BTU calculations and relevant products from our trusted HVAC partners",
       icon: "📊",
     },
     {
       number: "4",
-      title: "Connect with Pro",
-      description: "Match with certified installers and close the project deal",
+      title: "Make a purchase",
+      description: "Purchase AC units, match with certified installers, and close the project deal",
       icon: "🤝",
     },
   ];
@@ -109,7 +109,7 @@ export default function HowItWorksSection() {
             <div className="benefit-item">
               <h6 className="fw-bold">💡 Expert Guidance</h6>
               <p className="text-muted small mt-2">
-                AI-powered recommendations based on industry standards
+                Engineering powered recommendations based on industry standards
               </p>
             </div>
           </Col>

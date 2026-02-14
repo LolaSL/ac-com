@@ -22,7 +22,7 @@ const EngineerViewPage = () => {
   const [loading, setLoading] = useState(false);
   const [showHVAC, setShowHVAC] = useState(false);
   const [addMode, setAddMode] = useState(null); // 'duct' | 'diffuser' | 'indoor' | 'outdoor' | null
-  const [acType, setAcType] = useState("ducted"); // 'ducted' | 'ductless' | 'vrf-ducted' | 'vrf-ductless'
+  const [acType, setAcType] = useState("vrf-ducted"); // 'vrf-ducted' | 'vrf-ductless'
   const pdfContainerRef = useRef(null);
 
   // Fetch and render PDF + annotations
@@ -133,12 +133,13 @@ const EngineerViewPage = () => {
       container.appendChild(overlayCanvas);
       const overlayContext = overlayCanvas.getContext("2d");
       overlayAnnotations(overlayContext, annotation.annotations, acType);
-      if (showHVAC && annotation.annotations.hvac && acType === "ducted") {
+      if (showHVAC && annotation.annotations.hvac && (acType === "ducted" || acType === "vrf-ducted")) {
         overlayHVAC(
           overlayContext,
           annotation.annotations.hvac,
           hvacSymbols,
-          annotation.annotations.comments
+          annotation.annotations.comments,
+          acType
         );
       }
       if (showHVAC && annotation.annotations.vrf && acType.startsWith("vrf")) {
@@ -282,6 +283,29 @@ const EngineerViewPage = () => {
     renderOverlays();
   }, [pdfFile, annotation, showHVAC, addMode, acType]);
 
+  // Prevent browser printing - direct users to use SaveAsPDF button
+  useEffect(() => {
+    const handleBeforePrint = (e) => {
+      e.preventDefault();
+      alert("Please use the '💾 Save as PDF' button to generate the complete annotated PDF with all system views. Browser printing (Ctrl+P) only shows the current page.");
+    };
+
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        alert("Please use the '💾 Save as PDF' button to generate the complete annotated PDF with all system views. Browser printing (Ctrl+P) only shows the current page.");
+      }
+    };
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   // Save handler (save full annotation, not just hvac)
   const handleSave = async () => {
     if (!annotation) return;
@@ -304,8 +328,6 @@ const EngineerViewPage = () => {
       <div className="mb-2 mt-4 d-flex align-items-center gap-2">
         <label className="me-2 mb-4">AC Type:</label>
         <select value={acType} onChange={(e) => setAcType(e.target.value)}>
-          <option value="ducted">Minisplit - Ducted</option>
-          <option value="ductless">Minisplit - Ductless</option>
           <option value="vrf-ducted">VRF System - Ducted</option>
           <option value="vrf-ductless">VRF System - Ductless</option>
         </select>
@@ -318,11 +340,7 @@ const EngineerViewPage = () => {
       >
         <strong className="d-block mb-2">
           📋 Refrigerant Line Types (Current Mode:{" "}
-          {acType === "ducted"
-            ? "Minisplit - Ducted"
-            : acType === "ductless"
-            ? "Minisplit - Ductless"
-            : acType === "vrf-ducted"
+          {acType === "vrf-ducted"
             ? "VRF System - Ducted"
             : "VRF System - Ductless"}
           )
@@ -468,7 +486,7 @@ const EngineerViewPage = () => {
             )}
             {showHVAC && acType === "vrf-ducted" && (
               <div className="mb-2">
-                <strong>Legend (VRF Ducted HVAC):</strong>
+                <strong>Legend (VRF HVAC):</strong>
                 <span className="ms-2" style={{ color: "orange" }}>
                   ■ Ducts (Yellow/Orange)
                 </span>
@@ -482,7 +500,7 @@ const EngineerViewPage = () => {
       </div>
       <div className="mb-2 d-flex flex-wrap align-items-center gap-2">
         <div className="d-flex flex-wrap align-items-center gap-2">
-          {acType === "ducted" && (
+          {(acType === "ducted" || acType === "vrf-ducted") && (
             <>
               <Button
                 onClick={() => setAddMode("duct")}
@@ -498,17 +516,6 @@ const EngineerViewPage = () => {
               >
                 Add Diffuser
               </Button>
-              <Button
-                onClick={() => setAddMode("comment")}
-                variant="warning"
-                className="me-2"
-              >
-                Add Comment
-              </Button>
-            </>
-          )}
-          {acType === "vrf-ducted" && (
-            <>
               <Button
                 onClick={() => setAddMode("comment")}
                 variant="warning"
@@ -633,7 +640,7 @@ const EngineerViewPage = () => {
                 setAnnotation((prev) => {
                   let allItems = [];
 
-                  // Handle minisplit ducts and diffusers
+                  // Handle VRF ducts and diffusers
                   if (prev?.annotations?.hvac) {
                     const ducts = [...(prev.annotations.hvac.ducts || [])];
                     const diffusers = [

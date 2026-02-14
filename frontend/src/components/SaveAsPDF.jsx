@@ -16,8 +16,8 @@ GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/$
  * @param {string} acType - System type ('vrf-ducted' or 'vrf-ductless')
  *
  * Line Visualization:
- * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed)
- * - VRF-Ductless: Single solid teal line (direct refrigerant connection)
+ * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed) in chain: Condenser→AC1→AC2→...
+ * - VRF-Ductless: Single solid teal line in chain: Condenser→AC1→AC2→...
  */
 const drawVRFAnnotations = (
   context,
@@ -87,94 +87,74 @@ const drawVRFAnnotations = (
       const outY = outdoor.yPercent * canvasHeight;
 
       if (acType === "vrf-ductless") {
-        // VRF-Ductless: Star topology - direct connection from outdoor to each indoor
-        vrfAnnotations.indoorUnits.forEach((indoor) => {
-          const inX = indoor.xPercent * canvasWidth;
-          const inY = indoor.yPercent * canvasHeight;
-
+        // VRF-Ductless: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
+        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
+          (a, b) => a.xPercent - b.xPercent
+        );
+        const points = [{ x: outX, y: outY }];
+        sortedIndoors.forEach((indoor) => {
+          points.push({
+            x: indoor.xPercent * canvasWidth,
+            y: indoor.yPercent * canvasHeight,
+          });
+        });
+        // Draw lines between consecutive points
+        for (let i = 0; i < points.length - 1; i++) {
           context.save();
           context.setLineDash([]); // solid line
           context.lineWidth = 2.5;
           context.strokeStyle = "#008B8B"; // teal/dark cyan
           context.beginPath();
-          context.moveTo(outX, outY);
-          context.lineTo(inX, inY);
-          context.stroke();
-          context.restore();
-        });
-      } else {
-        // VRF-Ducted: Sequential chain - AC1→AC2→AC3→...→Outdoor
-        const indoorUnits = vrfAnnotations.indoorUnits;
-
-        // Draw chain connections between indoor units
-        for (let i = 0; i < indoorUnits.length - 1; i++) {
-          const x1 = indoorUnits[i].xPercent * canvasWidth;
-          const y1 = indoorUnits[i].yPercent * canvasHeight;
-          const x2 = indoorUnits[i + 1].xPercent * canvasWidth;
-          const y2 = indoorUnits[i + 1].yPercent * canvasHeight;
-
-          const offset = 3;
-          const dx = x2 - x1;
-          const dy = y2 - y1;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = (-dy / length) * offset;
-          const perpY = (dx / length) * offset;
-
-          // Supply line (red, dashed)
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "red";
-          context.beginPath();
-          context.moveTo(x1 + perpX, y1 + perpY);
-          context.lineTo(x2 + perpX, y2 + perpY);
-          context.stroke();
-          context.restore();
-
-          // Return line (blue, dashed)
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "#0066FF";
-          context.beginPath();
-          context.moveTo(x1 - perpX, y1 - perpY);
-          context.lineTo(x2 - perpX, y2 - perpY);
+          context.moveTo(points[i].x, points[i].y);
+          context.lineTo(points[i + 1].x, points[i + 1].y);
           context.stroke();
           context.restore();
         }
-
-        // Connect last indoor unit to outdoor condenser
-        if (indoorUnits.length > 0) {
-          const lastIndoor = indoorUnits[indoorUnits.length - 1];
-          const lastX = lastIndoor.xPercent * canvasWidth;
-          const lastY = lastIndoor.yPercent * canvasHeight;
+      } else if (acType === "vrf-ducted") {
+        // VRF-Ducted: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
+        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
+          (a, b) => a.xPercent - b.xPercent
+        );
+        const points = [{ x: outX, y: outY }];
+        sortedIndoors.forEach((indoor) => {
+          points.push({
+            x: indoor.xPercent * canvasWidth,
+            y: indoor.yPercent * canvasHeight,
+          });
+        });
+        // Draw dual parallel lines (red supply + blue return, dashed) between consecutive points
+        for (let i = 0; i < points.length - 1; i++) {
+          const startX = points[i].x;
+          const startY = points[i].y;
+          const endX = points[i + 1].x;
+          const endY = points[i + 1].y;
 
           const offset = 3;
-          const dx = outX - lastX;
-          const dy = outY - lastY;
+          const dx = endX - startX;
+          const dy = endY - startY;
           const length = Math.sqrt(dx * dx + dy * dy);
           const perpX = (-dy / length) * offset;
           const perpY = (dx / length) * offset;
 
-          // Supply line to outdoor
+          // Supply line (red, dashed) - from start to end
           context.save();
           context.setLineDash([8, 4]);
           context.lineWidth = 2;
           context.strokeStyle = "red";
           context.beginPath();
-          context.moveTo(lastX + perpX, lastY + perpY);
-          context.lineTo(outX + perpX, outY + perpY);
+          context.moveTo(startX + perpX, startY + perpY);
+          context.lineTo(endX + perpX, endY + perpY);
           context.stroke();
           context.restore();
 
-          // Return line from outdoor
+          // Return line (blue, dashed) - from end to start
           context.save();
           context.setLineDash([8, 4]);
           context.lineWidth = 2;
           context.strokeStyle = "#0066FF";
           context.beginPath();
-          context.moveTo(lastX - perpX, lastY - perpY);
-          context.lineTo(outX - perpX, outY - perpY);
+          context.moveTo(endX - perpX, endY - perpY);
+          context.lineTo(startX - perpX, startY - perpY);
           context.stroke();
           context.restore();
         }
@@ -303,7 +283,7 @@ function SaveAsPDF({
       });
     }
 
-    // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
+    // For VRF ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
     // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
     if (
       acType === "ducted" &&
@@ -571,9 +551,9 @@ function SaveAsPDF({
               rect.yPercent * canvasHeight +
               (rect.heightPercent * canvasHeight) / 2;
             context.save();
-            context.setLineDash([5, 5]); // dotted line for minisplit ductless
+            context.setLineDash([5, 5]); // dotted line for VRF ductless
             context.lineWidth = 2;
-            context.strokeStyle = "blue"; // blue refrigerant line for minisplit ductless
+            context.strokeStyle = "blue"; // blue refrigerant line for VRF ductless
             context.beginPath();
             context.moveTo(rx, ry);
             context.lineTo(cx, cy);
@@ -842,9 +822,8 @@ function SaveAsPDF({
       }
     }
 
-    // Draw HVAC annotations - ONLY for ducted minisplit systems
-    // VRF and ductless systems should NOT show ducts/diffusers
-    if (acType === "ducted" && annotations?.hvac?.ducts) {
+    // Draw HVAC annotations - for ducted minisplit and VRF-ducted systems
+    if ((acType === "ducted" || acType === "vrf-ducted") && annotations?.hvac?.ducts) {
       annotations.hvac.ducts.forEach((duct) => {
         const x = duct.xPercent * canvasWidth;
         const y = duct.yPercent * canvasHeight;
@@ -854,17 +833,17 @@ function SaveAsPDF({
         context.translate(x, y);
         context.beginPath();
         context.rect(0, 0, width, height);
-        context.fillStyle = duct.fill || "rgba(0,120,255,0.3)";
+        context.fillStyle = duct.fill || "rgba(255, 255, 0, 0.5)"; // semi-transparent yellow
         context.fill();
         context.lineWidth = 2;
-        context.strokeStyle = duct.stroke || "blue";
+        context.strokeStyle = duct.stroke || "orange";
         context.stroke();
         context.restore();
       });
     }
 
-    // Only show diffusers in ducted minisplit mode, NOT in ductless or VRF modes
-    if (acType === "ducted" && annotations?.hvac?.diffusers) {
+    // Show diffusers in ducted minisplit and VRF-ducted modes
+    if ((acType === "ducted" || acType === "vrf-ducted") && annotations?.hvac?.diffusers) {
       annotations.hvac.diffusers.forEach((diffuser) => {
         const x = diffuser.xPercent * canvasWidth;
         const y = diffuser.yPercent * canvasHeight;
@@ -875,7 +854,7 @@ function SaveAsPDF({
         } else {
           context.arc(x, y, size / 2, 0, 2 * Math.PI);
         }
-        context.fillStyle = "rgba(0, 255, 0, 0.5)";
+        context.fillStyle = "rgba(0, 255, 0, 0.5)"; // semi-transparent green
         context.fill();
         context.lineWidth = 2;
         context.strokeStyle = "lime";
@@ -885,7 +864,7 @@ function SaveAsPDF({
 
     // Draw dotted connection lines from diffusers to nearest ducts, preferring matching groups
     if (
-      acType === "ducted" &&
+      (acType === "ducted" || acType === "vrf-ducted") &&
       annotations?.hvac?.ducts &&
       annotations?.hvac?.diffusers
     ) {
@@ -955,7 +934,7 @@ function SaveAsPDF({
     }
 
     // Draw VRF system annotations (outdoor condenser + indoor units + refrigerant lines)
-    // VRF systems are standalone - do NOT render minisplit ducts/diffusers
+    // For VRF-ducted, also render ducts/diffusers as shown above
     if (acType.startsWith("vrf") && annotations?.vrf) {
       drawVRFAnnotations(
         context,
@@ -965,9 +944,8 @@ function SaveAsPDF({
         acType
       );
 
-      // NOTE: VRF systems use their own indoor units, not minisplit ductwork
-      // Indoor units handle air distribution internally (ducted) or directly (ductless)
-      // Ductwork visualization is NOT needed in PDF as it's internal to each unit
+      // NOTE: VRF-ducted systems show ductwork for air distribution
+      // VRF-ductless systems do not show ducts/diffusers
     }
   };
 
@@ -1025,19 +1003,12 @@ function SaveAsPDF({
       const scale = 1.0; // Reduced scale to avoid large canvas issues
       const viewport = page.getViewport({ scale });
 
-      // Prepare canvases for all 4 modes: minisplit-ducted, minisplit-ductless, vrf-ducted, vrf-ductless
+      // Prepare canvases for VRF systems only: vrf-ducted, vrf-ductless
       const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
       const canvases = {
-        ducted: { canvas: canvas, context: context, drawn: false },
-        ductless: {
-          canvas: document.createElement("canvas"),
-          context: null,
-          drawn: false,
-        },
         "vrf-ducted": {
           canvas: document.createElement("canvas"),
           context: null,
@@ -1090,7 +1061,7 @@ function SaveAsPDF({
 
       // Determine system views are handled by canvases; no alternate type variable needed
 
-      // Draw annotations for all 4 modes (user annotations only)
+      // Draw annotations for VRF modes only (user annotations only)
       if (normalizedAnnotations) {
         Object.keys(canvases).forEach((mode) => {
           drawAnnotations(
@@ -1105,10 +1076,6 @@ function SaveAsPDF({
       // Add small labels so each page is clear
       const getSystemLabel = (type) => {
         switch (type) {
-          case "ducted":
-            return "Minisplit - Ducted View";
-          case "ductless":
-            return "Minisplit - Ductless View";
           case "vrf-ducted":
             return "VRF System - Ducted Indoor Units";
           case "vrf-ductless":
@@ -1156,14 +1123,14 @@ function SaveAsPDF({
 
           ctx.font = "11px Arial";
 
-          if (mode === "ducted") {
+          if (mode === "vrf-ducted") {
             ctx.fillText(
-              "━ ━ Blue Dashed: Star Topology (Refrigerant)",
+              "━ ━ Red Dashed: Supply Line (Star Topology)",
               legendX + 5,
               legendY + 30
             );
             ctx.fillText(
-              "- - - Grey Dashed: Ducts & Diffusers",
+              "━ ━ Blue Dashed: Return Line (Star Topology)",
               legendX + 5,
               legendY + 45
             );
@@ -1171,28 +1138,6 @@ function SaveAsPDF({
               "(Each AC unit directly to Condenser)",
               legendX + 15,
               legendY + 60
-            );
-          } else if (mode === "ductless") {
-            ctx.fillText(
-              "· · · Blue Dotted: Star Topology",
-              legendX + 5,
-              legendY + 30
-            );
-            ctx.fillText(
-              "(Each AC unit to nearest Condenser)",
-              legendX + 15,
-              legendY + 45
-            );
-          } else if (mode === "vrf-ducted") {
-            ctx.fillText(
-              "━ ━ Red Dashed: Supply Line (Sequential)",
-              legendX + 5,
-              legendY + 30
-            );
-            ctx.fillText(
-              "━ ━ Blue Dashed: Return Line (Sequential)",
-              legendX + 5,
-              legendY + 45
             );
           } else if (mode === "vrf-ductless") {
             ctx.fillText(
@@ -1213,7 +1158,7 @@ function SaveAsPDF({
         }
       };
 
-      // Draw labels and legends on all 4 canvases
+      // Draw labels and legends on VRF canvases
       Object.keys(canvases).forEach((mode) => {
         drawLabel(canvases[mode].context, getSystemLabel(mode));
         drawLegend(canvases[mode].context, mode);
@@ -1235,25 +1180,17 @@ function SaveAsPDF({
       const newPdfPage = pdfDoc.getPages()[0];
       const { width, height } = newPdfPage.getSize();
 
-      // Page 1: Minisplit - Ducted
-      newPdfPage.drawImage(pngImageMap["ducted"], {
+      // Page 1: VRF - Ducted
+      newPdfPage.drawImage(pngImageMap["vrf-ducted"], {
         x: 0,
         y: 0,
         width,
         height,
       });
 
-      // Page 2: Minisplit - Ductless
+      // Page 2: VRF - Ductless
       const page2 = pdfDoc.addPage([width, height]);
-      page2.drawImage(pngImageMap["ductless"], { x: 0, y: 0, width, height });
-
-      // Page 3: VRF - Ducted
-      const page3 = pdfDoc.addPage([width, height]);
-      page3.drawImage(pngImageMap["vrf-ducted"], { x: 0, y: 0, width, height });
-
-      // Page 4: VRF - Ductless
-      const page4 = pdfDoc.addPage([width, height]);
-      page4.drawImage(pngImageMap["vrf-ductless"], {
+      page2.drawImage(pngImageMap["vrf-ductless"], {
         x: 0,
         y: 0,
         width,
@@ -1309,8 +1246,6 @@ function SaveAsPDF({
         formData.append("userId", userId || "6947bb2b736e7aceca4ac627"); // Use prop or fallback
         formData.append("userAnnotationId", pdfId);
         const systemTypeMap = {
-          ducted: "minisplit-ducted",
-          ductless: "minisplit-ductless",
           "vrf-ducted": "vrf-ducted",
           "vrf-ductless": "vrf-ductless",
         };

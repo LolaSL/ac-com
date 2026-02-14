@@ -16,7 +16,7 @@ export default function TestimonialsSection() {
       name: "Sarah Chen",
       role: "Facility Manager",
       company: "Tech Campus Inc.",
-      text: "The AI-powered design tool is incredibly accurate. Our installation went smoothly thanks to the detailed specifications provided.",
+      text: "The Engineering powered design tool is incredibly accurate. Our installation went smoothly thanks to the detailed specifications provided.",
       rating: 5,
       image: "👩‍💼",
     },

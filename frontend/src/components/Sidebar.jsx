@@ -680,7 +680,7 @@ const Sidebar = () => {
                             </span>
                           </Button>
                           <small className="text-muted d-block mt-1">
-                            System: minisplit-ducted/ductless | vrf
+                            System: vrf
                             ducted/ductless | Engineer:{" "}
                             {annotation.engineerId?.name || "Unknown"} |
                             Reviewed:{" "}
@@ -699,7 +699,7 @@ const Sidebar = () => {
             )}
 
             {/* SaveAsPDF only shown for My Annotations tab (user's own PDFs) */}
-            {/* {activeTab === "my-annotations" &&
+             {/* {activeTab === "my-annotations" &&
               selectedPdfFile &&
               currentPdfType === "user" && (
                 <SaveAsPDF
@@ -709,6 +709,20 @@ const Sidebar = () => {
                   token={token}
                   annotations={selectedAnnotations}
                   annotationType="user"
+                />
+              )} */}
+
+            {/* SaveAsPDF for Engineer Reviews tab (engineer/admin annotations) */}
+            {/* {activeTab === "engineer-reviews" &&
+              selectedPdfFile &&
+              currentPdfType === "engineer" && (
+                <SaveAsPDF
+                  file={selectedPdfFile}
+                  isPaid={false}
+                  pdfId={selectedPdf?._id}
+                  token={token}
+                  annotations={selectedAnnotations}
+                  annotationType="engineer"
                 />
               )} */}
 

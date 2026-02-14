@@ -6,8 +6,6 @@ import ValuePropositionSection from "../components/ValuePropositionSection";
 import HowItWorksSection from "../components/HowItWorksSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ROICalculatorPreview from "../components/ROICalculatorPreview";
-import SuccessStoriesSection from "../components/SuccessStoriesSection";
-import PricingTiersSection from "../components/PricingTiersSection";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
@@ -152,11 +150,6 @@ export default function HomeBannerPage() {
         />
       )}
 
-      {/* Animated Cosmonaut */}
-      {/* <div className="floating-cosmonaut">
-        🚀
-      </div> */}
-
       {/* Premium Hero Carousel */}
       <PremiumCarousel banners={banners} onSlideClick={handleSlideClick} />
 
@@ -165,8 +158,6 @@ export default function HomeBannerPage() {
       <ValuePropositionSection />
       <HowItWorksSection />
       <ROICalculatorPreview />
-      <SuccessStoriesSection />
-      <PricingTiersSection />
       <TestimonialsSection />
       <NewsletterSignup />
     </div>

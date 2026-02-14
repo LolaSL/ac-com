@@ -1,3 +1,29 @@
 /* EngineerViewPage Styles */
 
+/* Prevent browser printing - force users to use SaveAsPDF button */
+@media print {
+  /* Hide everything and show a message */
+  body::before {
+    content: "Please use the 'Save as PDF' button instead of browser print (Ctrl+P) to generate the complete annotated PDF with all system views.";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    background: white;
+    padding: 20px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 9999;
+  }
+
+  /* Hide all content */
+  * {
+    display: none !important;
+  }
+}
+
 /* EngineerViewPage uses Bootstrap classes and inline styles; no custom styles to extract from index.css */

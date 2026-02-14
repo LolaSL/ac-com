@@ -40,8 +40,8 @@ export default function ValuePropositionSection() {
     },
     {
       icon: <span style={{ fontSize: "2rem" }}>🌍</span>,
-      title: "National Coverage",
-      description: "Access to thousands of providers across the United States",
+      title: "Global Coverage",
+      description: "Access to thousands of providers across the World",
       color: "danger",
     },
     {
