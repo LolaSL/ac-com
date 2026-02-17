@@ -17,7 +17,7 @@ GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/$
  *
  * Line Visualization:
  * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed) in chain: Condenser→AC1→AC2→...
- * - VRF-Ductless: Single solid teal line in chain: Condenser→AC1→AC2→...
+ * - VRF-Ductless: Single solid teal line in star topology: Each AC connects to nearest Condenser
  */
 const drawVRFAnnotations = (
   context,
@@ -82,35 +82,40 @@ const drawVRFAnnotations = (
 
   // Draw refrigerant lines connecting outdoor to indoor units
   if (vrfAnnotations?.outdoorUnits && vrfAnnotations?.indoorUnits) {
-    vrfAnnotations.outdoorUnits.forEach((outdoor) => {
-      const outX = outdoor.xPercent * canvasWidth;
-      const outY = outdoor.yPercent * canvasHeight;
-
-      if (acType === "vrf-ductless") {
-        // VRF-Ductless: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
-        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
-          (a, b) => a.xPercent - b.xPercent
-        );
-        const points = [{ x: outX, y: outY }];
-        sortedIndoors.forEach((indoor) => {
-          points.push({
-            x: indoor.xPercent * canvasWidth,
-            y: indoor.yPercent * canvasHeight,
-          });
+    if (acType === "vrf-ductless") {
+      // VRF-Ductless: Star topology - each indoor connects to nearest outdoor
+      vrfAnnotations.indoorUnits.forEach((indoor) => {
+        const inX = indoor.xPercent * canvasWidth;
+        const inY = indoor.yPercent * canvasHeight;
+        // Find nearest outdoor
+        let nearestOut = null;
+        let minDist = Infinity;
+        vrfAnnotations.outdoorUnits.forEach((outdoor) => {
+          const outX = outdoor.xPercent * canvasWidth;
+          const outY = outdoor.yPercent * canvasHeight;
+          const dist = Math.sqrt((inX - outX) ** 2 + (inY - outY) ** 2);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestOut = { x: outX, y: outY };
+          }
         });
-        // Draw lines between consecutive points
-        for (let i = 0; i < points.length - 1; i++) {
+        if (nearestOut) {
           context.save();
           context.setLineDash([]); // solid line
           context.lineWidth = 2.5;
           context.strokeStyle = "#008B8B"; // teal/dark cyan
           context.beginPath();
-          context.moveTo(points[i].x, points[i].y);
-          context.lineTo(points[i + 1].x, points[i + 1].y);
+          context.moveTo(inX, inY);
+          context.lineTo(nearestOut.x, nearestOut.y);
           context.stroke();
           context.restore();
         }
-      } else if (acType === "vrf-ducted") {
+      });
+    } else if (acType === "vrf-ducted") {
+      vrfAnnotations.outdoorUnits.forEach((outdoor) => {
+        const outX = outdoor.xPercent * canvasWidth;
+        const outY = outdoor.yPercent * canvasHeight;
+
         // VRF-Ducted: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
         const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
           (a, b) => a.xPercent - b.xPercent
@@ -158,8 +163,8 @@ const drawVRFAnnotations = (
           context.stroke();
           context.restore();
         }
-      }
-    });
+      });
+    }
   }
 };
 

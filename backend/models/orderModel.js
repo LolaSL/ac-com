@@ -13,9 +13,11 @@ const orderSchema = new mongoose.Schema(
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Product',
-          required: true,
+          required: false, // Not required for custom items
         },
         discount: { type: Number, default: 0 },
+        isCustom: { type: Boolean, default: false }, // Flag for custom items
+        customId: { type: String }, // For custom condensers/placeholders
       },
     ],
     shippingAddress: {

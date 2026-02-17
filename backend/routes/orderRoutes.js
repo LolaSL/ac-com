@@ -118,10 +118,38 @@ orderRouter.post(
       return res.status(400).send({ message: 'Cart is empty!' });
     }
 
+    // Validate all items have required fields
+    const invalidItems = req.body.orderItems.filter(item => !item.slug || !item.name || !item.image || !item._id);
+    if (invalidItems.length > 0) {
+      console.error('Invalid order items:', invalidItems);
+      return res.status(400).send({ 
+        message: 'Cart contains items with missing information. Please clear cart and re-add items.',
+        invalidItems: invalidItems.map(i => ({ _id: i._id, name: i.name, missingFields: [] }))
+      });
+    }
+
     const orderItems = req.body.orderItems.map((item) => {
       const discountedPrice = item.discountedPrice || (item.discount > 0
         ? item.price * (1 - item.discount / 100)
         : item.price);
+      
+      // For custom items (condenser-*, placeholder-*), don't try to set product reference
+      // Just save the item data as-is
+      if (item._id && (item._id.toString().startsWith('condenser-') || item._id.toString().startsWith('placeholder-'))) {
+        console.log(`Handling custom item: ${item._id}`);
+        return { 
+          slug: item.slug,
+          name: item.name,
+          quantity: item.quantity,
+          image: item.image,
+          price: discountedPrice,
+          discount: item.discount || 0,
+          isCustom: true, // Mark as custom item
+          customId: item._id // Store the custom ID separately
+        };
+      }
+      
+      // For regular products, set product reference
       return { ...item, product: item._id, price: discountedPrice };
     });
 

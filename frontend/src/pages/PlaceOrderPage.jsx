@@ -68,6 +68,26 @@ export default function PlaceOrderPage() {
     try {
       dispatch({ type: "CREATE_REQUEST" });
 
+      // Validate all orderItems have required fields
+      const hasInvalidItems = cart.cartItems.some(item => !item.slug || !item.name || !item.image);
+      if (hasInvalidItems) {
+        const invalidItems = cart.cartItems.filter(item => !item.slug || !item.name || !item.image);
+        console.error("Invalid cart items:", invalidItems);
+        toast.error("Cart contains items with missing information. Please clear cart and re-add items.");
+        dispatch({ type: "CREATE_FAIL" });
+        return;
+      }
+
+      console.log("Sending order request with data:", {
+        orderItems: cart.cartItems,
+        shippingAddress: cart.shippingAddress,
+        paymentMethod: cart.paymentMethod,
+        itemsPrice: cart.itemsPrice,
+        shippingPrice: cart.shippingPrice,
+        taxPrice: cart.taxPrice,
+        totalPrice: cart.totalPrice,
+      });
+
       const { data } = await Axios.post(
         "/api/orders",
         {
@@ -85,13 +105,30 @@ export default function PlaceOrderPage() {
           },
         }
       );
+
+      console.log("Order response data:", data);
+      console.log("Order object:", data.order);
+      console.log("Order ID:", data.order?._id);
+
+      if (!data.order || !data.order._id) {
+        console.error("Invalid response structure:", data);
+        toast.error("Order created but missing ID. Please contact support.");
+        dispatch({ type: "CREATE_FAIL" });
+        return;
+      }
+
       ctxDispatch({ type: "CART_CLEAR" });
       dispatch({ type: "CREATE_SUCCESS" });
       localStorage.removeItem("cartItems");
+      
+      console.log(`Navigating to /order/${data.order._id}`);
       navigate(`/order/${data.order._id}`);
     } catch (err) {
       dispatch({ type: "CREATE_FAIL" });
-      toast.error(getError(err));
+      const errorMessage = err.response?.data?.message || getError(err);
+      console.error("Order placement error:", err);
+      console.error("Error response:", err.response?.data);
+      toast.error(errorMessage);
     }
   };
 

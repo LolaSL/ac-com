@@ -67,6 +67,26 @@ const annotationSchema = new Schema(
           },
         ],
       },
+      vrf: {
+        outdoorUnits: [
+          {
+            id: { type: String, required: true },
+            xPercent: { type: Number, required: true },
+            yPercent: { type: Number, required: true },
+            sizePercent: { type: Number, default: 0.12 },
+            capacity: { type: Number }, // optional BTU
+          },
+        ],
+        indoorUnits: [
+          {
+            id: { type: String, required: true },
+            xPercent: { type: Number, required: true },
+            yPercent: { type: Number, required: true },
+            sizePercent: { type: Number, default: 0.08 },
+            roomName: { type: String }, // optional
+          },
+        ],
+      },
 
     },
     isPaid: { type: Boolean, default: false },

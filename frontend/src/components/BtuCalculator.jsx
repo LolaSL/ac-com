@@ -770,8 +770,12 @@ useEffect(() => {
                 name: room.name,
                 btu,
                 price: 0,
-                slug: null,
+                slug: `placeholder-${room.name.toLowerCase().replace(/\s+/g, '-')}-${btu}-btu`,
                 displayName: "No product available",
+                image: "",
+                category: "Placeholder",
+                brand: "Custom",
+                description: `Product not available for ${room.name}`,
               };
 
         return { room, product, btu };
@@ -784,8 +788,12 @@ useEffect(() => {
             name: room.name,
             btu,
             price: 0,
-            slug: null,
+            slug: `placeholder-${room.name.toLowerCase().replace(/\s+/g, '-')}-${btu}-btu`,
             displayName: "No product available",
+            image: "",
+            category: "Placeholder",
+            brand: "Custom",
+            description: `Product not available for ${room.name}`,
           },
           btu,
         };
@@ -875,7 +883,11 @@ useEffect(() => {
             btu: Math.round(requiredBTU),
             price: estimatedPrice,
             discount: 0,
-            slug: null,
+            slug: `custom-condenser-${Math.round(requiredBTU)}-btu`,
+            image: "",
+            category: "Custom Condenser",
+            brand: "Custom",
+            description: `Custom VRF condenser for ${Math.round(requiredBTU)} BTU requirement`,
             flatName: label || undefined,
           };
         } else if (suitableCondenser) {
@@ -904,7 +916,11 @@ useEffect(() => {
             btu: Math.round(requiredBTU),
             price: estimatedPrice,
             discount: 0,
-            slug: null,
+            slug: `custom-condenser-${Math.round(requiredBTU)}-btu`,
+            image: "",
+            category: "Custom Condenser",
+            brand: "Custom",
+            description: `Custom VRF condenser for ${Math.round(requiredBTU)} BTU requirement`,
             flatName: label || undefined,
           };
         }
@@ -1146,8 +1162,12 @@ useEffect(() => {
         name: room.name,
         btu: 0,
         price: 0,
-        slug: null,
+        slug: `placeholder-${room.name.toLowerCase().replace(/\s+/g, '-')}-item`,
         displayName: "No product available",
+        image: "",
+        category: "Placeholder",
+        brand: "Custom",
+        description: `Product not available for ${room.name}`,
       };
     }
 
@@ -1350,8 +1370,12 @@ useEffect(() => {
         name: room.name,
         btu: 0,
         price: 0,
-        slug: null,
+        slug: `placeholder-${room.name.toLowerCase().replace(/\s+/g, '-')}-item-2`,
         displayName: "No product available",
+        image: "",
+        category: "Placeholder",
+        brand: "Custom",
+        description: `Product not available for ${room.name}`,
       };
     }
 

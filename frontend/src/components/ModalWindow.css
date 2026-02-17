@@ -6,16 +6,6 @@
   /* Specific to modal product display */
 }
 
-.modal-window .product-image {
-  margin-bottom: 15px;
-}
-
-.modal-window .product-image img {
-  max-height: 250px;
-  object-fit: cover;
-  width: 100%;
-}
-
 .modal-window .product-item h5 {
   margin-bottom: 1rem;
 }

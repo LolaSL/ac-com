@@ -107,14 +107,15 @@ export default function CartPage() {
     const fetchProducts = async () => {
       try {
         const { data } = await axios.get("/api/products");
-        // Filter for all outdoor unit types
-        const outdoorUnits = data.filter(
+        // Filter for VRF condensers - any product with "VRF" or "Condenser" in category
+        const vrfCondensers = data.filter(
           (product) =>
-            product.category === "Outdoor Condenser" ||
-            product.category === "VRF Heat Recovery" ||
-            product.category === "MRV-S Outdoor"
+            product.category &&
+            (product.category.includes("VRF") || product.category.includes("Condenser"))
         );
-        setRecommendedProducts(outdoorUnits);
+        console.log("VRF Condensers fetched:", vrfCondensers);
+        console.log("First product image URL:", vrfCondensers[0]?.image);
+        setRecommendedProducts(vrfCondensers);
       } catch (error) {
         console.error("Error fetching recommended products:", error);
       }
@@ -232,28 +233,6 @@ export default function CartPage() {
   const checkoutHandler = () => {
     navigate("/signin?redirect=/shipping");
   };
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { data } = await axios.get("/api/products");
-        // Filter for all outdoor unit types
-        const outdoorUnits = data.filter(
-          (product) =>
-            product.category === "Outdoor Condenser" ||
-            product.category === "VRF Heat Recovery" ||
-            product.category === "MRV-S Outdoor"
-        );
-
-        setRecommendedProducts(outdoorUnits);
-      } catch (error) {
-        console.error("Error fetching recommended products:", error);
-      }
-    };
-
-    if (showModal) {
-      fetchProducts();
-    }
-  }, [showModal]);
 
   return (
     <div className="p-4">
@@ -344,7 +323,7 @@ export default function CartPage() {
         onClick={() => setShowModal(true)}
         className="go-to-btn btn-text mb-4"
       >
-        Select a Recommended Condenser
+        Select Recommended Condenser
       </Button>
       <ModalWindow
         show={showModal}

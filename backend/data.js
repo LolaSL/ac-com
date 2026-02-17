@@ -819,14 +819,14 @@ const data = {
         },
       ],
     },
-     {
+    {
       name: "40000 BTU Multi V5 VRF Heat Recovery Outdoor Unit",
       model: "ARUN040GSS0",
       slug: "40000-btu-vrf-lg-condensing-unit",
       category: "VRF Heat Recovery",
       image: "/images/p21.jpg",
       price: 4310,
-      discount:10,
+      discount: 10,
       countInStock: 10,
       brand: "LG",
       rating: 4.8,
@@ -858,7 +858,7 @@ const data = {
         },
       ],
     },
-         {
+    {
       name: "50000 BTU Multi V5 VRF Heat Recovery Outdoor Unit",
       model: "ARUN050GSL0",
       slug: "50000-btu-vrf-lg-condensing-unit",
@@ -897,7 +897,7 @@ const data = {
         },
       ],
     },
-            {
+    {
       name: "60000 BTU Multi V5 VRF Heat Recovery Outdoor Unit",
       model: "ARUN060GSS0",
       slug: "60000-btu-vrf-lg-condensing-unit",
@@ -1906,362 +1906,443 @@ const data = {
         },
       },
     },
-  ],
-
-  engineerAnnotations: [],
-
-  orders: [
     {
-      orderItems: [
-        {
-          slug: "10000-btu-Mini-Split-air-conditioner",
-          name: "10000 BTU Mini Split AC",
-          quantity: 1,
-          image: "/images/p12.jpg",
-          price: 459.99,
-          discount: 50,
-        },
-        {
-          slug: "12000-btu-window-air-conditioner",
-          name: "12000 BTU Window AC",
-          quantity: 2,
-          image: "/images/p1.jpg",
-          price: 299.99,
-          discount: 0,
-        },
-      ],
-      shippingAddress: {
-        fullName: "Jane Doe",
-        address: "123 Main St",
-        city: "New York",
-        postalCode: "10001",
-        country: "USA",
-        location: {
-          lat: 40.7128,
-          lng: -74.006,
-          address: "123 Main St, New York, NY 10001",
-          name: "Main Street",
-          vicinity: "Downtown",
-          googleAddressId: "ChIJO1KL10REwokR_R-IfVR8eQ0",
-        },
-      },
-      paymentMethod: "PayPal",
-      paymentResult: {
-        id: "1A23456B7890",
-        status: "COMPLETED",
-        update_time: "2024-12-19T10:30:00Z",
-        email_address: "buyer@example.com",
-      },
-      itemsPrice: 1019.97,
-      shippingPrice: 50,
-      taxPrice: 108.00,
-      totalPrice: 1177.97,
-      isPaid: true,
-      paidAt: new Date("2024-12-19T10:30:00Z"),
-      isDelivered: true,
-      deliveredAt: new Date("2024-12-21T14:00:00Z"),
-      createdAt: new Date("2024-12-19T10:00:00Z"),
-      updatedAt: new Date("2024-12-21T14:00:00Z"),
-    },
-    {
-      orderItems: [
-        {
-          slug: "18000-btu-portable-ac",
-          name: "18000 BTU Portable AC",
-          quantity: 1,
-          image: "/images/p5.jpg",
-          price: 599.99,
-          discount: 20,
-        },
-      ],
-      shippingAddress: {
-        fullName: "Janny Smith",
-        address: "456 Oak Ave",
-        city: "Los Angeles",
-        postalCode: "90001",
-        country: "USA",
-        location: {
-          lat: 34.0522,
-          lng: -118.2437,
-          address: "456 Oak Ave, Los Angeles, CA 90001",
-          name: "Oak Avenue",
-          vicinity: "Downtown LA",
-          googleAddressId: "ChIJIQBpAG2ahYAR_6128GltTXQ",
-        },
-      },
-      paymentMethod: "Credit Card",
-      paymentResult: {
-        id: "2B34567C8901",
-        status: "COMPLETED",
-        update_time: "2024-12-18T15:45:00Z",
-        email_address: "buyer2@example.com",
-      },
-      itemsPrice: 599.99,
-      shippingPrice: 30,
-      taxPrice: 63.60,
-      totalPrice: 693.59,
-      isPaid: true,
-      paidAt: new Date("2024-12-18T15:45:00Z"),
-      isDelivered: false,
-      deliveredAt: null,
-      createdAt: new Date("2024-12-18T12:00:00Z"),
-      updatedAt: new Date("2024-12-18T15:45:00Z"),
-    },
-    {
-      orderItems: [
-        {
-          slug: "10000-btu-Mini-Split-air-conditioner",
-          name: "10000 BTU Mini Split AC",
-          quantity: 1,
-          image: "/images/p12.jpg",
-          price: 459.99,
-          discount: 50,
-        },
-      ],
-      shippingAddress: {
-        fullName: "Manny Johnson",
-        address: "789 Elm St",
-        city: "Chicago",
-        postalCode: "60601",
-        country: "USA",
-        location: {
-          lat: 41.8781,
-          lng: -87.6298,
-          address: "789 Elm St, Chicago, IL 60601",
-          name: "Elm Street",
-          vicinity: "Downtown Chicago",
-          googleAddressId: "ChIJ7cv00DwsDogRAMDACa2A4K8",
-        },
-      },
-      paymentMethod: "PayPal",
-      paymentResult: null,
-      itemsPrice: 459.99,
-      shippingPrice: 25,
-      taxPrice: 48.60,
-      totalPrice: 533.59,
+      filename: 'vrf-example.pdf',
+      pdfId: 'vrf-demo-pdf-456',
       isPaid: false,
-      paidAt: null,
-      isDelivered: false,
-      deliveredAt: null,
-      createdAt: new Date("2024-12-19T08:00:00Z"),
-      updatedAt: new Date("2024-12-19T08:00:00Z"),
-    },
-    {
-      orderItems: [
-        {
-          slug: "24000-btu-split-ac",
-          name: "24000 BTU Split AC",
-          quantity: 1,
-          image: "/images/p8.jpg",
-          price: 899.99,
-          discount: 15,
+      acType: 'vrf-ductless',
+      annotations: {
+        rectangles: [],
+        comments: [],
+        lines: [],
+        hvac: {
+          ducts: [],
+          diffusers: [],
         },
-        {
-          slug: "10000-btu-Mini-Split-air-conditioner",
-          name: "10000 BTU Mini Split AC",
-          quantity: 1,
-          image: "/images/p12.jpg",
-          price: 459.99,
-          discount: 50,
-        },
-      ],
-      shippingAddress: {
-        fullName: "Barny Wilson",
-        address: "321 Pine Rd",
-        city: "Houston",
-        postalCode: "77001",
-        country: "USA",
-        location: {
-          lat: 29.7604,
-          lng: -95.3698,
-          address: "321 Pine Rd, Houston, TX 77001",
-          name: "Pine Road",
-          vicinity: "Downtown Houston",
-          googleAddressId: "ChIJIQBpAG2ahYAR_6128GltTXQ",
-        },
-      },
-      paymentMethod: "Credit Card",
-      paymentResult: {
-        id: "3C45678D9012",
-        status: "COMPLETED",
-        update_time: "2024-12-17T12:00:00Z",
-        email_address: "buyer3@example.com",
-      },
-      itemsPrice: 1359.98,
-      shippingPrice: 60,
-      taxPrice: 141.60,
-      totalPrice: 1561.58,
-      isPaid: true,
-      paidAt: new Date("2024-12-17T12:00:00Z"),
-      isDelivered: true,
-      deliveredAt: new Date("2024-12-20T16:30:00Z"),
-      createdAt: new Date("2024-12-17T10:00:00Z"),
-      updatedAt: new Date("2024-12-20T16:30:00Z"),
-    },
-    {
-      orderItems: [
-        {
-          slug: "12000-btu-window-air-conditioner",
-          name: "12000 BTU Window AC",
-          quantity: 3,
-          image: "/images/p1.jpg",
-          price: 299.99,
-          discount: 0,
-        },
-      ],
-      shippingAddress: {
-        fullName: "Mikky Brown",
-        address: "654 Birch Ln",
-        city: "Phoenix",
-        postalCode: "85001",
-        country: "USA",
-        location: {
-          lat: 33.4484,
-          lng: -112.074,
-          address: "654 Birch Ln, Phoenix, AZ 85001",
-          name: "Birch Lane",
-          vicinity: "Downtown Phoenix",
-          googleAddressId: "ChIJQwMXyJw0K4cRfjiGOU34QyQ",
+        vrf: {
+          outdoorUnits: [
+            {
+              id: 'outdoor-1',
+              xPercent: 0.1,
+              yPercent: 0.1,
+              sizePercent: 0.12,
+              capacity: 24000,
+            }
+          ],
+          indoorUnits: [
+            {
+              id: 'indoor-1',
+              xPercent: 0.3,
+              yPercent: 0.3,
+              sizePercent: 0.08,
+              roomName: 'Living Room',
+            },
+            {
+              id: 'indoor-2',
+              xPercent: 0.6,
+              yPercent: 0.4,
+              sizePercent: 0.08,
+              roomName: 'Bedroom',
+            },
+            {
+              id: 'indoor-3',
+              xPercent: 0.8,
+              yPercent: 0.6,
+              sizePercent: 0.08,
+              roomName: 'Kitchen',
+            }
+          ]
         },
       },
-      paymentMethod: "PayPal",
-      paymentResult: {
-        id: "4D56789E0123",
-        status: "COMPLETED",
-        update_time: "2024-12-16T09:15:00Z",
-        email_address: "buyer4@example.com",
-      },
-      itemsPrice: 899.97,
-      shippingPrice: 50,
-      taxPrice: 95.00,
-      totalPrice: 1044.97,
-      isPaid: true,
-      paidAt: new Date("2024-12-16T09:15:00Z"),
-      isDelivered: false,
-      deliveredAt: null,
-      createdAt: new Date("2024-12-16T09:00:00Z"),
-      updatedAt: new Date("2024-12-16T09:15:00Z"),
     },
-  ],
-  payments: [
-    {
-      serviceProvider: "test-company1@example.com",
-      amount: 500,
-      status: "completed",
-      paymentMethod: "bank transfer",
-      transactionId: "TXN123456",
-      description: "Payment for residential house design project"
-    },
-    {
-      serviceProvider: "test-company2@example.com",
-      amount: 750,
-      status: "pending",
-      paymentMethod: "paypal",
-      description: "Payment for loft renovation project"
-    },
-    {
-      serviceProvider: "test-company3@example.com",
-      amount: 600,
-      status: "completed",
-      paymentMethod: "bank transfer",
-      transactionId: "TXN789012",
-      description: "Payment for office interior renovation"
-    }
   ],
 
-  demoRequests: [
+  engineerAnnotations: [
     {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      company: "ABC Corp",
-      phone: "123-456-7890",
-      projectSize: "5000-10000 sq ft",
-      preferredDate: "2026-03-15",
+      engineerId: 'engineer-sample-1',
+      annotations: {
+        rectangles: [
+          {
+            id: 'eng-rect-1',
+            xPercent: 0.5,
+            yPercent: 0.5,
+            widthPercent: 0.2,
+            heightPercent: 0.1,
+            fill: 'rgba(255, 0, 0, 0.5)',
+            stroke: 'red',
+            rotation: 0,
+          },
+        ],
+        comments: [
+          {
+            id: 'eng-comment-1',
+            rectId: 'eng-rect-1',
+            text: 'Engineer note: Check this area',
+            xPercent: 0.52,
+            yPercent: 0.52,
+            fill: 'rgba(255, 255, 0, 0.3)',
+            textColor: '#000000',
+          },
+        ],
+        lines: [],
+      },
+      status: 'completed',
+      notes: 'Sample engineer annotation',
     },
-    {
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      company: "XYZ Ltd",
-      phone: "987-654-3210",
-      projectSize: "10000-20000 sq ft",
-      preferredDate: "2026-04-01",
-    },
-    {
-      firstName: "Bob",
-      lastName: "Johnson",
-      email: "bob.johnson@example.com",
-      company: "Tech Solutions",
-      phone: "555-123-4567",
-      projectSize: "Under 5000 sq ft",
-      preferredDate: "2026-02-20",
-    }
   ],
 
-  newsletter: [
-    {
-      email: 'john.doe@example.com',
-      preferences: {
-        newFeatures: true,
-        pricingUpdates: true,
-        industryInsights: true,
-        promotions: false
+    orders: [
+      {
+        orderItems: [
+          {
+            slug: "10000-btu-Mini-Split-air-conditioner",
+            name: "10000 BTU Mini Split AC",
+            quantity: 1,
+            image: "/images/p12.jpg",
+            price: 459.99,
+            discount: 50,
+          },
+          {
+            slug: "12000-btu-window-air-conditioner",
+            name: "12000 BTU Window AC",
+            quantity: 2,
+            image: "/images/p1.jpg",
+            price: 299.99,
+            discount: 0,
+          },
+        ],
+        shippingAddress: {
+          fullName: "Jane Doe",
+          address: "123 Main St",
+          city: "New York",
+          postalCode: "10001",
+          country: "USA",
+          location: {
+            lat: 40.7128,
+            lng: -74.006,
+            address: "123 Main St, New York, NY 10001",
+            name: "Main Street",
+            vicinity: "Downtown",
+            googleAddressId: "ChIJO1KL10REwokR_R-IfVR8eQ0",
+          },
+        },
+        paymentMethod: "PayPal",
+        paymentResult: {
+          id: "1A23456B7890",
+          status: "COMPLETED",
+          update_time: "2024-12-19T10:30:00Z",
+          email_address: "buyer@example.com",
+        },
+        itemsPrice: 1019.97,
+        shippingPrice: 50,
+        taxPrice: 108.00,
+        totalPrice: 1177.97,
+        isPaid: true,
+        paidAt: new Date("2024-12-19T10:30:00Z"),
+        isDelivered: true,
+        deliveredAt: new Date("2024-12-21T14:00:00Z"),
+        createdAt: new Date("2024-12-19T10:00:00Z"),
+        updatedAt: new Date("2024-12-21T14:00:00Z"),
       },
-      subscriptionStatus: 'active',
-      subscriptionDate: new Date('2024-01-15'),
-      source: 'website'
-    },
-    {
-      email: 'jane.smith@company.com',
-      preferences: {
-        newFeatures: true,
-        pricingUpdates: false,
-        industryInsights: true,
-        promotions: true
+      {
+        orderItems: [
+          {
+            slug: "18000-btu-portable-ac",
+            name: "18000 BTU Portable AC",
+            quantity: 1,
+            image: "/images/p5.jpg",
+            price: 599.99,
+            discount: 20,
+          },
+        ],
+        shippingAddress: {
+          fullName: "Janny Smith",
+          address: "456 Oak Ave",
+          city: "Los Angeles",
+          postalCode: "90001",
+          country: "USA",
+          location: {
+            lat: 34.0522,
+            lng: -118.2437,
+            address: "456 Oak Ave, Los Angeles, CA 90001",
+            name: "Oak Avenue",
+            vicinity: "Downtown LA",
+            googleAddressId: "ChIJIQBpAG2ahYAR_6128GltTXQ",
+          },
+        },
+        paymentMethod: "Credit Card",
+        paymentResult: {
+          id: "2B34567C8901",
+          status: "COMPLETED",
+          update_time: "2024-12-18T15:45:00Z",
+          email_address: "buyer2@example.com",
+        },
+        itemsPrice: 599.99,
+        shippingPrice: 30,
+        taxPrice: 63.60,
+        totalPrice: 693.59,
+        isPaid: true,
+        paidAt: new Date("2024-12-18T15:45:00Z"),
+        isDelivered: false,
+        deliveredAt: null,
+        createdAt: new Date("2024-12-18T12:00:00Z"),
+        updatedAt: new Date("2024-12-18T15:45:00Z"),
       },
-      subscriptionStatus: 'active',
-      subscriptionDate: new Date('2024-02-01'),
-      source: 'website'
-    },
-    {
-      email: 'mike.wilson@techcorp.com',
-      preferences: {
-        newFeatures: true,
-        pricingUpdates: true,
-        industryInsights: true,
-        promotions: true
+      {
+        orderItems: [
+          {
+            slug: "10000-btu-Mini-Split-air-conditioner",
+            name: "10000 BTU Mini Split AC",
+            quantity: 1,
+            image: "/images/p12.jpg",
+            price: 459.99,
+            discount: 50,
+          },
+        ],
+        shippingAddress: {
+          fullName: "Manny Johnson",
+          address: "789 Elm St",
+          city: "Chicago",
+          postalCode: "60601",
+          country: "USA",
+          location: {
+            lat: 41.8781,
+            lng: -87.6298,
+            address: "789 Elm St, Chicago, IL 60601",
+            name: "Elm Street",
+            vicinity: "Downtown Chicago",
+            googleAddressId: "ChIJ7cv00DwsDogRAMDACa2A4K8",
+          },
+        },
+        paymentMethod: "PayPal",
+        paymentResult: null,
+        itemsPrice: 459.99,
+        shippingPrice: 25,
+        taxPrice: 48.60,
+        totalPrice: 533.59,
+        isPaid: false,
+        paidAt: null,
+        isDelivered: false,
+        deliveredAt: null,
+        createdAt: new Date("2024-12-19T08:00:00Z"),
+        updatedAt: new Date("2024-12-19T08:00:00Z"),
       },
-      subscriptionStatus: 'active',
-      subscriptionDate: new Date('2024-01-28'),
-      source: 'website'
-    },
-    {
-      email: 'sarah.davis@startup.io',
-      preferences: {
-        newFeatures: true,
-        pricingUpdates: true,
-        industryInsights: false,
-        promotions: false
+      {
+        orderItems: [
+          {
+            slug: "24000-btu-split-ac",
+            name: "24000 BTU Split AC",
+            quantity: 1,
+            image: "/images/p8.jpg",
+            price: 899.99,
+            discount: 15,
+          },
+          {
+            slug: "10000-btu-Mini-Split-air-conditioner",
+            name: "10000 BTU Mini Split AC",
+            quantity: 1,
+            image: "/images/p12.jpg",
+            price: 459.99,
+            discount: 50,
+          },
+        ],
+        shippingAddress: {
+          fullName: "Barny Wilson",
+          address: "321 Pine Rd",
+          city: "Houston",
+          postalCode: "77001",
+          country: "USA",
+          location: {
+            lat: 29.7604,
+            lng: -95.3698,
+            address: "321 Pine Rd, Houston, TX 77001",
+            name: "Pine Road",
+            vicinity: "Downtown Houston",
+            googleAddressId: "ChIJIQBpAG2ahYAR_6128GltTXQ",
+          },
+        },
+        paymentMethod: "Credit Card",
+        paymentResult: {
+          id: "3C45678D9012",
+          status: "COMPLETED",
+          update_time: "2024-12-17T12:00:00Z",
+          email_address: "buyer3@example.com",
+        },
+        itemsPrice: 1359.98,
+        shippingPrice: 60,
+        taxPrice: 141.60,
+        totalPrice: 1561.58,
+        isPaid: true,
+        paidAt: new Date("2024-12-17T12:00:00Z"),
+        isDelivered: true,
+        deliveredAt: new Date("2024-12-20T16:30:00Z"),
+        createdAt: new Date("2024-12-17T10:00:00Z"),
+        updatedAt: new Date("2024-12-20T16:30:00Z"),
       },
-      subscriptionStatus: 'active',
-      subscriptionDate: new Date('2024-02-10'),
-      source: 'website'
-    },
-    {
-      email: 'unsubscribed@example.com',
-      preferences: {
-        newFeatures: true,
-        pricingUpdates: true,
-        industryInsights: true,
-        promotions: false
+      {
+        orderItems: [
+          {
+            slug: "12000-btu-window-air-conditioner",
+            name: "12000 BTU Window AC",
+            quantity: 3,
+            image: "/images/p1.jpg",
+            price: 299.99,
+            discount: 0,
+          },
+        ],
+        shippingAddress: {
+          fullName: "Mikky Brown",
+          address: "654 Birch Ln",
+          city: "Phoenix",
+          postalCode: "85001",
+          country: "USA",
+          location: {
+            lat: 33.4484,
+            lng: -112.074,
+            address: "654 Birch Ln, Phoenix, AZ 85001",
+            name: "Birch Lane",
+            vicinity: "Downtown Phoenix",
+            googleAddressId: "ChIJQwMXyJw0K4cRfjiGOU34QyQ",
+          },
+        },
+        paymentMethod: "PayPal",
+        paymentResult: {
+          id: "4D56789E0123",
+          status: "COMPLETED",
+          update_time: "2024-12-16T09:15:00Z",
+          email_address: "buyer4@example.com",
+        },
+        itemsPrice: 899.97,
+        shippingPrice: 50,
+        taxPrice: 95.00,
+        totalPrice: 1044.97,
+        isPaid: true,
+        paidAt: new Date("2024-12-16T09:15:00Z"),
+        isDelivered: false,
+        deliveredAt: null,
+        createdAt: new Date("2024-12-16T09:00:00Z"),
+        updatedAt: new Date("2024-12-16T09:15:00Z"),
       },
-      subscriptionStatus: 'unsubscribed',
-      subscriptionDate: new Date('2024-01-05'),
-      unsubscribeDate: new Date('2024-01-20'),
-      source: 'website'
-    }
-  ]
+    ],
+    payments: [
+      {
+        serviceProvider: "test-company1@example.com",
+        amount: 500,
+        status: "completed",
+        paymentMethod: "bank transfer",
+        transactionId: "TXN123456",
+        description: "Payment for residential house design project",
+      },
+      {
+        serviceProvider: "test-company2@example.com",
+        amount: 750,
+        status: "pending",
+        paymentMethod: "paypal",
+        description: "Payment for loft renovation project",
+      },
+      {
+        serviceProvider: "test-company3@example.com",
+        amount: 600,
+        status: "completed",
+        paymentMethod: "bank transfer",
+        transactionId: "TXN789012",
+        description: "Payment for office interior renovation"
+      }
+    ],
+
+    demoRequests: [
+      {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john.doe@example.com",
+        company: "ABC Corp",
+        phone: "123-456-7890",
+        projectSize: "5000-10000 sq ft",
+        preferredDate: "2026-03-15",
+      },
+      {
+        firstName: "Jane",
+        lastName: "Smith",
+        email: "jane.smith@example.com",
+        company: "XYZ Ltd",
+        phone: "987-654-3210",
+        projectSize: "10000-20000 sq ft",
+        preferredDate: "2026-04-01",
+      },
+      {
+        firstName: "Bob",
+        lastName: "Johnson",
+        email: "bob.johnson@example.com",
+        company: "Tech Solutions",
+        phone: "555-123-4567",
+        projectSize: "Under 5000 sq ft",
+        preferredDate: "2026-02-20",
+      }
+    ],
+
+    newsletter: [
+      {
+        email: 'john.doe@example.com',
+        preferences: {
+          newFeatures: true,
+          pricingUpdates: true,
+          industryInsights: true,
+          promotions: false
+        },
+        subscriptionStatus: 'active',
+        subscriptionDate: new Date('2024-01-15'),
+        source: 'website'
+      },
+      {
+        email: 'jane.smith@company.com',
+        preferences: {
+          newFeatures: true,
+          pricingUpdates: false,
+          industryInsights: true,
+          promotions: true
+        },
+        subscriptionStatus: 'active',
+        subscriptionDate: new Date('2024-02-01'),
+        source: 'website'
+      },
+      {
+        email: 'mike.wilson@techcorp.com',
+        preferences: {
+          newFeatures: true,
+          pricingUpdates: true,
+          industryInsights: true,
+          promotions: true
+        },
+        subscriptionStatus: 'active',
+        subscriptionDate: new Date('2024-01-28'),
+        source: 'website'
+      },
+      {
+        email: 'sarah.davis@startup.io',
+        preferences: {
+          newFeatures: true,
+          pricingUpdates: true,
+          industryInsights: false,
+          promotions: false
+        },
+        subscriptionStatus: 'active',
+        subscriptionDate: new Date('2024-02-10'),
+        source: 'website'
+      },
+      {
+        email: 'unsubscribed@example.com',
+        preferences: {
+          newFeatures: true,
+          pricingUpdates: true,
+          industryInsights: true,
+          promotions: false
+        },
+        subscriptionStatus: 'unsubscribed',
+        subscriptionDate: new Date('2024-01-05'),
+        unsubscribeDate: new Date('2024-01-20'),
+        source: 'website'
+      }
+    ],
 
 
 }

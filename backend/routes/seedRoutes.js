@@ -268,15 +268,21 @@ seedRouter.get('/', async (req, res) => {
       const pdfBytes = await pdfDoc.save();
       const pdfBuffer = Buffer.from(pdfBytes);
 
-      engineerAnnotationsWithIds.push({
-        ...ea,
-        userId: createdUsers[1]._id, // Jane (user)
-        engineerId: createdUsers[0]._id, // Admin (engineer)
-        userAnnotationId: createdAnnotations[0]._id,
-        pdfData: pdfBuffer,
-        originalImageWidth: 800,
-        originalImageHeight: 1000,
-      });
+    engineerAnnotationsWithIds.push({
+  annotations: ea.annotations,
+  status: 'reviewed',
+  engineerNotes: ea.notes,
+  userId: createdUsers[1]._id,
+  engineerId: createdUsers[0]._id,
+  userAnnotationId: createdAnnotations[0]._id,
+  pdfData: pdfBuffer,
+  filename: 'engineer-review.pdf',
+  originalImageWidth: 800,
+  originalImageHeight: 1000,
+  systemConfig: {
+    systemType: 'vrf-ductless',
+  },
+});
     }
 
     const createdEngineerAnnotations = await EngineerAnnotation.insertMany(engineerAnnotationsWithIds);

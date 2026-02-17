@@ -142,7 +142,7 @@ const EngineerViewPage = () => {
           acType
         );
       }
-      if (showHVAC && annotation.annotations.vrf && acType.startsWith("vrf")) {
+      if (annotation.annotations.vrf && acType.startsWith("vrf")) {
         overlayVRFSystem(
           overlayContext,
           annotation.annotations.vrf,
@@ -496,6 +496,14 @@ const EngineerViewPage = () => {
               </div>
             )}
           </>
+        )}
+        {acType === "vrf-ductless" && (
+          <div className="mb-2">
+            <strong>Legend (VRF Ductless):</strong>
+            <span className="ms-2" style={{ color: "#008B8B" }}>
+              — Teal Lines: Refrigerant Connections
+            </span>
+          </div>
         )}
       </div>
       <div className="mb-2 d-flex flex-wrap align-items-center gap-2">

@@ -23,7 +23,7 @@ export const hvacSymbols = {
  *
  * Line Visualization:
  * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed) in chain
- * - VRF-Ductless: Single solid teal line (sequential chain connection)
+ * - VRF-Ductless: Single solid teal line (star topology - each indoor to nearest outdoor)
  */
 export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) => {
   const canvasWidth = context.canvas.width;
@@ -109,35 +109,40 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
 
   // Draw refrigerant lines connecting outdoor to indoor units
   if (vrfAnnotations?.outdoorUnits && vrfAnnotations?.indoorUnits) {
-    vrfAnnotations.outdoorUnits.forEach((outdoor) => {
-      const outX = outdoor.xPercent * canvasWidth;
-      const outY = outdoor.yPercent * canvasHeight;
-
-      if (acType === "vrf-ductless") {
-        // VRF-Ductless: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
-        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
-          (a, b) => a.xPercent - b.xPercent
-        );
-        const points = [{ x: outX, y: outY }];
-        sortedIndoors.forEach((indoor) => {
-          points.push({
-            x: indoor.xPercent * canvasWidth,
-            y: indoor.yPercent * canvasHeight,
-          });
+    if (acType === "vrf-ductless") {
+      // VRF-Ductless: Star topology - each indoor connects to nearest outdoor
+      vrfAnnotations.indoorUnits.forEach((indoor) => {
+        const inX = indoor.xPercent * canvasWidth;
+        const inY = indoor.yPercent * canvasHeight;
+        // Find nearest outdoor
+        let nearestOut = null;
+        let minDist = Infinity;
+        vrfAnnotations.outdoorUnits.forEach((outdoor) => {
+          const outX = outdoor.xPercent * canvasWidth;
+          const outY = outdoor.yPercent * canvasHeight;
+          const dist = Math.sqrt((inX - outX) ** 2 + (inY - outY) ** 2);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestOut = { x: outX, y: outY };
+          }
         });
-        // Draw lines between consecutive points
-        for (let i = 0; i < points.length - 1; i++) {
+        if (nearestOut) {
           context.save();
           context.setLineDash([]); // solid line
           context.lineWidth = 2.5;
           context.strokeStyle = "#008B8B"; // teal/dark cyan
           context.beginPath();
-          context.moveTo(points[i].x, points[i].y);
-          context.lineTo(points[i + 1].x, points[i + 1].y);
+          context.moveTo(inX, inY);
+          context.lineTo(nearestOut.x, nearestOut.y);
           context.stroke();
           context.restore();
         }
-      } else if (acType === "vrf-ducted") {
+      });
+    } else if (acType === "vrf-ducted") {
+      vrfAnnotations.outdoorUnits.forEach((outdoor) => {
+        const outX = outdoor.xPercent * canvasWidth;
+        const outY = outdoor.yPercent * canvasHeight;
+
         // VRF-Ducted: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
         const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
           (a, b) => a.xPercent - b.xPercent
@@ -185,8 +190,8 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
           context.stroke();
           context.restore();
         }
-      }
-    });
+      });
+    }
   }
 };
 
@@ -747,10 +752,7 @@ if (
   }
 
   // For VRF ductless systems, draw teal refrigerant lines connecting rectangles to their nearest condenser
-  // DISABLED: VRF systems use chain topology in overlayVRFSystem, not star topology here
-  if (
-    false // disabled for all VRF to prevent conflicting lines
-  ) {
+  if (acType === "vrf-ductless") {
     // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
     let condensers = [];
 

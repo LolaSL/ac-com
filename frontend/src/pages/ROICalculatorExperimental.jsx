@@ -30,7 +30,7 @@ import {
 import jsPDF from "jspdf";
 import axios from "axios";
 import { Store } from "../Store";
-import DemoRequestForm from "../components/DemoRequestForm";
+// import DemoRequestForm from "../components/DemoRequestForm";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import "./ROICalculatorExperimental.css";
@@ -1599,9 +1599,9 @@ export default function ROICalculatorExperimental() {
   };
 
   // Schedule Demo Function
-  const handleScheduleDemo = () => {
-    setShowDemoModal(true);
-  };
+  // const handleScheduleDemo = () => {
+  //   setShowDemoModal(true);
+  // };
 
   return (
     <div className="roi-experimental-page-container">
@@ -2418,13 +2418,13 @@ export default function ROICalculatorExperimental() {
                 💾 Save Calculation
               </Button>
             )}
-            <Button
+            {/* <Button
               variant="outline-primary"
               size="lg"
               onClick={handleScheduleDemo}
             >
               📞 Schedule Demo
-            </Button>
+            </Button> */}
           </Card.Body>
         </Card>
 
@@ -2512,7 +2512,7 @@ export default function ROICalculatorExperimental() {
             Schedule a demo by filling out the form below or contact our sales
             team at sales@ac-commerce.com
           </p>
-          <DemoRequestForm onSuccess={() => setShowDemoModal(false)} />
+          {/* <DemoRequestForm onSuccess={() => setShowDemoModal(false)} /> */}
         </Modal.Body>
       </Modal>
     </div>

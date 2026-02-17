@@ -82,13 +82,27 @@ const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
       <Modal.Body>
         {product ? (
           <div className="product-item">
-            <div className="product-image">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="img-fluid"
-              />
-            </div>
+            {product.image && (
+              <div style={{ textAlign: "center", marginBottom: "15px" }}>
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    objectFit: "cover",
+                    borderRadius: "4px",
+                    border: "1px solid #ddd"
+                  }}
+                  onLoad={() => {
+                    console.log(`✓ Image loaded successfully: ${product.image}`);
+                  }}
+                  onError={(e) => {
+                    console.error(`✗ Image failed to load: ${product.image}`);
+                  }}
+                />
+              </div>
+            )}
 
             <h5>{product.name}</h5>
 
