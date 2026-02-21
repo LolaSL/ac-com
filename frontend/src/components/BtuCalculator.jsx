@@ -163,32 +163,48 @@ useEffect(() => {
         unit: "meters",
       }));
 
-      // Parse AC annotations first to determine if multi-flat
+      // 1. Detect multi-flat from AC annotations
       let isMultiFlat = false;
+      let flatNamesFromAnnotations = [];
       if (acAnnotations?.length > 0) {
         const { flats } = groupFlatsByAnnotations(acAnnotations);
-        isMultiFlat = Object.keys(flats).length > 1;
+        flatNamesFromAnnotations = Object.keys(flats);
+        isMultiFlat = flatNamesFromAnnotations.length > 1;
       }
 
-      // If not multi-flat, strip flat prefixes from room names to force grouping under "Flat 1"
+      // 2. Also detect multi-flat from distinct flat-number prefixes in room names
+      //    (handles the case where Annotator sends rooms with prefixes but no annotations)
+      const flatNumsInRoomNames = new Set(
+        formattedRooms
+          .map((r) => r.name.match(/^flat\s*(\d+)\s*[:\s]/i)?.[1])
+          .filter(Boolean)
+      );
+      if (flatNumsInRoomNames.size > 1) {
+        isMultiFlat = true;
+      }
+
+      // Only strip prefixes when genuinely single-flat
       if (!isMultiFlat) {
         formattedRooms.forEach((room) => {
-          room.name = room.name.replace(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)[\s:]/i, '').trim();
+          room.name = room.name
+            .replace(/^(Flat\s*\d+|Unit\s*[A-Z0-9]+|Apt\s*\d+)[\s:]+/i, "")
+            .trim();
         });
       }
 
-      console.log("BtuCalculator received rooms:", formattedRooms);
+      console.log("BtuCalculator received rooms (multi-flat:", isMultiFlat, "):", formattedRooms);
       setRooms(formattedRooms);
-    }
 
-    // Set detected flats from annotations (but don't auto-check the box)
-    if (acAnnotations?.length > 0) {
-      const { flats } = groupFlatsByAnnotations(acAnnotations);
-      const flatNames = Object.keys(flats);
-      console.log("Detected flats from annotations:", flatNames);
-
-      if (flatNames.length > 1) {
-        setDetectedFlats(flatNames);
+      // 3. Update detectedFlats from annotations or from room-name prefixes
+      let allFlatNames = flatNamesFromAnnotations;
+      if (allFlatNames.length < 2 && flatNumsInRoomNames.size > 1) {
+        allFlatNames = Array.from(flatNumsInRoomNames)
+          .sort((a, b) => parseInt(a) - parseInt(b))
+          .map((n) => `Flat ${n}`);
+      }
+      if (allFlatNames.length > 1) {
+        setDetectedFlats(allFlatNames);
+        setIsMultiFlatProperty(true);
       } else {
         setDetectedFlats([]);
       }

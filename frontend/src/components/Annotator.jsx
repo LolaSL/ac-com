@@ -946,25 +946,89 @@ const Annotator = ({
       );
 
       if (validRooms.length > 0) {
-        // Format rooms for BTU Calculator
-        const formattedRooms = validRooms.map((room) => ({
-          name: room.roomType || "Room",
-          size:
-            parseFloat(
-              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-            ) || 0,
-          btu: 0,
-          unit: "meters",
-        }));
+        // Build AC annotations from current canvas comments
+        const acAnnotations = comments
+          .filter((c) => c.text)
+          .map((c) => ({
+            label: c.text,
+            coordinates: { x: c.x, y: c.y },
+          }));
 
-        console.log("Sending to BTU Calculator:", formattedRooms);
-        // Send formatted data to BTU Calculator
-        setRoomData(formattedRooms);
+        // Detect flat numbers from annotations.
+        // Rules:
+        //   condenser-N  or  condenser N  → flat N
+        //   flat N  / unit N              → flat N
+        //   ac-N.M  (dot notation)        → flat N  (multi-flat style)
+        //   ac-N    (no dot)              → single-flat, unit N — NOT a flat number
+        const detectedFlatNums = new Set();
+        acAnnotations.forEach(({ label }) => {
+          const t = label.toLowerCase();
+          const cm = t.match(/condenser[-\s]?(\d+)/);
+          if (cm) detectedFlatNums.add(parseInt(cm[1], 10));
+          const fm = t.match(/(?:flat|unit)\s*(\d+)/);
+          if (fm) detectedFlatNums.add(parseInt(fm[1], 10));
+          // Only multi-flat dot notation adds a flat number
+          const amDot = t.match(/ac[-\s]?(\d+)\.(\d+)/);
+          if (amDot) detectedFlatNums.add(parseInt(amDot[1], 10));
+        });
+
+        // Fall back: count duplicate room names to infer flat count.
+        // Require ≥2 DIFFERENT room types to be duplicated — a single flat
+        // can have 2 bedrooms, but is unlikely to have 2 bedrooms AND 2 living rooms.
+        let flatNumsArray = Array.from(detectedFlatNums).sort((a, b) => a - b);
+        if (flatNumsArray.length <= 1) {
+          const counts = {};
+          validRooms.forEach((r) => {
+            const n = r.roomType || "Room";
+            counts[n] = (counts[n] || 0) + 1;
+          });
+          const maxDup = Math.max(...Object.values(counts), 1);
+          const duplicatedTypeCount = Object.values(counts).filter((c) => c >= maxDup).length;
+          if (maxDup > 1 && duplicatedTypeCount >= 2) {
+            flatNumsArray = Array.from({ length: maxDup }, (_, i) => i + 1);
+          }
+        }
+
+        const isMultiFlat = flatNumsArray.length > 1;
+
+        // Format rooms, adding flat prefixes when multi-flat
+        let formattedRooms = validRooms.map((room, idx) => {
+          const base = room.roomType || "Room";
+          const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
+          const name =
+            isMultiFlat && !alreadyPrefixed
+              ? `Flat ${flatNumsArray[idx % flatNumsArray.length]}: ${base}`
+              : base;
+          return {
+            name,
+            size:
+              parseFloat(
+                (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+              ) || 0,
+            btu: 0,
+            unit: "meters",
+          };
+        });
+
+        // When multi-flat: sort by flat number so flats are grouped
+        if (isMultiFlat) {
+          formattedRooms = formattedRooms
+            .map((r) => ({
+              ...r,
+              _flatNum: parseInt(r.name.match(/^flat\s*(\d+)/i)?.[1] || "1", 10),
+            }))
+            .sort((a, b) => a._flatNum - b._flatNum)
+            .map(({ _flatNum, ...r }) => r);
+        }
+
+        console.log("Sending to BTU Calculator (multi-flat:", isMultiFlat, "):", formattedRooms);
+        // Pass rooms AND annotations so BtuCalculator can detect multi-flat
+        setRoomData(formattedRooms, isMultiFlat ? acAnnotations : []);
       }
     }
     // Intentionally exclude `setRoomData` from deps to avoid infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredRoomsTrigger]);
+  }, [filteredRoomsTrigger, comments]);
 
   // Trigger update when filter text changes
   useEffect(() => {
@@ -1732,51 +1796,58 @@ const Annotator = ({
 
     console.log("Raw AC annotations:", acAnnotations);
 
-    // Parse annotations to detect flats - look for specific patterns
+    // Parse annotations to detect flats - look for specific patterns.
+    // Rules (same as auto-update):
+    //   condenser-N  → flat N
+    //   flat N / unit N keyword → flat N
+    //   ac-N.M (dot notation) → flat N
+    //   ac-N (no dot) → single-flat unit, NOT a flat number
     const flatNumbers = new Set();
 
     acAnnotations.forEach((ann) => {
       const text = ann.label.toLowerCase();
 
-      // Pattern 1: condenser-1, condenser-2
-      const condenserMatch = text.match(/condenser-(\d+)/);
-      if (condenserMatch) {
-        flatNumbers.add(parseInt(condenserMatch[1]));
-      }
+      // condenser-N or condenser N
+      const condenserMatch = text.match(/condenser[-\s]?(\d+)/);
+      if (condenserMatch) flatNumbers.add(parseInt(condenserMatch[1]));
 
-      // Pattern 2: Flat 1, Unit 1
+      // flat N / unit N keyword
       const flatMatch = text.match(/(?:flat|unit)\s+(\d+)/);
-      if (flatMatch) {
-        flatNumbers.add(parseInt(flatMatch[1]));
-      }
+      if (flatMatch) flatNumbers.add(parseInt(flatMatch[1]));
+
+      // ac-N.M dot notation only
+      const acDotMatch = text.match(/ac[-\s]?(\d+)\.(\d+)/);
+      if (acDotMatch) flatNumbers.add(parseInt(acDotMatch[1]));
     });
 
     const flatArray = Array.from(flatNumbers).sort((a, b) => a - b);
     console.log("Detected flat numbers:", flatArray);
     console.log("Number of flats detected:", flatArray.length);
 
-    // Count room duplicates to detect multi-flat properties
+    // Count room duplicates to detect multi-flat properties.
+    // Require ≥2 DIFFERENT room types duplicated — a single flat with 2 bedrooms
+    // should NOT trigger multi-flat inference.
     const roomNameCounts = {};
     flatRooms.forEach((room) => {
       const roomName = room.roomType || "Room";
       roomNameCounts[roomName] = (roomNameCounts[roomName] || 0) + 1;
     });
     const maxDuplicateCount = Math.max(...Object.values(roomNameCounts), 1);
+    const duplicatedTypeCount = Object.values(roomNameCounts).filter(
+      (c) => c >= maxDuplicateCount
+    ).length;
     console.log("Room duplicate counts:", roomNameCounts);
-    console.log("Max duplicates per room:", maxDuplicateCount);
+    console.log("Max duplicates per room:", maxDuplicateCount, "across", duplicatedTypeCount, "room types");
 
-    // If no flats detected from annotations, but we have duplicates, infer multi-flat
+    // Infer multi-flat only when ≥2 room types are duplicated
     let inferredFlatCount = flatArray.length;
-    if (flatArray.length <= 1 && maxDuplicateCount > 1) {
-      // We have duplicate room names - likely a 2-flat (or more) property
+    if (flatArray.length <= 1 && maxDuplicateCount > 1 && duplicatedTypeCount >= 2) {
       inferredFlatCount = maxDuplicateCount;
       console.log(
         `Inferring ${inferredFlatCount}-flat property from duplicate rooms (no annotations found)`
       );
       for (let i = 1; i <= inferredFlatCount; i++) {
-        if (!flatArray.includes(i)) {
-          flatArray.push(i);
-        }
+        if (!flatArray.includes(i)) flatArray.push(i);
       }
       flatArray.sort((a, b) => a - b);
     }

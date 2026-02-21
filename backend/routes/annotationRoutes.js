@@ -61,7 +61,7 @@ router.post(
       const userId = req.user._id;
       const isPaid = req.user.isPaid; // <-- ensure user’s isPaid is used
 
-      const { pdfId, rectangles, comments, lines, imageWidth, imageHeight } =
+      const { pdfId, rectangles, comments, lines, imageWidth, imageHeight, rooms } =
         req.body;
 
       if (!imageWidth || !imageHeight) {
@@ -76,6 +76,7 @@ router.post(
       const parsedRectangles = JSON.parse(rectangles || "[]");
       const parsedComments = JSON.parse(comments || "[]");
       const parsedLines = JSON.parse(lines || "[]");
+      const parsedRooms = JSON.parse(rooms || "[]");
       const percentRectangles = parsedRectangles.map((rect) => ({
         id: rect.id,
         xPercent: rect.x / width,
@@ -119,6 +120,7 @@ router.post(
           comments: percentComments,
           lines: percentLines,
         },
+        roomData: parsedRooms,
       });
 
       const savedAnnotation = await newAnnotation.save();

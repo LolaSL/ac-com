@@ -91,6 +91,16 @@ const annotationSchema = new Schema(
     },
     isPaid: { type: Boolean, default: false },
     acType: { type: String, enum: ['ducted', 'ductless', 'vrf-ducted', 'vrf-ductless'], default: 'vrf-ducted' },
+    roomData: [
+      {
+        roomType: { type: String },
+        width: { type: String },
+        height: { type: String },
+        areaSqFt: { type: String },
+        areaSqM: { type: String },
+        uniqueId: { type: String },
+      }
+    ],
     createdAt: {
       type: Date,
       default: Date.now,

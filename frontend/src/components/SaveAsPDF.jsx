@@ -112,36 +112,56 @@ const drawVRFAnnotations = (
         }
       });
     } else if (acType === "vrf-ducted") {
+      // VRF-Ducted: per-flat chain  ac-N.1 → ac-N.2 → … → condenser-N
+      // Indoor units may carry a `flatNum` field; if not, assign to nearest outdoor unit.
       vrfAnnotations.outdoorUnits.forEach((outdoor) => {
         const outX = outdoor.xPercent * canvasWidth;
         const outY = outdoor.yPercent * canvasHeight;
+        const outdoorFlatNum = outdoor.flatNum ?? null;
 
-        // VRF-Ducted: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
-        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
-          (a, b) => a.xPercent - b.xPercent
-        );
-        const points = [{ x: outX, y: outY }];
-        sortedIndoors.forEach((indoor) => {
-          points.push({
-            x: indoor.xPercent * canvasWidth,
-            y: indoor.yPercent * canvasHeight,
-          });
+        // Select indoor units belonging to this condenser:
+        // 1) match by flatNum if available
+        // 2) fall back to all indoors (single-flat / legacy behaviour)
+        let flatIndoors;
+        if (outdoorFlatNum !== null) {
+          flatIndoors = vrfAnnotations.indoorUnits.filter(
+            (u) => (u.flatNum ?? null) === outdoorFlatNum
+          );
+        } else {
+          // Single outdoor unit → assign all indoors to it
+          flatIndoors = [...vrfAnnotations.indoorUnits];
+        }
+
+        // Sort by unitNum if available, otherwise by x position
+        const sortedIndoors = flatIndoors.slice().sort((a, b) => {
+          if (a.unitNum != null && b.unitNum != null) return a.unitNum - b.unitNum;
+          return a.xPercent - b.xPercent;
         });
-        // Draw dual parallel lines (red supply + blue return, dashed) between consecutive points
-        for (let i = 0; i < points.length - 1; i++) {
-          const startX = points[i].x;
-          const startY = points[i].y;
-          const endX = points[i + 1].x;
-          const endY = points[i + 1].y;
 
-          const offset = 3;
+        // Chain: ac-N.1 → ac-N.2 → … → condenser-N
+        const chain = [
+          ...sortedIndoors.map((u) => ({
+            x: u.xPercent * canvasWidth,
+            y: u.yPercent * canvasHeight,
+          })),
+          { x: outX, y: outY },
+        ];
+
+        // Draw dual parallel lines (red supply + blue return, dashed) along the chain
+        for (let i = 0; i < chain.length - 1; i++) {
+          const startX = chain[i].x;
+          const startY = chain[i].y;
+          const endX = chain[i + 1].x;
+          const endY = chain[i + 1].y;
           const dx = endX - startX;
           const dy = endY - startY;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = (-dy / length) * offset;
-          const perpY = (dx / length) * offset;
+          const len = Math.sqrt(dx * dx + dy * dy);
+          if (len === 0) continue;
+          const offset = 3;
+          const perpX = (-dy / len) * offset;
+          const perpY = (dx / len) * offset;
 
-          // Supply line (red, dashed) - from start to end
+          // Supply line (red, dashed)
           context.save();
           context.setLineDash([8, 4]);
           context.lineWidth = 2;
@@ -152,7 +172,7 @@ const drawVRFAnnotations = (
           context.stroke();
           context.restore();
 
-          // Return line (blue, dashed) - from end to start
+          // Return line (blue, dashed)
           context.save();
           context.setLineDash([8, 4]);
           context.lineWidth = 2;
@@ -700,131 +720,135 @@ function SaveAsPDF({
       });
     }
 
-    // For VRF ducted systems, draw red/blue dashed supply/return lines between user rectangles
-    // Uses sequential chain topology: Rect1→Rect2→Rect3→...→Condenser (largest rectangle)
+    // For VRF ducted systems, draw red/blue dashed supply/return lines between user rectangles.
+    // Supports both single-flat (ac-1, ac-2, condenser) and multi-flat
+    // (ac-1.1, ac-1.2, condenser-1, ac-2.1, ac-2.2, condenser-2) topologies.
+    // Chain per flat: ac-N.1 → ac-N.2 → ... → condenser-N
     if (
       acType === "vrf-ducted" &&
       annotations?.rectangles &&
       annotations.rectangles.length > 1
     ) {
-      // Find condenser by comment text "condenser"
-      let condenser = null;
-      if (annotations.comments) {
-        const condenserComment = annotations.comments.find((c) =>
-          c.text.toLowerCase().includes("condenser")
-        );
-        if (condenserComment) {
-          condenser = annotations.rectangles.find(
-            (r) => r.id === condenserComment.rectId
-          );
+      // Helper: get the comment label for a rectangle
+      const getRectComment = (rect) => {
+        if (!annotations.comments) return null;
+        return annotations.comments.find((c) => c.rectId === rect.id) || null;
+      };
+      const getRectLabel = (rect) => {
+        const c = getRectComment(rect);
+        return c ? c.text.toLowerCase().trim() : "";
+      };
+
+      // Classify every rectangle as condenser or AC unit, and extract flat/unit numbers
+      // Pattern: condenser-N  or  condenser N  (flat-aware)  →  flatNum = N, unitNum = 0
+      // Pattern: ac-N.M  or  ac-NM  or  ac-N  (flat N, unit M)  →  flatNum = N, unitNum = M
+      // Single-flat fallback: "condenser" with no number → flatNum = 1; "ac-N" → flatNum = 1, unitNum = N
+      const classifyRect = (rect) => {
+        const label = getRectLabel(rect);
+        // condenser-N or condenser N  (multi-flat)
+        const condMulti = label.match(/condenser[-\s]?(\d+)/);
+        if (condMulti) return { type: "condenser", flatNum: parseInt(condMulti[1]), unitNum: 0, rect };
+        // plain "condenser" (single-flat)
+        if (/\bcondenser\b/.test(label)) return { type: "condenser", flatNum: 1, unitNum: 0, rect };
+        if (rect.isCondenser) return { type: "condenser", flatNum: 1, unitNum: 0, rect };
+        // ac-N.M (flat N, unit M inside flat)
+        const acMulti = label.match(/ac[-\s]?(\d+)[.\-](\d+)/);
+        if (acMulti) return { type: "ac", flatNum: parseInt(acMulti[1]), unitNum: parseInt(acMulti[2]), rect };
+        // ac-N (single-flat style: flat 1, unit N)
+        const acSingle = label.match(/ac[-\s]?(\d+)/);
+        if (acSingle) return { type: "ac", flatNum: 1, unitNum: parseInt(acSingle[1]), rect };
+        return null; // unrecognised rectangle — skip
+      };
+
+      const classified = annotations.rectangles
+        .map(classifyRect)
+        .filter(Boolean);
+
+      // Group by flat number
+      const flats = {}; // flatNum → { condenserRect, acRects[] }
+      classified.forEach(({ type, flatNum, unitNum, rect }) => {
+        if (!flats[flatNum]) flats[flatNum] = { condenserRect: null, acRects: [] };
+        if (type === "condenser") {
+          flats[flatNum].condenserRect = rect;
+        } else {
+          flats[flatNum].acRects.push({ rect, unitNum });
         }
-      }
-      // Fallback to largest if no comment
-      if (!condenser) {
+      });
+
+      // If we found no flats at all (no comments match), fall back to largest-rect-as-condenser
+      if (Object.keys(flats).length === 0) {
         let maxArea = -Infinity;
+        let fallbackCondenser = null;
         annotations.rectangles.forEach((rect) => {
           const area = rect.widthPercent * rect.heightPercent;
-          if (area > maxArea) {
-            maxArea = area;
-            condenser = rect;
-          }
+          if (area > maxArea) { maxArea = area; fallbackCondenser = rect; }
         });
-      }
-
-      if (condenser) {
-        // Get all non-condenser rectangles and sort by comment text number (e.g., "ac-1" -> 1)
-        const indoorRects = annotations.rectangles
-          .filter((rect) => rect !== condenser && !rect.isCondenser)
-          .sort((a, b) => {
-            const getNum = (rect) => {
-              if (!annotations.comments) return 0;
-              const comment = annotations.comments.find(
-                (c) => c.rectId === rect.id
-              );
-              if (comment) {
-                const match = comment.text.match(/ac-(\d+)/i);
-                return match ? parseInt(match[1]) : 0;
-              }
-              return 0;
-            };
-            return getNum(a) - getNum(b);
-          });
-
-        // Draw chain connections between rectangles
-        for (let i = 0; i < indoorRects.length - 1; i++) {
-          const x1 = indoorRects[i].xPercent * canvasWidth;
-          const y1 = indoorRects[i].yPercent * canvasHeight;
-          const x2 = indoorRects[i + 1].xPercent * canvasWidth;
-          const y2 = indoorRects[i + 1].yPercent * canvasHeight;
-
-          const offset = 3;
-          const dx = x2 - x1;
-          const dy = y2 - y1;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = (-dy / length) * offset;
-          const perpY = (dx / length) * offset;
-
-          // Supply line (red, dashed)
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "red";
-          context.beginPath();
-          context.moveTo(x1 + perpX, y1 + perpY);
-          context.lineTo(x2 + perpX, y2 + perpY);
-          context.stroke();
-          context.restore();
-
-          // Return line (blue, dashed)
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "#0066FF";
-          context.beginPath();
-          context.moveTo(x1 - perpX, y1 - perpY);
-          context.lineTo(x2 - perpX, y2 - perpY);
-          context.stroke();
-          context.restore();
-        }
-
-        // Connect last rectangle to condenser
-        if (indoorRects.length > 0) {
-          const lastIndoor = indoorRects[indoorRects.length - 1];
-          const lastX = lastIndoor.xPercent * canvasWidth;
-          const lastY = lastIndoor.yPercent * canvasHeight;
-          const condX = condenser.xPercent * canvasWidth;
-          const condY = condenser.yPercent * canvasHeight;
-
-          const offset = 3;
-          const dx = condX - lastX;
-          const dy = condY - lastY;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = (-dy / length) * offset;
-          const perpY = (dx / length) * offset;
-
-          // Supply line to condenser
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "red";
-          context.beginPath();
-          context.moveTo(lastX + perpX, lastY + perpY);
-          context.lineTo(condX + perpX, condY + perpY);
-          context.stroke();
-          context.restore();
-
-          // Return line from condenser
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "#0066FF";
-          context.beginPath();
-          context.moveTo(lastX - perpX, lastY - perpY);
-          context.lineTo(condX - perpX, condY - perpY);
-          context.stroke();
-          context.restore();
+        if (fallbackCondenser) {
+          flats[1] = {
+            condenserRect: fallbackCondenser,
+            acRects: annotations.rectangles
+              .filter((r) => r !== fallbackCondenser)
+              .map((rect, i) => ({ rect, unitNum: i + 1 })),
+          };
         }
       }
+
+      // Helper: draw one dual-line segment (supply red + return blue, both dashed)
+      const drawDuctSegment = (x1, y1, x2, y2) => {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len === 0) return;
+        const offset = 3;
+        const perpX = (-dy / len) * offset;
+        const perpY = (dx / len) * offset;
+
+        context.save();
+        context.setLineDash([8, 4]);
+        context.lineWidth = 2;
+        context.strokeStyle = "red";
+        context.beginPath();
+        context.moveTo(x1 + perpX, y1 + perpY);
+        context.lineTo(x2 + perpX, y2 + perpY);
+        context.stroke();
+        context.restore();
+
+        context.save();
+        context.setLineDash([8, 4]);
+        context.lineWidth = 2;
+        context.strokeStyle = "#0066FF";
+        context.beginPath();
+        context.moveTo(x1 - perpX, y1 - perpY);
+        context.lineTo(x2 - perpX, y2 - perpY);
+        context.stroke();
+        context.restore();
+      };
+
+      // For each flat: chain ac-N.1 → ac-N.2 → … → condenser-N
+      Object.values(flats).forEach(({ condenserRect, acRects }) => {
+        // Sort AC units within this flat by their unit number
+        const sortedAC = [...acRects].sort((a, b) => a.unitNum - b.unitNum);
+
+        // If there's no condenser for this flat, skip drawing lines
+        if (!condenserRect && sortedAC.length === 0) return;
+
+        const rectCx = (r) =>
+          r.xPercent * canvasWidth + (r.widthPercent * canvasWidth) / 2;
+        const rectCy = (r) =>
+          r.yPercent * canvasHeight + (r.heightPercent * canvasHeight) / 2;
+
+        // Build ordered chain: [ac1, ac2, …, condenser]
+        const chain = sortedAC.map(({ rect }) => rect);
+        if (condenserRect) chain.push(condenserRect);
+
+        // Draw segments along the chain
+        for (let i = 0; i < chain.length - 1; i++) {
+          drawDuctSegment(
+            rectCx(chain[i]), rectCy(chain[i]),
+            rectCx(chain[i + 1]), rectCy(chain[i + 1])
+          );
+        }
+      });
     }
 
     // Draw HVAC annotations - for ducted minisplit and VRF-ducted systems
@@ -832,16 +856,16 @@ function SaveAsPDF({
       annotations.hvac.ducts.forEach((duct) => {
         const x = duct.xPercent * canvasWidth;
         const y = duct.yPercent * canvasHeight;
-        const width = (duct.width || 0.1) * canvasWidth;
-        const height = (duct.height || 0.02) * canvasHeight;
+        const width = (duct.width || 0.01) * canvasWidth;
+        const height = (duct.height || 0.003) * canvasHeight;
         context.save();
         context.translate(x, y);
         context.beginPath();
         context.rect(0, 0, width, height);
-        context.fillStyle = duct.fill || "rgba(255, 255, 0, 0.5)"; // semi-transparent yellow
+        context.fillStyle = duct.fill || "rgba(255, 200, 0, 0.6)"; // semi-transparent orange
         context.fill();
-        context.lineWidth = 2;
-        context.strokeStyle = duct.stroke || "orange";
+        context.lineWidth = 1;
+        context.strokeStyle = duct.stroke || "darkorange";
         context.stroke();
         context.restore();
       });
@@ -852,90 +876,131 @@ function SaveAsPDF({
       annotations.hvac.diffusers.forEach((diffuser) => {
         const x = diffuser.xPercent * canvasWidth;
         const y = diffuser.yPercent * canvasHeight;
-        const size = (diffuser.sizePercent || 0.04) * canvasWidth;
+        const size = (diffuser.sizePercent || 0.008) * canvasWidth;
         context.beginPath();
         if (diffuser.shape === "square") {
           context.rect(x - size / 2, y - size / 2, size, size);
         } else {
           context.arc(x, y, size / 2, 0, 2 * Math.PI);
         }
-        context.fillStyle = "rgba(0, 255, 0, 0.5)"; // semi-transparent green
+        context.fillStyle = "rgba(100, 200, 100, 0.6)"; // semi-transparent green
         context.fill();
-        context.lineWidth = 2;
-        context.strokeStyle = "lime";
+        context.lineWidth = 1;
+        context.strokeStyle = "darkgreen";
         context.stroke();
       });
     }
 
-    // Draw dotted connection lines from diffusers to nearest ducts, preferring matching groups
+    // Draw dotted connection lines from diffusers to ducts
+    // Logic: If equal number of ducts and diffusers, connect 1-to-1 (nearest by x position)
+    // Else, connect based on matching comment groups (1-to-many), fallback to nearest
     if (
       (acType === "ducted" || acType === "vrf-ducted") &&
       annotations?.hvac?.ducts &&
       annotations?.hvac?.diffusers
     ) {
-      annotations.hvac.diffusers.forEach((diffuser) => {
-        const dx = diffuser.xPercent * canvasWidth;
-        const dy = diffuser.yPercent * canvasHeight;
-        const diffuserGroup = getNearestCommentText(
-          dx,
-          dy,
-          annotations.comments
+      const numDucts = annotations.hvac.ducts.length;
+      const numDiffusers = annotations.hvac.diffusers.length;
+
+      if (numDucts === numDiffusers) {
+        // 1-to-1: pair ducts and diffusers by sorted position (left to right)
+        const sortedDucts = [...annotations.hvac.ducts].sort(
+          (a, b) => a.xPercent - b.xPercent
         );
-        let nearestDuct = null;
-        let minDist = Infinity;
-        // First, try to find a duct with matching group
-        annotations.hvac.ducts.forEach((duct) => {
-          const ductCenterX =
-            duct.xPercent * canvasWidth +
-            ((duct.width || 0.2) * canvasWidth) / 2;
-          const ductCenterY =
-            duct.yPercent * canvasHeight +
-            ((duct.height || 0.04) * canvasHeight) / 2;
-          const ductGroup = getNearestCommentText(
-            ductCenterX,
-            ductCenterY,
-            annotations.comments
-          );
-          if (diffuserGroup && ductGroup === diffuserGroup) {
-            const dist = Math.sqrt(
-              (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
-            );
-            if (dist < minDist) {
-              minDist = dist;
-              nearestDuct = { x: ductCenterX, y: ductCenterY };
-            }
+        const sortedDiffusers = [...annotations.hvac.diffusers].sort(
+          (a, b) => a.xPercent - b.xPercent
+        );
+        sortedDucts.forEach((duct, index) => {
+          const diffuser = sortedDiffusers[index];
+          if (diffuser) {
+            const ductCenterX =
+              duct.xPercent * canvasWidth +
+              ((duct.width || 0.01) * canvasWidth) / 2;
+            const ductCenterY =
+              duct.yPercent * canvasHeight +
+              ((duct.height || 0.003) * canvasHeight) / 2;
+            const dx = diffuser.xPercent * canvasWidth;
+            const dy = diffuser.yPercent * canvasHeight;
+            context.save();
+            context.setLineDash([3, 3]); // dotted line
+            context.lineWidth = 1;
+            context.strokeStyle = "darkgray";
+            context.beginPath();
+            context.moveTo(dx, dy);
+            context.lineTo(ductCenterX, ductCenterY);
+            context.stroke();
+            context.restore();
           }
         });
-        // If no matching group duct, find nearest overall
-        if (!nearestDuct) {
+      } else {
+        // 1-to-many: connect diffusers to ducts with matching comment groups, fallback to nearest
+        annotations.hvac.diffusers.forEach((diffuser) => {
+          const dx = diffuser.xPercent * canvasWidth;
+          const dy = diffuser.yPercent * canvasHeight;
+          const diffuserGroup = getNearestCommentText(
+            dx,
+            dy,
+            annotations.comments
+          );
+          let nearestDuct = null;
+          let minDist = Infinity;
+          
+          // First, try to find a duct with matching group
           annotations.hvac.ducts.forEach((duct) => {
             const ductCenterX =
               duct.xPercent * canvasWidth +
-              ((duct.width || 0.2) * canvasWidth) / 2;
+              ((duct.width || 0.01) * canvasWidth) / 2;
             const ductCenterY =
               duct.yPercent * canvasHeight +
-              ((duct.height || 0.04) * canvasHeight) / 2;
-            const dist = Math.sqrt(
-              (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+              ((duct.height || 0.003) * canvasHeight) / 2;
+            const ductGroup = getNearestCommentText(
+              ductCenterX,
+              ductCenterY,
+              annotations.comments
             );
-            if (dist < minDist) {
-              minDist = dist;
-              nearestDuct = { x: ductCenterX, y: ductCenterY };
+            if (diffuserGroup && ductGroup === diffuserGroup) {
+              const dist = Math.sqrt(
+                (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+              );
+              if (dist < minDist) {
+                minDist = dist;
+                nearestDuct = { x: ductCenterX, y: ductCenterY };
+              }
             }
           });
-        }
-        if (nearestDuct) {
-          context.save();
-          context.setLineDash([5, 5]); // dotted line
-          context.lineWidth = 2;
-          context.strokeStyle = "gray"; // relevant color for routes
-          context.beginPath();
-          context.moveTo(dx, dy);
-          context.lineTo(nearestDuct.x, nearestDuct.y);
-          context.stroke();
-          context.restore();
-        }
-      });
+          
+          // Fallback to nearest duct if no matching group
+          if (!nearestDuct) {
+            annotations.hvac.ducts.forEach((duct) => {
+              const ductCenterX =
+                duct.xPercent * canvasWidth +
+                ((duct.width || 0.01) * canvasWidth) / 2;
+              const ductCenterY =
+                duct.yPercent * canvasHeight +
+                ((duct.height || 0.003) * canvasHeight) / 2;
+              const dist = Math.sqrt(
+                (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
+              );
+              if (dist < minDist) {
+                minDist = dist;
+                nearestDuct = { x: ductCenterX, y: ductCenterY };
+              }
+            });
+          }
+          
+          if (nearestDuct) {
+            context.save();
+            context.setLineDash([3, 3]); // dotted line
+            context.lineWidth = 1;
+            context.strokeStyle = "darkgray"; // darker gray for better visibility
+            context.beginPath();
+            context.moveTo(dx, dy);
+            context.lineTo(nearestDuct.x, nearestDuct.y);
+            context.stroke();
+            context.restore();
+          }
+        });
+      }
     }
 
     // Draw VRF system annotations (outdoor condenser + indoor units + refrigerant lines)

@@ -236,6 +236,11 @@ seedRouter.get('/', async (req, res) => {
     // Seed EngineerAnnotations
     const engineerAnnotationsWithIds = [];
     for (const ea of data.engineerAnnotations) {
+      // Define systemConfig first before using it
+      const systemConfig = {
+        systemType: ea.systemConfig?.systemType || 'vrf-ductless',
+      };
+
       // Create a simple PDF with 4 pages for testing
       const pdfDoc = await PDFDocument.create();
       const pages = [];
@@ -252,7 +257,7 @@ seedRouter.get('/', async (req, res) => {
           size: fontSize,
           color: rgb(0, 0.53, 0.71),
         });
-        page.drawText(`System Type: ${ea.systemConfig.systemType}`, {
+        page.drawText(`System Type: ${systemConfig.systemType}`, {
           x: 50,
           y: height - 6 * fontSize,
           size: 20,
@@ -279,9 +284,7 @@ seedRouter.get('/', async (req, res) => {
   filename: 'engineer-review.pdf',
   originalImageWidth: 800,
   originalImageHeight: 1000,
-  systemConfig: {
-    systemType: 'vrf-ductless',
-  },
+  systemConfig: systemConfig,
 });
     }
 
