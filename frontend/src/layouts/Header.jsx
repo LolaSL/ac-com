@@ -279,7 +279,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     Blogs
                   </Link>
                   <Link to="/admin/all-annotations" className="dropdown-item">
-                    All Annotated PDFs
+                    Users Annotated PDFs
                   </Link>
                   <NavDropdown.Divider />
                   <Link

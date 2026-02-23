@@ -10,7 +10,7 @@ import {
   Col,
   Badge,
 } from "react-bootstrap";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
@@ -58,7 +58,7 @@ export default function UserListPage() {
   const token = userInfo?.token || adminInfo?.token;
 
   const [
-    { loading, error, users = [], loadingDelete, successDelete },
+    { loading, error, users = [], pages, loadingDelete, successDelete },
     dispatch,
   ] = useReducer(reducer, {
     loading: true,
@@ -193,6 +193,7 @@ export default function UserListPage() {
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
+        <>
         <div className="table-responsive admin-table-wrapper">
           <Table striped bordered hover className="admin-table">
             <thead className="admin-table-header">
@@ -256,6 +257,33 @@ export default function UserListPage() {
             </tbody>
           </Table>
         </div>
+          <div className="d-flex justify-content-center mt-3">
+            <nav>
+              <ul className="pagination">
+                <li className={`page-item ${Number(currentPage) === 1 ? "disabled" : ""}`}>
+                  <Link className="page-link" to={`/admin/users?page=${Number(currentPage) - 1}`}>
+                    &lt;
+                  </Link>
+                </li>
+                {[...Array(pages).keys()].map((x) => (
+                  <li
+                    key={x + 1}
+                    className={`page-item ${x + 1 === Number(currentPage) ? "active" : ""}`}
+                  >
+                    <Link className="page-link" to={`/admin/users?page=${x + 1}`}>
+                      {x + 1}
+                    </Link>
+                  </li>
+                ))}
+                <li className={`page-item ${Number(currentPage) === pages ? "disabled" : ""}`}>
+                  <Link className="page-link" to={`/admin/users?page=${Number(currentPage) + 1}`}>
+                    &gt;
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </div>
+      </>
       )}
     </Container>
   );

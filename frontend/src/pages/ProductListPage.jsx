@@ -225,15 +225,15 @@ export default function ProductListPage() {
 
   return (
     <Container className="provider-container">
-      <Row className="mb-3">
+      <Row className="mb-3 mt-4">
         <Col>
-          <h1>Products Management</h1>
+          <h1 className="admin-page-title fs-1">Products Management</h1>
         </Col>
         <Col className="col text-end">
           <div>
             <Button
-              type="button"
-              className="details"
+         type="button"
+            className="btn-admin-action"
               onClick={createHandler}
               disabled={loadingCreate}
             >
@@ -244,7 +244,7 @@ export default function ProductListPage() {
         </Col>
       </Row>
 
-      <Row className="mb-3">
+      <Row className="mb-3 mt-4">
         <Col md={6}>
           <Form.Control
             type="text"
@@ -439,7 +439,7 @@ export default function ProductListPage() {
             <nav>
               <ul className="pagination">
                 <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                  className={`page-item ${Number(currentPage) === 1 ? "disabled" : ""}`}
                 >
                   <Link
                     className="page-link"
@@ -465,7 +465,7 @@ export default function ProductListPage() {
                 ))}
                 <li
                   className={`page-item ${
-                    currentPage === pages ? "disabled" : ""
+                    Number(currentPage) === pages ? "disabled" : ""
                   }`}
                 >
                   <Link

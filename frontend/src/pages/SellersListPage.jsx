@@ -1,6 +1,6 @@
 import { useContext, useEffect, useReducer, useState } from "react";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
@@ -47,7 +47,7 @@ const reducer = (state, action) => {
 
 const SellersListPage = () => {
   const [
-    { loading, error, sellers, loadingCreate, loadingDelete, successDelete },
+    { loading, error, sellers, totalPages, loadingCreate, loadingDelete, successDelete },
     dispatch,
   ] = useReducer(reducer, {
     loading: true,
@@ -167,6 +167,7 @@ const SellersListPage = () => {
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
+        <>
         <div className="table-responsive admin-table-wrapper">
           <Table striped bordered hover className="admin-table">
             <thead className="admin-table-header">
@@ -255,6 +256,33 @@ const SellersListPage = () => {
             </tbody>
           </Table>
         </div>
+          <div className="d-flex justify-content-center mt-3">
+            <nav>
+              <ul className="pagination">
+                <li className={`page-item ${Number(currentPage) === 1 ? "disabled" : ""}`}>
+                  <Link className="page-link" to={`/admin/sellers?page=${Number(currentPage) - 1}`}>
+                    &lt;
+                  </Link>
+                </li>
+                {[...Array(totalPages).keys()].map((x) => (
+                  <li
+                    key={x + 1}
+                    className={`page-item ${x + 1 === Number(currentPage) ? "active" : ""}`}
+                  >
+                    <Link className="page-link" to={`/admin/sellers?page=${x + 1}`}>
+                      {x + 1}
+                    </Link>
+                  </li>
+                ))}
+                <li className={`page-item ${Number(currentPage) === totalPages ? "disabled" : ""}`}>
+                  <Link className="page-link" to={`/admin/sellers?page=${Number(currentPage) + 1}`}>
+                    &gt;
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </>
       )}
     </Container>
   );

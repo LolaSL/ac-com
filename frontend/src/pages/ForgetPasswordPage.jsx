@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Alert from "react-bootstrap/Alert";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
@@ -14,6 +15,7 @@ export default function ForgetPasswordPage() {
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -27,13 +29,14 @@ export default function ForgetPasswordPage() {
   const submitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setFormError("");
     try {
       const { data } = await axios.post("/api/users/forget-password", {
         email,
       });
       toast.success(data.message || "Password reset link sent to your email!");
     } catch (err) {
-      toast.error(getError(err));
+      setFormError(getError(err));
     } finally {
       setLoading(false);
     }
@@ -48,9 +51,15 @@ export default function ForgetPasswordPage() {
           <Form.Control
             type="email"
             required
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); setFormError(""); }}
           />
         </Form.Group>
+
+        {formError && (
+          <Alert variant="danger" dismissible onClose={() => setFormError("")} className="mb-3">
+            <i className="fas fa-exclamation-circle me-2"></i>{formError}
+          </Alert>
+        )}
         <div className="mb-3">
           <Button
             className="go-to-btn btn-text"

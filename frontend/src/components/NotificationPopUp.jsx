@@ -36,20 +36,20 @@ const NotificationPopUp = ({ notification, buttonText, onButtonClick }) => {
 
   return (
     <div className="notification-popup">
-      <div className="d-flex justify-content-between align-items-start mb-2">
-        <h3 className="text-danger mb-0">{notification.title}</h3>
+      <div className="popup-header mb-1">
+        <h5 className="text-danger mb-0 fs-5" style={{ fontSize: "0.9rem" }}>{notification.title}</h5>
         {notification.type && (
-          <Badge bg={getNotificationVariant(notification.type)}>
+          <Badge bg={getNotificationVariant(notification.type)} style={{ flexShrink: 0 }}>
             {notification.type}
           </Badge>
         )}
       </div>
-      <p className="notification-paragraph my-3">{notification.message}</p>
-      <p className="small mb-3 notification-time">
+      <p className="notification-paragraph my-2" style={{ fontSize: "0.82rem" }}>{notification.message}</p>
+      <p className="small mb-2 notification-time" style={{ fontSize: "0.75rem" }}>
         {formatDate(notification.createdAt || notification.date)} at{" "}
         {formatTime(notification.createdAt || notification.date)}
       </p>
-      <Button className="go-to-btn btn-text" onClick={onButtonClick}>
+      <Button className="go-to-btn btn-text popup-btn" size="sm" onClick={onButtonClick}>
         {buttonText || "Close"}
       </Button>
     </div>

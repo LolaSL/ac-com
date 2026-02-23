@@ -42,7 +42,6 @@ export default function SignInPage() {
       toast.success("Signed in successfully");
     } catch (err) {
       setError(getError(err));
-      toast.error(getError(err));
     } finally {
       setLoading(false);
     }

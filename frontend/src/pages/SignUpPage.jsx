@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import Alert from "react-bootstrap/Alert";
 import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
@@ -22,6 +23,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { userInfo } = state;
@@ -46,12 +48,13 @@ export default function SignUpPage() {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setFormError("");
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      setFormError("Passwords do not match");
       return;
     }
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      setFormError("Password must be at least 6 characters");
       return;
     }
     setLoading(true);
@@ -86,7 +89,7 @@ export default function SignUpPage() {
       toast.success("Account created successfully!");
       navigate(redirect || "/");
     } catch (err) {
-      toast.error(getError(err));
+      setFormError(getError(err));
     } finally {
       setLoading(false);
     }
@@ -197,6 +200,12 @@ export default function SignUpPage() {
             </Form.Text>
           )}
         </Form.Group>
+
+        {formError && (
+          <Alert variant="danger" dismissible onClose={() => setFormError("")} className="mb-3">
+            <i className="fas fa-exclamation-circle me-2"></i>{formError}
+          </Alert>
+        )}
 
         <div className="mb-3">
           <Button

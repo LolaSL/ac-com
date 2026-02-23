@@ -262,8 +262,10 @@ h1.blogs-title,
 h1.sellers-title,
 h1.advanced-title,
 h1.title-measurement,
-h1.about-us {
+h1.about-us,
+h1.contacts-title {
   position: relative;
+  font-size: clamp(2.2rem, 5vw, 3rem);
   font-family: var(--font-family);
   text-transform: uppercase;
   letter-spacing: 4px;
@@ -2358,4 +2360,17 @@ button:disabled {
   .main-content {
     margin-left: 0;
   }
+}
+
+/* Toast animation speed */
+.Toastify__toast {
+  animation-duration: 0.6s !important;
+}
+
+.Toastify__slide-enter--bottom-center {
+  animation-duration: 0.6s !important;
+}
+
+.Toastify__slide-exit--bottom-center {
+  animation-duration: 0.6s !important;
 }

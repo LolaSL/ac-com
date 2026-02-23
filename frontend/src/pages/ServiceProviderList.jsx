@@ -163,7 +163,7 @@ export default function ServiceProviderList() {
     <Container className="admin-page-container">
       <Row className="align-items-center mb-4">
         <Col>
-          <h1 className="admin-page-title">Service Providers</h1>
+          <h1 className="admin-page-title fs-1">Service Providers Management</h1>
         </Col>
         <Col xs="auto">
           <Button
@@ -172,7 +172,7 @@ export default function ServiceProviderList() {
             onClick={createHandler}
             disabled={loadingCreate}
           >
-            <FaPlus /> {loadingCreate ? "Creating..." : "Create"}
+            <FaPlus /> {loadingCreate ? "Creating..." : "Create Service Provider"}
           </Button>
         </Col>
       </Row>
@@ -307,11 +307,11 @@ export default function ServiceProviderList() {
             <nav>
               <ul className="pagination">
                 <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                  className={`page-item ${Number(currentPage) === 1 ? "disabled" : ""}`}
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/serviceProviders?page=${currentPage - 1}`}
+                    to={`/admin/serviceProviders?page=${Number(currentPage) - 1}`}
                   >
                     &lt;
                   </Link>
@@ -320,7 +320,7 @@ export default function ServiceProviderList() {
                   <li
                     key={x + 1}
                     className={`page-item ${
-                      x + 1 === currentPage ? "active" : ""
+                      x + 1 === Number(currentPage) ? "active" : ""
                     }`}
                   >
                     <Link
@@ -333,12 +333,12 @@ export default function ServiceProviderList() {
                 ))}
                 <li
                   className={`page-item ${
-                    currentPage === pages ? "disabled" : ""
+                    Number(currentPage) === pages ? "disabled" : ""
                   }`}
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/serviceProviders?page=${currentPage + 1}`}
+                    to={`/admin/serviceProviders?page=${Number(currentPage) + 1}`}
                   >
                     &gt;
                   </Link>

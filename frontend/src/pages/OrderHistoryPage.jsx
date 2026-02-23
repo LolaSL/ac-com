@@ -125,11 +125,11 @@ export default function OrderHistoryPage() {
             <nav>
               <ul className="pagination">
                 <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                  className={`page-item ${Number(currentPage) === 1 ? "disabled" : ""}`}
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/orders?page=${Number(currentPage) - 1}`}
+                    to={`/orderhistory?page=${Number(currentPage) - 1}`}
                   >
                     &lt;
                   </Link>
@@ -143,7 +143,7 @@ export default function OrderHistoryPage() {
                   >
                     <Link
                       className="page-link"
-                      to={`/admin/orders?page=${x + 1}`}
+                      to={`/orderhistory?page=${x + 1}`}
                     >
                       {x + 1}
                     </Link>
@@ -151,12 +151,12 @@ export default function OrderHistoryPage() {
                 ))}
                 <li
                   className={`page-item ${
-                    currentPage === pages ? "disabled" : ""
+                    Number(currentPage) === pages ? "disabled" : ""
                   }`}
                 >
                   <Link
                     className="page-link"
-                    to={`/admin/orders?page=${Number(currentPage) + 1}`}
+                    to={`/orderhistory?page=${Number(currentPage) + 1}`}
                   >
                     &gt;
                   </Link>

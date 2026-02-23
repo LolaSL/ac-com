@@ -82,7 +82,7 @@ export default function NewsletterSignup() {
         <div className="newsletter-content">
           <div className="newsletter-text">
             <h2 className="newsletter-title">Stay Updated</h2>
-            <p className="newsletter-description">
+            <p className="newsletter-description text-center">
               Get exclusive updates on new features, pricing options, and
               industry insights delivered to your inbox
             </p>

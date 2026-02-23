@@ -25,7 +25,14 @@ function AppContent() {
 
   return (
     <>
-      <ToastContainer position="bottom-center" limit={1} />
+      <ToastContainer
+        position="bottom-center"
+        limit={1}
+        autoClose={15000}
+        closeOnClick
+        pauseOnHover
+        pauseOnFocusLoss
+      />
       <MainLayout
         fullBox={fullBox}
         sidebarIsOpen={sidebarIsOpen}

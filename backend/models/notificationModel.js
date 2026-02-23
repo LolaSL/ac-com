@@ -12,6 +12,7 @@ const notificationSchema = new mongoose.Schema(
     },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Specific user (optional)
     isRead: { type: Boolean, default: false },
+    link: { type: String, default: '' }, // optional frontend route e.g. /order/:id
   },
   { timestamps: true }
 );

@@ -101,22 +101,42 @@ export default function HomeBannerPage() {
     };
   }, [fetchedNotifications]);
 
-  const handleNotificationClick = () => {
-    if (!currentNotification) return;
+  const resolveNotificationLink = async (notification) => {
+    // Use stored link first (new notifications)
+    if (notification.link) return notification.link;
 
-    if (currentNotification.title === "Get A Quote") {
-      if (adminInfo || userInfo || serviceProviderInfo) {
-        navigate("/uploadfile");
-      } else {
-        navigate("/signin?redirect=/uploadfile");
+    // Fall back: extract short order ID from message for old notifications
+    const orderMatch =
+      notification.message && notification.message.match(/#([a-zA-Z0-9]{6})/);
+    if (orderMatch) {
+      try {
+        const token =
+          userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
+        const { data } = await axios.get(
+          `/api/orders/by-short-id/${orderMatch[1]}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return adminInfo
+          ? `/admin/order/${data.orderId}`
+          : `/order/${data.orderId}`;
+      } catch {
+        return null;
       }
-    } else if (currentNotification.title === "Discount Offer") {
-      navigate("/offers");
-    } else if (currentNotification.recipientType === "serviceProvider") {
-      navigate("/serviceprovider/messages");
     }
 
+    // Other known routes
+    const { title, recipientType } = notification;
+    if (title === 'Get A Quote') return userInfo || adminInfo || serviceProviderInfo ? '/uploadfile' : '/signin?redirect=/uploadfile';
+    if (title === 'Discount Offer') return '/offers';
+    if (recipientType === 'serviceProvider') return '/serviceprovider/messages';
+    return null;
+  };
+
+  const handleNotificationClick = async () => {
+    if (!currentNotification) return;
+    const link = await resolveNotificationLink(currentNotification);
     setCurrentNotification(null);
+    if (link) navigate(link);
   };
 
   const handleSlideClick = (index) => {
@@ -152,7 +172,6 @@ export default function HomeBannerPage() {
 
       {/* Premium Hero Carousel */}
       <PremiumCarousel banners={banners} onSlideClick={handleSlideClick} />
-
       {/* Investor-Ready Sections */}
       <TrustSection />
       <ValuePropositionSection />

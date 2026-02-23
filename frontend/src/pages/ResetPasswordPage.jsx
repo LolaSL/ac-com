@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Alert from "react-bootstrap/Alert";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
@@ -17,6 +18,7 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -47,12 +49,13 @@ export default function ResetPasswordPage() {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setFormError("");
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      setFormError("Passwords do not match");
       return;
     }
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      setFormError("Password must be at least 6 characters");
       return;
     }
     setLoading(true);
@@ -66,7 +69,7 @@ export default function ResetPasswordPage() {
         navigate("/signin");
       }, 1500);
     } catch (err) {
-      toast.error(getError(err));
+      setFormError(getError(err));
     } finally {
       setLoading(false);
     }
@@ -184,6 +187,12 @@ export default function ResetPasswordPage() {
             </Form.Text>
           )}
         </Form.Group>
+
+        {formError && (
+          <Alert variant="danger" dismissible onClose={() => setFormError("")} className="mb-3">
+            <i className="fas fa-exclamation-circle me-2"></i>{formError}
+          </Alert>
+        )}
 
         <div className="mb-3">
           <Button

@@ -196,6 +196,7 @@ orderRouter.post(
       type: 'info',
       recipientType: 'user',
       userId: req.user._id,
+      link: `/order/${order._id}`,
     });
 
     // Create notification for admin
@@ -204,6 +205,7 @@ orderRouter.post(
       message: `New order #${order._id.toString().slice(-6)} from ${req.user.name}. Total: $${roundedTotalPrice.toFixed(2)}`,
       type: 'urgent',
       recipientType: 'admin',
+      link: `/admin/order/${order._id}`,
     });
 
     res.status(201).send({ message: 'New Order Created', order });
@@ -349,6 +351,25 @@ orderRouter.get(
 
 
 orderRouter.get(
+  '/by-short-id/:shortId',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const { shortId } = req.params;
+    // Match orders whose ObjectId ends with the given 6-char short ID
+    const regex = new RegExp(shortId + '$', 'i');
+    const allOrders = await Order.find(
+      req.user.isAdmin ? {} : { user: req.user._id }
+    ).select('_id').lean();
+    const match = allOrders.find((o) => regex.test(o._id.toString()));
+    if (match) {
+      res.send({ orderId: match._id });
+    } else {
+      res.status(404).send({ message: 'Order Not Found' });
+    }
+  })
+);
+
+orderRouter.get(
   '/mine',
   isAuth,
   expressAsyncHandler(async (req, res) => {
@@ -416,6 +437,7 @@ orderRouter.put(
           type: 'info',
           recipientType: 'user',
           userId: order.user,
+          link: `/order/${order._id}`,
         });
       }
 
@@ -453,6 +475,7 @@ orderRouter.put(
         type: 'info',
         recipientType: 'user',
         userId: order.user._id,
+        link: `/order/${order._id}`,
       });
 
       // Notify admin
@@ -461,6 +484,7 @@ orderRouter.put(
         message: `Payment received for order #${order._id.toString().slice(-6)} from ${order.user.name}.`,
         type: 'info',
         recipientType: 'admin',
+        link: `/admin/order/${order._id}`,
       });
 
       res.send({ message: 'Order Paid', order: updatedOrder });

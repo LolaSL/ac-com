@@ -24,6 +24,7 @@ import path from "path";
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import Notification from './models/notificationModel.js';
+import { startPaymentReminderJob } from './utils/paymentReminderJob.js';
 
 
 dotenv.config();
@@ -35,6 +36,9 @@ async function start() {
 
     const notifications = await Notification.find();
     console.log(notifications);
+
+    // Start scheduled jobs
+    startPaymentReminderJob();
   } catch (err) {
     console.error("MongoDB connection error:", err.message);
   }

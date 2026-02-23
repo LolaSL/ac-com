@@ -90,6 +90,38 @@ export default function Notifications() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  const resolveNotificationLink = async (notification) => {
+    if (notification.link) return notification.link;
+
+    const orderMatch =
+      notification.message && notification.message.match(/#([a-zA-Z0-9]{6})/);
+    if (orderMatch) {
+      try {
+        const { data } = await axios.get(
+          `/api/orders/by-short-id/${orderMatch[1]}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return isAdmin
+          ? `/admin/order/${data.orderId}`
+          : `/order/${data.orderId}`;
+      } catch {
+        return null;
+      }
+    }
+
+    const { title, recipientType } = notification;
+    if (title === "Get A Quote") return "/uploadfile";
+    if (title === "Discount Offer") return "/offers";
+    if (recipientType === "serviceProvider") return "/serviceprovider/messages";
+    return null;
+  };
+
+  const handleNotificationNavigate = async (notification) => {
+    await markAsRead(notification._id);
+    const link = await resolveNotificationLink(notification);
+    if (link) navigate(link);
+  };
+
   const markAsRead = async (id) => {
     try {
       await axios.put(`/api/notifications/${id}/read`, null, {
@@ -154,7 +186,9 @@ export default function Notifications() {
     <Container className="notifications-container py-4">
       <Row>
         <Col>
-          <h1 className="mb-4">Notifications</h1>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h1 className="mb-0">Notifications</h1>
+          </div>
           {loading ? (
             <LoadingBox />
           ) : error ? (
@@ -204,6 +238,16 @@ export default function Notifications() {
                       </div>
                     </div>
                     <div className="d-flex gap-2 notification-actions">
+                      {notification.link ||
+                      notification.message?.match(/#([a-zA-Z0-9]{6})/) ? (
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleNotificationNavigate(notification)}
+                        >
+                          <i className="bi bi-arrow-right-circle"></i> View Details
+                        </Button>
+                      ) : null}
                       {!notification.isRead && (
                         <Button
                           variant="primary"

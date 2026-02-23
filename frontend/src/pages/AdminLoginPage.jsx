@@ -7,6 +7,7 @@ import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
+import Alert from "react-bootstrap/Alert";
 import "./AdminLoginPage.css";
 
 export default function AdminLoginPage() {
@@ -16,6 +17,25 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [loginError, setLoginError] = useState("");
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validate = (trimmedEmail, trimmedPassword) => {
+    const errors = {};
+    if (!trimmedEmail) {
+      errors.email = "Email address is required";
+    } else if (!emailRegex.test(trimmedEmail)) {
+      errors.email = "Please enter a valid email address";
+    }
+    if (!trimmedPassword) {
+      errors.password = "Password is required";
+    } else if (trimmedPassword.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+    return errors;
+  };
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -24,11 +44,14 @@ export default function AdminLoginPage() {
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
-    if (!trimmedEmail || !trimmedPassword) {
-      toast.error("Email and password are required");
+    const errors = validate(trimmedEmail, trimmedPassword);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
+    setFieldErrors({});
+    setLoginError("");
     setSubmitting(true);
 
     try {
@@ -43,7 +66,9 @@ export default function AdminLoginPage() {
       toast.success("Welcome, Admin!");
       navigate("/admin/dashboard");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Invalid admin credentials");
+      const msg =
+        error.response?.data?.message || "Invalid email or password";
+      setLoginError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -81,7 +106,19 @@ export default function AdminLoginPage() {
                 </p>
               </div>
 
-              <Form onSubmit={handleAdminLogin}>
+              <Form onSubmit={handleAdminLogin} noValidate>
+                {loginError && (
+                  <Alert
+                    variant="danger"
+                    dismissible
+                    onClose={() => setLoginError("")}
+                    className="mb-3"
+                  >
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {loginError}
+                  </Alert>
+                )}
+
                 <Form.Group controlId="email" className="mb-3">
                   <Form.Label className="form-label">
                     <i className="fas fa-envelope"></i>
@@ -91,10 +128,18 @@ export default function AdminLoginPage() {
                     type="email"
                     placeholder="xxxxxx@xxxxxx.xxx"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (fieldErrors.email)
+                        setFieldErrors((p) => ({ ...p, email: "" }));
+                      if (loginError) setLoginError("");
+                    }}
+                    isInvalid={!!fieldErrors.email}
                     className="form-control-lg"
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {fieldErrors.email}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group controlId="password" className="mb-4">
@@ -106,10 +151,18 @@ export default function AdminLoginPage() {
                     type="password"
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (fieldErrors.password)
+                        setFieldErrors((p) => ({ ...p, password: "" }));
+                      if (loginError) setLoginError("");
+                    }}
+                    isInvalid={!!fieldErrors.password}
                     className="form-control-lg"
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {fieldErrors.password}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <div className="d-grid">

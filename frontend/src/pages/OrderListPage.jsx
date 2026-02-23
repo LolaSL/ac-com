@@ -271,7 +271,7 @@ export default function OrderListPage() {
 
   return (
     <Container className="admin-page-container">
-      <h1 className="admin-page-title">Orders</h1>
+      <h1 className="admin-page-title fs-1">Orders Management</h1>
 
       <Row className="mb-4 g-2 admin-toolbar">
         <Col md={5} lg={3}>
@@ -484,7 +484,7 @@ export default function OrderListPage() {
             <nav>
               <ul className="pagination">
                 <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                  className={`page-item ${Number(currentPage) === 1 ? "disabled" : ""}`}
                 >
                   <Link
                     className="page-link"
@@ -512,7 +512,7 @@ export default function OrderListPage() {
                 ))}
                 <li
                   className={`page-item ${
-                    currentPage === pages ? "disabled" : ""
+                    Number(currentPage) === pages ? "disabled" : ""
                   }`}
                 >
                   <Link

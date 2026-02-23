@@ -23,21 +23,24 @@ const AboutUs = () => {
           comprehensive e-commerce platform specializing in HVAC equipment and
           services. We combine an extensive online marketplace for air
           conditioning products with innovative tools for system planning,
-          design, and professional service connections.
+          design, ROI analysis, and professional service connections.
         </h3>
         <h3 className="about-paragraph mt-4 pb-2">
           Our platform offers a complete HVAC solution: browse and purchase
           premium air conditioning equipment, calculate precise BTU requirements
-          for any space, design and annotate floor plans with AC unit
-          placements, and connect with certified service providers for
-          installation and maintenance — all in one place.
+          for any space, analyse return on investment with our ROI Calculator,
+          design and annotate floor plans with AC unit placements, and connect
+          with certified service providers for installation and maintenance —
+          all in one place.
         </h3>
         <h3 className="about-paragraph mt-4 pb-4">
           What sets AC-Com Home Supply apart is our integrated approach. We're
           not just a product retailer or a design tool — we're a complete HVAC
           ecosystem that empowers homeowners, contractors, and businesses to
           make informed decisions, streamline their projects, and access
-          everything they need from a single trusted platform.
+          everything they need from a single trusted platform. Our affiliate
+          seller program also enables industry professionals to partner with us
+          and earn through referrals.
         </h3>
       </article>
       <article className="about mt-4 mb-4">
@@ -46,24 +49,34 @@ const AboutUs = () => {
             Our Measurement Service System process is straightforward:
           </strong>
           <ul className="mt-2">
-            <li>Upload your architectural plan ( PDF file)</li>
+            <li>Upload your architectural plan (PDF file)</li>
             <li>
               Place the created air conditioning unit with a relevant comment on
               the uploaded architectural plan.
             </li>
             <li>
-              Save AC architectural plan — complete with a digital signature
-              from a certified air conditioning engineer.
+              Submit for engineer review — a certified air conditioning engineer
+              examines your plan, adds professional annotations, and signs off
+              with a digital signature.
+            </li>
+            <li>
+              Save your AC architectural plan complete with the engineer's
+              verified review and digital signature.
             </li>
             <li>
               Complete a brief set of BTU Calculator guided questions regarding
-              the property’s specifications and user preferences.
+              the property's specifications and user preferences.
             </li>
             <li>
-              {" "}
               Receive BTU results from BTU table: the list of recommended air
               conditioning products chosen by your preferences, BTU, and
               recommended outdoor condenser.
+            </li>
+            <li>
+              Use the <strong>ROI Calculator</strong> to analyse the financial
+              return on your HVAC investment — compare traditional purchasing
+              costs versus AC-Com pricing, estimate labour savings, and project
+              long-term efficiency gains across different property types.
             </li>
           </ul>
         </h3>
@@ -87,6 +100,12 @@ const AboutUs = () => {
               <strong>Smart Planning:</strong> Use our BTU Calculator to make
               data-driven decisions about the right equipment for your specific
               needs.
+            </li>
+            <li>
+              <strong>ROI Analysis:</strong> Our built-in ROI Calculator helps
+              you evaluate the financial return on your HVAC investment,
+              comparing costs, labour savings, and efficiency gains across
+              residential, commercial, and industrial property types.
             </li>
             <li>
               <strong>Trusted Service Network:</strong> Connect with verified
@@ -147,6 +166,11 @@ const AboutUs = () => {
             <li>
               <strong>Commercial Buyers:</strong> Businesses purchasing HVAC
               equipment for offices, retail spaces, and facilities.
+            </li>
+            <li>
+              <strong>Affiliate Sellers:</strong> Industry professionals and
+              businesses who partner with AC-Com to list products, earn through
+              referrals, and grow their reach through our marketplace.
             </li>
           </ul>
         </h3>

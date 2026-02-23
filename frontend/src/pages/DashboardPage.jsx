@@ -4,7 +4,7 @@ import ServiceProviders from "../components/ServiceProviders.jsx";
 import Notifications from "../components/Notifications.jsx";
 import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "react-bootstrap";
+import { Button, Card, Row, Col } from "react-bootstrap";
 import { Store } from "../Store";
 import "./DashboardPage.css";
 function Dashboard() {
@@ -62,7 +62,21 @@ function Dashboard() {
       {renderSidebarContent()}
     </div>
 
-    <div className="main-content">{renderComponent()}</div>
+    <div className="main-content">
+      <Row className="mb-3 quick-actions-bar">
+        <Col>
+          <Card className="p-3 border-0 bg-light">
+            <div className="d-flex align-items-center gap-3 flex-wrap">
+              <span className="fw-semibold text-muted small">Quick Actions:</span>
+              <Button variant="outline-secondary" size="sm" onClick={() => setActiveComponent("Notification")}>
+                <i className="bi bi-envelope me-1"></i> View Notifications
+              </Button>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+      {renderComponent()}
+    </div>
   </div>
 );
 

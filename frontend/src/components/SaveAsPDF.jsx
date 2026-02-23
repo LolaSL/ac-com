@@ -752,7 +752,7 @@ function SaveAsPDF({
         if (/\bcondenser\b/.test(label)) return { type: "condenser", flatNum: 1, unitNum: 0, rect };
         if (rect.isCondenser) return { type: "condenser", flatNum: 1, unitNum: 0, rect };
         // ac-N.M (flat N, unit M inside flat)
-        const acMulti = label.match(/ac[-\s]?(\d+)[.\-](\d+)/);
+        const acMulti = label.match(/ac[-\s]?(\d+)[.](\d+)/);
         if (acMulti) return { type: "ac", flatNum: parseInt(acMulti[1]), unitNum: parseInt(acMulti[2]), rect };
         // ac-N (single-flat style: flat 1, unit N)
         const acSingle = label.match(/ac[-\s]?(\d+)/);

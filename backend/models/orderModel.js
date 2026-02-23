@@ -51,6 +51,9 @@ const orderSchema = new mongoose.Schema(
     paidAt: { type: Date },
     isDelivered: { type: Boolean, default: false },
     deliveredAt: { type: Date },
+    isCancelled: { type: Boolean, default: false },
+    cancelledAt: { type: Date },
+    cancellationReason: { type: String, default: '' },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller' },
   },
   {
