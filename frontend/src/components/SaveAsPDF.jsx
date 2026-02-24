@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Button } from "react-bootstrap";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import "./SaveAsPDF.css";
@@ -203,6 +203,7 @@ function SaveAsPDF({
   const [error, setError] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
 
+  // eslint-disable-next-line no-unused-vars
   const drawAnnotations = (context, annotations, viewport, acType) => {
     const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
@@ -1019,11 +1020,23 @@ function SaveAsPDF({
     }
   };
 
+  // Helper: trigger a browser file download
+  const triggerDownload = (bytes, filename) => {
+    const downloadBlob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(downloadBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  };
+
   const saveAsPDF = async () => {
     setError(null);
     setIsSaved(false);
 
-    // Only allow saving user-type or engineer-type annotations
     if (annotationType !== "user" && annotationType !== "engineer") {
       setError("Only user or engineer annotations can be saved.");
       return;
@@ -1040,341 +1053,133 @@ function SaveAsPDF({
     }
 
     try {
-      setError(null);
-      setIsSaved(false);
-
-      const response = await fetch(`/api/annotated-pdf/${pdfId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        let body = null;
-        try {
-          body = await response.json();
-        } catch (e) {
-          try {
-            body = await response.text();
-          } catch (e2) {
-            body = null;
-          }
+      // ── ENGINEER: download server-rendered PDF directly ──────────────────
+      if (annotationType === "engineer") {
+        const dlResponse = await fetch(
+          `/api/engineer-annotations/annotated-pdf/${pdfId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!dlResponse.ok) {
+          const errorData = await dlResponse.json().catch(() => ({}));
+          throw new Error(
+            errorData.message || "Failed to fetch engineer annotation PDF"
+          );
         }
-        const serverMsg =
-          body && body.message ? body.message : body || response.statusText;
-        throw new Error(`Failed to fetch PDF from server: ${serverMsg}`);
-      }
-
-      const blob = await response.blob();
-      const arrayBuffer = await blob.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
-
-      const loadingTask = pdfjsLib.getDocument(arrayBuffer);
-      const pdf = await loadingTask.promise;
-      const page = await pdf.getPage(1);
-      const scale = 1.0; // Reduced scale to avoid large canvas issues
-      const viewport = page.getViewport({ scale });
-
-      // Prepare canvases for VRF systems only: vrf-ducted, vrf-ductless
-      const canvas = canvasRef.current;
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      const canvases = {
-        "vrf-ducted": {
-          canvas: document.createElement("canvas"),
-          context: null,
-          drawn: false,
-        },
-        "vrf-ductless": {
-          canvas: document.createElement("canvas"),
-          context: null,
-          drawn: false,
-        },
-      };
-
-      // Initialize all canvases
-      Object.keys(canvases).forEach((mode) => {
-        if (mode !== "ducted") {
-          canvases[mode].context = canvases[mode].canvas.getContext("2d");
-        }
-        canvases[mode].canvas.width = viewport.width;
-        canvases[mode].canvas.height = viewport.height;
-      });
-
-      // Render base PDF page to all canvases
-      for (const mode of Object.keys(canvases)) {
-        await page.render({ canvasContext: canvases[mode].context, viewport })
-          .promise;
-      }
-
-      // Always fetch authoritative user annotations from backend
-      let normalizedAnnotations = null;
-      try {
-        const annRes = await fetch(`/api/annotations/${pdfId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!annRes.ok) {
-          let body = null;
-          try {
-            body = await annRes.json();
-          } catch {}
-          const serverMsg =
-            body && body.message ? body.message : annRes.statusText;
-          throw new Error(`Failed to fetch user annotations: ${serverMsg}`);
-        }
-        const annData = await annRes.json();
-        normalizedAnnotations = annData.annotations || annData;
-      } catch (e) {
-        console.warn("Failed to fetch annotations for PDF:", e);
-        setError("Could not load user annotations for saving.");
+        const dlBuffer = await (await dlResponse.blob()).arrayBuffer();
+        triggerDownload(dlBuffer, file.name || "engineer-review.pdf");
+        setIsSaved(true);
         return;
       }
 
-      // Determine system views are handled by canvases; no alternate type variable needed
-
-      // Draw annotations for VRF modes only (user annotations only)
-      if (normalizedAnnotations) {
-        Object.keys(canvases).forEach((mode) => {
-          drawAnnotations(
-            canvases[mode].context,
-            normalizedAnnotations,
-            viewport,
-            mode
-          );
-        });
+      // ── USER: single-page PDF with only the user's manual annotations ────
+      // Fetch the base PDF from the server
+      const baseResponse = await fetch(`/api/annotated-pdf/${pdfId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!baseResponse.ok) {
+        const body = await baseResponse.json().catch(() => ({}));
+        throw new Error(
+          body.message || `Failed to fetch PDF: ${baseResponse.statusText}`
+        );
       }
+      const baseBuffer = await (await baseResponse.blob()).arrayBuffer();
 
-      // Add small labels so each page is clear
-      const getSystemLabel = (type) => {
-        switch (type) {
-          case "vrf-ducted":
-            return "VRF System - Ducted Indoor Units";
-          case "vrf-ductless":
-            return "VRF System - Ductless Indoor Units";
-          default:
-            return `${type} View`;
-        }
-      };
+      // Fetch user-only annotations from backend
+      const annRes = await fetch(`/api/annotations/${pdfId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!annRes.ok) {
+        const body = await annRes.json().catch(() => ({}));
+        throw new Error(
+          body.message || `Failed to fetch annotations: ${annRes.statusText}`
+        );
+      }
+      const annData = await annRes.json();
+      const userAnnotations = annData.annotations || annData;
 
-      const drawLabel = (ctx, label) => {
-        try {
-          ctx.save();
-          ctx.fillStyle = "rgba(0,0,0,0.8)";
-          ctx.font = "16px Arial";
-          ctx.fillText(label, 10, 22);
-          ctx.restore();
-        } catch (e) {
-          // ignore font issues in some environments
-        }
-      };
+      // Render the first page of the base PDF to a canvas
+      const loadingTask = pdfjsLib.getDocument(baseBuffer);
+      const pdfJsDoc = await loadingTask.promise;
+      const pdfJsPage = await pdfJsDoc.getPage(1);
+      const scale = 1.5;
+      const viewport = pdfJsPage.getViewport({ scale });
 
-      const drawLegend = (ctx, mode) => {
-        try {
-          ctx.save();
-          ctx.fillStyle = "rgba(0,0,0,0.8)";
-          ctx.font = "12px Arial";
+      const renderCanvas = document.createElement("canvas");
+      renderCanvas.width = viewport.width;
+      renderCanvas.height = viewport.height;
+      const ctx = renderCanvas.getContext("2d");
+      await pdfJsPage.render({ canvasContext: ctx, viewport }).promise;
 
-          let legendY = ctx.canvas.height - 120;
-          let legendX = 10;
+      // Overlay only manual user annotations: rectangles, lines, comments
+      const cw = renderCanvas.width;
+      const ch = renderCanvas.height;
 
-          // Background box for legend
-          ctx.fillStyle = "rgba(248, 249, 250, 0.9)";
-          ctx.strokeStyle = "rgba(0,0,0,0.3)";
-          ctx.lineWidth = 1;
-          ctx.fillRect(legendX, legendY - 5, 350, 115);
-          ctx.strokeRect(legendX, legendY - 5, 350, 115);
-
-          ctx.fillStyle = "rgba(0,0,0,0.8)";
-          ctx.font = "bold 12px Arial";
-          ctx.fillText(
-            "Legend - Refrigerant Lines:",
-            legendX + 5,
-            legendY + 12
-          );
-
-          ctx.font = "11px Arial";
-
-          if (mode === "vrf-ducted") {
-            ctx.fillText(
-              "━ ━ Red Dashed: Supply Line (Star Topology)",
-              legendX + 5,
-              legendY + 30
-            );
-            ctx.fillText(
-              "━ ━ Blue Dashed: Return Line (Star Topology)",
-              legendX + 5,
-              legendY + 45
-            );
-            ctx.fillText(
-              "(Each AC unit directly to Condenser)",
-              legendX + 15,
-              legendY + 60
-            );
-          } else if (mode === "vrf-ductless") {
-            ctx.fillText(
-              "━ ━ Teal Solid: Star Topology",
-              legendX + 5,
-              legendY + 30
-            );
-            ctx.fillText(
-              "(Each AC unit directly to Condenser)",
-              legendX + 15,
-              legendY + 45
-            );
-          }
-
-          ctx.restore();
-        } catch (e) {
-          // ignore font issues in some environments
-        }
-      };
-
-      // Draw labels and legends on VRF canvases
-      Object.keys(canvases).forEach((mode) => {
-        drawLabel(canvases[mode].context, getSystemLabel(mode));
-        drawLegend(canvases[mode].context, mode);
+      // Rectangles
+      userAnnotations?.rectangles?.forEach((rect) => {
+        const x = rect.xPercent * cw;
+        const y = rect.yPercent * ch;
+        const w = rect.widthPercent * cw;
+        const h = rect.heightPercent * ch;
+        const angle = (rect.rotation || 0) * (Math.PI / 180);
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.rect(0, 0, w, h);
+        ctx.fillStyle = rect.fill || "rgba(20, 205, 230, 0.4)";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = rect.stroke || "black";
+        ctx.stroke();
+        ctx.restore();
       });
 
-      // Convert all canvases to images and embed in PDF
-      const imageDataMap = {};
-      const pngImageMap = {};
-
-      for (const mode of Object.keys(canvases)) {
-        const imageData = canvases[mode].canvas.toDataURL("image/png");
-        if (!imageData || imageData === "data:," || imageData.length < 100) {
-          throw new Error(`Failed to generate image for ${mode} mode`);
-        }
-        imageDataMap[mode] = imageData;
-        pngImageMap[mode] = await pdfDoc.embedPng(imageData);
-      }
-
-      const newPdfPage = pdfDoc.getPages()[0];
-      const { width, height } = newPdfPage.getSize();
-
-      // Page 1: VRF - Ducted
-      newPdfPage.drawImage(pngImageMap["vrf-ducted"], {
-        x: 0,
-        y: 0,
-        width,
-        height,
+      // Lines
+      userAnnotations?.lines?.forEach((line) => {
+        ctx.beginPath();
+        const pts = line.points.map((val, idx) =>
+          idx % 2 === 0 ? val * cw * 0.985 : val * ch * 0.985
+        );
+        ctx.moveTo(pts[0], pts[1]);
+        for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
+        ctx.lineWidth = line.strokeWidth || 2;
+        ctx.strokeStyle = line.stroke || "black";
+        ctx.stroke();
       });
 
-      // Page 2: VRF - Ductless
-      const page2 = pdfDoc.addPage([width, height]);
-      page2.drawImage(pngImageMap["vrf-ductless"], {
-        x: 0,
-        y: 0,
-        width,
-        height,
+      // Comments
+      userAnnotations?.comments?.forEach((comment) => {
+        const x = comment.xPercent * cw;
+        const y = comment.yPercent * ch;
+        const padding = 6;
+        const fontSize = 12;
+        const text = comment.text;
+        ctx.font = `bold ${fontSize}px Arial`;
+        const tw = ctx.measureText(text).width;
+        ctx.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
+        ctx.fillRect(x - padding, y - fontSize - padding, tw + padding * 2, fontSize + padding * 2);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x - padding, y - fontSize - padding, tw + padding * 2, fontSize + padding * 2);
+        ctx.fillStyle = comment.textColor || "#FF1493";
+        ctx.fillText(text, x, y);
       });
 
-      if (isPaid) {
-        const { width } = newPdfPage.getSize();
-        const font = await pdfDoc.embedFont(pdfDoc.DefaultFont);
-        const signatureText = "AC Commerce — User: admin_unique1@example.com";
-        const watermarkText = "APPROVED\nAC COMMERCE";
-
-        newPdfPage.drawText(signatureText, {
-          x: width - font.widthOfTextAtSize(signatureText, 10) - 10,
-          y: 20,
-          size: 10,
-          font: font,
-          color: rgb(0.5, 0.5, 0.5),
-        });
-
-        const watermarkBox = {
-          x: 20,
-          y: 20,
-          width: 150,
-          height: 50,
-        };
-        newPdfPage.drawRectangle({
-          ...watermarkBox,
-          borderColor: rgb(0, 1, 0),
-          borderWidth: 2,
-        });
-
-        newPdfPage.drawText(watermarkText, {
-          x: watermarkBox.x + 10,
-          y: watermarkBox.y + 15,
-          size: 12,
-          font: font,
-          color: rgb(0, 1, 0),
-        });
+      // Embed the canvas image into a new PDF page
+      const imageData = renderCanvas.toDataURL("image/png");
+      if (!imageData || imageData === "data:," || imageData.length < 100) {
+        throw new Error("Failed to render PDF to canvas");
       }
+
+      const pdfDoc = await PDFDocument.load(baseBuffer);
+      const pngImage = await pdfDoc.embedPng(imageData);
+      const firstPage = pdfDoc.getPages()[0];
+      const { width, height } = firstPage.getSize();
+      firstPage.drawImage(pngImage, { x: 0, y: 0, width, height });
 
       const pdfBytes = await pdfDoc.save();
-
-      if (annotationType === "engineer") {
-        // For engineer, save to server
-        const blob = new Blob([pdfBytes], { type: "application/pdf" });
-
-        // Prepare form data for POST
-        const formData = new FormData();
-        formData.append("pdfFile", blob, file.name || "engineer-review.pdf"); // Use original filename
-        // Need userId, but since it's engineer, perhaps from context
-        // For now, hardcode or get from props
-        formData.append("userId", userId || "6947bb2b736e7aceca4ac627"); // Use prop or fallback
-        formData.append("userAnnotationId", pdfId);
-        const systemTypeMap = {
-          "vrf-ducted": "vrf-ducted",
-          "vrf-ductless": "vrf-ductless",
-        };
-        formData.append("systemType", systemTypeMap[acType] || acType);
-        formData.append("roomType", "living room");
-        formData.append("areaSqft", "400");
-        formData.append("btuRequired", "18000");
-        formData.append(
-          "rectangles",
-          JSON.stringify(normalizedAnnotations?.rectangles || [])
-        );
-        formData.append(
-          "comments",
-          JSON.stringify(normalizedAnnotations?.comments || [])
-        );
-        formData.append(
-          "lines",
-          JSON.stringify(normalizedAnnotations?.lines || [])
-        );
-        formData.append(
-          "hvac",
-          JSON.stringify(normalizedAnnotations?.hvac || {})
-        );
-        formData.append("refrigerantLinesAuto", "true");
-        formData.append(
-          "engineerNotes",
-          "System design looks good. Recommended for installation."
-        );
-        formData.append("imageWidth", viewport.width.toString());
-        formData.append("imageHeight", viewport.height.toString());
-
-        const saveResponse = await fetch("/api/engineer-annotations", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        });
-
-        if (!saveResponse.ok) {
-          const errorData = await saveResponse.json().catch(() => ({}));
-          throw new Error(
-            errorData.message || "Failed to save engineer annotation"
-          );
-        }
-
-        setIsSaved(true);
-        alert("Engineer annotation saved successfully!");
-      } else {
-        // For user, download
-        const downloadBlob = new Blob([pdfBytes], { type: "application/pdf" });
-        const url = URL.createObjectURL(downloadBlob);
-
-        // Open in new tab as workaround for download issues (includes unique filename in URL, but user can save manually)
-        window.open(url, "_blank");
-
-        // Clean up
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-        setIsSaved(true);
-      }
+      triggerDownload(pdfBytes, file.name || "my-drawing.pdf");
+      setIsSaved(true);
     } catch (err) {
       console.error("Failed to save PDF:", err);
       setError("Failed to save PDF. Please try again.");

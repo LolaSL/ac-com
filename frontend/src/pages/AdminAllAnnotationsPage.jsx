@@ -57,7 +57,7 @@ const AdminAllAnnotationsPage = () => {
 
   return (
     <div className="container mt-4">
-      <h1 className="admin-page-title fs-1 mb-4"> Users Annotated PDFs Management</h1>
+      <h1 className="admin-page-title fs-1 mb-4"> Users Drawings Management</h1>
       {loading && <Spinner animation="border" />}
       {error && <Alert variant="danger">{error}</Alert>}
       {!loading && !error && (

@@ -30,7 +30,8 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
   const canvasHeight = context.canvas.height;
 
   // Draw outdoor condenser units
-  vrfAnnotations?.outdoorUnits?.forEach((unit) => {
+  // Skip for vrf-ducted: user's own condenser rectangle already represents this unit
+  if (acType !== "vrf-ducted") vrfAnnotations?.outdoorUnits?.forEach((unit) => {
     const x = unit.xPercent * canvasWidth;
     const y = unit.yPercent * canvasHeight;
     const size = (unit.sizePercent || 0.12) * canvasWidth;
@@ -71,10 +72,11 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
       context.fillText(`${unit.capacity} BTU`, x, y + size / 2 + 15);
       context.restore();
     }
-  });
+  }); // end outdoor units (skipped for vrf-ducted)
 
   // Draw indoor units (for VRF systems)
-  vrfAnnotations?.indoorUnits?.forEach((unit) => {
+  // Skip in vrf-ducted: overlayAnnotations already renders the user-drawn rectangles for each AC unit
+  if (acType !== "vrf-ducted") vrfAnnotations?.indoorUnits?.forEach((unit) => {
     const x = unit.xPercent * canvasWidth;
     const y = unit.yPercent * canvasHeight;
     const size = (unit.sizePercent || 0.08) * canvasWidth;
@@ -139,58 +141,9 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
         }
       });
     } else if (acType === "vrf-ducted") {
-      vrfAnnotations.outdoorUnits.forEach((outdoor) => {
-        const outX = outdoor.xPercent * canvasWidth;
-        const outY = outdoor.yPercent * canvasHeight;
+      // vrf-ducted chain is handled entirely by overlayAnnotations (rectangle-based).
+      // Nothing to draw here — avoids double chain lines.
 
-        // VRF-Ducted: Chain topology - outdoor -> indoor1 -> indoor2 -> ...
-        const sortedIndoors = [...vrfAnnotations.indoorUnits].sort(
-          (a, b) => a.xPercent - b.xPercent
-        );
-        const points = [{ x: outX, y: outY }];
-        sortedIndoors.forEach((indoor) => {
-          points.push({
-            x: indoor.xPercent * canvasWidth,
-            y: indoor.yPercent * canvasHeight,
-          });
-        });
-        // Draw dual parallel lines (red supply + blue return, dashed) between consecutive points
-        for (let i = 0; i < points.length - 1; i++) {
-          const startX = points[i].x;
-          const startY = points[i].y;
-          const endX = points[i + 1].x;
-          const endY = points[i + 1].y;
-
-          const offset = 3;
-          const dx = endX - startX;
-          const dy = endY - startY;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = (-dy / length) * offset;
-          const perpY = (dx / length) * offset;
-
-          // Supply line (red, dashed) - from start to end
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "red";
-          context.beginPath();
-          context.moveTo(startX + perpX, startY + perpY);
-          context.lineTo(endX + perpX, endY + perpY);
-          context.stroke();
-          context.restore();
-
-          // Return line (blue, dashed) - from end to start
-          context.save();
-          context.setLineDash([8, 4]);
-          context.lineWidth = 2;
-          context.strokeStyle = "#0066FF";
-          context.beginPath();
-          context.moveTo(endX - perpX, endY - perpY);
-          context.lineTo(startX - perpX, startY - perpY);
-          context.stroke();
-          context.restore();
-        }
-      });
     }
   }
 };
@@ -215,12 +168,13 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     // Only return text if comment is within 50 pixels
     return nearest && minDist <= 50 ? nearest.text.toLowerCase() : null;
   };
-  // ducts
+  // ducts — use percentage-based dimensions stored on the duct object so the rect
+  // matches the size the engineer placed, instead of a hardcoded 40×20 px symbol.
   hvacAnnotations?.ducts?.forEach((duct) => {
     const x = duct.xPercent * canvasWidth;
     const y = duct.yPercent * canvasHeight;
-    const width = 40;
-    const height = 20;
+    const width = (duct.width || 0.2) * canvasWidth;
+    const height = (duct.height || 0.04) * canvasHeight;
     context.save();
     context.translate(x, y);
     context.beginPath();
@@ -365,9 +319,12 @@ export const overlayAnnotations = (context, annotations, acType) => {
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
 
-  // Helper function to get the center of a rotated rectangle
+  // Helper function to get the center of a rectangle for chain line connections.
+  // Note: rectangles are rotated around their top-left corner (not center),
+  // so chain lines must connect from the top-left position adjusted by rotation offset.
   const getRotatedCenter = (x, y, width, height, angleDeg) => {
     const angle = (angleDeg || 0) * (Math.PI / 180);
+    // The center of the rotated rectangle (after rotation around top-left)
     const cx = width / 2;
     const cy = height / 2;
     const cos = Math.cos(angle);
@@ -378,7 +335,7 @@ export const overlayAnnotations = (context, annotations, acType) => {
   };
 
   // rectangles - ALWAYS render user-drawn rectangles (engineer annotations)
-  // These represent condenser, AC units, and other system components
+  // Rotate around top-left corner to match stored rectangle positioning
   annotations?.rectangles?.forEach((rect) => {
     const x = rect.xPercent * canvasWidth;
     const y = rect.yPercent * canvasHeight;
@@ -397,9 +354,8 @@ export const overlayAnnotations = (context, annotations, acType) => {
     context.stroke();
     context.restore();
   });
-  // lines - skip in ducted modes since we auto-generate refrigerant lines
-  // (to avoid rendering old daisy-chain lines that interfere with star topology)
-  if (acType !== "ducted" && acType !== "vrf-ducted") {
+  // lines - skip in all VRF and ducted modes since we auto-generate refrigerant lines
+  if (acType !== "ducted" && acType !== "vrf-ducted" && acType !== "vrf-ductless") {
     annotations?.lines?.forEach((line) => {
       const lineReductionFactor = 0.985;
       context.beginPath();
@@ -452,7 +408,8 @@ export const overlayAnnotations = (context, annotations, acType) => {
   });
 
   // Draw lines from rectangles to nearest comments (callout style)
-  annotations?.rectangles?.forEach((rect) => {
+  // Skip for all VRF modes — refrigerant lines handle connectivity visually
+  if (acType !== "vrf-ducted" && acType !== "vrf-ductless") annotations?.rectangles?.forEach((rect) => {
     const rectCenter = getRotatedCenter(
       rect.xPercent * canvasWidth,
       rect.yPercent * canvasHeight,
@@ -491,7 +448,7 @@ export const overlayAnnotations = (context, annotations, acType) => {
       context.stroke();
       context.restore();
     }
-  });
+  }); // end callout lines (skipped for vrf-ducted)
 
   // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
   // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
@@ -1048,8 +1005,10 @@ if (
 
     // If no groups formed (e.g., no matching comments), fall back to original single-chain logic
     if (groups.every((g) => g.indoorRects.length === 0)) {
+      // condensers[] contains spread copies, so compare by id not reference
+      const condenserIds = new Set(condensers.map((c) => c.id));
       const allIndoorRects = annotations.rectangles
-        .filter((rect) => !rect.isCondenser && !condensers.includes(rect))
+        .filter((rect) => !rect.isCondenser && !condenserIds.has(rect.id))
         .sort((a, b) => {
           const getNum = (rect) => {
             if (!annotations.comments) return 0;

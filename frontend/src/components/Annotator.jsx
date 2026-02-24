@@ -954,12 +954,7 @@ const Annotator = ({
             coordinates: { x: c.x, y: c.y },
           }));
 
-        // Detect flat numbers from annotations.
-        // Rules:
-        //   condenser-N  or  condenser N  → flat N
-        //   flat N  / unit N              → flat N
-        //   ac-N.M  (dot notation)        → flat N  (multi-flat style)
-        //   ac-N    (no dot)              → single-flat, unit N — NOT a flat number
+        // Detect flat numbers from annotations
         const detectedFlatNums = new Set();
         acAnnotations.forEach(({ label }) => {
           const t = label.toLowerCase();
@@ -967,14 +962,11 @@ const Annotator = ({
           if (cm) detectedFlatNums.add(parseInt(cm[1], 10));
           const fm = t.match(/(?:flat|unit)\s*(\d+)/);
           if (fm) detectedFlatNums.add(parseInt(fm[1], 10));
-          // Only multi-flat dot notation adds a flat number
-          const amDot = t.match(/ac[-\s]?(\d+)\.(\d+)/);
-          if (amDot) detectedFlatNums.add(parseInt(amDot[1], 10));
+          const am = t.match(/ac[-\s]?(\d+)(?:\.\d+)?/);
+          if (am) detectedFlatNums.add(parseInt(am[1], 10));
         });
 
-        // Fall back: count duplicate room names to infer flat count.
-        // Require ≥2 DIFFERENT room types to be duplicated — a single flat
-        // can have 2 bedrooms, but is unlikely to have 2 bedrooms AND 2 living rooms.
+        // Fall back: count duplicate room names to infer flat count
         let flatNumsArray = Array.from(detectedFlatNums).sort((a, b) => a - b);
         if (flatNumsArray.length <= 1) {
           const counts = {};
@@ -983,8 +975,7 @@ const Annotator = ({
             counts[n] = (counts[n] || 0) + 1;
           });
           const maxDup = Math.max(...Object.values(counts), 1);
-          const duplicatedTypeCount = Object.values(counts).filter((c) => c >= maxDup).length;
-          if (maxDup > 1 && duplicatedTypeCount >= 2) {
+          if (maxDup > 1) {
             flatNumsArray = Array.from({ length: maxDup }, (_, i) => i + 1);
           }
         }
@@ -1796,58 +1787,51 @@ const Annotator = ({
 
     console.log("Raw AC annotations:", acAnnotations);
 
-    // Parse annotations to detect flats - look for specific patterns.
-    // Rules (same as auto-update):
-    //   condenser-N  → flat N
-    //   flat N / unit N keyword → flat N
-    //   ac-N.M (dot notation) → flat N
-    //   ac-N (no dot) → single-flat unit, NOT a flat number
+    // Parse annotations to detect flats - look for specific patterns
     const flatNumbers = new Set();
 
     acAnnotations.forEach((ann) => {
       const text = ann.label.toLowerCase();
 
-      // condenser-N or condenser N
-      const condenserMatch = text.match(/condenser[-\s]?(\d+)/);
-      if (condenserMatch) flatNumbers.add(parseInt(condenserMatch[1]));
+      // Pattern 1: condenser-1, condenser-2
+      const condenserMatch = text.match(/condenser-(\d+)/);
+      if (condenserMatch) {
+        flatNumbers.add(parseInt(condenserMatch[1]));
+      }
 
-      // flat N / unit N keyword
+      // Pattern 2: Flat 1, Unit 1
       const flatMatch = text.match(/(?:flat|unit)\s+(\d+)/);
-      if (flatMatch) flatNumbers.add(parseInt(flatMatch[1]));
-
-      // ac-N.M dot notation only
-      const acDotMatch = text.match(/ac[-\s]?(\d+)\.(\d+)/);
-      if (acDotMatch) flatNumbers.add(parseInt(acDotMatch[1]));
+      if (flatMatch) {
+        flatNumbers.add(parseInt(flatMatch[1]));
+      }
     });
 
     const flatArray = Array.from(flatNumbers).sort((a, b) => a - b);
     console.log("Detected flat numbers:", flatArray);
     console.log("Number of flats detected:", flatArray.length);
 
-    // Count room duplicates to detect multi-flat properties.
-    // Require ≥2 DIFFERENT room types duplicated — a single flat with 2 bedrooms
-    // should NOT trigger multi-flat inference.
+    // Count room duplicates to detect multi-flat properties
     const roomNameCounts = {};
     flatRooms.forEach((room) => {
       const roomName = room.roomType || "Room";
       roomNameCounts[roomName] = (roomNameCounts[roomName] || 0) + 1;
     });
     const maxDuplicateCount = Math.max(...Object.values(roomNameCounts), 1);
-    const duplicatedTypeCount = Object.values(roomNameCounts).filter(
-      (c) => c >= maxDuplicateCount
-    ).length;
     console.log("Room duplicate counts:", roomNameCounts);
-    console.log("Max duplicates per room:", maxDuplicateCount, "across", duplicatedTypeCount, "room types");
+    console.log("Max duplicates per room:", maxDuplicateCount);
 
-    // Infer multi-flat only when ≥2 room types are duplicated
+    // If no flats detected from annotations, but we have duplicates, infer multi-flat
     let inferredFlatCount = flatArray.length;
-    if (flatArray.length <= 1 && maxDuplicateCount > 1 && duplicatedTypeCount >= 2) {
+    if (flatArray.length <= 1 && maxDuplicateCount > 1) {
+      // We have duplicate room names - likely a 2-flat (or more) property
       inferredFlatCount = maxDuplicateCount;
       console.log(
         `Inferring ${inferredFlatCount}-flat property from duplicate rooms (no annotations found)`
       );
       for (let i = 1; i <= inferredFlatCount; i++) {
-        if (!flatArray.includes(i)) flatArray.push(i);
+        if (!flatArray.includes(i)) {
+          flatArray.push(i);
+        }
       }
       flatArray.sort((a, b) => a - b);
     }

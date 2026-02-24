@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import { Store } from "../Store.js";
-// import SaveAsPDF from "./SaveAsPDF.jsx";
+import SaveAsPDF from "./SaveAsPDF.jsx";
 import "./Sidebar.css";
 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
@@ -64,6 +64,7 @@ const Sidebar = () => {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [selectedPdfFile, setSelectedPdfFile] = useState(null);
   const [selectedAnnotations, setSelectedAnnotations] = useState(null);
+  const [selectedAcType, setSelectedAcType] = useState("ducted"); // Track acType for current PDF
   const [showHVAC, setShowHVAC] = useState(false);
   const [activeTab, setActiveTab] = useState("my-annotations"); // "my-annotations" or "engineer-reviews"
   // eslint-disable-next-line no-unused-vars
@@ -178,11 +179,11 @@ const Sidebar = () => {
     setIsOpen((prev) => !prev);
   };
 
-  const overlayAnnotations = (context, annotations) => {
+  const overlayAnnotations = (context, annotations, acType) => {
     const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
 
-    // rectangles
+    // rectangles — rotate around top-left to match stored positioning
     annotations?.rectangles?.forEach((rect) => {
       const x = rect.xPercent * canvasWidth;
       const y = rect.yPercent * canvasHeight;
@@ -299,6 +300,9 @@ const Sidebar = () => {
   // Remove HVAC overlay from rendering
   useEffect(() => {
     if (!selectedAnnotations || !selectedPdfFile) return;
+    // Engineer PDFs are fully baked images — overlaying again would double-draw
+    // comments and other elements on top of what's already burned into the PNG.
+    if (currentPdfType === "engineer") return;
 
     const container = document.getElementById("pdf-container");
     if (!container) return;
@@ -310,7 +314,7 @@ const Sidebar = () => {
     context.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
     // redraw normal annotations
-    overlayAnnotations(context, selectedAnnotations);
+    overlayAnnotations(context, selectedAnnotations, selectedAcType);
 
     // draw HVAC layer if toggled
     if (showHVAC) {
@@ -319,7 +323,7 @@ const Sidebar = () => {
         selectedAnnotations.hvac || { ducts: [], diffusers: [] }
       );
     }
-  }, [showHVAC, selectedAnnotations, selectedPdfFile]);
+  }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType]);
 
   const viewPdfWithAnnotations = async (pdf) => {
     console.log("Viewing PDF:", pdf);
@@ -358,6 +362,8 @@ const Sidebar = () => {
         annotationsData && annotationsData.annotations
           ? annotationsData.annotations
           : annotationsData;
+      const acType = annotationsData?.acType || "ducted"; // Get acType from backend response
+      setSelectedAcType(acType); // Store for use in overlay rendering
       console.log("Fetched annotations for", pdf._id, normalizedAnnotations);
       setSelectedAnnotations(normalizedAnnotations);
 
@@ -393,7 +399,7 @@ const Sidebar = () => {
 
         const overlayContext = overlayCanvas.getContext("2d");
         // draw the normalized annotations immediately
-        overlayAnnotations(overlayContext, normalizedAnnotations);
+        overlayAnnotations(overlayContext, normalizedAnnotations, acType);
         // HVAC overlay if enabled
         if (showHVAC) {
           overlayHVAC(
@@ -474,31 +480,9 @@ const Sidebar = () => {
         container.appendChild(canvas);
 
         await page.render({ canvasContext: context, viewport }).promise;
-
-        // overlay annotations only on the first page for now, or adjust as needed
-        if (pageNum === 1 && normalizedAnnotations) {
-          const overlayCanvas = document.createElement("canvas");
-          overlayCanvas.width = viewport.width;
-          overlayCanvas.height = viewport.height;
-          overlayCanvas.style.position = "absolute";
-          overlayCanvas.style.top = `${
-            (pageNum - 1) * (viewport.height + 10)
-          }px`; // adjust positioning
-          overlayCanvas.style.left = "0";
-          overlayCanvas.style.pointerEvents = "none";
-          container.style.position = "relative";
-          container.appendChild(overlayCanvas);
-
-          const overlayContext = overlayCanvas.getContext("2d");
-          overlayAnnotations(overlayContext, normalizedAnnotations);
-          // HVAC overlay if enabled
-          if (showHVAC) {
-            overlayHVAC(
-              overlayContext,
-              normalizedAnnotations.hvac || { ducts: [], diffusers: [] }
-            );
-          }
-        }
+        // Engineer PDFs already have all annotations baked into the image
+        // (rendered by handleSaveToMongoDB). No overlay needed — adding one
+        // would draw everything twice in conflicting colors.
       }
     } catch (err) {
       console.error(err);
@@ -571,7 +555,7 @@ const Sidebar = () => {
                 if (container) container.innerHTML = "";
               }}
             >
-              My Annotations
+              My Drawings
             </Button>
             <Button
               variant={
@@ -699,7 +683,7 @@ const Sidebar = () => {
             )}
 
             {/* SaveAsPDF only shown for My Annotations tab (user's own PDFs) */}
-             {/* {activeTab === "my-annotations" &&
+             {activeTab === "my-annotations" &&
               selectedPdfFile &&
               currentPdfType === "user" && (
                 <SaveAsPDF
@@ -710,10 +694,10 @@ const Sidebar = () => {
                   annotations={selectedAnnotations}
                   annotationType="user"
                 />
-              )} */}
+              )} 
 
             {/* SaveAsPDF for Engineer Reviews tab (engineer/admin annotations) */}
-            {/* {activeTab === "engineer-reviews" &&
+             {activeTab === "engineer-reviews" &&
               selectedPdfFile &&
               currentPdfType === "engineer" && (
                 <SaveAsPDF
@@ -724,7 +708,7 @@ const Sidebar = () => {
                   annotations={selectedAnnotations}
                   annotationType="engineer"
                 />
-              )} */}
+              )} 
 
             {/* HVAC toggle button and legend for admins/engineers only */}
             {isAdmin && selectedPdfFile && (

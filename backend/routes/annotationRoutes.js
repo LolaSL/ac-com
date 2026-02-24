@@ -211,20 +211,10 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
       if (ann) {
         console.log('Found annotations object. Rendering...');
 
-        // Draw rectangles
-        if (ann.rectangles && Array.isArray(ann.rectangles)) {
-          ann.rectangles.forEach((rect) => {
-            const { width, height } = firstPage.getSize();
-            firstPage.drawRectangle({
-              x: rect.xPercent * width,
-              y: height - rect.yPercent * height - rect.heightPercent * height,
-              width: rect.widthPercent * width,
-              height: rect.heightPercent * height,
-              borderColor: rgb(0, 0, 0),
-              borderWidth: 2,
-            });
-          });
-        }
+        // Rectangles are rendered by the canvas overlay (overlayAnnotations) which
+        // supports rotation and fill. Drawing them here again (without rotation) would
+        // produce a duplicate "empty" rectangle at the original un-rotated position.
+        // Rectangle rendering intentionally omitted from the PDF-lib paid overlay.
 
         // Draw lines
         if (ann.lines && Array.isArray(ann.lines)) {
@@ -729,7 +719,8 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
       annotations: annotation.annotations,
       isPaid: annotation.isPaid,
       acType: annotation.acType,
-      filename: annotation.filename
+      filename: annotation.filename,
+      userId: annotation.userId,
     });
   } catch (error) {
     console.error('Error fetching annotations:', error);
@@ -860,19 +851,9 @@ router.get("/print-annotated-pdf/:id", isAuth, async (req, res) => {
     const { width: pdfWidth, height: pdfHeight } = firstPage.getSize();
     const { rectangles, comments, lines } = annotation.annotations || {};
 
-    rectangles?.forEach((rect) => {
-      firstPage.drawRectangle({
-        x: rect.xPercent * pdfWidth,
-        y: rect.yPercent * pdfHeight,
-        width: rect.widthPercent * pdfWidth,
-        height: rect.heightPercent * pdfHeight,
-        color: rgb(0, 0.8, 0.9),
-        opacity: 0.3,
-        borderColor: rgb(0, 0, 0),
-        borderWidth: 2,
-      });
-    });
-
+    // Rectangles are rendered by the canvas overlay (overlayAnnotations) which supports
+    // rotation and fill colors. Drawing them here (without rotation support) creates
+    // duplicate uncolored rectangles. Rectangle rendering intentionally omitted.
 
     const pdfBytes = await pdfDoc.save();
 
