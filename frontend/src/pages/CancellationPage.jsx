@@ -5,7 +5,7 @@ import "./CancellationPage.css";
 const CancellationPage = () => {
   return (
     <Container className="my-5">
-      <h1 className="mb-4 fs-1">Cancellation Policy</h1>
+      <h1 className="page-title mb-4">Cancellation Policy</h1>
 
       <p className="fs-5">
         At AC Com Home Supply, we understand that sometimes plans change. Any

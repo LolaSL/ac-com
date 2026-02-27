@@ -92,7 +92,7 @@ export default function PricingTiersSection() {
     <section className="pricing-tiers-section">
       <Container>
         <div className="pricing-header text-center mb-5">
-          <h2 className="pricing-title">Simple, Transparent Pricing</h2>
+          <h2 className="section-title">Simple, Transparent Pricing</h2>
           <p className="pricing-subtitle">
             Choose the plan that fits your business needs
           </p>

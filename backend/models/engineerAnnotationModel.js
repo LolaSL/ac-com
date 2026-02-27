@@ -55,6 +55,7 @@ const engineerAnnotationSchema = new Schema(
                     id: { type: String, required: true },
                     rectId: { type: String, required: true },
                     text: { type: String, required: true },
+                    acType: { type: String },
                     xPercent: { type: Number, required: true },
                     yPercent: { type: Number, required: true },
                     fill: { type: String },
@@ -100,6 +101,26 @@ const engineerAnnotationSchema = new Schema(
                         stroke: { type: String },
                         strokeWidth: { type: Number },
                         lineType: { type: String }, // "liquid", "vapor", "suction"
+                    },
+                ],
+            },
+            vrf: {
+                outdoorUnits: [
+                    {
+                        id: { type: String, required: true },
+                        xPercent: { type: Number, required: true },
+                        yPercent: { type: Number, required: true },
+                        sizePercent: { type: Number, default: 0.12 },
+                        capacity: { type: Number },
+                    },
+                ],
+                indoorUnits: [
+                    {
+                        id: { type: String, required: true },
+                        xPercent: { type: Number, required: true },
+                        yPercent: { type: Number, required: true },
+                        sizePercent: { type: Number, default: 0.08 },
+                        roomName: { type: String },
                     },
                 ],
             },

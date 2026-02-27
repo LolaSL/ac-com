@@ -156,7 +156,7 @@ export default function UserListPage() {
     <Container className="admin-page-container">
       <Row className="align-items-center mb-4">
         <Col>
-          <h1 className="admin-page-title">Users Management</h1>
+          <h1 className="page-title">Users Management</h1>
         </Col>
       </Row>
 

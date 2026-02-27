@@ -57,7 +57,7 @@ const Projects = () => {
 
   return (
 <Container classname="provider-container">
-  <h2 className="mt-4 mb-4 fw-bold">Projects</h2>
+  <h1 className="page-title">Projects</h1>
   <div className="table-responsive">
     <Table striped bordered hover>
       <thead>

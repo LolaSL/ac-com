@@ -158,7 +158,7 @@ export default function SellerDashboard() {
 
   return (
     <div className="container mt-4">
-      <h1 className="mb-4">Seller Referral Dashboard</h1>
+      <h1 className="page-title">Seller Referral Dashboard</h1>
 
       {loading ? (
         <LoadingBox />

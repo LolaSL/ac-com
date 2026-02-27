@@ -203,7 +203,7 @@ const ProductEditPage = () => {
 
   return (
     <Container className="small-container">
-      <h1>Edit Product {productId}</h1>
+      <h1 className="page-title">Edit Product {productId}</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (

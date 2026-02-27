@@ -72,7 +72,7 @@ const ContactPage = () => {
 
   return (
     <Container>
-      <h1 className="contacts-title mt-4 mb-2 fs-1">Contact Us</h1>
+      <h1 className="page-title mt-4 mb-2">Contact Us</h1>
 
       <p
         className="lead mb-4 fs-4 text-break ps-5"
@@ -218,7 +218,7 @@ const ContactPage = () => {
           {loading ? "Submitting..." : "Submit"}
         </Button>
 
-        <h2 className="mb-5 text-center">Get in Touch</h2>
+        <h2 className="section-title">Get in Touch</h2>
 
         <div className="contact-info">
           <div className="secondary-item">

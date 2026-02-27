@@ -49,7 +49,7 @@ const ServiceProviderLogin = () => {
         style={{ maxWidth: "500px", width: "100%" }}
       >
         <Card.Body>
-          <h1 className="text-center mb-4 fw-bold text-primary fs-1">
+          <h1 className="page-title text-center text-primary">
             Service Provider Login
           </h1>
           <Form onSubmit={submitHandler}>

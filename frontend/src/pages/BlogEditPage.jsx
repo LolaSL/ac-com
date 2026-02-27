@@ -129,7 +129,7 @@ const BlogEditPage = () => {
 
   return (
     <Container className="small-container">
-      <h1>Edit Blog {blogId}</h1>
+      <h1 className="page-title">Edit Blog {blogId}</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (

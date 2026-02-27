@@ -100,7 +100,7 @@ export default function SellerEditPage() {
 
   return (
     <Container className="small-container">
-      <h1>Edit Seller {id}</h1>
+      <h1 className="page-title">Edit Seller {id}</h1>
       {loading ? (
         <LoadingBox></LoadingBox>
       ) : error ? (

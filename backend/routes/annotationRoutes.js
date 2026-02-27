@@ -61,7 +61,7 @@ router.post(
       const userId = req.user._id;
       const isPaid = req.user.isPaid; // <-- ensure user’s isPaid is used
 
-      const { pdfId, rectangles, comments, lines, imageWidth, imageHeight, rooms } =
+      const { pdfId, rectangles, comments, lines, hvac, vrf, acType, imageWidth, imageHeight, rooms } =
         req.body;
 
       if (!imageWidth || !imageHeight) {
@@ -76,36 +76,111 @@ router.post(
       const parsedRectangles = JSON.parse(rectangles || "[]");
       const parsedComments = JSON.parse(comments || "[]");
       const parsedLines = JSON.parse(lines || "[]");
+      const parsedHvac = JSON.parse(hvac || "{}");
+      const parsedVrf = JSON.parse(vrf || "{}");
       const parsedRooms = JSON.parse(rooms || "[]");
-      const percentRectangles = parsedRectangles.map((rect) => ({
-        id: rect.id,
-        xPercent: rect.x / width,
-        yPercent: rect.y / height,
-        widthPercent: rect.width / width,
-        heightPercent: rect.height / height,
-        fill: rect.fill,
-        stroke: rect.stroke,
-        rotation: rect.rotation || 0,
-      }));
+
+      const percentRectangles = parsedRectangles.map((rect) => {
+        const xPercent = rect.xPercent ?? (rect.x / width);
+        const yPercent = rect.yPercent ?? (rect.y / height);
+        const widthPercent = rect.widthPercent ?? (rect.width / width);
+        const heightPercent = rect.heightPercent ?? (rect.height / height);
+
+        return {
+          id: rect.id,
+          xPercent: Number.isFinite(parseFloat(xPercent)) ? parseFloat(xPercent) : 0,
+          yPercent: Number.isFinite(parseFloat(yPercent)) ? parseFloat(yPercent) : 0,
+          widthPercent: Number.isFinite(parseFloat(widthPercent)) ? parseFloat(widthPercent) : 0,
+          heightPercent: Number.isFinite(parseFloat(heightPercent)) ? parseFloat(heightPercent) : 0,
+          fill: rect.fill,
+          stroke: rect.stroke,
+          rotation: rect.rotation || 0,
+        };
+      });
 
       const percentComments = parsedComments.map((comment) => ({
         id: comment.id,
         rectId: comment.rectId,
         text: comment.text,
-        xPercent: comment.x / width,
-        yPercent: comment.y / height,
+        acType: comment.acType,
+        xPercent: (comment.xPercent ?? (comment.x / width)) || 0,
+        yPercent: (comment.yPercent ?? (comment.y / height)) || 0,
         fill: comment.fill,
         textColor: comment.textColor,
       }));
 
-      const percentLines = parsedLines.map((line) => ({
-        id: line.id,
-        rectId: line.rectId,
-        commentId: line.commentId,
-        points: line.points.map((p, i) => (i % 2 === 0 ? p / width : p / height)),
-        stroke: line.stroke,
-        strokeWidth: line.strokeWidth,
-      }));
+      const percentLines = parsedLines.map((line) => {
+        const points = Array.isArray(line.points) ? line.points : [];
+        const maxAbsPoint = points.reduce((m, p) => {
+          const n = typeof p === 'string' ? parseFloat(p) : p;
+          return Number.isFinite(n) ? Math.max(m, Math.abs(n)) : m;
+        }, 0);
+
+        const looksLikePixels = maxAbsPoint > 1.5;
+        const normalizedPoints = looksLikePixels
+          ? points.map((p, i) => {
+              const n = typeof p === 'string' ? parseFloat(p) : p;
+              if (!Number.isFinite(n)) return 0;
+              return i % 2 === 0 ? n / width : n / height;
+            })
+          : points.map((p) => {
+              const n = typeof p === 'string' ? parseFloat(p) : p;
+              return Number.isFinite(n) ? n : 0;
+            });
+
+        return {
+          id: line.id,
+          rectId: line.rectId,
+          commentId: line.commentId,
+          points: normalizedPoints,
+          stroke: line.stroke,
+          strokeWidth: line.strokeWidth,
+        };
+      });
+
+      const hvacData = {
+        ducts: (parsedHvac.ducts || []).map((duct) => ({
+          id: duct.id,
+          xPercent: duct.xPercent || duct.x / width || 0,
+          yPercent: duct.yPercent || duct.y / height || 0,
+          width: duct.width || 0.2,
+          height: duct.height || 0.04,
+          fill: duct.fill || "transparent",
+          stroke: duct.stroke || "#0078d4",
+        })),
+        diffusers: (parsedHvac.diffusers || []).map((diffuser) => ({
+          id: diffuser.id,
+          shape: diffuser.shape || "circle",
+          xPercent: diffuser.xPercent || diffuser.x / width || 0,
+          yPercent: diffuser.yPercent || diffuser.y / height || 0,
+          sizePercent: diffuser.sizePercent || 0.08,
+          airflow: diffuser.airflow,
+        })),
+        refrigerantLines: (parsedHvac.refrigerantLines || []).map((line) => ({
+          id: line.id,
+          points: (line.points || []).map((p, i) => (i % 2 === 0 ? p / width : p / height)),
+          stroke: line.stroke || "#FF6B35",
+          strokeWidth: line.strokeWidth || 2,
+          lineType: line.lineType || "liquid",
+        })),
+      };
+
+      const vrfData = {
+        outdoorUnits: (parsedVrf.outdoorUnits || []).map((unit) => ({
+          id: unit.id,
+          xPercent: unit.xPercent || unit.x / width || 0,
+          yPercent: unit.yPercent || unit.y / height || 0,
+          sizePercent: unit.sizePercent || 0.12,
+          capacity: unit.capacity,
+        })),
+        indoorUnits: (parsedVrf.indoorUnits || []).map((unit) => ({
+          id: unit.id,
+          xPercent: unit.xPercent || unit.x / width || 0,
+          yPercent: unit.yPercent || unit.y / height || 0,
+          sizePercent: unit.sizePercent || 0.08,
+          roomName: unit.roomName,
+        })),
+      };
 
       const newAnnotation = new AnnotationModel({
         filename: req.file.originalname,
@@ -113,12 +188,15 @@ router.post(
         userId,
         pdfId,
         isPaid,
+        acType,
         originalImageWidth: width,
         originalImageHeight: height,
         annotations: {
           rectangles: percentRectangles,
           comments: percentComments,
           lines: percentLines,
+          hvac: hvacData,
+          vrf: vrfData,
         },
         roomData: parsedRooms,
       });

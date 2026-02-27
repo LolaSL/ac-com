@@ -128,7 +128,7 @@ const MessageEditPage = () => {
 
   return (
     <Container className="small-container">
-      <h1>Edit Message {messageId}</h1>
+      <h1 className="page-title">Edit Message {messageId}</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (

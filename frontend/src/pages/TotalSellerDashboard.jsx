@@ -67,7 +67,7 @@ export default function TotalSellerDashboard() {
 
   return (
     <div className="container mt-4">
-      <h1 className="mb-4">Total Seller Referral Dashboard</h1>
+      <h1 className="page-title">Total Seller Referral Dashboard</h1>
 
       {loading ? (
         <LoadingBox />
@@ -144,21 +144,7 @@ export default function TotalSellerDashboard() {
                     return (
                       <tr key={item.seller._id}>
                         <td>
-                          <div className="d-flex align-items-center">
-                            {item.seller.logo &&
-                              item.seller.logo !== "undefined" &&
-                              item.seller.logo !== "" &&
-                              item.seller.logo.startsWith("/images/") && (
-                                <img
-                                  src={item.seller.logo}
-                                  alt={`${item.seller.name} logo`}
-                                  className="seller-logo"
-                                />
-                              )}
-                            <div>
-                              <strong>{item.seller.name}</strong>
-                            </div>
-                          </div>
+                          <strong>{item.seller.name}</strong>
                         </td>
                         <td>{item.seller.brand}</td>
                         <td>

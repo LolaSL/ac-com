@@ -90,7 +90,7 @@ export default function UserMessagesPage() {
 
   return (
     <Container className="provider-container my-5">
-      <h1 className="mb-4 fs-1">Order Status Messages</h1>
+      <h1 className="page-title">Order Status Messages</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (

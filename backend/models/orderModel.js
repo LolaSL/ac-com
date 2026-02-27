@@ -49,6 +49,9 @@ const orderSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date },
+    reminderSent: { type: Boolean, default: false }, // Track if 24-hour unpaid reminder was sent
+    isCancelled: { type: Boolean, default: false }, // Track if order auto-cancelled due to non-payment after 7 days
+    cancelledAt: { type: Date }, // When order was cancelled
     isDelivered: { type: Boolean, default: false },
     deliveredAt: { type: Date },
     isCancelled: { type: Boolean, default: false },

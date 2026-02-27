@@ -35,7 +35,7 @@ export default function TestimonialsSection() {
       <Container>
         <Row className="mb-5 text-center">
           <Col>
-            <h2 className="fw-bold mb-3">What Our Customers Say</h2>
+            <h2 className="section-title">What Our Customers Say</h2>
             <p className="text-muted lead">
               Real results from industry professionals
             </p>

@@ -133,7 +133,7 @@ const SellersListPage = () => {
     <Container className="admin-page-container">
       <Row className="align-items-center mb-4">
         <Col>
-          <h1 className="admin-page-title">Sellers Management</h1>
+          <h1 className="page-title">Sellers Management</h1>
         </Col>
         <Col className="text-end">
           <Button

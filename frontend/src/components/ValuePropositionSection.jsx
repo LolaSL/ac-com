@@ -21,7 +21,7 @@ export default function ValuePropositionSection() {
       icon: <FaClock size={32} />,
       title: "10x Faster Quotes",
       description:
-        "AI-powered instant calculations vs traditional manual processes",
+        "Engineer-powered instant calculations vs traditional manual processes",
       color: "info",
     },
     {
@@ -57,7 +57,7 @@ export default function ValuePropositionSection() {
       <Container>
         <Row className="mb-5 text-center">
           <Col>
-            <h2 className="fw-bold mb-3">Why Choose Our Platform?</h2>
+            <h2 className="section-title">Why Choose Our Platform?</h2>
             <p className="text-muted lead">
               Transforming how HVAC projects are designed, quoted, and executed
             </p>

@@ -28,6 +28,7 @@ const annotationSchema = new Schema(
           id: { type: String, required: true },
           rectId: { type: String, required: true },
           text: { type: String, required: true },
+          acType: { type: String },
           xPercent: { type: Number, required: true },
           yPercent: { type: Number, required: true },
           fill: { type: String },
@@ -64,6 +65,15 @@ const annotationSchema = new Schema(
             yPercent: { type: Number, required: true },
             sizePercent: { type: Number, required: true },
             airflow: { type: Number }, // optional CFM
+          },
+        ],
+        refrigerantLines: [
+          {
+            id: { type: String, required: true },
+            points: [{ type: Number }], // [x1, y1, x2, y2, ...]
+            stroke: { type: String },
+            strokeWidth: { type: Number },
+            lineType: { type: String }, // "liquid", "vapor", "suction"
           },
         ],
       },

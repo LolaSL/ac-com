@@ -92,7 +92,7 @@ export default function UserEditPage() {
   };
   return (
     <Container className="small-container">
-      <h1>Edit User {userId}</h1>
+      <h1 className="page-title">Edit User {userId}</h1>
 
       {loading ? (
         <LoadingBox></LoadingBox>

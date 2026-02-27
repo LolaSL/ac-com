@@ -163,7 +163,7 @@ function BrowsingHistoryPage() {
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fs-1">
+        <h1 className="page-title">
           <FaEye className="me-2" />
           Browsing History
         </h1>

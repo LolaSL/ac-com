@@ -4,7 +4,7 @@ import { Container } from "react-bootstrap";
 const PrivacyPolicyPage = () => {
   return (
     <Container className="my-5">
-       <h1 className="mb-4 fs-1">Privacy Policy</h1>
+       <h1 className="page-title mb-4">Privacy Policy</h1>
 
       <h4>Information We Collect</h4>
       <p className="fs-5">

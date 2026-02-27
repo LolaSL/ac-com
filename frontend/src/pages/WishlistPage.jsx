@@ -93,7 +93,7 @@ export default function WishlistPage() {
 
   return (
     <div className="container my-5">
-      <h1 className="mb-4 fs-1">
+      <h1 className="page-title">
         <i className="fas fa-heart me-2 heart-icon"></i>
         My Wishlist
       </h1>

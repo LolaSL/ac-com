@@ -5,7 +5,7 @@ import "./TermsOfusePage.css";
 const TermsOfusePage = () => {
   return (
     <Container className="my-5">
-      <h1 className="mb-4 fs-1">Terms of Use / Terms & Conditions</h1>
+      <h1 className="page-title">Terms of Use / Terms & Conditions</h1>
 
       <p className="fs-5">
         PLEASE READ THESE TERMS AND CONDITIONS CAREFULLY BEFORE USING THIS

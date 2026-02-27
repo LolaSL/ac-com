@@ -105,7 +105,7 @@ const ServiceProviderMessages = () => {
         `}
       </style>
       <Container>
-        <h1>Messages from Clients</h1>
+        <h1 className="page-title">Messages from Clients</h1>
         {loading ? (
           <LoadingBox />
         ) : error ? (

@@ -1,10 +1,8 @@
 /* ContactPage Styles */
 
+/* Deprecated: now uses .page-title class */
 h1.contacts-title {
-  position: relative;
-  font-family: var(--font-family);
-  text-transform: uppercase;
-  letter-spacing: 4px;
+  /* Removed old styling */
 }
 
 .contact-form {

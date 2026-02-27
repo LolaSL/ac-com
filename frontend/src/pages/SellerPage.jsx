@@ -101,7 +101,7 @@ export default function SellerPage() {
 
   return (
     <div>
-      <h1 className="mt-4 mb-4 p-4 fs-1">Seller Details</h1>
+      <h1 className="page-title">Seller Details</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -118,7 +118,7 @@ export default function SellerPage() {
                 style={{ objectFit: "contain", borderRadius: "4px" }}
               />
             </div>
-            <h2 className="p-4">{seller.name || "Seller Name"}</h2>
+            <h2 className="section-title p-4">{seller.name || "Seller Name"}</h2>
             <p>Brand: {seller.brand || "Not specified"}</p>
             <p>
               Company website:{" "}
@@ -159,7 +159,7 @@ export default function SellerPage() {
             )}
           </div>
           <div>
-            <h2 className="mt-2 mb-2 p-2" ref={reviewsRef}>
+            <h2 className="section-title" ref={reviewsRef}>
               Reviews
             </h2>
             <ListGroup>
@@ -190,7 +190,7 @@ export default function SellerPage() {
             <div>
               {userInfo ? (
                 <form onSubmit={submitHandler}>
-                  <h2 className="mt-2 mb-2 p-2">Write a customer review</h2>
+                  <h2 className="section-title">Write a customer review</h2>
                   <Form.Group className="mb-3" controlId="rating">
                     <Form.Label>Rating</Form.Label>
                     <Form.Control

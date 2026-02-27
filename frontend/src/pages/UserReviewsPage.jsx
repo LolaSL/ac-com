@@ -170,7 +170,7 @@ function UserReviewsPage() {
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fs-1 m-0">My Reviews</h1>
+        <h1 className="page-title">My Reviews</h1>
         <div>
           <Button
             variant="outline-danger"

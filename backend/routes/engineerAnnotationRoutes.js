@@ -39,6 +39,7 @@ router.post(
             comments,
             lines,
             hvac,
+            vrf,
             refrigerantLinesAuto,
             engineerNotes,
             imageWidth,
@@ -71,39 +72,71 @@ router.post(
         const parsedComments = JSON.parse(comments || "[]");
         const parsedLines = JSON.parse(lines || "[]");
         const parsedHvac = JSON.parse(hvac || "{}");
+        const parsedVrf = JSON.parse(vrf || "{}");
 
-        const percentRectangles = parsedRectangles.map((rect) => ({
-            id: rect.id,
-            xPercent: isNaN(rect.x) ? 0 : rect.x / width,
-            yPercent: isNaN(rect.y) ? 0 : rect.y / height,
-            widthPercent: isNaN(rect.width) ? 0 : rect.width / width,
-            heightPercent: isNaN(rect.height) ? 0 : rect.height / height,
-            fill: rect.fill,
-            stroke: rect.stroke,
-            rotation: rect.rotation || 0,
-        }));
+        const percentRectangles = parsedRectangles.map((rect) => {
+            const xPercent = rect.xPercent ?? (rect.x / width);
+            const yPercent = rect.yPercent ?? (rect.y / height);
+            const widthPercent = rect.widthPercent ?? (rect.width / width);
+            const heightPercent = rect.heightPercent ?? (rect.height / height);
 
-        const percentComments = parsedComments.map((comment) => ({
-            id: comment.id,
-            rectId: comment.rectId,
-            text: comment.text,
-            xPercent: isNaN(comment.x) ? 0 : comment.x / width,
-            yPercent: isNaN(comment.y) ? 0 : comment.y / height,
-            fill: comment.fill,
-            textColor: comment.textColor,
-        }));
+            return {
+                id: rect.id,
+                xPercent: Number.isFinite(parseFloat(xPercent)) ? parseFloat(xPercent) : 0,
+                yPercent: Number.isFinite(parseFloat(yPercent)) ? parseFloat(yPercent) : 0,
+                widthPercent: Number.isFinite(parseFloat(widthPercent)) ? parseFloat(widthPercent) : 0,
+                heightPercent: Number.isFinite(parseFloat(heightPercent)) ? parseFloat(heightPercent) : 0,
+                fill: rect.fill,
+                stroke: rect.stroke,
+                rotation: rect.rotation || 0,
+            };
+        });
 
-        const percentLines = parsedLines.map((line) => ({
-            id: line.id,
-            rectId: line.rectId,
-            commentId: line.commentId,
-            points: line.points.map((p, i) => {
-                const val = i % 2 === 0 ? p / width : p / height;
-                return isNaN(val) ? 0 : val;
-            }),
-            stroke: line.stroke,
-            strokeWidth: line.strokeWidth,
-        }));
+        const percentComments = parsedComments.map((comment) => {
+            const xPercent = comment.xPercent ?? (comment.x / width);
+            const yPercent = comment.yPercent ?? (comment.y / height);
+
+            return {
+                id: comment.id,
+                rectId: comment.rectId,
+                text: comment.text,
+                acType: comment.acType,
+                xPercent: Number.isFinite(parseFloat(xPercent)) ? parseFloat(xPercent) : 0,
+                yPercent: Number.isFinite(parseFloat(yPercent)) ? parseFloat(yPercent) : 0,
+                fill: comment.fill,
+                textColor: comment.textColor,
+            };
+        });
+
+        const percentLines = parsedLines.map((line) => {
+            const points = Array.isArray(line.points) ? line.points : [];
+            const maxAbsPoint = points.reduce((m, p) => {
+                const n = typeof p === "string" ? parseFloat(p) : p;
+                return Number.isFinite(n) ? Math.max(m, Math.abs(n)) : m;
+            }, 0);
+
+            // Heuristic: if points look like pixels (> 1), normalize; otherwise treat as already-percent.
+            const looksLikePixels = maxAbsPoint > 1.5;
+            const normalizedPoints = looksLikePixels
+                ? points.map((p, i) => {
+                    const n = typeof p === "string" ? parseFloat(p) : p;
+                    if (!Number.isFinite(n)) return 0;
+                    return i % 2 === 0 ? n / width : n / height;
+                })
+                : points.map((p) => {
+                    const n = typeof p === "string" ? parseFloat(p) : p;
+                    return Number.isFinite(n) ? n : 0;
+                });
+
+            return {
+                id: line.id,
+                rectId: line.rectId,
+                commentId: line.commentId,
+                points: normalizedPoints,
+                stroke: line.stroke,
+                strokeWidth: line.strokeWidth,
+            };
+        });
 
         // Normalize HVAC data
         const hvacData = {
@@ -133,6 +166,23 @@ router.post(
             })),
         };
 
+        const vrfData = {
+            outdoorUnits: (parsedVrf.outdoorUnits || []).map((unit) => ({
+                id: unit.id,
+                xPercent: unit.xPercent || unit.x / width || 0,
+                yPercent: unit.yPercent || unit.y / height || 0,
+                sizePercent: unit.sizePercent || 0.12,
+                capacity: unit.capacity,
+            })),
+            indoorUnits: (parsedVrf.indoorUnits || []).map((unit) => ({
+                id: unit.id,
+                xPercent: unit.xPercent || unit.x / width || 0,
+                yPercent: unit.yPercent || unit.y / height || 0,
+                sizePercent: unit.sizePercent || 0.08,
+                roomName: unit.roomName,
+            })),
+        };
+
         const newEngineerAnnotation = new EngineerAnnotationModel({
             userId,
             engineerId: req.user._id,
@@ -153,6 +203,7 @@ router.post(
                 comments: percentComments,
                 lines: percentLines,
                 hvac: hvacData,
+                vrf: vrfData,
             },
             engineerNotes,
             status: "reviewed",

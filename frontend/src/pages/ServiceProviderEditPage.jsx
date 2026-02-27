@@ -96,7 +96,7 @@ export default function ServiceProviderEditPage() {
 
   return (
     <Container className="small-container">
-      <h1>Edit Service Provider {serviceProviderId}</h1>
+      <h1 className="page-title">Edit Service Provider {serviceProviderId}</h1>
 
       {loading ? (
         <LoadingBox></LoadingBox>

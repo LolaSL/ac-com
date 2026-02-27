@@ -14,7 +14,7 @@ export default function ROICalculatorPreview() {
     <section className="roi-calculator-section">
       <Container>
         <div className="roi-header text-center mb-5">
-          <h2 className="roi-title">Calculate Your ROI</h2>
+          <h2 className="section-title">Calculate Your ROI</h2>
           <p className="roi-subtitle">
             See how much you can save by switching to AC Commerce
           </p>

@@ -94,15 +94,7 @@ export default function OurNetworkPage() {
   return (
     <Container className="py-5">
       <div className="text-center mb-5">
-        <h1
-          className="display-4 fw-bold mb-3 sellers-title"
-          style={{
-            background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}
-        >
+        <h1 className="page-title mb-3">
           Our Network
         </h1>
         <p className="lead text-muted">
@@ -128,12 +120,13 @@ export default function OurNetworkPage() {
       {/* Sellers Section */}
       <div className="mb-5">
         <h2
-          className="text-center mb-4 "
+          className="section-title text-center mb-4 "
           style={{
             background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
+            borderBottom: "none"
           }}
         >
           Our Suppliers
@@ -219,12 +212,13 @@ export default function OurNetworkPage() {
       {/* Partners Section */}
       <div className="mb-5">
         <h2
-          className="text-center mb-4 "
+          className="section-title text-center mb-4 "
           style={{
             background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
+            borderBottom: "none"
           }}
         >
           Our Manufacturer Partners

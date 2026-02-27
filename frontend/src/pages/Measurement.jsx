@@ -96,7 +96,7 @@ const Measurement = () => {
   return (
     <Container>
       {error && <div className="alert alert-danger">{error}</div>}
-      <h1 className="mt-4 mb-4 title-measurement">
+      <h1 className="page-title">
         Measurement Service System
       </h1>
       <div className="row row-cols-2 row-cols-md-4 g-3 pt-4 mt-4">

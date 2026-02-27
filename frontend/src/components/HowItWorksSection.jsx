@@ -34,7 +34,7 @@ export default function HowItWorksSection() {
       <Container>
         <Row className="mb-5 text-center">
           <Col>
-            <h2 className="fw-bold mb-3">How It Works</h2>
+            <h2 className="section-title">How It Works</h2>
             <p className="text-muted lead">
               From design to installation in 4 simple steps
             </p>

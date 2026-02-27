@@ -48,7 +48,7 @@ export default function Offers() {
 
   return (
     <div className="container mt-5">
-      <h1 className="offers text-center mb-4 fs-1">Special Offers</h1>
+      <h1 className="page-title text-center mb-4">Special Offers</h1>
       {loading ? (
         <div className="text-center">
           <Spinner animation="border" role="status">

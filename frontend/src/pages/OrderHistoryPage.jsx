@@ -65,7 +65,7 @@ export default function OrderHistoryPage() {
 
   return (
     <Container className="provider-container">
-      <h1 className="fs-1">Order History</h1>
+      <h1 className="page-title">Order History</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (

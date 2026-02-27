@@ -51,7 +51,7 @@ export default function SuccessStoriesSection() {
     <section className="success-stories-section">
       <Container>
         <div className="stories-header text-center mb-5">
-          <h2 className="stories-title">Success Stories</h2>
+          <h2 className="section-title">Success Stories</h2>
           <p className="stories-subtitle">
             Real results from leading HVAC companies
           </p>

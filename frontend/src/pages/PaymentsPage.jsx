@@ -187,15 +187,15 @@ export default function PaymentsPage() {
 
   return (
     <div>
-      <div className="row">
-        <h1>Payments to Service Providers</h1>
+      <div className="row mb-4">
+        <h1 className="page-title">Payments to Service Providers</h1>
         <div className="col text-end">
           <div>
             <button
-              type="button"
-              className="btn btn-primary"
+                 type="button"
+            className="btn-admin-action"
               onClick={() => setShowCreateModal(true)}
-            >
+            >   <i className="fas fa-plus me-2"></i>
               Create Payment
             </button>
           </div>

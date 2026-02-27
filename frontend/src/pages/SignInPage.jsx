@@ -60,7 +60,7 @@ export default function SignInPage() {
         style={{ maxWidth: "600px", width: "100%" }}
       >
         <Card.Body>
-          <h1 className="text-center text-primary fs-1 pt-4 mb-4 fw-bold my-3">
+          <h1 className="page-title text-center text-primary">
             User Login
           </h1>
           <Form onSubmit={submitHandler}>

@@ -5,7 +5,7 @@ import "./ShipMentPage.css";
 const ShipMentPage = () => {
   return (
     <Container className="my-5">
-      <h1 className="mb-4 fs-1">Shipping, Tax & Delivery</h1>
+      <h1 className="page-title">Shipping, Tax & Delivery</h1>
 
       <p className="fs-5">
         We’ve made shipping simple for all our air conditioners, outdoor units,

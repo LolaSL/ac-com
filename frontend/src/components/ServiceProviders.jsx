@@ -128,7 +128,7 @@ const ServiceProviders = () => {
     <Container className="provider-container">
       <div className="provider-header">
         <div>
-          <h1 className="mb-2">Admin Service Providers Sales</h1>
+          <h1 className="page-title">Admin Service Providers Sales</h1>
           <p className="text-muted mb-0">
             Monitor service provider performance and earnings
           </p>

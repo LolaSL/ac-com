@@ -93,7 +93,7 @@ export default function ServiceProviderProfile() {
 
   return (
     <Container className="container small-container">
-      <h1 className="mt-4 mb-4 fw-bold">Service Provider Profile</h1>
+      <h1 className="page-title">Service Provider Profile</h1>
       <div className="card p-3 mb-4">
         <h1 className="mt-2 mb-2-italic">{name}</h1>
         {serviceProviderInfo && (

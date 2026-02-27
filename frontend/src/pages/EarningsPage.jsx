@@ -58,7 +58,7 @@ const EarningsPage = () => {
 
   return (
     <Container className="provider-container">
-      <h1 className="mt-4 mb-4 fw-bold">Earnings</h1>
+      <h1 className="page-title">Earnings</h1>
       <div className="table-responsive">
         <Table striped bordered hover>
           <thead>
