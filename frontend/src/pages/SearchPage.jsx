@@ -316,7 +316,6 @@ export default function SearchPage() {
                         xs={12}
                         sm={6}
                         md={4}
-                        lg={3}
                         className="p-2"
                       >
                         <Product product={product} />
@@ -342,11 +341,6 @@ export default function SearchPage() {
               )}
             </Col>
           </Row>
-        </div>
-        <div className=" mt-4 mb-4">
-          <Link to="/" className="go-to-btn btn-text">
-            Back to Home
-          </Link>
         </div>
       </div>
     </Container>

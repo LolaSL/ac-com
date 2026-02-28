@@ -4,6 +4,8 @@ html,
 body {
   height: 100%;
   margin: 0;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -11,6 +13,13 @@ body {
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* Admin Login Page - Hi-Tech Background */
@@ -2185,8 +2194,36 @@ h2 {
   max-width: 90% !important;
   width: 90%;
 }
+
+/* ── PDF scroll wrapper ─────────────────────────────────────────── */
+/* Wraps #pdf-container in EngineerViewPage and Sidebar modal.      */
+/* The canvas renders at a fixed pixel width so we allow horizontal */
+/* scroll instead of clipping or squashing the PDF on small screens.*/
+.pdf-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS */
+}
+
+.pdf-scroll-wrapper > #pdf-container {
+  /* Let canvas determine its own width; don't constrain it */
+  min-width: min-content;
+}
+
 #pdf-container {
   position: relative;
+}
+
+@media (max-width: 767px) {
+  .pdf-scroll-wrapper {
+    /* subtle scroll hint shadow on right edge when content overflows */
+    background:
+      linear-gradient(to right, white 30%, rgba(255,255,255,0)) left center,
+      linear-gradient(to left,  white 30%, rgba(255,255,255,0)) right center;
+    background-size: 30px 100%, 30px 100%;
+    background-attachment: local, local;
+    background-repeat: no-repeat;
+  }
 }
 
 .square-payment-wrapper {

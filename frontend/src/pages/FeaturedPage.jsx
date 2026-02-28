@@ -5,7 +5,6 @@ import Col from "react-bootstrap/Col";
 import Product from "../components/Product.jsx";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
-import { Link } from "react-router-dom";
 import "./FeaturedPage.css";
 
 const reducer = (state, action) => {
@@ -87,11 +86,6 @@ const FeaturedPage = () => {
             No featured products available at the moment. Check back soon!
           </MessageBox>
         )}
-      </div>
-      <div className="mt-4 mb-4 text-center">
-        <Link to="/" className="go-to-btn btn-text">
-          Back to Home
-        </Link>
       </div>
     </div>
   );

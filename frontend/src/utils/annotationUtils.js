@@ -315,7 +315,8 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
   }
 };
 
-export const overlayAnnotations = (context, annotations, acType) => {
+export const overlayAnnotations = (context, annotations, acType, options = {}) => {
+  const { skipRefrigerantLines = false } = options;
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
 
@@ -455,6 +456,7 @@ export const overlayAnnotations = (context, annotations, acType) => {
   // Skip for VRF systems which have their own topology logic
 
 if (
+  !skipRefrigerantLines &&
   acType === "ducted" &&
   !acType.startsWith("vrf") &&
   annotations?.rectangles &&
@@ -565,6 +567,7 @@ if (
 }
   // For ductless systems, draw refrigerant lines connecting rectangles to their nearest condenser
   if (
+    !skipRefrigerantLines &&
     acType === "ductless" &&
     !acType.startsWith("vrf") &&
     annotations?.rectangles &&
@@ -709,7 +712,7 @@ if (
   }
 
   // For VRF ductless systems, draw teal refrigerant lines connecting rectangles to their nearest condenser
-  if (acType === "vrf-ductless") {
+  if (!skipRefrigerantLines && acType === "vrf-ductless") {
     // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
     let condensers = [];
 
@@ -837,6 +840,7 @@ if (
   // For VRF ducted systems, draw red/blue dashed supply/return lines between user rectangles
   // Uses sequential chain topology: Rect1→Rect2→Rect3→...→Condenser (largest rectangle)
 if (
+  !skipRefrigerantLines &&
   acType === "vrf-ducted" &&
   annotations?.rectangles &&
   annotations.rectangles.length > 1

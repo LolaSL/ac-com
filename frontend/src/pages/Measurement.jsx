@@ -38,6 +38,18 @@ const Measurement = () => {
   const [error, setError] = useState(null);
   const btuCalculatorRef = useRef(null);
 
+  // Clean up any Bootstrap modal state left behind when navigating away
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+      document
+        .querySelectorAll(".modal-backdrop")
+        .forEach((el) => el.remove());
+    };
+  }, []);
+
   // Wrapper for setRoomData that also accepts annotations
   const setRoomData = (rooms, annotations = []) => {
     setRoomDataState(rooms);

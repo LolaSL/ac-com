@@ -219,36 +219,6 @@ router.post(
 );
 
 /**
- * GET /api/engineer-annotations/:id
- * Get a specific engineer annotation by ID
- * Requires: isAuth (owner or admin)
- */
-router.get(
-    "/:id",
-    isAuth,
-    expressAsyncHandler(async (req, res) => {
-        const annotation = await EngineerAnnotationModel.findById(req.params.id)
-            .populate("engineerId", "name email")
-            .populate("userId", "name email");
-
-        if (!annotation) {
-            return res.status(404).json({ message: "Engineer annotation not found" });
-        }
-
-        // Authorization: allow if current user owns the underlying user annotation or is admin
-        const ownerUserId = annotation.userId?._id?.toString();
-        const isOwner = ownerUserId && ownerUserId === req.user._id.toString();
-        const isAdmin = req.user.isAdmin;
-
-        if (!isOwner && !isAdmin) {
-            return res.status(403).json({ message: "Unauthorized to view this annotation" });
-        }
-
-        return res.json(annotation);
-    })
-);
-
-/**
  * GET /api/engineer-annotations/user/:userId
  * Get all engineer annotations for a specific user
  * Requires: isAuth
@@ -420,19 +390,9 @@ router.get(
         if (ann) {
             const { width, height } = firstPage.getSize();
 
-            // Draw rectangles
-            if (ann.rectangles && Array.isArray(ann.rectangles)) {
-                ann.rectangles.forEach((rect) => {
-                    firstPage.drawRectangle({
-                        x: rect.xPercent * width,
-                        y: height - rect.yPercent * height - rect.heightPercent * height,
-                        width: rect.widthPercent * width,
-                        height: rect.heightPercent * height,
-                        borderColor: rgb(0, 0, 0),
-                        borderWidth: 2,
-                    });
-                });
-            }
+            // Rectangles are already baked into the PDF canvas image (with correct rotation).
+            // Drawing them again via pdf-lib (which has no rotation support) would produce
+            // unrotated "echo" outlines on top of the correctly rotated baked shapes.
 
             // Draw lines
             if (ann.lines && Array.isArray(ann.lines)) {
@@ -453,18 +413,8 @@ router.get(
                 });
             }
 
-            // Draw comments
-            if (ann.comments && Array.isArray(ann.comments)) {
-                ann.comments.forEach((comment) => {
-                    firstPage.drawText(comment.text || "", {
-                        x: comment.xPercent * width,
-                        y: height - comment.yPercent * height,
-                        size: 12,
-                        font: helveticaFont,
-                        color: rgb(0, 0, 0),
-                    });
-                });
-            }
+            // Comments are already baked into the PDF canvas image (with correct rose color).
+            // Drawing them again via pdf-lib would produce black duplicate text on top.
 
             // Draw HVAC elements
             if (ann.hvac) {
@@ -651,10 +601,11 @@ router.get(
         }
 
         // Check authorization: user can see their own, or engineer can see their own, or admin
+        // Note: userId/engineerId are populated documents here, so use ._id to get the ObjectId
         const tokenUserId = req.user._id.toString();
-        const isOwner =
-            annotation.userId.toString() === tokenUserId ||
-            annotation.engineerId.toString() === tokenUserId;
+        const ownerUserId = annotation.userId?._id?.toString() || annotation.userId?.toString();
+        const ownerEngineerId = annotation.engineerId?._id?.toString() || annotation.engineerId?.toString();
+        const isOwner = ownerUserId === tokenUserId || ownerEngineerId === tokenUserId;
         const isAdmin = req.user.isAdmin;
 
         if (!isOwner && !isAdmin) {

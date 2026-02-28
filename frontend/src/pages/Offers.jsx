@@ -85,11 +85,6 @@ export default function Offers() {
           ))}
         </div>
       )}
-      <div className="mt-4 mb-4 text-center">
-        <Link to="/" className="go-to-btn btn-text">
-          Back to Home
-        </Link>
-      </div>
     </div>
   );
 }

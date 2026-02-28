@@ -340,7 +340,7 @@ function ProductPage() {
   ) : (
     <div className="p-4 product-page-container">
       <Row className="g-4">
-        <Col md={6}>
+        <Col xs={12} lg={6}>
           <ListGroup.Item>
             <h1 className="product-title">
               <strong>{product.name}</strong>
@@ -410,7 +410,7 @@ function ProductPage() {
             )}
           </div>
         </Col>
-        <Col md={3}>
+        <Col xs={12} md={6} lg={3}>
           <ListGroup variant="flush" className="product-details-section">
             <ListGroup.Item>
               <Rating
@@ -494,10 +494,6 @@ function ProductPage() {
                   </Col>
                 ))}
               </Row>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong> Description: </strong>
-              <p className="product-paragraph">{product.description}</p>
             </ListGroup.Item>
             <ListGroup.Item>
               <strong>BTU:</strong> {product.btu}BTU
@@ -609,7 +605,7 @@ function ProductPage() {
             </ListGroup.Item>
           </ListGroup>
         </Col>
-        <Col md={3}>
+        <Col xs={12} md={6} lg={3}>
           <Card className="product-info-card">
             <Card.Body>
               <ListGroup variant="flush">
@@ -706,6 +702,17 @@ function ProductPage() {
           </Card>
         </Col>
       </Row>
+
+      {/* Description — spans two column widths on large screens */}
+      <Row className="g-4 mt-0">
+        <Col xs={12} lg={{ span: 6, offset: 6 }}>
+          <div className="product-description-block">
+            <strong>Description:</strong>
+            <p className="product-paragraph mt-1">{product.description}</p>
+          </div>
+        </Col>
+      </Row>
+
       <div className="my-3 mb-3">
         <h3 className="product-title">Documentation</h3>
         <ul>

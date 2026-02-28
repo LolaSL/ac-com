@@ -5,10 +5,7 @@ import { Store } from "../Store.js";
 import { PDFDocument } from "pdf-lib";
 import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols } from "../utils/annotationUtils.js";
 import * as pdfjsLib from "pdfjs-dist";
-import { GlobalWorkerOptions, version as pdfjsVersion } from "pdfjs-dist";
 import "./EngineerViewPage.css";
-
-GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
 
 const EngineerViewPage = () => {
@@ -947,11 +944,13 @@ const EngineerViewPage = () => {
           </Button>
         </div>
 
-        <div
-          ref={pdfContainerRef}
-          id="pdf-container"
-          style={{ width: "100%", minHeight: 400, margin: "2rem 0", position: "relative" }}
-        ></div>
+        <div className="pdf-scroll-wrapper">
+          <div
+            ref={pdfContainerRef}
+            id="pdf-container"
+            style={{ minHeight: 400, margin: "2rem 0", position: "relative" }}
+          ></div>
+        </div>
         {annotation && pdfFile && (
           <div className="mt-2">
             <Button

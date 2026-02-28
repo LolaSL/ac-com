@@ -1,26 +1,50 @@
 /* Product.css */
 
+/* ── Card shell ─────────────────────────────────────── */
 .product-card {
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
+/* ── Image area ─────────────────────────────────────── */
 .image-container {
   position: relative;
+  width: 100%;
+  /* square ratio — fits both portrait condensers and landscape units */
+  aspect-ratio: 1 / 1;
   overflow: hidden;
+  background-color: #f8f9fa;
 }
 
 .spinner-container {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
 }
 
+/* fill container, never crop */
 .product-image {
-  transition: transform 0.3s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+  display: block;
   opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .product-image.loaded {
@@ -31,6 +55,7 @@
   transform: scale(1.05);
 }
 
+/* ── Wishlist button ────────────────────────────────── */
 .wishlist-btn {
   position: absolute;
   top: 10px;
@@ -38,8 +63,8 @@
   background: white;
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +72,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s, box-shadow 0.2s;
   z-index: 10;
-  opacity: 1;
 }
 
 .wishlist-btn.loading {
@@ -56,54 +80,114 @@
 }
 
 .wishlist-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.12);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .wishlist-icon {
   color: #6c757d;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .wishlist-icon.in-wishlist {
   color: #ff6b35;
 }
 
+/* ── Discount badge ─────────────────────────────────── */
 .discount-badge {
   position: absolute;
   top: 10px;
   left: 10px;
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
   color: white;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: bold;
   box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
   z-index: 10;
+}
+
+/* ── Card body ──────────────────────────────────────── */
+.product-card .card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0.85rem;
+  gap: 0.35rem;
 }
 
 .product-link {
   text-decoration: none;
 }
 
-/* Responsive styles */
-@media (max-width: 767px) {
-  .product-card {
-    margin-bottom: 1rem;
+/* price */
+.original-price {
+  text-decoration: line-through;
+  color: #9e9e9e;
+  font-size: 0.9rem;
+}
+
+.discount-text {
+  color: #ff6b35;
+  font-size: 0.85rem;
+}
+
+.discounted-price {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* push Add-to-cart to the bottom */
+.product-card .card-body > .btn,
+.product-card .card-body > .btn-out-of-stock {
+  margin-top: auto;
+}
+
+/* ── Small screens (< 576 px) ───────────────────────── */
+@media (max-width: 575px) {
+  .product-card .card-body {
+    padding: 0.65rem;
+  }
+
+  .product-card .card-title {
+    font-size: 0.82rem;
   }
 
   .wishlist-btn {
-    width: 35px;
-    height: 35px;
-    top: 8px;
-    right: 8px;
+    width: 30px;
+    height: 30px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .wishlist-icon {
+    font-size: 0.95rem;
   }
 
   .discount-badge {
-    top: 8px;
-    left: 8px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
+    top: 6px;
+    left: 6px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+  }
+
+  .discounted-price {
+    font-size: 0.95rem;
+  }
+}
+
+/* ── Medium screens (576 – 991 px) ─────────────────── */
+@media (min-width: 576px) and (max-width: 991px) {
+  .product-card .card-title {
+    font-size: 0.88rem;
+  }
+}
+
+/* ── Large screens (≥ 992 px) ──────────────────────── */
+@media (min-width: 992px) {
+  .product-card .card-title {
+    font-size: 0.95rem;
   }
 }

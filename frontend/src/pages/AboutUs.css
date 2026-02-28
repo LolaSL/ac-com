@@ -5,50 +5,167 @@
   margin: auto;
 }
 
-.about-paragraph,
-.goals-paragraph {
-  text-align: center;
-  font-size: 1.2rem;
-  line-height: 1.6;
-  text-align: justify;
-}
-
+/* ── Hero image ──────────────────────────────────── */
 .responsive-image-about {
   max-width: 100%;
-  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
 
-@media (max-width: 992px) {
-  .about-paragraph,
-  .goals-paragraph {
-    font-size: 1.1rem;
-  }
-
-  .responsive-image-about {
-    min-height: 250px;
-  }
+/* ── Section spacing ────────────────────────────── */
+.about-section {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
 }
 
-@media (max-width: 768px) {
-  .about-paragraph,
-  .goals-paragraph {
-    font-size: 1rem;
-    padding: 0 15px;
-  }
-
-  .responsive-image-about {
-    min-height: 200px;
-  }
+.about-section-title {
+  font-size: clamp(1.3rem, 3vw, 1.75rem);
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #e63946;
+  display: inline-block;
 }
 
-@media (max-width: 576px) {
-  .about-paragraph,
-  .goals-paragraph {
-    font-size: 0.95rem;
-    line-height: 1.5;
+/* ── Intro text ───────────────────────────────── */
+.about-lead {
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.75;
+  color: #444;
+  text-align: justify;
+  margin-bottom: 1rem;
+}
+
+/* ── Steps cards ──────────────────────────────── */
+.about-step-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.about-step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+}
+
+/* number sits inside the flow, not absolutely positioned */
+.about-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e63946;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-bottom: 0.75rem;
+}
+
+.about-step-icon {
+  font-size: 1.6rem;
+  color: #e63946;
+  margin-bottom: 0.6rem;
+}
+
+.about-step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.4rem;
+}
+
+.about-step-text {
+  font-size: 0.88rem;
+  color: #555;
+  line-height: 1.55;
+  margin-bottom: 0;
+}
+
+/* ── Feature cards ────────────────────────────── */
+.about-feature-card {
+  border: none;
+  border-radius: 10px;
+  background: #f8f9fa;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.about-feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+}
+
+.about-feature-icon {
+  font-size: 1.5rem;
+  color: #0077b6;
+  margin-bottom: 0.6rem;
+}
+
+.about-feature-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.35rem;
+}
+
+.about-feature-text {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* ── Audience tiles ───────────────────────────── */
+.about-audience-tile {
+  text-align: center;
+  padding: 1.1rem 0.75rem;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  height: 100%;
+  transition: box-shadow 0.2s ease;
+}
+
+.about-audience-tile:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+}
+
+.about-audience-icon {
+  font-size: 1.8rem;
+  color: #e63946;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.about-audience-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #222;
+  margin-bottom: 0.3rem;
+}
+
+.about-audience-desc {
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* ── Mobile ───────────────────────────────────── */
+@media (max-width: 575px) {
+  .about-section {
+    margin-top: 2rem;
   }
 
-  .responsive-image-about {
-    height: 100%;
+  .about-audience-desc {
+    display: none;
+  }
+
+  .about-audience-tile {
+    padding: 0.85rem 0.4rem;
   }
 }

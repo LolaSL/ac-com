@@ -24,7 +24,7 @@ notificationRouter.get(
           { recipientType: 'all' },                               // General notifications
         ],
       })
-        .select('_id title message type recipientType userId orderId isRead createdAt updatedAt')
+        .select('_id title message type recipientType userId orderId isRead createdAt updatedAt link')
         .sort({ createdAt: -1 })
         .lean({ virtuals: true });
     } else {
@@ -36,7 +36,7 @@ notificationRouter.get(
           { recipientType: 'all' },                               // General notifications
         ],
       })
-        .select('_id title message type recipientType userId orderId isRead createdAt updatedAt')
+        .select('_id title message type recipientType userId orderId isRead createdAt updatedAt link')
         .sort({ createdAt: -1 })
         .lean({ virtuals: true });
     }

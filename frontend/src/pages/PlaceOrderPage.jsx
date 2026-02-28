@@ -12,6 +12,7 @@ import { Store } from "../Store";
 import CheckoutSteps from "../components/CheckoutSteps";
 import LoadingBox from "../components/LoadingBox";
 import Image from "react-bootstrap/Image";
+import "./CartPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -186,33 +187,33 @@ export default function PlaceOrderPage() {
               <ListGroup variant="flush">
                 {cart.cartItems.map((item, index) => (
                   <ListGroup.Item key={index}>
-                    <Row className="align-items-center">
-                      <Link
-                        to={`/product/${item.slug}`}
-                        className="order-link mb-2"
-                      >
-                        {item.name}
-                      </Link>
-                      <Col md={6}>
+                    <Row className="align-items-center g-2">
+                      <Col xs={3} sm={2}>
                         <Image
                           src={item.image}
                           alt={item.name}
                           className="img-fluid rounded cart-thumbnail"
-                        ></Image>{" "}
+                        />
                       </Col>
-                      <Col md={3}>
+                      <Col xs={9} sm={5}>
+                        <Link
+                          to={`/product/${item.slug}`}
+                          className="order-link"
+                        >
+                          {item.name}
+                        </Link>
+                      </Col>
+                      <Col xs={6} sm={2} className="text-center">
+                        <small className="text-muted d-sm-none">Qty: </small>
                         <span>{item.quantity}</span>
                       </Col>
-                      <Col md={3}>
+                      <Col xs={6} sm={3} className="text-end">
                         <div>
-                          ${item.price.toFixed(2)}
+                          <strong>${item.price.toFixed(2)}</strong>
                           {item.discount > 0 && (
-                            <div style={{ color: "green" }}>
-                              ($
-                              {(item.price * (1 - item.discount / 100)).toFixed(
-                                2
-                              )}{" "}
-                              after {item.discount}% off)
+                            <div style={{ color: "green", fontSize: "0.8rem" }}>
+                              ${(item.price * (1 - item.discount / 100)).toFixed(2)}{" "}
+                              <span className="text-muted">({item.discount}% off)</span>
                             </div>
                           )}
                         </div>

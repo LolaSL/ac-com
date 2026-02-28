@@ -3,10 +3,17 @@ import UsersProductSales from "../components/UsersProductSales.jsx";
 import ServiceProviders from "../components/ServiceProviders.jsx";
 import Notifications from "../components/Notifications.jsx";
 import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx";
-import { Link, useNavigate } from "react-router-dom";
-import { Button, Card, Row, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { Store } from "../Store";
 import "./DashboardPage.css";
+
+const NAV_ITEMS = [
+  { key: "Users Product Sales",     label: "Users & Sales",       icon: "fas fa-chart-bar" },
+  { key: "ServiceProviders",         label: "Service Providers",   icon: "fas fa-hard-hat" },
+  { key: "MessagesServiceProviders", label: "Messages",            icon: "fas fa-envelope" },
+  { key: "Notification",             label: "Notifications",       icon: "fas fa-bell" },
+];
+
 function Dashboard() {
   const navigate = useNavigate();
   const { state } = useContext(Store);
@@ -22,92 +29,83 @@ function Dashboard() {
       navigate("/signin");
     }
   }, [adminInfo, userInfo, navigate]);
+
   function renderComponent() {
     switch (activeComponent) {
-      case "Users Product Sales":
-        return <UsersProductSales />;
-      case "ServiceProviders":
-        return <ServiceProviders />;
-      case "MessagesServiceProviders":
-        return <MessagesServiceProviders />;
-      case "Notification":
-        return <Notifications />;
-      default:
-        return <div>Select a component</div>;
+      case "Users Product Sales":      return <UsersProductSales />;
+      case "ServiceProviders":         return <ServiceProviders />;
+      case "MessagesServiceProviders": return <MessagesServiceProviders />;
+      case "Notification":             return <Notifications />;
+      default:                         return <div>Select a section</div>;
     }
   }
+
+  const handleSelect = (key) => {
+    setActiveComponent(key);
+    setSidebarOpen(false);
+  };
+
+  const activeLabel = NAV_ITEMS.find((i) => i.key === activeComponent)?.label || "Menu";
+
   return (
-    <div className="dashboard-container">
-    <div className="sidebar-toggle d-md-none position-relative">
-      <Button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="toggle-button"
-        aria-expanded={sidebarOpen}
-        aria-controls="dashboard-sidebar"
-      >
-        ☰ Menu
-      </Button>
-      {sidebarOpen && (
-        <div
-          id="dashboard-sidebar"
-          className="sidebar-dropdown position-absolute top-100 start-0 w-100 bg-white border shadow-sm"
-          style={{ zIndex: 1050 }}
+    <div className="db-container">
+
+      {/* Mobile toggle */}
+      <div className="db-mobile-toggle d-md-none">
+        <button
+          className="db-toggle-btn"
+          onClick={() => setSidebarOpen((p) => !p)}
+          aria-expanded={sidebarOpen}
         >
-          {renderSidebarContent()}
-        </div>
-      )}
-    </div>
+          <i className="fas fa-bars me-2"></i>
+          {activeLabel}
+          <i className={`fas fa-chevron-${sidebarOpen ? "up" : "down"} ms-2 db-chevron`}></i>
+        </button>
 
-    <div className="sidebar d-none d-md-flex" id="dashboard-sidebar">
-      {renderSidebarContent()}
-    </div>
-
-    <div className="main-content">
-      <Row className="mb-3 quick-actions-bar">
-        <Col>
-          <Card className="p-3 border-0 bg-light">
-            <div className="d-flex align-items-center gap-3 flex-wrap">
-              <span className="fw-semibold text-muted small">Quick Actions:</span>
-              <Button variant="outline-secondary" size="sm" onClick={() => setActiveComponent("Notification")}>
-                <i className="bi bi-envelope me-1"></i> View Notifications
-              </Button>
+        {sidebarOpen && (
+          <>
+            <div className="db-overlay" onClick={() => setSidebarOpen(false)} />
+            <div className="db-dropdown">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.key}
+                  className={"db-dropdown-item" + (activeComponent === item.key ? " active" : "")}
+                  onClick={() => handleSelect(item.key)}
+                >
+                  <i className={item.icon + " db-item-icon"}></i>
+                  {item.label}
+                </button>
+              ))}
             </div>
-          </Card>
-        </Col>
-      </Row>
-      {renderComponent()}
-    </div>
-  </div>
-);
+          </>
+        )}
+      </div>
 
-  function renderSidebarContent() {
-    return (
-      <>
-        <h3 className="mb-4">Dashboard</h3>
-        <ul>
-          {[
-            "Users Product Sales",
-            "ServiceProviders",
-            "MessagesServiceProviders",
-            "Notification",
-          ].map((item) => (
-            <li key={item}>
-              <Link
-                to="#"
-                className={activeComponent === item ? "active" : ""}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveComponent(item);
-                  setSidebarOpen(false);
-                }}
-              >
-                {item.replace(/([A-Z])/g, " $1").trim()}
-              </Link>
-            </li>
+      {/* Desktop sidebar */}
+      <aside className="db-sidebar d-none d-md-flex">
+        <h3 className="db-sidebar-title">
+          <i className="fas fa-tachometer-alt me-2"></i>Dashboard
+        </h3>
+        <nav className="db-nav">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              className={"db-nav-item" + (activeComponent === item.key ? " active" : "")}
+              onClick={() => handleSelect(item.key)}
+            >
+              <i className={item.icon + " db-item-icon"}></i>
+              {item.label}
+            </button>
           ))}
-        </ul>
-      </>
-    );
-  }
+        </nav>
+      </aside>
+
+      {/* Main content */}
+      <main className="db-main">
+        {renderComponent()}
+      </main>
+    </div>
+  );
 }
+
 export default Dashboard;

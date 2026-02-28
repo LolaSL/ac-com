@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import Nav from "react-bootstrap/Nav";
-import NavDropdown from "react-bootstrap/NavDropdown";
 import { toast } from "react-toastify";
 import { getError } from "../utils.js";
 import axios from "axios";
@@ -66,45 +65,48 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
       <div
         className={sidebarIsOpen ? "sidebar-modal active" : "sidebar-modal"}
       >
-        <div className="d-flex justify-content-end p-3">
-          <button
-            className="btn btn-light btn-sm sidebar-close-btn"
-            onClick={() => setSidebarIsOpen(false)}
-          >
-            ×
-          </button>
-        </div>
-        <Nav className="flex-column text-white w-100 p-4">
+        <Nav className="flex-column text-white w-100 p-3">
           {sidebarItems.map((item) => (
-            <Nav.Item className="search-title me-auto mb-2" key={item.label}>
+            <Nav.Item className="sidebar-nav-item" key={item.label}>
               {item.type === "categories" ? (
-                <NavDropdown
-                  title={<strong>{item.label}</strong>}
-                  id="categories-dropdown"
-                  show={isDropdownOpen}
-                  onToggle={(isOpen) => setIsDropdownOpen(isOpen)}
-                >
-                  {categories.length > 0 ? (
-                    categories.map((category) => (
-                      <NavDropdown.Item
-                        key={category}
-                        as={Link}
-                        to={`/search?category=${category}`}
-                        onClick={() => {
-                          setSidebarIsOpen(false);
-                          setIsDropdownOpen(false);
-                        }}
-                        className="fw-bold"
-                      >
-                        {category}
-                      </NavDropdown.Item>
-                    ))
-                  ) : (
-                    <NavDropdown.Item disabled>
-                      Loading categories...
-                    </NavDropdown.Item>
+                <div className="sidebar-accordion">
+                  <button
+                    className="sidebar-accordion-toggle"
+                    onClick={() => setIsDropdownOpen((prev) => !prev)}
+                    aria-expanded={isDropdownOpen}
+                  >
+                    <span>Categories</span>
+                    <i
+                      className={`fas fa-chevron-${
+                        isDropdownOpen ? "up" : "down"
+                      } sidebar-chevron`}
+                    ></i>
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="sidebar-accordion-body">
+                      {categories.length > 0 ? (
+                        categories.map((category) => (
+                          <Link
+                            key={category}
+                            to={`/search?category=${category}`}
+                            className="sidebar-accordion-item"
+                            onClick={() => {
+                              setSidebarIsOpen(false);
+                              setIsDropdownOpen(false);
+                            }}
+                          >
+                            <i className="fas fa-tag sidebar-tag-icon"></i>
+                            {category}
+                          </Link>
+                        ))
+                      ) : (
+                        <span className="sidebar-accordion-item text-white-50">
+                          Loading…
+                        </span>
+                      )}
+                    </div>
                   )}
-                </NavDropdown>
+                </div>
               ) : (
                 <Link
                   to={item.path === "/roi-calculator" ? "#" : item.path}

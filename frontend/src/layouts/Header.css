@@ -1,9 +1,14 @@
 .header-nav {
   width: 100%;
+  max-width: 100%;
   margin: 0;
   padding: 0;
   background: #868d9c;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  /* position + z-index ensures dropdowns stack above all page content */
+  position: relative;
+  z-index: 1030;
 }
 
 .header-container {
@@ -178,9 +183,31 @@
   justify-content: center;
 }
 
-@media (max-width: 768px) {
+/* iPad (768–991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .header-container {
+    padding: 0 0.75rem;
+  }
+
   .search-box {
-    max-width: 250px;
+    max-width: 60%;
+  }
+
+  .navbar-brand h3 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Mobile (≤767px) */
+@media (max-width: 767px) {
+  .search-box {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .search-wrapper {
+    width: 100%;
+    padding: 0.5rem 0;
   }
 
   .btn-search {
@@ -188,5 +215,29 @@
     min-width: 28px;
     min-height: 34px;
     font-size: 14px;
+  }
+
+  .navbar-brand h3 {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+
+  .navbar-brand .handwritten {
+    font-size: 10px !important;
+  }
+
+  .btn-toggle {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+
+  /* Ensure collapsed nav items have comfortable tap targets */
+  .navbar-collapse .nav-link,
+  .navbar-collapse .dropdown-item {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 }

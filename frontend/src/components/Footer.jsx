@@ -22,9 +22,9 @@ const Footer = () => {
 
   return (
     <>
-      <footer className="container-fluid footer mt-4">
+      <footer className="container-fluid footer">
         <Row className="text-white p-4 g-4 justify-content-between">
-          <Col xs={12} lg={2} className="ft-1">
+          <Col xs={12} sm={6} lg={2} className="ft-1">
             <h4>AC Commerce</h4>
             <hr />
             <p>
@@ -47,7 +47,7 @@ const Footer = () => {
               </NavLink>
             </div>
           </Col>
-          <Col xs={12} lg={2} className="ft-2">
+          <Col xs={12} sm={6} lg={2} className="ft-2">
             <h5>Quick Links</h5>
             <hr />
             <NavLink className="text-white d-block" href="/">
@@ -77,7 +77,7 @@ const Footer = () => {
               Offers
             </NavLink>
           </Col>
-          <Col xs={12} lg={2} className="ft-2">
+          <Col xs={12} sm={6} lg={2} className="ft-2">
             <h5>Policies</h5>
             <hr />
 
@@ -98,7 +98,7 @@ const Footer = () => {
               Cancellation Policy
             </NavLink>
           </Col>
-          <Col xs={12} lg={2} className="ft-2">
+          <Col xs={12} sm={6} lg={2} className="ft-2">
             <h5>Company Info</h5>
             <hr />
             <NavLink className="text-white d-block" href="/about-us">
@@ -114,7 +114,7 @@ const Footer = () => {
               Contact Us
             </NavLink>
           </Col>
-          <Col xs={12} lg={2} className="ft-3">
+          <Col xs={12} sm={6} lg={2} className="ft-3">
             <h5>Company Address</h5>
             <hr />
             <p className="contact-item">
@@ -148,7 +148,7 @@ const Footer = () => {
             </p>
           </Col>
         </Row>
-        <div className="mb-4 text-center">
+        <div className="text-center">
           <Row className="d-flex justify-content-center">
             <div className="last-footer text-center">
               &copy; {new Date().getFullYear()} AC Commerce. All rights reserved
