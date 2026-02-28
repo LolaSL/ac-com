@@ -207,6 +207,7 @@ useEffect(() => {
         setIsMultiFlatProperty(true);
       } else {
         setDetectedFlats([]);
+        setIsMultiFlatProperty(false);
       }
     }
   }
@@ -260,6 +261,56 @@ useEffect(() => {
     const totalAllBTU = totalProductBTU + condenserTotalBTU;
     const totalAllPrice = totalPrice + condenserTotalPrice;
 
+    // Build room rows — insert flat section headers for multi-flat properties
+    const getFlatPrefix = (name) => {
+      const m = name?.match(/^(Flat\s*\d+)\s*:/i);
+      return m ? m[1] : null;
+    };
+    // Pre-compute per-flat (or total) BTU requirement for each condenser
+    const condenserBtus = condensersForDisplay.map((cond) => {
+      const flatNum = cond?.flatName?.match(/\d+/)?.[0];
+      if (flatNum) {
+        return btuResults.reduce(
+          (s, btu, ri) =>
+            rooms[ri]?.name?.toLowerCase().includes(`flat ${flatNum}:`) ? s + (btu || 0) : s,
+          0
+        );
+      }
+      return btuResults.reduce((s, b) => s + (b || 0), 0);
+    });
+
+    let lastFlatHeader = null;
+    const roomRowsHtml = btuResults
+      .map((btu, i) => {
+        const rawName = rooms[i]?.name || "";
+        const flatPrefix = getFlatPrefix(rawName);
+        let headerHtml = "";
+        if (flatPrefix && flatPrefix !== lastFlatHeader) {
+          lastFlatHeader = flatPrefix;
+          headerHtml = `<tr class="flat-section-header"><td colspan="5">${flatPrefix}</td></tr>`;
+        }
+        const displayName = flatPrefix
+          ? rawName.replace(/^Flat\s*\d+\s*:\s*/i, "")
+          : rawName;
+        return `${headerHtml}<tr>
+              <td>${displayName}</td>
+              <td>${btu}</td>
+              <td>${products[i]?.model || ""}</td>
+              <td>${products[i]?.btu || ""}</td>
+              <td>${
+                products[i]?.price
+                  ? products[i].discount
+                    ? (
+                        products[i].price -
+                        (products[i].price * products[i].discount) / 100
+                      ).toFixed(2)
+                    : products[i].price.toFixed(2)
+                  : ""
+              }</td>
+            </tr>`;
+      })
+      .join("");
+
     let tableHtml = `
     <div class="print-container">
       <h1>Products Quote</h1>
@@ -275,28 +326,7 @@ useEffect(() => {
         </thead>
         <tr class="cooling-load-row">
         <tbody>
-          ${btuResults
-            .map(
-              (btu, i) => `
-            <tr>
-              <td>${rooms[i]?.name || ""}</td>
-              <td>${btu}</td>
-              <td>${products[i]?.model || ""}</td>
-              <td>${products[i]?.btu || ""}</td>
-              <td>${
-                products[i]?.price
-                  ? products[i].discount
-                    ? (
-                        products[i].price -
-                        (products[i].price * products[i].discount) / 100
-                      ).toFixed(2)
-                    : products[i].price.toFixed(2)
-                  : ""
-              }</td>
-            </tr>
-          `
-            )
-            .join("")}
+          ${roomRowsHtml}
           ${
             condensersForDisplay &&
             condensersForDisplay.length > 0 &&
@@ -306,25 +336,19 @@ useEffect(() => {
                     (cond, index) => `
             <tr style="background-color: #f0f8ff;">
               <td style="font-weight: bold; color: #007bff;">${
-                condensersForDisplay.length > 1
+                cond?.flatName
+                  ? `${cond.flatName} Condenser`
+                  : condensersForDisplay.length > 1
                   ? `Condenser ${index + 1}`
                   : "Condenser"
               }</td>
+              <td style="font-weight: bold; color: #007bff;">
+                ${condenserBtus[index].toLocaleString()} BTU
+              </td>
               <td style="font-weight: bold; color: #007bff;">${
-                index === 0
-                  ? (
-                      btuResults.reduce((sum, btu) => sum + (btu || 0), 0) *
-                      1.0
-                    ).toLocaleString() + " BTU"
-                  : ""
+                cond?.model || cond?.name || ""
               }</td>
-              <td style="font-weight: bold; color: #007bff;">${
-                cond?.model || ""
-              }</td>
-              <td style="font-weight: bold;">${
-                cond?.name ||
-                `${cond?.btu} BTU VRF Condenser`
-              }</td>
+              <td style="font-weight: bold;">${cond?.btu || ""}</td>
               <td style="font-weight: bold; color: ${
                 condenserSizingStatus === "custom" ? "#ff8c00" : "#007bff"
               };">${
@@ -466,6 +490,16 @@ useEffect(() => {
         .total-results {
           font-weight: bold;
         }
+        .flat-section-header td {
+          background: linear-gradient(135deg, #0056b3, #003d82);
+          color: white;
+          font-weight: bold;
+          font-size: 1em;
+          text-align: left;
+          padding: 8px 12px;
+          letter-spacing: 0.5px;
+          border-top: 3px solid #ffc107;
+        }
       `,
     });
   };
@@ -558,12 +592,15 @@ useEffect(() => {
   const MAX_VRF_INDOOR_UNITS = 64;
   const MAX_VRF_TOTAL_CAPACITY = 360000; // BTU
 
-  // Validate system capacity limits (warnings, not blocking)
-  if (isVRFSystem && rooms.length > MAX_VRF_INDOOR_UNITS) {
-    setError(
-      `⚠️ Warning: VRF systems support maximum ${MAX_VRF_INDOOR_UNITS} indoor units. Current: ${rooms.length}. Consider splitting into multiple VRF systems.`
-    );
-  }
+  // Validate system capacity limits (side-effect moved to useEffect to avoid render-phase setState)
+  useEffect(() => {
+    if (isVRFSystem && rooms.length > MAX_VRF_INDOOR_UNITS) {
+      setError(
+        `⚠️ Warning: VRF systems support maximum ${MAX_VRF_INDOOR_UNITS} indoor units. Current: ${rooms.length}. Consider splitting into multiple VRF systems.`
+      );
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rooms.length]);
 
   const selectedUnit = "kW";
 
@@ -648,6 +685,20 @@ useEffect(() => {
   const handleFloorChange = (e) =>
     handleOptionChange("floorType", e.target.name);
 
+  // Clear stale results whenever any calculation input changes —
+  // forces the user to click Calculate again with the new settings.
+  useEffect(() => {
+    setBtuResults([]);
+    setProducts([]);
+    setCondenser(null);
+    setSelectedCondensers([]);
+    setTotalBTU(0);
+    setShowCondenser(false);
+    setCondenserSizingStatus("");
+    setError("");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options, ceilingHeight, numPeople, measurementSystem, rooms]);
+
   const calculateBTUForRoom = (room) => {
     let area = convertArea(parseFloat(room.size));
     let height = parseFloat(ceilingHeight);
@@ -663,15 +714,16 @@ useEffect(() => {
     if (room.name === "Kitchen") btu += CONSTANTS.KITCHEN_BTU_ADDITION;
 
     const diningRoomBtuByClimate = {
-      "Average Europe": 3000,
-      "Hot Middle East": 4000,
-      "Cold Alaska": 2500,
+      AverageEurope: 3000,
+      HotMiddleEast: 4000,
+      ColdAlaska: 2500,
     };
 
-    const userSelectedClimate = "Hot Middle East";
-
     if (room.name === "Dining Room") {
-      btu += diningRoomBtuByClimate[userSelectedClimate] || 3000;
+      const selectedClimate = Object.keys(options.climate || {}).find(
+        (k) => options.climate[k]
+      );
+      btu += diningRoomBtuByClimate[selectedClimate] || 3000;
     }
 
     // VRF efficiency adjustment (VRF systems use base calculation)
@@ -693,9 +745,27 @@ useEffect(() => {
       Good: 0.8,
     });
     applyMultiplier("floorType", {
+      Marble: 1.0,
       Timber: 1.05,
       Concrete: 1.0,
       Carpeted: 0.95,
+    });
+    applyMultiplier("windowType", {
+      SingleGlazed: 1.15,
+      DoubleGlazed: 1.0,
+      TripleGlazed: 0.85,
+      Louvered: 1.2,
+    });
+    applyMultiplier("roofType", {
+      Flat: 1.1,
+      Pitched: 1.0,
+      Gable: 1.0,
+      Roof: 1.0,
+    });
+    applyMultiplier("appliances", {
+      Oven: 1.1,
+      Television: 1.02,
+      Computer: 1.03,
     });
 
     applyMultiplier("sunExposure", {
@@ -707,7 +777,7 @@ useEffect(() => {
     applyMultiplier("climate", {
       HotMiddleEast: 1.2,
       AverageEurope: 1.0,
-      ColdSAlaska: 0.8,
+      ColdAlaska: 0.8,
     });
 
     applyMultiplier("typeOfWall", {
@@ -743,7 +813,13 @@ useEffect(() => {
       const flatMatch = room.name.match(
         /^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)[\s:]/i
       );
-      const flatId = flatMatch ? flatMatch[1].toUpperCase() : "Flat 1";
+      // Normalise to title-case "Flat 1" so keys match detectedFlats from useEffect
+      const flatId = flatMatch
+        ? flatMatch[1].replace(/^(\w)(.*)/, (_, a, b) => a.toUpperCase() + b.toLowerCase())
+        : null;
+
+      // Skip rooms without a flat prefix (single-flat properties)
+      if (!flatId) return;
 
       if (!flats[flatId]) {
         flats[flatId] = [];
@@ -955,32 +1031,33 @@ useEffect(() => {
 
         const { flats, acUnits } = groupFlatsByAnnotations(acAnnotations);
 
-        // Calculate BTU per flat based on AC annotations
+        // Calculate BTU per flat by summing already-computed room results directly.
+        // Room names carry a "Flat N:" prefix for multi-flat properties.
         const flatBTUs = {};
-        const flatRooms = detectFlatGroupings(rooms);
 
-        // For each detected flat, sum the BTU from associated rooms
         detectedFlats.forEach((flatName) => {
           const flatNum = flatName.match(/\d+/)?.[0];
-          if (flatNum && flats[flatName]) {
-            // Sum BTU from all rooms for this flat (if room naming includes flat identifier)
-            let flatTotalBTU = 0;
-            if (flatRooms[flatName]) {
-              flatRooms[flatName].forEach((room) => {
-                const roomBtu = room.btu || 0;
-                flatTotalBTU += roomBtu;
-              });
-            } else {
-              // If rooms don't have flat identifiers, estimate based on AC unit count
-              const acUnitCount = flats[flatName].acUnits.length;
-              const avgBtuPerUnit = totalBTU / (acUnits.length || 1);
-              flatTotalBTU = avgBtuPerUnit * acUnitCount;
+          if (!flatNum) return;
+
+          // Sum BTU for every room whose name starts with "Flat N:"
+          let flatTotalBTU = 0;
+          rooms.forEach((room, roomIdx) => {
+            if (room.name.toLowerCase().includes(`flat ${flatNum}:`)) {
+              flatTotalBTU += results[roomIdx] || 0;
             }
+          });
+
+          if (flatTotalBTU > 0) {
             flatBTUs[flatName] = flatTotalBTU;
+          } else if (flats[flatName]) {
+            // Fallback: estimate from AC unit count ratio when rooms have no flat prefix
+            const acUnitCount = flats[flatName].acUnits.length;
+            const avgBtuPerUnit = totalBTU / (acUnits.length || 1);
+            flatBTUs[flatName] = avgBtuPerUnit * acUnitCount;
           }
         });
 
-        // If flatBTUs calculation didn't work, use equal distribution
+        // Last-resort: equal distribution if nothing matched
         if (Object.keys(flatBTUs).length === 0) {
           const btuPerFlat = totalBTU / detectedFlats.length;
           detectedFlats.forEach((flatName) => {
@@ -1070,70 +1147,6 @@ useEffect(() => {
       : condenser
       ? [condenser]
       : [];
-
-  // const saveResultsToCart = (e) => {
-  //   if (e) {
-  //     e.preventDefault();
-  //     e.stopPropagation();
-  //   }
-
-  //   // Ensure condenser calculation has completed if condensers should be shown
-  //   if (showCondenser && condensersForDisplay.length === 0) {
-  //     alert("Please wait for calculations to complete before saving to cart.");
-  //     return;
-  //   }
-
-  //   const addItemToCart = (product, quantity = 1) => {
-  //     if (!product) return;
-
-  //     console.log(`[handleAddToCart] Adding: ${product.name}, _id: ${product._id}, btu: ${product.btu}, quantity: ${quantity}`);
-
-  //     const existItem = cartItems.find((x) => x._id === product._id);
-  //     const newQuantity = existItem ? existItem.quantity + quantity : quantity;
-
-  //     ctxDispatch({
-  //       type: "CART_ADD_ITEM",
-  //       payload: { ...product, quantity: newQuantity },
-  //     });
-  //   };
-
-  //   if (!Array.isArray(rooms)) {
-  //     console.error("'rooms' must be an array.");
-  //     return;
-  //   }
-
-  //   const productCount = {};
-
-  //   rooms.forEach((room, index) => {
-  //     let product = products[index];
-  //     if (!product || !product._id || !product.price) {
-  //       product = {
-  //         _id: `placeholder-${index}`,
-  //         name: room.name,
-  //         btu: 0,
-  //         price: 0,
-  //         slug: null,
-  //         displayName: "No product available",
-  //       };
-  //     }
-
-  //     if (!productCount[product.btu]) {
-  //       productCount[product.btu] = { product, quantity: 0 };
-  //     }
-  //     productCount[product.btu].quantity += 1;
-  //   });
-  //   Object.values(productCount).forEach(({ product, quantity }) => {
-  //     addItemToCart(product, quantity);
-  //   });
-
-  //   // Add all condensers (supports multi-flat) to cart if available
-  //   if (showCondenser && condensersForDisplay.length > 0) {
-  //     condensersForDisplay.forEach((c) => addItemToCart(c, 1));
-  //   }
-
-  //   toast.success("Products added to cart successfully!");
-  //   navigate("/cart");
-  // };
 
   // Navigate to ROI Calculator with BTU data
   
@@ -1445,11 +1458,21 @@ useEffect(() => {
           }, 0)
         : 0;
 
-    const condenserCost = totalBTU > 0 ? 4058.4 : 0;
+    const condenserCost = showCondenser
+      ? condensersForDisplay.reduce((sum, c) => {
+          if (!c) return sum;
+          const price = c.price
+            ? c.discount
+              ? c.price - (c.price * c.discount) / 100
+              : c.price
+            : 0;
+          return sum + price;
+        }, 0)
+      : 0;
     const totalEquipmentCost = totalIndoorUnitsCost + condenserCost;
 
     let propertyType = "residential-single";
-    if (rooms.length >= 10) {
+    if (isMultiFlatProperty || detectedFlats.length > 1 || rooms.length >= 10) {
       propertyType = "residential-multi";
     } else if (rooms.length >= 3) {
       propertyType = "residential-multi";
@@ -1485,13 +1508,21 @@ useEffect(() => {
         0
       ),
       numberOfRooms: rooms.length,
-      recommendedUnits: products
-        .filter((p) => p.model)
-        .map((p) => ({
+      recommendedUnits: [
+        ...products.filter((p) => p.model).map((p) => ({
           type: p.model || "Split System",
           btu: p.btu || 0,
           estimatedCost: p.price || 0,
         })),
+        ...(showCondenser && condensersForDisplay.length > 0
+          ? condensersForDisplay.map((c) => ({
+              type: c.model || c.name || "Condenser",
+              btu: c.btu || 0,
+              estimatedCost: c.price || 0,
+              flatName: c.flatName || undefined,
+            }))
+          : []),
+      ],
       propertyType,
       condenserCost,
       equipmentCost: totalEquipmentCost,
@@ -1723,37 +1754,50 @@ useEffect(() => {
     <h5>Rooms from Annotator:</h5>
     {(() => {
       const groupedRooms = rooms.reduce((acc, room) => {
-        // Improved regex to handle variations like "Flat1:", "Flat 1:", "Flat 1 ", etc.
         const match = room.name.match(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)\s*[:\s]/i);
-        const flat = match ? match[1].replace(/\s+/g, '') : "Flat1"; // Normalize flat name (e.g., "Flat 1" -> "Flat1")
-        const cleanName = room.name.replace(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)\s*[:\s]/i, '').trim();
-        if (!acc[flat]) acc[flat] = [];
-        acc[flat].push(`${cleanName} - ${room.size} m²`);
+        // Only group by flat when the room name has an explicit flat prefix
+        const flat = match ? match[1].replace(/\s+/g, '') : null;
+        const cleanName = match
+          ? room.name.replace(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)\s*[:\s]/i, '').trim()
+          : room.name;
+        const key = flat || '__single__';
+        if (!acc[key]) acc[key] = [];
+        acc[key].push({ displayName: `${cleanName} - ${room.size} m²`, flat });
         return acc;
       }, {});
-      
-      // Sort rooms within each flat alphabetically
-      Object.keys(groupedRooms).forEach(flat => {
-        groupedRooms[flat].sort();
-      });
-      
-      // Sort flats numerically (e.g., Flat1, Flat2, Flat10)
-      return Object.entries(groupedRooms)
-        .sort(([a], [b]) => {
-          const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
-          const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
-          return numA - numB;
-        })
-        .map(([flat, roomList]) => (
-          <div key={flat} className="mb-3">
-            <h6>{flat.replace(/(\d+)/, ' $1')}:</h6> {/* Add space for display, e.g., "Flat 1:" */}
-            <ul className="list-group">
-              {roomList.map((room, idx) => (
-                <li key={idx} className="list-group-item">{room}</li>
-              ))}
-            </ul>
-          </div>
-        ));
+
+      const flatKeys = Object.keys(groupedRooms).filter(k => k !== '__single__');
+      const isMultiGroup = flatKeys.length > 1;
+
+      // Single flat — just render a plain list, no "Flat 1:" header
+      if (!isMultiGroup) {
+        const allRoomItems = Object.values(groupedRooms).flat();
+        allRoomItems.sort((a, b) => a.displayName.localeCompare(b.displayName));
+        return (
+          <ul className="list-group">
+            {allRoomItems.map((r, idx) => (
+              <li key={idx} className="list-group-item">{r.displayName}</li>
+            ))}
+          </ul>
+        );
+      }
+
+      // Multi-flat — show grouped headers
+      return flatKeys
+        .sort((a, b) => (parseInt(a.replace(/\D/g, ''), 10) || 0) - (parseInt(b.replace(/\D/g, ''), 10) || 0))
+        .map((flat) => {
+          const roomList = (groupedRooms[flat] || []).map(r => r.displayName).sort();
+          return (
+            <div key={flat} className="mb-3">
+              <h6>{flat.replace(/(\d+)/, ' $1')}:</h6>
+              <ul className="list-group">
+                {roomList.map((room, idx) => (
+                  <li key={idx} className="list-group-item">{room}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        });
     })()}
   </div>
 )}
@@ -1989,7 +2033,11 @@ useEffect(() => {
                         className="condenser-row condenser-row-bg"
                       >
                         <td data-label="Room" className="condenser-cell">
-                          {cond?.name || `Condenser ${idx + 1}`}
+                          {cond?.flatName
+                            ? `${cond.flatName} Condenser`
+                            : condensersForDisplay.length > 1
+                            ? `Condenser ${idx + 1}`
+                            : "Condenser"}
                         </td>
                         <td data-label="Room BTU" className="condenser-cell">
                           {`${displayBtu.toLocaleString()} BTU`}
@@ -2010,8 +2058,7 @@ useEffect(() => {
                           className="product-btu table-fit-content condenser-cell"
                           data-label="Product BTU"
                         >
-                          {cond?.name ||
-                            `${cond?.btu} BTU VRF Condenser`}
+                          {cond?.btu || "N/A"}
                         </td>
                         <td
                           data-label="Product Price"

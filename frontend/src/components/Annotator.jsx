@@ -954,31 +954,31 @@ const Annotator = ({
             coordinates: { x: c.x, y: c.y },
           }));
 
-        // Detect flat numbers from annotations
+        // Detect flat numbers from annotations.
+        // Rules:
+        //   condenser-N  → flat N (explicit multi-flat condenser)
+        //   flat-N / unit-N → flat N (explicit flat keyword)
+        //   ac-N.M       → flat N (dot notation: flat N, unit M — multi-flat specific)
+        //   ac-N alone   → NOT a flat indicator (just "AC unit N" in a single flat)
         const detectedFlatNums = new Set();
         acAnnotations.forEach(({ label }) => {
           const t = label.toLowerCase();
+          // condenser-N or condenser N
           const cm = t.match(/condenser[-\s]?(\d+)/);
           if (cm) detectedFlatNums.add(parseInt(cm[1], 10));
+          // flat N / unit N keyword
           const fm = t.match(/(?:flat|unit)\s*(\d+)/);
           if (fm) detectedFlatNums.add(parseInt(fm[1], 10));
-          const am = t.match(/ac[-\s]?(\d+)(?:\.\d+)?/);
+          // ac-N.M (dot notation only — plain ac-N is NOT multi-flat)
+          const am = t.match(/ac[-\s]?(\d+)\.\d+/);
           if (am) detectedFlatNums.add(parseInt(am[1], 10));
         });
 
         // Fall back: count duplicate room names to infer flat count
         let flatNumsArray = Array.from(detectedFlatNums).sort((a, b) => a - b);
-        if (flatNumsArray.length <= 1) {
-          const counts = {};
-          validRooms.forEach((r) => {
-            const n = r.roomType || "Room";
-            counts[n] = (counts[n] || 0) + 1;
-          });
-          const maxDup = Math.max(...Object.values(counts), 1);
-          if (maxDup > 1) {
-            flatNumsArray = Array.from({ length: maxDup }, (_, i) => i + 1);
-          }
-        }
+        // NOTE: We intentionally do NOT fall back to duplicate-room-name counting here.
+        // A single large apartment can have multiple bedrooms/bathrooms with the same name.
+        // Multi-flat must be indicated explicitly via annotation labels (condenser-N, flat-N, ac-N).
 
         const isMultiFlat = flatNumsArray.length > 1;
 
@@ -1809,32 +1809,9 @@ const Annotator = ({
     const flatArray = Array.from(flatNumbers).sort((a, b) => a - b);
     console.log("Detected flat numbers:", flatArray);
     console.log("Number of flats detected:", flatArray.length);
-
-    // Count room duplicates to detect multi-flat properties
-    const roomNameCounts = {};
-    flatRooms.forEach((room) => {
-      const roomName = room.roomType || "Room";
-      roomNameCounts[roomName] = (roomNameCounts[roomName] || 0) + 1;
-    });
-    const maxDuplicateCount = Math.max(...Object.values(roomNameCounts), 1);
-    console.log("Room duplicate counts:", roomNameCounts);
-    console.log("Max duplicates per room:", maxDuplicateCount);
-
-    // If no flats detected from annotations, but we have duplicates, infer multi-flat
-    let inferredFlatCount = flatArray.length;
-    if (flatArray.length <= 1 && maxDuplicateCount > 1) {
-      // We have duplicate room names - likely a 2-flat (or more) property
-      inferredFlatCount = maxDuplicateCount;
-      console.log(
-        `Inferring ${inferredFlatCount}-flat property from duplicate rooms (no annotations found)`
-      );
-      for (let i = 1; i <= inferredFlatCount; i++) {
-        if (!flatArray.includes(i)) {
-          flatArray.push(i);
-        }
-      }
-      flatArray.sort((a, b) => a - b);
-    }
+    // NOTE: We intentionally do NOT infer flats from duplicate room names.
+    // A single large apartment can have multiple rooms with the same name.
+    // Multi-flat must be indicated explicitly via condenser-N, flat-N, or ac-N.M labels.
 
     // Format rooms with flat prefixes if multiple flats detected
     let formattedRooms = flatRooms.map((room, idx) => ({
@@ -1875,17 +1852,6 @@ const Annotator = ({
       formattedRooms.sort((a, b) => a._flatNum - b._flatNum);
       // Remove the temporary _flatNum property
       formattedRooms = formattedRooms.map(({ _flatNum, ...room }) => room);
-    } // If still no flats detected but we inferred some, add synthetic annotations to help BtuCalculator
-    if (flatArray.length <= 1 && inferredFlatCount > 1) {
-      console.log(
-        "Adding synthetic annotations for BtuCalculator multi-flat detection"
-      );
-      for (let i = 1; i <= inferredFlatCount; i++) {
-        acAnnotations.push({
-          label: `condenser-${i}`,
-          coordinates: { x: 0, y: 0 },
-        });
-      }
     }
 
     console.log("Formatted rooms:", formattedRooms);

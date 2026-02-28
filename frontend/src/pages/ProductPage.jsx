@@ -434,7 +434,7 @@ function ProductPage() {
                       </span>
                       <span
                         className="ms-2 fw-bold text-success"
-                        style={{ fontSize: "1.3rem" }}
+                        style={{ fontSize: "1rem" }}
                       >
                         ${discountedPrice}
                       </span>
@@ -443,7 +443,7 @@ function ProductPage() {
                       </Badge>
                     </>
                   ) : (
-                    <span className="fw-bold" style={{ fontSize: "1.2rem" }}>
+                    <span className="fw-bold" style={{ fontSize: "1rem" }}>
                       ${(product.price || 0).toFixed(2)}
                     </span>
                   )}
