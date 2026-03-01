@@ -364,7 +364,7 @@ userRouter.delete(
   expressAsyncHandler(async (req, res) => {
     const payment = await Payment.findById(req.params.id);
     if (payment) {
-      await payment.remove();
+      await Payment.findByIdAndDelete(req.params.id);
       res.send({ message: 'Payment deleted' });
     } else {
       res.status(404).send({ message: 'Payment not found' });

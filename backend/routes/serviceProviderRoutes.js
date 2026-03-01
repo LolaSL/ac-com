@@ -176,12 +176,55 @@ serviceProviderRouter.get(
 
 
 serviceProviderRouter.get(
+  '/dashboard',
+  isAuth,
+  isServiceProvider,
+  expressAsyncHandler(async (req, res) => {
+    try {
+      const spId = req.serviceProvider._id;
+
+      const [projects, earningsRaw, sp] = await Promise.all([
+        Project.find({ serviceProvider: spId }),
+        Earnings.find({ serviceProvider: spId }).populate('projectName', 'name'),
+        ServiceProvider.findById(spId).select('-password'),
+      ]);
+
+      const completed   = projects.filter(p => p.status === 'Completed').length;
+      const inProgress  = projects.filter(p => p.status === 'In Progress').length;
+      const totalHours  = projects.reduce((s, p) => s + (p.hoursWorked || 0), 0);
+      const totalEarned = earningsRaw.reduce((s, e) => s + (e.amount || 0), 0);
+
+      const earningsByProject = earningsRaw.map(e => ({
+        project: e.projectName?.name || 'Unknown',
+        amount:  e.amount,
+        status:  e.status,
+        date:    e.date,
+      }));
+
+      const recentProjects = projects
+        .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
+        .slice(0, 5);
+
+      res.send({
+        sp,
+        stats: { totalProjects: projects.length, completed, inProgress, totalHours, totalEarned },
+        earningsByProject,
+        recentProjects,
+      });
+    } catch (err) {
+      res.status(500).send({ message: 'Error fetching dashboard', error: err.message });
+    }
+  })
+);
+
+
+serviceProviderRouter.get(
   '/projects',
   isAuth,
   isServiceProvider,
   expressAsyncHandler(async (req, res) => {
     try {
-      const serviceProviderId = req.serviceProvider._id
+      const serviceProviderId = req.serviceProvider._id;
       const projects = await Project.find({ serviceProvider: serviceProviderId });
 
       if (projects.length === 0) {
@@ -526,10 +569,15 @@ serviceProviderRouter.put(
         return res.status(404).send({ message: 'Service Provider not found' });
       }
 
-      serviceProvider.name = req.body.name || serviceProvider.name;
-      serviceProvider.email = req.body.email || serviceProvider.email;
-      serviceProvider.typeOfProvider = req.body.typeOfProvider || serviceProvider.typeOfProvider;
-      serviceProvider.experience = req.body.experience || serviceProvider.experience;
+      serviceProvider.name             = req.body.name             || serviceProvider.name;
+      serviceProvider.email            = req.body.email            || serviceProvider.email;
+      serviceProvider.typeOfProvider   = req.body.typeOfProvider   || serviceProvider.typeOfProvider;
+      serviceProvider.experience       = req.body.experience       !== undefined ? req.body.experience : serviceProvider.experience;
+      serviceProvider.bio              = req.body.bio              !== undefined ? req.body.bio              : serviceProvider.bio;
+      serviceProvider.location         = req.body.location         !== undefined ? req.body.location         : serviceProvider.location;
+      serviceProvider.skills           = req.body.skills           !== undefined ? req.body.skills           : serviceProvider.skills;
+      serviceProvider.availabilityStatus = req.body.availabilityStatus !== undefined ? req.body.availabilityStatus : serviceProvider.availabilityStatus;
+      serviceProvider.socialLinks      = req.body.socialLinks      !== undefined ? req.body.socialLinks      : serviceProvider.socialLinks;
 
       if (req.body.password) {
         serviceProvider.password = bcrypt.hashSync(req.body.password, 8);

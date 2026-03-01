@@ -1,14 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { Store } from "../Store";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import MessageBox from "../components/MessageBox";
-import ListGroup from "react-bootstrap/ListGroup";
-import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import Image from "react-bootstrap/Image";
 import ModalWindow from "../components/ModalWindow.jsx";
 import "./CartPage.css";
 
@@ -18,6 +11,7 @@ export default function CartPage() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const {
     cart: { cartItems },
+    userInfo,
   } = state;
 
   const [showAlert, setShowAlert] = useState(true);
@@ -231,100 +225,61 @@ export default function CartPage() {
   };
 
   const checkoutHandler = () => {
-    navigate("/signin?redirect=/shipping");
+    navigate(userInfo ? "/shipping" : "/signin?redirect=/shipping");
   };
 
+  // ── derived totals ──────────────────────────────────────────
+  const itemCount   = cartItems.reduce((a, c) => a + c.quantity, 0);
+  const subtotal    = cartItems.reduce((a, c) => a + c.quantity * (c.discount > 0 ? c.price * (1 - c.discount / 100) : c.price), 0);
+  const originalTotal = cartItems.reduce((a, c) => a + c.quantity * c.price, 0);
+  const totalSavings  = originalTotal - subtotal;
+
+  // ── condenser banner config ──────────────────────────────────
+  const recBanner = (() => {
+    if (!showAlert) return null;
+    if (condenserSizingStatus === "already_added")
+      return { cls: "cp-rec-banner--green",  icon: "✅", title: "Condenser Already Added",     sub: "Your cart already includes a correctly sized condenser." };
+    if (!recommendedCondenser || totalBTU < 10000) return null;
+    if (condenserSizingStatus === "perfect")
+      return { cls: "cp-rec-banner--blue",   icon: "🎯", title: `Perfect Match — ${recommendedCondenser.btu} BTU`, sub: recommendedCondenser.name };
+    if (condenserSizingStatus === "oversized")
+      return { cls: "cp-rec-banner--blue",   icon: "📈", title: `Slightly Oversized — ${recommendedCondenser.btu} BTU`, sub: `${recommendedCondenser.name} · Extra capacity is good for extreme weather.` };
+    if (condenserSizingStatus === "undersized")
+      return { cls: "cp-rec-banner--yellow", icon: "⚠️", title: `Slightly Undersized — ${recommendedCondenser.btu} BTU`, sub: `${recommendedCondenser.name} · Consider upgrading for extreme heat conditions.` };
+    if (condenserSizingStatus === "custom")
+      return { cls: "cp-rec-banner--orange", icon: "📞", title: `Custom Order Required — ${recommendedCondenser.btu} BTU`, sub: "No stock product matches this requirement. Contact us for a custom solution." };
+    return null;
+  })();
+
   return (
-    <div className="p-4">
-      <h1 className="fs-1">Shopping Cart</h1>
-      <div className="p-4">
-        {showAlert && condenserSizingStatus === "already_added" && (
-          <div
-            className="p-3 mb-3 text-center rounded"
-            style={{
-              backgroundColor: "#d4edda",
-            }}
-          >
-            <span className="badge bg-success">✓ Condenser Already Added</span>
-            <p className="small text-muted mb-0 mt-1">
-              You have a condenser in your cart. No additional recommendation
-              needed.
-            </p>
-          </div>
-        )}
-        {showAlert &&
-          recommendedCondenser &&
-          totalBTU >= 10000 &&
-          condenserSizingStatus !== "already_added" && (
-            <div
-              className="p-3 mb-3 text-center rounded"
-              style={{
-                backgroundColor:
-                  condenserSizingStatus === "custom" ? "#fff3cd" : "#f0f8ff",
-              }}
-            >
-              <strong className="text-primary fs-5">
-                Recommended Condenser: {recommendedCondenser.btu} BTU
-              </strong>
-              {condenserSizingStatus === "perfect" && (
-                <div className="mt-2">
-                  <span className="badge bg-success">✓ Perfect Match</span>
-                  <p className="small text-muted mb-0 mt-1">
-                    {recommendedCondenser.name} - {recommendedCondenser.btu} BTU
-                  </p>
-                </div>
-              )}
-              {condenserSizingStatus === "oversized" && (
-                <div className="mt-2">
-                  <span className="badge bg-info">📈 Slightly Oversized</span>
-                  <p className="small text-muted mb-0 mt-1">
-                    {recommendedCondenser.name} - {recommendedCondenser.btu} BTU
-                    <br />
-                    <em>
-                      Provides extra capacity - good for extreme weather
-                      conditions
-                    </em>
-                  </p>
-                </div>
-              )}
-              {condenserSizingStatus === "undersized" && (
-                <div className="mt-2">
-                  <span className="badge bg-warning text-dark">
-                    ⚠️ Slightly Undersized
-                  </span>
-                  <p className="small text-muted mb-0 mt-1">
-                    {recommendedCondenser.name} - {recommendedCondenser.btu} BTU
-                    <br />
-                    <em>
-                      May not cool effectively in extreme heat - consider next
-                      size up if available
-                    </em>
-                  </p>
-                </div>
-              )}
-              {condenserSizingStatus === "custom" && (
-                <div className="mt-2">
-                  <span className="badge bg-warning text-dark">
-                    📞 Custom Order Required
-                  </span>
-                  <p className="small text-muted mb-0 mt-1">
-                    No stock product matches your {recommendedCondenser.btu} BTU
-                    requirement
-                    <br />
-                    <em>Please contact us for a custom solution</em>
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+    <div className="cp-page">
+
+      {/* ── Hero bar ── */}
+      <div className="cp-hero">
+        <h1 className="cp-hero__title">🛒 Shopping Cart</h1>
+        <div className="cp-hero__meta">
+          <span className="cp-badge cp-badge--white">{itemCount} {itemCount === 1 ? "item" : "items"}</span>
+          {totalBTU > 0 && <span className="cp-badge cp-badge--white">❄️ {totalBTU.toLocaleString()} BTU total</span>}
+          {totalSavings > 0.01 && <span className="cp-badge cp-badge--white">💰 Saving ${totalSavings.toFixed(2)}</span>}
+        </div>
       </div>
-      <Button
-        variant="primary"
-        onClick={() => setShowModal(true)}
-        className="go-to-btn btn-text mb-4"
-      >
-        Select Recommended Condenser
-      </Button>
+
+      {/* ── Condenser recommendation banner ── */}
+      {recBanner && (
+        <div className={`cp-rec-banner ${recBanner.cls}`}>
+          <span className="cp-rec-banner__icon">{recBanner.icon}</span>
+          <div className="cp-rec-banner__body">
+            <div className="cp-rec-banner__title">{recBanner.title}</div>
+            <p className="cp-rec-banner__sub">{recBanner.sub}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Select condenser button ── */}
+      <button className="cp-condenser-btn" onClick={() => setShowModal(true)}>
+        🔧 Select Recommended Condenser
+      </button>
+
       <ModalWindow
         show={showModal}
         onHide={() => setShowModal(false)}
@@ -332,181 +287,127 @@ export default function CartPage() {
         addToCart={addToCart}
         recommendedBTU={recommendedCondenser?.btu}
       />
-      <Row>
-        <Col md={8}>
-          {cartItems.length === 0 ? (
-            <MessageBox>
-              Cart is empty.{" "}
-              <Link to="/products" className="link-cart">
-                Go Shopping
-              </Link>
-            </MessageBox>
-          ) : (
-            <ListGroup>
-              {cartItems.map((item, index) => {
-                const discountedPrice =
-                  item.discount > 0
-                    ? item.price * (1 - item.discount / 100)
-                    : item.price;
-                return (
-                  <ListGroup.Item key={index}>
-                    <Row className="align-items-center">
-                      <Col md={4}>
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          className="img-fluid rounded cart-thumbnail"
-                        ></Image>{" "}
-                        <Link
-                          className="nav-link-product"
-                          to={`/product/${item.slug}`}
-                        >
-                          {item.name}
-                        </Link>
-                        {item.category && <p>{item.category}</p>}
-                        {item.btu && <p className="text-muted small">{item.btu} BTU</p>}
-                      </Col>
-                      <Col md={3}>
-                        <Button
-                          onClick={() =>
-                            updateCartHandler(item, item.quantity - 1)
-                          }
-                          disabled={item.quantity === 1}
-                          className="btn-icon"
-                        >
-                          <i className="fas fa-minus-circle icon-color"></i>
-                        </Button>{" "}
-                        <span>{item.quantity}</span>{" "}
-                        <Button
-                          onClick={() =>
-                            updateCartHandler(item, item.quantity + 1)
-                          }
-                          disabled={item.quantity === item.countInStock}
-                          className="btn-icon"
-                        >
-                          <i className="fas fa-plus-circle icon-color"></i>
-                        </Button>
-                      </Col>
 
-                      <Col md={3}>
-                        {item.discount > 0 ? (
-                          <>
-                            <span
-                              className="text-muted"
-                              style={{ textDecoration: "line-through" }}
-                            >
-                              ${item.price.toFixed(2)}
-                            </span>{" "}
-                            <span className="ms-2">
-                              ${discountedPrice.toFixed(2)}
-                            </span>
-                          </>
-                        ) : (
-                          <span>${item.price.toFixed(2)}</span>
-                        )}
-                      </Col>
-                      <Col md={2}>
-                        <Button
-                          onClick={() => removeItemHandler(item)}
-                          className="btn-trash"
-                        >
-                          <i className="fas fa-trash"></i>
-                        </Button>
-                      </Col>
-                    </Row>
-                  </ListGroup.Item>
+      {/* ── Main layout ── */}
+      <div className="cp-layout">
+
+        {/* ── LEFT: cart items ── */}
+        <div>
+          {cartItems.length === 0 ? (
+            <div className="cp-empty">
+              <div className="cp-empty__icon">🛒</div>
+              <p className="cp-empty__text">Your cart is empty</p>
+              <Link to="/search" className="cp-empty__link">🔍 Browse Products</Link>
+            </div>
+          ) : (
+            <div className="cp-items-list">
+              {cartItems.map((item, index) => {
+                const discountedPrice = item.discount > 0
+                  ? item.price * (1 - item.discount / 100)
+                  : item.price;
+                return (
+                  <div className="cp-item" key={index}>
+                    <img src={item.image} alt={item.name} className="cp-item__img" />
+
+                    <div className="cp-item__info">
+                      <Link to={`/product/${item.slug}`} className="cp-item__name">{item.name}</Link>
+                      {item.category && <p className="cp-item__category">{item.category}</p>}
+                      {item.btu && <span className="cp-item__btu">{item.btu.toLocaleString()} BTU</span>}
+                    </div>
+
+                    <div className="cp-qty">
+                      <button className="cp-qty__btn" disabled={item.quantity === 1} onClick={() => updateCartHandler(item, item.quantity - 1)}>
+                        <i className="fas fa-minus" style={{ fontSize: "0.65rem" }} />
+                      </button>
+                      <span className="cp-qty__val">{item.quantity}</span>
+                      <button className="cp-qty__btn" disabled={item.quantity === item.countInStock} onClick={() => updateCartHandler(item, item.quantity + 1)}>
+                        <i className="fas fa-plus" style={{ fontSize: "0.65rem" }} />
+                      </button>
+                    </div>
+
+                    <div className="cp-item__price">
+                      {item.discount > 0 && (
+                        <span className="cp-item__price-original">${item.price.toFixed(2)}</span>
+                      )}
+                      <span className="cp-item__price-final">${discountedPrice.toFixed(2)}</span>
+                      {item.discount > 0 && (
+                        <span className="cp-item__price-discount">−{item.discount}% off</span>
+                      )}
+                    </div>
+
+                    <button className="cp-remove-btn" onClick={() => removeItemHandler(item)} title="Remove">
+                      <i className="fas fa-trash" />
+                    </button>
+                  </div>
                 );
               })}
-            </ListGroup>
-          )}
-        </Col>
-        <Col md={4}>
-          <Card>
-            <Card.Body>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <h3>
-                    Subtotal ({cartItems.reduce((a, c) => a + c.quantity, 0)}{" "}
-                    items): $
-                    {cartItems
-                      .reduce(
-                        (a, c) =>
-                          a +
-                          (c.discount > 0
-                            ? c.quantity * c.price * (1 - c.discount / 100)
-                            : c.quantity * c.price),
-                        0
-                      )
-                      .toFixed(2)}
-                  </h3>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <div className="d-grid">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="go-to-btn btn-text"
-                      onClick={checkoutHandler}
-                      disabled={cartItems.length === 0}
-                    >
-                      Proceed to Checkout
-                    </Button>
-                  </div>
-                </ListGroup.Item>
-              </ListGroup>
-            </Card.Body>
-          </Card>
-          {cartItems.length > 0 && relatedProducts.length > 0 && (
-            <div className="mt-4">
-              <h5>Recommended for your cart</h5>
-              <Row>
-                {relatedProducts.map((p) => (
-                  <Col key={p._id} sm={6} className="mb-3">
-                    <Card className="h-100">
-                      <Link to={`/product/${p.slug}`}>
-                        <Image
-                          src={p.image}
-                          alt={p.name}
-                          style={{
-                            width: "100%",
-                            height: 140,
-                            objectFit: "contain",
-                          }}
-                        />
-                      </Link>
-                      <Card.Body>
-                        <Link
-                          to={`/product/${p.slug}`}
-                          className="text-decoration-none"
-                        >
-                          <div
-                            className="fw-semibold"
-                            style={{ minHeight: 40 }}
-                          >
-                            {p.name}
-                          </div>
-                        </Link>
-                        <div className="d-flex justify-content-between align-items-center mt-2">
-                          <span className="fw-bold">
-                            ${(p.price || 0).toFixed(2)}
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="primary"
-                            onClick={() => addToCart(p)}
-                          >
-                            Add
-                          </Button>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
             </div>
           )}
-        </Col>
-      </Row>
+        </div>
+
+        {/* ── RIGHT: order summary + related ── */}
+        <div>
+          <div className="cp-summary">
+            <div className="cp-summary__header">
+              <h3>Order Summary</h3>
+            </div>
+            <div className="cp-summary__body">
+              <div className="cp-summary__row">
+                <span className="cp-summary__label">Items ({itemCount})</span>
+                <span>${originalTotal.toFixed(2)}</span>
+              </div>
+              {totalSavings > 0.01 && (
+                <div className="cp-summary__row">
+                  <span className="cp-summary__label">Discounts</span>
+                  <span style={{ color: "#16a34a" }}>−${totalSavings.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="cp-summary__row">
+                <span className="cp-summary__label">Shipping</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <div className="cp-summary__total">
+                <span>Total</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              {totalSavings > 0.01 && (
+                <div className="cp-summary__savings">🎉 You save ${totalSavings.toFixed(2)}</div>
+              )}
+              <button
+                className="cp-checkout-btn"
+                onClick={checkoutHandler}
+                disabled={cartItems.length === 0}
+              >
+                Proceed to Checkout →
+              </button>
+              <Link to="/search" className="cp-continue-link">← Continue Shopping</Link>
+            </div>
+          </div>
+
+          {/* ── Related products ── */}
+          {relatedProducts.length > 0 && (
+            <div className="cp-related">
+              <div className="cp-related__title">You may also like</div>
+              <div className="cp-related__grid">
+                {relatedProducts.map((p) => (
+                  <div className="cp-rel-card" key={p._id}>
+                    <Link to={`/product/${p.slug}`}>
+                      <img src={p.image} alt={p.name} className="cp-rel-card__img" />
+                    </Link>
+                    <div className="cp-rel-card__body">
+                      <Link to={`/product/${p.slug}`} className="cp-rel-card__name">{p.name}</Link>
+                      <div className="cp-rel-card__footer">
+                        <span className="cp-rel-card__price">${(p.price || 0).toFixed(2)}</span>
+                        <button className="cp-rel-card__add" onClick={() => addToCart(p)}>+ Add</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

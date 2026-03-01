@@ -194,10 +194,16 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   id="provider-nav-dropdown"
                 >
                   <Link
+                    to="/serviceprovider/dashboard"
+                    className="dropdown-item"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
                     to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
                     className="dropdown-item"
                   >
-                    Service Provider Profile
+                    My Profile
                   </Link>
                   <Link
                     to="/serviceprovider/projects"
@@ -277,6 +283,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </Link>
                   <Link to="/admin/blogs-list" className="dropdown-item">
                     Blogs
+                  </Link>
+                  <Link to="/admin/roi-calculations" className="dropdown-item">
+                    Users ROI Calculations
                   </Link>
                   <Link to="/admin/all-annotations" className="dropdown-item">
                     Users Drawings

@@ -46,14 +46,14 @@ const roiCalculationSchema = new mongoose.Schema(
         projectSize: {
             type: Number,
             required: true,
-            min: 1000,
-            max: 50000,
+            min: 100,           // allow small repair/maintenance jobs
+            max: 10000000,      // up to $10M for large commercial projects
         },
         installationTime: {
             type: Number,
             required: true,
             min: 1,
-            max: 30,
+            max: 365,           // up to 12 months for industrial/commercial
         },
         teamSize: {
             type: Number,

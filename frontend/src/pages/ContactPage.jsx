@@ -261,8 +261,8 @@ const ContactPage = () => {
       </Form>
 
       <div className="mt-4 mb-4 me-4">
-        <Link to="/" className="go-to-btn btn-text">
-          Back to Home
+        <Link to="/" className="home-btn">
+          🏠 Home
         </Link>
       </div>
     </Container>

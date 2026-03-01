@@ -4,6 +4,7 @@ import OrderHistoryPage from "../pages/OrderHistoryPage.jsx";
 import OrderPage from "../pages/OrderPage.jsx";
 import MapPage from "../pages/MapPage.jsx";
 import ServiceProviderProfile from "../pages/ServiceProviderProfile.jsx";
+import ServiceProviderDashboard from "../pages/ServiceProviderDashboard.jsx";
 import EarningsPage from "../pages/EarningsPage.jsx";
 import HoursPage from "../pages/HoursPage.jsx";
 import ProjectsPage from "../pages/ProjectsPage.jsx";
@@ -63,6 +64,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <MapPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/serviceprovider/dashboard",
+    element: (
+      <ProtectedRoute>
+        <ServiceProviderDashboard />
       </ProtectedRoute>
     ),
   },

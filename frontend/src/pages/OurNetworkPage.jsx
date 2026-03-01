@@ -299,8 +299,8 @@ export default function OurNetworkPage() {
       </Row>
 
       <div className="text-center mt-4">
-        <Link to="/" className="btn btn go-to-btn btn-sm btn-text">
-          Back to Home
+        <Link to="/" className="home-btn">
+          🏠 Home
         </Link>
       </div>
     </Container>

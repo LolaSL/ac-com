@@ -6,7 +6,7 @@ import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
 import { Store } from "../Store.js";
 import { Modal, Button, Form } from "react-bootstrap";
-import { FaThumbsUp, FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import { FaCheckCircle, FaTrash, FaBan } from "react-icons/fa";
 import "./PaymentsPage.css";
 const reducer = (state, action) => {
   switch (action.type) {
@@ -62,6 +62,23 @@ export default function PaymentsPage() {
 
   const userInfo = adminInfo;
 
+  // Service providers list for dropdown
+  const [serviceProviders, setServiceProviders] = useState([]);
+
+  useEffect(() => {
+    const fetchSPs = async () => {
+      try {
+        const { data } = await axios.get("/api/service-providers/all", {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        });
+        setServiceProviders(data);
+      } catch (err) {
+        // non-critical, dropdown will just be empty
+      }
+    };
+    if (userInfo?.isAdmin) fetchSPs();
+  }, [userInfo]);
+
   // Form state for creating payments
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [paymentData, setPaymentData] = useState({
@@ -94,7 +111,7 @@ export default function PaymentsPage() {
     if (window.confirm("Are you sure to create this payment?")) {
       try {
         dispatch({ type: "CREATE_REQUEST" });
-        const { data } = await axios.post(
+        await axios.post(
           "/api/users/admin/payments",
           paymentData,
           {
@@ -103,7 +120,11 @@ export default function PaymentsPage() {
         );
         toast.success("Payment created successfully");
         dispatch({ type: "CREATE_SUCCESS" });
-        dispatch({ type: "FETCH_SUCCESS", payload: [...payments, data] });
+        // Re-fetch with populate so SP name shows correctly
+        const { data: refreshed } = await axios.get("/api/users/admin/payments", {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        });
+        dispatch({ type: "FETCH_SUCCESS", payload: refreshed });
         setShowCreateModal(false);
         setPaymentData({
           serviceProvider: "",
@@ -218,6 +239,7 @@ export default function PaymentsPage() {
                 <th>ID</th>
                 <th>Service Provider</th>
                 <th>Amount</th>
+                <th>Currency</th>
                 <th>Status</th>
                 <th>Payment Method</th>
                 <th>Description</th>
@@ -230,25 +252,27 @@ export default function PaymentsPage() {
                   <td>{payment._id}</td>
                   <td>{payment.serviceProvider?.name || "N/A"}</td>
                   <td>${payment.amount}</td>
+                  <td>{payment.currency || "USD"}</td>
                   <td>{payment.status}</td>
                   <td>{payment.paymentMethod}</td>
                   <td>{payment.description}</td>
-                  <td>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    <div className="d-flex gap-1">
                     {payment.status === "pending" && (
                       <>
                         <Button
                           size="sm"
                           variant="success"
-                          className="me-1 payment-btn payment-btn-success"
+                          className="w-auto"
                           onClick={() => updateHandler(payment)}
-                          title="Mark Completed"
+                          title="Mark as Completed"
                         >
-                          <FaThumbsUp />
+                          <FaCheckCircle />
                         </Button>
                         <Button
                           size="sm"
                           variant="danger"
-                          className="payment-btn payment-btn-danger"
+                          className="w-auto"
                           onClick={() => deleteHandler(payment)}
                           title="Delete payment"
                         >
@@ -261,16 +285,16 @@ export default function PaymentsPage() {
                         <Button
                           size="sm"
                           variant="warning"
-                          className="me-1 payment-btn payment-btn-warning"
+                          className="w-auto"
                           onClick={() => markMissedHandler(payment)}
                           title="Mark as Missed"
                         >
-                          <FaExclamationTriangle />
+                          <FaBan />
                         </Button>
                         <Button
                           size="sm"
                           variant="danger"
-                          className="payment-btn payment-btn-danger"
+                          className="w-auto"
                           onClick={() => deleteHandler(payment)}
                           title="Delete payment"
                         >
@@ -282,13 +306,14 @@ export default function PaymentsPage() {
                       <Button
                         size="sm"
                         variant="danger"
-                        className="payment-btn payment-btn-danger"
+                        className="w-auto"
                         onClick={() => deleteHandler(payment)}
                         title="Delete payment"
                       >
                         <FaTrash />
                       </Button>
                     )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -305,10 +330,8 @@ export default function PaymentsPage() {
         <Form onSubmit={createHandler}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Service Provider Email</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="serviceprovider@example.com"
+              <Form.Label>Service Provider</Form.Label>
+              <Form.Select
                 value={paymentData.serviceProvider}
                 onChange={(e) =>
                   setPaymentData({
@@ -317,14 +340,22 @@ export default function PaymentsPage() {
                   })
                 }
                 required
-              />
+              >
+                <option value="">Select a service provider…</option>
+                {serviceProviders.map((sp) => (
+                  <option key={sp._id} value={sp.email}>
+                    {sp.name} ({sp.email})
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Amount</Form.Label>
               <Form.Control
                 type="number"
                 step="0.01"
-                placeholder="100.00"
+                min="0.01"
+                placeholder="Enter amount (e.g. 250.00)"
                 value={paymentData.amount}
                 onChange={(e) =>
                   setPaymentData({ ...paymentData, amount: e.target.value })

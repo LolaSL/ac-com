@@ -1,21 +1,206 @@
 import axios from "axios";
 import { useContext, useEffect, useReducer } from "react";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { useNavigate, useParams } from "react-router-dom";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Button from "react-bootstrap/Button";
-import ListGroup from "react-bootstrap/ListGroup";
-import Card from "react-bootstrap/Card";
-import { Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import LoadingBox from "../components/LoadingBox";
-import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { toast } from "react-toastify";
-import { Container } from "react-bootstrap";
 import printJS from "print-js";
-import "./OrderPage.css";
+
+const styles = `
+  .op-page { min-height: 100vh; background: #f5f6fa; }
+  .op-hero {
+    background: linear-gradient(135deg, #5b6070, #2563a8);
+    border-radius: 0 0 16px 16px;
+    padding: 2.5rem 2rem 2rem;
+    color: #fff;
+    margin-bottom: 2rem;
+  }
+  .op-hero__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .op-hero__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .op-hero__id {
+    font-size: 1rem;
+    opacity: 0.8;
+    font-family: monospace;
+    letter-spacing: 0.04em;
+  }
+  .op-hero__badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .op-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .op-badge--green { background: rgba(34,197,94,.25); border: 1px solid rgba(34,197,94,.5); }
+  .op-badge--yellow { background: rgba(234,179,8,.25); border: 1px solid rgba(234,179,8,.5); }
+  .op-badge--grey { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); }
+  .op-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  @media(max-width:860px) { .op-grid { grid-template-columns: 1fr; } }
+  .op-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    animation: opFade 0.35s ease;
+  }
+  .op-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a2b4b;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1.5px solid #f0f1f5;
+  }
+  .op-card__body { color: #444; line-height: 1.7; font-size: 0.93rem; margin: 0 0 0.5rem; }
+  .op-label { font-weight: 600; color: #1a2b4b; }
+  .op-map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.83rem;
+    color: #2563a8;
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+  }
+  .op-map-link:hover { text-decoration: underline; }
+  .op-status {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+  }
+  .op-status--success { background: #d1fae5; color: #065f46; }
+  .op-status--warning { background: #fef3c7; color: #92400e; }
+  .op-method-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563a8;
+    border-radius: 20px;
+    padding: 2px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .op-items { display: flex; flex-direction: column; gap: 0.5rem; }
+  .op-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #f0f1f5;
+  }
+  .op-item:last-child { border-bottom: none; }
+  .op-item__img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1.5px solid #e5e7eb;
+    flex-shrink: 0;
+  }
+  .op-item__info { flex: 1; min-width: 0; }
+  .op-item__name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a2b4b;
+    text-decoration: none;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .op-item__name:hover { color: #2563a8; }
+  .op-item__cat { font-size: 0.78rem; color: #888; }
+  .op-item__meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+  .op-item__qty { font-size: 0.83rem; color: #666; }
+  .op-item__price { font-size: 0.95rem; font-weight: 700; color: #1a2b4b; }
+  .op-summary {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    padding: 1.5rem;
+    position: sticky;
+    top: 80px;
+  }
+  .op-summary__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a2b4b;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1.5px solid #f0f1f5;
+  }
+  .op-summary__rows { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }
+  .op-summary__row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #555; }
+  .op-summary__row--total {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #1a2b4b;
+    padding-top: 0.5rem;
+    border-top: 1.5px solid #f0f1f5;
+    margin-top: 0.25rem;
+  }
+  .op-print-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+    color: #444;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 1rem;
+  }
+  .op-print-btn:hover { background: #f0f1f5; }
+  .op-paypal { padding-top: 0.75rem; border-top: 1.5px solid #f0f1f5; margin-top: 0.5rem; }
+  .op-paypal__label { font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 0.75rem; text-align: center; }
+  .op-deliver { padding-top: 0.75rem; border-top: 1.5px solid #f0f1f5; margin-top: 0.5rem; }
+  .op-deliver-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #a8112a, #ec133e);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(236,19,62,.35);
+    transition: opacity 0.2s;
+  }
+  .op-deliver-btn:hover { opacity: 0.9; }
+  @keyframes opFade {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
 
 function printOrder() {
   const orderContainer = document.querySelector("#order-container");
@@ -23,147 +208,150 @@ function printOrder() {
 
   const clone = orderContainer.cloneNode(true);
 
-  // Remove elements that shouldn't be printed
+  // Remove interactive / non-print elements
   clone
-    .querySelectorAll("button, a, .badge, .no-print")
+    .querySelectorAll("button, .op-paypal, .op-deliver, .op-print-btn, .op-summary")
     .forEach((el) => el.remove());
 
-  // Get order ID from the heading
-  // const orderHeading = clone.querySelector("h1");
-  const orderNumber = clone.querySelector(".fw-bold")?.textContent || "";
+  // Replace <a> tags with plain spans (keep text content)
+  clone.querySelectorAll("a").forEach((a) => {
+    const span = document.createElement("span");
+    span.textContent = a.textContent;
+    span.style.color = "#2563a8";
+    a.replaceWith(span);
+  });
+
+  const orderNumber = clone.querySelector(".op-hero__id")?.textContent?.trim() || "";
+
+  // Build a standalone summary table from the live DOM (not cloned, which had summary removed)
+  const liveRows = document.querySelectorAll(".op-summary__row");
+  let summaryRows = "";
+  liveRows.forEach((row) => {
+    const cells = row.querySelectorAll("span");
+    if (cells.length === 2) {
+      const isTotalRow = row.classList.contains("op-summary__row--total");
+      summaryRows += `<tr style="font-weight:${isTotalRow ? "700" : "400"}; border-top:${isTotalRow ? "2px solid #e5e7eb" : "none"}">
+        <td style="padding:6px 0; color:#555">${cells[0].textContent}</td>
+        <td style="padding:6px 0; text-align:right; color:${isTotalRow ? "#1a2b4b" : "#555"}">${cells[1].textContent}</td>
+      </tr>`;
+    }
+  });
+
+  const printHTML = `
+    <div style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; max-width:720px; margin:0 auto; color:#333; background:#fff;">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#5b6070,#2563a8); border-radius:0 0 16px 16px; padding:2rem 2rem 1.5rem; color:#fff; margin-bottom:1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <div>
+            <div style="font-size:0.75rem; opacity:0.7; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:4px;">Order Receipt</div>
+            <div style="font-size:1.5rem; font-weight:700;">Order <span style="font-family:monospace; opacity:0.85;">#${orderNumber}</span></div>
+          </div>
+          <div style="font-size:0.78rem; opacity:0.8; text-align:right;">
+            Printed: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      ${clone.querySelector(".op-grid > div:first-child")?.innerHTML || clone.innerHTML}
+
+      <!-- Summary table -->
+      <div style="background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; padding:1.5rem; margin-top:1.5rem; page-break-inside:avoid;">
+        <div style="font-size:1rem; font-weight:700; color:#1a2b4b; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1.5px solid #f0f1f5;">
+          Order Summary
+        </div>
+        <table style="width:100%; border-collapse:collapse;">
+          ${summaryRows}
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align:center; margin-top:2rem; padding-top:1rem; border-top:1px solid #e5e7eb; font-size:0.78rem; color:#aaa;">
+        Thank you for your order — AC Commerce
+      </div>
+    </div>
+  `;
 
   printJS({
-    printable: clone.innerHTML,
+    printable: printHTML,
     type: "raw-html",
     style: `
-      @media print {
-        * {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          margin: 20px;
-          background: white;
-        }
-        .container {
-          max-width: none;
-          background: white;
-          padding: 20px;
-          border-radius: 10px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-          color: #007bff;
-          text-align: center;
-          font-size: 2.5em;
-          margin-bottom: 20px;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        .badge {
-          display: inline-block;
-          padding: 4px 8px;
-          font-size: 0.75em;
-          font-weight: bold;
-          border-radius: 4px;
-          margin: 2px;
-        }
-        .bg-success {
-          background: linear-gradient(135deg, #28a745, #20c997);
-          color: white;
-        }
-        .bg-warning {
-          background: linear-gradient(135deg, #ffc107, #fd7e14);
-          color: white;
-        }
-        .bg-secondary {
-          background: linear-gradient(135deg, #6c757d, #495057);
-          color: white;
-        }
-        .card {
-          border: none;
-          border-radius: 10px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-          margin-bottom: 20px;
-          page-break-inside: avoid;
-        }
-        .card-title {
-          color: #007bff;
-          font-weight: bold;
-          font-size: 1.2em;
-          margin-bottom: 15px;
-        }
-        .card-text {
-          line-height: 1.6;
-        }
-        .list-group-item {
-          border: none;
-          border-bottom: 1px solid #eee;
-          padding: 10px 0;
-        }
-        .list-group-item:last-child {
-          border-bottom: none;
-        }
-        .row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .col-md-8, .col-md-4, .col-md-2, .col-md-3 {
-          flex: 1;
-          padding: 0 10px;
-        }
-        .col-md-8 {
-          flex: 2;
-        }
-        .col-md-4 {
-          flex: 1;
-        }
-        .col-md-2 {
-          flex: 0.5;
-        }
-        .col-md-3 {
-          flex: 0.75;
-        }
-        img {
-          width: 60px;
-          height: 60px;
-          object-fit: cover;
-          border: 2px solid #ddd;
-          border-radius: 5px;
-        }
-        strong {
-          font-weight: bold;
-          color: #333;
-        }
-        .alert {
-          border-radius: 5px;
-          padding: 10px;
-          margin: 10px 0;
-        }
-        .alert-success {
-          background: linear-gradient(135deg, #d4edda, #c3e6cb);
-          color: #155724;
-          border: 1px solid #c3e6cb;
-        }
-        .alert-warning {
-          background: linear-gradient(135deg, #fff3cd, #ffeeba);
-          color: #856404;
-          border: 1px solid #ffeeba;
-        }
-        .text-primary {
-          color: #007bff !important;
-        }
-        .order-link {
-          color: #007bff;
-          text-decoration: none;
-        }
-        .order-link:hover {
-          text-decoration: underline;
-        }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
+      body { margin: 0; padding: 20px; background: #fff; }
+      .op-hero { display: none; }
+      .op-card {
+        background: #fff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        page-break-inside: avoid;
       }
+      .op-card__title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1a2b4b;
+        margin: 0 0 0.6rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1.5px solid #f0f1f5;
+      }
+      .op-card__body { font-size: 0.88rem; line-height: 1.7; margin: 0 0 0.5rem; color: #444; }
+      .op-label { font-weight: 600; color: #1a2b4b; }
+      .op-status {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+        display: inline-block;
+      }
+      .op-status--success { background: #d1fae5; color: #065f46; }
+      .op-status--warning { background: #fef3c7; color: #92400e; }
+      .op-method-badge {
+        background: #eff6ff;
+        color: #2563a8;
+        border-radius: 20px;
+        padding: 2px 12px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .op-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #f0f1f5;
+      }
+      .op-item:last-child { border-bottom: none; }
+      .op-item__img {
+        width: 54px;
+        height: 54px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1.5px solid #e5e7eb;
+        flex-shrink: 0;
+      }
+      .op-item__info { flex: 1; }
+      .op-item__name { font-size: 0.88rem; font-weight: 600; color: #1a2b4b; display: block; }
+      .op-item__cat { font-size: 0.75rem; color: #888; }
+      .op-item__meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+      .op-item__qty { font-size: 0.8rem; color: #666; }
+      .op-item__price { font-size: 0.92rem; font-weight: 700; color: #1a2b4b; }
+      .op-badge {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 6px;
+      }
+      .op-badge--green { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+      .op-badge--yellow { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+      .op-badge--grey { background: #f3f4f6; color: #555; border: 1px solid #d1d5db; }
     `,
-    documentTitle: "Order " + orderNumber,
+    documentTitle: `Order ${orderNumber}`,
   });
 }
 
@@ -344,7 +532,11 @@ export default function OrderPage() {
   }
 
   if (error) {
-    return <MessageBox variant="danger">{error}</MessageBox>;
+    return (
+      <div style={{ maxWidth: 600, margin: "3rem auto", padding: "1rem 1.5rem", background: "#fee2e2", color: "#991b1b", borderRadius: 12, fontWeight: 500 }}>
+        {error}
+      </div>
+    );
   }
 
   if (!order || !order.shippingAddress) {
@@ -352,276 +544,163 @@ export default function OrderPage() {
   }
 
   return (
-    <div>
-      <Container id="order-container">
-        <div className="d-flex justify-space-between align-items-center my-3 fs-1">
-          <h1 className="my-3 text-primary">Order: #{orderId} </h1>
-          <div>
-            {order.isPaid ? (
-              <span
-                className="badge bg-success me-2 "
-                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
-              >
-                Paid
-              </span>
-            ) : (
-              <span
-                className="badge bg-warning  me-2"
-                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
-              >
-                Unpaid
-              </span>
-            )}
-            {order.isDelivered ? (
-              <span
-                className="badge bg-success"
-                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
-              >
-                Delivered
-              </span>
-            ) : (
-              <span
-                className="badge bg-secondary"
-                style={{ fontSize: "0.8rem", padding: "8px 12px" }}
-              >
-                Pending
-              </span>
-            )}
+    <>
+      <style>{styles}</style>
+      <div className="op-page" id="order-container">
+        <div className="op-hero">
+          <div className="op-hero__inner">
+            <div className="op-hero__title">
+              <span>Order</span>
+              <span className="op-hero__id">#{orderId}</span>
+            </div>
+            <div className="op-hero__badges">
+              {order.isPaid ? (
+                <span className="op-badge op-badge--green">✓ Paid</span>
+              ) : (
+                <span className="op-badge op-badge--yellow">⏳ Unpaid</span>
+              )}
+              {order.isDelivered ? (
+                <span className="op-badge op-badge--green">✓ Delivered</span>
+              ) : (
+                <span className="op-badge op-badge--grey">🚚 Pending Delivery</span>
+              )}
+            </div>
           </div>
         </div>
-        <Row>
-          <Col md={8}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title className="text-primary">Shipping</Card.Title>
-                <Card.Text>
-                  <strong>Name:</strong> {order.shippingAddress.fullName} <br />
-                  <strong>Address:</strong> {order.shippingAddress.address},{" "}
-                  {order.shippingAddress.city},{" "}
-                  {order.shippingAddress.postalCode},{" "}
-                  {order.shippingAddress.country}
-                  {order.shippingAddress.location &&
-                    order.shippingAddress.location.lat && (
-                      <>
-                        <br />
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          href={`https://maps.google.com?q=${order.shippingAddress.location.lat},${order.shippingAddress.location.lng}`}
-                          className="btn btn-sm go-to-btn btn-text mt-2"
-                        >
-                          📍 Show On Map
-                        </a>
-                      </>
-                    )}
-                </Card.Text>
-                {order.isDelivered ? (
-                  <MessageBox variant="success">
-                    Delivered on{" "}
-                    {new Date(order.deliveredAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </MessageBox>
-                ) : (
-                  <MessageBox variant="warning">Not Delivered Yet</MessageBox>
-                )}
-              </Card.Body>
-            </Card>
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title className="text-primary">Payment</Card.Title>
-                <Card.Text>
-                  <strong>Method:</strong> {order.paymentMethod}
-                </Card.Text>
-                {order.isPaid ? (
-                  <MessageBox variant="success">
-                    Paid on{" "}
-                    {new Date(order.paidAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </MessageBox>
-                ) : (
-                  <MessageBox variant="warning">Awaiting Payment</MessageBox>
-                )}
-              </Card.Body>
-            </Card>
 
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title className="text-primary">
-                  Items ({order.orderItems.length})
-                </Card.Title>
-                <ListGroup variant="flush">
-                  {order.orderItems.map((item) => (
-                    <ListGroup.Item key={item._id}>
-                      <Row className="align-items-center">
-                        <Col md={2}>
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="img-fluid rounded"
-                            style={{
-                              width: "60px",
-                              height: "60px",
-                              objectFit: "cover",
-                              border: "2px solid #ddd",
-                              borderRadius: "5px",
-                            }}
-                          />
-                        </Col>
-                        <Col md={4}>
-                          <Link
-                            to={`/product/${item.slug}`}
-                            className="order-link"
-                          >
-                            {item.name}
-                          </Link>
-                        </Col>
-                        <Col md={3}>
-                          <strong className="text-primary">Quantity:</strong>{" "}
-                          {item.quantity}
-                        </Col>
-                        <Col md={3}>
-                          <strong className="text-primary">Price:</strong> $
-                          {item.price.toFixed(2)}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={4}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title className="text-primary">Order Summary</Card.Title>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>
-                    <Row>
-                      <Col>Items</Col>
-                      <Col>${order.itemsPrice.toFixed(2)}</Col>
-                    </Row>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Row>
-                      <Col>Shipping</Col>
-                      <Col>${order.shippingPrice.toFixed(2)}</Col>
-                    </Row>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Row>
-                      <Col>Tax</Col>
-                      <Col>${order.taxPrice.toFixed(2)}</Col>
-                    </Row>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Row>
-                      <Col>
-                        <strong> Order Total</strong>
-                      </Col>
-                      <Col>
-                        <strong>${order.totalPrice.toFixed(2)}</strong>
-                      </Col>
-                    </Row>
-                  </ListGroup.Item>
-                  {order.isPaid && (
-                    <ListGroup.Item>
-                      <div className="d-grid">
-                        <Button
-                          onClick={printOrder}
-                          variant="light"
-                          size="sm"
-                          className="go-to-btn btn-text w-auto pt-2"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-printer"
-                          >
-                            <polyline points="6 9 6 2 18 2 18 9" />
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                            <rect width="12" height="8" x="6" y="14" />
-                          </svg>
-                          Print Order
-                        </Button>
-                      </div>
-                    </ListGroup.Item>
-                  )}
-                  {order.isPaid ? (
-                    <MessageBox variant="success order-paid">
-                      Paid on{" "}
-                      {new Date(order.paidAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </MessageBox>
+        <div className="op-grid">
+          {/* Left column */}
+          <div>
+            {/* Shipping */}
+            <div className="op-card">
+              <h3 className="op-card__title">📦 Shipping</h3>
+              <p className="op-card__body">
+                <span className="op-label">Name: </span>{order.shippingAddress.fullName}<br />
+                <span className="op-label">Address: </span>
+                {order.shippingAddress.address}, {order.shippingAddress.city},{" "}
+                {order.shippingAddress.postalCode}, {order.shippingAddress.country}
+              </p>
+              {order.shippingAddress.location?.lat && (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={`https://maps.google.com?q=${order.shippingAddress.location.lat},${order.shippingAddress.location.lng}`}
+                  className="op-map-link"
+                >
+                  📍 {order.shippingAddress.location.lat}, {order.shippingAddress.location.lng}
+                </a>
+              )}
+              {order.isDelivered ? (
+                <div className="op-status op-status--success">
+                  ✓ Delivered on{" "}
+                  {new Date(order.deliveredAt).toLocaleDateString("en-US", {
+                    year: "numeric", month: "long", day: "numeric",
+                    hour: "2-digit", minute: "2-digit",
+                  })}
+                </div>
+              ) : (
+                <div className="op-status op-status--warning">Not Delivered Yet</div>
+              )}
+            </div>
+
+            {/* Payment */}
+            <div className="op-card">
+              <h3 className="op-card__title">💳 Payment</h3>
+              <p className="op-card__body">
+                <span className="op-label">Method: </span>
+                <span className="op-method-badge">{order.paymentMethod}</span>
+              </p>
+              {order.isPaid ? (
+                <div className="op-status op-status--success">
+                  ✓ Paid on{" "}
+                  {new Date(order.paidAt).toLocaleDateString("en-US", {
+                    year: "numeric", month: "long", day: "numeric",
+                    hour: "2-digit", minute: "2-digit",
+                  })}
+                </div>
+              ) : (
+                <div className="op-status op-status--warning">Awaiting Payment</div>
+              )}
+            </div>
+
+            {/* Items */}
+            <div className="op-card">
+              <h3 className="op-card__title">🛒 Items ({order.orderItems.length})</h3>
+              <div className="op-items">
+                {order.orderItems.map((item) => (
+                  <div key={item._id} className="op-item">
+                    <img src={item.image} alt={item.name} className="op-item__img" />
+                    <div className="op-item__info">
+                      <Link to={`/product/${item.slug}`} className="op-item__name">
+                        {item.name}
+                      </Link>
+                      {item.category && (
+                        <span className="op-item__cat">{item.category}</span>
+                      )}
+                    </div>
+                    <div className="op-item__meta">
+                      <span className="op-item__qty">× {item.quantity}</span>
+                      <span className="op-item__price">${item.price.toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right column — Summary */}
+          <div>
+            <div className="op-summary">
+              <h3 className="op-summary__title">Order Summary</h3>
+              <div className="op-summary__rows">
+                <div className="op-summary__row">
+                  <span>Items</span><span>${order.itemsPrice.toFixed(2)}</span>
+                </div>
+                <div className="op-summary__row">
+                  <span>Shipping</span><span>${order.shippingPrice.toFixed(2)}</span>
+                </div>
+                <div className="op-summary__row">
+                  <span>Tax</span><span>${order.taxPrice.toFixed(2)}</span>
+                </div>
+                <div className="op-summary__row op-summary__row--total">
+                  <span>Total</span><span>${order.totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {order.isPaid && (
+                <button className="op-print-btn" onClick={printOrder}>
+                  🖨️ Print Order
+                </button>
+              )}
+
+              {!order.isPaid && !isAdmin && (
+                <div className="op-paypal">
+                  <p className="op-paypal__label">Pay with PayPal</p>
+                  {isPending ? (
+                    <LoadingBox />
                   ) : (
-                    <MessageBox variant="warning">Awaiting Payment</MessageBox>
+                    <PayPalButtons
+                      createOrder={createOrder}
+                      onApprove={onApprove}
+                      onError={onError}
+                    />
                   )}
-                  {!order.isPaid && !isAdmin && (
-                    <ListGroup.Item>
-                      <div className="payment-section">
-                        <h5>Pay with PayPal</h5>
-                        <div className="paypal-section">
-                          {isPending ? (
-                            <div className="loading-box">
-                              <LoadingBox />
-                            </div>
-                          ) : (
-                            <div className="paypal-buttons-container">
-                              <PayPalButtons
-                                createOrder={createOrder}
-                                onApprove={onApprove}
-                                onError={onError}
-                              />
-                            </div>
-                          )}
-                          {loadingPay && (
-                            <div className="loading-box">
-                              <LoadingBox />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </ListGroup.Item>
-                  )}
-                  {isAdmin === true && order.isPaid && !order.isDelivered && (
-                    <ListGroup.Item>
-                      {loadingDeliver && <LoadingBox />}
-                      <div className="d-grid">
-                        <Button
-                          className="go-to-btn btn-text"
-                          type="button"
-                          onClick={deliverOrderHandler}
-                        >
-                          Deliver Order
-                        </Button>
-                      </div>
-                    </ListGroup.Item>
-                  )}
-                </ListGroup>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+                  {loadingPay && <LoadingBox />}
+                </div>
+              )}
+
+              {isAdmin === true && order.isPaid && !order.isDelivered && (
+                <div className="op-deliver">
+                  {loadingDeliver && <LoadingBox />}
+                  <button className="op-deliver-btn" onClick={deliverOrderHandler}>
+                    Mark as Delivered
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

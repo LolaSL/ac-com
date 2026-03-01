@@ -141,8 +141,8 @@ const Measurement = () => {
       )}
 
       <div className="mt-4 mb-4">
-        <Link to="/" className="go-to-btn btn-text w-auto">
-          Back to Home
+        <Link to="/" className="home-btn">
+          🏠 Home
         </Link>
       </div>
     </Container>

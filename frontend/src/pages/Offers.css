@@ -1,52 +1,73 @@
 /* Offers.css */
 
-.offer-title {
+.offers-page {
+  padding-bottom: 2rem;
+}
+
+
+.offers-page .offer-title {
   color: hsl(0, 81.2%, 39.6%);
   text-shadow: 1px 1px 2px grey;
   font-weight: lighter;
   font-family: "Cedarville Cursive", cursive;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
 }
 
-.offer-desc {
+.offers-page .offer-desc {
   color: rgb(33, 110, 90);
   font-weight: lighter;
   font-family: "Cedarville Cursive", cursive;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
-/* Card animations */
-.card {
+/* Card animations — scoped to offers page only */
+.offers-page .card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   opacity: 0;
   animation: fadeInUp 0.6s ease forwards;
-  overflow: hidden; /* Prevent image overflow on zoom */
+  overflow: hidden;
+  height: 100%;
 }
 
-.card:nth-child(1) { animation-delay: 0.1s; }
-.card:nth-child(2) { animation-delay: 0.2s; }
-.card:nth-child(3) { animation-delay: 0.3s; }
-.card:nth-child(4) { animation-delay: 0.4s; }
+.offers-page .col:nth-child(1) .card { animation-delay: 0.1s; }
+.offers-page .col:nth-child(2) .card { animation-delay: 0.2s; }
+.offers-page .col:nth-child(3) .card { animation-delay: 0.3s; }
+.offers-page .col:nth-child(4) .card { animation-delay: 0.4s; }
 
-.card:hover {
-  transform: translateY(-10px);
+.offers-page .card:hover {
+  transform: translateY(-8px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-.card img {
+.offers-page .offer-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
   transition: transform 0.3s ease;
   display: block;
-  width: 100%;
-  height: auto;
 }
 
-.card:hover img {
+@media (min-width: 576px) {
+  .offers-page .offer-img {
+    height: 220px;
+  }
+}
+
+@media (min-width: 992px) {
+  .offers-page .offer-img {
+    height: 240px;
+  }
+}
+
+.offers-page .card:hover .offer-img {
   transform: scale(1.08);
 }
 
-.btn {
+.offers-page .go-to-btn {
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.btn:hover {
+.offers-page .go-to-btn:hover {
   transform: scale(1.05);
 }
 

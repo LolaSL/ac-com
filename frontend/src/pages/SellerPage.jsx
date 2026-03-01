@@ -13,7 +13,6 @@ import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import Rating from "../components/Rating";
 import { Store } from "../Store";
-import ListGroup from "react-bootstrap/ListGroup";
 import Form from "react-bootstrap/Form";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Button from "react-bootstrap/Button";
@@ -100,146 +99,154 @@ export default function SellerPage() {
   };
 
   return (
-    <div>
-      <h1 className="page-title">Seller Details</h1>
+    <div className="seller-page">
       {loading ? (
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <>
-          <div className="seller">
-            <div className="logo-container p-4">
-              <img
-                src={seller.logo}
-                alt="logo"
-                width="100"
-                height="100"
-                style={{ objectFit: "contain", borderRadius: "4px" }}
-              />
+          {/* ── Hero Card ── */}
+          <div className="sp-hero">
+            <div className="sp-hero__banner" />
+            <div className="sp-hero__body">
+              <div className="sp-hero__logo-wrap">
+                <img
+                  src={seller.logo}
+                  alt={seller.name}
+                  className="sp-hero__logo"
+                />
+              </div>
+              <div className="sp-hero__info">
+                <h1 className="sp-hero__name">{seller.name || "Seller Name"}</h1>
+                {seller.brand && (
+                  <span className="sp-hero__badge">{seller.brand}</span>
+                )}
+                <p className="sp-hero__desc">
+                  {seller.info || "No additional information available."}
+                </p>
+                <div className="sp-hero__meta">
+                  {seller.companyLink ? (
+                    <a
+                      href={seller.companyLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="sp-hero__link"
+                    >
+                      🌐 Visit Website
+                    </a>
+                  ) : (
+                    <span className="sp-hero__link sp-hero__link--disabled">
+                      🌐 Website not available
+                    </span>
+                  )}
+                  {seller.rating > 0 && (
+                    <span className="sp-hero__rating-pill">
+                      ★ {Number(seller.rating).toFixed(1)} &nbsp;·&nbsp; {seller.numReviews} review{seller.numReviews !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <h2 className="section-title p-4">{seller.name || "Seller Name"}</h2>
-            <p>Brand: {seller.brand || "Not specified"}</p>
-            <p>
-              Company website:{" "}
-              {seller.companyLink ? (
-                <a
-                  href={seller.companyLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Visit {seller.name || "Seller"}'s Website
-                </a>
-              ) : (
-                <span className="text-muted">Website not available</span>
-              )}
-            </p>
-            <p>
-              Information:{" "}
-              {seller.info || "No additional information available"}
-            </p>
           </div>
-          <div className="iframe-container">
-            <p>
-              <strong>VIDEO:</strong>
-            </p>
-            {seller.link ? (
-              <iframe
-                className="rounded"
-                src={seller.link}
-                title={`${seller.name} Product Video`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              ></iframe>
+
+          {/* ── Video ── */}
+          {seller.link && (
+            <div className="sp-section sp-video-section">
+              <h2 className="sp-section__title">📹 Product Video</h2>
+              <div className="sp-iframe-wrap">
+                <iframe
+                  src={seller.link}
+                  title={`${seller.name} Product Video`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ── Reviews ── */}
+          <div className="sp-section" ref={reviewsRef}>
+            <h2 className="sp-section__title">⭐ Customer Reviews</h2>
+            {seller.reviews && seller.reviews.length > 0 ? (
+              <div className="sp-reviews-list">
+                {seller.reviews.map((review) => (
+                  <div className="sp-review-card" key={review._id}>
+                    <div className="sp-review-card__header">
+                      <span className="sp-review-card__name">{review.name}</span>
+                      <span className="sp-review-card__date">
+                        {review.createdAt.substring(0, 10)}
+                      </span>
+                    </div>
+                    <Rating rating={review.rating} caption=" " />
+                    <p className="sp-review-card__comment">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="text-center py-4">
-                <i className="fas fa-video-slash fa-3x text-muted mb-3"></i>
-                <p className="text-muted">Video not available</p>
+              <div className="sp-no-reviews">
+                <span className="sp-no-reviews__icon">💬</span>
+                <p>No reviews yet. Be the first to share your experience!</p>
+                {!userInfo && (
+                  <MessageBox className="mt-3">
+                    Please{" "}
+                    <Link to={`/signin?redirect=/sellers/${id}`}>Sign In</Link>{" "}
+                    to write a review
+                  </MessageBox>
+                )}
               </div>
             )}
           </div>
-          <div>
-            <h2 className="section-title" ref={reviewsRef}>
-              Reviews
-            </h2>
-            <ListGroup>
-              {seller.reviews && seller.reviews.length > 0 ? (
-                seller.reviews.map((review) => (
-                  <ListGroup.Item key={review._id}>
-                    <strong>{review.name}</strong>
-                    <Rating rating={review.rating} caption=" "></Rating>
-                    <p>{review.createdAt.substring(0, 10)}</p>
-                    <p>{review.comment}</p>
-                  </ListGroup.Item>
-                ))
-              ) : (
-                <ListGroup.Item>
-                  <p className="text-muted mb-3">No reviews yet.</p>
-                  {!userInfo && (
-                    <MessageBox className="mt-3">
-                      Please{" "}
-                      <Link to={`/signin?redirect=/sellers/${id}`}>
-                        Sign In
-                      </Link>{" "}
-                      to write a review
-                    </MessageBox>
-                  )}
-                </ListGroup.Item>
-              )}
-            </ListGroup>
-            <div>
-              {userInfo ? (
-                <form onSubmit={submitHandler}>
-                  <h2 className="section-title">Write a customer review</h2>
-                  <Form.Group className="mb-3" controlId="rating">
-                    <Form.Label>Rating</Form.Label>
-                    <Form.Control
-                      as="select"
-                      value={rating}
-                      onChange={(e) => setRating(e.target.value)}
-                    >
-                      <option value="">Select...</option>
-                      <option value="1">1- Poor</option>
-                      <option value="2">2- Fair</option>
-                      <option value="3">3- Good</option>
-                      <option value="4">4- Very good</option>
-                      <option value="5">5- Excellent</option>
-                    </Form.Control>
-                  </Form.Group>
-                  <FloatingLabel
-                    controlId="floatingTextarea"
-                    label="Comments"
-                    className="mb-3"
+
+          {/* ── Write Review ── */}
+          {userInfo ? (
+            <div className="sp-section sp-review-form-section">
+              <h2 className="sp-section__title">✍️ Write a Review</h2>
+              <form onSubmit={submitHandler} className="sp-review-form">
+                <Form.Group className="mb-3" controlId="rating">
+                  <Form.Label className="sp-form-label">Your Rating</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={rating}
+                    onChange={(e) => setRating(e.target.value)}
+                    className="sp-select"
                   >
-                    <Form.Control
-                      as="textarea"
-                      placeholder="Leave a comment here"
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                    />
-                  </FloatingLabel>
-                  <div className="mb-3">
-                    <Button
-                      disabled={loadingCreateReview}
-                      className="go-to-btn btn-text"
-                      type="submit"
-                    >
-                      Submit
-                    </Button>
-                    {loadingCreateReview && <LoadingBox />}
-                  </div>
-                </form>
-              ) : seller.reviews && seller.reviews.length > 0 ? (
-                <MessageBox>
-                  Please{" "}
-                  <Link to={`/signin?redirect=/sellers/${id}`} className="my-4">
-                    Sign In
-                  </Link>{" "}
-                  to write a review
-                </MessageBox>
-              ) : null}
+                    <option value="">Select a rating…</option>
+                    <option value="1">⭐ 1 – Poor</option>
+                    <option value="2">⭐⭐ 2 – Fair</option>
+                    <option value="3">⭐⭐⭐ 3 – Good</option>
+                    <option value="4">⭐⭐⭐⭐ 4 – Very Good</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 5 – Excellent</option>
+                  </Form.Control>
+                </Form.Group>
+                <FloatingLabel controlId="floatingTextarea" label="Your comment" className="mb-3">
+                  <Form.Control
+                    as="textarea"
+                    placeholder="Leave a comment here"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    style={{ minHeight: "120px" }}
+                  />
+                </FloatingLabel>
+                <Button
+                  disabled={loadingCreateReview}
+                  className="sp-submit-btn"
+                  type="submit"
+                >
+                  {loadingCreateReview ? "Submitting…" : "Submit Review"}
+                </Button>
+                {loadingCreateReview && <LoadingBox />}
+              </form>
             </div>
-          </div>
+          ) : seller.reviews && seller.reviews.length > 0 ? (
+            <div className="sp-section">
+              <MessageBox>
+                Please{" "}
+                <Link to={`/signin?redirect=/sellers/${id}`}>Sign In</Link> to
+                write a review
+              </MessageBox>
+            </div>
+          ) : null}
         </>
       )}
     </div>

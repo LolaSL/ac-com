@@ -167,8 +167,8 @@ const AboutUs = () => {
       </article>
 
       <div className="mt-5 mb-4">
-        <Link to="/" className="go-to-btn btn-text">
-          Back to Home
+        <Link to="/" className="home-btn">
+          🏠 Home
         </Link>
       </div>
     </Container>
