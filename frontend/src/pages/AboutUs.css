@@ -1,171 +1,292 @@
-/* AboutUs Page Styles */
+/* AboutUs — scoped .au-* styles */
 
-.site-container-about {
+/* ── Page wrapper ────────────────────────────────────────── */
+.au-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding-bottom: 3rem;
+  overflow-x: hidden;
+}
+
+/* ── Hero ────────────────────────────────────────────────── */
+.au-hero {
+  background: linear-gradient(135deg, #5b6070, #2563a8);
+  border-radius: 0 0 16px 16px;
+  padding: 2.2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.au-hero__inner {
   max-width: 1200px;
-  margin: auto;
+  margin: 0 auto;
 }
 
-/* ── Hero image ──────────────────────────────────── */
-.responsive-image-about {
-  max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+.au-hero__icon {
+  font-size: 2.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.5rem;
 }
 
-/* ── Section spacing ────────────────────────────── */
-.about-section {
-  margin-top: 3rem;
-  margin-bottom: 1rem;
-}
-
-.about-section-title {
-  font-size: clamp(1.3rem, 3vw, 1.75rem);
+.au-hero__title {
+  font-size: 1.7rem;
   font-weight: 700;
-  color: #222;
-  margin-bottom: 1.5rem;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+
+.au-hero__sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+}
+
+/* ── Banner image ────────────────────────────────────────── */
+.au-banner {
+  max-width: 1200px;
+  margin: 0 auto 1.75rem;
+  padding: 0 1.25rem;
+}
+
+.au-banner__img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Inner content wrapper ───────────────────────────────── */
+.au-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ── Card base ───────────────────────────────────────────── */
+.au-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 1.75rem 1.5rem;
+  min-width: 0;
+  word-break: break-word;
+  text-align: left;
+}
+
+/* ── Intro card ──────────────────────────────────────────── */
+.au-intro {
+  margin-bottom: 2rem;
+}
+
+.au-lead {
+  font-size: 0.97rem;
+  line-height: 1.8;
+  color: #374151;
+  margin: 0 0 0.85rem;
+}
+
+.au-lead--last {
+  margin-bottom: 0;
+}
+
+/* ── Section ─────────────────────────────────────────────── */
+.au-section {
+  display: block;
+  width: 100%;
+  margin-bottom: 2.5rem;
+}
+
+.au-section__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0 0 1.25rem;
   padding-bottom: 0.5rem;
-  border-bottom: 3px solid #e63946;
-  display: inline-block;
+  border-bottom: 3px solid #2563a8;
+  display: block;
 }
 
-/* ── Intro text ───────────────────────────────── */
-.about-lead {
-  font-size: clamp(1rem, 2vw, 1.15rem);
-  line-height: 1.75;
-  color: #444;
-  text-align: justify;
-  margin-bottom: 1rem;
+/* ── Grids ───────────────────────────────────────────────── */
+.au-grid {
+  display: grid;
+  gap: 1.1rem;
 }
 
-/* ── Steps cards ──────────────────────────────── */
-.about-step-card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  position: relative;
+.au-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 
-.about-step-card:hover {
+.au-grid--6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* grid children must not overflow their cell */
+.au-grid > * {
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .au-grid--6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .au-grid--3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .au-grid--6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .au-grid--3 {
+    grid-template-columns: 1fr;
+  }
+  .au-grid--6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .au-grid--6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Step cards ──────────────────────────────────────────── */
+.au-step-card {
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.au-step-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.11);
 }
 
-/* number sits inside the flow, not absolutely positioned */
-.about-step-number {
+.au-step__number {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e63946;
+  background: linear-gradient(135deg, #a8112a, #ec133e);
   color: #fff;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   width: 28px;
   height: 28px;
   border-radius: 50%;
   margin-bottom: 0.75rem;
 }
 
-.about-step-icon {
-  font-size: 1.6rem;
-  color: #e63946;
-  margin-bottom: 0.6rem;
+.au-step__icon {
+  font-size: 1.55rem;
+  color: #2563a8;
+  margin-bottom: 0.55rem;
 }
 
-.about-step-title {
-  font-size: 1rem;
+.au-step__title {
+  font-size: 0.97rem;
   font-weight: 700;
-  color: #222;
-  margin-bottom: 0.4rem;
+  color: #1e3a5f;
+  margin: 0 0 0.4rem;
 }
 
-.about-step-text {
-  font-size: 0.88rem;
-  color: #555;
-  line-height: 1.55;
-  margin-bottom: 0;
+.au-step__text {
+  font-size: 0.87rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
 }
 
-/* ── Feature cards ────────────────────────────── */
-.about-feature-card {
-  border: none;
-  border-radius: 10px;
-  background: #f8f9fa;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ── Feature cards ───────────────────────────────────────── */
+.au-feature-card {
+  background: linear-gradient(135deg, #eff6ff, #f9fafb);
+  border: 1px solid #dbeafe;
+  transition: transform 0.18s, box-shadow 0.18s;
 }
 
-.about-feature-card:hover {
+.au-feature-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+  box-shadow: 0 5px 16px rgba(37, 99, 168, 0.13);
 }
 
-.about-feature-icon {
+.au-feature__icon {
   font-size: 1.5rem;
-  color: #0077b6;
-  margin-bottom: 0.6rem;
+  color: #ec133e;
+  margin-bottom: 0.55rem;
 }
 
-.about-feature-title {
+.au-feature__title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #222;
-  margin-bottom: 0.35rem;
+  color: #1e3a5f;
+  margin: 0 0 0.35rem;
 }
 
-.about-feature-text {
+.au-feature__text {
   font-size: 0.85rem;
-  color: #555;
-  line-height: 1.5;
-  margin-bottom: 0;
+  color: #4b5563;
+  line-height: 1.55;
+  margin: 0;
 }
 
-/* ── Audience tiles ───────────────────────────── */
-.about-audience-tile {
-  text-align: center;
-  padding: 1.1rem 0.75rem;
-  border-radius: 10px;
+/* ── Audience tiles ──────────────────────────────────────── */
+.au-audience-tile {
   background: #fff;
-  border: 1px solid #e9ecef;
-  height: 100%;
-  transition: box-shadow 0.2s ease;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  padding: 1.25rem 0.75rem;
+  transition: box-shadow 0.18s, transform 0.18s;
+  min-width: 0;
+  word-break: break-word;
 }
 
-.about-audience-tile:hover {
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+.au-audience-tile:hover {
+  box-shadow: 0 4px 16px rgba(37, 99, 168, 0.13);
+  transform: translateY(-3px);
 }
 
-.about-audience-icon {
+.au-audience__icon {
   font-size: 1.8rem;
-  color: #e63946;
+  color: #ec133e;
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.55rem;
 }
 
-.about-audience-label {
+.au-audience__label {
   font-weight: 700;
-  font-size: 0.9rem;
-  color: #222;
+  font-size: 0.88rem;
+  color: #1e3a5f;
   margin-bottom: 0.3rem;
 }
 
-.about-audience-desc {
-  font-size: 0.78rem;
-  color: #666;
+.au-audience__desc {
+  font-size: 0.77rem;
+  color: #6b7280;
   line-height: 1.4;
 }
 
-/* ── Mobile ───────────────────────────────────── */
+/* ── Home row ────────────────────────────────────────────── */
+.au-home-row {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 575px) {
-  .about-section {
-    margin-top: 2rem;
+  .au-section {
+    margin-bottom: 1.75rem;
   }
 
-  .about-audience-desc {
+  .au-audience__desc {
     display: none;
   }
 
-  .about-audience-tile {
-    padding: 0.85rem 0.4rem;
+  .au-audience-tile {
+    padding: 0.9rem 0.4rem;
   }
 }

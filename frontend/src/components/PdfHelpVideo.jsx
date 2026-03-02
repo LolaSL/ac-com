@@ -1,63 +1,65 @@
-import { useState } from "react";
-import { Modal, Button } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { FaPlayCircle, FaTimes } from "react-icons/fa";
 import "./PdfHelpVideo.css";
 
 const PdfHelpVideoModal = () => {
   const [show, setShow] = useState(false);
 
-  const handleShow = () => setShow(true);
-  const handleClose = () => setShow(false);
+  // Prevent body scroll when open
+  useEffect(() => {
+    document.body.style.overflow = show ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [show]);
 
   return (
     <>
-      <Button
-        className="go-to-btn btn-text w-auto"
-        size="sm"
-        variant="btn-outline"
-        onClick={handleShow}
-      >
+      {/* Trigger button */}
+      <button className="phv-trigger" onClick={() => setShow(true)}>
+        <FaPlayCircle className="phv-trigger__icon" />
         Learn with Video
-      </Button>
+      </button>
 
-      <Modal
-        show={show}
-        onHide={handleClose}
-        size="lg"
-        centered
-        className="pdf-help-video-modal"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title className="text-primary text-bold">
-            PDF Annotation Instruction Video
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p className="text-secondary text-bold fs-5">
-            Watch this short tutorial to learn how to annotate, edit, and
-            download your PDF file.
-          </p>
-          <div className="ratio ratio-16x9">
-            <iframe
-              width="560"
-              height="315"
-              src="https://www.youtube.com/embed/-s4pdK35YZk"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+      {/* Modal overlay */}
+      {show && (
+        <div className="phv-overlay" onClick={() => setShow(false)}>
+          <div className="phv-modal" onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className="phv-header">
+              <div className="phv-header__left">
+                <FaPlayCircle className="phv-header__icon" />
+                <h2 className="phv-header__title">PDF Annotation Tutorial</h2>
+              </div>
+              <button className="phv-close" onClick={() => setShow(false)} aria-label="Close">
+                <FaTimes />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="phv-body">
+              <p className="phv-subtitle">
+                Watch this short tutorial to learn how to annotate, edit, and download your PDF file.
+              </p>
+              <div className="phv-video-wrap">
+                <iframe
+                  src="https://www.youtube.com/embed/-s4pdK35YZk"
+                  title="PDF Annotation Instruction Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="phv-footer">
+              <button className="phv-close-btn" onClick={() => setShow(false)}>
+                Close Video
+              </button>
+            </div>
+
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            className="go-to-btn btn-text w-auto"
-            variant="btn-outline"
-            size="sm"
-            onClick={handleClose}
-          >
-            Close Video
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        </div>
+      )}
     </>
   );
 };

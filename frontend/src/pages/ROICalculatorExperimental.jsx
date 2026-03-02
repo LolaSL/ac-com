@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
 import {
-  Container,
   Row,
   Col,
   Card,
@@ -12,6 +11,7 @@ import {
   Spinner,
   Modal,
 } from "react-bootstrap";
+import { FaChartLine } from "react-icons/fa";
 import {
   BarChart,
   Bar,
@@ -1692,14 +1692,16 @@ export default function ROICalculatorExperimental() {
 
   return (
     <div className="roi-experimental-page-container">
-      <Container>
-        <div className="page-header text-center mb-5">
-          <h1 className="page-title">ROI Calculator - Experimental</h1>
-          <p className="page-subtitle">
-            Deep dive into your potential savings with AC Commerce
-          </p>
+      {/* Hero */}
+      <div className="roi-exp-hero">
+        <div className="roi-exp-hero__inner">
+          <div className="roi-exp-hero__icon"><FaChartLine /></div>
+          <h1 className="roi-exp-hero__title">ROI Calculator</h1>
+          <p className="roi-exp-hero__sub">Deep dive into your potential savings with AC Commerce.</p>
         </div>
+      </div>
 
+      <div className="roi-exp-inner">
         <Tabs
           activeKey={activeTab}
           onSelect={(k) => k && setActiveTab(k)}
@@ -2701,7 +2703,7 @@ export default function ROICalculatorExperimental() {
             track them over time!
           </Alert>
         )}
-      </Container>
+      </div>
 
       {/* Save Calculation Modal */}
       <Modal show={showSaveModal} onHide={() => setShowSaveModal(false)}>

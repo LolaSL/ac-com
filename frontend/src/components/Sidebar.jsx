@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext, useCallback } from "react";
-import { Button, Modal, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 import { Store } from "../Store.js";
@@ -43,6 +42,12 @@ const FaTrash = () => (
     fill="currentColor"
   >
     <path d="M135.2 17.7C140.9 6.8 152.6 0 165.2 0H282.8c12.6 0 24.3 6.8 30 17.7L384 80H448c6.9 0 12.5 5.6 12.5 12.5s-5.6 12.5-12.5 12.5H0C-6.9 105-12.5 99.4-12.5 92.5S-6.9 80 0 80H64L135.2 17.7zM192 256c0-4.4 3.6-8 8-8h32c4.4 0 8 3.6 8 8v160c0 4.4-3.6 8-8 8h-32c-4.4 0-8-3.6-8-8V256zm-64 0c0-4.4 3.6-8 8-8h32c4.4 0 8 3.6 8 8v160c0 4.4-3.6 8-8 8h-32c-4.4 0-8-3.6-8-8V256zm192 0c0-4.4 3.6-8 8-8h32c4.4 0 8 3.6 8 8v160c0 4.4-3.6 8-8 8h-32c-4.4 0-8-3.6-8-8V256zM56.8 208.5c-.3-4.5-4.1-7.8-8.6-7.8H8.6C3.9 200.7 0 204.6 0 209.3s3.9 8.6 8.6 8.6H48.2c4.5 0 8.3-3.3 8.6-7.8z" />
+  </svg>
+);
+
+const FaTimes = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="14" height="14" fill="currentColor">
+    <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256l105.3-105.4z"/>
   </svg>
 );
 
@@ -169,6 +174,12 @@ const Sidebar = () => {
       setError(null);
     }
   }, [isOpen, fetchSavedPdfs, fetchEngineerAnnotations]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
 
   // Ensure engineer reviews refresh if needed, but data is fetched on open
   // Removed separate useEffect for activeTab to avoid redundant fetches
@@ -406,280 +417,213 @@ const Sidebar = () => {
 
   return (
     <>
-      <Button
-        variant="primary"
-        size="sm"
-        onClick={toggleSidebar}
-        className="go-to-btn btn-text w-auto "
-      >
+      <button className="phv-trigger" onClick={toggleSidebar}>
         <FaFilePdf /> {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
-      </Button>
+      </button>
 
-      <Modal
-        show={isOpen}
-        onHide={toggleSidebar}
-        dialogClassName="custom-modal-width"
-        scrollable
-        keyboard
-      >
-        <Modal.Header closeButton>
-          <Modal.Title className="fs-6 fw-bold">Saved PDFs</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {error && <p className="text-danger">{error}</p>}
+      {isOpen && (
+        <div className="sb-overlay" onClick={toggleSidebar}>
+          <div className="sb-modal" onClick={e => e.stopPropagation()}>
 
-          {/* Tab navigation */}
-          <div className="d-flex gap-2 mb-3">
-            <Button
-              variant={
-                activeTab === "my-annotations" ? "primary" : "outline-primary"
-              }
-              className="go-to-btn btn-text w-auto"
-              size="sm"
-              onClick={() => {
-                setActiveTab("my-annotations");
-                setSelectedPdf(null);
-                setSelectedPdfFile(null);
-                setSelectedAnnotations(null);
-                setCurrentPdfType(null);
-                const container = document.getElementById("pdf-container");
-                if (container) container.innerHTML = "";
-              }}
-            >
-              My Drawings
-            </Button>
-            <Button
-              variant={
-                activeTab === "engineer-reviews" ? "primary" : "outline-primary"
-              }
-              size="sm"
-              className="go-to-btn btn-text w-auto"
-              onClick={() => {
-                setActiveTab("engineer-reviews");
-                setSelectedPdf(null);
-                setSelectedPdfFile(null);
-                setSelectedAnnotations(null);
-                setCurrentPdfType(null);
-                const container = document.getElementById("pdf-container");
-                if (container) container.innerHTML = "";
-              }}
-            >
-              Engineer Reviews
-            </Button>
-          </div>
+            {/* Header */}
+            <div className="sb-header">
+              <div className="sb-header__left">
+                <FaFilePdf />
+                <h2 className="sb-header__title">Saved PDFs</h2>
+              </div>
+              <button className="phv-close" onClick={toggleSidebar} aria-label="Close">
+                <FaTimes />
+              </button>
+            </div>
 
-          <div
-            style={{
-              width: "100%",
-              maxHeight: "82vh",
-              border: "1px solid #ccc",
-              overflow: "auto",
-              marginTop: "0.5rem",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "stretch",
-            }}
-          >
-            {/* ── LIST VIEW: shown when no PDF is open ── */}
-            {!selectedPdf && (
-              <>
-                {/* MY ANNOTATIONS TAB */}
-                {activeTab === "my-annotations" && (
+            {/* Body */}
+            <div className="sb-body">
+              {error && <div className="sb-error">{error}</div>}
+
+              {/* Tab navigation */}
+              <div className="sb-tabs">
+                <button
+                  className={`sb-tab${activeTab === "my-annotations" ? " sb-tab--active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("my-annotations");
+                    setSelectedPdf(null);
+                    setSelectedPdfFile(null);
+                    setSelectedAnnotations(null);
+                    setCurrentPdfType(null);
+                    const container = document.getElementById("pdf-container");
+                    if (container) container.innerHTML = "";
+                  }}
+                >
+                  My Drawings
+                </button>
+                <button
+                  className={`sb-tab${activeTab === "engineer-reviews" ? " sb-tab--active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("engineer-reviews");
+                    setSelectedPdf(null);
+                    setSelectedPdfFile(null);
+                    setSelectedAnnotations(null);
+                    setCurrentPdfType(null);
+                    const container = document.getElementById("pdf-container");
+                    if (container) container.innerHTML = "";
+                  }}
+                >
+                  Engineer Reviews
+                </button>
+              </div>
+
+              {/* Content area */}
+              <div className="sb-content">
+
+                {/* ── LIST VIEW ── */}
+                {!selectedPdf && (
                   <>
-                    {savedPdfs.length > 0 ? (
-                      <ListGroup className="w-100">
-                        {savedPdfs.map((pdf) => (
-                          <ListGroup.Item
-                            key={pdf._id}
-                            className="d-flex justify-content-between align-items-center pdf-drawing"
-                          >
-                            <Button
-                              variant="btn-outline w-auto"
-                              size="sm"
-                              onClick={() => viewPdfWithAnnotations(pdf)}
-                              disabled={pdf.isPaid}
-                              className="p-2 text-left go-to-btn btn-text d-flex align-items-center"
-                            >
-                              <FaFilePdf />
-                              {pdf.filename || "Untitled Document"}
-                              {pdf.isPaid && <FaLock />}
-                            </Button>
-                            <small className="text-muted">
-                              Saved: {new Date(pdf.createdAt).toLocaleString()}
-                            </small>
-                            <div className="d-flex align-items-center">
-                              <Button
-                                variant="danger"
-                                className="p-1 ms-2"
-                                onClick={() =>
-                                  handleDeletePdf(pdf._id, pdf.filename)
-                                }
-                              >
-                                <FaTrash />
-                              </Button>
-                            </div>
-                          </ListGroup.Item>
-                        ))}
-                      </ListGroup>
-                    ) : (
-                      <p className="text-danger fs-4 text-center mt-4">
-                        No saved documents yet.
-                      </p>
-                    )}
-                  </>
-                )}
-
-                {/* ENGINEER REVIEWS TAB */}
-                {activeTab === "engineer-reviews" && (
-                  <>
-                    {engineerAnnotationsLoading ? (
-                      <p className="text-muted fs-4 text-center mt-4">
-                        Loading engineer reviews...
-                      </p>
-                    ) : engineerAnnotations.length > 0 ? (
-                      <ListGroup className="w-100">
-                        {engineerAnnotations.map((annotation) => (
-                          <ListGroup.Item
-                            key={annotation._id}
-                            className="d-flex justify-content-between align-items-center pdf-drawing"
-                          >
-                            <div className="flex-grow-1">
-                              <Button
-                                variant="btn-outline w-auto"
-                                size="sm"
-                                onClick={() =>
-                                  viewEngineerAnnotationPdf(annotation)
-                                }
-                                className="p-2 text-left go-to-btn btn-text d-flex align-items-center w-100"
+                    {activeTab === "my-annotations" && (
+                      savedPdfs.length > 0 ? (
+                        <ul className="sb-list">
+                          {savedPdfs.map((pdf) => (
+                            <li key={pdf._id} className="sb-item">
+                              <button
+                                className="sb-item__open"
+                                onClick={() => viewPdfWithAnnotations(pdf)}
+                                disabled={pdf.isPaid}
                               >
                                 <FaFilePdf />
-                                <span className="ms-2">
-                                  {annotation.filename || "Untitled Document"}
-                                </span>
-                              </Button>
-                              <small className="text-muted d-block mt-1">
-                                Engineer: {annotation.engineerId?.name || "Unknown"} |{" "}
-                                Reviewed: {new Date(annotation.createdAt).toLocaleString()}
+                                <span>{pdf.filename || "Untitled Document"}</span>
+                                {pdf.isPaid && <FaLock />}
+                              </button>
+                              <small className="sb-item__date">
+                                {new Date(pdf.createdAt).toLocaleString()}
                               </small>
-                            </div>
-                          </ListGroup.Item>
-                        ))}
-                      </ListGroup>
-                    ) : (
-                      <p className="text-info fs-4 text-center mt-4">
-                        No engineer reviews yet.
-                      </p>
+                              <button
+                                className="sb-item__delete"
+                                onClick={() => handleDeletePdf(pdf._id, pdf.filename)}
+                                title="Delete"
+                              >
+                                <FaTrash />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="sb-empty sb-empty--danger">No saved documents yet.</p>
+                      )
+                    )}
+
+                    {activeTab === "engineer-reviews" && (
+                      engineerAnnotationsLoading ? (
+                        <p className="sb-empty">Loading engineer reviews…</p>
+                      ) : engineerAnnotations.length > 0 ? (
+                        <ul className="sb-list">
+                          {engineerAnnotations.map((annotation) => (
+                            <li key={annotation._id} className="sb-item">
+                              <button
+                                className="sb-item__open"
+                                onClick={() => viewEngineerAnnotationPdf(annotation)}
+                              >
+                                <FaFilePdf />
+                                <span>{annotation.filename || "Untitled Document"}</span>
+                              </button>
+                              <small className="sb-item__meta">
+                                Engineer: {annotation.engineerId?.name || "Unknown"} | Reviewed: {new Date(annotation.createdAt).toLocaleString()}
+                              </small>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="sb-empty sb-empty--info">No engineer reviews yet.</p>
+                      )
                     )}
                   </>
                 )}
-              </>
-            )}
 
-            {/* ── PDF VIEW: compact header + full canvas when a PDF is open ── */}
-            {selectedPdf && (
-              <>
-                {/* Compact "now viewing" bar */}
-                <div className="d-flex align-items-center gap-2 px-2 py-2 border-bottom bg-light">
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    className="d-flex align-items-center gap-1 flex-shrink-0"
-                    onClick={() => {
-                      setSelectedPdf(null);
-                      setSelectedPdfFile(null);
-                      setSelectedAnnotations(null);
-                      setCurrentPdfType(null);
-                      const container = document.getElementById("pdf-container");
-                      if (container) container.innerHTML = "";
-                    }}
-                  >
-                    ← Back
-                  </Button>
-                  <FaFilePdf />
-                  <span
-                    className="fw-semibold text-truncate"
-                    style={{ fontSize: "0.85rem", minWidth: 0 }}
-                  >
-                    {selectedPdf.filename || "Untitled Document"}
-                  </span>
-                  {/* Delete button — only for own drawings */}
-                  {activeTab === "my-annotations" && currentPdfType === "user" && (
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      className="p-1 ms-auto flex-shrink-0"
-                      onClick={() =>
-                        handleDeletePdf(selectedPdf._id, selectedPdf.filename)
-                      }
-                    >
-                      <FaTrash />
-                    </Button>
-                  )}
-                </div>
+                {/* ── PDF VIEW ── */}
+                {selectedPdf && (
+                  <>
+                    <div className="sb-pdfbar">
+                      <button
+                        className="sb-back"
+                        onClick={() => {
+                          setSelectedPdf(null);
+                          setSelectedPdfFile(null);
+                          setSelectedAnnotations(null);
+                          setCurrentPdfType(null);
+                          const container = document.getElementById("pdf-container");
+                          if (container) container.innerHTML = "";
+                        }}
+                      >
+                        ← Back
+                      </button>
+                      <FaFilePdf />
+                      <span className="sb-pdfbar__name">
+                        {selectedPdf.filename || "Untitled Document"}
+                      </span>
+                      {activeTab === "my-annotations" && currentPdfType === "user" && (
+                        <button
+                          className="sb-item__delete sb-pdfbar__delete"
+                          onClick={() => handleDeletePdf(selectedPdf._id, selectedPdf.filename)}
+                          title="Delete"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                    </div>
 
-                {/* SaveAsPDF — My Annotations */}
-                {activeTab === "my-annotations" && currentPdfType === "user" && (
-                  <SaveAsPDF
-                    file={selectedPdfFile}
-                    isPaid={selectedPdf?.isPaid}
-                    pdfId={selectedPdf?._id}
-                    token={token}
-                    annotations={selectedAnnotations}
-                    annotationType="user"
-                  />
+                    {activeTab === "my-annotations" && currentPdfType === "user" && (
+                      <SaveAsPDF
+                        file={selectedPdfFile}
+                        isPaid={selectedPdf?.isPaid}
+                        pdfId={selectedPdf?._id}
+                        token={token}
+                        annotations={selectedAnnotations}
+                        annotationType="user"
+                      />
+                    )}
+                    {activeTab === "engineer-reviews" && currentPdfType === "engineer" && (
+                      <SaveAsPDF
+                        file={selectedPdfFile}
+                        isPaid={false}
+                        pdfId={selectedPdf?._id}
+                        token={token}
+                        annotations={selectedAnnotations}
+                        annotationType="engineer"
+                      />
+                    )}
+
+                    {isAdmin && selectedPdfFile && (
+                      <button
+                        className="sb-hvac-btn"
+                        onClick={() => setShowHVAC((prev) => !prev)}
+                      >
+                        {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
+                      </button>
+                    )}
+                    {isAdmin && selectedPdfFile && (
+                      <div className="sb-legend">
+                        <strong>Legend:</strong>
+                        <span className="sb-legend__ducts">■ Ducts</span>
+                        <span className="sb-legend__diff">● Diffusers</span>
+                        <span className="sb-legend__refrig">— Refrigerant Lines</span>
+                      </div>
+                    )}
+
+                    <div className="sb-pdf-canvas">
+                      <div id="pdf-container" style={{ position: "relative" }}></div>
+                    </div>
+                  </>
                 )}
 
-                {/* SaveAsPDF — Engineer Reviews */}
-                {activeTab === "engineer-reviews" && currentPdfType === "engineer" && (
-                  <SaveAsPDF
-                    file={selectedPdfFile}
-                    isPaid={false}
-                    pdfId={selectedPdf?._id}
-                    token={token}
-                    annotations={selectedAnnotations}
-                    annotationType="engineer"
-                  />
-                )}
+              </div>
+            </div>
 
-                {/* HVAC toggle + legend for admins */}
-                {isAdmin && selectedPdfFile && (
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="mx-2 mt-2 mb-1"
-                    onClick={() => setShowHVAC((prev) => !prev)}
-                  >
-                    {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
-                  </Button>
-                )}
-                {isAdmin && selectedPdfFile && (
-                  <div className="px-2 mb-2" style={{ fontSize: "0.8rem" }}>
-                    <strong>Legend:</strong>
-                    <span className="ms-2" style={{ color: "orange" }}>■ Ducts</span>
-                    <span className="ms-3" style={{ color: "lime" }}>● Diffusers</span>
-                    <span className="ms-3" style={{ color: "red" }}>— Refrigerant Lines</span>
-                  </div>
-                )}
-
-                <div className="pdf-scroll-wrapper" style={{ flexGrow: 1, marginTop: "0.5rem" }}>
-                  <div id="pdf-container" style={{ position: "relative" }}></div>
-                </div>
-              </>
-            )}
+            {/* Footer */}
+            <div className="sb-footer">
+              <button className="phv-close-btn" onClick={toggleSidebar}>Close</button>
+            </div>
 
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            className="go-to-btn btn-text w-auto"
-            variant="btn-outline"
-            size="sm"
-            onClick={toggleSidebar}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        </div>
+      )}
     </>
   );
 };

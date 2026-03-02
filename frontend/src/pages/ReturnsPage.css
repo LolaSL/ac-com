@@ -1,5 +1,58 @@
-/* ReturnsPage Styles */
+/* ReturnsPage */
+.ret-page {
+  background: #f5f6fa;
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+.ret-hero {
+  background: linear-gradient(135deg, #5b6070, #2563a8);
+  border-radius: 0 0 16px 16px;
+  padding: 2.2rem 1.5rem 2rem;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 2rem;
+}
+
+.ret-hero__inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.ret-hero__icon {
+  font-size: 2.4rem;
+  margin-bottom: 0.6rem;
+  opacity: 0.92;
+}
+
+.ret-hero__title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.ret-hero__sub {
+  font-size: 1rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.ret-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  text-align: justify;
+}
+
+/* existing */
 .custom-ul {
   list-style-type: disc;
   padding-left: 1.5rem;
+  text-align: justify;
 }
+
+.ret-no-justify,
+.ret-no-justify li {
+  text-align: left;
+}
+

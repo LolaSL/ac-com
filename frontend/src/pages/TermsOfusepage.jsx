@@ -1,11 +1,18 @@
 import React from "react";
-import { Container } from "react-bootstrap";
+import { FaFileAlt } from "react-icons/fa";
 import "./TermsOfusePage.css";
 
 const TermsOfusePage = () => {
   return (
-    <Container className="my-5">
-      <h1 className="page-title">Terms of Use / Terms & Conditions</h1>
+    <div className="tou-page">
+      <div className="tou-hero">
+        <div className="tou-hero__inner">
+          <div className="tou-hero__icon"><FaFileAlt /></div>
+          <h1 className="tou-hero__title">Terms of Use</h1>
+          <p className="tou-hero__sub">Please read these terms and conditions carefully before using this website.</p>
+        </div>
+      </div>
+      <div className="tou-inner">
 
       <p className="fs-5">
         PLEASE READ THESE TERMS AND CONDITIONS CAREFULLY BEFORE USING THIS
@@ -197,7 +204,8 @@ const TermsOfusePage = () => {
         </a>
         .
       </p>
-    </Container>
+      </div>
+    </div>
   );
 };
 

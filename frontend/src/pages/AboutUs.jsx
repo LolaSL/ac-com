@@ -1,6 +1,6 @@
 import React from "react";
-import { Container, Row, Col, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { FaInfoCircle } from "react-icons/fa";
 import "./AboutUs.css";
 
 const AboutUs = () => {
@@ -80,100 +80,88 @@ const AboutUs = () => {
   ];
 
   return (
-    <Container className="site-container-about mt-4 p-4">
+    <div className="au-page">
       {/* Hero */}
-      <h1 className="page-title mb-3">About AC-Com</h1>
-      <div
-        className="responsive-image-about rounded mb-4"
-        style={{
-          backgroundImage: `url("/images/about-us.jpg")`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          width: "100%",
-          paddingTop: "40%",
-        }}
-      />
-
-      {/* Intro */}
-      <article className="about-section">
-        <p className="about-lead">
-          <strong>AC-Com Home Supply</strong> is a full-stack HVAC marketplace that combines product commerce with
-          professional-grade planning tools. Whether you're buying a mini-split, designing a
-          VRF system for a multi-room property, or getting a certified engineer to review your
-          floor plan — everything happens in one platform.
-        </p>
-        <p className="about-lead">
-          We replace the fragmented process of juggling multiple vendors, contractors, and
-          design consultants with a single, integrated workflow — from first measurement to
-          final sign-off.
-        </p>
-      </article>
-
-      {/* How It Works */}
-      <article className="about-section">
-        <h2 className="about-section-title">How It Works</h2>
-        <Row className="g-3">
-          {steps.map((s, i) => (
-            <Col key={i} xs={12} sm={6} lg={4}>
-              <Card className="about-step-card h-100">
-                <Card.Body>
-                  <div className="about-step-number">{i + 1}</div>
-                  <div className="about-step-icon">
-                    <i className={s.icon} />
-                  </div>
-                  <Card.Title className="about-step-title">{s.title}</Card.Title>
-                  <Card.Text className="about-step-text">{s.text}</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </article>
-
-      {/* Why AC-Com */}
-      <article className="about-section">
-        <h2 className="about-section-title">Why AC-Com</h2>
-        <Row className="g-3">
-          {features.map((f, i) => (
-            <Col key={i} xs={12} sm={6} lg={4}>
-              <Card className="about-feature-card h-100">
-                <Card.Body>
-                  <div className="about-feature-icon">
-                    <i className={f.icon} />
-                  </div>
-                  <Card.Title className="about-feature-title">{f.title}</Card.Title>
-                  <Card.Text className="about-feature-text">{f.text}</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </article>
-
-      {/* Who We Serve */}
-      <article className="about-section">
-        <h2 className="about-section-title">Who We Serve</h2>
-        <Row className="g-3">
-          {audiences.map((a, i) => (
-            <Col key={i} xs={6} sm={4} lg={2}>
-              <div className="about-audience-tile">
-                <i className={`${a.icon} about-audience-icon`} />
-                <div className="about-audience-label">{a.label}</div>
-                <div className="about-audience-desc">{a.desc}</div>
-              </div>
-            </Col>
-          ))}
-        </Row>
-      </article>
-
-      <div className="mt-5 mb-4">
-        <Link to="/" className="home-btn">
-          🏠 Home
-        </Link>
+      <div className="au-hero">
+        <div className="au-hero__inner">
+          <div className="au-hero__icon"><FaInfoCircle /></div>
+          <h1 className="au-hero__title">About AC-Com</h1>
+          <p className="au-hero__sub">Your complete HVAC marketplace — from first measurement to final sign-off.</p>
+        </div>
       </div>
-    </Container>
+
+      {/* Banner image */}
+      <div className="au-banner">
+        <img src="/images/about-us.jpg" alt="About AC-Com" className="au-banner__img" />
+      </div>
+
+      <div className="au-inner">
+        {/* Intro */}
+        <div className="au-card au-intro">
+          <p className="au-lead">
+            <strong>AC-Com Home Supply</strong> is a full-stack HVAC marketplace that combines product commerce with
+            professional-grade planning tools. Whether you're buying a mini-split, designing a
+            VRF system for a multi-room property, or getting a certified engineer to review your
+            floor plan — everything happens in one platform.
+          </p>
+          <p className="au-lead au-lead--last">
+            We replace the fragmented process of juggling multiple vendors, contractors, and
+            design consultants with a single, integrated workflow — from first measurement to
+            final sign-off.
+          </p>
+        </div>
+
+        {/* How It Works */}
+        <section className="au-section">
+          <h2 className="au-section__title">How It Works</h2>
+          <div className="au-grid au-grid--3">
+            {steps.map((s, i) => (
+              <div key={i} className="au-card au-step-card">
+                <div className="au-step__number">{i + 1}</div>
+                <div className="au-step__icon"><i className={s.icon} /></div>
+                <h3 className="au-step__title">{s.title}</h3>
+                <p className="au-step__text">{s.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Why AC-Com */}
+        <section className="au-section">
+          <h2 className="au-section__title">Why AC-Com</h2>
+          <div className="au-grid au-grid--3">
+            {features.map((f, i) => (
+              <div key={i} className="au-card au-feature-card">
+                <div className="au-feature__icon"><i className={f.icon} /></div>
+                <h3 className="au-feature__title">{f.title}</h3>
+                <p className="au-feature__text">{f.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Who We Serve */}
+        <section className="au-section">
+          <h2 className="au-section__title">Who We Serve</h2>
+          <div className="au-grid au-grid--6">
+            {audiences.map((a, i) => (
+              <div key={i} className="au-audience-tile">
+                <i className={`${a.icon} au-audience__icon`} />
+                <div className="au-audience__label">{a.label}</div>
+                <div className="au-audience__desc">{a.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <div className="au-home-row">
+          <Link to="/" className="home-btn">🏠 Home</Link>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default AboutUs;
 
+  

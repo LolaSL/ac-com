@@ -1,4 +1,349 @@
-.sidebar-modal .modal-body {
+/* Shared trigger button — matches PdfHelpVideo .phv-trigger */
+.phv-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(37, 99, 168, 0.3);
+  transition: opacity 0.18s, transform 0.12s;
+}
+.phv-trigger:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ── Overlay ────────────────────────────────────────────── */
+.sb-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: sbFadeIn 0.18s ease;
+}
+
+@keyframes sbFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Modal panel ────────────────────────────────────────── */
+.sb-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
+  width: 94vw;
+  max-width: 1400px;
+  min-height: 92vh;
+  max-height: 96vh;
+  display: flex;
+  flex-direction: column;
+  animation: sbSlideUp 0.22s ease;
+  overflow: hidden;
+}
+
+@keyframes sbSlideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.sb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.4rem;
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
+  border-radius: 16px 16px 0 0;
+  flex-shrink: 0;
+}
+
+.sb-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #fff;
+}
+
+.sb-header__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* ── Body ───────────────────────────────────────────────── */
+.sb-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1.1rem 1.25rem 0;
+}
+
+/* ── Error ──────────────────────────────────────────────── */
+.sb-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.88rem;
+  margin-bottom: 0.85rem;
+}
+
+/* ── Tabs ───────────────────────────────────────────────── */
+.sb-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  flex-shrink: 0;
+}
+
+.sb-tab {
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 7px;
+  background: #f5f6fa;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sb-tab:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.sb-tab--active {
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* ── Content scroll area ────────────────────────────────── */
+.sb-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── List ───────────────────────────────────────────────── */
+.sb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.12s;
+}
+
+.sb-item:last-child { border-bottom: none; }
+.sb-item:hover { background: #f9fafb; }
+
+.sb-item__open {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e3a5f;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.sb-item__open:hover:not(:disabled) { background: #eff6ff; }
+.sb-item__open:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.sb-item__date,
+.sb-item__meta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sb-item__delete {
+  background: none;
+  border: none;
+  color: #ef4444;
+  padding: 0.3rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+
+.sb-item__delete:hover { background: #fee2e2; }
+
+/* ── Empty state ────────────────────────────────────────── */
+.sb-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  font-size: 1rem;
+  color: #9ca3af;
+}
+
+.sb-empty--danger { color: #ef4444; }
+.sb-empty--info   { color: #2563a8; }
+
+/* ── PDF view bar ───────────────────────────────────────── */
+.sb-pdfbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  background: #f5f6fa;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.sb-back {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 7px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+
+.sb-back:hover { background: #eff6ff; border-color: #93c5fd; }
+
+.sb-pdfbar__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e3a5f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.sb-pdfbar__delete { margin-left: auto; }
+
+/* ── HVAC admin controls ────────────────────────────────── */
+.sb-hvac-btn {
+  margin: 0.5rem 0.85rem 0.25rem;
+  padding: 0.35rem 0.85rem;
+  border: 1.5px solid #2563a8;
+  border-radius: 7px;
+  background: #fff;
+  color: #2563a8;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+  align-self: flex-start;
+}
+
+.sb-hvac-btn:hover { background: #eff6ff; }
+
+.sb-legend {
+  padding: 0.2rem 0.85rem 0.5rem;
+  font-size: 0.8rem;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sb-legend__ducts  { color: orange;  font-weight: 600; }
+.sb-legend__diff   { color: #16a34a; font-weight: 600; }
+.sb-legend__refrig { color: #ef4444; font-weight: 600; }
+
+/* ── PDF canvas wrapper ─────────────────────────────────── */
+.sb-pdf-canvas {
+  flex: 1;
+  overflow: auto;
+  padding: 0.5rem;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+.sb-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.phv-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.phv-close:hover { background: rgba(255, 255, 255, 0.3); }
+
+.phv-close-btn {
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(135deg, #a8112a, #ec133e);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(236, 19, 62, 0.35);
+  transition: opacity 0.18s, transform 0.12s;
+}
+
+.phv-close-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+@media (max-width: 600px) {
+  .sb-modal { width: 100vw; min-height: 100dvh; border-radius: 0; }
+  .sb-header { border-radius: 0; }
+  .sb-item { flex-wrap: wrap; }
+  .sb-item__date, .sb-item__meta { width: 100%; }
+  .sb-item__open { width: 100%; }
   padding: 1.5rem;
   max-height: 80vh;
   overflow-y: auto;

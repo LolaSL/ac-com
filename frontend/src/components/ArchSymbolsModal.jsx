@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { Modal } from "react-bootstrap";
 import { Carousel } from "react-bootstrap";
+import "./ArchSymbolsModal.css";
 
 const ArchSymbolsModal = () => {
   const [show, setShow] = useState(false);
@@ -22,14 +23,9 @@ const ArchSymbolsModal = () => {
 
   return (
     <>
-      <Button
-        variant="btn-outline w-auto"
-        size="sm"
-        className=" text-center go-to-btn btn-text"
-        onClick={handleShow}
-      >
-        View Arch Symbols
-      </Button>
+      <button className="phv-trigger arch-trigger" onClick={handleShow}>
+        📐 View Arch Symbols
+      </button>
       <Modal
         show={show}
         onHide={handleClose}

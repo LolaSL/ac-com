@@ -1,14 +1,14 @@
-/* OurNetworkPage — scoped .on-* shell styles */
+/* SearchPage — scoped .srch-* shell styles */
 
 /* ── Page wrapper ────────────────────────────────────────── */
-.on-page {
+.srch-page {
   min-height: 100vh;
   background: #f5f6fa;
   padding-bottom: 3rem;
 }
 
 /* ── Hero ────────────────────────────────────────────────── */
-.on-hero {
+.srch-hero {
   background: linear-gradient(135deg, #5b6070, #2563a8);
   border-radius: 0 0 16px 16px;
   padding: 2.2rem 1.5rem 2rem;
@@ -16,49 +16,33 @@
   text-align: center;
 }
 
-.on-hero__inner {
+.srch-hero__inner {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.on-hero__icon {
+.srch-hero__icon {
   font-size: 2.4rem;
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 0.5rem;
 }
 
-.on-hero__title {
+.srch-hero__title {
   font-size: 1.7rem;
   font-weight: 700;
   color: #fff;
   margin: 0 0 0.35rem;
 }
 
-.on-hero__sub {
+.srch-hero__sub {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.78);
   margin: 0;
 }
 
 /* ── Inner content wrapper ───────────────────────────────── */
-.on-inner {
-  max-width: 1200px;
+.srch-inner {
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.25rem;
-}
-
-/* ── Home row ────────────────────────────────────────────── */
-.on-home-row {
-  margin-top: 2.5rem;
-  text-align: center;
-}
-
-/* Partners Page Hover Effect */
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
 }

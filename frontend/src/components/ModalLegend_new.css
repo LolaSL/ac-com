@@ -1,3 +1,25 @@
+/* Shared trigger button — matches PdfHelpVideo .phv-trigger */
+.phv-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(37, 99, 168, 0.3);
+  transition: opacity 0.18s, transform 0.12s;
+}
+.phv-trigger:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
 .modal-legend {
   /* No specific styles for the root, but can add if needed */
 }

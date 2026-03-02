@@ -5,8 +5,8 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { FaRulerCombined } from "react-icons/fa";
 import AnnotatorErrorBoundary from "../components/AnnotatorErrorBoundary.js";
 import Annotator from "../components/Annotator.jsx";
 import Sidebar from "../components/Sidebar.jsx";
@@ -26,9 +26,7 @@ const getToken = () => {
 };
 
 const GridItem = ({ children }) => (
-  <div className="col d-flex">
-    <div className="w-100 h-100 d-flex align-items-stretch">{children}</div>
-  </div>
+  <div className="ms-tool-item">{children}</div>
 );
 
 const Measurement = () => {
@@ -106,46 +104,46 @@ const Measurement = () => {
   };
 
   return (
-    <Container>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <h1 className="page-title">
-        Measurement Service System
-      </h1>
-      <div className="row row-cols-2 row-cols-md-4 g-3 pt-4 mt-4">
-        <GridItem>
-          <ModalLegend />
-        </GridItem>
-        <GridItem>
-          <PdfHelpVideo />
-        </GridItem>
-        <GridItem>
-          <ArchSymbolsModal />
-        </GridItem>
-        <GridItem>
-          <Sidebar savedPdfs={savedPdfs} fetchSavedPdfs={fetchSavedPdfs} />
-        </GridItem>
-        <br />
-      </div>
-
-      <AnnotatorErrorBoundary>
-        <Annotator
-          fetchSavedPdfs={fetchSavedPdfs}
-          setRoomData={setRoomData}
-          onExportToBtuCalculator={handleScrollToBtuCalculator}
-        />
-      </AnnotatorErrorBoundary>
-      {roomData && roomData.length > 0 && (
-        <div ref={btuCalculatorRef}>
-          <BtuCalculator roomData={roomData} acAnnotations={acAnnotations} />
+    <div className="ms-page">
+      {/* Hero */}
+      <div className="ms-hero">
+        <div className="ms-hero__inner">
+          <div className="ms-hero__icon"><FaRulerCombined /></div>
+          <h1 className="ms-hero__title">Measurement Service System</h1>
+          <p className="ms-hero__sub">Upload your floor plan, annotate rooms and export to BTU calculator.</p>
         </div>
-      )}
-
-      <div className="mt-4 mb-4">
-        <Link to="/" className="home-btn">
-          🏠 Home
-        </Link>
       </div>
-    </Container>
+
+      <div className="ms-inner">
+        {error && <div className="ms-alert">{error}</div>}
+
+        {/* Tool buttons grid */}
+        <div className="ms-tools-grid">
+          <GridItem><ModalLegend /></GridItem>
+          <GridItem><PdfHelpVideo /></GridItem>
+          <GridItem><ArchSymbolsModal /></GridItem>
+          <GridItem><Sidebar savedPdfs={savedPdfs} fetchSavedPdfs={fetchSavedPdfs} /></GridItem>
+        </div>
+
+        <AnnotatorErrorBoundary>
+          <Annotator
+            fetchSavedPdfs={fetchSavedPdfs}
+            setRoomData={setRoomData}
+            onExportToBtuCalculator={handleScrollToBtuCalculator}
+          />
+        </AnnotatorErrorBoundary>
+
+        {roomData && roomData.length > 0 && (
+          <div ref={btuCalculatorRef}>
+            <BtuCalculator roomData={roomData} acAnnotations={acAnnotations} />
+          </div>
+        )}
+
+        <div className="ms-home-row">
+          <Link to="/" className="home-btn">🏠 Home</Link>
+        </div>
+      </div>
+    </div>
   );
 };
 

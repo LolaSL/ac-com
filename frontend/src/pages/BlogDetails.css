@@ -40,14 +40,12 @@
 .bd-hero {
   position: relative;
   width: 100%;
-  max-height: 480px;
   overflow: hidden;
 }
 
 .bd-hero__img {
   width: 100%;
-  height: 480px;
-  object-fit: cover;
+  height: auto;
   display: block;
   transition: transform 8s ease;
 }
@@ -266,6 +264,6 @@
 
 /* Responsive */
 @media (max-width: 576px) {
-  .bd-hero__img { height: 260px; }
+  .bd-hero__img { height: auto; }
   .bd-hero { max-height: 260px; }
 }

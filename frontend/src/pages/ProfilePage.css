@@ -223,23 +223,63 @@
   margin-top: 24px;
 }
 .pp-save-btn {
-  background: linear-gradient(135deg, #1a3c5e, #2563a8) !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-  font-size: 0.9rem !important;
-  padding: 10px 28px !important;
-  box-shadow: 0 2px 8px rgba(37,99,168,0.3) !important;
-  transition: transform 0.15s, box-shadow 0.15s !important;
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 28px;
+  box-shadow: 0 2px 8px rgba(37,99,168,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
 }
 .pp-save-btn:hover:not(:disabled) {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(37,99,168,0.4) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37,99,168,0.4);
 }
-.pp-save-btn:disabled { opacity: 0.7 !important; }
+.pp-save-btn:disabled { opacity: 0.7; cursor: default; }
 
 /* ── Responsive hero ──────────────────────────────────────── */
 @media (max-width: 500px) {
   .pp-hero__body { flex-direction: column; align-items: flex-start; padding: 0 16px 20px; }
   .pp-avatar-wrap { align-self: center; }
+}
+
+/* ── Strength row ─────────────────────────────────────────── */
+.pp-strength-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ── Password match feedback ──────────────────────────────── */
+.pp-match-err {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #ef4444;
+}
+.pp-match-ok {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #22c55e;
+}
+
+/* ── Submit spinner ───────────────────────────────────────── */
+.pp-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ppSpin 0.7s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes ppSpin {
+  to { transform: rotate(360deg); }
 }

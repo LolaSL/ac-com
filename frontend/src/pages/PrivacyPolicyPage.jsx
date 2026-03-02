@@ -1,10 +1,18 @@
 import React from "react";
-import { Container } from "react-bootstrap";
+import { FaShieldAlt } from "react-icons/fa";
+import "./PrivacyPolicyPage.css";
 
 const PrivacyPolicyPage = () => {
   return (
-    <Container className="my-5">
-       <h1 className="page-title mb-4">Privacy Policy</h1>
+    <div className="prv-page">
+      <div className="prv-hero">
+        <div className="prv-hero__inner">
+          <div className="prv-hero__icon"><FaShieldAlt /></div>
+          <h1 className="prv-hero__title">Privacy Policy</h1>
+          <p className="prv-hero__sub">How we collect, use, and protect your personal information.</p>
+        </div>
+      </div>
+      <div className="prv-inner">
 
       <h4>Information We Collect</h4>
       <p className="fs-5">
@@ -75,7 +83,8 @@ const PrivacyPolicyPage = () => {
       <p className="fs-5">
         Any changes will be posted on this page. Changes apply only to information collected after the modification date. Last modified: December 9, 2025.
       </p>
-    </Container>
+      </div>
+    </div>
   );
 };
 

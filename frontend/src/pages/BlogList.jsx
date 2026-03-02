@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import Container from "react-bootstrap/Container";
+import { FaNewspaper, FaSearch } from "react-icons/fa";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
 import "./BlogList.css";
@@ -64,23 +64,31 @@ function BlogList() {
   );
 
   return (
-    <>
-      <Container fluid className="c-4">
-        <h1 className="page-title pt-4 mb-4">Blogs</h1>
-        <div className="d-flex align-items-center mt-4 mb-3">
-          <div style={{ flex: "1 1 auto", marginLeft: 16 }}>
-            <input
-              type="search"
-              className="form-control w-auto"
-              placeholder="Search blogs by subject..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Search blogs by subject"
-            />
-          </div>
+    <div className="bl-page">
+      {/* Hero */}
+      <div className="bl-hero">
+        <div className="bl-hero__inner">
+          <div className="bl-hero__icon"><FaNewspaper /></div>
+          <h1 className="bl-hero__title">Blogs</h1>
+          <p className="bl-hero__sub">Insights, tips and news from the AC Commerce team.</p>
+        </div>
+      </div>
+
+      <div className="bl-inner">
+        {/* Search */}
+        <div className="bl-search-wrap">
+          <FaSearch className="bl-search-wrap__icon" />
+          <input
+            type="search"
+            className="bl-search"
+            placeholder="Search blogs by subject..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search blogs by subject"
+          />
         </div>
 
-        <div className="blog-container pt-4 mb-4">
+        <div className="blog-container">
           {loading ? (
             <LoadingBox />
           ) : error ? (
@@ -108,13 +116,12 @@ function BlogList() {
             ))
           )}
         </div>
-      </Container>
-      <div className="mt-4 mb-4 text-center">
-        <Link to="/" className="home-btn">
-          🏠 Home
-        </Link>
+
+        <div className="bl-home-row">
+          <Link to="/" className="home-btn">🏠 Home</Link>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

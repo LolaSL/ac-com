@@ -1,5 +1,52 @@
 /* ROI Calculator Experimental Page Styles */
 
+/* ── Page wrapper ────────────────────────────────────────── */
+.roi-experimental-page-container {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding-bottom: 3rem;
+}
+
+/* ── Hero ────────────────────────────────────────────────── */
+.roi-exp-hero {
+  background: linear-gradient(135deg, #5b6070, #2563a8);
+  border-radius: 0 0 16px 16px;
+  padding: 2.2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.roi-exp-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.roi-exp-hero__icon {
+  font-size: 2.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.5rem;
+}
+
+.roi-exp-hero__title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+
+.roi-exp-hero__sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+}
+
+/* ── Inner content wrapper ───────────────────────────────── */
+.roi-exp-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
 .roi-experimental-page {
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   padding: clamp(2rem, 5vh, 4rem) 0 clamp(5rem, 10vh, 8rem) 0;

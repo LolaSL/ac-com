@@ -1,76 +1,180 @@
-/* Offers.css */
+/* Offers Page — scoped .of-* styles */
 
-.offers-page {
-  padding-bottom: 2rem;
+/* ── Page wrapper ───────────────────────────────────────── */
+.of-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding-bottom: 3rem;
 }
 
-
-.offers-page .offer-title {
-  color: hsl(0, 81.2%, 39.6%);
-  text-shadow: 1px 1px 2px grey;
-  font-weight: lighter;
-  font-family: "Cedarville Cursive", cursive;
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
+/* ── Hero ───────────────────────────────────────────────── */
+.of-hero {
+  background: linear-gradient(135deg, #5b6070, #2563a8);
+  border-radius: 0 0 16px 16px;
+  padding: 2.2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
-.offers-page .offer-desc {
-  color: rgb(33, 110, 90);
-  font-weight: lighter;
-  font-family: "Cedarville Cursive", cursive;
-  font-size: clamp(0.875rem, 2vw, 1rem);
+.of-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Card animations — scoped to offers page only */
-.offers-page .card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.of-hero__icon {
+  font-size: 2.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.5rem;
+}
+
+.of-hero__title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+
+.of-hero__sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+}
+
+/* ── Inner wrapper ──────────────────────────────────────── */
+.of-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ── Loading spinner ────────────────────────────────────── */
+.of-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.of-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(37, 99, 168, 0.2);
+  border-top-color: #2563a8;
+  border-radius: 50%;
+  animation: ofSpin 0.75s linear infinite;
+}
+
+@keyframes ofSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Cards grid ─────────────────────────────────────────── */
+.of-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .of-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .of-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Card ───────────────────────────────────────────────── */
+.of-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   opacity: 0;
   animation: fadeInUp 0.6s ease forwards;
-  overflow: hidden;
-  height: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.offers-page .col:nth-child(1) .card { animation-delay: 0.1s; }
-.offers-page .col:nth-child(2) .card { animation-delay: 0.2s; }
-.offers-page .col:nth-child(3) .card { animation-delay: 0.3s; }
-.offers-page .col:nth-child(4) .card { animation-delay: 0.4s; }
-
-.offers-page .card:hover {
+.of-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
 }
 
-.offers-page .offer-img {
+.of-grid .of-card:nth-child(1) { animation-delay: 0.1s; }
+.of-grid .of-card:nth-child(2) { animation-delay: 0.2s; }
+.of-grid .of-card:nth-child(3) { animation-delay: 0.3s; }
+.of-grid .of-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* ── Card image ─────────────────────────────────────────── */
+.of-card__img-wrap {
+  overflow: hidden;
+  height: 220px;
+}
+
+.of-card__img {
   width: 100%;
-  height: 200px;
+  height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
   display: block;
+  transition: transform 0.35s ease;
 }
 
-@media (min-width: 576px) {
-  .offers-page .offer-img {
-    height: 220px;
-  }
-}
-
-@media (min-width: 992px) {
-  .offers-page .offer-img {
-    height: 240px;
-  }
-}
-
-.offers-page .card:hover .offer-img {
+.of-card:hover .of-card__img {
   transform: scale(1.08);
 }
 
-.offers-page .go-to-btn {
-  transition: background-color 0.3s ease, transform 0.2s ease;
+/* ── Card body ──────────────────────────────────────────── */
+.of-card__body {
+  padding: 1.2rem 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
-.offers-page .go-to-btn:hover {
-  transform: scale(1.05);
+.of-card__title {
+  color: hsl(0, 81%, 39%);
+  font-weight: 400;
+  font-family: "Cedarville Cursive", cursive;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin: 0 0 0.5rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
 }
 
+.of-card__desc {
+  color: rgb(33, 110, 90);
+  font-weight: 400;
+  font-family: "Cedarville Cursive", cursive;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  margin: 0 0 1.1rem;
+  flex: 1;
+}
+
+/* ── Card CTA button ────────────────────────────────────── */
+.of-card__btn {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  background: linear-gradient(135deg, #a8112a, #ec133e);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(236, 19, 62, 0.35);
+  transition: opacity 0.18s, transform 0.12s;
+  align-self: flex-start;
+}
+
+.of-card__btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+/* ── Fade-in animation ──────────────────────────────────── */
 @keyframes fadeInUp {
   from {
     opacity: 0;

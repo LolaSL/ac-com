@@ -4,7 +4,8 @@ import { getError } from "../utils";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { Link } from "react-router-dom";
-import { Container, Row, Col, Card, Badge } from "react-bootstrap";
+import { Row, Col, Card, Badge } from "react-bootstrap";
+import { FaNetworkWired } from "react-icons/fa";
 import "./OurNetworkPage.css";
 
 const reducer = (state, action) => {
@@ -92,30 +93,17 @@ export default function OurNetworkPage() {
   }, []);
 
   return (
-    <Container className="py-5">
-      <div className="text-center mb-5">
-        <h1 className="page-title mb-3">
-          Our Network
-        </h1>
-        <p className="lead text-muted">
-          Trusted suppliers, service providers, and manufacturer partnerships
-        </p>
-        <hr className="w-25 mx-auto" />
+    <div className="on-page">
+      {/* Hero */}
+      <div className="on-hero">
+        <div className="on-hero__inner">
+          <div className="on-hero__icon"><FaNetworkWired /></div>
+          <h1 className="on-hero__title">Our Network</h1>
+          <p className="on-hero__sub">Trusted suppliers, service providers, and manufacturer partnerships.</p>
+        </div>
       </div>
 
-      <Row className="mb-5">
-        <Col lg={8} className="mx-auto text-center">
-          <p className="fs-5 mb-4">
-            Discover our comprehensive network of verified HVAC suppliers and
-            service providers, along with our strategic partnerships with
-            industry-leading manufacturers.
-          </p>
-          <p className="text-muted">
-            From local experts to global brands, we connect you with the best in
-            HVAC solutions.
-          </p>
-        </Col>
-      </Row>
+      <div className="on-inner">
 
       {/* Sellers Section */}
       <div className="mb-5">
@@ -298,11 +286,12 @@ export default function OurNetworkPage() {
         </Col>
       </Row>
 
-      <div className="text-center mt-4">
+      <div className="on-home-row">
         <Link to="/" className="home-btn">
           🏠 Home
         </Link>
       </div>
-    </Container>
+      </div>
+    </div>
   );
 }

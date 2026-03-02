@@ -7,200 +7,7 @@ import { Store } from "../Store";
 import { getError } from "../utils";
 import { toast } from "react-toastify";
 import printJS from "print-js";
-
-const styles = `
-  .op-page { min-height: 100vh; background: #f5f6fa; }
-  .op-hero {
-    background: linear-gradient(135deg, #5b6070, #2563a8);
-    border-radius: 0 0 16px 16px;
-    padding: 2.5rem 2rem 2rem;
-    color: #fff;
-    margin-bottom: 2rem;
-  }
-  .op-hero__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  .op-hero__title {
-    display: flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-  .op-hero__id {
-    font-size: 1rem;
-    opacity: 0.8;
-    font-family: monospace;
-    letter-spacing: 0.04em;
-  }
-  .op-hero__badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .op-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-  .op-badge--green { background: rgba(34,197,94,.25); border: 1px solid rgba(34,197,94,.5); }
-  .op-badge--yellow { background: rgba(234,179,8,.25); border: 1px solid rgba(234,179,8,.5); }
-  .op-badge--grey { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); }
-  .op-grid {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem 3rem;
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 1.5rem;
-    align-items: start;
-  }
-  @media(max-width:860px) { .op-grid { grid-template-columns: 1fr; } }
-  .op-card {
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.08);
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    animation: opFade 0.35s ease;
-  }
-  .op-card__title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1a2b4b;
-    margin: 0 0 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1.5px solid #f0f1f5;
-  }
-  .op-card__body { color: #444; line-height: 1.7; font-size: 0.93rem; margin: 0 0 0.5rem; }
-  .op-label { font-weight: 600; color: #1a2b4b; }
-  .op-map-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.83rem;
-    color: #2563a8;
-    text-decoration: none;
-    margin-bottom: 0.75rem;
-  }
-  .op-map-link:hover { text-decoration: underline; }
-  .op-status {
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin-top: 0.5rem;
-  }
-  .op-status--success { background: #d1fae5; color: #065f46; }
-  .op-status--warning { background: #fef3c7; color: #92400e; }
-  .op-method-badge {
-    display: inline-block;
-    background: #eff6ff;
-    color: #2563a8;
-    border-radius: 20px;
-    padding: 2px 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-  .op-items { display: flex; flex-direction: column; gap: 0.5rem; }
-  .op-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid #f0f1f5;
-  }
-  .op-item:last-child { border-bottom: none; }
-  .op-item__img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1.5px solid #e5e7eb;
-    flex-shrink: 0;
-  }
-  .op-item__info { flex: 1; min-width: 0; }
-  .op-item__name {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #1a2b4b;
-    text-decoration: none;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .op-item__name:hover { color: #2563a8; }
-  .op-item__cat { font-size: 0.78rem; color: #888; }
-  .op-item__meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-  .op-item__qty { font-size: 0.83rem; color: #666; }
-  .op-item__price { font-size: 0.95rem; font-weight: 700; color: #1a2b4b; }
-  .op-summary {
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.08);
-    padding: 1.5rem;
-    position: sticky;
-    top: 80px;
-  }
-  .op-summary__title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1a2b4b;
-    margin: 0 0 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1.5px solid #f0f1f5;
-  }
-  .op-summary__rows { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }
-  .op-summary__row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #555; }
-  .op-summary__row--total {
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: #1a2b4b;
-    padding-top: 0.5rem;
-    border-top: 1.5px solid #f0f1f5;
-    margin-top: 0.25rem;
-  }
-  .op-print-btn {
-    width: 100%;
-    padding: 10px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 10px;
-    background: #f9fafb;
-    color: #444;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-bottom: 1rem;
-  }
-  .op-print-btn:hover { background: #f0f1f5; }
-  .op-paypal { padding-top: 0.75rem; border-top: 1.5px solid #f0f1f5; margin-top: 0.5rem; }
-  .op-paypal__label { font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 0.75rem; text-align: center; }
-  .op-deliver { padding-top: 0.75rem; border-top: 1.5px solid #f0f1f5; margin-top: 0.5rem; }
-  .op-deliver-btn {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(135deg, #a8112a, #ec133e);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(236,19,62,.35);
-    transition: opacity 0.2s;
-  }
-  .op-deliver-btn:hover { opacity: 0.9; }
-  @keyframes opFade {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-`;
+import "./OrderPage.css";
 
 function printOrder() {
   const orderContainer = document.querySelector("#order-container");
@@ -544,9 +351,7 @@ export default function OrderPage() {
   }
 
   return (
-    <>
-      <style>{styles}</style>
-      <div className="op-page" id="order-container">
+    <div className="op-page" id="order-container">
         <div className="op-hero">
           <div className="op-hero__inner">
             <div className="op-hero__title">
@@ -701,6 +506,5 @@ export default function OrderPage() {
           </div>
         </div>
       </div>
-    </>
   );
 }

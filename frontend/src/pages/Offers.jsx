@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Card, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { FaTag } from "react-icons/fa";
 import "./Offers.css";
 
 export default function Offers() {
@@ -47,46 +47,44 @@ export default function Offers() {
   }, []);
 
   return (
-    <div className="offers-page container-fluid container-lg mt-5 px-3 px-md-4">
-      <h1 className="page-title text-center mb-4">Special Offers</h1>
-      {loading ? (
-        <div className="text-center">
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
+    <div className="of-page">
+      {/* Hero */}
+      <div className="of-hero">
+        <div className="of-hero__inner">
+          <div className="of-hero__icon"><FaTag /></div>
+          <h1 className="of-hero__title">Special Offers</h1>
+          <p className="of-hero__sub">Exclusive deals on HVAC units — save big today.</p>
         </div>
-      ) : (
-        <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-          {offers.map((offer, index) => (
-            <div className="col" key={index}>
-              <Card>
-                <img
-                  className="offer-img"
-                  src={offer.imageSrc}
-                  alt={offer.title}
-                />
-                <Card.Body className="d-flex flex-column">
-                  <Card.Title className="offer-title">{offer.title}</Card.Title>
-                  <Card.Text className="offer-desc flex-grow-1">
-                    {offer.description}
-                  </Card.Text>
-                  <div className="mt-auto">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="go-to-btn btn-text w-auto"
-                      as={Link}
-                      to={offer.linkTo}
-                    >
-                      {offer.linkText}
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </div>
-          ))}
-        </div>
-      )}
+      </div>
+
+      <div className="of-inner">
+        {loading ? (
+          <div className="of-spinner-wrap">
+            <div className="of-spinner" />
+          </div>
+        ) : (
+          <div className="of-grid">
+            {offers.map((offer, index) => (
+              <div className="of-card" key={index}>
+                <div className="of-card__img-wrap">
+                  <img
+                    className="of-card__img"
+                    src={offer.imageSrc}
+                    alt={offer.title}
+                  />
+                </div>
+                <div className="of-card__body">
+                  <h2 className="of-card__title">{offer.title}</h2>
+                  <p className="of-card__desc">{offer.description}</p>
+                  <Link className="of-card__btn" to={offer.linkTo}>
+                    {offer.linkText}
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

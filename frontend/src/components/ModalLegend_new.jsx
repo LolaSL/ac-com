@@ -13,14 +13,9 @@ const ModalLegend = () => {
 
   return (
     <>
-      <Button
-        className="go-to-btn btn-text w-auto"
-        size="sm"
-        variant="btn-outline"
-        onClick={handleShow}
-      >
-        Legend / Instructions
-      </Button>
+      <button className="phv-trigger" onClick={handleShow}>
+        📋 Legend / Instructions
+      </button>
       <Modal
         show={show}
         onHide={() => setShow(false)}

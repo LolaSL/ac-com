@@ -11,7 +11,8 @@ import MessageBox from "../components/MessageBox.jsx";
 import Button from "react-bootstrap/Button";
 import Product from "../components/Product.jsx";
 import { useParams } from "react-router-dom";
-import Container from "react-bootstrap/Container";
+import { FaSearch } from "react-icons/fa";
+import "./SearchPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -131,8 +132,17 @@ export default function SearchPage() {
   };
 
   return (
-    <Container fluid>
-      <div>
+    <div className="srch-page">
+      {/* Hero */}
+      <div className="srch-hero">
+        <div className="srch-hero__inner">
+          <div className="srch-hero__icon"><FaSearch /></div>
+          <h1 className="srch-hero__title">Search Products</h1>
+          <p className="srch-hero__sub">Filter by category, price, brand, rating and more.</p>
+        </div>
+      </div>
+
+      <div className="srch-inner">
         <div className="search">
           <Row className="mt-4 p-4">
             <Col md={3}>
@@ -343,6 +353,6 @@ export default function SearchPage() {
           </Row>
         </div>
       </div>
-    </Container>
+    </div>
   );
 }

@@ -1,11 +1,18 @@
 import React from "react";
-import { Container } from "react-bootstrap";
+import { FaBan } from "react-icons/fa";
 import "./CancellationPage.css";
 
 const CancellationPage = () => {
   return (
-    <Container className="my-5">
-      <h1 className="page-title mb-4">Cancellation Policy</h1>
+    <div className="cnc-page">
+      <div className="cnc-hero">
+        <div className="cnc-hero__inner">
+          <div className="cnc-hero__icon"><FaBan /></div>
+          <h1 className="cnc-hero__title">Cancellation Policy</h1>
+          <p className="cnc-hero__sub">We process orders quickly — here's what you need to know about cancellations.</p>
+        </div>
+      </div>
+      <div className="cnc-inner">
 
       <p className="fs-5">
         At AC Com Home Supply, we understand that sometimes plans change. Any
@@ -36,7 +43,8 @@ const CancellationPage = () => {
         We encourage you to double-check your order details before placing an
         order to avoid delays or additional fees.
       </p>
-    </Container>
+      </div>
+    </div>
   );
 };
 

@@ -1,11 +1,18 @@
 import React from "react";
-import { Container } from "react-bootstrap";
+import { FaTruck } from "react-icons/fa";
 import "./ShipMentPage.css";
 
 const ShipMentPage = () => {
   return (
-    <Container className="my-5">
-      <h1 className="page-title">Shipping, Tax & Delivery</h1>
+    <div className="shp-page">
+      <div className="shp-hero">
+        <div className="shp-hero__inner">
+          <div className="shp-hero__icon"><FaTruck /></div>
+          <h1 className="shp-hero__title">Shipping, Tax &amp; Delivery</h1>
+          <p className="shp-hero__sub">Everything you need to know about shipping, taxes, and delivery options.</p>
+        </div>
+      </div>
+      <div className="shp-inner">
 
       <p className="fs-5">
         We’ve made shipping simple for all our air conditioners, outdoor units,
@@ -103,7 +110,8 @@ const ShipMentPage = () => {
         available by prior arrangement. Once an order has shipped, it cannot be
         canceled.
       </p>
-    </Container>
+      </div>
+    </div>
   );
 };
 

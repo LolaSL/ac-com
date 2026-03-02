@@ -1,164 +1,302 @@
-/* ContactPage Styles */
+/* ContactPage — scoped .ct-* styles */
 
-/* Deprecated: now uses .page-title class */
-h1.contacts-title {
-  /* Removed old styling */
+/* ── Page wrapper ────────────────────────────────────────── */
+.ct-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding-bottom: 3rem;
 }
 
-.contact-form {
-  max-width: 1200px;
-  width: 90%;
-  margin: 20px auto;
-  padding: 20px;
-  border-radius: 8px;
-  background: #f8f9fa;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.contact-form input,
-.contact-form textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  box-sizing: border-box;
-}
-
-.contact-form button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background-color: #ec2222;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  text-transform: uppercase;
-}
-
-.contact-form button:hover {
-  background-color: grey;
-}
-
-.contact-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 20px 0;
-  padding: 0;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.contact-item i {
-  width: 24px;
-  height: 24px;
+/* ── Hero ────────────────────────────────────────────────── */
+.ct-hero {
+  background: linear-gradient(135deg, #5b6070, #2563a8);
+  border-radius: 0 0 16px 16px;
+  padding: 2.2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
   text-align: center;
-  font-size: 18px;
 }
 
-.contact-item a {
-  text-decoration: none;
-  color: white;
-}
-
-.contact-item a:hover {
-  color: #ccc;
-}
-
-.contact-item .fa-phone-volume {
-  font-size: 16px;
-}
-
-.secondary-item {
-  display: flex;
-  align-items: center;
-  margin: 0 20px;
-  padding: 10px;
-}
-
-.secondary-item i {
-  font-size: 3.2rem;
-  margin-right: 10px;
-  color: #00bfff;
-}
-
-.secondary-item p {
-  margin: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.fa-map-marker-alt,
-.fa-phone-alt,
-.fa-envelope {
-  font-size: 30px;
-}
-
-.responsive-image-contact {
-  min-width: 90%;
-  max-width: 300px;
-  height: auto;
-  display: block;
+.ct-hero__inner {
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-@media (max-width: 1480px) {
-  .responsive-image-contact {
-    max-width: 100%;
-  }
+.ct-hero__icon {
+  font-size: 2.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.5rem;
+}
 
-  .contact-form {
-    width: 100%;
-    padding: 10px;
+.ct-hero__title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+
+.ct-hero__sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+}
+
+/* ── Banner image ────────────────────────────────────────── */
+.ct-banner {
+  max-width: 1200px;
+  margin: 0 auto 1.75rem;
+  padding: 0 1.25rem;
+}
+
+.ct-banner__img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Two-column layout ───────────────────────────────────── */
+.ct-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+@media (max-width: 860px) {
+  .ct-layout {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 768px) {
-  .responsive-image-contact {
-    max-width: 90%;
-  }
+/* ── Alert banners ───────────────────────────────────────── */
+.ct-alert {
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1.1rem;
+}
 
-  .contact-form {
-    width: 95%;
-    padding: 15px;
-  }
+.ct-alert--success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
 
-  .secondary-item {
-    margin: 10px 0;
-  }
+.ct-alert--error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
 
-  .secondary-item p {
-    text-align: center;
-  }
+/* ── Form card ───────────────────────────────────────────── */
+.ct-form {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 1.75rem 1.5rem;
+}
 
-  .secondary-item i {
-    font-size: 2.2rem;
-    margin-right: 10px;
+/* ── Input grid ──────────────────────────────────────────── */
+.ct-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+}
+
+@media (max-width: 540px) {
+  .ct-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 480px) {
-  .responsive-image-contact {
-    max-width: 100%;
-  }
-
-  .contact-form {
-    width: 100%;
-    padding: 10px;
-  }
+/* ── Field ───────────────────────────────────────────────── */
+.ct-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-@media (max-width: 768px) {
-  .responsive-image-contact {
-    max-width: 90%;
-  }
+.ct-field--full {
+  grid-column: 1 / -1;
+}
 
-  .contact-info {
-    display: block;
-    text-align: center;
-  }
+/* ── Label ───────────────────────────────────────────────── */
+.ct-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+
+.ct-label__icon {
+  margin-right: 6px;
+  color: #2563a8;
+}
+
+/* ── Input / Select / Textarea ───────────────────────────── */
+.ct-input {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #1f2937;
+  background: #fff;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ct-input:focus {
+  border-color: #2563a8;
+  box-shadow: 0 0 0 3px rgba(37, 99, 168, 0.15);
+}
+
+.ct-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* ── Submit button ───────────────────────────────────────── */
+.ct-submit {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #a8112a, #ec133e);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(236, 19, 62, 0.35);
+  transition: opacity 0.18s, transform 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.ct-submit:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.ct-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.ct-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ctSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ctSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Info column cards ───────────────────────────────────── */
+.ct-info-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 1.4rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.ct-info-card--blue {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1px solid #bfdbfe;
+}
+
+.ct-info-card__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #2563a8;
+  margin: 0 0 1rem;
+}
+
+/* ── Info items ──────────────────────────────────────────── */
+.ct-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.ct-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.ct-info-item__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563a8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.ct-info-item__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.ct-info-item__value {
+  font-size: 0.88rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+/* ── Links ───────────────────────────────────────────────── */
+.ct-link {
+  color: #2563a8;
+  text-decoration: none;
+}
+
+.ct-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Quick links ─────────────────────────────────────────── */
+.ct-quick-link {
+  display: block;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(37, 99, 168, 0.08);
+  color: #1e3a5f;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  transition: background 0.15s;
+}
+
+.ct-quick-link:last-child {
+  margin-bottom: 0;
+}
+
+.ct-quick-link:hover {
+  background: rgba(37, 99, 168, 0.16);
 }

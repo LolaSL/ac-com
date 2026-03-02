@@ -1,5 +1,94 @@
 /* BlogList Page Styles */
 
+/* ── Page wrapper ───────────────────────────────────────── */
+.bl-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding-bottom: 3rem;
+}
+
+/* ── Hero ───────────────────────────────────────────────── */
+.bl-hero {
+  background: linear-gradient(135deg, #5b6070, #2563a8);
+  border-radius: 0 0 16px 16px;
+  padding: 2.2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.bl-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bl-hero__icon {
+  font-size: 2.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.5rem;
+}
+
+.bl-hero__title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+
+.bl-hero__sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+}
+
+/* ── Inner content wrapper ──────────────────────────────── */
+.bl-inner {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ── Search ─────────────────────────────────────────────── */
+.bl-search-wrap {
+  position: relative;
+  max-width: 420px;
+  margin-bottom: 1.75rem;
+}
+
+.bl-search-wrap__icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.bl-search {
+  width: 100%;
+  padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #1f2937;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-sizing: border-box;
+}
+
+.bl-search:focus {
+  border-color: #2563a8;
+  box-shadow: 0 0 0 3px rgba(37, 99, 168, 0.15);
+}
+
+/* ── Home row ───────────────────────────────────────────── */
+.bl-home-row {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+/* ── Blog grid ──────────────────────────────────────────── */
 .blog-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -64,16 +153,21 @@
 
 .blog-link {
   display: inline-block;
-  padding: 8px 15px;
-  background: #ec2222;
-  color: white;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #a8112a, #ec133e);
+  color: #fff;
   text-decoration: none;
-  font-weight: bold;
-  transition: background 0.3s;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(236, 19, 62, 0.35);
+  transition: opacity 0.18s, transform 0.12s;
 }
 
 .blog-link:hover {
-  background: grey;
+  opacity: 0.9;
+  transform: translateY(-1px);
+  color: #fff;
 }
 
 @media (max-width: 768px) {

@@ -1,7 +1,5 @@
 import React, { useContext, useReducer, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
 import { Store } from '../Store';
 import { toast } from 'react-toastify';
 import { getError } from '../utils';
@@ -134,18 +132,18 @@ export default function ProfilePage() {
         <div className="pp-card">
           <h2 className="pp-card__title">&#9999;&#65039; Personal Information</h2>
           <div className="pp-grid">
-            <Form.Group controlId="ppName">
-              <Form.Label className="pp-label"><FaUser style={{ marginRight: 5 }} />Full Name</Form.Label>
-              <Form.Control value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" className="pp-input" required />
-            </Form.Group>
-            <Form.Group controlId="ppEmail">
-              <Form.Label className="pp-label"><FaEnvelope style={{ marginRight: 5 }} />Email Address</Form.Label>
-              <Form.Control type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="pp-input" required />
-            </Form.Group>
-            <Form.Group controlId="ppPhone">
-              <Form.Label className="pp-label"><FaPhone style={{ marginRight: 5 }} />Phone Number</Form.Label>
-              <Form.Control type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+1 (555) 123-4567" className="pp-input" />
-            </Form.Group>
+            <div>
+              <label className="pp-label" htmlFor="ppName"><FaUser style={{ marginRight: 5 }} />Full Name</label>
+              <input id="ppName" value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" className="pp-input" required />
+            </div>
+            <div>
+              <label className="pp-label" htmlFor="ppEmail"><FaEnvelope style={{ marginRight: 5 }} />Email Address</label>
+              <input id="ppEmail" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="pp-input" required />
+            </div>
+            <div>
+              <label className="pp-label" htmlFor="ppPhone"><FaPhone style={{ marginRight: 5 }} />Phone Number</label>
+              <input id="ppPhone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+1 (555) 123-4567" className="pp-input" />
+            </div>
           </div>
         </div>
 
@@ -155,42 +153,42 @@ export default function ProfilePage() {
           </button>
           {showPwSection && (
             <div className="pp-grid">
-              <Form.Group controlId="ppPassword">
-                <Form.Label className="pp-label">New Password</Form.Label>
+              <div>
+                <label className="pp-label" htmlFor="ppPassword">New Password</label>
                 <div className="pp-input-wrap">
-                  <Form.Control type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Leave blank to keep current" className="pp-input" style={{ paddingRight: 38 }} />
+                  <input id="ppPassword" type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Leave blank to keep current" className="pp-input" style={{ paddingRight: 38 }} />
                   <button type="button" className="pp-eye-btn" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
                 {password && (
-                  <div className="d-flex align-items-center gap-2 mt-2">
+                  <div className="pp-strength-row">
                     <div className="pp-strength-bar">
                       <div className="pp-strength-fill" style={{ width: strength.pct + '%', background: strength.color }} />
                     </div>
                     <small style={{ color: strength.color, minWidth: 50, fontWeight: 600 }}>{strength.label}</small>
                   </div>
                 )}
-              </Form.Group>
-              <Form.Group controlId="ppConfirmPassword">
-                <Form.Label className="pp-label">Confirm Password</Form.Label>
+              </div>
+              <div>
+                <label className="pp-label" htmlFor="ppConfirmPassword">Confirm Password</label>
                 <div className="pp-input-wrap">
-                  <Form.Control type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat new password" className="pp-input" style={{ paddingRight: 38 }} />
+                  <input id="ppConfirmPassword" type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat new password" className="pp-input" style={{ paddingRight: 38 }} />
                   <button type="button" className="pp-eye-btn" onClick={() => setShowConfirm(!showConfirm)}>
                     {showConfirm ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
-                {confirmPassword && password !== confirmPassword && <small className="text-danger d-block mt-1">Passwords do not match</small>}
-                {confirmPassword && password === confirmPassword && password && <small className="text-success d-block mt-1">&#10003; Passwords match</small>}
-              </Form.Group>
+                {confirmPassword && password !== confirmPassword && <small className="pp-match-err">Passwords do not match</small>}
+                {confirmPassword && password === confirmPassword && password && <small className="pp-match-ok">&#10003; Passwords match</small>}
+              </div>
             </div>
           )}
         </div>
 
         <div className="pp-footer">
-          <Button type="submit" disabled={loadingUpdate} className="pp-save-btn">
-            {loadingUpdate ? <><span className="spinner-border spinner-border-sm me-2" />Saving…</> : '💾 Save Changes'}
-          </Button>
+          <button type="submit" disabled={loadingUpdate} className="pp-save-btn">
+            {loadingUpdate ? <><span className="pp-spinner" />Saving…</> : '💾 Save Changes'}
+          </button>
         </div>
       </form>
     </div>

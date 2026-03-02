@@ -334,23 +334,23 @@ useEffect(() => {
               ? condensersForDisplay
                   .map(
                     (cond, index) => `
-            <tr style="background-color: #f0f8ff;">
-              <td style="font-weight: bold; color: #007bff;">${
+            <tr style="background-color: #eff6ff;">
+              <td style="font-weight: 700; color: #2563a8;">${
                 cond?.flatName
                   ? `${cond.flatName} Condenser`
                   : condensersForDisplay.length > 1
                   ? `Condenser ${index + 1}`
                   : "Condenser"
               }</td>
-              <td style="font-weight: bold; color: #007bff;">
+              <td style="font-weight: 700; color: #2563a8;">
                 ${condenserBtus[index].toLocaleString()} BTU
               </td>
-              <td style="font-weight: bold; color: #007bff;">${
+              <td style="font-weight: 700; color: #2563a8;">${
                 cond?.model || cond?.name || ""
               }</td>
-              <td style="font-weight: bold;">${cond?.btu || ""}</td>
-              <td style="font-weight: bold; color: ${
-                condenserSizingStatus === "custom" ? "#ff8c00" : "#007bff"
+              <td style="font-weight: 700;">${cond?.btu || ""}</td>
+              <td style="font-weight: 700; color: ${
+                condenserSizingStatus === "custom" ? "#d97706" : "#2563a8"
               };">${
                       cond?.price > 0
                         ? `$${
@@ -383,7 +383,7 @@ useEffect(() => {
             }</strong></td>
           </tr>
           <tr class="cooling-load-row">
-            <td colspan="5" style="color: #007bff; font-weight: bold; text-align: center;">
+            <td colspan="5" style="color: #1e40af; font-weight: bold; text-align: center;">
               Total Cooling Load: ${displayValue} ${selectedUnit}
             </td>
           </tr>
@@ -395,27 +395,27 @@ useEffect(() => {
     if (showCondenser && condenser) {
       // Show condenser sizing status
       let statusText = "";
-      let statusColor = "#007bff";
+      let statusColor = "#2563a8";
 
       if (condenserSizingStatus === "perfect") {
         statusText = "✓ Perfect Match";
-        statusColor = "#28a745";
+        statusColor = "#16a34a";
       } else if (condenserSizingStatus === "oversized") {
         statusText = "📈 Slightly Oversized";
-        statusColor = "#17a2b8";
+        statusColor = "#2563a8";
       } else if (condenserSizingStatus === "undersized") {
         statusText = "⚠️ Slightly Undersized";
-        statusColor = "#ffc107";
+        statusColor = "#d97706";
       } else if (condenserSizingStatus === "custom") {
         statusText = "🔧 Custom Solution Required";
-        statusColor = "#ff8c00";
+        statusColor = "#dc2626";
       }
 
       const condenserStatusRow = `
-      <tr class="text-center" style="background-color: #f8f9fa;">
-        <td colspan="5" style="color: ${statusColor}; font-weight: bold;">
+      <tr class="text-center" style="background-color: #eff6ff;">
+        <td colspan="5" style="color: ${statusColor}; font-weight: 700; padding: 10px;">
           <strong>Condenser Status: ${statusText}</strong><br/>
-          <small>${condenser ? `${condenser.name} - ${condenser.btu} BTU` : "Estimated condenser"}</small>
+          <small style="color:#6b7280;">${condenser ? `${condenser.name} - ${condenser.btu} BTU` : "Estimated condenser"}</small>
         </td>
       </tr>
     `;
@@ -429,76 +429,85 @@ useEffect(() => {
     printJS({
       printable: tableHtml,
       type: "raw-html",
-      header: "<h2>Product List</h2>",
+      header: null,
       css: "../index.css",
       style: `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f5f6fa; }
         .print-container {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          max-width: 900px;
-          margin: 0 auto;
-          padding: 20px;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-          border-radius: 10px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          max-width: 960px;
+          margin: 24px auto;
+          padding: 0 0 24px;
+          background: #fff;
+          border-radius: 14px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+          overflow: hidden;
         }
-        h1 {
+        .print-container > h1 {
+          background: linear-gradient(135deg, #5b6070, #2563a8);
+          color: #fff;
           text-align: center;
-          color: #007bff;
-          margin-bottom: 20px;
-          font-size: 2.5em;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+          padding: 1.4rem 1rem;
+          font-size: 1.5rem;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          margin: 0;
+          border-radius: 14px 14px 0 0;
         }
         .quote-table {
-          width: 100%;
+          width: calc(100% - 2rem);
+          margin: 1.25rem 1rem 0;
           border-collapse: collapse;
-          border-radius: 8px;
+          border-radius: 10px;
           overflow: hidden;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-          margin: 0 auto;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.07);
         }
         th {
-          background: linear-gradient(135deg, #007bff, #0056b3);
-          color: white;
-          padding: 15px;
-          font-weight: bold;
+          background: linear-gradient(135deg, #1a3c5e, #2563a8);
+          color: #fff;
+          padding: 12px 14px;
+          font-size: 0.8rem;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.06em;
+          text-align: center;
         }
         td {
-          padding: 12px;
+          padding: 10px 14px;
           text-align: center;
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid #f3f4f6;
+          font-size: 0.88rem;
+          color: #1f2937;
         }
         tbody tr:nth-child(even) {
-          background: #f8f9fa;
+          background: #f9fafb;
         }
         tbody tr:hover {
-          background: #e9ecef;
+          background: #eff6ff;
         }
-        .total-row {
-          background: linear-gradient(135deg, #dc3545, #c82333);
-          color: teal;
-          font-weight: bold;
+        .total-row td {
+          background: linear-gradient(135deg, #a8112a, #ec133e);
+          color: #fff !important;
+          font-weight: 700;
+          font-size: 0.9rem;
         }
-        .cooling-load-row {
-          background: #fff3cd;
-          border-top: 2px solid #ffc107;
-        }
-        .bg-info {
-          background: #cce5ff !important;
-        }
-        .total-results {
-          font-weight: bold;
+        .cooling-load-row td {
+          background: #dbeafe;
+          color: #1e40af;
+          font-weight: 700;
+          text-align: center;
+          border-top: 2px solid #2563a8;
         }
         .flat-section-header td {
-          background: linear-gradient(135deg, #0056b3, #003d82);
-          color: white;
-          font-weight: bold;
-          font-size: 1em;
+          background: linear-gradient(135deg, #1a3c5e, #2563a8);
+          color: #fff;
+          font-weight: 700;
+          font-size: 0.85rem;
           text-align: left;
-          padding: 8px 12px;
-          letter-spacing: 0.5px;
-          border-top: 3px solid #ffc107;
+          padding: 8px 14px;
+          letter-spacing: 0.04em;
+          border-top: 3px solid #ec133e;
         }
       `,
     });
