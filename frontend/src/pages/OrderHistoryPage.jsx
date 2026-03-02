@@ -7,7 +7,8 @@ import { Store } from "../Store.js";
 import { getError } from "../utils";
 import Button from "react-bootstrap/esm/Button";
 import { Link, useLocation } from "react-router-dom";
-import { Container, Table } from "react-bootstrap";
+import { Table } from "react-bootstrap";
+import { FaHistory } from "react-icons/fa";
 import "./OrderHistoryPage.css";
 
 const reducer = (state, action) => {
@@ -64,8 +65,15 @@ export default function OrderHistoryPage() {
   }, [userInfo, currentPage, token]);
 
   return (
-    <Container className="provider-container">
-      <h1 className="page-title">Order History</h1>
+    <div className="oh-page">
+      <div className="oh-hero">
+        <div className="oh-hero__inner">
+          <div className="oh-hero__icon"><FaHistory /></div>
+          <h1 className="oh-hero__title">Order History</h1>
+          <p className="oh-hero__sub">Track and manage all your past orders.</p>
+        </div>
+      </div>
+      <div className="oh-inner">
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -166,6 +174,7 @@ export default function OrderHistoryPage() {
           </div>
         </>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }

@@ -43,7 +43,7 @@ export default function HomeBannerPage() {
         "Upload floor plans and receive professional AC unit annotations, BTU calculations, and installation specifications instantly.",
       imageSrc: "/images/floor-plan.jpg",
       linkText: "Try Design Tools",
-      linkTo: "/uploadfile",
+      linkTo: "/measurement",
     },
     {
       title: "Industry-Leading Partnerships",
@@ -126,7 +126,7 @@ export default function HomeBannerPage() {
 
     // Other known routes
     const { title, recipientType } = notification;
-    if (title === 'Get A Quote') return userInfo || adminInfo || serviceProviderInfo ? '/uploadfile' : '/signin?redirect=/uploadfile';
+    if (title === 'Get A Quote') return userInfo || adminInfo || serviceProviderInfo ? '/measurement' : '/signin?redirect=/measurement';
     if (title === 'Discount Offer') return '/offers';
     if (recipientType === 'serviceProvider') return '/serviceprovider/messages';
     return null;
@@ -148,7 +148,7 @@ export default function HomeBannerPage() {
     const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
 
     if (requiresLogin && !isLoggedIn) {
-      navigate("/signin?redirect=/uploadfile");
+      navigate("/signin?redirect=/measurement");
     } else {
       navigate(banner.linkTo);
     }

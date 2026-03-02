@@ -1,0 +1,66 @@
+.nf-page {
+  background: #f5f6fa;
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+.nf-hero {
+  background: linear-gradient(135deg, #5b6070, #2563a8);
+  padding: 3rem 1.5rem 2.5rem;
+  border-radius: 0 0 16px 16px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 2.5rem;
+}
+
+.nf-hero__inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.nf-hero__icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.92;
+}
+
+.nf-hero__title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.nf-hero__sub {
+  font-size: 1.05rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.nf-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.nf-message {
+  font-size: 1.05rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.nf-home-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #2563a8, #1e4d8c);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.nf-home-btn:hover {
+  opacity: 0.88;
+  color: #fff;
+}

@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import {
-  Container,
   Table,
   Button,
   Form,
@@ -16,8 +15,9 @@ import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { FaEdit, FaTrash, FaSearch, FaUsers } from "react-icons/fa";
 import "./UserListPage.css";
+import "./AdminHero.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -153,14 +153,16 @@ export default function UserListPage() {
   };
 
   return (
-    <Container className="admin-page-container">
-      <Row className="align-items-center mb-4">
-        <Col>
-          <h1 className="page-title">Users Management</h1>
-        </Col>
-      </Row>
-
-      <Row className="mb-4 g-3">
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaUsers /></div>
+          <h1 className="adm-hero__title">Users Management</h1>
+          <p className="adm-hero__sub">Manage registered users, roles and account details.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <Row className="mb-4 g-3">
         <Col md={6}>
           <InputGroup className="admin-search-box">
             <InputGroup.Text className="admin-search-icon">
@@ -285,6 +287,7 @@ export default function UserListPage() {
           </div>
       </>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }

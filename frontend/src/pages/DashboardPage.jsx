@@ -5,7 +5,9 @@ import Notifications from "../components/Notifications.jsx";
 import MessagesServiceProviders from "../components/MessagesServiceProviders.jsx";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store";
+import { FaTachometerAlt } from "react-icons/fa";
 import "./DashboardPage.css";
+import "./AdminHero.css";
 
 const NAV_ITEMS = [
   { key: "Users Product Sales",     label: "Users & Sales",       icon: "fas fa-chart-bar" },
@@ -48,7 +50,15 @@ function Dashboard() {
   const activeLabel = NAV_ITEMS.find((i) => i.key === activeComponent)?.label || "Menu";
 
   return (
-    <div className="db-container">
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaTachometerAlt /></div>
+          <h1 className="adm-hero__title">Admin Dashboard</h1>
+          <p className="adm-hero__sub">Manage users, sales, service providers and notifications.</p>
+        </div>
+      </div>
+      <div className="db-container">
 
       {/* Mobile toggle */}
       <div className="db-mobile-toggle d-md-none">
@@ -104,6 +114,7 @@ function Dashboard() {
       <main className="db-main">
         {renderComponent()}
       </main>
+    </div>
     </div>
   );
 }

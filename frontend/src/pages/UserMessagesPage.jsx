@@ -6,7 +6,8 @@ import MessageBox from "../components/MessageBox.jsx";
 import { Store } from "../Store.js";
 import { getError } from "../utils";
 import "./UserMessagesPage.css";
-import { Container, Table, Badge } from "react-bootstrap";
+import { Table, Badge } from "react-bootstrap";
+import { FaEnvelope } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -89,8 +90,15 @@ export default function UserMessagesPage() {
   };
 
   return (
-    <Container className="provider-container my-5">
-      <h1 className="page-title">Order Status Messages</h1>
+    <div className="umsg-page">
+      <div className="umsg-hero">
+        <div className="umsg-hero__inner">
+          <div className="umsg-hero__icon"><FaEnvelope /></div>
+          <h1 className="umsg-hero__title">Order Messages</h1>
+          <p className="umsg-hero__sub">View status updates and messages for your orders.</p>
+        </div>
+      </div>
+      <div className="umsg-inner">
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -175,6 +183,7 @@ export default function UserMessagesPage() {
           )}
         </>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }

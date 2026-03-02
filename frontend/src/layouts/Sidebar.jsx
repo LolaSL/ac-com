@@ -35,7 +35,7 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
     { path: "/about-us", label: "About Us" },
     { path: "/sellers", label: "Our Network" },
     { type: "categories", label: "Categories" }, // Categories marker
-    { path: "/uploadfile", label: "Get A Quote" },
+    { path: "/measurement", label: "Get A Quote" },
     { path: "/roi-calculator", label: "ROI Calculator" },
     { path: "/offers", label: "Offers" },
     { path: "/shipment", label: "Shipment & Delivery" },
@@ -112,12 +112,12 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
                   to={item.path === "/roi-calculator" ? "#" : item.path}
                   className="nav-link-side fw-bold"
                   onClick={(e) => {
-                    if (item.path === "/uploadfile") {
+                    if (item.path === "/measurement") {
                       e.preventDefault();
                       if (!userInfo) {
-                        navigate(`/signin?redirect=/uploadfile`);
+                        navigate(`/signin?redirect=/measurement`);
                       } else {
-                        navigate("/uploadfile");
+                        navigate("/measurement");
                       }
                       setSidebarIsOpen(false);
                     } else if (item.path === "/roi-calculator") {

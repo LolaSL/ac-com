@@ -65,6 +65,25 @@ export default function SellerPage() {
     fetchData();
   }, [id]);
 
+  const handleCompanyLinkClick = async (e) => {
+    e.preventDefault();
+    // Build URL with UTM params so seller's analytics shows AC Commerce as traffic source
+    const url = new URL(seller.companyLink);
+    url.searchParams.set('utm_source', 'accommerce');
+    url.searchParams.set('utm_medium', 'referral');
+    url.searchParams.set('utm_campaign', seller.referralCode || seller._id);
+    // Open immediately (synchronous) so popup blockers don't interfere
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+    // Track in background after navigation
+    try {
+      await axios.post(`/api/sellers/${seller._id}/track-click`, {
+        userId: userInfo?._id || null,
+      });
+    } catch (_) {
+      // fire-and-forget — don't block the user if tracking fails
+    }
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!comment || !rating) {
@@ -129,6 +148,7 @@ export default function SellerPage() {
                   {seller.companyLink ? (
                     <a
                       href={seller.companyLink}
+                      onClick={handleCompanyLinkClick}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="sp-hero__link"

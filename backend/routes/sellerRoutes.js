@@ -130,10 +130,11 @@ sellerRouter.put(
 
 sellerRouter.get(
   "/all-referral-stats",
+  isAuth,
+  isAdmin,
   expressAsyncHandler(async (req, res) => {
     try {
       const sellers = await Seller.find({});
-      console.log(`[DEBUG] Total sellers found in DB: ${sellers.length}`);
       const allStats = [];
 
       for (const seller of sellers) {
@@ -155,7 +156,6 @@ sellerRouter.get(
         const commissionRate = 0.1; // 10%
         const totalCommission = totalReferredSales * commissionRate;
 
-        console.log(`[DEBUG] Processing seller: ${seller.name} (${seller._id})`);
         allStats.push({
           seller: {
             _id: seller._id,
@@ -163,6 +163,10 @@ sellerRouter.get(
             brand: seller.brand,
             logo: seller.logo,
             referralCode: seller.referralCode,
+            outboundClicks: seller.outboundClicks || 0,
+            lastClickAt: seller.clickLogs?.length > 0
+              ? seller.clickLogs[seller.clickLogs.length - 1].clickedAt
+              : null,
           },
           stats: {
             referredUsersCount: referredUsers.length,
@@ -174,7 +178,6 @@ sellerRouter.get(
         });
       }
 
-      console.log(`[DEBUG] Returning ${allStats.length} sellers in response`);
       res.json({
         totalSellers: sellers.length,
         sellers: allStats,
@@ -227,6 +230,10 @@ sellerRouter.get('/:id/dashboard', expressAsyncHandler(async (req, res) => {
       brand: seller.brand,
       logo: seller.logo,
       referralCode: seller.referralCode,
+      outboundClicks: seller.outboundClicks || 0,
+      lastClickAt: seller.clickLogs?.length > 0
+        ? seller.clickLogs[seller.clickLogs.length - 1].clickedAt
+        : null,
     },
     stats: {
       referredUsersCount: totalReferredUsers,
@@ -234,6 +241,10 @@ sellerRouter.get('/:id/dashboard', expressAsyncHandler(async (req, res) => {
       totalReferredSales,
       totalCommission,
       commissionRate,
+      outboundClicks: seller.outboundClicks || 0,
+      lastClickAt: seller.clickLogs?.length > 0
+        ? seller.clickLogs[seller.clickLogs.length - 1].clickedAt
+        : null,
     },
     referredUsers,
     referredOrders,
@@ -269,6 +280,7 @@ sellerRouter.get('/:id', expressAsyncHandler(async (req, res) => {
     numReviews: seller.numReviews,
     reviews: seller.reviews,
     referralCode: seller.referralCode,
+    outboundClicks: seller.outboundClicks || 0,
     stats: {
       referredUsersCount: referredUsers.length,
       totalReferredOrders,
@@ -431,5 +443,27 @@ sellerRouter.get(
 );
 
 
+
+// Track outbound click when a user visits the seller's external website
+sellerRouter.post(
+  '/:id/track-click',
+  expressAsyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    const clickEntry = {
+      clickedAt: new Date(),
+      userId: userId || null,
+    };
+    const seller = await Seller.findByIdAndUpdate(
+      req.params.id,
+      {
+        $inc: { outboundClicks: 1 },
+        $push: { clickLogs: { $each: [clickEntry], $slice: -500 } }, // keep last 500 logs
+      },
+      { new: true }
+    );
+    if (!seller) return res.status(404).json({ message: 'Seller not found' });
+    res.json({ clicks: seller.outboundClicks, lastClickAt: clickEntry.clickedAt });
+  })
+);
 
 export default sellerRouter;

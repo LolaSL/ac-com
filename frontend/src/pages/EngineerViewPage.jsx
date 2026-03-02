@@ -5,7 +5,9 @@ import { Store } from "../Store.js";
 import { PDFDocument } from "pdf-lib";
 import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols } from "../utils/annotationUtils.js";
 import * as pdfjsLib from "pdfjs-dist";
+import { FaDraftingCompass } from "react-icons/fa";
 import "./EngineerViewPage.css";
+import "./AdminHero.css";
 
 
 const EngineerViewPage = () => {
@@ -483,8 +485,15 @@ const EngineerViewPage = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="mt-4 mb-4">Engineer View: User Drawing</h2>
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaDraftingCompass /></div>
+          <h1 className="adm-hero__title">Engineer View: User Drawing</h1>
+          <p className="adm-hero__sub">Review, annotate and export user HVAC drawing projects.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
       {loading && <Spinner animation="border" />}
       {error && <Alert variant="danger">{error}</Alert>}
       <div className="mb-2 mt-4 d-flex align-items-center gap-2">
@@ -974,6 +983,7 @@ const EngineerViewPage = () => {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

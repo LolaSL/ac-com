@@ -39,9 +39,20 @@ const PrivacyPolicyPage = () => {
         We implement a variety of security measures to safeguard your personal information. Sensitive data, including credit card information, is transmitted via Secure Socket Layer (SSL) and encrypted in our databases. Access is limited to authorized personnel only.
       </p>
 
-      <h4>Cookies</h4>
+      <h4>Cookies &amp; Local Storage</h4>
       <p className="fs-5">
-        We use cookies to enhance your experience, remember items in your cart, understand preferences, and analyze site traffic. You may disable cookies in your browser settings, but some features of the site may not function properly. Orders can still be placed via phone.
+        We use browser cookies and local storage to operate and improve this site. Specifically, we store:
+      </p>
+      <ul className="fs-5">
+        <li><strong>Authentication tokens</strong> — a secure JWT token is saved in local storage when you sign in to keep you logged in across sessions.</li>
+        <li><strong>Cart &amp; preferences</strong> — your shopping cart and site preferences are saved locally so they persist between visits.</li>
+        <li><strong>Referral codes</strong> — if you arrive via a referral link, the referral code is temporarily stored to credit the correct partner.</li>
+        <li><strong>Browsing history</strong> — products you view may be recorded to personalise recommendations shown to you.</li>
+        <li><strong>Outbound click tracking</strong> — when you click a link to a third-party brand website, we record the click count and timestamp so we can measure the traffic we refer to our partner brands. No personal browsing activity on those external sites is collected by us.</li>
+        <li><strong>Cookie consent</strong> — once you accept this policy via the banner, your acceptance is saved in local storage so the banner is not shown again.</li>
+      </ul>
+      <p className="fs-5">
+        You may clear local storage and cookies via your browser settings at any time. Doing so will sign you out and reset your preferences. Some features may not function correctly without local storage enabled.
       </p>
 
       <h4>Information Sharing</h4>
@@ -81,7 +92,7 @@ const PrivacyPolicyPage = () => {
 
       <h4>Changes to Our Policy</h4>
       <p className="fs-5">
-        Any changes will be posted on this page. Changes apply only to information collected after the modification date. Last modified: December 9, 2025.
+        Any changes will be posted on this page. Changes apply only to information collected after the modification date. Last modified: March 2, 2026.
       </p>
       </div>
     </div>

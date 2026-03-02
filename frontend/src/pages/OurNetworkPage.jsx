@@ -233,7 +233,7 @@ export default function OurNetworkPage() {
                   </div>
                   <h5 className="card-title fw-bold mb-2">{partner.name}</h5>
                   <p className="text-muted small mb-2">{partner.description}</p>
-                  <Badge Badge className="badge bg-primary">
+                  <Badge bg="primary">
                     {partner.partnership}
                   </Badge>
                 </Card.Body>

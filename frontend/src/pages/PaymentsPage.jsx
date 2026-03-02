@@ -6,8 +6,9 @@ import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
 import { Store } from "../Store.js";
 import { Modal, Button, Form } from "react-bootstrap";
-import { FaCheckCircle, FaTrash, FaBan } from "react-icons/fa";
+import { FaCheckCircle, FaTrash, FaBan, FaMoneyBillWave } from "react-icons/fa";
 import "./PaymentsPage.css";
+import "./AdminHero.css";
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
@@ -207,21 +208,21 @@ export default function PaymentsPage() {
   };
 
   return (
-    <div>
-      <div className="row mb-4">
-        <h1 className="page-title">Payments to Service Providers</h1>
-        <div className="col text-end">
-          <div>
-            <button
-                 type="button"
-            className="btn-admin-action"
-              onClick={() => setShowCreateModal(true)}
-            >   <i className="fas fa-plus me-2"></i>
-              Create Payment
-            </button>
-          </div>
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaMoneyBillWave /></div>
+          <h1 className="adm-hero__title">Payments</h1>
+          <p className="adm-hero__sub">Track and manage payments to service providers.</p>
         </div>
       </div>
+      <div className="adm-inner">
+        <div className="d-flex justify-content-end mb-4">
+          <button type="button" className="btn-admin-action" onClick={() => setShowCreateModal(true)}>
+            <i className="fas fa-plus me-2"></i>
+            Create Payment
+          </button>
+        </div>
 
       {loadingCreate && <LoadingBox />}
       {loadingUpdate && <LoadingBox />}
@@ -422,6 +423,7 @@ export default function PaymentsPage() {
           </Modal.Footer>
         </Form>
       </Modal>
+      </div>
     </div>
   );
 }

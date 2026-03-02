@@ -61,8 +61,8 @@ const Footer = () => {
             </NavLink>
             <NavLink
               className="text-white d-block"
-              href="/uploadfile"
-              onClick={(e) => handleNavigation(e, "/uploadfile")}
+              href="/measurement"
+              onClick={(e) => handleNavigation(e, "/measurement")}
             >
               Get A Quote
             </NavLink>
@@ -152,6 +152,9 @@ const Footer = () => {
           <Row className="d-flex justify-content-center">
             <div className="last-footer text-center">
               &copy; {new Date().getFullYear()} AC Commerce. All rights reserved
+            </div>
+            <div className="footer-disclaimer">
+              Brand names and logos are property of their respective owners. AC Commerce is not affiliated with or endorsed by any brand displayed on this site.
             </div>
           </Row>
         </div>

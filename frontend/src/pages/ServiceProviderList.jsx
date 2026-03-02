@@ -7,7 +7,6 @@ import { Store } from "../Store";
 import { getError } from "../utils";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
-  Container,
   Table,
   Button,
   Form,
@@ -16,7 +15,8 @@ import {
   Col,
   Badge,
 } from "react-bootstrap";
-import { FaSearch, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaSearch, FaEdit, FaTrash, FaPlus, FaUserTie } from "react-icons/fa";
+import "./AdminHero.css";
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
@@ -160,22 +160,20 @@ export default function ServiceProviderList() {
   };
 
   return (
-    <Container className="admin-page-container">
-      <Row className="align-items-center mb-4">
-        <Col>
-          <h1 className="admin-page-title fs-1">Service Providers Management</h1>
-        </Col>
-        <Col xs="auto">
-          <Button
-            type="button"
-            className="btn-admin-action"
-            onClick={createHandler}
-            disabled={loadingCreate}
-          >
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaUserTie /></div>
+          <h1 className="adm-hero__title">Service Providers</h1>
+          <p className="adm-hero__sub">Manage all service provider accounts and assignments.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <div className="d-flex justify-content-end mb-4">
+          <Button type="button" className="btn-admin-action" onClick={createHandler} disabled={loadingCreate}>
             <FaPlus /> {loadingCreate ? "Creating..." : "Create Service Provider"}
           </Button>
-        </Col>
-      </Row>
+        </div>
 
       <Row className="mb-4 g-2">
         <Col md={6}>
@@ -348,6 +346,7 @@ export default function ServiceProviderList() {
           </div>
         </div>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }

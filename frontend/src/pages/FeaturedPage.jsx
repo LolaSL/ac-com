@@ -1,4 +1,5 @@
 import React, { useReducer, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -21,11 +22,20 @@ const reducer = (state, action) => {
 };
 
 const FeaturedPage = () => {
+  const [searchParams] = useSearchParams();
   const [{ loading, error, products }, dispatch] = useReducer(reducer, {
     products: [],
     loading: true,
     error: "",
   });
+
+  // Capture referral code from URL into localStorage so SignUpPage can use it
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) {
+      localStorage.setItem("referralCode", ref);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {

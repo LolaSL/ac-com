@@ -256,12 +256,10 @@ userRouter.post(
 userRouter.post(
   '/signup',
   expressAsyncHandler(async (req, res) => {
-    const referredBy = req.query.ref; // Check for referral code in query params
-    console.log('Signup request - ref query param:', referredBy);
+    const referredBy = req.query.ref;
     let sellerId = null;
     if (referredBy) {
       const seller = await Seller.findOne({ referralCode: referredBy });
-      console.log('Found seller for ref', referredBy, ':', seller ? seller._id : 'not found');
       if (seller) {
         sellerId = seller._id;
       }
@@ -277,7 +275,6 @@ userRouter.post(
       referredBy: sellerId,
     });
     const user = await newUser.save();
-    console.log('Created user with referredBy:', user.referredBy);
     res.send({
       _id: user._id,
       name: user.name,

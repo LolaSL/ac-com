@@ -6,7 +6,6 @@ import React, {
   useCallback,
 } from "react";
 import {
-  Container,
   Row,
   Col,
   Card,
@@ -15,6 +14,7 @@ import {
   Alert,
   Button,
 } from "react-bootstrap";
+import { FaStar } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Store } from "../Store";
@@ -168,10 +168,17 @@ function UserReviewsPage() {
   };
 
   return (
-    <Container className="my-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="page-title">My Reviews</h1>
-        <div>
+    <div className="urv-page">
+      <div className="urv-hero">
+        <div className="urv-hero__inner">
+          <div className="urv-hero__icon"><FaStar /></div>
+          <h1 className="urv-hero__title">My Reviews</h1>
+          <p className="urv-hero__sub">Manage your product and seller reviews.</p>
+        </div>
+      </div>
+      <div className="urv-inner">
+        <div className="d-flex justify-content-end align-items-center mb-4">
+          <div>
           <Button
             variant="outline-danger"
             onClick={clearAllReviews}
@@ -271,7 +278,8 @@ function UserReviewsPage() {
           </Col>
         </Row>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }
 

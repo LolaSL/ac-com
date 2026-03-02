@@ -110,7 +110,7 @@ export default function Notifications() {
     }
 
     const { title, recipientType } = notification;
-    if (title === "Get A Quote") return "/uploadfile";
+    if (title === "Get A Quote") return "/measurement";
     if (title === "Discount Offer") return "/offers";
     if (recipientType === "serviceProvider") return "/serviceprovider/messages";
     return null;

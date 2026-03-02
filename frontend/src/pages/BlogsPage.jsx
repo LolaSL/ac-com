@@ -1,10 +1,7 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import { toast } from "react-toastify";
@@ -13,8 +10,9 @@ import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
 import { getError } from "../utils.js";
 import { Table } from "react-bootstrap";
-import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaNewspaper } from "react-icons/fa";
 import "./BlogsPage.css";
+import "./AdminHero.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -135,22 +133,21 @@ export default function BlogsPage() {
   };
 
   return (
-    <Container className="admin-page-container">
-      <Row className="align-items-center mb-4">
-        <Col>
-          <h1 className="page-title">Blogs Management</h1>
-        </Col>
-        <Col className="text-end">
-          <Button
-            className="btn-admin-action"
-            onClick={createHandler}
-            disabled={loadingCreate}
-          >
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaNewspaper /></div>
+          <h1 className="adm-hero__title">Blogs Management</h1>
+          <p className="adm-hero__sub">Create, edit and publish blog articles.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <div className="d-flex justify-content-end mb-4">
+          <Button className="btn-admin-action" onClick={createHandler} disabled={loadingCreate}>
             <FaPlus className="me-2" />
             {loadingCreate ? "Creating..." : "Create Blog"}
           </Button>
-        </Col>
-      </Row>
+        </div>
 
       <InputGroup className="mb-4 admin-search-box">
         <InputGroup.Text className="admin-search-icon">
@@ -251,6 +248,7 @@ export default function BlogsPage() {
           </div>
       </>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }

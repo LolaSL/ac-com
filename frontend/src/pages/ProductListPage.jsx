@@ -3,13 +3,14 @@ import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import { Container, Table, Button, Form, Badge } from "react-bootstrap";
+import { Table, Button, Form, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaBoxes } from "react-icons/fa";
+import "./AdminHero.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -224,25 +225,21 @@ export default function ProductListPage() {
   };
 
   return (
-    <Container className="provider-container">
-      <Row className="mb-3 mt-4">
-        <Col>
-          <h1 className="admin-page-title fs-1">Products Management</h1>
-        </Col>
-        <Col className="col text-end">
-          <div>
-            <Button
-         type="button"
-            className="btn-admin-action"
-              onClick={createHandler}
-              disabled={loadingCreate}
-            >
-              <i className="fas fa-plus me-2"></i>
-              {loadingCreate ? "Creating..." : "Create Product"}
-            </Button>
-          </div>
-        </Col>
-      </Row>
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaBoxes /></div>
+          <h1 className="adm-hero__title">Products Management</h1>
+          <p className="adm-hero__sub">Create, edit and manage all products in the catalogue.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <div className="d-flex justify-content-end mb-4">
+          <Button type="button" className="btn-admin-action" onClick={createHandler} disabled={loadingCreate}>
+            <i className="fas fa-plus me-2"></i>
+            {loadingCreate ? "Creating..." : "Create Product"}
+          </Button>
+        </div>
 
       <Row className="mb-3 mt-4">
         <Col md={6}>
@@ -480,6 +477,7 @@ export default function ProductListPage() {
           </div>
         </div>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }

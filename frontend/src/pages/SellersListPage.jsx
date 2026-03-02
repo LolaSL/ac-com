@@ -6,11 +6,12 @@ import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
-import { Container, Table, Button, Form, InputGroup } from "react-bootstrap";
+import { Table, Button, Form, InputGroup } from "react-bootstrap";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaStore } from "react-icons/fa";
 import "./SellersListPage.css";
+import "./AdminHero.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -113,6 +114,25 @@ const SellersListPage = () => {
     }
   };
 
+  const handleVisitClick = async (e, seller) => {
+    e.preventDefault();
+    // Build URL with UTM params so seller's analytics shows AC Commerce as traffic source
+    const url = new URL(seller.companyLink);
+    url.searchParams.set('utm_source', 'accommerce');
+    url.searchParams.set('utm_medium', 'referral');
+    url.searchParams.set('utm_campaign', seller.referralCode || seller._id);
+    // Open immediately (synchronous) so popup blockers don't interfere
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+    // Track in background after navigation
+    try {
+      await axios.post(`/api/sellers/${seller._id}/track-click`, {
+        userId: userInfo?._id || null,
+      });
+    } catch (_) {
+      // fire-and-forget
+    }
+  };
+
   const deleteHandler = async (seller) => {
     if (window.confirm("Are you sure to delete?")) {
       try {
@@ -130,22 +150,21 @@ const SellersListPage = () => {
   };
 
   return (
-    <Container className="admin-page-container">
-      <Row className="align-items-center mb-4">
-        <Col>
-          <h1 className="page-title">Sellers Management</h1>
-        </Col>
-        <Col className="text-end">
-          <Button
-            className="btn-admin-action"
-            onClick={createHandler}
-            disabled={loadingCreate}
-          >
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaStore /></div>
+          <h1 className="adm-hero__title">Sellers Management</h1>
+          <p className="adm-hero__sub">Manage seller accounts, listings and profiles.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <div className="d-flex justify-content-end mb-4">
+          <Button className="btn-admin-action" onClick={createHandler} disabled={loadingCreate}>
             <FaPlus className="me-2" />
             {loadingCreate ? "Creating..." : "Create Seller"}
           </Button>
-        </Col>
-      </Row>
+        </div>
 
       <InputGroup className="mb-4 admin-search-box">
         <InputGroup.Text className="admin-search-icon">
@@ -226,6 +245,7 @@ const SellersListPage = () => {
                     <td data-label="Company Link">
                       <a
                         href={seller.companyLink}
+                        onClick={(e) => handleVisitClick(e, seller)}
                         target="_blank"
                         rel="noreferrer"
                         className="admin-link"
@@ -284,7 +304,8 @@ const SellersListPage = () => {
           </div>
         </>
       )}
-    </Container>
+      </div>
+    </div>
   );
 };
 

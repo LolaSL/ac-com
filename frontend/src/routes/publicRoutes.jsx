@@ -42,7 +42,7 @@ export const publicRoutes = [
   { path: "/sellers", element: <OurNetworkPage /> },
   { path: "/sellers/:id", element: <SellerPage /> },
   { path: "/about-us", element: <AboutUs /> },
-  { path: "/uploadfile", element: <Measurement /> },
+  { path: "/measurement", element: <Measurement /> },
   { path: "/contact", element: <ContactPage /> },
   { path: "/blogs", element: <BlogList /> },
   { path: "/blogs/:id", element: <BlogDetails /> },

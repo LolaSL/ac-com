@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import LoadingBox from "../components/LoadingBox";
@@ -10,6 +10,7 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import Badge from "react-bootstrap/Badge";
+import { FaCopy, FaCheckCircle } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -37,6 +38,8 @@ const reducer = (state, action) => {
 };
 
 export default function SellerDashboard() {
+  const [sellerInfo, setSellerInfo] = useState(null);
+  const [copied, setCopied] = useState(false);
   // Filter state
   const [showFilters, setShowFilters] = React.useState(false);
   const [filterStatus, setFilterStatus] = React.useState("");
@@ -124,6 +127,7 @@ export default function SellerDashboard() {
       try {
         dispatch({ type: "FETCH_REQUEST" });
         const { data } = await axios.get(`/api/sellers/${id}/dashboard`);
+        setSellerInfo(data.seller);
         // Set stats and referredOrders from the dashboard response
         dispatch({ type: "FETCH_SUCCESS", payload: data.stats });
         dispatch({
@@ -154,6 +158,14 @@ export default function SellerDashboard() {
     }
   };
 
+  const copyReferralLink = () => {
+    const link = `${window.location.origin}/products?ref=${sellerInfo.referralCode}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
+
   // Remove fetchReferredOrders, as orders are loaded with stats
 
   return (
@@ -167,6 +179,29 @@ export default function SellerDashboard() {
       ) : (
         stats && (
           <>
+            {/* Referral Link Card */}
+            {sellerInfo && (
+              <Card className="mb-4 border-primary">
+                <Card.Header className="bg-primary text-white">
+                  <strong>Your Referral Link</strong>
+                </Card.Header>
+                <Card.Body className="d-flex align-items-center gap-3 flex-wrap">
+                  <code className="flex-grow-1 p-2 bg-light rounded" style={{ wordBreak: "break-all" }}>
+                    {`${window.location.origin}/products?ref=${sellerInfo.referralCode}`}
+                  </code>
+                  <Button
+                    variant={copied ? "success" : "outline-primary"}
+                    onClick={copyReferralLink}
+                    style={{ whiteSpace: "nowrap" }}
+                  >
+                    {copied ? <><FaCheckCircle className="me-1" />Copied!</> : <><FaCopy className="me-1" />Copy Link</>}
+                  </Button>
+                </Card.Body>
+                <Card.Footer className="text-muted small">
+                  Share this link — users who sign up through it will be tracked as your referrals.
+                </Card.Footer>
+              </Card>
+            )}
             {/* Statistics Cards */}
             <Row className="mb-4">
               <Col md={3}>
@@ -208,6 +243,21 @@ export default function SellerDashboard() {
                     <Card.Text>
                       Commission ({(stats.commissionRate * 100).toFixed(0)}%)
                     </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="text-center">
+                  <Card.Body>
+                    <Card.Title style={{ color: '#8b5cf6' }}>
+                      {stats.outboundClicks || 0}
+                    </Card.Title>
+                    <Card.Text>Website Clicks</Card.Text>
+                    {stats.lastClickAt && (
+                      <small className="text-muted">
+                        Last: {new Date(stats.lastClickAt).toLocaleString()}
+                      </small>
+                    )}
                   </Card.Body>
                 </Card>
               </Col>

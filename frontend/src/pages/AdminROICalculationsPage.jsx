@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
 import {
-  Container,
   Table,
   Spinner,
   Alert,
@@ -15,7 +14,8 @@ import {
 import axios from "axios";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
-import { FaTrash, FaEye, FaFilePdf } from "react-icons/fa";
+import { FaTrash, FaEye, FaFilePdf, FaChartBar } from "react-icons/fa";
+import "./AdminHero.css";
 import jsPDF from "jspdf";
 
 const SERVICE_TYPES = [
@@ -265,18 +265,27 @@ export default function AdminROICalculationsPage() {
 
   if (!isAdminUser) {
     return (
-      <Container className="mt-5">
-        <Alert variant="danger">Admin access required.</Alert>
-      </Container>
+      <div className="adm-page">
+        <div className="adm-inner">
+          <Alert variant="danger">Admin access required.</Alert>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container fluid className="mt-4 px-4">
-      <h1 className="admin-page-title fs-2 mb-1">ROI Calculations Management</h1>
-      <p className="text-muted mb-4">
-        {total} calculation{total !== 1 ? "s" : ""} in total
-      </p>
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaChartBar /></div>
+          <h1 className="adm-hero__title">ROI Calculations</h1>
+          <p className="adm-hero__sub">Review and manage all saved ROI calculations across users.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <p className="text-muted mb-4">
+          {total} calculation{total !== 1 ? "s" : ""} in total
+        </p>
 
       {/* Filters */}
       <Row className="mb-3 g-2 align-items-end">
@@ -627,6 +636,7 @@ export default function AdminROICalculationsPage() {
           </Button>
         </Modal.Footer>
       </Modal>
-    </Container>
+      </div>
+    </div>
   );
 }

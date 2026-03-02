@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import {
-  Container,
   Row,
   Col,
   Card,
@@ -161,13 +160,17 @@ function BrowsingHistoryPage() {
     : browsingHistory.filter((item) => item.product);
 
   return (
-    <Container className="my-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="page-title">
-          <FaEye className="me-2" />
-          Browsing History
-        </h1>
-        <div>
+    <div className="bh-page">
+      <div className="bh-hero">
+        <div className="bh-hero__inner">
+          <div className="bh-hero__icon"><FaEye /></div>
+          <h1 className="bh-hero__title">Browsing History</h1>
+          <p className="bh-hero__sub">Products you&apos;ve recently viewed.</p>
+        </div>
+      </div>
+      <div className="bh-inner">
+        <div className="d-flex justify-content-end align-items-center mb-4">
+          <div>
           <Button
             variant={filterPriceDrops ? "primary" : "outline-primary"}
             onClick={() => setFilterPriceDrops(!filterPriceDrops)}
@@ -306,7 +309,8 @@ function BrowsingHistoryPage() {
           ))}
         </Row>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }
 

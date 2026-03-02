@@ -8,6 +8,7 @@ import { Store } from "./Store.js";
 import MainLayout from "./layouts/MainLayout.jsx";
 import AppRoutes from "./routes/AppRoutes.jsx";
 import Footer from "./components/Footer.jsx";
+import CookieConsent from "./components/CookieConsent.jsx";
 
 function AppContent() {
   const [searchParams] = useSearchParams();
@@ -41,6 +42,7 @@ function AppContent() {
         <AppRoutes />
       </MainLayout>
       <Footer />
+      <CookieConsent />
     </>
   );
 }

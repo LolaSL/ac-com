@@ -2,7 +2,8 @@ import { useEffect, useState, useContext } from "react";
 import { Table, Spinner, Alert, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store.js";
-import { FaEye } from "react-icons/fa";
+import { FaEye, FaPencilRuler } from "react-icons/fa";
+import "./AdminHero.css";
 
 const AdminAllAnnotationsPage = () => {
   const { state } = useContext(Store);
@@ -56,8 +57,15 @@ const AdminAllAnnotationsPage = () => {
   }, [token]);
 
   return (
-    <div className="container mt-4">
-      <h1 className="admin-page-title fs-1 mb-4"> Users Drawings Management</h1>
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaPencilRuler /></div>
+          <h1 className="adm-hero__title">Users Drawings Management</h1>
+          <p className="adm-hero__sub">View and manage all user annotation projects.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
       {loading && <Spinner animation="border" />}
       {error && <Alert variant="danger">{error}</Alert>}
       {!loading && !error && (
@@ -94,7 +102,8 @@ const AdminAllAnnotationsPage = () => {
             ))}
           </tbody>
         </Table>
-      )}
+      )}  
+      </div>
     </div>
   );
 };

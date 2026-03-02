@@ -1,12 +1,12 @@
-/* OrderHistoryPage */
-.oh-page {
+/* Shared Admin Hero Shell — imported by all admin list pages */
+.adm-page {
   background: #f5f6fa;
   min-height: 100vh;
   padding-bottom: 3rem;
 }
 
-.oh-hero {
-  background: linear-gradient(135deg, #5b6070, #2563a8);
+.adm-hero {
+  background: linear-gradient(135deg, #1a2e4a, #1e4d8c);
   border-radius: 0 0 16px 16px;
   padding: 2.2rem 1.5rem 2rem;
   text-align: center;
@@ -14,32 +14,31 @@
   margin-bottom: 2rem;
 }
 
-.oh-hero__inner {
+.adm-hero__inner {
   max-width: 700px;
   margin: 0 auto;
 }
 
-.oh-hero__icon {
+.adm-hero__icon {
   font-size: 2.4rem;
   margin-bottom: 0.6rem;
   opacity: 0.92;
 }
 
-.oh-hero__title {
+.adm-hero__title {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.4rem;
 }
 
-.oh-hero__sub {
+.adm-hero__sub {
   font-size: 1rem;
   opacity: 0.85;
   margin: 0;
 }
 
-.oh-inner {
-  max-width: 1200px;
+.adm-inner {
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.25rem;
 }
-

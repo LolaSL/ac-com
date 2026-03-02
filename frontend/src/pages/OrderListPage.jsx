@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { toast } from "react-toastify";
 import {
-  Container,
   Table,
   Button,
   Form,
@@ -17,8 +16,9 @@ import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
 import { Link } from "react-router-dom";
-import { FaSearch, FaEye, FaTrash } from "react-icons/fa";
+import { FaSearch, FaEye, FaTrash, FaClipboardList } from "react-icons/fa";
 import "./OrderListPage.css";
+import "./AdminHero.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -270,10 +270,16 @@ export default function OrderListPage() {
   };
 
   return (
-    <Container className="admin-page-container">
-      <h1 className="admin-page-title fs-1">Orders Management</h1>
-
-      <Row className="mb-4 g-2 admin-toolbar">
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaClipboardList /></div>
+          <h1 className="adm-hero__title">Orders Management</h1>
+          <p className="adm-hero__sub">View, filter and manage all customer orders.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <Row className="mb-4 g-2 admin-toolbar">
         <Col md={5} lg={3}>
           <InputGroup className="admin-search-box">
             <InputGroup.Text className="admin-search-icon">
@@ -529,6 +535,7 @@ export default function OrderListPage() {
           </div>
         </div>
       )}
-    </Container>
+      </div>
+    </div>
   );
 }

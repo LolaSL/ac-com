@@ -27,6 +27,13 @@ const sellerSchema = new mongoose.Schema(
     reviews: [reviewSchema],
     logo: { type: String, default: "" },
     referralCode: { type: String, required: true, unique: true },
+    outboundClicks: { type: Number, default: 0 },
+    clickLogs: [
+      {
+        clickedAt: { type: Date, default: Date.now },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+      },
+    ],
   },
   {
     timestamps: true,

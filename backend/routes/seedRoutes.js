@@ -27,7 +27,7 @@ seedRouter.get('/', async (req, res) => {
     const ordersMode = req.query.ordersMode || (includeOrders ? 'append' : 'skip');
 
     await Product.deleteMany({});
-    await Seller.deleteMany({});
+    // Sellers are upserted below to preserve click tracking data
     await Contact.deleteMany({});
     await ServiceProvider.deleteMany({});
     await Project.deleteMany({});
@@ -99,7 +99,33 @@ seedRouter.get('/', async (req, res) => {
     if (createdUsers.length === 0) {
       createdUsers = await User.insertMany(data.users);
     }
-    const createdSellers = await Seller.insertMany(data.sellers);
+    // Upsert sellers by referralCode to preserve outboundClicks and clickLogs
+    const sellerOps = data.sellers.map((s) => ({
+      updateOne: {
+        filter: { referralCode: s.referralCode },
+        update: {
+          $set: {
+            name: s.name,
+            brand: s.brand,
+            info: s.info,
+            link: s.link,
+            companyLink: s.companyLink,
+            logo: s.logo,
+            rating: s.rating,
+            numReviews: s.numReviews,
+          },
+          $setOnInsert: {
+            referralCode: s.referralCode,
+            outboundClicks: 0,
+            clickLogs: [],
+            reviews: [],
+          },
+        },
+        upsert: true,
+      },
+    }));
+    await Seller.bulkWrite(sellerOps);
+    const createdSellers = await Seller.find({});
     const createdContacts = await Contact.insertMany(data.contacts);
 
     // Assign referrals to some users

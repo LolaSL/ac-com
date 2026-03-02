@@ -132,7 +132,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/profile" className="dropdown-item ">
                     User Profile
                   </Link>
-                  <Link to="/uploadfile" className="dropdown-item">
+                  <Link to="/measurement" className="dropdown-item">
                     Get A Quote
                   </Link>
                   <Link to="/roi-calculator" className="dropdown-item">

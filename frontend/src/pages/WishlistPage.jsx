@@ -11,6 +11,7 @@ import Image from "react-bootstrap/Image";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import Rating from "../components/Rating";
+import { FaHeart } from "react-icons/fa";
 import "./WishlistPage.css";
 
 const reducer = (state, action) => {
@@ -92,11 +93,15 @@ export default function WishlistPage() {
   };
 
   return (
-    <div className="container my-5">
-      <h1 className="page-title">
-        <i className="fas fa-heart me-2 heart-icon"></i>
-        My Wishlist
-      </h1>
+    <div className="wl-page">
+      <div className="wl-hero">
+        <div className="wl-hero__inner">
+          <div className="wl-hero__icon"><FaHeart /></div>
+          <h1 className="wl-hero__title">My Wishlist</h1>
+          <p className="wl-hero__sub">Products you&apos;ve saved for later.</p>
+        </div>
+      </div>
+      <div className="wl-inner">
 
       {loading ? (
         <LoadingBox />
@@ -206,6 +211,7 @@ export default function WishlistPage() {
           </p>
         </div>
       )}
+      </div>
     </div>
   );
 }
