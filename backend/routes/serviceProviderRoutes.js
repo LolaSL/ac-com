@@ -4,7 +4,9 @@ import expressAsyncHandler from 'express-async-handler';
 import Project from '../models/projectModel.js';
 import Message from '../models/messageModel.js';
 import Earnings from '../models/earningModel.js';
+import Payment from '../models/paymentModel.js';
 import ServiceProvider from '../models/serviceProviderModel.js';
+import Notification from '../models/notificationModel.js';
 import jwt from 'jsonwebtoken';
 import { isAdmin } from '../utils.js';
 import mongoose from 'mongoose';
@@ -29,22 +31,42 @@ const generateToken = (serviceProvider) => {
   );
 };
 
-export const isAuth = (req, res, next) => {
+export const isAuth = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  if (token) {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        console.error('Token verification failed:', err);
-        return res.status(401).send({ message: 'Invalid Token' });
-      }
-      req.serviceProvider = decoded;
-      req.user = decoded;
-      next();
-    });
-  } else {
+  if (!token) {
     console.warn('Authorization header is missing or token not found.');
-    res.status(401).send({ message: 'Token Not Found' });
+    return res.status(401).send({ message: 'Token Not Found' });
   }
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+    if (err) {
+      console.error('Token verification failed:', err);
+      return res.status(401).send({ message: 'Invalid Token' });
+    }
+    try {
+      // Admin users are in the User collection, not ServiceProvider — skip SP lookup
+      if (decoded.isAdmin) {
+        req.user = decoded;
+        return next();
+      }
+      // Try email first (stable across reseeds), then fall back to _id
+      let sp = null;
+      if (decoded.email) {
+        sp = await ServiceProvider.findOne({ email: decoded.email }).select('-password');
+      }
+      if (!sp && decoded._id) {
+        sp = await ServiceProvider.findById(decoded._id).select('-password');
+      }
+      if (!sp) {
+        return res.status(401).send({ message: 'Service provider not found — please sign in again' });
+      }
+      req.serviceProvider = sp;
+      req.user = sp;
+      next();
+    } catch (e) {
+      console.error('Auth lookup failed:', e);
+      return res.status(500).send({ message: 'Auth lookup failed' });
+    }
+  });
 };
 
 
@@ -67,8 +89,8 @@ serviceProviderRouter.get(
       const serviceProviders = await ServiceProvider.find({});
       res.send(serviceProviders);
     } catch (error) {
-      console.error('Error in serviceProviderRouter.get /:id', err);
-      res.status(500).send({ message: err.message });
+      console.error('Error in serviceProviderRouter.get /all', error);
+      res.status(500).send({ message: error.message });
     }
 
   })
@@ -243,7 +265,7 @@ serviceProviderRouter.get(
 serviceProviderRouter.get('/projects/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const projects = await ProjectModel.find({ serviceProviderId: id });
+    const projects = await Project.find({ serviceProvider: id });
     res.json(projects);
   } catch (err) {
     res.status(500).send({ message: 'Error fetching projects' });
@@ -342,9 +364,8 @@ serviceProviderRouter.put(
 
 
 serviceProviderRouter.delete(
-  '/message/:id',
+  '/messages/:id',
   isAuth,
-  isAdmin,
   expressAsyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -353,13 +374,20 @@ serviceProviderRouter.delete(
     }
 
     try {
-      const deletedMessage = await Message.findByIdAndDelete(id);
+      const message = await Message.findById(id);
 
-      if (deletedMessage) {
-        res.send({ message: "Message deleted successfully" });
-      } else {
-        res.status(404).send({ message: "Message not found" });
+      if (!message) {
+        return res.status(404).send({ message: "Message not found" });
       }
+
+      // Allow admins to delete any message; SPs can only delete their own
+      const isAdminUser = req.user?.isAdmin;
+      if (!isAdminUser && message.serviceProvider?.toString() !== req.user?._id?.toString()) {
+        return res.status(403).send({ message: "Not authorised to delete this message" });
+      }
+
+      await message.deleteOne();
+      res.send({ message: "Message deleted successfully" });
     } catch (err) {
       res.status(500).send({ message: "Error deleting message", error: err.message });
     }
@@ -394,8 +422,10 @@ serviceProviderRouter.get(
       const earningThreshold = 10000;
       if (totalEarnings > earningThreshold) {
         await Notification.create({
+          title: 'Earnings Threshold Exceeded',
           message: `Service Provider ${req.serviceProvider.name} has exceeded the earning threshold of $${earningThreshold}. Total Earnings: $${totalEarnings}`,
           type: 'Earnings Alert',
+          recipientType: 'admin',
           priority: 'high',
         });
       }
@@ -417,21 +447,22 @@ serviceProviderRouter.get(
 
     const earnings = await Earnings.find({ serviceProvider: serviceProviderId }).populate('projectName');
 
-    console.log('Earnings:', earnings);
-
     if (!earnings || earnings.length === 0) {
       return res.send({ totalHours: 0, projects: [] });
     }
 
-    const totalHours = earnings.reduce((sum, earning) => sum + earning.hoursWorked, 0);
-
+    const totalHours = earnings.reduce((sum, earning) => {
+      // prefer the snapshot on Earnings; fall back to the linked Project value
+      const hrs = earning.hoursWorked || earning.projectName?.hoursWorked || 0;
+      return sum + hrs;
+    }, 0);
 
     res.send({
       totalHours,
       projects: earnings.map(e => ({
         _id: e._id,
         projectName: e.projectName,
-        hoursWorked: e.hoursWorked,
+        hoursWorked: e.hoursWorked || e.projectName?.hoursWorked || 0,
         date: e.date,
         amount: e.amount,
         status: e.status,
@@ -446,17 +477,86 @@ serviceProviderRouter.get(
 serviceProviderRouter.get('/hours/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const totalHours = await HoursModel.aggregate([
-      { $match: { serviceProviderId: id } },
-      { $group: { _id: null, totalHours: { $sum: "$hours" } } },
+    // Prefer hoursWorked snapshot on Earnings; fall back to the linked Project's hoursWorked
+    const result = await Earnings.aggregate([
+      { $match: { serviceProvider: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: 'projects',
+          localField: 'projectName',
+          foreignField: '_id',
+          as: 'project',
+        },
+      },
+      { $unwind: { path: '$project', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: null,
+          totalHours: {
+            $sum: {
+              $ifNull: [
+                '$hoursWorked',
+                { $ifNull: ['$project.hoursWorked', 0] },
+              ],
+            },
+          },
+        },
+      },
     ]);
-    res.json(totalHours[0] || { totalHours: 0 });
+    res.json(result[0] || { totalHours: 0 });
   } catch (err) {
     res.status(500).send({ message: 'Error fetching hours' });
   }
 });
 
 
+// ── SP updates hours on one of their own projects ──────────────────────────
+serviceProviderRouter.patch(
+  '/projects/:id/hours',
+  isAuth,
+  isServiceProvider,
+  expressAsyncHandler(async (req, res) => {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).send({ message: 'Project not found' });
+    }
+    // Verify the project belongs to this SP
+    if (project.serviceProvider.toString() !== req.serviceProvider._id.toString()) {
+      return res.status(403).send({ message: 'Not authorised to update this project' });
+    }
+    const hours = Number(req.body.hoursWorked);
+    if (isNaN(hours) || hours < 0) {
+      return res.status(400).send({ message: 'Invalid hours value' });
+    }
+    project.hoursWorked = hours;
+    const updated = await project.save();
+
+    // Also update the snapshot on any linked Earnings records
+    await Earnings.updateMany(
+      { projectName: project._id, serviceProvider: req.serviceProvider._id },
+      { $set: { hoursWorked: hours } }
+    );
+
+    res.send({ message: 'Hours updated', project: updated });
+  })
+);
+
+
+// ── SP views their own payments ────────────────────────────────────────────
+serviceProviderRouter.get(
+  '/payments',
+  isAuth,
+  isServiceProvider,
+  expressAsyncHandler(async (req, res) => {
+    const payments = await Payment.find({ serviceProvider: req.serviceProvider._id })
+      .populate('project', 'name')
+      .sort({ createdAt: -1 });
+    res.send(payments);
+  })
+);
+
+
+// ── Register ────────────────────────────────────────────────────────────────
 serviceProviderRouter.post(
   '/register',
   expressAsyncHandler(async (req, res) => {

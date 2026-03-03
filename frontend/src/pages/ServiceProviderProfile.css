@@ -48,7 +48,7 @@
 
 .sp-profile-hero__banner {
   height: 110px;
-  background: linear-gradient(135deg, #3a3f4b 0%, #868d9c 100%);
+  background: linear-gradient(135deg, #1a3c5e 0%, #2563a8 60%, #3b82f6 100%);
 }
 
 .sp-profile-hero__body {
@@ -66,7 +66,7 @@
   height: 88px;
   border-radius: 50%;
   border: 4px solid #fff;
-  background: linear-gradient(135deg, #3a3f4b, #868d9c);
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
   color: #fff;
   font-size: 1.6rem;
   font-weight: 800;
@@ -200,8 +200,8 @@
 }
 
 .sp-input:focus {
-  border-color: #868d9c;
-  box-shadow: 0 0 0 3px rgba(134,141,156,0.18);
+  border-color: #2563a8;
+  box-shadow: 0 0 0 3px rgba(37,99,168,0.12);
 }
 
 /* Password toggle section */

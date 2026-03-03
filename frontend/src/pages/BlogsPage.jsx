@@ -188,7 +188,7 @@ export default function BlogsPage() {
                 .map((blog) => (
                   <tr key={blog._id} className="admin-table-row">
                     <td data-label="ID" className="small-text">
-                      {blog._id.substring(0, 8)}...
+                      {blog._id}
                     </td>
                     <td data-label="Title" className="title-cell">
                       {blog.title}

@@ -7,8 +7,8 @@ import { Store } from "../Store.js";
 import { getError } from "../utils";
 import Button from "react-bootstrap/esm/Button";
 import { Link, useLocation } from "react-router-dom";
-import { Table } from "react-bootstrap";
-import { FaHistory } from "react-icons/fa";
+import { Table, Badge } from "react-bootstrap";
+import { FaHistory, FaBoxOpen, FaEye } from "react-icons/fa";
 import "./OrderHistoryPage.css";
 
 const reducer = (state, action) => {
@@ -78,50 +78,61 @@ export default function OrderHistoryPage() {
         <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
+      ) : orders?.length === 0 ? (
+        <div className="oh-empty">
+          <FaBoxOpen className="oh-empty__icon" />
+          <h4>No orders yet</h4>
+          <p>Once you place an order, it will appear here.</p>
+          <Button variant="primary" onClick={() => navigate('/products')}>Shop Now</Button>
+        </div>
       ) : (
         <>
           <div className="table-responsive">
-            <Table striped bordered hover>
+            <Table className="oh-table" hover>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Transaction ID</th>
-                  <th>DATE</th>
-                  <th>TOTAL</th>
-                  <th>PAID</th>
-                  <th>DELIVERED</th>
-                  <th>ACTIONS</th>
+                  <th>Order Ref</th>
+                  <th>Date</th>
+                  <th>Total</th>
+                  <th>Payment</th>
+                  <th>Delivery</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
                   <tr key={order._id}>
-                    <td data-label="ID">{order._id}</td>
-                    <td data-label="Transaction ID">
-                      {order.paymentResult?.id || "-"}
+                    <td data-label="Order Ref">
+                      <span className="oh-order-ref">{order._id}</span>
                     </td>
                     <td data-label="Date">
-                      {order.createdAt.substring(0, 10)}
+                      {new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
-                    <td data-label="Total">${order.totalPrice.toFixed(2)}</td>
-                    <td data-label="Paid">
-                      {order.isPaid
-                        ? new Date(order.paidAt).toLocaleString()
-                        : "No"}
+                    <td data-label="Total">
+                      <strong>${order.totalPrice.toFixed(2)}</strong>
                     </td>
-                    <td data-label="Delivered">
-                      {order.isDelivered
-                        ? order.deliveredAt.substring(0, 10)
-                        : "No"}
+                    <td data-label="Payment">
+                      {order.isPaid ? (
+                        <Badge bg="success">Paid &nbsp;{new Date(order.paidAt).toLocaleDateString()}</Badge>
+                      ) : (
+                        <Badge bg="warning" text="dark">Pending</Badge>
+                      )}
+                    </td>
+                    <td data-label="Delivery">
+                      {order.isDelivered ? (
+                        <Badge bg="primary">Delivered &nbsp;{new Date(order.deliveredAt).toLocaleDateString()}</Badge>
+                      ) : (
+                        <Badge bg="secondary">Not Shipped</Badge>
+                      )}
                     </td>
                     <td>
                       <Button
                         type="button"
-                        variant="light"
-                        className="details"
+                        className="btn-admin-edit"
+                        title="View Details"
                         onClick={() => navigate(`/order/${order._id}`)}
                       >
-                        Details
+                        <FaEye />
                       </Button>
                     </td>
                   </tr>

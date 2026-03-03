@@ -213,7 +213,7 @@ const SellersListPage = () => {
                 .map((seller) => (
                   <tr key={seller._id} className="admin-table-row">
                     <td data-label="ID" className="small-text">
-                      {seller._id.substring(0, 8)}...
+                      {seller._id}
                     </td>
                     <td data-label="Logo" className="logo-cell">
                       {seller.logo &&

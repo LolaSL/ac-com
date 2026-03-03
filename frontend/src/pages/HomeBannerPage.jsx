@@ -129,7 +129,11 @@ export default function HomeBannerPage() {
     if (title === 'Get A Quote') return userInfo || adminInfo || serviceProviderInfo ? '/measurement' : '/signin?redirect=/measurement';
     if (title === 'Discount Offer') return '/offers';
     if (recipientType === 'serviceProvider') return '/serviceprovider/messages';
-    return null;
+
+    // Fallback: send each role to their notifications view
+    if (adminInfo) return '/admin/dashboard/notification';
+    if (serviceProviderInfo) return '/serviceprovider/notifications';
+    return '/profile';
   };
 
   const handleNotificationClick = async () => {

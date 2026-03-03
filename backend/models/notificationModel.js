@@ -11,6 +11,7 @@ const notificationSchema = new mongoose.Schema(
       required: true
     },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Specific user (optional)
+    serviceProviderId: { type: mongoose.Schema.Types.ObjectId, ref: 'ServiceProvider' }, // Specific SP (optional)
     orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' }, // Link to specific order (optional)
     isRead: { type: Boolean, default: false },
     link: { type: String, default: '' }, // optional frontend route e.g. /order/:id

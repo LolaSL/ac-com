@@ -16,6 +16,7 @@ import WishlistPage from "../pages/WishlistPage.jsx";
 import SellerDashboard from "../pages/SellerDashboard.jsx";
 import TotalSellerDashboard from "../pages/TotalSellerDashboard.jsx";
 import AdminAllAnnotationsPage from "../pages/AdminAllAnnotationsPage.jsx";
+import SPPaymentsPage from "../pages/SPPaymentsPage.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.js";
 
 export const protectedRoutes = [
@@ -112,6 +113,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <ServiceProviderMessages />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/serviceprovider/payments",
+    element: (
+      <ProtectedRoute>
+        <SPPaymentsPage />
       </ProtectedRoute>
     ),
   },

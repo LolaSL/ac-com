@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useCallback } from "react";
+import React, { useContext, useEffect, useReducer, useCallback, useState } from "react";
 import axios from "axios";
 import { Store } from "../Store.js";
 import { getError } from "../utils.js";
@@ -6,7 +6,7 @@ import LoadingBox from "./LoadingBox.jsx";
 import MessageBox from "./MessageBox.jsx";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { Button, Badge, Card, Container, Row, Col } from "react-bootstrap";
+import { Button, Badge, Card, Container, Row, Col, Nav } from "react-bootstrap";
 import "./Notifications.css";
 
 const initialState = {
@@ -65,6 +65,8 @@ export default function Notifications() {
   const token =
     userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
   const isAdmin = adminInfo !== null;
+
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     if (!token) {
@@ -133,6 +135,21 @@ export default function Notifications() {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      await axios.put('/api/notifications/mark-all-read', null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Mark all locally
+      notifications.forEach(n => {
+        if (!n.isRead) dispatch({ type: "MARK_AS_READ", payload: n._id });
+      });
+      toast.success('All notifications marked as read');
+    } catch (err) {
+      toast.error(getError(err));
+    }
+  };
+
   const deleteHandler = async (notification) => {
     if (!notification._id) {
       toast.error("Notification ID missing.");
@@ -187,8 +204,31 @@ export default function Notifications() {
       <Row>
         <Col>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1 className="mb-0">Notifications</h1>
+            <div className="d-flex align-items-center gap-3">
+              <h1 className="mb-0">Notifications</h1>
+              {notifications.filter(n => !n.isRead).length > 0 && (
+                <Badge bg="danger" pill>{notifications.filter(n => !n.isRead).length} unread</Badge>
+              )}
+            </div>
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={markAllAsRead}
+              disabled={notifications.every(n => n.isRead)}
+            >
+              Mark all as read
+            </Button>
           </div>
+
+          {isAdmin && (
+            <Nav variant="tabs" className="mb-3" activeKey={activeTab} onSelect={setActiveTab}>
+              <Nav.Item><Nav.Link eventKey="all">All</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="admin">Admin</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="user">Users</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="serviceProvider">Service Providers</Nav.Link></Nav.Item>
+            </Nav>
+          )}
+
           {loading ? (
             <LoadingBox />
           ) : error ? (
@@ -197,7 +237,9 @@ export default function Notifications() {
             <MessageBox>No notifications to display.</MessageBox>
           ) : (
             <div>
-              {notifications.map((notification) => (
+              {notifications
+                .filter(n => activeTab === 'all' || n.recipientType === activeTab)
+                .map((notification) => (
                 <Card
                   key={
                     notification._id ||

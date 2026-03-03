@@ -6,8 +6,8 @@ import MessageBox from "../components/MessageBox.jsx";
 import { Store } from "../Store.js";
 import { getError } from "../utils";
 import "./UserMessagesPage.css";
-import { Table, Badge } from "react-bootstrap";
-import { FaEnvelope } from "react-icons/fa";
+import { Table, Badge, Button } from "react-bootstrap";
+import { FaEnvelope, FaBoxOpen, FaEye } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -63,31 +63,22 @@ export default function UserMessagesPage() {
     fetchData();
   }, [userInfo, token, navigate]);
 
-  const getStatusBadge = (order) => {
-    if (order.isDelivered) {
-      return <Badge bg="success">Delivered</Badge>;
-    }
-    if (order.isPaid) {
-      return <Badge bg="info">Paid - In Transit</Badge>;
-    }
-    return <Badge bg="warning">Pending Payment</Badge>;
-  };
+  const fmtDate = (d) =>
+    new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
-  const getPaymentStatus = (order) => {
-    return order.isPaid ? (
-      <Badge bg="success">Paid</Badge>
+  const getPaymentBadge = (order) =>
+    order.isPaid ? (
+      <Badge bg="success">Paid {fmtDate(order.paidAt)}</Badge>
     ) : (
-      <Badge bg="danger">Not Paid</Badge>
+      <Badge bg="warning" text="dark">Pending</Badge>
     );
-  };
 
-  const getDeliveryStatus = (order) => {
-    return order.isDelivered ? (
-      <Badge bg="success">Delivered</Badge>
+  const getDeliveryBadge = (order) =>
+    order.isDelivered ? (
+      <Badge bg="primary">Delivered {fmtDate(order.deliveredAt)}</Badge>
     ) : (
-      <Badge bg="secondary">Not Delivered</Badge>
+      <Badge bg="secondary">Not Shipped</Badge>
     );
-  };
 
   return (
     <div className="umsg-page">
@@ -104,84 +95,54 @@ export default function UserMessagesPage() {
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : orders.length === 0 ? (
-        <MessageBox>You have no orders yet.</MessageBox>
+        <div className="umsg-empty">
+          <div className="umsg-empty__icon"><FaBoxOpen /></div>
+          <h4>No orders yet</h4>
+          <p>Your order messages will appear here once you place an order.</p>
+          <Button variant="primary" onClick={() => navigate('/products')}>Shop Now</Button>
+        </div>
       ) : (
-        <>
-          <div className="table-responsive">
-            <Table striped bordered hover>
-              <thead className="table-dark">
-                <tr>
-                  <th>ORDER ID</th>
-                  <th>TRANSACTION ID</th>
-                  <th>DATE</th>
-                  <th>TOTAL</th>
-                  <th>STATUS</th>
-                  <th>PAYMENT</th>
-                  <th>DELIVERY</th>
-                  <th>PAID DATE</th>
-                  <th>DELIVERED DATE</th>
+        <div className="table-responsive">
+          <Table className="umsg-table" borderless>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Delivery</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order._id}>
+                  <td data-label="Order ID">
+                    <span className="umsg-order-ref">{order._id}</span>
+                  </td>
+                  <td data-label="Date">
+                    {new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </td>
+                  <td data-label="Total" className="fw-bold">
+                    ${order.totalPrice?.toFixed(2) || '0.00'}
+                  </td>
+                  <td data-label="Payment">{getPaymentBadge(order)}</td>
+                  <td data-label="Delivery">{getDeliveryBadge(order)}</td>
+                  <td data-label="Actions">
+                    <Button
+                      type="button"
+                      className="btn-admin-edit"
+                      title="View Details"
+                      onClick={() => navigate(`/order/${order._id}`)}
+                    >
+                      <FaEye />
+                    </Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <tr key={order._id} className="align-middle">
-                    <td data-label="Order ID" className="fw-semibold order-id">
-                      {order._id}
-                    </td>
-                    <td data-label="Transaction ID">
-                      {order.paymentResult?.id || "-"}
-                    </td>
-                    <td data-label="Date">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </td>
-                    <td data-label="Total" className="fw-bold">
-                      ${order.totalPrice?.toFixed(2) || "0.00"}
-                    </td>
-                    <td data-label="Status">{getStatusBadge(order)}</td>
-                    <td data-label="Payment">{getPaymentStatus(order)}</td>
-                    <td data-label="Delivery">{getDeliveryStatus(order)}</td>
-                    <td data-label="Paid Date">
-                      {order.isPaid && order.paidAt
-                        ? new Date(order.paidAt).toLocaleDateString()
-                        : "—"}
-                    </td>
-                    <td data-label="Delivered Date">
-                      {order.isDelivered && order.deliveredAt
-                        ? new Date(order.deliveredAt).toLocaleDateString()
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-
-          {orders.length > 0 && (
-            <div className="mt-4 p-3 bg-light rounded">
-              <h5>Status Legend</h5>
-              <div className="d-flex flex-wrap gap-3">
-                <div>
-                  <Badge bg="warning" className="me-2">
-                    Pending Payment
-                  </Badge>
-                  Order awaiting payment.
-                </div>
-                <div>
-                  <Badge bg="info" className="me-2">
-                    Paid - In Transit
-                  </Badge>
-                  Payment received, order in transit.
-                </div>
-                <div>
-                  <Badge bg="success" className="me-2">
-                    Delivered
-                  </Badge>
-                  Order delivered successfully.
-                </div>
-              </div>
-            </div>
-          )}
-        </>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       )}
       </div>
     </div>

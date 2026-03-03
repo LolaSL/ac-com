@@ -2,13 +2,14 @@ import axios from "axios";
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Container from "react-bootstrap/Container";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { Store } from "../Store";
 import { getError } from "../utils";
+import { FaUserEdit } from "react-icons/fa";
+import "./AdminHero.css";
 import "./ServiceProviderEditPage.css";
 
 const reducer = (state, action) => {
@@ -95,26 +96,35 @@ export default function ServiceProviderEditPage() {
   };
 
   return (
-    <Container className="small-container">
-      <h1 className="page-title">Edit Service Provider {serviceProviderId}</h1>
-
+    <div className="adm-page">
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon"><FaUserEdit /></div>
+          <h1 className="adm-hero__title">Edit Service Provider</h1>
+          <p className="adm-hero__sub">Update name, email and active status for this provider.</p>
+        </div>
+      </div>
+      <div className="adm-inner">
+        <div className="sp-edit-card">
       {loading ? (
-        <LoadingBox></LoadingBox>
+        <LoadingBox />
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <Form onSubmit={submitHandler}>
           <Form.Group className="mb-3" controlId="name">
-            <Form.Label>Name</Form.Label>
+            <Form.Label className="sp-edit-label">Name</Form.Label>
             <Form.Control
+              className="sp-edit-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="email">
-            <Form.Label>Email</Form.Label>
+            <Form.Label className="sp-edit-label">Email</Form.Label>
             <Form.Control
+              className="sp-edit-input"
               value={email}
               type="email"
               onChange={(e) => setEmail(e.target.value)}
@@ -123,7 +133,7 @@ export default function ServiceProviderEditPage() {
           </Form.Group>
 
           <Form.Check
-            className="mb-3"
+            className="mb-4"
             type="checkbox"
             id="isActive"
             label="Active"
@@ -131,18 +141,20 @@ export default function ServiceProviderEditPage() {
             onChange={(e) => setIsActive(e.target.checked)}
           />
 
-          <div className="mb-3">
-            <Button
-              disabled={loadingUpdate}
-              type="submit"
-              className="go-to-btn btn-text"
-            >
-              Update
+          <div className="sp-edit-actions">
+            <Button type="submit" className="sp-edit-save-btn" disabled={loadingUpdate}>
+              {loadingUpdate ? "Saving…" : "Save Changes"}
             </Button>
-            {loadingUpdate && <LoadingBox></LoadingBox>}
+            <Button type="button" className="sp-edit-cancel-btn"
+              onClick={() => navigate("/admin/manage-service-providers")}>
+              Cancel
+            </Button>
           </div>
+          {loadingUpdate && <LoadingBox />}
         </Form>
       )}
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

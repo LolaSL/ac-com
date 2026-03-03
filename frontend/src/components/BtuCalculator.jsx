@@ -14,9 +14,13 @@ import { toast } from "react-toastify";
 import "./BtuCalculator.css";
 
 const CONSTANTS = {
-  BASE_BTU_PER_SQ_METER: 600,
-  HEIGHT_ADDITIONAL_BTU: 1000,
-  BTU_PER_ADDITIONAL_PERSON: 600,
+  // ~147 W/m² ≈ 500 BTU/m² — calibrated for Israel (Tel Aviv / central regions).
+  // Hot Middle East ×1.2 brings this to ~600 BTU/m² for Negev / Eilat desert.
+  BASE_BTU_PER_SQ_METER: 500,
+  // Each extra metre above 2.5 m adds this fraction of base BTU (proportional volume increase).
+  HEIGHT_BTU_FACTOR_PER_METER: 0.4,
+  // ASHRAE sensible heat for sedentary occupancy: ~450 BTU/hr per person.
+  BTU_PER_ADDITIONAL_PERSON: 450,
   KITCHEN_BTU_ADDITION: 4000,
   OUTDOOR_LOCATION_BTU_ADJUSTMENTS: {
     Roof: 1.0,
@@ -622,8 +626,9 @@ useEffect(() => {
   const convertedValue = totalBTU * outputUnitConversion[selectedUnit];
 
   const convertArea = (value) => {
+    // 1 sq ft = 0.0929 m²  (0.3048²)
     return measurementSystem === "feet"
-      ? value * CONSTANTS.CONVERT_FEET_TO_METERS
+      ? value * 0.0929
       : value;
   };
 
@@ -717,8 +722,10 @@ useEffect(() => {
     }
 
     let btu = area * CONSTANTS.BASE_BTU_PER_SQ_METER;
+    // Height adjustment: proportional to room volume increase above 2.5 m baseline.
+    // Adds HEIGHT_BTU_FACTOR_PER_METER × (extra metres) × current base BTU.
     if (height > 2.5)
-      btu += CONSTANTS.HEIGHT_ADDITIONAL_BTU * ((height - 2.5) / 0.1);
+      btu += btu * CONSTANTS.HEIGHT_BTU_FACTOR_PER_METER * (height - 2.5);
     btu += CONSTANTS.BTU_PER_ADDITIONAL_PERSON * Math.max(0, numPeople - 1);
     if (room.name === "Kitchen") btu += CONSTANTS.KITCHEN_BTU_ADDITION;
 
@@ -732,7 +739,8 @@ useEffect(() => {
       const selectedClimate = Object.keys(options.climate || {}).find(
         (k) => options.climate[k]
       );
-      btu += diningRoomBtuByClimate[selectedClimate] || 3000;
+      // Only add climate-based dining bonus when a climate is explicitly selected
+      btu += diningRoomBtuByClimate[selectedClimate] || 0;
     }
 
     // VRF efficiency adjustment (VRF systems use base calculation)

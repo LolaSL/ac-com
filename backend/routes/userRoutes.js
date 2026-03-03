@@ -6,6 +6,7 @@ import User from '../models/userModel.js';
 import Seller from '../models/sellerModel.js';
 import ServiceProvider from '../models/serviceProviderModel.js';
 import Payment from '../models/paymentModel.js';
+import Notification from '../models/notificationModel.js';
 import {
   isAuth, isAdmin, generateToken, baseUrl,
   mailgun
@@ -340,6 +341,7 @@ userRouter.put(
   expressAsyncHandler(async (req, res) => {
     const payment = await Payment.findById(req.params.id);
     if (payment) {
+      const wasCompleted = payment.status === 'completed';
       payment.status = req.body.status || payment.status;
       payment.transactionId = req.body.transactionId || payment.transactionId;
       if (req.body.status === 'completed') {
@@ -347,6 +349,21 @@ userRouter.put(
       }
       payment.updatedAt = Date.now();
       const updatedPayment = await payment.save();
+
+      // Notify the SP when a payment is newly marked completed
+      if (!wasCompleted && updatedPayment.status === 'completed' && updatedPayment.serviceProvider) {
+        await Notification.create({
+          title: 'Payment Received',
+          message: `Your payment of $${updatedPayment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} has been processed successfully.${
+            updatedPayment.description ? ' Note: ' + updatedPayment.description : ''
+          }`,
+          type: 'info',
+          recipientType: 'serviceProvider',
+          serviceProviderId: updatedPayment.serviceProvider,
+          isRead: false,
+        });
+      }
+
       res.send(updatedPayment);
     } else {
       res.status(404).send({ message: 'Payment not found' });

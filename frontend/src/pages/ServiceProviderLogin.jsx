@@ -1,13 +1,12 @@
 import Axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
 import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
+import { FaToolbox, FaEnvelope, FaLock } from "react-icons/fa";
 import "./ServiceProviderLogin.css";
 
 const ServiceProviderLogin = () => {
@@ -43,57 +42,59 @@ const ServiceProviderLogin = () => {
   }, [navigate, redirect, serviceProviderInfo]);
 
   return (
-    <Container className="d-flex justify-content-center align-items-center min-vh-100">
-      <Card
-        className="shadow-lg p-4"
-        style={{ maxWidth: "500px", width: "100%" }}
-      >
-        <Card.Body>
-          <h1 className="page-title text-center text-primary">
-            Service Provider Login
-          </h1>
-          <Form onSubmit={submitHandler}>
-            <Form.Group controlId="email" className="mb-3">
-              <Form.Label>Email Address</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </Form.Group>
+    <div className="sp-login-page">
+      <div className="sp-login-hero">
+        <div className="sp-login-hero__icon"><FaToolbox /></div>
+        <h1 className="sp-login-hero__title">Service Provider Portal</h1>
+        <p className="sp-login-hero__sub">Sign in to manage your projects, earnings and profile.</p>
+      </div>
 
-            <Form.Group controlId="password" className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </Form.Group>
-            <div className="d-grid mb-3">
-              <Button
-                type="submit"
-                className="go-to-btn btn-lg"
-                variant="primary"
-              >
-                Login
-              </Button>
-            </div>
-            <div className="text-center">
-              New service provider?{" "}
-              <Link to={`/serviceprovider/register?redirect=${redirect}`}>
-                Register here
-              </Link>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+      <div className="sp-login-card">
+        <h2 className="sp-login-card__title">Welcome back</h2>
+        <p className="sp-login-card__sub">Enter your credentials to continue</p>
+
+        <Form onSubmit={submitHandler}>
+          <Form.Group controlId="email" className="sp-login-field">
+            <Form.Label className="sp-login-label">
+              <FaEnvelope className="sp-login-label__icon" /> Email Address
+            </Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="your@email.com"
+              className="sp-login-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group controlId="password" className="sp-login-field">
+            <Form.Label className="sp-login-label">
+              <FaLock className="sp-login-label__icon" /> Password
+            </Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Enter your password"
+              className="sp-login-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Button type="submit" className="sp-login-btn">
+            Sign In
+          </Button>
+        </Form>
+
+        <div className="sp-login-footer">
+          New here?{" "}
+          <Link to={`/serviceprovider/register?redirect=${redirect}`}>Create an account</Link>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default ServiceProviderLogin;
+

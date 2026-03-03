@@ -142,7 +142,7 @@ const MessagesServiceProviders = () => {
     ) {
       dispatch({ type: "DELETE_REQUEST" });
       try {
-        await axios.delete(`/api/service-providers/message/${messageId}`, {
+        await axios.delete(`/api/service-providers/messages/${messageId}`, {
           headers: { Authorization: `Bearer ${token}` },
           data: {
             adminAction: true,

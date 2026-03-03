@@ -69,10 +69,12 @@ seedRouter.get('/', async (req, res) => {
     }));
     const createdEarnings = await Earnings.insertMany(earningsWithIds);
 
-    // Seed Payments
+    // Seed Payments — resolve serviceProvider by email so data.js assignments are respected
+    const spEmailToId = {};
+    createdServiceProviders.forEach(sp => { spEmailToId[sp.email] = sp._id.toString(); });
     const paymentsWithIds = data.payments.map((payment, index) => ({
       ...payment,
-      serviceProvider: serviceProviderIds[index % serviceProviderIds.length],
+      serviceProvider: spEmailToId[payment.serviceProvider] || serviceProviderIds[index % serviceProviderIds.length],
     }));
     const createdPayments = await Payment.insertMany(paymentsWithIds);
 
@@ -154,7 +156,13 @@ seedRouter.get('/', async (req, res) => {
     }
 
     const createdBlogs = await Blog.insertMany(data.blogs);
-    const createdNotifications = await Notification.insertMany(data.notifications);
+    const notificationsWithIds = data.notifications.map(({ serviceProviderEmail, ...n }) => ({
+      ...n,
+      ...(serviceProviderEmail && spEmailToId[serviceProviderEmail]
+        ? { serviceProviderId: spEmailToId[serviceProviderEmail] }
+        : {}),
+    }));
+    const createdNotifications = await Notification.insertMany(notificationsWithIds);
 
     // Seed Orders with proper user and product references
     let createdOrders = [];

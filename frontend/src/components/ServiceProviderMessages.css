@@ -1,68 +1,121 @@
-.service-provider-messages {
-  padding: 2rem 0;
+/* ServiceProviderMessages */
+
+.spm-page {
+  min-height: 100vh;
+  background: #f4f7fb;
 }
 
-.service-provider-messages h2 {
-  text-align: center;
+/* Hero */
+.spm-hero {
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
+  border-radius: 0 0 16px 16px;
+  padding: 2.2rem 1.5rem 2rem;
   margin-bottom: 2rem;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.service-provider-messages .loading-message,
-.service-provider-messages .error-message,
-.service-provider-messages .no-messages {
   text-align: center;
-  padding: 2rem;
-  font-size: 1.1rem;
-  color: #666;
+}
+.spm-hero__inner { max-width: 1200px; margin: 0 auto; }
+.spm-hero__icon {
+  font-size: 2.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.5rem;
+}
+.spm-hero__title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+.spm-hero__sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
 }
 
-.service-provider-messages .error-message {
-  color: #dc3545;
+/* Body */
+.spm-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 2.5rem;
 }
 
-.service-provider-messages .table {
-  margin-top: 1rem;
-  border-radius: 0.5rem;
+/* Table */
+.spm-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
-
-.service-provider-messages .table th {
-  background-color: #f8f9fa;
+.spm-table thead tr {
+  background: #1a3c5e !important;
+}
+.spm-table thead th {
+  padding: 0.85rem 1rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  border-top: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff !important;
+  background-color: #1a3c5e !important;
+  border: none;
+  white-space: nowrap;
 }
-
-.service-provider-messages .table td {
+.spm-table tbody tr {
+  border-bottom: 1px solid #eef0f4;
+  transition: background 0.15s;
+}
+.spm-table tbody tr:last-child { border-bottom: none; }
+.spm-table tbody tr:hover { background: #f0f5ff; }
+.spm-table td {
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+  color: #2d3748;
   vertical-align: middle;
 }
 
-.service-provider-messages .btn-danger {
-  transition: all 0.2s ease;
+/* Empty state */
+.spm-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+.spm-empty__icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.35;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.service-provider-messages .btn-danger:hover {
-  transform: scale(1.1);
-}
-
-@media (max-width: 768px) {
-  .service-provider-messages {
-    padding: 1rem 0;
+/* Mobile card layout */
+@media (max-width: 640px) {
+  .spm-table thead { display: none; }
+  .spm-table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #dde3ef;
+    border-radius: 8px;
+    padding: 0.5rem 0;
   }
-
-  .service-provider-messages h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+  .spm-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 1rem;
+    border: none;
+    border-bottom: 1px solid #f0f2f6;
   }
-
-  .service-provider-messages .table {
-    font-size: 0.875rem;
-  }
-
-  .service-provider-messages .btn-danger {
-    padding: 0.25rem 0.5rem;
+  .spm-table td:last-child { border-bottom: none; }
+  .spm-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-right: 0.5rem;
+    white-space: nowrap;
   }
 }

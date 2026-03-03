@@ -207,15 +207,13 @@ export default function TotalSellerDashboard() {
                         <td>
                           <Button
                             type="button"
-                            variant={copiedId === item.seller._id ? "success" : "outline-secondary"}
-                            size="sm"
-                            className="me-2"
-                            title="Copy referral link"
+                            className={`btn-copy-link me-2${copiedId === item.seller._id ? ' copied' : ''}`}
+                            title={copiedId === item.seller._id ? 'Copied!' : 'Copy referral link'}
                             onClick={() => copyLink(item.seller.referralCode, item.seller._id)}
                           >
                             {copiedId === item.seller._id
-                              ? <><FaCheckCircle className="me-1" />Copied!</>
-                              : <><FaCopy className="me-1" />Copy Link</>}
+                              ? <FaCheckCircle />
+                              : <FaCopy />}
                           </Button>
                           <Button
                             type="button"

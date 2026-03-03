@@ -2,7 +2,11 @@ import React, { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import { Container, Table } from "react-bootstrap";
+import { Badge } from "react-bootstrap";
+import { FaFolderOpen, FaBoxOpen } from "react-icons/fa";
+import LoadingBox from "../components/LoadingBox.jsx";
+import MessageBox from "../components/MessageBox.jsx";
+import "./ProjectsPage.css";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -52,36 +56,60 @@ const Projects = () => {
     fetchProjects();
   }, [serviceProviderInfo]);
 
-  if (loading) return <p>Loading projects...</p>;
-  if (error) return <p>Error loading projects: {error}</p>;
+  if (loading) return <LoadingBox />;
+  if (error) return <MessageBox variant="danger">{error}</MessageBox>;
+
+  const statusBadge = (status) => {
+    if (!status) return <Badge bg="secondary">Unknown</Badge>;
+    const s = status.toLowerCase();
+    if (s === "completed") return <Badge bg="success">Completed</Badge>;
+    if (s === "in progress" || s === "in-progress") return <Badge bg="warning" text="dark">In Progress</Badge>;
+    if (s === "pending") return <Badge bg="info" text="dark">Pending</Badge>;
+    return <Badge bg="secondary">{status}</Badge>;
+  };
 
   return (
-<Container classname="provider-container">
-  <h1 className="page-title">Projects</h1>
-  <div className="table-responsive">
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Project Name</th>
-          <th>Status</th>
-          <th>Time On Project</th>
-        </tr>
-      </thead>
-      <tbody>
-        {projects.map((project, index) => (
-          <tr key={index}>
-            <td data-label="ID">{index + 1}</td>
-            <td data-label="Project Name">{project.name}</td>
-            <td data-label="Status">{project.status}</td>
-            <td data-label="Time On Project">{project.hoursWorked}</td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  </div>
-</Container>
+    <div className="prj-page">
+      <div className="prj-hero">
+        <div className="prj-hero__inner">
+          <div className="prj-hero__icon"><FaFolderOpen /></div>
+          <h1 className="prj-hero__title">My Projects</h1>
+          <p className="prj-hero__sub">Overview of all assigned projects and their current status.</p>
+        </div>
+      </div>
 
+      <div className="prj-body">
+        {projects && projects.length > 0 ? (
+          <div className="table-responsive">
+            <table className="prj-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Project Name</th>
+                  <th>Status</th>
+                  <th>Hours on Project</th>
+                </tr>
+              </thead>
+              <tbody>
+                {projects.map((project, index) => (
+                  <tr key={project._id || index}>
+                    <td data-label="#">{index + 1}</td>
+                    <td data-label="Project Name">{project.name}</td>
+                    <td data-label="Status">{statusBadge(project.status)}</td>
+                    <td data-label="Hours on Project">{project.hoursWorked ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="prj-empty">
+            <FaBoxOpen className="prj-empty__icon" />
+            <p>No projects found.</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

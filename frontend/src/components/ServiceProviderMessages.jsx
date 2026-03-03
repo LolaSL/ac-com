@@ -2,10 +2,11 @@ import React, { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import { Container, Table, Button } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaEnvelope, FaBoxOpen } from "react-icons/fa";
 import "./ServiceProviderMessages.css";
+import "../pages/AdminHero.css";
 import LoadingBox from "./LoadingBox.jsx";
 import MessageBox from "./MessageBox.jsx";
 
@@ -71,12 +72,6 @@ const ServiceProviderMessages = () => {
     fetchMessages();
   }, [serviceProviderInfo, token, successDelete, navigate]);
 
-  useEffect(() => {
-    if (messages.length === 0 && !loading) {
-      // Handle empty state
-    }
-  }, [messages, loading]);
-
   const deleteHandler = async (messageId) => {
     if (window.confirm("Are you sure to delete this message?")) {
       dispatch({ type: "DELETE_REQUEST" });
@@ -93,59 +88,64 @@ const ServiceProviderMessages = () => {
   };
 
   return (
-<>
-      <style>
-        {`
-          .table-responsive td::before {
-            color: #333 !important;
-          }
-          .table-responsive td {
-            color: #333 !important; 
-          }
-        `}
-      </style>
-      <Container>
-        <h1 className="page-title">Messages from Clients</h1>
+    <div className="spm-page">
+      <div className="spm-hero">
+        <div className="spm-hero__inner">
+          <div className="spm-hero__icon"><FaEnvelope /></div>
+          <h1 className="spm-hero__title">Client Messages</h1>
+          <p className="spm-hero__sub">Manage incoming messages from your clients.</p>
+        </div>
+      </div>
+
+      <div className="spm-body">
         {loading ? (
           <LoadingBox />
         ) : error ? (
           <MessageBox variant="danger">{error}</MessageBox>
+        ) : messages.length === 0 ? (
+          <div className="spm-empty">
+            <FaBoxOpen className="spm-empty__icon" />
+            <p>No messages found.</p>
+          </div>
         ) : (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Client Name</th>
-                <th>Project Name</th>
-                <th>Message</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {messages.map((message) => (
-                <tr key={message._id}>
-                  <td data-label="ID">{message._id}</td>
-                  <td data-label="Client Name">{message.client}</td>
-                  <td data-label="Project Name">{message.projectName}</td>
-                  <td data-label="Message">{message.text}</td>
-                  <td data-label="Date">{new Date(message.date).toLocaleDateString()}</td>
-                  <td data-label="Actions">
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => deleteHandler(message._id)}
-                    >
-                      <FaTrash />
-                    </Button>
-                  </td>
+          <div className="table-responsive">
+            <table className="spm-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Client Name</th>
+                  <th>Project Name</th>
+                  <th>Message</th>
+                  <th>Date</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {messages.map((message, index) => (
+                  <tr key={message._id}>
+                    <td data-label="#">{index + 1}</td>
+                    <td data-label="Client Name">{message.client}</td>
+                    <td data-label="Project Name">{message.projectName}</td>
+                    <td data-label="Message">{message.text}</td>
+                    <td data-label="Date">{new Date(message.date).toLocaleDateString()}</td>
+                    <td data-label="Actions">
+                      <Button
+                        type="button"
+                        className="btn-admin-delete"
+                        title="Delete"
+                        onClick={() => deleteHandler(message._id)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Container>
-    </>
+      </div>
+    </div>
   );
 };
 

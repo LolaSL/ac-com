@@ -9,7 +9,8 @@ import {
 } from "recharts";
 import { FaFolderOpen, FaCheckCircle, FaSpinner, FaDollarSign,
          FaClock, FaEnvelope, FaUserEdit, FaMapMarkerAlt,
-         FaStar, FaExternalLinkAlt } from "react-icons/fa";
+         FaStar, FaExternalLinkAlt, FaMoneyBillWave,
+         FaLinkedin, FaInstagram, FaTwitter, FaFacebook } from "react-icons/fa";
 import "./ServiceProviderDashboard.css";
 
 const reducer = (state, action) => {
@@ -117,6 +118,26 @@ export default function ServiceProviderDashboard() {
                   <FaExternalLinkAlt /> Portfolio
                 </a>
               )}
+              {sp?.socialLinks?.linkedin?.startsWith('http') && (
+                <a href={sp.socialLinks.linkedin} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--linkedin" title="LinkedIn">
+                  <FaLinkedin />
+                </a>
+              )}
+              {sp?.socialLinks?.instagram?.startsWith('http') && (
+                <a href={sp.socialLinks.instagram} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--instagram" title="Instagram">
+                  <FaInstagram />
+                </a>
+              )}
+              {sp?.socialLinks?.twitter?.startsWith('http') && (
+                <a href={sp.socialLinks.twitter} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--twitter" title="Twitter / X">
+                  <FaTwitter />
+                </a>
+              )}
+              {sp?.socialLinks?.facebook?.startsWith('http') && (
+                <a href={sp.socialLinks.facebook} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--facebook" title="Facebook">
+                  <FaFacebook />
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -177,6 +198,7 @@ export default function ServiceProviderDashboard() {
             <Link to="/serviceprovider/earnings"  className="spd-quick-link"><FaDollarSign /> Earnings</Link>
             <Link to="/serviceprovider/hours"     className="spd-quick-link"><FaClock />     Hours Worked</Link>
             <Link to="/serviceprovider/messages"  className="spd-quick-link"><FaEnvelope />  Messages</Link>
+            <Link to="/serviceprovider/payments"  className="spd-quick-link"><FaMoneyBillWave /> Payments</Link>
           </div>
 
           {/* Hours summary */}

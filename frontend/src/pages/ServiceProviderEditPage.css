@@ -1,1 +1,69 @@
-/* No unique styles for ServiceProviderEditPage. Uses shared small-container from index.css and go-to-btn btn-text */
+/* ServiceProviderEditPage */
+.sp-edit-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 2rem;
+  max-width: 560px;
+  animation: spEditFade 0.35s ease both;
+}
+
+@keyframes spEditFade {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sp-edit-label {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.3rem;
+}
+
+.sp-edit-input {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.93rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sp-edit-input:focus {
+  border-color: #2563a8;
+  box-shadow: 0 0 0 3px rgba(37,99,168,0.12);
+  outline: none;
+}
+
+.sp-edit-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.sp-edit-save-btn {
+  background: linear-gradient(135deg, #1a3c5e, #2563a8);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.55rem 1.5rem;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.sp-edit-save-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.sp-edit-cancel-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #374151;
+  font-weight: 600;
+  padding: 0.55rem 1.5rem;
+  transition: background 0.2s;
+}
+
+.sp-edit-cancel-btn:hover {
+  background: #e5e7eb;
+  color: #1a2e4a;
+}

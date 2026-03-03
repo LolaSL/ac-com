@@ -43,8 +43,127 @@
   padding: 0 1.25rem;
 }
 
-/* existing */
-.order-id {
+/* Table */
+.umsg-table thead th {
+  background: #1a2e4a;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: none;
+  padding: 0.85rem 1rem;
+}
+
+.umsg-table tbody tr {
+  transition: background-color 0.15s;
+}
+
+.umsg-table tbody tr:hover {
+  background-color: #eef3fb;
+}
+
+.umsg-table tbody td {
+  vertical-align: middle;
+  padding: 0.8rem 1rem;
+  font-size: 0.92rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.umsg-order-ref {
+  font-family: monospace;
+  font-weight: 600;
+  color: #2563a8;
+  background: #e8f0fe;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
   word-break: break-all;
+  display: inline-block;
+  max-width: 200px;
+}
+
+.btn-admin-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  background: #e3f2fd;
+  color: #1976d2;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-edit:hover {
+  background: #1976d2;
+  color: #fff;
+}
+
+/* Empty state */
+.umsg-empty {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  color: #6b7280;
+}
+
+.umsg-empty__icon {
+  font-size: 4rem;
+  color: #2563a8;
+  opacity: 0.4;
+  margin-bottom: 1rem;
+}
+
+.umsg-empty h4 {
+  font-weight: 700;
+  color: #1a2e4a;
+  margin-bottom: 0.5rem;
+}
+
+.umsg-empty p {
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile cards */
+@media (max-width: 640px) {
+  .umsg-table thead {
+    display: none;
+  }
+
+  .umsg-table tbody tr {
+    display: block;
+    background: #fff;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    padding: 0.75rem;
+  }
+
+  .umsg-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.88rem;
+  }
+
+  .umsg-table tbody td:last-child {
+    border-bottom: none;
+    justify-content: flex-end;
+    padding-top: 0.75rem;
+  }
+
+  .umsg-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 0.5rem;
+  }
 }
 

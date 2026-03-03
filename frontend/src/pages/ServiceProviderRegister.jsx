@@ -1,13 +1,12 @@
 import Axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
 import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
+import { FaToolbox, FaEnvelope, FaLock, FaUser, FaPhone, FaBuilding, FaStar, FaLink } from "react-icons/fa";
 import "./ServiceProviderRegister.css";
 
 const ServiceProviderRegister = () => {
@@ -32,14 +31,7 @@ const ServiceProviderRegister = () => {
     e.preventDefault();
     try {
       const { data } = await Axios.post("/api/service-providers/register", {
-        name,
-        email,
-        password,
-        typeOfProvider,
-        phone,
-        company,
-        experience,
-        portfolio,
+        name, email, password, typeOfProvider, phone, company, experience, portfolio,
       });
       ctxDispatch({ type: "SERVICE_PROVIDER_REGISTER", payload: data });
       localStorage.setItem("serviceProviderInfo", JSON.stringify(data));
@@ -48,127 +40,90 @@ const ServiceProviderRegister = () => {
       toast.error(getError(err));
     }
   };
+
   useEffect(() => {
-    if (serviceProviderInfo) {
-      navigate(redirect);
-    }
+    if (serviceProviderInfo) navigate(redirect);
   }, [navigate, redirect, serviceProviderInfo]);
+
   return (
-    <Container className="d-flex justify-content-center align-items-center min-vh-100 py-4">
-      <Card
-        className="shadow-lg p-4"
-        style={{ maxWidth: "500px", width: "100%" }}
-      >
-        <Card.Body>
-          <h1 className="page-title text-center text-primary">
-            Service Provider Register
-          </h1>
-          <Form onSubmit={submitHandler}>
-            <Form.Group controlId="name" className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
+    <div className="sp-reg-page">
+      <div className="sp-reg-hero">
+        <div className="sp-reg-hero__icon"><FaToolbox /></div>
+        <h1 className="sp-reg-hero__title">Join as a Service Provider</h1>
+        <p className="sp-reg-hero__sub">Create your account to start receiving projects and managing earnings.</p>
+      </div>
+
+      <div className="sp-reg-card">
+        <h2 className="sp-reg-card__title">Create Account</h2>
+        <p className="sp-reg-card__sub">Fill in your details below</p>
+
+        <Form onSubmit={submitHandler}>
+          <div className="sp-reg-grid">
+            <Form.Group controlId="name">
+              <Form.Label className="sp-reg-label"><FaUser className="sp-reg-label__icon" /> Full Name</Form.Label>
+              <Form.Control type="text" placeholder="Your full name" className="sp-reg-input"
+                value={name} onChange={(e) => setName(e.target.value)} required />
             </Form.Group>
 
-            <Form.Group controlId="email" className="mb-3">
-              <Form.Label>Email Address</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+            <Form.Group controlId="email">
+              <Form.Label className="sp-reg-label"><FaEnvelope className="sp-reg-label__icon" /> Email Address</Form.Label>
+              <Form.Control type="email" placeholder="your@email.com" className="sp-reg-input"
+                value={email} onChange={(e) => setEmail(e.target.value)} required />
             </Form.Group>
 
-            <Form.Group controlId="password" className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <Form.Group controlId="password">
+              <Form.Label className="sp-reg-label"><FaLock className="sp-reg-label__icon" /> Password</Form.Label>
+              <Form.Control type="password" placeholder="Create a password" className="sp-reg-input"
+                value={password} onChange={(e) => setPassword(e.target.value)} required />
             </Form.Group>
 
-            <Form.Group controlId="typeOfProvider" className="mb-3">
-              <Form.Label>Type of Service Provider</Form.Label>
-              <Form.Select
-                value={typeOfProvider}
-                onChange={(e) => setTypeOfProvider(e.target.value)}
-                required
-              >
-                <option value="">Select Type</option>
+            <Form.Group controlId="typeOfProvider">
+              <Form.Label className="sp-reg-label"><FaToolbox className="sp-reg-label__icon" /> Type of Provider</Form.Label>
+              <Form.Select className="sp-reg-input" value={typeOfProvider}
+                onChange={(e) => setTypeOfProvider(e.target.value)} required>
+                <option value="">Select type…</option>
                 <option value="architect">Architect</option>
                 <option value="constructor">Constructor</option>
                 <option value="designer">Designer</option>
               </Form.Select>
             </Form.Group>
 
-            <Form.Group controlId="phone" className="mb-3">
-              <Form.Label>Phone</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter phone number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
+            <Form.Group controlId="phone">
+              <Form.Label className="sp-reg-label"><FaPhone className="sp-reg-label__icon" /> Phone</Form.Label>
+              <Form.Control type="text" placeholder="+1 000-000-0000" className="sp-reg-input"
+                value={phone} onChange={(e) => setPhone(e.target.value)} />
             </Form.Group>
 
-            <Form.Group controlId="company" className="mb-3">
-              <Form.Label>Company</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter company name"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-              />
+            <Form.Group controlId="company">
+              <Form.Label className="sp-reg-label"><FaBuilding className="sp-reg-label__icon" /> Company</Form.Label>
+              <Form.Control type="text" placeholder="Company name" className="sp-reg-input"
+                value={company} onChange={(e) => setCompany(e.target.value)} />
             </Form.Group>
 
-            <Form.Group controlId="experience" className="mb-3">
-              <Form.Label>Experience (Years)</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Enter experience in years"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-              />
+            <Form.Group controlId="experience">
+              <Form.Label className="sp-reg-label"><FaStar className="sp-reg-label__icon" /> Experience (Years)</Form.Label>
+              <Form.Control type="number" placeholder="e.g. 5" className="sp-reg-input"
+                value={experience} onChange={(e) => setExperience(e.target.value)} />
             </Form.Group>
-            <Form.Group controlId="portfolio" className="mb-3">
-              <Form.Label>Portfolio</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter portfolio link"
-                value={portfolio}
-                onChange={(e) => setPortfolio(e.target.value)}
-              />
+
+            <Form.Group controlId="portfolio">
+              <Form.Label className="sp-reg-label"><FaLink className="sp-reg-label__icon" /> Portfolio URL</Form.Label>
+              <Form.Control type="text" placeholder="https://yourportfolio.com" className="sp-reg-input"
+                value={portfolio} onChange={(e) => setPortfolio(e.target.value)} />
             </Form.Group>
-            <div className="d-grid mb-3">
-              <Button
-                type="submit"
-                className="go-to-btn btn-lg"
-                variant="primary"
-              >
-                Register
-              </Button>
-            </div>
-            <div className="text-center">
-              Already have an account?{" "}
-              <Link to={`/serviceprovider/login?redirect=${redirect}`}>
-                Login here
-              </Link>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+          </div>
+
+          <Button type="submit" className="sp-reg-btn">Create Account</Button>
+        </Form>
+
+        <div className="sp-reg-footer">
+          Already have an account?{" "}
+          <Link to={`/serviceprovider/login?redirect=${redirect}`}>Sign in</Link>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default ServiceProviderRegister;
+

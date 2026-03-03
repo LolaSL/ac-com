@@ -11,38 +11,76 @@ notificationRouter.get(
   '/',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    console.log('Logged-in user info:', req.user);
-
     let notifications;
 
     if (req.user.isAdmin) {
-      // Admin sees all admin notifications (no userId) or specifically for them
+      // Admin sees all admin-targeted + 'all' notifications
       notifications = await Notification.find({
         $or: [
-          { recipientType: 'admin', userId: { $exists: false } }, // General admin notifications
-          { recipientType: 'admin', userId: req.user._id },       // Specific admin notifications
-          { recipientType: 'all' },                               // General notifications
+          { recipientType: 'admin' },
+          { recipientType: 'all' },
         ],
       })
-        .select('_id title message type recipientType userId orderId isRead createdAt updatedAt link')
+        .select('_id title message type recipientType userId serviceProviderId orderId isRead createdAt updatedAt link')
         .sort({ createdAt: -1 })
         .lean({ virtuals: true });
-    } else {
-      // Users / service providers see their specific notifications + general ones for their type
+
+    } else if (req.user.isServiceProvider) {
+      // Service Provider — match by serviceProviderId or general SP broadcasts
       notifications = await Notification.find({
         $or: [
-          { recipientType: req.user.type, userId: req.user._id }, // Their specific notifications
-          { recipientType: req.user.type, userId: { $exists: false } }, // General for their type
-          { recipientType: 'all' },                               // General notifications
+          { recipientType: 'serviceProvider', serviceProviderId: req.user._id },
+          { recipientType: 'serviceProvider', serviceProviderId: { $in: [null, undefined] } },
+          { recipientType: 'all' },
         ],
       })
-        .select('_id title message type recipientType userId orderId isRead createdAt updatedAt link')
+        .select('_id title message type recipientType userId serviceProviderId orderId isRead createdAt updatedAt link')
+        .sort({ createdAt: -1 })
+        .lean({ virtuals: true });
+
+    } else {
+      // Regular user — match by userId or general user broadcasts
+      notifications = await Notification.find({
+        $or: [
+          { recipientType: 'user', userId: req.user._id },
+          { recipientType: 'user', userId: { $in: [null, undefined] } },
+          { recipientType: 'all' },
+        ],
+      })
+        .select('_id title message type recipientType userId serviceProviderId orderId isRead createdAt updatedAt link')
         .sort({ createdAt: -1 })
         .lean({ virtuals: true });
     }
 
-    console.log('Fetched notifications recipientTypes:', notifications.map(n => n.recipientType));
     res.json(notifications);
+  })
+);
+
+// MARK notification as read
+notificationRouter.put(
+  '/mark-all-read',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    let query;
+    if (req.user.isAdmin) {
+      query = { $or: [{ recipientType: 'admin' }, { recipientType: 'all' }] };
+    } else if (req.user.isServiceProvider) {
+      query = {
+        $or: [
+          { recipientType: 'serviceProvider', serviceProviderId: req.user._id },
+          { recipientType: 'all' },
+        ],
+      };
+    } else {
+      query = {
+        $or: [
+          { recipientType: 'user', userId: req.user._id },
+          { recipientType: 'all' },
+        ],
+      };
+    }
+    await Notification.updateMany({ ...query, isRead: false }, { $set: { isRead: true } });
+    res.json({ message: 'All notifications marked as read' });
   })
 );
 

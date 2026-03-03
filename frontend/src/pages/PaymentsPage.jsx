@@ -6,7 +6,7 @@ import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
 import { Store } from "../Store.js";
 import { Modal, Button, Form } from "react-bootstrap";
-import { FaCheckCircle, FaTrash, FaBan, FaMoneyBillWave } from "react-icons/fa";
+import { FaCheckCircle, FaTrash, FaBan, FaMoneyBillWave, FaRedoAlt } from "react-icons/fa";
 import "./PaymentsPage.css";
 import "./AdminHero.css";
 const reducer = (state, action) => {
@@ -182,6 +182,30 @@ export default function PaymentsPage() {
     }
   };
 
+  const markPendingHandler = async (payment) => {
+    if (window.confirm("Re-queue this payment as pending?")) {
+      try {
+        dispatch({ type: "UPDATE_REQUEST" });
+        await axios.put(
+          `/api/users/admin/payments/${payment._id}`,
+          { status: "pending" },
+          {
+            headers: { Authorization: `Bearer ${userInfo.token}` },
+          }
+        );
+        toast.success("Payment re-queued as pending");
+        dispatch({ type: "UPDATE_SUCCESS" });
+        const { data } = await axios.get("/api/users/admin/payments", {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        });
+        dispatch({ type: "FETCH_SUCCESS", payload: data });
+      } catch (err) {
+        toast.error(getError(err));
+        dispatch({ type: "UPDATE_FAIL" });
+      }
+    }
+  };
+
   const markMissedHandler = async (payment) => {
     if (window.confirm("Mark this payment as missed?")) {
       try {
@@ -262,18 +286,16 @@ export default function PaymentsPage() {
                     {payment.status === "pending" && (
                       <>
                         <Button
-                          size="sm"
-                          variant="success"
-                          className="w-auto"
+                          type="button"
+                          className="btn-admin-complete"
                           onClick={() => updateHandler(payment)}
                           title="Mark as Completed"
                         >
                           <FaCheckCircle />
                         </Button>
                         <Button
-                          size="sm"
-                          variant="danger"
-                          className="w-auto"
+                          type="button"
+                          className="btn-admin-delete"
                           onClick={() => deleteHandler(payment)}
                           title="Delete payment"
                         >
@@ -284,18 +306,16 @@ export default function PaymentsPage() {
                     {payment.status === "completed" && (
                       <>
                         <Button
-                          size="sm"
-                          variant="warning"
-                          className="w-auto"
+                          type="button"
+                          className="btn-admin-warn"
                           onClick={() => markMissedHandler(payment)}
                           title="Mark as Missed"
                         >
                           <FaBan />
                         </Button>
                         <Button
-                          size="sm"
-                          variant="danger"
-                          className="w-auto"
+                          type="button"
+                          className="btn-admin-delete"
                           onClick={() => deleteHandler(payment)}
                           title="Delete payment"
                         >
@@ -304,15 +324,32 @@ export default function PaymentsPage() {
                       </>
                     )}
                     {payment.status === "missed" && (
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        className="w-auto"
-                        onClick={() => deleteHandler(payment)}
-                        title="Delete payment"
-                      >
-                        <FaTrash />
-                      </Button>
+                      <>
+                        <Button
+                          type="button"
+                          className="btn-admin-view"
+                          onClick={() => markPendingHandler(payment)}
+                          title="Re-queue as Pending"
+                        >
+                          <FaRedoAlt />
+                        </Button>
+                        <Button
+                          type="button"
+                          className="btn-admin-complete"
+                          onClick={() => updateHandler(payment)}
+                          title="Mark as Completed"
+                        >
+                          <FaCheckCircle />
+                        </Button>
+                        <Button
+                          type="button"
+                          className="btn-admin-delete"
+                          onClick={() => deleteHandler(payment)}
+                          title="Delete payment"
+                        >
+                          <FaTrash />
+                        </Button>
+                      </>
                     )}
                     </div>
                   </td>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useCallback } from "react";
+import React, { useContext, useEffect, useReducer, useCallback, useState } from "react";
 import axios from "axios";
 import { Chart } from "react-google-charts";
 import { Store } from "../Store";
@@ -44,6 +44,8 @@ const ServiceProviders = () => {
   const { adminInfo } = state;
   const token = adminInfo?.token;
 
+  const [chartPage, setChartPage] = useState(0);
+
   const fetchData = useCallback(async () => {
     dispatch({ type: "FETCH_REQUEST" });
     try {
@@ -64,14 +66,13 @@ const ServiceProviders = () => {
     fetchData();
   }, [fetchData]);
 
+  // --- Chart data ---
+
+  // Page 1: Earnings bar + Project distribution pie
   const barChartData = [
     ["Provider", "Earnings"],
-    ...serviceProviders.map((provider) => [
-      provider.name,
-      provider.totalEarnings || 0,
-    ]),
+    ...serviceProviders.map((p) => [p.name, p.totalEarnings || 0]),
   ];
-
   const barChartOptions = {
     title: "Provider vs Earnings",
     chartArea: { width: "70%" },
@@ -83,22 +84,9 @@ const ServiceProviders = () => {
 
   const pieChartData = [
     ["Status", "Number of Projects"],
-    [
-      "Completed Projects",
-      serviceProviders.reduce(
-        (sum, provider) => sum + (provider.completedProjects || 0),
-        0
-      ),
-    ],
-    [
-      "In Progress Projects",
-      serviceProviders.reduce(
-        (sum, provider) => sum + (provider.inProgressProjects || 0),
-        0
-      ),
-    ],
+    ["Completed", serviceProviders.reduce((s, p) => s + (p.completedProjects || 0), 0)],
+    ["In Progress", serviceProviders.reduce((s, p) => s + (p.inProgressProjects || 0), 0)],
   ];
-
   const pieChartOptions = {
     title: "Project Distribution",
     pieHole: 0.4,
@@ -106,6 +94,91 @@ const ServiceProviders = () => {
     legend: { position: "bottom" },
     colors: ["#0ac22f", "#cd17ee"],
   };
+
+  // Page 2: Projects per SP grouped bar + Specialty pie
+  const projectsPerSPData = [
+    ["Provider", "Completed", "In Progress"],
+    ...serviceProviders.map((p) => [p.name, p.completedProjects || 0, p.inProgressProjects || 0]),
+  ];
+  const projectsPerSPOptions = {
+    title: "Projects per Provider",
+    chartArea: { width: "65%" },
+    hAxis: { title: "Count", minValue: 0 },
+    vAxis: { title: "Provider" },
+    isStacked: false,
+    colors: ["#0ac22f", "#cd17ee"],
+  };
+
+  const specialtyCount = serviceProviders.reduce((acc, p) => {
+    const key = p.typeOfProvider || "Unknown";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+  const specialtyPieData = [
+    ["Specialty", "Count"],
+    ...Object.entries(specialtyCount),
+  ];
+  const specialtyPieOptions = {
+    title: "SP Specialty Distribution",
+    pieHole: 0.4,
+    legend: { position: "bottom" },
+  };
+
+  // Page 3: Experience column + Message volume bar
+  const experienceData = [
+    ["Provider", "Years of Experience"],
+    ...serviceProviders.map((p) => [p.name, Number(p.experience) || 0]),
+  ];
+  const experienceOptions = {
+    title: "Experience per Provider",
+    chartArea: { width: "70%" },
+    hAxis: { title: "Provider" },
+    vAxis: { title: "Years", minValue: 0 },
+    legend: "none",
+    colors: ["#f59e0b"],
+  };
+
+  const messageVolumeData = [
+    ["Provider", "Messages"],
+    ...serviceProviders.map((p) => [p.name, Array.isArray(p.messages) ? p.messages.length : 0]),
+  ];
+  const messageVolumeOptions = {
+    title: "Message Volume per Provider",
+    chartArea: { width: "70%" },
+    hAxis: { title: "Messages", minValue: 0 },
+    vAxis: { title: "Provider" },
+    legend: "none",
+    colors: ["#1976d2"],
+  };
+
+  const renderChart = (title, chartType, data, options, height = "300px") => {
+    const hasData = data && data.length > 1;
+    return (
+      <div className="chart-container">
+        <h3>{title}</h3>
+        {!hasData ? (
+          <MessageBox>No Data Available</MessageBox>
+        ) : (
+          <Chart chartType={chartType} width="100%" height={height} data={data} options={options} />
+        )}
+      </div>
+    );
+  };
+
+  const chartPages = [
+    <>
+      {renderChart("Provider vs Earnings", "BarChart", barChartData, barChartOptions)}
+      {renderChart("Project Distribution", "PieChart", pieChartData, pieChartOptions)}
+    </>,
+    <>
+      {renderChart("Projects per Provider", "BarChart", projectsPerSPData, projectsPerSPOptions, "350px")}
+      {renderChart("SP Specialty Distribution", "PieChart", specialtyPieData, specialtyPieOptions)}
+    </>,
+    <>
+      {renderChart("Experience per Provider", "ColumnChart", experienceData, experienceOptions)}
+      {renderChart("Message Volume per Provider", "BarChart", messageVolumeData, messageVolumeOptions)}
+    </>,
+  ];
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
@@ -203,26 +276,6 @@ const ServiceProviders = () => {
               )}
             </tbody>
           </Table>
-          <div className="chart-container">
-            <h3>Project Distribution</h3>
-            <Chart
-              chartType="PieChart"
-              width="100%"
-              height="300px"
-              data={pieChartData}
-              options={pieChartOptions}
-            />
-          </div>
-          <div className="chart-container">
-            <h3>Provider vs Earnings</h3>
-            <Chart
-              chartType="BarChart"
-              width="100%"
-              height="300px"
-              data={barChartData}
-              options={barChartOptions}
-            />
-          </div>
           <div className="pagination-container">
             <button
               className="details"
@@ -240,6 +293,26 @@ const ServiceProviders = () => {
               disabled={currentPage === totalPages}
             >
               Next →
+            </button>
+          </div>
+
+          {/* Charts */}
+          <div className="mt-4">{chartPages[chartPage]}</div>
+          <div className="pagination-container mt-2">
+            <button
+              className="details"
+              onClick={() => setChartPage((p) => Math.max(p - 1, 0))}
+              disabled={chartPage === 0}
+            >
+              ← Prev Charts
+            </button>
+            <span>Charts {chartPage + 1} / {chartPages.length}</span>
+            <button
+              className="details"
+              onClick={() => setChartPage((p) => Math.min(p + 1, chartPages.length - 1))}
+              disabled={chartPage === chartPages.length - 1}
+            >
+              Next Charts →
             </button>
           </div>
         </div>

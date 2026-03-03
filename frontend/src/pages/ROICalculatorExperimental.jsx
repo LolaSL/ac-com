@@ -161,7 +161,7 @@ export default function ROICalculatorExperimental() {
       setSaveCalculationDescription(
         `BTU Project: ${btuData.numberOfRooms} room(s), ${
           btuData.totalSquareFootage
-        } m², ${btuData.totalBTU.toLocaleString("de-DE")} BTU total. Estimated project cost: $${
+        } m², ${btuData.totalBTU.toLocaleString("en-US")} BTU total. Estimated project cost: $${
           btuData.estimatedProjectCost?.toLocaleString() || 0
         }. Installation: ${btuData.estimatedInstallationDays} day(s).`
       );
@@ -809,54 +809,54 @@ export default function ROICalculatorExperimental() {
     // Build dynamic insights from saved calculation data
     const insights = [];
 
-    // 1 — Per-project saving
-    insights.push(`💡 Per-Project Saving: AC Commerce reduces cost by ${calculation.savingsPercentage}% — saving $${calculation.savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} per project.`);
+    // 1 -- Per-project saving
+    insights.push(`[SAVING] Per-Project Saving: AC Commerce reduces cost by ${calculation.savingsPercentage}% - saving $${calculation.savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} per project.`);
 
-    // 2 — Payback signal
+    // 2 -- Payback signal
     if (calcPayback <= 6) {
-      insights.push(`✅ Low-Risk Investment: Break-even in ${calcPayback} month${calcPayback !== 1 ? "s" : ""} with ${calculation.roi}% ROI over ${calculation.monthsToAnalyze} months. Prioritise scaling immediately.`);
+      insights.push(`[LOW RISK] Break-even in ${calcPayback} month${calcPayback !== 1 ? "s" : ""} with ${calculation.roi}% ROI over ${calculation.monthsToAnalyze} months. Prioritise scaling immediately.`);
     } else if (calcPayback <= 12) {
-      insights.push(`⚠ Moderate Payback: Break-even in ${calcPayback} months with ${calculation.roi}% ROI. Scaling project volume will shorten payback.`);
+      insights.push(`[MODERATE] Break-even in ${calcPayback} months with ${calculation.roi}% ROI. Scaling project volume will shorten payback.`);
     } else {
-      insights.push(`⏳ Longer Payback: Break-even in ${calcPayback} months with ${calculation.roi}% ROI. Increasing monthly project volume is the fastest way to accelerate returns.`);
+      insights.push(`[LONG PAYBACK] Break-even in ${calcPayback} months with ${calculation.roi}% ROI. Increasing monthly project volume is the fastest way to accelerate returns.`);
     }
 
-    // 3 — Service-type tip
+    // 3 -- Service-type tip
     const calcServiceTips = {
-      "AC Installation": `🔧 Installation: Platform pricing reduces equipment cost vs. traditional procurement for this service type (${(calcServiceMult * 100).toFixed(0)}% cost factor).`,
-      "AC Repair": `🔨 Repair Efficiency: Repair jobs run at ~40% of install cost — higher volume is achievable without proportional cost growth (${(calcServiceMult * 100).toFixed(0)}% cost factor).`,
-      "AC Maintenance": `🗓 Maintenance Volume: Maintenance has a 3× frequency multiplier — maximises recurring revenue at lower per-visit cost (${(calcServiceMult * 100).toFixed(0)}% cost factor).`,
-      "Gas Ducted Heating": `🔥 Heating Premium: Gas ducted carries a 1.3× cost factor — AC Commerce discounts are proportionally larger here.`,
-      "Indoor Air Quality": `🌬 IAQ Opportunity: IAQ work combines high value with moderate cost — ${calculation.savingsPercentage}% margin improvement gives strong competitive positioning.`,
-      "Smart Control Automation": `🤖 Automation Edge: Smart control has the shortest time factor (0.6×). Pair with IoT upsells to compound revenue beyond base savings.`,
-      "Electrical Service": `⚡ Electrical Bundling: Electrical jobs bundled with HVAC installs absorb team availability without extra mobilisation cost.`,
+      "AC Installation": `[INSTALLATION] Platform pricing reduces equipment cost vs. traditional procurement for this service type (${(calcServiceMult * 100).toFixed(0)}% cost factor).`,
+      "AC Repair": `[REPAIR] Repair jobs run at ~40% of install cost - higher volume is achievable without proportional cost growth (${(calcServiceMult * 100).toFixed(0)}% cost factor).`,
+      "AC Maintenance": `[MAINTENANCE] Maintenance has a 3x frequency multiplier - maximises recurring revenue at lower per-visit cost (${(calcServiceMult * 100).toFixed(0)}% cost factor).`,
+      "Gas Ducted Heating": `[HEATING] Gas ducted carries a 1.3x cost factor - AC Commerce discounts are proportionally larger here.`,
+      "Indoor Air Quality": `[IAQ] IAQ work combines high value with moderate cost - ${calculation.savingsPercentage}% margin improvement gives strong competitive positioning.`,
+      "Smart Control Automation": `[AUTOMATION] Smart control has the shortest time factor (0.6x). Pair with IoT upsells to compound revenue beyond base savings.`,
+      "Electrical Service": `[ELECTRICAL] Electrical jobs bundled with HVAC installs absorb team availability without extra mobilisation cost.`,
     };
     if (calcServiceTips[calculation.serviceType]) insights.push(calcServiceTips[calculation.serviceType]);
 
-    // 4 — Property-type tip
+    // 4 -- Property-type tip
     if (calculation.propertyType === "residential-multi" && calculation.numberOfUnits) {
-      insights.push(`🏢 Multi-Unit Advantage: ${calculation.numberOfUnits} unit${calculation.numberOfUnits !== 1 ? "s" : ""} — AC Commerce's multi-unit platform discount offsets bulk coordination overhead.`);
+      insights.push(`[MULTI-UNIT] ${calculation.numberOfUnits} unit${calculation.numberOfUnits !== 1 ? "s" : ""} - AC Commerce's multi-unit platform discount offsets bulk coordination overhead.`);
     } else if (calculation.propertyType === "industrial-commercial") {
-      insights.push(`🏭 Commercial Maintenance Impact: Maintenance cost drops from 5% → 2% of project value on the AC Commerce platform.`);
+      insights.push(`[COMMERCIAL] Maintenance cost drops from 5% to 2% of project value on the AC Commerce platform.`);
     }
 
-    // 5 — Scale/ROI opportunity
+    // 5 -- Scale/ROI opportunity
     if (calcRoi >= 100) {
-      insights.push(`📈 Scale Opportunity: ROI exceeds 100% — every additional project per month generates over $${calculation.savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} in incremental savings.`);
+      insights.push(`[SCALE] ROI exceeds 100% - every additional project per month generates over $${calculation.savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} in incremental savings.`);
     } else if (calcRoi < 50 && calculation.projectsPerMonth < 5) {
-      insights.push(`📊 Volume Suggestion: ROI is relatively low at current volume (${calculation.projectsPerMonth}/month). Growing to 5+ projects/month will substantially improve the payback curve.`);
+      insights.push(`[VOLUME] ROI is relatively low at current volume (${calculation.projectsPerMonth}/month). Growing to 5+ projects/month will substantially improve the payback curve.`);
     }
 
-    // 6 — BTU data source
+    // 6 -- BTU data source
     if (calculation.btuProjectData) {
       const bpd = calculation.btuProjectData;
-      insights.push(`📐 BTU-Sourced Data: Equipment costs derived from actual BTU Calculator units ($${(bpd.estimatedProjectCost || 0).toLocaleString("en-US", { maximumFractionDigits: 0 })} project cost, ${bpd.numberOfRooms || "?"} rooms, ${(bpd.totalBTU || 0).toLocaleString("de-DE")} BTU).`);
+      insights.push(`[BTU DATA] Equipment costs derived from actual BTU Calculator units ($${(bpd.estimatedProjectCost || 0).toLocaleString("en-US", { maximumFractionDigits: 0 })} project cost, ${bpd.numberOfRooms || "?"} rooms, ${(bpd.totalBTU || 0).toLocaleString("en-US")} BTU).`);
     }
 
-    // 7 — Recommendations list
+    // 7 -- Recommendations list
     insights.push("");
     insights.push(`RECOMMENDATIONS:`);
-    insights.push(`  1. Implement AC Commerce immediately — payback in ${calcPayback} month${calcPayback !== 1 ? "s" : ""}`);
+    insights.push(`  1. Implement AC Commerce immediately - payback in ${calcPayback} month${calcPayback !== 1 ? "s" : ""}`);
     insights.push(`  2. Scale project volume to ${Math.max((calculation.projectsPerMonth || 1) + 2, 5)}/month to accelerate ROI`);
     insights.push(`  3. Monitor actual vs. projected savings monthly`);
     insights.push(`  4. Leverage BTU Calculator integration for precise per-project cost data`);
@@ -1495,7 +1495,7 @@ export default function ROICalculatorExperimental() {
 
       if (btuData.totalBTU) {
         doc.text(
-          `Total BTU Required: ${btuData.totalBTU.toLocaleString("de-DE")} BTU`,
+          `Total BTU Required: ${btuData.totalBTU.toLocaleString("en-US")} BTU`,
           margin + 10,
           yPosition
         );
@@ -1575,46 +1575,46 @@ export default function ROICalculatorExperimental() {
     const insights = [];
 
     // 1 — Per-project saving
-    insights.push(`💡 Per-Project Saving: AC Commerce reduces cost by ${savingsPercentage}% — saving $${savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} per project.`);
+    insights.push(`[SAVING] Per-Project Saving: AC Commerce reduces cost by ${savingsPercentage}% - saving $${savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} per project.`);
 
     // 2 — Payback signal
     if (paybackMonths <= 6) {
-      insights.push(`✅ Low-Risk Investment: Break-even in ${paybackMonths} month${paybackMonths !== 1 ? "s" : ""} with ${roi}% ROI over ${monthsToAnalyze} months. Prioritise scaling immediately.`);
+      insights.push(`[LOW RISK] Break-even in ${paybackMonths} month${paybackMonths !== 1 ? "s" : ""} with ${roi}% ROI over ${monthsToAnalyze} months. Prioritise scaling immediately.`);
     } else if (paybackMonths <= 12) {
-      insights.push(`⚠ Moderate Payback: Break-even in ${paybackMonths} months with ${roi}% ROI. Scaling project volume will shorten payback.`);
+      insights.push(`[MODERATE] Break-even in ${paybackMonths} months with ${roi}% ROI. Scaling project volume will shorten payback.`);
     } else {
-      insights.push(`⏳ Longer Payback: Break-even in ${paybackMonths} months with ${roi}% ROI. Increasing monthly project volume is the fastest way to accelerate returns.`);
+      insights.push(`[LONG PAYBACK] Break-even in ${paybackMonths} months with ${roi}% ROI. Increasing monthly project volume is the fastest way to accelerate returns.`);
     }
 
     // 3 — Service-type tip
     const serviceTips = {
-      "AC Installation": `🔧 Installation: Platform pricing yields ${((1 - config.costMultiplier.acCommerce / config.costMultiplier.traditional) * 100).toFixed(0)}% equipment cost reduction vs. traditional procurement.`,
-      "AC Repair": `🔨 Repair Efficiency: Repair jobs run at ~40% of install cost — higher volume is achievable without proportional cost growth.`,
-      "AC Maintenance": `🗓 Maintenance Volume: Maintenance has a 3× frequency multiplier — ${adjustedProjectsPerMonth} visits/month maximises recurring revenue at lower per-visit cost.`,
-      "Gas Ducted Heating": `🔥 Heating Premium: Gas ducted carries a 1.3× cost factor — AC Commerce equipment discounts are proportionally larger here.`,
-      "Indoor Air Quality": `🌬 IAQ Opportunity: IAQ work combines high perceived value with moderate cost — the ${savingsPercentage}% margin improvement gives strong competitive positioning.`,
-      "Smart Control Automation": `🤖 Automation Edge: Smart control has the shortest time factor (0.6×). Pair with IoT upsells to compound revenue beyond base savings.`,
-      "Electrical Service": `⚡ Electrical Bundling: Electrical jobs bundled with HVAC installs absorb team availability without extra mobilisation cost.`,
+      "AC Installation": `[INSTALLATION] Platform pricing yields ${((1 - config.costMultiplier.acCommerce / config.costMultiplier.traditional) * 100).toFixed(0)}% equipment cost reduction vs. traditional procurement.`,
+      "AC Repair": `[REPAIR] Repair jobs run at ~40% of install cost - higher volume is achievable without proportional cost growth.`,
+      "AC Maintenance": `[MAINTENANCE] Maintenance has a 3x frequency multiplier - ${adjustedProjectsPerMonth} visits/month maximises recurring revenue at lower per-visit cost.`,
+      "Gas Ducted Heating": `[HEATING] Gas ducted carries a 1.3x cost factor - AC Commerce equipment discounts are proportionally larger here.`,
+      "Indoor Air Quality": `[IAQ] IAQ work combines high perceived value with moderate cost - the ${savingsPercentage}% margin improvement gives strong competitive positioning.`,
+      "Smart Control Automation": `[AUTOMATION] Smart control has the shortest time factor (0.6x). Pair with IoT upsells to compound revenue beyond base savings.`,
+      "Electrical Service": `[ELECTRICAL] Electrical jobs bundled with HVAC installs absorb team availability without extra mobilisation cost.`,
     };
     if (serviceTips[serviceType]) insights.push(serviceTips[serviceType]);
 
     // 4 — Property-type tip
     if (propertyType === "residential-multi") {
-      insights.push(`🏢 Multi-Unit Advantage: ${numberOfUnits} unit${numberOfUnits !== 1 ? "s" : ""} — bulk coordination overhead (5%) is offset by AC Commerce's 10% multi-unit platform discount.`);
+      insights.push(`[MULTI-UNIT] ${numberOfUnits} unit${numberOfUnits !== 1 ? "s" : ""} - bulk coordination overhead (5%) is offset by AC Commerce's 10% multi-unit platform discount.`);
     } else if (propertyType === "industrial-commercial") {
-      insights.push(`🏭 Commercial Maintenance Impact: Maintenance cost drops from 5% → 2% of project value on the AC Commerce platform — a significant recurring saving at commercial scale.`);
+      insights.push(`[COMMERCIAL] Maintenance cost drops from 5% to 2% of project value on the AC Commerce platform - a significant recurring saving at commercial scale.`);
     }
 
     // 5 — Scale opportunity
     if (parseFloat(roi) >= 100) {
-      insights.push(`📈 Scale Opportunity: ROI exceeds 100% — every additional project per month generates over $${savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} in incremental savings.`);
+      insights.push(`[SCALE] ROI exceeds 100% - every additional project per month generates over $${savingsPerProject.toLocaleString("en-US", { maximumFractionDigits: 0 })} in incremental savings.`);
     } else if (parseFloat(roi) < 50 && projectsPerMonth < 5) {
-      insights.push(`📊 Volume Suggestion: ROI is relatively low at current volume (${projectsPerMonth}/month). Growing to 5+ projects/month will substantially improve the payback curve.`);
+      insights.push(`[VOLUME] ROI is relatively low at current volume (${projectsPerMonth}/month). Growing to 5+ projects/month will substantially improve the payback curve.`);
     }
 
-    // 6 — BTU data source
+    // 6 -- BTU data source
     if (isFromBTU && capturedBtuData) {
-      insights.push(`📐 BTU-Sourced Data: Equipment costs are based on actual selected units ($${capturedBtuData.equipmentCost?.toLocaleString("en-US", { maximumFractionDigits: 0 })} equipment, ${capturedBtuData.totalBTU?.toLocaleString("de-DE")} BTU total) rather than estimated percentages.`);
+      insights.push(`[BTU DATA] Equipment costs are based on actual selected units ($${capturedBtuData.equipmentCost?.toLocaleString("en-US", { maximumFractionDigits: 0 })} equipment, ${capturedBtuData.totalBTU?.toLocaleString("en-US")} BTU total) rather than estimated percentages.`);
     }
 
     // 7 — Recommendations list

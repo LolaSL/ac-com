@@ -147,6 +147,7 @@
 
 .spd-hero__actions {
   display: flex;
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -181,6 +182,26 @@
   transform: translateY(-2px);
   color: #1a3c5e;
 }
+
+/* Social icon buttons */
+.spd-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  color: #fff;
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.spd-social-btn:hover { opacity: 0.85; transform: translateY(-2px); color: #fff; }
+.spd-social-btn--linkedin  { background: #0a66c2; }
+.spd-social-btn--instagram { background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
+.spd-social-btn--twitter   { background: #1da1f2; }
+.spd-social-btn--facebook  { background: #1877f2; }
 
 /* ─── KPI Grid ────────────────────────────────────────────── */
 .spd-kpi-grid {

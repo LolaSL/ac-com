@@ -15,7 +15,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
-import { FaShoppingCart, FaUsers, FaBox, FaChartLine } from "react-icons/fa";
+import { FaShoppingCart, FaUsers, FaBox, FaChartLine, FaMoneyBillWave, FaHardHat, FaTasks, FaEnvelope, FaBell } from "react-icons/fa";
 import "./UsersProductSales.css";
 
 const initialState = {
@@ -59,6 +59,11 @@ export default function UsersProductSales() {
   const totalProducts =
     summary?.productCategories?.reduce((sum, x) => sum + x.count, 0) || 0;
   const totalOrders = summary?.orders?.[0]?.numOrders || 0;
+  const totalEarnings = summary?.totalEarnings?.[0]?.totalEarnings || 0;
+  const totalSPs = summary?.totalServiceProviders || 0;
+  const totalProjects = summary?.totalProjects?.[0]?.numProjects || 0;
+  const totalMessages = summary?.totalMessages || 0;
+  const totalNotifications = summary?.totalNotifications?.[0]?.numNotifications || 0;
 
   const fetchData = useCallback(
     async (page = 1) => {
@@ -157,6 +162,69 @@ export default function UsersProductSales() {
     ],
     [
       renderChart(
+        "Daily Order Count",
+        [
+          ["Date", "Orders"],
+          ...(summary.dailyOrders?.map((x) => [x._id, x.orders]) || []),
+        ],
+        "ColumnChart",
+        {
+          title: "Orders per Day",
+          hAxis: { title: "Date" },
+          vAxis: { title: "# Orders", minValue: 0 },
+          colors: ["#7c3aed"],
+          legend: { position: "none" },
+        }
+      ),
+      renderChart(
+        "Paid vs Unpaid Over Time",
+        [
+          ["Date", "Paid", "Unpaid"],
+          ...(summary.dailyOrders?.map((x) => [x._id, x.paidOrders, x.notPaidOrders]) || []),
+        ],
+        "BarChart",
+        {
+          isStacked: true,
+          hAxis: { title: "Orders", minValue: 0 },
+          vAxis: { title: "Date" },
+          colors: ["#2e7d32", "#d32f2f"],
+        }
+      ),
+    ],
+    [
+      renderChart(
+        "Delivered vs Undelivered Over Time",
+        [
+          ["Date", "Delivered", "Not Delivered"],
+          ...(summary.dailyOrders?.map((x) => [x._id, x.deliveredOrders || 0, x.notDeliveredOrders || 0]) || []),
+        ],
+        "BarChart",
+        {
+          isStacked: true,
+          hAxis: { title: "Count", minValue: 0 },
+          vAxis: { title: "Date" },
+          colors: ["#1976d2", "#f59e0b"],
+        }
+      ),
+      renderChart(
+        "Earnings by SP Project",
+        [
+          ["Category", "Earnings ($)"],
+          ...(summary.totalEarnings?.length
+            ? [["Total SP Earnings", totalEarnings]]
+            : []),
+        ],
+        "BarChart",
+        {
+          hAxis: { title: "Amount ($)", minValue: 0 },
+          vAxis: { title: "" },
+          colors: ["#0f766e"],
+          legend: { position: "none" },
+        }
+      ),
+    ],
+    [
+      renderChart(
         "Orders Status",
         [
           ["Status", "Count"],
@@ -229,9 +297,7 @@ export default function UsersProductSales() {
             <Col md={3} className="mb-3">
               <Card className="overview-card">
                 <Card.Body>
-                  <div className="card-icon">
-                    <FaShoppingCart />
-                  </div>
+                  <div className="card-icon"><FaShoppingCart /></div>
                   <h5 className="card-title">Total Sales</h5>
                   <h3 className="card-value">${totalSales?.toFixed(2) || 0}</h3>
                 </Card.Body>
@@ -240,9 +306,7 @@ export default function UsersProductSales() {
             <Col md={3} className="mb-3">
               <Card className="overview-card">
                 <Card.Body>
-                  <div className="card-icon">
-                    <FaUsers />
-                  </div>
+                  <div className="card-icon"><FaUsers /></div>
                   <h5 className="card-title">Total Users</h5>
                   <h3 className="card-value">{totalUsers || 0}</h3>
                 </Card.Body>
@@ -251,9 +315,7 @@ export default function UsersProductSales() {
             <Col md={3} className="mb-3">
               <Card className="overview-card">
                 <Card.Body>
-                  <div className="card-icon">
-                    <FaBox />
-                  </div>
+                  <div className="card-icon"><FaBox /></div>
                   <h5 className="card-title">Total Products</h5>
                   <h3 className="card-value">{totalProducts || 0}</h3>
                 </Card.Body>
@@ -262,11 +324,54 @@ export default function UsersProductSales() {
             <Col md={3} className="mb-3">
               <Card className="overview-card">
                 <Card.Body>
-                  <div className="card-icon">
-                    <FaChartLine />
-                  </div>
+                  <div className="card-icon"><FaChartLine /></div>
                   <h5 className="card-title">Total Orders</h5>
                   <h3 className="card-value">{totalOrders || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon"><FaMoneyBillWave /></div>
+                  <h5 className="card-title">SP Earnings</h5>
+                  <h3 className="card-value">${totalEarnings?.toFixed(2) || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon"><FaHardHat /></div>
+                  <h5 className="card-title">Service Providers</h5>
+                  <h3 className="card-value">{totalSPs || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon"><FaTasks /></div>
+                  <h5 className="card-title">Projects</h5>
+                  <h3 className="card-value">{totalProjects || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon"><FaEnvelope /></div>
+                  <h5 className="card-title">Messages</h5>
+                  <h3 className="card-value">{totalMessages || 0}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Card className="overview-card">
+                <Card.Body>
+                  <div className="card-icon"><FaBell /></div>
+                  <h5 className="card-title">Notifications</h5>
+                  <h3 className="card-value">{totalNotifications || 0}</h3>
                 </Card.Body>
               </Card>
             </Col>

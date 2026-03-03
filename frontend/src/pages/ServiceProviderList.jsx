@@ -243,7 +243,7 @@ export default function ServiceProviderList() {
                 .map((serviceProvider) => (
                   <tr key={serviceProvider._id} className="admin-table-row">
                     <td className="small-text">
-                      {serviceProvider._id.substring(0, 8)}
+                      {serviceProvider._id}
                     </td>
                     <td>{serviceProvider.name}</td>
                     <td>{serviceProvider.email}</td>

@@ -424,27 +424,24 @@ export default function AdminROICalculationsPage() {
                     <td style={{ whiteSpace: "nowrap" }}>
                       <div className="d-flex gap-1">
                       <Button
-                        size="sm"
-                        variant="outline-primary"
-                        className="w-auto"
+                        type="button"
+                        className="btn-admin-view"
                         title="View details"
                         onClick={() => handleView(calc)}
                       >
                         <FaEye />
                       </Button>
                       <Button
-                        size="sm"
-                        variant="outline-info"
-                        className="w-auto"
+                        type="button"
+                        className="btn-admin-pdf"
                         title="Export PDF"
                         onClick={() => handleExportPDF(calc)}
                       >
                         <FaFilePdf />
                       </Button>
                       <Button
-                        size="sm"
-                        variant="outline-danger"
-                        className="w-auto"
+                        type="button"
+                        className="btn-admin-delete"
                         title="Delete"
                         onClick={() => handleDelete(calc._id)}
                       >

@@ -42,3 +42,70 @@
   margin: 0 auto;
   padding: 0 1.25rem;
 }
+
+/* Shared icon action buttons for all admin tables */
+.btn-admin-view,
+.btn-admin-pdf,
+.btn-admin-delete,
+.btn-admin-complete,
+.btn-admin-warn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  border: none !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.btn-admin-view {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+.btn-admin-view:hover {
+  background: #1976d2;
+  color: #fff;
+}
+
+.btn-admin-pdf {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.btn-admin-pdf:hover {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.btn-admin-delete {
+  background: #ffebee;
+  color: #d32f2f;
+}
+.btn-admin-delete:hover {
+  background: #d32f2f;
+  color: #fff;
+}
+
+.btn-admin-complete {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.btn-admin-complete:hover {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.btn-admin-warn {
+  background: #fff8e1;
+  color: #f59e0b;
+}
+.btn-admin-warn:hover {
+  background: #f59e0b;
+  color: #fff;
+}

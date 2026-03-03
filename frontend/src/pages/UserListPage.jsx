@@ -227,7 +227,7 @@ export default function UserListPage() {
               {sortedUsers.map((user) => (
                 <tr key={user._id} className="admin-table-row">
                   <td data-label="ID" className="small-text">
-                    {user._id.substring(0, 8)}...
+                    {user._id}
                   </td>
                   <td data-label="Name">{user.name}</td>
                   <td data-label="Email">{user.email}</td>

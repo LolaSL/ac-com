@@ -2,7 +2,10 @@ import React, { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import { Container, Table } from "react-bootstrap";
+import { Badge } from "react-bootstrap";
+import { FaDollarSign, FaBoxOpen } from "react-icons/fa";
+import LoadingBox from "../components/LoadingBox.jsx";
+import MessageBox from "../components/MessageBox.jsx";
 import "./EarningsPage.css";
 
 const reducer = (state, action) => {
@@ -53,49 +56,59 @@ const EarningsPage = () => {
     fetchEarnings();
   }, [serviceProviderInfo?.token]);
 
-  if (loading) return <p>Loading earnings...</p>;
-  if (error) return <p>Error loading earnings: {error}</p>;
+  if (loading) return <LoadingBox />;
+  if (error) return <MessageBox variant="danger">{error}</MessageBox>;
 
   return (
-    <Container className="provider-container">
-      <h1 className="page-title">Earnings</h1>
-      <div className="table-responsive">
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Project Name</th>
-              <th>Time On Project</th>
-              <th>Amount Earned</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {earnings && earnings.length > 0 ? (
-              earnings.map((earning, index) => (
-                <tr key={index}>
-                  <td data-label="ID">{index + 1}</td>
-                  <td data-label="Project name">{earning.projectName.name}</td>
-                  <td data-label="Time On Project">
-                    {earning.projectName.hoursWorked}
-                  </td>
-                  <td data-label="Amount Earned">{earning.amount}</td>
-                  <td data-label="Date">
-                    {new Date(earning.date).toLocaleDateString()}
-                  </td>
-                  <td data-label="Status">{earning.status}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6">No earnings data found</td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+    <div className="ep-page">
+      <div className="ep-hero">
+        <div className="ep-hero__inner">
+          <div className="ep-hero__icon"><FaDollarSign /></div>
+          <h1 className="ep-hero__title">Earnings</h1>
+          <p className="ep-hero__sub">Track your project earnings and payment status.</p>
+        </div>
       </div>
-    </Container>
+
+      <div className="ep-body">
+        {earnings && earnings.length > 0 ? (
+          <div className="table-responsive">
+            <table className="ep-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Project Name</th>
+                  <th>Time on Project</th>
+                  <th>Amount Earned</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {earnings.map((earning, index) => (
+                  <tr key={earning._id || index}>
+                    <td data-label="#">{index + 1}</td>
+                    <td data-label="Project Name">{earning.projectName?.name ?? "—"}</td>
+                    <td data-label="Time on Project">{earning.projectName?.hoursWorked ?? "—"}</td>
+                    <td data-label="Amount Earned">${earning.amount}</td>
+                    <td data-label="Date">{new Date(earning.date).toLocaleDateString()}</td>
+                    <td data-label="Status">
+                      <Badge bg={earning.status === "paid" ? "success" : "warning"} text={earning.status === "paid" ? undefined : "dark"}>
+                        {earning.status || "Pending"}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="ep-empty">
+            <FaBoxOpen className="ep-empty__icon" />
+            <p>No earnings data found.</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

@@ -7,9 +7,13 @@ import { getError } from "../utils";
 import "./ServiceProviderProfile.css";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import { FaLinkedin, FaInstagram, FaTwitter, FaFacebook } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case "FETCH_REQUEST":   return { ...state, loadingFetch: true };
+    case "FETCH_SUCCESS":   return { ...state, loadingFetch: false };
+    case "FETCH_FAIL":      return { ...state, loadingFetch: false };
     case "UPDATE_REQUEST":  return { ...state, loadingUpdate: true };
     case "UPDATE_SUCCESS":  return { ...state, loadingUpdate: false };
     case "UPDATE_FAIL":     return { ...state, loadingUpdate: false };
@@ -30,13 +34,51 @@ export default function ServiceProviderProfile() {
   const [location,           setLocation]           = useState(serviceProviderInfo?.location || "");
   const [skillsInput,        setSkillsInput]        = useState((serviceProviderInfo?.skills || []).join(", "));
   const [availabilityStatus, setAvailabilityStatus] = useState(serviceProviderInfo?.availabilityStatus || "Available");
-  const [socialLinkedin,     setSocialLinkedin]     = useState(serviceProviderInfo?.socialLinks?.linkedin || "");
+  const [socialLinkedin,     setSocialLinkedin]     = useState(serviceProviderInfo?.socialLinks?.linkedin  || "");
   const [socialInstagram,    setSocialInstagram]    = useState(serviceProviderInfo?.socialLinks?.instagram || "");
+  const [socialTwitter,      setSocialTwitter]      = useState(serviceProviderInfo?.socialLinks?.twitter   || "");
+  const [socialFacebook,     setSocialFacebook]     = useState(serviceProviderInfo?.socialLinks?.facebook  || "");
   const [password,           setPassword]           = useState("");
   const [confirmPassword,    setConfirmPassword]    = useState("");
   const [showPassword,       setShowPassword]       = useState(false);
 
-  const [{ loadingUpdate }, dispatch] = useReducer(reducer, { loadingUpdate: false });
+  const [{ loadingUpdate }, dispatch] = useReducer(reducer, { loadingFetch: true, loadingUpdate: false });
+
+  // ── Fetch fresh SP data from server on mount ──────────────────────────────
+  useEffect(() => {
+    if (!serviceProviderInfo) { navigate("/serviceprovider/login"); return; }
+    const fetchProfile = async () => {
+      dispatch({ type: "FETCH_REQUEST" });
+      try {
+        const { data: res } = await axios.get("/api/service-providers/dashboard", {
+          headers: { Authorization: `Bearer ${serviceProviderInfo.token}` },
+        });
+        const sp = res.sp;
+        setName(sp.name || "");
+        setTypeOfProvider(sp.typeOfProvider || "");
+        setExperience(sp.experience || "");
+        setEmail(sp.email || "");
+        setBio(sp.bio || "");
+        setLocation(sp.location || "");
+        setSkillsInput((sp.skills || []).join(", "));
+        setAvailabilityStatus(sp.availabilityStatus || "Available");
+        setSocialLinkedin(sp.socialLinks?.linkedin  || "");
+        setSocialInstagram(sp.socialLinks?.instagram || "");
+        setSocialTwitter(sp.socialLinks?.twitter    || "");
+        setSocialFacebook(sp.socialLinks?.facebook  || "");
+        // Keep localStorage in sync so other pages see fresh data too
+        const merged = { ...serviceProviderInfo, ...sp, token: serviceProviderInfo.token };
+        ctxDispatch({ type: "SERVICE_PROVIDER_LOGIN", payload: merged });
+        localStorage.setItem("serviceProviderInfo", JSON.stringify(merged));
+        dispatch({ type: "FETCH_SUCCESS" });
+      } catch (err) {
+        dispatch({ type: "FETCH_FAIL" });
+        toast.error(getError(err));
+      }
+    };
+    fetchProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -56,7 +98,7 @@ export default function ServiceProviderProfile() {
           bio, location,
           skills: skillsInput.split(",").map(s => s.trim()).filter(Boolean),
           availabilityStatus,
-          socialLinks: { linkedin: socialLinkedin, instagram: socialInstagram },
+          socialLinks: { linkedin: socialLinkedin, instagram: socialInstagram, twitter: socialTwitter, facebook: socialFacebook },
           password: password || undefined,
         },
         { headers: { Authorization: `Bearer ${serviceProviderInfo.token}` } }
@@ -71,10 +113,6 @@ export default function ServiceProviderProfile() {
       toast.error(getError(err));
     }
   };
-
-  useEffect(() => {
-    if (!serviceProviderInfo) navigate("/serviceprovider/login");
-  }, [serviceProviderInfo, navigate]);
 
   const initials = name
     ? name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
@@ -174,14 +212,24 @@ export default function ServiceProviderProfile() {
           {/* Social links */}
           <div className="sp-profile-form-grid mt-3">
             <Form.Group controlId="spLinkedin">
-              <Form.Label className="sp-form-label">LinkedIn URL</Form.Label>
+              <Form.Label className="sp-form-label"><FaLinkedin style={{marginRight:5,color:'#0a66c2'}}/> LinkedIn URL</Form.Label>
               <Form.Control value={socialLinkedin} onChange={e => setSocialLinkedin(e.target.value)}
                 placeholder="https://linkedin.com/in/yourname" className="sp-input" />
             </Form.Group>
             <Form.Group controlId="spInstagram">
-              <Form.Label className="sp-form-label">Instagram URL</Form.Label>
+              <Form.Label className="sp-form-label"><FaInstagram style={{marginRight:5,color:'#e1306c'}}/> Instagram URL</Form.Label>
               <Form.Control value={socialInstagram} onChange={e => setSocialInstagram(e.target.value)}
                 placeholder="https://instagram.com/yourhandle" className="sp-input" />
+            </Form.Group>
+            <Form.Group controlId="spTwitter">
+              <Form.Label className="sp-form-label"><FaTwitter style={{marginRight:5,color:'#1da1f2'}}/> Twitter / X URL</Form.Label>
+              <Form.Control value={socialTwitter} onChange={e => setSocialTwitter(e.target.value)}
+                placeholder="https://twitter.com/yourhandle" className="sp-input" />
+            </Form.Group>
+            <Form.Group controlId="spFacebook">
+              <Form.Label className="sp-form-label"><FaFacebook style={{marginRight:5,color:'#1877f2'}}/> Facebook URL</Form.Label>
+              <Form.Control value={socialFacebook} onChange={e => setSocialFacebook(e.target.value)}
+                placeholder="https://facebook.com/yourpage" className="sp-input" />
             </Form.Group>
           </div>
 
@@ -216,4 +264,4 @@ export default function ServiceProviderProfile() {
     </div>
   );
 }
-
+
