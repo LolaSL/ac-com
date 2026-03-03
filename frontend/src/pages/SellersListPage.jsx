@@ -7,8 +7,6 @@ import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
 import { Table, Button, Form, InputGroup } from "react-bootstrap";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaStore } from "react-icons/fa";
 import "./SellersListPage.css";
 import "./AdminHero.css";
