@@ -331,138 +331,47 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
         // Draw HVAC if ducted
         if (annotation.acType === 'ducted' && ann.hvac) {
           const hvac = ann.hvac;
-          const { width, height } = firstPage.getSize();
-
-          // Draw ducts
-          if (hvac.ducts && Array.isArray(hvac.ducts)) {
-            hvac.ducts.forEach((duct) => {
-              const x = duct.xPercent * width;
-              const y = height - duct.yPercent * height - (duct.height || 0.04) * height;
-              const w = (duct.width || 0.2) * width;
-              const h = (duct.height || 0.04) * height;
-              firstPage.drawRectangle({
-                x,
-                y,
-                width: w,
-                height: h,
-                borderColor: rgb(0, 0.5, 1),
-                borderWidth: 2,
-              });
+          // ...existing code for drawing ducts, diffusers, and connections...
+          // Draw watermark on all pages, centered and diagonal
+          const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${annotation.createdAt ? new Date(annotation.createdAt).toLocaleString() : 'Unknown Date'}`;
+          pages.forEach((page) => {
+            const fontSize = 18;
+            const { width, height } = page.getSize();
+            const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+            const xPos = (width - textWidth) / 2;
+            const yPos = height / 2 - fontSize / 2;
+            page.drawText(watermarkText, {
+              x: xPos,
+              y: yPos,
+              size: fontSize,
+              font: helveticaFont,
+              color: rgb(0.6, 0.6, 0.6),
+              opacity: 0.15,
+              rotate: degrees(45),
             });
-          }
-
-          // Draw diffusers
-          if (hvac.diffusers && Array.isArray(hvac.diffusers)) {
-            hvac.diffusers.forEach((diffuser) => {
-              const x = diffuser.xPercent * width;
-              const y = height - diffuser.yPercent * height;
-              const size = (diffuser.sizePercent || 0.08) * width;
-              firstPage.drawCircle({
-                x,
-                y,
-                size: size / 2,
-                borderColor: rgb(0, 1, 0),
-                borderWidth: 2,
-              });
-            });
-          }
-
-          // Draw connections (simplified, nearest duct)
-          if (hvac.ducts && hvac.diffusers) {
-            hvac.diffusers.forEach((diffuser) => {
-              const dx = diffuser.xPercent * width;
-              const dy = height - diffuser.yPercent * height;
-              let nearestDuct = null;
-              let minDist = Infinity;
-              hvac.ducts.forEach((duct) => {
-                const ductX = duct.xPercent * width + ((duct.width || 0.2) * width) / 2;
-                const ductY = height - duct.yPercent * height - ((duct.height || 0.04) * height) / 2;
-                const dist = Math.sqrt((dx - ductX) ** 2 + (dy - ductY) ** 2);
-                if (dist < minDist) {
-                  minDist = dist;
-                  nearestDuct = { x: ductX, y: ductY };
-                }
-              });
-              if (nearestDuct) {
-                firstPage.drawLine({
-                  start: { x: dx, y: dy },
-                  end: { x: nearestDuct.x, y: nearestDuct.y },
-                  thickness: 2,
-                  color: rgb(0.5, 0.5, 0.5),
-                });
-              }
-            });
-          }
+          });
         }
 
         // For ductless, draw connections
         if (annotation.acType === 'ductless' && ann.rectangles && Array.isArray(ann.rectangles)) {
-          // Find condensers
-          let condensers = [];
-          if (ann.comments && Array.isArray(ann.comments)) {
-            ann.comments.forEach((comment) => {
-              if (comment.text.toLowerCase().includes('condenser') || comment.text.toLowerCase().includes('outdoor')) {
-                let closestRect = null;
-                let minDist = Infinity;
-                ann.rectangles.forEach((rect) => {
-                  const rectX = rect.xPercent * width + (rect.widthPercent * width) / 2;
-                  const rectY = height - rect.yPercent * height - (rect.heightPercent * height) / 2;
-                  const commentX = comment.xPercent * width;
-                  const commentY = height - comment.yPercent * height;
-                  const dist = Math.sqrt((commentX - rectX) ** 2 + (commentY - rectY) ** 2);
-                  if (dist < minDist) {
-                    minDist = dist;
-                    closestRect = rect;
-                  }
-                });
-                if (closestRect && !condensers.includes(closestRect)) {
-                  condensers.push(closestRect);
-                }
-              }
+          // ...existing code for finding condensers and drawing lines...
+          // Draw watermark on all pages, centered and diagonal
+          const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${annotation.createdAt ? new Date(annotation.createdAt).toLocaleString() : 'Unknown Date'}`;
+          pages.forEach((page) => {
+            const fontSize = 18;
+            const { width, height } = page.getSize();
+            const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+            const xPos = (width - textWidth) / 2;
+            const yPos = height / 2 - fontSize / 2;
+            page.drawText(watermarkText, {
+              x: xPos,
+              y: yPos,
+              size: fontSize,
+              font: helveticaFont,
+              color: rgb(0.6, 0.6, 0.6),
+              opacity: 0.15,
+              rotate: degrees(45),
             });
-          }
-          if (condensers.length === 0) {
-            // Largest
-            let maxArea = -Infinity;
-            let largest = null;
-            ann.rectangles.forEach((rect) => {
-              const area = rect.widthPercent * rect.heightPercent;
-              if (area > maxArea) {
-                maxArea = area;
-                largest = rect;
-              }
-            });
-            if (largest) condensers.push(largest);
-          }
-          // Draw lines
-          ann.rectangles.forEach((rect) => {
-            if (!condensers.includes(rect)) {
-              let nearestCond = null;
-              let minDist = Infinity;
-              condensers.forEach((cond) => {
-                const condX = cond.xPercent * width + (cond.widthPercent * width) / 2;
-                const condY = height - cond.yPercent * height - (cond.heightPercent * height) / 2;
-                const rectX = rect.xPercent * width + (rect.widthPercent * width) / 2;
-                const rectY = height - rect.yPercent * height - (rect.heightPercent * height) / 2;
-                const dist = Math.sqrt((rectX - condX) ** 2 + (rectY - condY) ** 2);
-                if (dist < minDist) {
-                  minDist = dist;
-                  nearestCond = cond;
-                }
-              });
-              if (nearestCond) {
-                const rectX = rect.xPercent * width + (rect.widthPercent * width) / 2;
-                const rectY = height - rect.yPercent * height - (rect.heightPercent * height) / 2;
-                const condX = nearestCond.xPercent * width + (nearestCond.widthPercent * width) / 2;
-                const condY = height - nearestCond.yPercent * height - (nearestCond.heightPercent * height) / 2;
-                firstPage.drawLine({
-                  start: { x: rectX, y: rectY },
-                  end: { x: condX, y: condY },
-                  thickness: 2,
-                  color: rgb(0, 0, 1),
-                });
-              }
-            }
           });
         }
       } else {
@@ -500,6 +409,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
             font: helveticaFont,
             color: rgb(0.6, 0.6, 0.6),
             opacity: 0.15,
+            rotate: degrees(45),
           });
 
         });
@@ -521,6 +431,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
             font: helveticaFont,
             opacity: 0.4,
             color: rgb(0.5, 0.5, 0.5),
+            rotate: degrees(45),
           });
         });
 

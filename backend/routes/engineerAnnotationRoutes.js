@@ -520,20 +520,30 @@ router.get(
             ? new Date(annotation.createdAt).toLocaleString()
             : "Unknown Date";
         const engineerName = annotation.engineerId?.name || "Engineer";
-        const watermarkText = `AC Commerce — Engineer: ${engineerName} — Reviewed: ${formattedDate}`;
+        // Fetch user email for watermark
+        let userEmail = "User";
+        try {
+            const userAnnotation = await AnnotationModel.findById(annotation.userAnnotationId).populate('userId', 'email');
+            if (userAnnotation && userAnnotation.userId && userAnnotation.userId.email) {
+                userEmail = userAnnotation.userId.email;
+            }
+        } catch (e) {}
+        const watermarkText = `AC-Commerce — User: ${userEmail} — Engineer: ${engineerName} — Reviewed: ${formattedDate}`;
 
         pages.forEach((page) => {
-            const { width, height } = page.getSize();
             const fontSize = 12;
+            const { width, height } = page.getSize();
             const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-
+            const xPos = (width - textWidth) / 2;
+            const yPos = height / 2 - fontSize / 2;
             page.drawText(watermarkText, {
-                x: (width - textWidth) / 2,
-                y: 25,
+                x: xPos,
+                y: yPos,
                 size: fontSize,
                 font: helveticaFont,
-                opacity: 0.4,
-                color: rgb(0.5, 0.5, 0.5),
+                opacity: 0.28,
+                color: rgb(0.4, 0.4, 0.4),
+                rotate: { type: 'degrees', angle: 30 },
             });
         });
 

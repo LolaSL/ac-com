@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
 import Form from "react-bootstrap/Form";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store";
 import CheckoutSteps from "../components/CheckoutSteps";
-import { FaUser, FaMapMarkerAlt, FaCity, FaMailBulk, FaGlobe, FaMapPin } from "react-icons/fa";
+import { FaUser, FaMapMarkerAlt, FaCity, FaMailBulk, FaGlobe, FaMapPin, FaSpinner, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 import "./ShippingAddressPage.css";
 
 const COUNTRIES = [
@@ -28,6 +28,9 @@ export default function ShippingAddressPage() {
 
   const [lat, setLat] = useState(shippingAddress.location?.lat?.toString() || "");
   const [lng, setLng] = useState(shippingAddress.location?.lng?.toString() || "");
+  const [geoStatus, setGeoStatus] = useState("idle"); // idle | loading | found | error
+  const debounceRef = useRef(null);
+  const autoGeocodedRef = useRef(false);
 
   useEffect(() => {
     if (!userInfo) navigate("/signin?redirect=/shipping");
@@ -37,9 +40,57 @@ export default function ShippingAddressPage() {
     ctxDispatch({ type: "SET_FULLBOX_OFF" });
   }, [ctxDispatch]);
 
+  // Auto-geocode via free OpenStreetMap Nominatim (no API key needed)
+  const geocodeAddress = useCallback(async (address, city, country) => {
+    if (!city.trim() || !country.trim()) return;
+    setGeoStatus("loading");
+    try {
+      const tryFetch = async (q) => {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`,
+          { headers: { "Accept-Language": "en", "User-Agent": "ac-commerce-app/1.0" } }
+        );
+        return res.json();
+      };
+
+      // Try full address first, fall back to city+country
+      let data = address.trim() ? await tryFetch(`${address}, ${city}, ${country}`) : [];
+      if (!data || data.length === 0) data = await tryFetch(`${city}, ${country}`);
+
+      if (data && data.length > 0) {
+        setLat(parseFloat(data[0].lat).toFixed(6));
+        setLng(parseFloat(data[0].lon).toFixed(6));
+        autoGeocodedRef.current = true;
+        setGeoStatus("found");
+      } else {
+        setGeoStatus("error");
+      }
+    } catch {
+      setGeoStatus("error");
+    }
+  }, []);
+
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    const updated = { ...formData, [id]: value };
+    setFormData(updated);
+
+    // Clear auto-coords when address fields change
+    if (["address", "city", "country"].includes(id) && autoGeocodedRef.current) {
+      setLat("");
+      setLng("");
+      autoGeocodedRef.current = false;
+      setGeoStatus("idle");
+    }
+
+    // Debounce geocoding — fires 900ms after user stops typing
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const a  = id === "address" ? value : updated.address;
+      const c  = id === "city"    ? value : updated.city;
+      const co = id === "country" ? value : updated.country;
+      if (c.trim() && co.trim()) geocodeAddress(a, c, co);
+    }, 900);
   };
 
   const submitHandler = (e) => {
@@ -64,9 +115,32 @@ export default function ShippingAddressPage() {
       (pos) => {
         setLat(pos.coords.latitude.toFixed(6));
         setLng(pos.coords.longitude.toFixed(6));
+        autoGeocodedRef.current = false;
+        setGeoStatus("found");
       },
       () => alert("Unable to retrieve your location")
     );
+  };
+
+  const geoStatusEl = () => {
+    if (geoStatus === "loading") return (
+      <span className="sa-location__coords" style={{ color: "#888" }}>
+        <FaSpinner style={{ marginRight: 5, animation: "spin 1s linear infinite" }} />Locating address…
+      </span>
+    );
+    if (geoStatus === "found" && lat && lng) return (
+      <span className="sa-location__coords">
+        <FaCheckCircle style={{ color: "#28a745", marginRight: 5 }} />
+        📍 {parseFloat(lat).toFixed(4)}, {parseFloat(lng).toFixed(4)}
+      </span>
+    );
+    if (geoStatus === "error") return (
+      <span className="sa-location__none" style={{ color: "#dc3545" }}>
+        <FaExclamationCircle style={{ marginRight: 5 }} />Address not found — enter coordinates manually or use GPS
+      </span>
+    );
+    if (lat && lng) return <span className="sa-location__coords">📍 {parseFloat(lat).toFixed(4)}, {parseFloat(lng).toFixed(4)}</span>;
+    return <span className="sa-location__none">Coordinates auto-fill when address is entered</span>;
   };
 
   return (
@@ -125,21 +199,32 @@ export default function ShippingAddressPage() {
           <div className="sa-grid">
             <Form.Group controlId="lat">
               <Form.Label className="sa-label"><FaMapMarkerAlt /> Latitude</Form.Label>
-              <Form.Control className="sa-input" type="number" step="any" value={lat} onChange={e => setLat(e.target.value)} placeholder="e.g. 40.712800" />
+              <Form.Control
+                className="sa-input"
+                type="number"
+                step="any"
+                value={lat}
+                onChange={e => { setLat(e.target.value); autoGeocodedRef.current = false; setGeoStatus(e.target.value ? "found" : "idle"); }}
+                placeholder="Auto-filled from address"
+              />
             </Form.Group>
             <Form.Group controlId="lng">
               <Form.Label className="sa-label"><FaMapMarkerAlt /> Longitude</Form.Label>
-              <Form.Control className="sa-input" type="number" step="any" value={lng} onChange={e => setLng(e.target.value)} placeholder="e.g. -74.005900" />
+              <Form.Control
+                className="sa-input"
+                type="number"
+                step="any"
+                value={lng}
+                onChange={e => { setLng(e.target.value); autoGeocodedRef.current = false; setGeoStatus(e.target.value ? "found" : "idle"); }}
+                placeholder="Auto-filled from address"
+              />
             </Form.Group>
           </div>
           <div className="sa-location" style={{marginTop: 14}}>
             <button type="button" className="sa-location__btn" onClick={handleUseMyLocation}>
               📍 Use My Current Location
             </button>
-            {lat && lng
-              ? <span className="sa-location__coords">📌 {parseFloat(lat).toFixed(4)}, {parseFloat(lng).toFixed(4)}</span>
-              : <span className="sa-location__none">No coordinates entered</span>
-            }
+            {geoStatusEl()}
           </div>
         </div>
 
