@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import PremiumCarousel from "../components/PremiumCarousel.jsx";
 import NotificationPopUp from "../components/NotificationPopUp";
 import TrustSection from "../components/TrustSection";
 import ValuePropositionSection from "../components/ValuePropositionSection";
@@ -10,6 +9,7 @@ import NewsletterSignup from "../components/NewsletterSignup";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaHome } from "react-icons/fa";
 import "./HomeBannerPage.css";
 
 export default function HomeBannerPage() {
@@ -29,12 +29,12 @@ export default function HomeBannerPage() {
       linkText: "Explore Our Technology",
       linkTo: "/products",
     },
-    {
-      title: "Professional Installation Services",
+  {
+      title: "Industry-Leading Partnerships",
       description:
-        "Connect with certified HVAC technicians and service providers through our verified network and project management platform.",
-      imageSrc: "/images/intallation.jpg",
-      linkText: "Find Service Providers",
+        "Trusted by leading HVAC manufacturers including Daikin, LG, Samsung, and Mitsubishi for comprehensive equipment solutions.",
+      imageSrc: "/images/hvac-business-partnership.jpg",
+      linkText: "View Our Network",
       linkTo: "/sellers",
     },
     {
@@ -46,12 +46,12 @@ export default function HomeBannerPage() {
       linkTo: "/measurement",
     },
     {
-      title: "Industry-Leading Partnerships",
+      title: "About Us - AC-Com",
       description:
-        "Trusted by leading HVAC manufacturers including Daikin, LG, Samsung, and Mitsubishi for comprehensive equipment solutions.",
-      imageSrc: "/images/about-us.jpg",
-      linkText: "View Our Network",
-      linkTo: "/sellers",
+        "Learn more about AC-Com, our mission, values, and the team driving innovation in the HVAC industry.",
+      imageSrc: "/images/about-us4.jpg",
+      linkText: "Learn More",
+      linkTo: "/about-us",
     },
   ];
 
@@ -173,9 +173,33 @@ export default function HomeBannerPage() {
           onButtonClick={handleNotificationClick}
         />
       )}
-
-      {/* Premium Hero Carousel */}
-      <PremiumCarousel banners={banners} onSlideClick={handleSlideClick} />
+   <div className="home-page">
+      {/* Hero */}
+      <div className="home-hero">
+        <div className="home-hero__inner">
+          <div className="home-hero__icon"><FaHome /></div>
+          <h1 className="home-hero__title">Welcome to AC-Com</h1>
+          <p className="home-hero__sub">Smarter HVAC  designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
+        </div>
+      </div>
+      {/* Premium Hero Cards Grid */}
+      <div className="premium-cards-grid">
+        {banners.map((banner, idx) => (
+          <div className="premium-card" key={idx}>
+            <div className="premium-card-image" style={{ backgroundImage: `url(${banner.imageSrc})` }} />
+            <div className="premium-card-content">
+              <h1 className="premium-card-title">{banner.title}</h1>
+              <p className="premium-card-description">{banner.description}</p>
+              <button
+                className="premium-card-btn"
+                onClick={() => handleSlideClick(idx)}
+              >
+                {banner.linkText} <span className="btn-arrow">→</span>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
       {/* Investor-Ready Sections */}
       <TrustSection />
       <ValuePropositionSection />
@@ -183,6 +207,7 @@ export default function HomeBannerPage() {
       <ROICalculatorPreview />
       <TestimonialsSection />
       <NewsletterSignup />
+      </div>
     </div>
   );
 }

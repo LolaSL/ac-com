@@ -8,22 +8,22 @@ const AboutUs = () => {
     {
       icon: "fas fa-file-upload",
       title: "Upload Your Floor Plan",
-      text: "Upload any architectural PDF — residential suite, office, or commercial space. The plan is rendered directly in the browser at full resolution.",
+      text: "Upload any architectural PDF — residential suite, office, or commercial space. The plan is rendered directly in the browser at high resolution.",
     },
     {
       icon: "fas fa-drafting-compass",
-      title: "Annotate AC Placements",
-      text: "Place labelled AC unit rectangles on the plan, add comments, draw VRF refrigerant lines, and overlay ducted HVAC elements. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations.",
+      title: "Mark AC Placements",
+      text: "Place labelled AC unit rectangles on the plan - add comments (ac-1, ac-2...etc) and condenser (outdoor unit rectangle) placement. Save your work on the cloud.",
     },
     {
       icon: "fas fa-hard-hat",
       title: "Engineer Review",
-      text: "A certified HVAC engineer opens your submitted plan, adds professional annotations for both ducted and ductless VRF modes, and signs off with a digital signature — producing a verified 2-page review PDF.",
+      text: "After making an order submission, a certified HVAC engineer opens your submitted plan, adds professional VRF refrigerant lines, and signs off with a digital signature — producing a verified 2-page review PDF. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations. Symbols of ducted HVAC elements/accessories for both ducted and ductless VRF modes-comming soon",
     },
     {
       icon: "fas fa-file-pdf",
       title: "Save & Download",
-      text: "Download your completed engineer-reviewed plan as a PDF with all annotations, comments, system lines, and the engineer's digital stamp baked in.",
+      text: "Download your completed engineer-reviewed plan as a PDF with all ac rectangles, outdoor unit -condenser rectangle, comments, system lines, and the engineer's digital stamp baked in.",
     },
     {
       icon: "fas fa-calculator",
@@ -32,7 +32,7 @@ const AboutUs = () => {
     },
     {
       icon: "fas fa-chart-line",
-      title: "ROI Calculator",
+      title: "Return on Investment (ROI) Calculator",
       text: "Compare traditional HVAC purchasing costs against AC-Com pricing. Estimate labour savings, efficiency gains, and project payback periods across residential, commercial, and industrial property types.",
     },
   ];
@@ -46,7 +46,7 @@ const AboutUs = () => {
     {
       icon: "fas fa-pencil-ruler",
       title: "Professional Annotation Tools",
-      text: "Browser-based PDF annotation with coloured rectangles, text comments, VRF refrigerant lines, ducted air diffusers, and real-time canvas overlays.",
+      text: "Browser-based PDF notifications with coloured rectangles, text comments, VRF refrigerant lines, (ducted air diffusers -comming soon).",
     },
     {
       icon: "fas fa-user-check",
@@ -56,12 +56,12 @@ const AboutUs = () => {
     {
       icon: "fas fa-tools",
       title: "Trusted Service Network",
-      text: "Connect directly with verified HVAC service providers for installation, maintenance, and emergency repairs through our integrated messaging and booking system.",
+      text: "Connect directly with verified HVAC service providers for installation, maintenance, and  repairs through our integrated messaging and booking system.",
     },
     {
       icon: "fas fa-hand-holding-usd",
       title: "Affiliate Seller Programme",
-      text: "Industry professionals and businesses can list products on the marketplace, earn commission through referrals, access a dedicated seller dashboard, and track their earnings in real time.",
+      text: "Industry professionals and businesses can list products on the marketplace, earn commission through referrals, (access a dedicated seller dashboard and track their earnings in real time - comming soon).",
     },
     {
       icon: "fas fa-bell",
@@ -99,7 +99,7 @@ const AboutUs = () => {
         {/* Intro */}
         <div className="au-card au-intro">
           <p className="au-lead">
-            <strong>AC-Com Home Supply</strong> is a full-stack HVAC marketplace that combines product commerce with
+            <strong>AC-Com Home Supply</strong> is HVAC marketplace that combines product commerce with
             professional-grade planning tools. Whether you're buying a mini-split, designing a
             VRF system for a multi-room property, or getting a certified engineer to review your
             floor plan — everything happens in one platform.

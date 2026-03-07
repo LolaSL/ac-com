@@ -141,6 +141,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/orderhistory" className="dropdown-item">
                     Order History
                   </Link>
+                  <Link to="/recommendations" className="dropdown-item">
+                    <i className="fas fa-thumbs-up me-2"></i>
+                    Recommendations
+                  </Link>
                   <Link to="/wishlist" className="dropdown-item">
                     <i className="fas fa-heart me-2 heart-icon"></i>
                     My Wishlist

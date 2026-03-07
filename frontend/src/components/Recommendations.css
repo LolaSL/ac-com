@@ -1,0 +1,35 @@
+.recommendations-card {
+  margin-top: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  background: #fff;
+}
+
+.recommendations-card .card-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #2563a8;
+  margin-bottom: 1rem;
+}
+
+.recommendations-table {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.recommendations-table th {
+  background: #f3f6fa;
+  color: #1a3c5e;
+  font-weight: 500;
+}
+
+.recommendations-table td {
+  vertical-align: middle;
+}
+
+.recommendations-empty {
+  color: #868d9c;
+  font-style: italic;
+  padding: 1.5rem 0;
+  text-align: center;
+}

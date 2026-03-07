@@ -1,5 +1,6 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
+import "./HowItWorksSection.css";
 
 export default function HowItWorksSection() {
   const steps = [
@@ -29,6 +30,7 @@ export default function HowItWorksSection() {
     },
   ];
 
+
   return (
     <section className="how-it-works-section py-5 bg-light">
       <Container>
@@ -41,59 +43,19 @@ export default function HowItWorksSection() {
           </Col>
         </Row>
 
-        <Row>
-          {steps.map((step, index) => (
-            <React.Fragment key={index}>
-              <Col md={3} sm={6} xs={12} className="mb-4">
-                <div className="text-center">
-                  <div
-                    className="step-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      borderRadius: "50%",
-                      backgroundColor: "#007bff",
-                      color: "white",
-                      fontSize: "2.5rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {step.icon}
-                  </div>
-                  <h5 className="fw-bold mt-3">{step.title}</h5>
-                  <p className="text-muted small mt-2">{step.description}</p>
-                </div>
-              </Col>
-
-              {/* Arrow between steps (except after last) */}
-              {index < steps.length - 1 && (
-                <Col
-                  md={0}
-                  className="d-none d-md-flex align-items-center justify-content-center mb-4"
-                  style={{ position: "relative", height: "80px" }}
-                >
-                  <div
-                    style={{
-                      width: "100%",
-                      textAlign: "center",
-                      marginTop: "-60px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "1.5rem",
-                        color: "#007bff",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      →
-                    </span>
-                  </div>
-                </Col>
-              )}
-            </React.Fragment>
+        <div className="howitworks-cards-grid">
+          {steps.map((step, idx) => (
+            <div className="howitworks-card" key={idx}>
+              <div className="howitworks-card-icon">
+                {step.icon}
+              </div>
+              <div className="howitworks-card-content">
+                <h5 className="howitworks-card-title">{step.title}</h5>
+                <p className="howitworks-card-desc">{step.description}</p>
+              </div>
+            </div>
           ))}
-        </Row>
+        </div>
 
         {/* Additional Benefits */}
         <Row className="mt-5 pt-5 border-top">

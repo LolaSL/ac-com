@@ -16,12 +16,12 @@ import "./BtuCalculator.css";
 const CONSTANTS = {
   // ~147 W/m² ≈ 500 BTU/m² — calibrated for Israel (Tel Aviv / central regions).
   // Hot Middle East ×1.2 brings this to ~600 BTU/m² for Negev / Eilat desert.
-  BASE_BTU_PER_SQ_METER: 500,
+  BASE_BTU_PER_SQ_METER:600,
   // Each extra metre above 2.5 m adds this fraction of base BTU (proportional volume increase).
   HEIGHT_BTU_FACTOR_PER_METER: 0.4,
   // ASHRAE sensible heat for sedentary occupancy: ~450 BTU/hr per person.
   BTU_PER_ADDITIONAL_PERSON: 450,
-  KITCHEN_BTU_ADDITION: 4000,
+  KITCHEN_BTU_ADDITION: 600,
   OUTDOOR_LOCATION_BTU_ADJUSTMENTS: {
     Roof: 1.0,
     WallBrackets: 1.0,
@@ -1342,12 +1342,19 @@ useEffect(() => {
       equipmentCost: totalEquipmentCost,
       estimatedProjectCost: estimatedProjectSize,
       estimatedInstallationDays: estimatedDays,
-      rooms: rooms.map((room, index) => ({
-        name: room.name,
-        size: room.size,
-        btu: btuResults[index],
-        product: products[index],
-      })),
+      rooms: rooms.map((room, index) => {
+        const product = products[index] || {};
+        return {
+          name: room.name,
+          size: room.size,
+          btu: btuResults[index],
+          product: {
+            ...product,
+            name: product.name || "No product available",
+            price: typeof product.price === "number" ? product.price : null,
+          },
+        };
+      }),
       // Include original input parameters so ROI can save/display full calculation context
       inputParams: {
         measurementSystem,
@@ -1768,7 +1775,7 @@ useEffect(() => {
         </Row>
 {rooms.length > 0 && (
   <div className="mb-4">
-    <h5>Rooms from Annotator:</h5>
+    <h5>Room Measurements:</h5>
     {(() => {
       const groupedRooms = rooms.reduce((acc, room) => {
         const match = room.name.match(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)\s*[:\s]/i);
