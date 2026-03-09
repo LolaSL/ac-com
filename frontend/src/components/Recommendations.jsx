@@ -1,28 +1,72 @@
-
 import React, { useContext } from "react";
 import { Store } from "../Store";
 import { Card, Table } from "react-bootstrap";
 import "./Recommendations.css";
 import { COMMON_AC_RECOMMENDATIONS } from "./acRecommendationData.js";
-import "./Recommendations.css";
 
 export default function Recommendations() {
   const { state } = useContext(Store);
-  // Try to get recommended units from ROI or BTU data
 
-  // Prefer per-room BTU results if available
-  const btuProject = state?.roiData?.currentCalculation?.btuProjectData || state?.btuData?.currentProject;
-  const perRoomResults = btuProject?.rooms && btuProject?.rooms.length > 0 ? btuProject.rooms : null;
-  const recommendedUnits = btuProject?.recommendedUnits || [];
+  // Extract BTU/ROI project data
+  const btuProject =
+    state?.roiData?.currentCalculation?.btuProjectData ||
+    state?.btuData?.currentProject ||
+    null;
+
+  const perRoomResults =
+    Array.isArray(btuProject?.rooms) && btuProject.rooms.length > 0
+      ? btuProject.rooms
+      : null;
+
+  const recommendedUnits = Array.isArray(btuProject?.recommendedUnits)
+    ? btuProject.recommendedUnits
+    : [];
+
+  // Helper: safely extract name
+  const getName = (obj) =>
+    obj?.name ||
+    obj?.model ||
+    obj?.productName ||
+    obj?.type ||
+    "—";
+
+  // Helper: safely extract price
+  const getPrice = (obj) => {
+    const price =
+      obj?.price ??
+      obj?.cost ??
+      obj?.minPrice ??
+      obj?.maxPrice ??
+      obj?.estimatedCost;
+
+    if (price === undefined || price === null) return "—";
+
+    const num = Number(price);
+    if (isNaN(num)) return "—";
+
+    return `$${num.toLocaleString()}`;
+  };
 
   return (
     <div>
-
+      {/* ============================
+          CALCULATED RECOMMENDATIONS
+      ============================= */}
       <Card className="recommendations-card">
         <Card.Body>
-          <Card.Title className="card-title">AC Unit Recommendations (Calculated)</Card.Title>
+          <Card.Title className="card-title">
+            AC Unit Recommendations (Calculated)
+          </Card.Title>
+
+          {/* --- Per-room results table --- */}
           {perRoomResults ? (
-            <Table className="recommendations-table" striped bordered hover responsive>
+            <Table
+              className="recommendations-table"
+              striped
+              bordered
+              hover
+              responsive
+            >
               <thead>
                 <tr>
                   <th>Room</th>
@@ -37,26 +81,30 @@ export default function Recommendations() {
               </thead>
               <tbody>
                 {perRoomResults.map((room, idx) => {
-                  const product = room.product || {};
+                  // fallback: if room.product doesn't exist, use room itself
+                  const product = room.product || room;
+
                   return (
                     <tr key={idx}>
-                      <td>{room.name}</td>
+                      <td>{room.name || `Room ${idx + 1}`}</td>
                       <td>{room.size}</td>
                       <td>{room.btu}</td>
-                      <td>{product.name || "No product available"}</td>
-                      <td>{product.btu || "No product available"}</td>
-                      <td>
-                        {product.price
-                          ? product.discount > 0
-                            ? (product.price - (product.price * product.discount) / 100).toFixed(2)
-                            : product.price.toFixed(2)
-                          : "No price available"}
-                      </td>
+                      <td>{getName(product)}</td>
+                      <td>{product.btu || "—"}</td>
+                      <td>{getPrice(product)}</td>
                       <td>{product.slug || "—"}</td>
                       <td>
                         {product.slug ? (
-                          <a href={`/product/${product.slug}`} target="_blank" rel="noopener noreferrer">View</a>
-                        ) : "—"}
+                          <a
+                            href={`/product/${product.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View
+                          </a>
+                        ) : (
+                          "—"
+                        )}
                       </td>
                     </tr>
                   );
@@ -65,10 +113,18 @@ export default function Recommendations() {
             </Table>
           ) : recommendedUnits.length === 0 ? (
             <div className="recommendations-empty">
-              No recommendations available. Please complete a BTU or ROI calculation first.
+              No recommendations available. Please complete a BTU or ROI
+              calculation first.
             </div>
           ) : (
-            <Table className="recommendations-table" striped bordered hover responsive>
+            /* --- Recommended units table --- */
+            <Table
+              className="recommendations-table"
+              striped
+              bordered
+              hover
+              responsive
+            >
               <thead>
                 <tr>
                   <th>Name</th>
@@ -80,15 +136,9 @@ export default function Recommendations() {
               <tbody>
                 {recommendedUnits.map((unit, idx) => (
                   <tr key={idx}>
-                    <td>{unit.name || unit.type || "—"}</td>
-                    <td>{unit.btu}</td>
-                    <td>
-                      {unit.price
-                        ? `$${unit.price.toLocaleString()}`
-                        : unit.estimatedCost
-                        ? `$${unit.estimatedCost.toLocaleString()}`
-                        : "—"}
-                    </td>
+                    <td>{getName(unit)}</td>
+                    <td>{unit.btu || "—"}</td>
+                    <td>{getPrice(unit)}</td>
                     <td>{unit.quantity || 1}</td>
                   </tr>
                 ))}
@@ -98,10 +148,22 @@ export default function Recommendations() {
         </Card.Body>
       </Card>
 
+      {/* ============================
+          COMMON AC PARTS
+      ============================= */}
       <Card className="recommendations-card">
         <Card.Body>
-          <Card.Title className="card-title">Common AC Installations & Spare Parts</Card.Title>
-          <Table className="recommendations-table" striped bordered hover responsive>
+          <Card.Title className="card-title">
+            Common AC Installations & Spare Parts
+          </Card.Title>
+
+          <Table
+            className="recommendations-table"
+            striped
+            bordered
+            hover
+            responsive
+          >
             <thead>
               <tr>
                 <th>Category</th>
