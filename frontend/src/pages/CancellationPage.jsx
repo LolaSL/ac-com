@@ -15,7 +15,7 @@ const CancellationPage = () => {
       <div className="cnc-inner">
 
       <p className="fs-5">
-        At AC Com Home Supply, we understand that sometimes plans change. Any
+        At AC-Commerce Home Supply, we understand that sometimes plans change. Any
         order that has{" "}
         <strong>not yet been loaded onto a truck or shipped</strong> can be
         cancelled. Please contact us immediately if you need to cancel, as we

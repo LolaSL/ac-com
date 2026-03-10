@@ -122,7 +122,7 @@ export default function ROICalculatorSection() {
         <div className="roi-header text-center mb-5">
           <h2 className="section-title">Calculate Your ROI</h2>
           <p className="roi-subtitle">
-            See how much you can save by switching to AC Commerce
+            See how much you can save by switching to AC-Commerce
           </p>
         </div>
 
@@ -329,7 +329,7 @@ export default function ROICalculatorSection() {
                   </span>
                 </div>
                 <div className="breakdown-item">
-                  <span className="breakdown-label">AC Commerce Platform:</span>
+                  <span className="breakdown-label">AC-Commerce Platform:</span>
                   <span className="breakdown-cost platform">
                     $
                     {acCommerceCost.toLocaleString("en-US", {
@@ -429,7 +429,7 @@ export default function ROICalculatorSection() {
                 </div>
 
                 <div className="breakdown-section mt-3">
-                  <h6 className="breakdown-subtitle">AC Commerce Platform</h6>
+                  <h6 className="breakdown-subtitle">AC-Commerce Platform</h6>
                   <div className="breakdown-item">
                     <span className="breakdown-label">Equipment Cost:</span>
                     <span className="breakdown-cost highlight-green">

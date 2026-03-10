@@ -120,7 +120,12 @@
 .product-link {
   text-decoration: none;
 }
-
+/* .product-brand{
+  font-size: 0.9rem;
+  color: #6c757d;
+  /* text-transform: uppercase; */
+  /* letter-spacing: 0.02em;
+} */ 
 /* price */
 .original-price {
   text-decoration: line-through;

@@ -1610,7 +1610,7 @@ const data = {
     name: "Indoor Unit, Air Purifier, Fan Coil, Fan Motor",
     model: "ADB0030Y*M",
     slug: "ac-fan-motor",
-    category: "LG",
+    category: "Fan Motor",
     image: "/images/spare-fan-motor.jpg",
     price: 85,
     discount: 5,
@@ -1680,7 +1680,7 @@ const data = {
     price: 12,
     discount: 0,
     countInStock: 300,
-    brand: "AA Ignition",
+    brand: "Ignition",
     rating: 4.3,
     numReviews: 75,
     description:

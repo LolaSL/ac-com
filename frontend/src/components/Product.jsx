@@ -177,9 +177,18 @@ const Product = memo(({ product }) => {
           to={`/product/${product.slug}`}
           className="card-link text-secondary product-link"
         >
-          <Card.Title className="text-truncate" title={product.name}>
+          <Card.Title style={{ 
+     fontSize: "0.85rem",
+    whiteSpace: "nowrap",
+    // overflow: "hidden",
+            // textOverflow: "ellipsis",
+     wordBreak: "break-word", // break long words
+    display: "block",
+    maxWidth: "100%"
+
+}}>
             <strong>
-              {CONDENSER_REGEX.test(product.name || product.category || "")
+              {CONDENSER_REGEX.test(product.name || product.category || "Product")
                 ? "Condenser:"
                 : "Product:"}
             </strong>{" "}
@@ -187,7 +196,7 @@ const Product = memo(({ product }) => {
           </Card.Title>
 
           <div className="mb-1">
-            <span className="fs-6 fw-semibold">Brand: {product.brand}</span>
+            <span className="product-brand">Brand: {product.brand}</span>
           </div>
         </Link>
 

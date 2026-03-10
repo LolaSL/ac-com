@@ -75,7 +75,7 @@ function printOrder() {
 
       <!-- Footer -->
       <div style="text-align:center; margin-top:2rem; padding-top:1rem; border-top:1px solid #e5e7eb; font-size:0.78rem; color:#aaa;">
-        Thank you for your order — AC Commerce
+        Thank you for your order — AC-Commerce
       </div>
     </div>
   `;

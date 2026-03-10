@@ -14,7 +14,7 @@ export default function SuccessStoriesSection() {
       beforeMetrics: { projects: "12/month", time: "14 days", cost: "$18,000" },
       afterMetrics: { projects: "18/month", time: "9 days", cost: "$11,700" },
       testimonial:
-        "AC Commerce transformed how we manage projects. The design tools alone cut our quoting time in half. We've increased profitability by nearly 40%.",
+        "AC-Commerce transformed how we manage projects. The design tools alone cut our quoting time in half. We've increased profitability by nearly 40%.",
       author: "James Mitchell",
       role: "CEO",
       rating: 5,

@@ -25,7 +25,7 @@ const Footer = () => {
       <footer className="container-fluid footer">
         <Row className="text-white p-4 g-4 justify-content-between">
           <Col xs={12} sm={6} lg={2} className="ft-1">
-            <h4>AC Commerce</h4>
+            <h4>AC-Commerce</h4>
             <hr />
             <p>
               We believe innovation transforms how we manage indoor and outdoor
@@ -151,10 +151,10 @@ const Footer = () => {
         <div className="text-center">
           <Row className="d-flex justify-content-center">
             <div className="last-footer text-center">
-              &copy; {new Date().getFullYear()} AC Commerce. All rights reserved
+              &copy; {new Date().getFullYear()} AC-Commerce. All rights reserved
             </div>
             <div className="footer-disclaimer">
-              Brand names and logos are property of their respective owners. AC Commerce is not affiliated with or endorsed by any brand displayed on this site.
+              Brand names and logos are property of their respective owners. AC-Commerce is not affiliated with or endorsed by any brand displayed on this site.
             </div>
           </Row>
         </div>

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import NotificationPopUp from "../components/NotificationPopUp";
 import TrustSection from "../components/TrustSection";
 import ValuePropositionSection from "../components/ValuePropositionSection";
-import HowItWorksSection from "../components/HowItWorksSection";
+// import HowItWorksSection from "../components/HowItWorksSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ROICalculatorPreview from "../components/ROICalculatorPreview";
 import NewsletterSignup from "../components/NewsletterSignup";
@@ -22,9 +22,9 @@ export default function HomeBannerPage() {
 
   const banners = [
     {
-      title: "AC Commerce Platform",
+      title: "AC-Commerce Marketplace Technology",
       description:
-        "Revolutionizing HVAC procurement with integrated design tools, AI-powered annotations, and comprehensive marketplace solutions.",
+        "Revolutionizing HVAC procurement with comprehensive marketplace solutions.",
       imageSrc: "/images/hero.jpg",
       linkText: "Explore Our Technology",
       linkTo: "/products",
@@ -46,9 +46,9 @@ export default function HomeBannerPage() {
       linkTo: "/measurement",
     },
     {
-      title: "About Us - AC-Com",
+      title: "About Us - AC-Commerce",
       description:
-        "Learn more about AC-Com, our mission, values, and the team driving innovation in the HVAC industry.",
+        "Learn more about AC-Commerce, our mission, values, and the team driving innovation in the HVAC industry.",
       imageSrc: "/images/about-us4.jpg",
       linkText: "Learn More",
       linkTo: "/about-us",
@@ -178,7 +178,7 @@ export default function HomeBannerPage() {
       <div className="home-hero">
         <div className="home-hero__inner">
           <div className="home-hero__icon"><FaHome /></div>
-          <h1 className="home-hero__title">Welcome to AC-Com</h1>
+          <h1 className="home-hero__title">Welcome to AC-Commerce</h1>
           <p className="home-hero__sub">Smarter HVAC  designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
       </div>
@@ -203,9 +203,8 @@ export default function HomeBannerPage() {
       {/* Investor-Ready Sections */}
       <TrustSection />
       <ValuePropositionSection />
-      <HowItWorksSection />
-      <ROICalculatorPreview />
-      <TestimonialsSection />
+        <TestimonialsSection />
+        <ROICalculatorPreview />
       <NewsletterSignup />
       </div>
     </div>

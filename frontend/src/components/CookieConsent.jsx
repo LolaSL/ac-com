@@ -43,11 +43,11 @@ export default function CookieConsent() {
         <FaUniversalAccess className="cookie-banner__icon" />
         <div className="cookie-banner__text">
           <span>
-            AC Commerce uses cookies and similar technologies to keep our
+            AC-Commerce uses cookies and similar technologies to keep our
             platform running smoothly, remember your preferences, and help us
             understand how you interact with our site. We may share anonymised
             usage data with trusted analytics partners to improve our services.
-            By continuing to use AC Commerce, you agree to our use of cookies as
+            By continuing to use AC-Commerce, you agree to our use of cookies as
             described in our{" "}
             <Link to="/privacy-policy" className="cookie-banner__link">
               Cookie &amp; Privacy Policy

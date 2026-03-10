@@ -33,7 +33,7 @@ const AboutUs = () => {
     {
       icon: "fas fa-chart-line",
       title: "Return on Investment (ROI) Calculator",
-      text: "Compare traditional HVAC purchasing costs against AC-Com pricing. Estimate labour savings, efficiency gains, and project payback periods across residential, commercial, and industrial property types.",
+      text: "Compare traditional HVAC purchasing costs against AC-Commerce pricing. Estimate labour savings, efficiency gains, and project payback periods across residential, commercial, and industrial property types.",
     },
   ];
 
@@ -76,7 +76,7 @@ const AboutUs = () => {
     { icon: "fas fa-wrench", label: "HVAC Contractors", desc: "Source equipment and manage project plans in one place." },
     { icon: "fas fa-compass", label: "Architects & Designers", desc: "Integrate HVAC layouts directly into architectural workflows." },
     { icon: "fas fa-shield-alt", label: "Service Providers", desc: "Offer installation, maintenance, and repair through the platform." },
-    { icon: "fas fa-tags", label: "Affiliate Sellers", desc: "Partner with AC-Com and grow revenue through the marketplace." },
+    { icon: "fas fa-tags", label: "Affiliate Sellers", desc: "Partner with AC-Commerce and grow revenue through the marketplace." },
   ];
 
   return (
@@ -85,21 +85,21 @@ const AboutUs = () => {
       <div className="au-hero">
         <div className="au-hero__inner">
           <div className="au-hero__icon"><FaInfoCircle /></div>
-          <h1 className="au-hero__title">About AC-Com</h1>
+          <h1 className="au-hero__title">About AC-Commerce</h1>
           <p className="au-hero__sub">Your complete HVAC marketplace — from first measurement to final sign-off.</p>
         </div>
       </div>
 
       {/* Banner image */}
       <div className="au-banner">
-        <img src="/images/about-us.jpg" alt="About AC-Com" className="au-banner__img" />
+        <img src="/images/about-us.jpg" alt="About AC-Commerce" className="au-banner__img" />
       </div>
 
       <div className="au-inner">
         {/* Intro */}
         <div className="au-card au-intro">
           <p className="au-lead">
-            <strong>AC-Com Home Supply</strong> is HVAC marketplace that combines product commerce with
+            <strong>AC-Commerce Home Supply</strong> is HVAC marketplace that combines product commerce with
             professional-grade planning tools. Whether you're buying a mini-split, designing a
             VRF system for a multi-room property, or getting a certified engineer to review your
             floor plan — everything happens in one platform.
@@ -126,9 +126,9 @@ const AboutUs = () => {
           </div>
         </section>
 
-        {/* Why AC-Com */}
+        {/* Why AC-Commerce */}
         <section className="au-section">
-          <h2 className="au-section__title">Why AC-Com</h2>
+          <h2 className="au-section__title">Why AC-Commerce</h2>
           <div className="au-grid au-grid--3">
             {features.map((f, i) => (
               <div key={i} className="au-card au-feature-card">

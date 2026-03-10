@@ -101,7 +101,7 @@ export default function DemoRequestForm({ onClose }) {
                 <div className="demo-text">
                   <h2 className="section-title">See It In Action</h2>
                   <p className="demo-description">
-                    Watch how AC Commerce can transform your business with a
+                    Watch how AC-Commerce can transform your business with a
                     personalized 30-minute demo
                   </p>
 

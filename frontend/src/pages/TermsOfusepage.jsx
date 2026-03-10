@@ -23,9 +23,9 @@ const TermsOfusePage = () => {
 
       <h4>Purchases and Installation</h4>
       <p className="fs-5">
-        By purchasing from <strong>AC-Com Home Supply</strong>, you agree to all
+        By purchasing from <strong>AC-Commerce Home Supply</strong>, you agree to all
         terms of use, including our Return Policy and Shipping Policy. All items
-        must be installed by a qualified installer. AC-Com Home Supply is not
+        must be installed by a qualified installer. AC-Commerce Home Supply is not
         responsible for injuries, damages, or losses due to improper
         installation or handling.
       </p>
@@ -70,7 +70,7 @@ const TermsOfusePage = () => {
       <h4>Product Usage</h4>
       <p className="fs-5">
         Customers are responsible for ensuring products meet local code
-        requirements and are installed correctly. AC-Com Home Supply disclaims
+        requirements and are installed correctly. AC-Commerce Home Supply disclaims
         liability for improper installation or local code violations.
       </p>
 
@@ -84,27 +84,27 @@ const TermsOfusePage = () => {
 
       <h4>Trademarks</h4>
       <p className="fs-5">
-        All trademarks and trade names on this site are the property of ACCom
+        All trademarks and trade names on this site are the property of AC-Commerce
         Home Supply.
       </p>
 
       <h4>Warranty Disclaimer</h4>
       <p className="fs-5">
         Products carry the manufacturer’s warranty unless otherwise noted. This
-        website is provided "as is" without warranties. AC-Com Home Supply does
+        website is provided "as is" without warranties. AC-Commerce Home Supply does
         not guarantee uninterrupted or error-free site access.
       </p>
 
       <h4>Limitation of Liability</h4>
       <p className="fs-5">
-        AC-Com Home Supply is not liable for any special, incidental, or
+        AC-Commerce Home Supply is not liable for any special, incidental, or
         consequential damages arising from the use of this site or purchased
         products.
       </p>
 
-      <h4>Order Cancellations by AC-Com Home Supply</h4>
+      <h4>Order Cancellations by AC-Commerce Home Supply</h4>
       <p className="fs-5">
-        AC-Com Home Supply reserves the right to cancel any order at its
+        AC-Commerce Home Supply reserves the right to cancel any order at its
         discretion prior to shipping, including cases of suspected fraud or
         pricing errors. Refunds will be issued to the original payment method.
       </p>
@@ -113,16 +113,16 @@ const TermsOfusePage = () => {
       <p className="fs-5">
         Users may not harass others, impersonate representatives, or upload
         content that is illegal, abusive, or infringes on intellectual property
-        rights. AC-Com Home Supply may remove unacceptable content at its
+        rights. AC-Commerce Home Supply may remove unacceptable content at its
         discretion.
       </p>
 
       <h4>Service Provider Communications and Platform Monitoring</h4>
       <p className="fs-5">
-        AC-Com Home Supply operates as a platform connecting customers with
+        AC-Commerce Home Supply operates as a platform connecting customers with
         service providers for HVAC installations, maintenance, and related
         services. To ensure service quality, resolve disputes, provide customer
-        support, and maintain platform integrity, AC-Com Home Supply reserves
+        support, and maintain platform integrity, AC-Commerce Home Supply reserves
         the right to access, monitor, review, and moderate communications
         between customers and service providers. This includes but is not
         limited to messages, quotes, service requests, and project-related
@@ -139,7 +139,7 @@ const TermsOfusePage = () => {
           compliance purposes.
         </li>
         <li>
-          AC-Com Home Supply may intervene in communications to ensure
+          AC-Commerce Home Supply may intervene in communications to ensure
           compliance with our terms, applicable laws, and professional
           standards.
         </li>
@@ -158,21 +158,21 @@ const TermsOfusePage = () => {
       </ul>
       <p className="fs-5">
         This monitoring is conducted in good faith to maintain a safe,
-        professional, and trustworthy marketplace for all users. AC-Com Home
+        professional, and trustworthy marketplace for all users. AC-Commerce Home
         Supply will not disclose message content to third parties except as
         required by law or with user consent.
       </p>
 
       <h4>Indemnification</h4>
       <p className="fs-5">
-        By using this website or placing an order, you agree to indemnify AC-Com
+        By using this website or placing an order, you agree to indemnify AC-Commerce
         Home Supply and its affiliates from any losses, claims, or expenses
         arising from your use of the site or violation of these terms.
       </p>
 
       <h4>Third-Party Links</h4>
       <p className="fs-5">
-        The site may include links to third-party websites. AC-Com Home Supply
+        The site may include links to third-party websites. AC-Commerce Home Supply
         is not responsible for their content or privacy practices. Use these
         links at your own risk.
       </p>
@@ -192,7 +192,7 @@ const TermsOfusePage = () => {
 
       <h4>Miscellaneous</h4>
       <p className="fs-5">
-        AC-Com Home Supply reserves the right to modify these terms at any time.
+        AC-Commerce Home Supply reserves the right to modify these terms at any time.
         Use of this site constitutes consent to the current terms.
       </p>
 

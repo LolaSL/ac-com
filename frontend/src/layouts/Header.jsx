@@ -51,7 +51,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
           </Button>
 
           <Link to="/" className="navbar-brand me-4">
-            <h3>AC Commerce</h3>
+            <h3>AC-Commerce</h3>
             <p className="handwritten">Cooling Solutions For Every Space</p>
           </Link>
 

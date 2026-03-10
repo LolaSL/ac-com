@@ -1715,7 +1715,7 @@ useEffect(() => {
   )}
   {acAnnotations?.length > 0 && (
     <small className="text-success d-block mt-2">
-      ✓ AC annotations found: {acAnnotations.length} label(s) detected
+      ✓ AC notifications found: {acAnnotations.length} label(s) detected
       <br />
       <em>
         Flats auto-detected from condenser labels (e.g., condenser-1,

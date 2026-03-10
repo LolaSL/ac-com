@@ -70,7 +70,7 @@ function BlogList() {
         <div className="bl-hero__inner">
           <div className="bl-hero__icon"><FaNewspaper /></div>
           <h1 className="bl-hero__title">Blogs</h1>
-          <p className="bl-hero__sub">Insights, tips and news from the AC Commerce team.</p>
+          <p className="bl-hero__sub">Insights, tips and news from the AC-Commerce team.</p>
         </div>
       </div>
 

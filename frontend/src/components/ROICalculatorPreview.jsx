@@ -16,7 +16,7 @@ export default function ROICalculatorPreview() {
         <div className="roi-header text-center mb-5">
           <h2 className="section-title">Calculate Your ROI</h2>
           <p className="roi-subtitle">
-            See how much you can save by switching to AC Commerce
+            See how much you can save by switching to AC-Commerce
           </p>
           <Button
             variant="primary"

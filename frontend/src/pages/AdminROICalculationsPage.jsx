@@ -171,7 +171,7 @@ export default function AdminROICalculationsPage() {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
     doc.setFont(undefined, "bold");
-    doc.text("AC COMMERCE — Admin ROI Report", margin, 20);
+    doc.text("AC-COMMERCE — Admin ROI Report", margin, 20);
     doc.setFontSize(10);
     doc.setFont(undefined, "normal");
     doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 30);
