@@ -1,35 +1,508 @@
+/* ============================
+   RECOMMENDATIONS PAGE STYLES
+============================ */
+
+/* Page Container */
+.recommendations-page-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  padding: 2rem 1rem;
+  position: relative;
+}
+
+.recommendations-page-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.recommendations-page-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Page Header */
+.recommendations-header {
+  animation: fadeInDown 0.6s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page Footer */
+.recommendations-footer {
+  animation: fadeInUp 0.8s ease;
+}
+
+.recommendations-footer button {
+  transition: all 0.3s ease;
+}
+
+.recommendations-footer button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Cards */
 .recommendations-card {
   margin-top: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   background: #fff;
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.recommendations-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.recommendations-card .card-body {
+  padding: 2rem;
 }
 
 .recommendations-card .card-title {
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: #2563a8;
-  margin-bottom: 1rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a3c5e;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #0d6efd;
+  position: relative;
 }
 
+.recommendations-card .card-title::before {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+}
+
+/* ============================
+   SYSTEM SUMMARY CARD
+============================ */
+
+.recommendations-card[style*="background: #f8f9fa"] .card-body,
+.recommendations-card[style*="background-color: #f8f9fa"] .card-body,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] .card-body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 16px;
+}
+
+.recommendations-card[style*="background: #f8f9fa"] .card-title,
+.recommendations-card[style*="background-color: #f8f9fa"] .card-title,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] .card-title {
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.recommendations-card[style*="background: #f8f9fa"] .card-title::before,
+.recommendations-card[style*="background-color: #f8f9fa"] .card-title::before,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] .card-title::before {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.recommendations-card[style*="background: #f8f9fa"] strong,
+.recommendations-card[style*="background-color: #f8f9fa"] strong,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.recommendations-card[style*="background: #f8f9fa"] .text-primary,
+.recommendations-card[style*="background-color: #f8f9fa"] .text-primary,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] .text-primary {
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.recommendations-card[style*="background: #f8f9fa"] .border-top,
+.recommendations-card[style*="background-color: #f8f9fa"] .border-top,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] .border-top {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.recommendations-card[style*="background: #f8f9fa"] .badge,
+.recommendations-card[style*="background-color: #f8f9fa"] .badge,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] .badge {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #fff !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+.recommendations-card[style*="background: #f8f9fa"] .text-success,
+.recommendations-card[style*="background-color: #f8f9fa"] .text-success,
+.recommendations-card[style*="background-color: rgb(248, 249, 250)"] .text-success {
+  color: #a0f3c2 !important;
+}
+
+/* ============================
+   CATEGORY FILTER BUTTONS
+============================ */
+
+.category-filter-section {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.category-filter-section p.text-muted {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #495057;
+}
+
+.category-filter-section .btn-group {
+  gap: 0.5rem;
+}
+
+.category-filter-section .btn {
+  font-size: 0.9rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.category-filter-section .btn-outline-primary {
+  background: #fff;
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.category-filter-section .btn-outline-primary:hover {
+  background: #0d6efd;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.category-filter-section .btn-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+  transform: translateY(-2px);
+}
+
+.category-filter-section .btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.5);
+  transform: translateY(-3px);
+}
+
+.category-filter-section .mt-2 small {
+  color: #6c757d;
+  font-weight: 500;
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+
+/* ============================
+   TABLES
+============================ */
+
 .recommendations-table {
-  margin-top: 1rem;
-  font-size: 1rem;
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+  border: none;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+.recommendations-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .recommendations-table th {
-  background: #f3f6fa;
-  color: #1a3c5e;
-  font-weight: 500;
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 1rem 0.75rem;
+  border: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.recommendations-table tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.recommendations-table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .recommendations-table td {
   vertical-align: middle;
+  padding: 1rem 0.75rem;
+  border: none;
+  color: #495057;
 }
 
+.recommendations-table td:first-child {
+  font-weight: 600;
+  color: #1a3c5e;
+}
+
+.recommendations-table a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.recommendations-table a:hover {
+  background: #0d6efd;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+/* Alternating row colors */
+.recommendations-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+/* ============================
+   EMPTY STATE
+============================ */
+
 .recommendations-empty {
-  color: #868d9c;
+  color: #6c757d;
   font-style: italic;
-  padding: 1.5rem 0;
+  padding: 3rem 1rem;
   text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  font-size: 1.1rem;
+}
+
+.recommendations-empty::before {
+  content: '📋';
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* ============================
+   RESPONSIVE DESIGN
+============================ */
+
+@media (max-width: 768px) {
+  .recommendations-card .card-body {
+    padding: 1.5rem;
+  }
+
+  .recommendations-card .card-title {
+    font-size: 1.4rem;
+  }
+
+  .category-filter-section {
+    padding: 1rem;
+  }
+
+  .category-filter-section .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .recommendations-table {
+    font-size: 0.85rem;
+  }
+
+  .recommendations-table th,
+  .recommendations-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .recommendations-card .card-title {
+    font-size: 1.2rem;
+  }
+
+  .recommendations-table {
+    font-size: 0.8rem;
+  }
+
+  .recommendations-table th,
+  .recommendations-table td {
+    padding: 0.5rem 0.35rem;
+  }
+}
+
+/* ============================
+   ANIMATIONS
+============================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recommendations-card {
+  animation: fadeInUp 0.5s ease;
+}
+
+.recommendations-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.recommendations-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.recommendations-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* ============================
+   CUSTOM SCROLLBAR
+============================ */
+
+.recommendations-page-container ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.recommendations-page-container ::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.recommendations-page-container ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+.recommendations-page-container ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* ============================
+   UTILITY CLASSES
+============================ */
+
+.recommendations-page-container .text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.recommendations-page-container .shadow-lg {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Pulse animation for active buttons */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
+.category-filter-section .btn-primary {
+  animation: pulse 2s infinite;
+}
+
+/* ============================
+   PRINT STYLES
+============================ */
+
+@media print {
+  .recommendations-page-container {
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .recommendations-page-container::before {
+    display: none !important;
+  }
+
+  .recommendations-header button,
+  .category-filter-section {
+    display: none !important;
+  }
+
+  .recommendations-card {
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  .recommendations-table {
+    font-size: 10pt;
+  }
+
+  .recommendations-table thead {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .recommendations-table th {
+    color: #000 !important;
+  }
+
+  .recommendations-card:hover {
+    transform: none !important;
+  }
+
+  .recommendations-table tbody tr:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
 }

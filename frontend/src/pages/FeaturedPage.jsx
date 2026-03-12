@@ -7,6 +7,7 @@ import Product from "../components/Product.jsx";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
 import "./FeaturedPage.css";
+import { FaGem } from "react-icons/fa";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -65,12 +66,15 @@ const FeaturedPage = () => {
 
   return (
     <div className="featured-page-wrapper">
-      <article className="py-4 mb-4">
-        <h1 className="featured-title ">Featured Products</h1>
-        <h3 className="py-2 mb-2 featured-products text-center fs-4">
-          Discover our top-rated and special offer air conditioning units
-        </h3>
-      </article>
+    
+            {/* Hero */}
+            <div className="featured-hero">
+              <div className="featured-hero__inner">
+                <div className="featured-hero__icon"><FaGem /></div>
+                <h1 className="featured-hero__title">Featured Products</h1>
+                <p className="featured-hero__sub">Discover our top-rated and special offer air conditioning units.</p>
+              </div>
+            </div>
       <div className="featured-products-container">
         {loading ? (
           <LoadingBox />

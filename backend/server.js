@@ -158,8 +158,6 @@ app.use('/api/blogs', blogRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api', annotationRoutes);
 app.use('/api/engineer-annotations', engineerAnnotationRoutes);
-import recommendationRouter from './routes/recommendationRoutes.js';
-app.use('/api/recommendations', recommendationRouter);
 app.use('/api/browsing-history', browsingHistoryRouter);
 app.use('/api/user-reviews', userReviewsRouter);
 app.use('/api/wishlist', wishlistRouter);

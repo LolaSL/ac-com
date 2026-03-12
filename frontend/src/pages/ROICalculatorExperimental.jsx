@@ -265,10 +265,21 @@ export default function ROICalculatorExperimental() {
               estimatedProjectCost: capturedBtuData.estimatedProjectCost,
               estimatedInstallationDays: capturedBtuData.estimatedInstallationDays,
               recommendedUnits: capturedBtuData.recommendedUnits?.map((unit) => ({
-                name: unit.name,
+                name: unit.type || unit.name || unit.model,
                 btu: unit.btu,
-                price: unit.price,
+                price: unit.estimatedCost || unit.price,
                 quantity: unit.quantity || 1,
+              })),
+              rooms: capturedBtuData.rooms?.map((room) => ({
+                name: room.name,
+                size: room.size,
+                btu: room.btu,
+                product: {
+                  name: room.product?.name || room.product?.model,
+                  btu: room.product?.btu,
+                  price: room.product?.price,
+                  slug: room.product?.slug,
+                }
               })),
               // Preserve full BTU input parameters (measurement, options, condensers)
               inputParams: capturedBtuData.inputParams || undefined,

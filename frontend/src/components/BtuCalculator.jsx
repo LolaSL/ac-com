@@ -1386,6 +1386,157 @@ useEffect(() => {
     });
   };
 
+  // Handle "View Recommendations" - save BTU data to Store and navigate to recommendations
+  const handleViewRecommendations = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Ensure condenser calculation has completed
+    if (showCondenser && condensersForDisplay.length === 0) {
+      alert("Please wait for calculations to complete before proceeding.");
+      return;
+    }
+
+    // Calculate total equipment cost from products (indoor units)
+    const totalIndoorUnitsCost =
+      products.length > 0
+        ? products.reduce((total, product) => {
+            const price =
+              product.price - (product.price * (product.discount || 0)) / 100;
+            return total + price;
+          }, 0)
+        : 0;
+
+    // Add condenser cost based on selected condensers (supports multi-flat)
+    const condenserCost = showCondenser
+      ? condensersForDisplay.reduce((sum, c) => {
+          if (!c) return sum;
+          const price = c.price
+            ? c.discount
+              ? c.price - (c.price * c.discount) / 100
+              : c.price
+            : 0;
+          return sum + price;
+        }, 0)
+      : 0;
+    const totalEquipmentCost = totalIndoorUnitsCost + condenserCost;
+
+    // Determine property type based on number of rooms
+    let propertyType = "residential-single";
+    if (isMultiFlatProperty || detectedFlats.length > 1 || rooms.length >= 10) {
+      propertyType = "residential-multi";
+    } else if (rooms.length >= 3) {
+      propertyType = "residential-multi";
+    }
+
+    // Estimate installation time based on rooms and BTU
+    const estimatedDays = Math.max(
+      1,
+      Math.ceil(rooms.length * 0.7 + totalBTU / 10000)
+    );
+
+    // Calculate realistic project size
+    let estimatedProjectSize = totalEquipmentCost;
+    if (propertyType === "residential-single") {
+      estimatedProjectSize = Math.max(
+        1000,
+        Math.round(totalEquipmentCost / 0.2)
+      );
+    } else if (propertyType === "residential-multi") {
+      estimatedProjectSize = Math.max(
+        10000,
+        Math.round(totalEquipmentCost / 0.25)
+      );
+    } else {
+      estimatedProjectSize = Math.max(
+        50000,
+        Math.round(totalEquipmentCost / 0.3)
+      );
+    }
+
+    // Prepare BTU data
+    let recommendedUnits = products
+      .filter((p) => p.model)
+      .map((p) => ({
+        type: p.model || "Split System",
+        btu: p.btu || 0,
+        estimatedCost: p.price || 0,
+      }));
+
+    // Append condensers to recommendedUnits when present
+    if (showCondenser && condensersForDisplay.length > 0) {
+      recommendedUnits = recommendedUnits.concat(
+        condensersForDisplay.map((c) => ({
+          type: c.model || c.name || "Condenser",
+          btu: c.btu || 0,
+          estimatedCost: c.price || 0,
+          flatName: c.flatName || undefined,
+        }))
+      );
+    }
+
+    const btuData = {
+      totalBTU,
+      totalSquareFootage: rooms.reduce(
+        (sum, room) => sum + (parseFloat(room.size) || 0),
+        0
+      ),
+      numberOfRooms: rooms.length,
+      recommendedUnits,
+      propertyType,
+      condenserCost,
+      equipmentCost: totalEquipmentCost,
+      estimatedProjectCost: estimatedProjectSize,
+      estimatedInstallationDays: estimatedDays,
+      rooms: rooms.map((room, index) => {
+        const product = products[index] || {};
+        return {
+          name: room.name,
+          size: room.size,
+          btu: btuResults[index],
+          product: {
+            ...product,
+            name: product.name || "No product available",
+            price: typeof product.price === "number" ? product.price : null,
+          },
+        };
+      }),
+      // Include original input parameters
+      inputParams: {
+        measurementSystem,
+        ceilingHeight,
+        numPeople,
+        options,
+        isMultiFlatProperty,
+        detectedFlats,
+        acAnnotations,
+        isVRFSystem,
+        condenserSizingStatus,
+        condensers: condensersForDisplay.map((c) => ({
+          _id: c._id,
+          name: c.name,
+          model: c.model,
+          btu: c.btu,
+          price: c.price,
+          flatName: c.flatName,
+        })),
+      },
+    };
+
+    // Save BTU data to Store
+    ctxDispatch({
+      type: "BTU_SET_CURRENT_PROJECT",
+      payload: btuData,
+    });
+
+    toast.success("BTU calculation saved! Navigating to recommendations...");
+
+    // Navigate to recommendations page
+    navigate("/recommendations");
+  };
+
   // Handle "Do Both" - save to cart AND navigate to ROI
  const handleDoBoth = (e) => {
   if (e) {
@@ -2255,6 +2406,44 @@ useEffect(() => {
               {showCondenser && !condenser && (
                 <small className="d-block text-muted">Calculating...</small>
               )}
+            </Button>
+
+            <Button
+              onClick={handleViewRecommendations}
+              variant="success"
+              className="btn-outline-success w-75 w-md-auto py-2"
+              disabled={showCondenser && condensersForDisplay.length === 0}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="me-1"
+              >
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+              <span>View Recommendations</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="ms-1"
+              >
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
             </Button>
 
             <Button

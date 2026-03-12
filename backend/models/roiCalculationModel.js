@@ -102,6 +102,17 @@ const roiCalculationSchema = new mongoose.Schema(
                 price: Number,
                 quantity: Number,
             }],
+            rooms: [{
+                name: String,
+                size: mongoose.Schema.Types.Mixed,
+                btu: Number,
+                product: {
+                    name: String,
+                    btu: Number,
+                    price: Number,
+                    slug: String,
+                }
+            }],
             // Preserve original BTU Calculator input parameters and selected condensers
             inputParams: {
                 measurementSystem: String,

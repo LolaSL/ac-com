@@ -1,55 +1,40 @@
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
+import { memo, useCallback, useContext, useState, useEffect } from "react";
+import { Card, Button, Spinner, Image, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import Rating from "./Rating.jsx";
+import Rating from "./Rating";
 import axios from "axios";
-import { useContext, useState, useEffect, memo, useCallback } from "react";
-import { Store } from "../Store.js";
-import Image from "react-bootstrap/Image";
+import { Store } from "../Store";
 import { toast } from "react-toastify";
-import Spinner from "react-bootstrap/Spinner";
 import "./Product.css";
-
-// Unified regex for condenser/VRF detection
-const CONDENSER_REGEX =
-  /\b(?:vrf(?:\s+system)?|condens(?:er|ing)|outdoor unit|outdoor|heat recovery|heat pump)\b/i;
 
 const Product = memo(({ product }) => {
   const { state, dispatch: ctxDispatch } = useContext(Store);
-  const {
-    cart: { cartItems },
-    userInfo,
-  } = state;
-
-  const [inWishlist, setInWishlist] = useState(false);
+  const { cart: { cartItems }, userInfo } = state;
+  
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [inWishlist, setInWishlist] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-    const checkWishlist = async () => {
-      if (userInfo && product._id) {
+    if (userInfo) {
+      // Check if product is in wishlist
+      const checkWishlist = async () => {
         try {
-          const { data } = await axios.get(
-            `/api/wishlist/check/${product._id}`,
-            {
-              headers: { Authorization: `Bearer ${userInfo.token}` },
-            }
-          );
-          if (isMounted) {
-            setInWishlist(data.inWishlist);
-          }
+          const { data } = await axios.get("/api/wishlist", {
+            headers: { Authorization: `Bearer ${userInfo.token}` },
+          });
+          setInWishlist(data.products.some(p => p._id === product._id));
         } catch (error) {
-          if (isMounted && error.response?.status !== 401) {
-            console.error("Error checking wishlist:", error);
-          }
+          console.error("Error checking wishlist:", error);
         }
-      }
-    };
-    checkWishlist();
+      };
+      checkWishlist();
+    }
+
     return () => {
-      isMounted = false;
+      setWishlistLoading(false);
+      setAddingToCart(false);
     };
   }, [product._id, userInfo]);
 
@@ -57,24 +42,22 @@ const Product = memo(({ product }) => {
     async (item) => {
       if (addingToCart) return;
 
+      setAddingToCart(true);
       try {
-        setAddingToCart(true);
         const existItem = cartItems.find((x) => x._id === product._id);
         const quantity = existItem ? existItem.quantity + 1 : 1;
-
+        
         const { data } = await axios.get(`/api/products/${item._id}`);
-
-        if (!data.countInStock || data.countInStock < quantity) {
+        if (data.countInStock < quantity) {
           toast.error("Sorry. Product is out of stock");
           return;
         }
-
+        
         ctxDispatch({
           type: "CART_ADD_ITEM",
           payload: { ...item, quantity },
         });
-
-        toast.success(`${item.name} added to cart!`);
+        toast.success("Added to cart successfully!");
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to add to cart");
       } finally {
@@ -132,135 +115,151 @@ const Product = memo(({ product }) => {
   );
 
   return (
-    <Card className="h-100 product-card">
-      <div className="image-container">
-        <Link to={`/product/${product.slug}`}>
+    <Card className="product-card h-100">
+      {/* Image Section with Overlays */}
+      <div className="product-image-wrapper">
+        <Link to={`/product/${product.slug}`} className="product-image-link">
           {imageLoading && (
-            <div className="spinner-container">
-              <Spinner animation="border" variant="primary" />
+            <div className="image-loader">
+              <Spinner animation="border" variant="primary" size="sm" />
             </div>
           )}
           <Image
             src={product.image}
-            className={`responsive product-image ${
-              !imageLoading ? "loaded" : ""
-            }`}
+            className={`product-image ${!imageLoading ? "loaded" : ""}`}
             alt={product.name}
             onLoad={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
+            loading="lazy"
           />
         </Link>
+
+        {/* Discount Badge */}
+        {product.discount > 0 && (
+          <Badge className="product-discount-badge">
+            <i className="fas fa-tag me-1"></i>
+            {product.discount}% OFF
+          </Badge>
+        )}
+
+        {/* Wishlist Button */}
         <button
           onClick={toggleWishlistHandler}
           disabled={wishlistLoading}
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-          className={`wishlist-btn ${wishlistLoading ? "loading" : ""}`}
+          className={`product-wishlist-btn ${inWishlist ? "active" : ""}`}
         >
           {wishlistLoading ? (
             <Spinner animation="border" size="sm" />
           ) : (
-            <i
-              className={`${
-                inWishlist ? "fas fa-heart" : "far fa-heart"
-              } wishlist-icon ${inWishlist ? "in-wishlist" : ""}`}
-            />
+            <i className={`${inWishlist ? "fas" : "far"} fa-heart`} />
           )}
         </button>
+
+        {/* Stock Badge */}
+        {product.countInStock > 0 && product.countInStock <= 5 && (
+          <Badge className="product-stock-badge" bg="warning" text="dark">
+            <i className="fas fa-exclamation-circle me-1"></i>
+            Only {product.countInStock} left
+          </Badge>
+        )}
+
+        {product.countInStock === 0 && (
+          <Badge className="product-stock-badge" bg="danger">
+            Out of Stock
+          </Badge>
+        )}
       </div>
 
-      <Card.Body>
-        {product.discount > 0 && (
-          <div className="discount-badge">-{product.discount}% OFF</div>
-        )}
-
+      {/* Card Body */}
+      <Card.Body className="product-card-body">
         <Link
           to={`/product/${product.slug}`}
-          className="card-link text-secondary product-link"
+          className="product-title-link"
         >
-          <Card.Title style={{ 
-     fontSize: "0.85rem",
-    whiteSpace: "nowrap",
-    // overflow: "hidden",
-            // textOverflow: "ellipsis",
-     wordBreak: "break-word", // break long words
-    display: "block",
-    maxWidth: "100%"
-
-}}>
-            <strong>
-              {CONDENSER_REGEX.test(product.name || product.category || "Product")
-                ? "Condenser:"
-                : "Product:"}
-            </strong>{" "}
+          <Card.Title className="product-title">
             {product.name}
           </Card.Title>
-
-          <div className="mb-1">
-            <span className="product-brand">Brand: {product.brand}</span>
-          </div>
         </Link>
 
-        <Rating rating={product.rating} numReviews={product.numReviews} />
+        {/* Brand */}
+        <div className="product-brand-section">
+          <i className="fas fa-industry me-2 text-muted"></i>
+          <span className="product-brand-label">Brand:</span>
+          <span className="product-brand-name">{product.brand}</span>
+        </div>
 
-        <Card.Text className="mt-2">
-          <span className={product.discount > 0 ? "original-price" : ""}>
-            ${product.price.toFixed(2)}
-          </span>
+        {/* Rating */}
+        <div className="product-rating-section">
+          <Rating rating={product.rating} numReviews={product.numReviews} />
+        </div>
 
-          {product.discount > 0 && (
+        {/* Price Section */}
+        <div className="product-price-section mt-auto">
+          {product.discount > 0 ? (
             <>
-              <span className="ms-2 discount-text fw-bold">
-                Save {product.discount}%
-              </span>
-              <div className="discounted-price">
-                ${((product.price * (100 - product.discount)) / 100).toFixed(2)}
+              <div className="price-original">
+                <span className="price-label">Was:</span>
+                <span className="price-value">${product.price.toFixed(2)}</span>
+              </div>
+              <div className="price-discounted">
+                <span className="price-label">Now:</span>
+                <span className="price-value">
+                  ${((product.price * (100 - product.discount)) / 100).toFixed(2)}
+                </span>
+                <span className="price-savings ms-2">
+                  Save ${(product.price * product.discount / 100).toFixed(2)}
+                </span>
               </div>
             </>
+          ) : (
+            <div className="price-regular">
+              <span className="price-value">${product.price.toFixed(2)}</span>
+            </div>
           )}
-        </Card.Text>
+        </div>
 
-        {product.countInStock === 0 ? (
-          <Button
-            className="btn-out-of-stock"
-            variant="secondary"
-            disabled
-            aria-label="Product out of stock"
-          >
-            Out of stock
-          </Button>
-        ) : (
-          <Button
-            className="go-to-btn btn-text w-auto"
-            onClick={() => addToCartHandler(product)}
-            disabled={addingToCart}
-            aria-label={`Add ${product.name} to cart`}
-          >
-            {addingToCart ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                  className="me-2"
-                />
-                Adding...
-              </>
-            ) : (
-              "Add to cart"
-            )}
-          </Button>
-        )}
-
-        {product.countInStock > 0 && product.countInStock <= 5 && (
-          <small className="text-warning d-block mt-2">
-            Only {product.countInStock} left in stock!
-          </small>
-        )}
+        {/* Add to Cart Button */}
+        <div className="product-actions">
+          {product.countInStock === 0 ? (
+            <Button
+              className="product-btn product-btn-disabled"
+              variant="secondary"
+              disabled
+            >
+              <i className="fas fa-ban me-2"></i>
+              Out of Stock
+            </Button>
+          ) : (
+            <Button
+              className="product-btn product-btn-primary"
+              onClick={() => addToCartHandler(product)}
+              disabled={addingToCart}
+            >
+              {addingToCart ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    className="me-2"
+                  />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-shopping-cart me-2"></i>
+                  Add to Cart
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </Card.Body>
     </Card>
   );
 });
+
+Product.displayName = "Product";
 
 export default Product;
