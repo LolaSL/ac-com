@@ -915,6 +915,10 @@ useEffect(() => {
     let condenserCandidates = [];
 
     productResults.forEach(({ room, product }) => {
+      if (!product) {
+        // Skip null products (errors during calculation)
+        return;
+      }
       if (
         (product.category &&
           product.category.toLowerCase().includes("condenser")) ||
@@ -1354,7 +1358,60 @@ useEffect(() => {
             price: typeof product.price === "number" ? product.price : null,
           },
         };
-      }),
+      }).concat(
+        // Add condenser rows to the rooms array
+        showCondenser && condensersForDisplay.length > 0
+          ? condensersForDisplay.map((cond, idx) => {
+              // Calculate condenser BTU requirement
+              let condenserBtuRequirement = 0;
+              if (cond?.flatName && isMultiFlatProperty) {
+                const flatKeyword = cond.flatName.match(/\d+/)?.[0];
+                if (flatKeyword) {
+                  condenserBtuRequirement = rooms.reduce(
+                    (sum, room, roomIdx) => {
+                      if (
+                        room.name
+                          .toLowerCase()
+                          .includes(`flat ${flatKeyword}:`)
+                      ) {
+                        return sum + (btuResults[roomIdx] || 0);
+                      }
+                      return sum;
+                    },
+                    0
+                  );
+                }
+              } else {
+                condenserBtuRequirement = btuResults.reduce(
+                  (sum, btu) => sum + (btu || 0),
+                  0
+                );
+              }
+
+              const displayBtu = Math.round(condenserBtuRequirement * 1.0);
+
+              return {
+                name: cond?.flatName
+                  ? `${cond.flatName} Condenser`
+                  : condensersForDisplay.length > 1
+                  ? `Condenser ${idx + 1}`
+                  : "Condenser",
+                size: "—",
+                btu: displayBtu,
+                product: {
+                  _id: cond._id,
+                  name: cond.name || cond.model,
+                  model: cond.model,
+                  btu: cond.btu,
+                  price: cond.price,
+                  discount: cond.discount || 0,
+                  slug: cond.slug,
+                  isCondenser: true, // Flag to identify condensers
+                },
+              };
+            })
+          : []
+      ),
       // Include original input parameters so ROI can save/display full calculation context
       inputParams: {
         measurementSystem,
@@ -1502,7 +1559,60 @@ useEffect(() => {
             price: typeof product.price === "number" ? product.price : null,
           },
         };
-      }),
+      }).concat(
+        // Add condenser rows to the rooms array
+        showCondenser && condensersForDisplay.length > 0
+          ? condensersForDisplay.map((cond, idx) => {
+              // Calculate condenser BTU requirement
+              let condenserBtuRequirement = 0;
+              if (cond?.flatName && isMultiFlatProperty) {
+                const flatKeyword = cond.flatName.match(/\d+/)?.[0];
+                if (flatKeyword) {
+                  condenserBtuRequirement = rooms.reduce(
+                    (sum, room, roomIdx) => {
+                      if (
+                        room.name
+                          .toLowerCase()
+                          .includes(`flat ${flatKeyword}:`)
+                      ) {
+                        return sum + (btuResults[roomIdx] || 0);
+                      }
+                      return sum;
+                    },
+                    0
+                  );
+                }
+              } else {
+                condenserBtuRequirement = btuResults.reduce(
+                  (sum, btu) => sum + (btu || 0),
+                  0
+                );
+              }
+
+              const displayBtu = Math.round(condenserBtuRequirement * 1.0);
+
+              return {
+                name: cond?.flatName
+                  ? `${cond.flatName} Condenser`
+                  : condensersForDisplay.length > 1
+                  ? `Condenser ${idx + 1}`
+                  : "Condenser",
+                size: "—",
+                btu: displayBtu,
+                product: {
+                  _id: cond._id,
+                  name: cond.name || cond.model,
+                  model: cond.model,
+                  btu: cond.btu,
+                  price: cond.price,
+                  discount: cond.discount || 0,
+                  slug: cond.slug,
+                  isCondenser: true, // Flag to identify condensers
+                },
+              };
+            })
+          : []
+      ),
       // Include original input parameters
       inputParams: {
         measurementSystem,

@@ -90,20 +90,23 @@ app.use((req, _res, next) => {
   next();
 });
 
-// General API rate limit: 200 req / 15 min per IP
+// General API rate limit: Higher limit for dev, stricter for production
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 200 : 1000, // 1000 for dev, 200 for prod
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many requests, please try again later.' },
+  // Skip rate limiting for localhost in development
+  skip: (req) => process.env.NODE_ENV !== 'production' && 
+                  (req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1'),
 });
 app.use('/api', apiLimiter);
 
-// Stricter limit on auth endpoints: 20 req / 15 min per IP
+// Stricter limit on auth endpoints: 20 req / 15 min per IP (production), 100 for dev
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: process.env.NODE_ENV === 'production' ? 20 : 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many login attempts, please try again later.' },

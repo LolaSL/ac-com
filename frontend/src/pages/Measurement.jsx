@@ -98,6 +98,11 @@ const Measurement = () => {
       });
 
       if (!response.ok) {
+        // Don't set error for rate limit - just log it
+        if (response.status === 429) {
+          console.warn("Rate limit reached. Please wait before fetching again.");
+          return;
+        }
         setError(`Failed to fetch saved PDFs: ${response.statusText}`);
         return;
       }
@@ -111,8 +116,11 @@ const Measurement = () => {
   }, [token]);
 
   useEffect(() => {
-    fetchSavedPdfs();
-  }, [fetchSavedPdfs]);
+    // Only fetch once on mount if token is available
+    if (token) {
+      fetchSavedPdfs();
+    }
+  }, [token]); // Removed fetchSavedPdfs from dependencies to prevent re-fetching
 
   useEffect(() => {
     console.log("ROOM DATA UPDATED:", roomData);

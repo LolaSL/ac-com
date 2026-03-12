@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import { Store } from "../Store";
 import { Card, Table, Button, ButtonGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaPrint } from "react-icons/fa";
 import "./Recommendations.css";
 import { COMMON_AC_RECOMMENDATIONS } from "./acRecommendationData.js";
 
@@ -10,9 +11,31 @@ export default function Recommendations() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = useCallback(() => {
+    const printDate = new Date().toLocaleString();
+    const originalTitle = document.title;
+    document.title = `HVAC Recommendations - ${printDate}`;
+    
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 100);
+    }, 100);
+  }, []);
+
+  // Add keyboard shortcut support (Ctrl+P)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        handlePrint();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePrint]);
 
   // Extract BTU/ROI project data
   const btuProject =
@@ -121,31 +144,53 @@ export default function Recommendations() {
     
     const systems = [];
     
-    // Separate indoor and outdoor units
-    const indoorUnits = recommendedUnits.filter(unit => {
-      const name = getName(unit).toLowerCase();
-      // Exclude outdoor/condenser units
-      return !(name.includes('condenser') || name.includes('outdoor') || unit.flatName);
-    });
+    // Check perRoomResults (includes condensers) if available
+    if (perRoomResults && perRoomResults.length > 0) {
+      const indoorRooms = perRoomResults.filter(room => {
+        const roomName = room.name?.toLowerCase() || '';
+        const productIsCondenser = room.product?.isCondenser === true;
+        return !roomName.includes('condenser') && !productIsCondenser;
+      });
 
-    const outdoorUnits = recommendedUnits.filter(unit => {
-      const name = getName(unit).toLowerCase();
-      // Include only outdoor/condenser units
-      return name.includes('condenser') || name.includes('outdoor') || unit.flatName;
-    });
+      const condenserRooms = perRoomResults.filter(room => {
+        const roomName = room.name?.toLowerCase() || '';
+        const productIsCondenser = room.product?.isCondenser === true;
+        return roomName.includes('condenser') || productIsCondenser;
+      });
 
+      if (indoorRooms.length > 0) {
+        systems.push({ name: 'Indoor Units', icon: '❄️', count: indoorRooms.length });
+      }
+      
+      if (condenserRooms.length > 0) {
+        systems.push({ name: 'Outdoor Condensers', icon: '🔧', count: condenserRooms.length });
+      }
+    } else {
+      // Fallback to recommendedUnits if perRoomResults not available
+      const indoorUnits = recommendedUnits.filter(unit => {
+        const name = getName(unit).toLowerCase();
+        return !(name.includes('condenser') || name.includes('outdoor') || unit.flatName);
+      });
+
+      const outdoorUnits = recommendedUnits.filter(unit => {
+        const name = getName(unit).toLowerCase();
+        return name.includes('condenser') || name.includes('outdoor') || unit.flatName;
+      });
+
+      if (indoorUnits.length > 0) {
+        systems.push({ name: 'Indoor Units', icon: '❄️', count: indoorUnits.length });
+      }
+      
+      if (outdoorUnits.length > 0) {
+        systems.push({ name: 'Outdoor Condensers', icon: '🔧', count: outdoorUnits.length });
+      }
+    }
+    
+    // Check for VRF system
     const hasVRF = recommendedUnits.some(unit => {
       const name = getName(unit).toLowerCase();
       return name.includes('vrf') || name.includes('multi');
     }) || (perRoomResults && perRoomResults.length > 5);
-
-    if (indoorUnits.length > 0) {
-      systems.push({ name: 'Indoor Units', icon: '❄️', count: indoorUnits.length });
-    }
-    
-    if (outdoorUnits.length > 0) {
-      systems.push({ name: 'Outdoor Condensers', icon: '🔧', count: outdoorUnits.length });
-    }
     
     if (hasVRF) {
       systems.push({ name: 'VRF/Multi-Split System', icon: '🏢', count: null });
@@ -200,6 +245,21 @@ export default function Recommendations() {
             }}>
               Complete installation guide with product recommendations and required accessories
             </p>
+            {/* Print-only metadata */}
+            <div className="print-only-info" style={{ display: 'none' }}>
+              <p style={{ marginTop: '0.75rem', fontSize: '0.9rem', opacity: 0.9 }}>
+                <strong>Generated:</strong> {new Date().toLocaleString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric', 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </p>
+              <p style={{ fontSize: '0.85rem', opacity: 0.85, margin: '0.25rem 0 0 0' }}>
+                AC Commerce - Professional HVAC Solutions | www.accommerce.com
+              </p>
+            </div>
           </div>
           <div className="d-flex gap-2">
             <Button 
@@ -219,10 +279,14 @@ export default function Recommendations() {
               style={{
                 fontWeight: '600',
                 padding: '0.6rem 1.2rem',
-                borderRadius: '8px'
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}
+              title="Print recommendations"
             >
-              🖨️ Print
+              <FaPrint /> Print
             </Button>
           </div>
         </div>
@@ -266,7 +330,7 @@ export default function Recommendations() {
                 <div className="p-3 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
                   <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Units</div>
                   <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
-                    {recommendedUnits.length || 'N/A'}
+                    {perRoomResults ? perRoomResults.length : (recommendedUnits.length || 'N/A')}
                   </div>
                 </div>
               </div>
@@ -337,8 +401,8 @@ export default function Recommendations() {
                   <th>Optimal Product</th>
                   <th>Product BTU</th>
                   <th>Product Price ($)</th>
-                  <th>Product Slug</th>
-                  <th>Product Link</th>
+                  <th>Product Model</th>
+                  <th>View</th>
                 </tr>
               </thead>
               <tbody>
@@ -354,15 +418,17 @@ export default function Recommendations() {
                       <td>{getName(product)}</td>
                       <td>{product.btu || "—"}</td>
                       <td>{getPrice(product)}</td>
-                      <td>{product.slug || "—"}</td>
-                      <td>
+                      <td>{product.model || product.name || "—"}</td>
+                      <td style={{ textAlign: 'center' }}>
                         {product.slug ? (
                           <a
                             href={`/product/${product.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            style={{ fontSize: '1.2rem', color: '#0d6efd' }}
+                            title="View product details"
                           >
-                            View
+                            <FaEye />
                           </a>
                         ) : (
                           "—"
@@ -531,7 +597,7 @@ export default function Recommendations() {
             <Button 
               variant="primary" 
               size="lg"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/search')}
               style={{
                 padding: '0.75rem 2rem',
                 fontWeight: '600',

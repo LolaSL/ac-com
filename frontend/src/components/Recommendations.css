@@ -299,6 +299,15 @@
   box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
 }
 
+/* Eye icon styling for view links */
+.recommendations-table a svg {
+  transition: transform 0.2s ease;
+}
+
+.recommendations-table a:hover svg {
+  transform: scale(1.2);
+}
+
 /* Alternating row colors */
 .recommendations-table tbody tr:nth-child(even) {
   background-color: #f8f9fa;
@@ -462,47 +471,276 @@
    PRINT STYLES
 ============================ */
 
+/* Hide print-only elements on screen */
+@media screen {
+  .print-only-info {
+    display: none !important;
+  }
+}
+
 @media print {
+  /* Override ALL inline styles */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Basic print setup */
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  html, body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Make container visible - override inline styles */
   .recommendations-page-container {
     background: white !important;
-    padding: 0 !important;
+    padding: 1rem !important;
+    max-width: 100% !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: auto !important;
   }
 
   .recommendations-page-container::before {
     display: none !important;
   }
 
+  .recommendations-page-container > * {
+    position: static !important;
+  }
+
+  /* Show print-only info - override inline display: none */
+  .print-only-info {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin-top: 0.75rem !important;
+  }
+
+  .print-only-info p {
+    color: white !important;
+    margin: 0.25rem 0 !important;
+    display: block !important;
+  }
+
+  /* Hide buttons - be very specific */
+  button,
+  .btn,
   .recommendations-header button,
+  .recommendations-header .btn,
   .category-filter-section {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Header styling for print - override inline styles */
+  .recommendations-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 1.5rem !important;
+    page-break-after: avoid;
+    border-radius: 0 !important;
+    margin-bottom: 1rem !important;
+    box-shadow: none !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .recommendations-header * {
+    color: white !important;
+  }
+
+  .recommendations-header h1 {
+    color: white !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+    display: block !important;
+    text-shadow: none !important;
+  }
+
+  .recommendations-header p {
+    color: white !important;
+    font-size: 0.9rem !important;
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+  .recommendations-header .d-flex {
+    display: block !important;
+  }
+
+  /* Card styling - force visibility and override inline styles */
+  .recommendations-card,
+  .card {
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    background: white !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+  }
+
+  .recommendations-card .card-body,
+  .card-body {
+    padding: 1rem !important;
+    background: white !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .recommendations-card .card-title,
+  .card-title {
+    color: #1a3c5e !important;
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    margin-bottom: 1rem !important;
+    border-bottom: 2px solid #667eea !important;
+    padding-bottom: 0.5rem !important;
+    display: block !important;
+  }
+
+  /* System Summary card with inline background color */
+  .recommendations-card[style] {
+    background: #f0f0f0 !important;
+  }
+
+  /* Force all divs to be visible */
+  div, p, span, h1, h2, h3, h4, h5, h6 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Table styling - force complete visibility */
+  .recommendations-table,
+  table {
+    font-size: 10pt !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    display: table !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+  }
+
+  .recommendations-table thead,
+  table thead {
+    display: table-header-group !important;
+    background: #667eea !important;
+    visibility: visible !important;
+  }
+
+  .recommendations-table th,
+  table th {
+    background: #667eea !important;
+    color: white !important;
+    padding: 0.5rem !important;
+    border: 1px solid #333 !important;
+    font-weight: bold !important;
+    display: table-cell !important;
+    visibility: visible !important;
+  }
+
+  .recommendations-table tbody,
+  table tbody {
+    display: table-row-group !important;
+    visibility: visible !important;
+  }
+
+  .recommendations-table tr,
+  table tr {
+    display: table-row !important;
+    page-break-inside: avoid;
+    visibility: visible !important;
+  }
+
+  .recommendations-table td,
+  table td {
+    padding: 0.5rem !important;
+    border: 1px solid #333 !important;
+    color: #000 !important;
+    display: table-cell !important;
+    visibility: visible !important;
+    background: white !important;
+  }
+
+  .recommendations-table tbody tr:nth-child(even),
+  table tbody tr:nth-child(even) {
+    background-color: #f8f9fa !important;
+  }
+
+  /* Links - hide icons but show text */
+  .recommendations-table a,
+  a {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
+    display: inline !important;
+  }
+
+  .recommendations-table a svg,
+  svg {
     display: none !important;
   }
 
-  .recommendations-card {
-    page-break-inside: avoid;
-    box-shadow: none !important;
+  /* Badges and spans */
+  .badge,
+  span {
     border: 1px solid #ddd !important;
-  }
-
-  .recommendations-table {
-    font-size: 10pt;
-  }
-
-  .recommendations-table thead {
-    background: #f0f0f0 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .recommendations-table th {
+    padding: 0.25rem 0.5rem !important;
+    display: inline-block !important;
+    visibility: visible !important;
     color: #000 !important;
   }
 
-  .recommendations-card:hover {
-    transform: none !important;
+  /* Bootstrap grid - convert to block */
+  .row {
+    display: block !important;
   }
 
-  .recommendations-table tbody tr:hover {
+  .col-lg-3, .col-md-6, .col-sm-6, [class*="col-"] {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Text elements - force visibility */
+  strong, b {
+    color: #000 !important;
+    font-weight: bold !important;
+  }
+
+  .text-primary {
+    color: #0d6efd !important;
+  }
+
+  .text-success {
+    color: #198754 !important;
+  }
+
+  /* Page break control */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    color: #1a3c5e !important;
+  }
+
+  /* Remove hover and animations */
+  * {
     transform: none !important;
-    box-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
   }
 }
+
