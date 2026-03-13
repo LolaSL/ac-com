@@ -97,3 +97,29 @@ section {
   display: flex;
   justify-content: center;
 }
+
+/* Global Print Styles - Hide Navigation Elements */
+@media print {
+  /* Hide sidebar navigation globally */
+  .sidebar-modal,
+  .sidebar-overlay,
+  aside,
+  nav,
+  .navbar,
+  header,
+  footer,
+  [class*="sidebar"],
+  [class*="Sidebar"],
+  [class*="navigation"],
+  [class*="Navigation"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Ensure main content is visible */
+  body, #root, main, .main-content {
+    display: block !important;
+    visibility: visible !important;
+    background: white !important;
+  }
+}

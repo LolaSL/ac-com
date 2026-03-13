@@ -61,7 +61,7 @@ router.post(
       const userId = req.user._id;
       const isPaid = req.user.isPaid; // <-- ensure user’s isPaid is used
 
-      const { pdfId, rectangles, comments, lines, hvac, vrf, acType, imageWidth, imageHeight, rooms } =
+      const { pdfId, rectangles, comments, lines, hvac, vrf, acType, imageWidth, imageHeight, rooms, roomData } =
         req.body;
 
       if (!imageWidth || !imageHeight) {
@@ -78,7 +78,7 @@ router.post(
       const parsedLines = JSON.parse(lines || "[]");
       const parsedHvac = JSON.parse(hvac || "{}");
       const parsedVrf = JSON.parse(vrf || "{}");
-      const parsedRooms = JSON.parse(rooms || "[]");
+      const parsedRooms = JSON.parse(rooms || roomData || "[]"); // Accept either rooms or roomData
 
       const percentRectangles = parsedRectangles.map((rect) => {
         const xPercent = rect.xPercent ?? (rect.x / width);
@@ -710,6 +710,7 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
       acType: annotation.acType,
       filename: annotation.filename,
       userId: annotation.userId,
+      roomData: annotation.roomData || [], // Include room data for BTU Calculator export
     });
   } catch (error) {
     console.error('Error fetching annotations:', error);

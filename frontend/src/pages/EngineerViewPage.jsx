@@ -284,29 +284,6 @@ const EngineerViewPage = () => {
     renderOverlays();
   }, [pdfFile, annotation, showHVAC, addMode, acType]);
 
-  // Prevent browser printing - direct users to use SaveAsPDF button
-  useEffect(() => {
-    const handleBeforePrint = (e) => {
-      e.preventDefault();
-      alert("Please use the '💾 Save as PDF' button to generate the complete annotated PDF with all system views. Browser printing (Ctrl+P) only shows the current page.");
-    };
-
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-        e.preventDefault();
-        alert("Please use the '💾 Save as PDF' button to generate the complete annotated PDF with all system views. Browser printing (Ctrl+P) only shows the current page.");
-      }
-    };
-
-    window.addEventListener('beforeprint', handleBeforePrint);
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('beforeprint', handleBeforePrint);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
   // Save handler (save full annotation, not just hvac)
   const handleSave = async () => {
     if (!annotation) return;

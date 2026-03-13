@@ -45,8 +45,8 @@ const ModalLegend = () => {
                   <li><strong>🗑️ Delete Shape:</strong> Right-click or tap & hold to remove</li>
                   <li><strong>📊 Extract Rooms:</strong> Process drawing to identify rooms</li>
                   <li><strong>🚀 Export (n):</strong> Send rooms to BTU Calculator</li>
-                  <li><strong>💾 Save PDF File:</strong> Download annotated PDF</li>
-                  <li><strong>🧹 Clear:</strong> Remove all annotations</li>
+                  <li><strong>💾 Save PDF File:</strong> Download notated PDF</li>
+                  <li><strong>🧹 Clear:</strong> Remove all notations</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">📐 BTU Calculator Buttons</h6>
@@ -61,7 +61,7 @@ const ModalLegend = () => {
 
                 <h6 className="mb-2 mt-3 text-primary">🎯 Interaction Notes</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li><strong>Single Flat:</strong> Standard workflow - annotate one flat, calculate BTU</li>
+                  <li><strong>Single Flat:</strong> Standard workflow - notate one flat, calculate BTU</li>
                   <li><strong>Multi-Flat:</strong> Label AC units with numbers (ac-1, ac-2), rename rooms with flat numbers, system auto-detects separate units</li>
                   <li><strong>VRF System:</strong> All calculations use VRF technology with chain topology refrigerant connections</li>
                 </ul>
@@ -69,7 +69,7 @@ const ModalLegend = () => {
             </Tab>
 
             {/* ANNOTATOR TAB */}
-            <Tab eventKey="annotator" title="🖼️ PDF Annotator">
+            <Tab eventKey="annotator" title="🖼️ PDF Designer">
               <div className="mt-3">
                 <h6 className="mb-2 text-primary">📌 Step 1: Upload PDF</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
@@ -79,20 +79,32 @@ const ModalLegend = () => {
                   </li>
                   <li>Works best with floor plans showing room layouts</li>
                 </ul>
-
+<h6 className="mb-2 mt-3 text-primary">
+                  ✅ Step 2: Extract Room Data
+                </h6>
+                <ul className="list-disc ml-4 space-y-1 fs-6">
+                  <li>
+                    Review the classified room data table below the canvas
+                  </li>
+                  <li>Edit room names, sizes if needed</li>
+                  <li>
+                    For multi-flat: name room (e.g., "Kitchen ", "LivingRoom "  and etc.)
+                  </li>
+                  <li>Delete duplicate or unwanted room entries</li>
+                </ul>
                 <h6 className="mb-2 mt-3 text-primary">
-                  🔄 Step 2: Rotate PDF Drawing (if needed)
+                  🔄 Step 3: Rotate PDF Drawing (if needed)
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
                     <strong>Rotation Buttons:</strong> Dedicated to rotate the
                     uploaded PDF drawing (0°, 90°, 180°, 270°) before
-                    annotations if PDF was uploaded with incorrect position
+                    notations if PDF was uploaded with incorrect position
                   </li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
-                  🎯 Step 3: Mark AC Unit Locations
+                  🎯 Step 4: Mark AC Unit Locations
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
@@ -100,19 +112,19 @@ const ModalLegend = () => {
                     AC unit should go
                   </li>
                     <li>
-                    <strong>💬 Add Comment:</strong> Enter AC label (e.g.,
+                    <strong>💬 Add Comment for single Flat:</strong> Enter AC label (e.g.,
                     "ac-1", "ac-2" for single flat VRF systems)
                   </li>
                   <li>
-                    <strong>💬 Add Comment:</strong> Enter AC label (e.g.,
+                    <strong>💬 Add Comment for multi-Flat:</strong> Enter AC label (e.g.,
                     "ac-1.1", "ac-1.2" for flat 1, "ac-2.1", "ac-2.2" for flat 2 and etc. in multi-flat VRF systems)
                   </li>
                      <li>
-                    <strong>💬 Add Comment:</strong> Enter Condenser label (e.g.,
+                    <strong>💬 Add Comment for single Flat:</strong> Enter Condenser label (e.g.,
                     "condenser-1" for single flat VRF systems)
                   </li>
                      <li>
-                    <strong>💬 Add Comment:</strong> Enter Condenser label (e.g.,
+                    <strong>💬 Add Comment for multi-Flat:</strong> Enter Condenser label (e.g.,
                     "condenser-1" for flat 1, "condenser-2" for flat 2 and etc. in multi-flat VRF systems)
                   </li>
                   <li>
@@ -124,9 +136,8 @@ const ModalLegend = () => {
                     drawing
                   </li>
                 </ul>
-
                 <h6 className="mb-2 mt-3 text-primary">
-                  🔧 Step 4: Edit Shapes
+                  🔧 Step 5: Edit Shapes
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
@@ -145,22 +156,6 @@ const ModalLegend = () => {
                     move view
                   </li>
                 </ul>
-
-                <h6 className="mb-2 mt-3 text-primary">
-                  ✅ Step 5: Extract Room Data
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    Review the classified room data table below the canvas
-                  </li>
-                  <li>Edit room names, sizes if needed</li>
-                  <li>
-                    For multi-flat: Rename rooms with numbers (e.g., "LivingRoom
-                    1", "LivingRoom 2")
-                  </li>
-                  <li>Delete duplicate or unwanted room entries</li>
-                </ul>
-
                 <h6 className="mb-2 mt-3 text-primary">
                   🚀 Step 6: Export to BTU Calculator
                 </h6>
@@ -174,7 +169,6 @@ const ModalLegend = () => {
                     prefixed (Flat 1, Flat 2)
                   </li>
                   <li>Page will scroll to VRF BTU Calculator automatically</li>
-                  <li>System prepares chain topology refrigerant connections</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
@@ -182,11 +176,11 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Click <strong>"Save PDF File"</strong> to store annotated
+                    Click <strong>"Save PDF File"</strong> to store notated
                     drawing
                   </li>
                   <li>
-                    Click <strong>"Clear"</strong> to remove all annotations and
+                    Click <strong>"Clear"</strong> to remove all notations and
                     start over
                   </li>
                 </ul>
@@ -260,7 +254,7 @@ const ModalLegend = () => {
                   </li>
                   <li>System calculates required BTU for each room using VRF technology</li>
                   <li>Matches optimal VRF AC units from product database</li>
-                  <li>For multi-flat: Sizes separate VRF condensers per flat with chain connections</li>
+                  <li>For multi-flat: Sizes separate VRF condensers per flat</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
@@ -292,6 +286,9 @@ const ModalLegend = () => {
                     <strong>Add to Cart:</strong> Save equipment selections to
                     shopping cart
                   </li>
+                      <li>
+                    <strong>View Recommendations:</strong> Recommend additional products like smart thermostats, air purifiers, etc.
+                  </li>
                   <li>
                     <strong>Calculate ROI:</strong> Analyze cost savings vs
                     traditional HVAC
@@ -308,7 +305,7 @@ const ModalLegend = () => {
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
                     System auto-detects 2+ flats from room duplicates or AC
-                    annotations (ac-1, ac-2, etc.)
+                   notations (ac-1, ac-2, etc.)
                   </li>
                   <li>
                     Each flat gets <strong>separate VRF condenser sizing</strong> with chain topology

@@ -800,9 +800,9 @@ const Annotator = ({
   const [downloadedFiles, setDownloadedFiles] = useState([]);
   const [pdfRotation, setPdfRotation] = useState(0); // Store rotation in degrees
 
-  const clearResults = () => {
-    setResults([]);
-  };
+  // const clearResults = () => {
+  //   setResults([]);
+  // };
 
   useEffect(() => {
     const loadScript = (src, id, onloadCallback) => {
@@ -934,6 +934,76 @@ const Annotator = ({
     }
   }, [results]);
 
+  // Helper function to format rooms with flat prefixes
+  const formatRoomsWithFlatPrefixes = (validRooms, acAnnotations) => {
+    // Build AC annotations from current canvas comments if not provided
+    const annotations = acAnnotations || comments
+      .filter((c) => c.text)
+      .map((c) => ({
+        label: c.text,
+        coordinates: { x: c.x, y: c.y },
+      }));
+
+    // Detect flat numbers from annotations
+    const detectedFlatNums = new Set();
+    annotations.forEach(({ label }) => {
+      const t = label.toLowerCase();
+      const cm = t.match(/condenser[-\s]?(\d+)/);
+      if (cm) detectedFlatNums.add(parseInt(cm[1], 10));
+      const fm = t.match(/(?:flat|unit)\s*(\d+)/);
+      if (fm) detectedFlatNums.add(parseInt(fm[1], 10));
+      const am = t.match(/ac[-\s]?(\d+)\.\d+/);
+      if (am) detectedFlatNums.add(parseInt(am[1], 10));
+    });
+
+    let flatNumsArray = Array.from(detectedFlatNums).sort((a, b) => a - b);
+    const isMultiFlat = flatNumsArray.length > 1;
+
+    // Format rooms, adding flat prefixes when multi-flat
+    let formattedRooms = validRooms.map((room, idx) => {
+      const base = room.roomType || "Room";
+      const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
+      let name = base;
+      
+      if (isMultiFlat && !alreadyPrefixed) {
+        const numFlats = flatNumsArray.length;
+        const roomsPerFlat = Math.floor(validRooms.length / numFlats);
+        
+        if (validRooms.length % numFlats === 0 && roomsPerFlat > 0) {
+          const flatIndex = Math.floor(idx / roomsPerFlat);
+          const flatNum = flatNumsArray[Math.min(flatIndex, numFlats - 1)];
+          name = `Flat ${flatNum}: ${base}`;
+        } else {
+          const flatNum = flatNumsArray[idx % numFlats];
+          name = `Flat ${flatNum}: ${base}`;
+        }
+      }
+      
+      return {
+        name,
+        size:
+          parseFloat(
+            (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+          ) || 0,
+        btu: 0,
+        unit: "meters",
+      };
+    });
+
+    // When multi-flat: sort by flat number so flats are grouped
+    if (isMultiFlat) {
+      formattedRooms = formattedRooms
+        .map((r) => ({
+          ...r,
+          _flatNum: parseInt(r.name.match(/^flat\s*(\d+)/i)?.[1] || "1", 10),
+        }))
+        .sort((a, b) => a._flatNum - b._flatNum)
+        .map(({ _flatNum, ...r }) => r);
+    }
+
+    return { formattedRooms, isMultiFlat, annotations };
+  };
+
   // Auto-update BTU Calculator whenever filtered rooms change
   useEffect(() => {
     // Get filtered rooms from the table (from filteredRoomsRef)
@@ -946,75 +1016,11 @@ const Annotator = ({
       );
 
       if (validRooms.length > 0) {
-        // Build AC annotations from current canvas comments
-        const acAnnotations = comments
-          .filter((c) => c.text)
-          .map((c) => ({
-            label: c.text,
-            coordinates: { x: c.x, y: c.y },
-          }));
-
-        // Detect flat numbers from annotations.
-        // Rules:
-        //   condenser-N  → flat N (explicit multi-flat condenser)
-        //   flat-N / unit-N → flat N (explicit flat keyword)
-        //   ac-N.M       → flat N (dot notation: flat N, unit M — multi-flat specific)
-        //   ac-N alone   → NOT a flat indicator (just "AC unit N" in a single flat)
-        const detectedFlatNums = new Set();
-        acAnnotations.forEach(({ label }) => {
-          const t = label.toLowerCase();
-          // condenser-N or condenser N
-          const cm = t.match(/condenser[-\s]?(\d+)/);
-          if (cm) detectedFlatNums.add(parseInt(cm[1], 10));
-          // flat N / unit N keyword
-          const fm = t.match(/(?:flat|unit)\s*(\d+)/);
-          if (fm) detectedFlatNums.add(parseInt(fm[1], 10));
-          // ac-N.M (dot notation only — plain ac-N is NOT multi-flat)
-          const am = t.match(/ac[-\s]?(\d+)\.\d+/);
-          if (am) detectedFlatNums.add(parseInt(am[1], 10));
-        });
-
-        // Fall back: count duplicate room names to infer flat count
-        let flatNumsArray = Array.from(detectedFlatNums).sort((a, b) => a - b);
-        // NOTE: We intentionally do NOT fall back to duplicate-room-name counting here.
-        // A single large apartment can have multiple bedrooms/bathrooms with the same name.
-        // Multi-flat must be indicated explicitly via annotation labels (condenser-N, flat-N, ac-N).
-
-        const isMultiFlat = flatNumsArray.length > 1;
-
-        // Format rooms, adding flat prefixes when multi-flat
-        let formattedRooms = validRooms.map((room, idx) => {
-          const base = room.roomType || "Room";
-          const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
-          const name =
-            isMultiFlat && !alreadyPrefixed
-              ? `Flat ${flatNumsArray[idx % flatNumsArray.length]}: ${base}`
-              : base;
-          return {
-            name,
-            size:
-              parseFloat(
-                (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-              ) || 0,
-            btu: 0,
-            unit: "meters",
-          };
-        });
-
-        // When multi-flat: sort by flat number so flats are grouped
-        if (isMultiFlat) {
-          formattedRooms = formattedRooms
-            .map((r) => ({
-              ...r,
-              _flatNum: parseInt(r.name.match(/^flat\s*(\d+)/i)?.[1] || "1", 10),
-            }))
-            .sort((a, b) => a._flatNum - b._flatNum)
-            .map(({ _flatNum, ...r }) => r);
-        }
-
+        const { formattedRooms, isMultiFlat, annotations } = formatRoomsWithFlatPrefixes(validRooms);
+        
         console.log("Sending to BTU Calculator (multi-flat:", isMultiFlat, "):", formattedRooms);
         // Pass rooms AND annotations so BtuCalculator can detect multi-flat
-        setRoomData(formattedRooms, isMultiFlat ? acAnnotations : []);
+        setRoomData(formattedRooms, isMultiFlat ? annotations : []);
       }
     }
     // Intentionally exclude `setRoomData` from deps to avoid infinite loops
@@ -1534,12 +1540,37 @@ const Annotator = ({
       return;
     }
     setIsSaved(false);
+    
+    // Get the filtered room data and format with flat prefixes
+    const filteredRooms = filteredRoomsRef.current.flat().filter(Boolean);
+    const validRooms = filteredRooms.filter(
+      (room) => room.roomType && room.areaSqM
+    );
+    
+    // Format rooms with flat prefixes using the same logic as BTU Calculator export
+    const { formattedRooms } = formatRoomsWithFlatPrefixes(validRooms);
+    
+    // Deduplicate rooms by name (keep first occurrence)
+    const seenRoomNames = new Set();
+    const roomsToSave = formattedRooms.filter((room) => {
+      const key = room.name;
+      if (seenRoomNames.has(key)) {
+        console.log(`Removing duplicate room: ${key}`);
+        return false;
+      }
+      seenRoomNames.add(key);
+      return true;
+    });
+    
+    console.log(`Saving ${roomsToSave.length} unique rooms:`, roomsToSave.map(r => r.name));
+    
     const formData = new FormData();
     formData.append("pdfFile", file);
     formData.append("rectangles", JSON.stringify(rectangles));
     formData.append("comments", JSON.stringify(comments));
     formData.append("lines", JSON.stringify(lines));
     formData.append("pdfId", pdfId);
+    formData.append("roomData", JSON.stringify(roomsToSave)); // Save room data with flat prefixes
 
     const canvas = document.getElementById("my-canvas");
     const imageWidth = canvas?.width;
@@ -1570,16 +1601,8 @@ const Annotator = ({
         alert("PDF and annotations saved successfully!");
 
         setIsSaved(true);
-        setFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = null;
-        }
-
-        setPreviewUrl(null);
-        setRectangles([]);
-        setComments([]);
-        setLines([]);
-        clearResults();
+        // Keep the PDF and annotations on canvas after saving
+        // User can manually clear using "Clear Canvas" button if needed
       } else {
         const errorData = await response.json();
         console.error("Error saving data:", errorData);

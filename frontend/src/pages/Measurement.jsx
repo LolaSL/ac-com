@@ -120,7 +120,7 @@ const Measurement = () => {
     if (token) {
       fetchSavedPdfs();
     }
-  }, [token]); // Removed fetchSavedPdfs from dependencies to prevent re-fetching
+  }, [fetchSavedPdfs, token]); // Removed fetchSavedPdfs from dependencies to prevent re-fetching
 
   useEffect(() => {
     console.log("ROOM DATA UPDATED:", roomData);

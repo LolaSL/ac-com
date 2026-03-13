@@ -472,14 +472,12 @@
 ============================ */
 
 /* Hide print-only elements on screen */
-@media screen {
-  .print-only-info {
-    display: none !important;
-  }
+.print-only-info {
+  display: none !important;
 }
 
 @media print {
-  /* Override ALL inline styles */
+  /* Force color printing */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -498,9 +496,18 @@
     padding: 0 !important;
     width: 100% !important;
     height: auto !important;
+    overflow: visible !important;
   }
 
-  /* Make container visible - override inline styles */
+  /* CRITICAL: Force root container to be visible */
+  #root {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+  }
+
+  /* Make main container fully visible */
   .recommendations-page-container {
     background: white !important;
     padding: 1rem !important;
@@ -509,6 +516,8 @@
     visibility: visible !important;
     opacity: 1 !important;
     min-height: auto !important;
+    position: static !important;
+    overflow: visible !important;
   }
 
   .recommendations-page-container::before {
@@ -517,9 +526,12 @@
 
   .recommendations-page-container > * {
     position: static !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
-  /* Show print-only info - override inline display: none */
+  /* Show print-only info */
   .print-only-info {
     display: block !important;
     visibility: visible !important;
@@ -533,27 +545,29 @@
     display: block !important;
   }
 
-  /* Hide buttons - be very specific */
+  /* Hide interactive elements */
   button,
   .btn,
   .recommendations-header button,
   .recommendations-header .btn,
-  .category-filter-section {
+  .category-filter-section,
+  .no-print {
     display: none !important;
     visibility: hidden !important;
   }
 
-  /* Header styling for print - override inline styles */
+  /* Header styling for print */
   .recommendations-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     color: white !important;
     padding: 1.5rem !important;
     page-break-after: avoid;
-    border-radius: 0 !important;
+    border-radius: 8px !important;
     margin-bottom: 1rem !important;
     box-shadow: none !important;
     display: block !important;
     visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .recommendations-header * {
@@ -579,7 +593,7 @@
     display: block !important;
   }
 
-  /* Card styling - force visibility and override inline styles */
+  /* Card styling - force complete visibility */
   .recommendations-card,
   .card {
     page-break-inside: avoid;
@@ -591,6 +605,7 @@
     visibility: visible !important;
     opacity: 1 !important;
     box-shadow: none !important;
+    overflow: visible !important;
   }
 
   .recommendations-card .card-body,
@@ -599,6 +614,7 @@
     background: white !important;
     display: block !important;
     visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .recommendations-card .card-title,
@@ -610,23 +626,35 @@
     border-bottom: 2px solid #667eea !important;
     padding-bottom: 0.5rem !important;
     display: block !important;
+    visibility: visible !important;
   }
 
-  /* System Summary card with inline background color */
-  .recommendations-card[style] {
+  /* System Summary card */
+  .recommendations-card[style*="background"] {
     background: #f0f0f0 !important;
   }
 
-  /* Force all divs to be visible */
-  div, p, span, h1, h2, h3, h4, h5, h6 {
+  .recommendations-card[style*="background"] .card-body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+  }
+
+  /* Force visibility on all text elements */
+  div, p, span, h1, h2, h3, h4, h5, h6, strong, em, small {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    overflow: visible !important;
   }
 
-  /* Table styling - force complete visibility */
+  span, strong, em, small {
+    display: inline !important;
+  }
+
+  /* Table styling - complete visibility */
   .recommendations-table,
-  table {
+  table,
+  .table {
     font-size: 10pt !important;
     width: 100% !important;
     border-collapse: collapse !important;
@@ -634,17 +662,20 @@
     visibility: visible !important;
     opacity: 1 !important;
     background: white !important;
+    page-break-inside: auto !important;
   }
 
   .recommendations-table thead,
-  table thead {
+  table thead,
+  .table thead {
     display: table-header-group !important;
     background: #667eea !important;
     visibility: visible !important;
   }
 
   .recommendations-table th,
-  table th {
+  table th,
+  .table th {
     background: #667eea !important;
     color: white !important;
     padding: 0.5rem !important;
@@ -655,20 +686,23 @@
   }
 
   .recommendations-table tbody,
-  table tbody {
+  table tbody,
+  .table tbody {
     display: table-row-group !important;
     visibility: visible !important;
   }
 
   .recommendations-table tr,
-  table tr {
+  table tr,
+  .table tr {
     display: table-row !important;
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
     visibility: visible !important;
   }
 
   .recommendations-table td,
-  table td {
+  table td,
+  .table td {
     padding: 0.5rem !important;
     border: 1px solid #333 !important;
     color: #000 !important;
@@ -679,10 +713,10 @@
 
   .recommendations-table tbody tr:nth-child(even),
   table tbody tr:nth-child(even) {
-    background-color: #f8f9fa !important;
+    background-color: #f2f2f2 !important;
   }
 
-  /* Links - hide icons but show text */
+  /* Links */
   .recommendations-table a,
   a {
     color: #0d6efd !important;
@@ -691,21 +725,22 @@
   }
 
   .recommendations-table a svg,
-  svg {
+  svg,
+  .svg-inline--fa {
     display: none !important;
   }
 
-  /* Badges and spans */
-  .badge,
-  span {
+  /* Badges */
+  .badge {
     border: 1px solid #ddd !important;
     padding: 0.25rem 0.5rem !important;
     display: inline-block !important;
     visibility: visible !important;
     color: #000 !important;
+    background: white !important;
   }
 
-  /* Bootstrap grid - convert to block */
+  /* Bootstrap grid */
   .row {
     display: block !important;
   }
@@ -716,12 +751,7 @@
     margin-bottom: 0.5rem !important;
   }
 
-  /* Text elements - force visibility */
-  strong, b {
-    color: #000 !important;
-    font-weight: bold !important;
-  }
-
+  /* Text utilities */
   .text-primary {
     color: #0d6efd !important;
   }
@@ -730,17 +760,28 @@
     color: #198754 !important;
   }
 
+  .text-muted {
+    color: #6c757d !important;
+  }
+
   /* Page break control */
   h1, h2, h3, h4, h5, h6 {
-    page-break-after: avoid;
+    page-break-after: avoid !important;
     color: #1a3c5e !important;
   }
 
-  /* Remove hover and animations */
+  /* Remove animations and transforms */
   * {
     transform: none !important;
     animation: none !important;
     transition: none !important;
+  }
+
+  /* Force Bootstrap containers to be visible */
+  .container, .container-fluid {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 

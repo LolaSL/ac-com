@@ -14,11 +14,12 @@ import { toast } from "react-toastify";
 import "./BtuCalculator.css";
 
 const CONSTANTS = {
-  // ~147 W/m² ≈ 500 BTU/m² — calibrated for Israel (Tel Aviv / central regions).
-  // Hot Middle East ×1.2 brings this to ~600 BTU/m² for Negev / Eilat desert.
-  BASE_BTU_PER_SQ_METER:600,
+  // ~147 W/m² ≈ 450 BTU/m² — moderate climate baseline
+  // Climate multiplier will adjust this for hot/cold regions
+  BASE_BTU_PER_SQ_METER: 400,
   // Each extra metre above 2.5 m adds this fraction of base BTU (proportional volume increase).
-  HEIGHT_BTU_FACTOR_PER_METER: 0.4,
+  // 0.2 means 20% increase per meter above baseline
+  HEIGHT_BTU_FACTOR_PER_METER: 0.2,
   // ASHRAE sensible heat for sedentary occupancy: ~450 BTU/hr per person.
   BTU_PER_ADDITIONAL_PERSON: 450,
   KITCHEN_BTU_ADDITION: 600,
@@ -28,10 +29,10 @@ const CONSTANTS = {
     HardGround: 1.0,
   },
   apartmentOrientationMultipliers: {
-    North: 0.9,
-    East: 1.1,
-    South: 1.2,
-    West: 1.0,
+    North: 0.95,
+    East: 1.08,     // Increased from 1.05 (morning sun important)
+    South: 1.12,    // Increased from 1.10 (all-day sun critical)
+    West: 1.08,     // Increased from 1.05 (afternoon heat)
   },
   CONVERT_FEET_TO_METERS: 0.3048,
 };
@@ -156,8 +157,14 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
 
 useEffect(() => {
   if (roomData?.length) {
-    // Filter out invalid rooms (those without name or size)
-    const validRooms = roomData.filter((room) => room.name && room.size);
+    // Filter out invalid rooms and condenser entries
+    const validRooms = roomData.filter((room) => 
+      room.name && 
+      room.size && 
+      !room.name?.toLowerCase().includes('condenser') && 
+      room.size !== '—' &&
+      !room.product?.isCondenser
+    );
 
     if (validRooms.length > 0) {
       const formattedRooms = validRooms.map((room) => ({
@@ -729,10 +736,11 @@ useEffect(() => {
     btu += CONSTANTS.BTU_PER_ADDITIONAL_PERSON * Math.max(0, numPeople - 1);
     if (room.name === "Kitchen") btu += CONSTANTS.KITCHEN_BTU_ADDITION;
 
+    // Dining room climate bonuses (moderate values)
     const diningRoomBtuByClimate = {
-      AverageEurope: 3000,
-      HotMiddleEast: 4000,
-      ColdAlaska: 2500,
+      AverageEurope: 1000,
+      HotMiddleEast: 1500,
+      ColdAlaska: 700,
     };
 
     if (room.name === "Dining Room") {
@@ -756,51 +764,52 @@ useEffect(() => {
         }
       });
     };
+    // Reduced multipliers to avoid excessive compounding
     applyMultiplier("insulation", {
-      Poor: 1.2,
+      Poor: 1.18,      // Increased from 1.15 (poor insulation has significant impact in hot climate)
       Average: 1,
-      Good: 0.8,
+      Good: 0.85,
     });
     applyMultiplier("floorType", {
       Marble: 1.0,
-      Timber: 1.05,
+      Timber: 1.03,
       Concrete: 1.0,
-      Carpeted: 0.95,
+      Carpeted: 0.97,
     });
     applyMultiplier("windowType", {
-      SingleGlazed: 1.15,
+      SingleGlazed: 1.12,    // Increased from 1.10 (windows critical in hot climate)
       DoubleGlazed: 1.0,
-      TripleGlazed: 0.85,
-      Louvered: 1.2,
+      TripleGlazed: 0.90,
+      Louvered: 1.14,        // Increased from 1.12
     });
     applyMultiplier("roofType", {
-      Flat: 1.1,
+      Flat: 1.05,      // was 1.1
       Pitched: 1.0,
       Gable: 1.0,
       Roof: 1.0,
     });
     applyMultiplier("appliances", {
-      Oven: 1.1,
+      Oven: 1.08,      // was 1.1
       Television: 1.02,
       Computer: 1.03,
     });
 
     applyMultiplier("sunExposure", {
-      FullSunlight: 1.2,
+      FullSunlight: 1.18,    // Increased from 1.15 (critical factor in hot climate)
       Average: 1,
-      HeavilyShaded: 0.8,
+      HeavilyShaded: 0.85,
     });
 
     applyMultiplier("climate", {
-      HotMiddleEast: 1.2,
+      HotMiddleEast: 1.5,    // Increased from 1.25 to properly reflect hot climate needs
       AverageEurope: 1.0,
-      ColdAlaska: 0.8,
+      ColdAlaska: 0.85,
     });
 
     applyMultiplier("typeOfWall", {
-      BrickVeneer: 1.1,
-      DoubleBrick: 0.9,
-      FoamCladding: 0.8,
+      BrickVeneer: 1.08,
+      DoubleBrick: 0.92,
+      FoamCladding: 0.85,
     });
 
     applyMultiplier(
@@ -851,7 +860,14 @@ useEffect(() => {
     const results = [];
     let totalBTU = 0;
 
-    const productRequests = rooms.map(async (room) => {
+    // Filter out condenser entries before processing
+    const actualRooms = rooms.filter(room => 
+      !room.name?.toLowerCase().includes('condenser') && 
+      room.size !== '—' &&
+      !room.product?.isCondenser
+    );
+
+    const productRequests = actualRooms.map(async (room) => {
       const { btu, error } = calculateBTUForRoom(room);
       if (error) {
         setError(error);
@@ -2038,7 +2054,14 @@ useEffect(() => {
   <div className="mb-4">
     <h5>Room Measurements:</h5>
     {(() => {
-      const groupedRooms = rooms.reduce((acc, room) => {
+      // Filter out condenser entries from room measurements display
+      const actualRooms = rooms.filter(room => 
+        !room.name?.toLowerCase().includes('condenser') && 
+        room.size !== '—' &&
+        !room.product?.isCondenser
+      );
+      
+      const groupedRooms = actualRooms.reduce((acc, room) => {
         const match = room.name.match(/^(Flat\s*\d+|Unit\s*[A-Z]|Apt\s*\d+)\s*[:\s]/i);
         // Only group by flat when the room name has an explicit flat prefix
         const flat = match ? match[1].replace(/\s+/g, '') : null;
@@ -2222,12 +2245,17 @@ useEffect(() => {
                   <th>Room</th>
                   <th>Room BTU</th>
                   <th>Optimal Product</th>
+                  <th>Model</th>
                   <th>Product BTU</th>
                   <th>Product Price, ($)</th>
                 </tr>
               </thead>
               <TableBody
-                data={rooms}
+                data={rooms.filter(room => 
+                  !room.name?.toLowerCase().includes('condenser') && 
+                  room.size !== '—' &&
+                  !room.product?.isCondenser
+                )}
                 renderRow={(room, index) => {
                   const product = products[index] || {};
                   return (
@@ -2248,6 +2276,12 @@ useEffect(() => {
                         ) : (
                           "No product available"
                         )}
+                      </td>
+                      <td
+                        className="table-fit-content"
+                        data-label="Model"
+                      >
+                        {product.model || "N/A"}
                       </td>
                       <td
                         className="product-btu table-fit-content"
@@ -2281,23 +2315,29 @@ useEffect(() => {
                     // Calculate per-flat BTU total if flat name is present
                     let condenserBtuRequirement = 0;
                     if (cond?.flatName && isMultiFlatProperty) {
-                      // Extract flat number from condenser name (e.g., "Flat 1 Condenser" -> "1")
+                      // Extract flat number from condenser name (e.g., "Flat 1" -> "1")
                       const flatKeyword = cond.flatName.match(/\d+/)?.[0];
+                      console.log(`Calculating BTU for ${cond.flatName}, flatKeyword: ${flatKeyword}`);
+                      console.log('Available rooms:', rooms.map(r => r.name));
+                      
                       if (flatKeyword) {
                         condenserBtuRequirement = rooms.reduce(
                           (sum, room, roomIdx) => {
-                            // Check if room belongs to this flat
-                            if (
-                              room.name
-                                .toLowerCase()
-                                .includes(`flat ${flatKeyword}:`)
-                            ) {
+                            // Check if room belongs to this flat (case-insensitive)
+                            const roomNameLower = room.name.toLowerCase();
+                            const searchKey = `flat ${flatKeyword}:`;
+                            const matches = roomNameLower.includes(searchKey);
+                            
+                            console.log(`Room: "${room.name}", Looking for: "${searchKey}", Matches: ${matches}, BTU: ${btuResults[roomIdx]}`);
+                            
+                            if (matches) {
                               return sum + (btuResults[roomIdx] || 0);
                             }
                             return sum;
                           },
                           0
                         );
+                        console.log(`Total BTU for ${cond.flatName}: ${condenserBtuRequirement}`);
                       }
                     } else {
                       // Single flat or no flat name: use total
@@ -2340,6 +2380,12 @@ useEffect(() => {
                           )}
                         </td>
                         <td
+                          className="table-fit-content condenser-cell"
+                          data-label="Model"
+                        >
+                          {cond?.model || "N/A"}
+                        </td>
+                        <td
                           className="product-btu table-fit-content condenser-cell"
                           data-label="Product BTU"
                         >
@@ -2370,7 +2416,7 @@ useEffect(() => {
                   })}
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="total-results text-center cooling-load-cell"
                   >
                     {isMultiFlatProperty && detectedFlats.length > 1
@@ -2434,6 +2480,12 @@ useEffect(() => {
                     {(optimalProductCount || 0) +
                       (showCondenser ? condensersForDisplay.length : 0) ||
                       "No products available"}
+                  </td>
+                  <td
+                    data-label="Model"
+                    className="total-results total-cell"
+                  >
+                    —
                   </td>
                   <td
                     data-label="Total Product BTU"

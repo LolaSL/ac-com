@@ -103,7 +103,11 @@ const annotationSchema = new Schema(
     acType: { type: String, enum: ['ducted', 'ductless', 'vrf-ducted', 'vrf-ductless'], default: 'vrf-ducted' },
     roomData: [
       {
-        roomType: { type: String },
+        name: { type: String }, // Room name with flat prefix (e.g., "Flat 1: Kitchen")
+        size: { type: Number }, // Area in square meters
+        btu: { type: Number, default: 0 }, // Calculated BTU
+        unit: { type: String, default: 'meters' }, // Unit of measurement
+        roomType: { type: String }, // Original room type for backward compatibility
         width: { type: String },
         height: { type: String },
         areaSqFt: { type: String },
