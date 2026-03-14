@@ -46,6 +46,8 @@ export default function SignUpPage() {
     return levels[strength];
   };
 
+  const pwStrength = getPasswordStrength(password);
+
   const submitHandler = async (e) => {
     e.preventDefault();
     setFormError("");
@@ -59,32 +61,19 @@ export default function SignUpPage() {
     }
     setLoading(true);
     try {
-      let ref = new URLSearchParams(search).get("ref"); // Get referral code from URL
+      let ref = new URLSearchParams(search).get("ref");
       if (!ref) {
-        ref = localStorage.getItem("referralCode"); // Fallback to localStorage
+        ref = localStorage.getItem("referralCode");
       }
-      console.log(
-        "Signup ref from URL:",
-        new URLSearchParams(search).get("ref")
-      );
-      console.log(
-        "Signup ref from localStorage:",
-        localStorage.getItem("referralCode")
-      );
-      console.log("Final ref used:", ref);
       const { data } = await Axios.post(
         `/api/users/signup${ref ? `?ref=${ref}` : ""}`,
-        {
-          name,
-          email,
-          password,
-        }
+        { name, email, password }
       );
 
       ctxDispatch({ type: "USER_SIGNIN", payload: data });
       localStorage.setItem("userInfo", JSON.stringify(data));
       if (ref) {
-        localStorage.removeItem("referralCode"); // Clear after use
+        localStorage.removeItem("referralCode");
       }
       toast.success("Account created successfully!");
       navigate(redirect || "/");
@@ -102,136 +91,221 @@ export default function SignUpPage() {
   }, [navigate, redirect, userInfo]);
 
   return (
-    <Container className="small-container">
-      <h1 className="page-title">Sign Up</h1>
-      <Form onSubmit={submitHandler}>
-        <Form.Group className="mb-3" controlId="name">
-          <Form.Label>Name</Form.Label>
-          <Form.Control onChange={(e) => setName(e.target.value)} required />
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="email">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            required
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="password">
-          <Form.Label>Password</Form.Label>
-          <div className="position-relative">
-            <Form.Control
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button
-              variant="link"
-              onClick={() => setShowPassword(!showPassword)}
-              className="password-toggle-btn"
-            >
-              <i
-                className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}
-              ></i>
-            </Button>
-          </div>
-          {password && (
-            <div className="password-strength-container">
-              <div className="d-flex align-items-center gap-2">
-                <div className="password-strength-bar-container">
-                  <div
-                    className="password-strength-bar"
-                    style={{
-                      width: `${
-                        (getPasswordStrength(password).strength / 4) * 100
-                      }%`,
-                      backgroundColor:
-                        getPasswordStrength(password).color === "danger"
-                          ? "#dc3545"
-                          : getPasswordStrength(password).color === "warning"
-                          ? "#ffc107"
-                          : getPasswordStrength(password).color === "info"
-                          ? "#0dcaf0"
-                          : "#198754",
-                    }}
-                  />
-                </div>
-                <small
-                  className={`text-${
-                    getPasswordStrength(password).color
-                  } password-strength-label`}
-                >
-                  {getPasswordStrength(password).label}
-                </small>
+    <div className="signup-page">
+      <Link to="/" className="auth-home-link">
+        <i className="fas fa-home"></i>
+        <span>Home</span>
+      </Link>
+      <Container fluid className="signup-container">
+        <div className="signup-wrapper">
+          {/* Left Side - Branding */}
+          <div className="signup-left">
+            <div className="signup-branding">
+              <div className="signup-logo-container">
+                <i className="fas fa-user-plus signup-logo-icon"></i>
               </div>
-              <Form.Text className="text-muted">
-                Use 8+ characters with mix of letters, numbers & symbols
-              </Form.Text>
+              <h1 className="signup-brand-title">AC-Commerce</h1>
+              <h2 className="signup-brand-subtitle">Join Us Today</h2>
+              <p className="signup-brand-description">
+                Create your free account and unlock the full HVAC experience —
+                smart design tools, personalized recommendations, and seamless
+                order management.
+              </p>
+
+              <div className="signup-features">
+                <div className="signup-feature-item">
+                  <i className="fas fa-bolt"></i>
+                  <span>Instant Quotes</span>
+                </div>
+                <div className="signup-feature-item">
+                  <i className="fas fa-chart-line"></i>
+                  <span>ROI Calculator</span>
+                </div>
+                <div className="signup-feature-item">
+                  <i className="fas fa-ruler-combined"></i>
+                  <span>BTU Sizing</span>
+                </div>
+                <div className="signup-feature-item">
+                  <i className="fas fa-shield-alt"></i>
+                  <span>Secure Account</span>
+                </div>
+              </div>
             </div>
-          )}
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="confirmPassword">
-          <Form.Label>Confirm Password</Form.Label>
-          <div className="position-relative">
-            <Form.Control
-              type={showConfirmPassword ? "text" : "password"}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              value={confirmPassword}
-              required
-            />
-            <Button
-              variant="link"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="password-toggle-btn"
-            >
-              <i
-                className={
-                  showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"
-                }
-              ></i>
-            </Button>
           </div>
-          {confirmPassword && password !== confirmPassword && (
-            <Form.Text className="text-danger">
-              Passwords do not match
-            </Form.Text>
-          )}
-        </Form.Group>
 
-        {formError && (
-          <Alert variant="danger" dismissible onClose={() => setFormError("")} className="mb-3">
-            <i className="fas fa-exclamation-circle me-2"></i>{formError}
-          </Alert>
-        )}
+          {/* Right Side - Sign Up Form */}
+          <div className="signup-right">
+            <div className="signup-form-container">
+              <div className="signup-form-header">
+                <i className="fas fa-id-card signup-form-icon"></i>
+                <h2 className="signup-form-title">Create Account</h2>
+                <p className="signup-form-subtitle">
+                  Fill in your details to get started
+                </p>
+              </div>
 
-        <div className="mb-3">
-          <Button
-            type="submit"
-            className="go-to-btn btn-text me-2"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span
-                  className="spinner-border spinner-border-sm me-2"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                Creating account...
-              </>
-            ) : (
-              "Sign Up"
-            )}
-          </Button>
+              <Form
+                onSubmit={submitHandler}
+                noValidate
+                className="signup-form"
+              >
+                {formError && (
+                  <Alert
+                    variant="danger"
+                    dismissible
+                    onClose={() => setFormError("")}
+                    className="signup-error-alert"
+                  >
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {formError}
+                  </Alert>
+                )}
+
+                <Form.Group controlId="name" className="signup-form-group">
+                  <Form.Label className="signup-form-label">
+                    <i className="fas fa-user me-2"></i>
+                    Full Name
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="John Doe"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="signup-form-input"
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="email" className="signup-form-group">
+                  <Form.Label className="signup-form-label">
+                    <i className="fas fa-envelope me-2"></i>
+                    Email Address
+                  </Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="signup-form-input"
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="password" className="signup-form-group">
+                  <Form.Label className="signup-form-label">
+                    <i className="fas fa-lock me-2"></i>
+                    Password
+                  </Form.Label>
+                  <div className="signup-password-wrapper">
+                    <Form.Control
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a strong password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="signup-form-input"
+                    />
+                    <button
+                      type="button"
+                      className="signup-toggle-pw"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                    </button>
+                  </div>
+                  {password && (
+                    <div className="signup-pw-strength">
+                      <div className="signup-pw-strength-track">
+                        <div
+                          className="signup-pw-strength-fill"
+                          style={{
+                            width: `${(pwStrength.strength / 4) * 100}%`,
+                            backgroundColor:
+                              pwStrength.color === "danger"
+                                ? "#dc3545"
+                                : pwStrength.color === "warning"
+                                ? "#ffc107"
+                                : pwStrength.color === "info"
+                                ? "#0dcaf0"
+                                : "#198754",
+                          }}
+                        />
+                      </div>
+                      <small className={`text-${pwStrength.color} signup-pw-strength-label`}>
+                        {pwStrength.label}
+                      </small>
+                    </div>
+                  )}
+                </Form.Group>
+
+                <Form.Group controlId="confirmPassword" className="signup-form-group">
+                  <Form.Label className="signup-form-label">
+                    <i className="fas fa-lock me-2"></i>
+                    Confirm Password
+                  </Form.Label>
+                  <div className="signup-password-wrapper">
+                    <Form.Control
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Re-enter your password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="signup-form-input"
+                    />
+                    <button
+                      type="button"
+                      className="signup-toggle-pw"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      tabIndex={-1}
+                    >
+                      <i className={showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                    </button>
+                  </div>
+                  {confirmPassword && password !== confirmPassword && (
+                    <small className="text-danger d-block mt-1">
+                      Passwords do not match
+                    </small>
+                  )}
+                </Form.Group>
+
+                <div className="d-grid">
+                  <Button
+                    type="submit"
+                    className="signup-button"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                        ></span>
+                        Creating account...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-rocket me-2"></i>
+                        Create Account
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Form>
+
+              <div className="signup-form-footer">
+                <span>Already have an account? </span>
+                <Link
+                  to={`/signin?redirect=${redirect}`}
+                  className="signup-signin-link"
+                >
+                  Sign In
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="mb-3">
-          Already have an account?{" "}
-          <Link to={`/signin?redirect=${redirect}`}>Sign-In</Link>
-        </div>
-      </Form>
-    </Container>
+      </Container>
+    </div>
   );
 }

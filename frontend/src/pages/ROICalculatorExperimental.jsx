@@ -187,6 +187,12 @@ export default function ROICalculatorExperimental() {
         headers: { authorization: `Bearer ${userInfo.token}` },
       });
 
+      console.log('Fetched calculations:', data.calculations);
+      // Debug: Check BTU data in first calculation
+      if (data.calculations && data.calculations.length > 0) {
+        console.log('First calculation BTU data:', data.calculations[0].btuProjectData);
+      }
+
       setSavedCalculations(data.calculations || []);
       dispatch({
         type: "ROI_SET_SAVED_CALCULATIONS",
@@ -202,20 +208,24 @@ export default function ROICalculatorExperimental() {
 
   // Handle opening save modal with auto-generated description from BTU data
   const handleOpenSaveModal = () => {
-    // Auto-generate description if one hasn't been written or pre-populated yet
-    if (!saveCalculationDescription) {
-      const description =
-        `${serviceType} — ${config.label}. ` +
-        `Project value: $${Number(projectSize).toLocaleString()}. ` +
-        `Installation: ${installationTime} day(s), ${teamSize}-person team. ` +
-        `${projectsPerMonth} project(s)/month over ${monthsToAnalyze} months. ` +
-        `Projected savings: $${Number(savingsPerProject).toLocaleString(
-          "en-US",
-          { maximumFractionDigits: 0 }
-        )}/project (${savingsPercentage}%). ` +
-        `ROI: ${roi}% | Payback: ${paybackMonths} month(s).`;
-      setSaveCalculationDescription(description);
+    // Always auto-generate description with current calculation results
+    let description =
+      `${serviceType} — ${config.label}. ` +
+      `Project value: $${Number(projectSize).toLocaleString()}. ` +
+      `Installation: ${installationTime} day(s), ${teamSize}-person team. ` +
+      `${projectsPerMonth} project(s)/month over ${monthsToAnalyze} months. ` +
+      `Projected savings: $${Number(savingsPerProject).toLocaleString(
+        "en-US",
+        { maximumFractionDigits: 0 }
+      )}/project (${savingsPercentage}%). ` +
+      `ROI: ${roi}% | Payback: ${paybackMonths} month(s).`;
+    
+    // Append BTU data if available
+    if (capturedBtuData) {
+      description += ` | BTU Data: ${capturedBtuData.numberOfRooms} room(s), ${Number(capturedBtuData.totalSquareFootage).toFixed(2)} m², ${capturedBtuData.totalBTU.toLocaleString()} BTU total.`;
     }
+    
+    setSaveCalculationDescription(description);
     setShowSaveModal(true);
   };
 
@@ -291,9 +301,15 @@ export default function ROICalculatorExperimental() {
           .filter(Boolean),
       };
 
+      console.log('Saving ROI calculation with data:', roiData);
+      console.log('capturedBtuData:', capturedBtuData);
+      console.log('btuProjectData being saved:', roiData.btuProjectData);
+
       const { data } = await axios.post(`/api/roi-calculations`, roiData, {
         headers: { authorization: `Bearer ${userInfo.token}` },
       });
+
+      console.log('Saved calculation response:', data);
 
       dispatch({ type: "ROI_ADD_CALCULATION", payload: data });
       setSavedCalculations([data, ...savedCalculations]);

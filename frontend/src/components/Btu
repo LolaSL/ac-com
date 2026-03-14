@@ -1,11 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { getError } from "../utils";
 import { useContext } from "react";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import CheckboxGroup from "./CheckboxGroup.jsx";
+import printJS from "print-js";
+import TableBody from "./TableBody";
+import { ShoppingCart } from "lucide-react";
 import { toast } from "react-toastify";
 import "./BtuCalculator.css";
 
@@ -33,8 +37,10 @@ const CONSTANTS = {
   CONVERT_FEET_TO_METERS: 0.3048,
 };
 function BtuCalculator({ roomData, acAnnotations = [] }) {
-  const { dispatch: ctxDispatch } = useContext(Store);
+  const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
+  const componentRef = useRef();
+  const cartItems = state?.cart?.cartItems || [];
 
   // Parse AC annotations (e.g., "ac-1.1", "ac-1.2", "condenser-1", "Flat 1", etc.)
   const parseAcAnnotations = useCallback((annotations) => {
@@ -223,7 +229,15 @@ useEffect(() => {
   const [rooms, setRooms] = useState([{ name: "Bedroom 1", size: "", btu: 0 }]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
   const [numPeople, setNumPeople] = useState(2);
+  const [showCondenser, setShowCondenser] = useState(false);
   const [error, setError] = useState("");
+  const [totalBTU, setTotalBTU] = useState(0);
+  const [condenser, setCondenser] = useState(null);
+  const [selectedCondensers, setSelectedCondensers] = useState([]);
+  const [condenserSizingStatus, setCondenserSizingStatus] = useState(""); // 'perfect', 'oversized', 'undersized', 'custom'
+  // eslint-disable-next-line no-unused-vars
+  const [showTable, setShowTable] = useState(false);
+  const [optimalProductCount, setOptimalProductCount] = useState(0);
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
       Roof: false,
@@ -287,6 +301,8 @@ useEffect(() => {
     },
   });
 
+  const [btuResults, setBtuResults] = useState([]);
+  const [products, setProducts] = useState([]);
   const isVRFSystem = true;
   const [isMultiFlatProperty, setIsMultiFlatProperty] = useState(false);
   const [detectedFlats, setDetectedFlats] = useState([]);
@@ -307,7 +323,15 @@ useEffect(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rooms.length]);
 
+  const selectedUnit = "kW";
 
+  const outputUnitConversion = {
+    BTU: 1,
+    Watt: 0.29307107,
+    kW: 0.00029307107,
+  };
+
+  const convertedValue = totalBTU * outputUnitConversion[selectedUnit];
 
   const convertArea = (value) => {
     // 1 sq ft = 0.0929 m²  (0.3048²)
@@ -383,8 +407,16 @@ useEffect(() => {
   const handleFloorChange = (e) =>
     handleOptionChange("floorType", e.target.name);
 
-  // Clear error whenever any calculation input changes
+  // Clear stale results whenever any calculation input changes —
+  // forces the user to click Calculate again with the new settings.
   useEffect(() => {
+    setBtuResults([]);
+    setProducts([]);
+    setCondenser(null);
+    setSelectedCondensers([]);
+    setTotalBTU(0);
+    setShowCondenser(false);
+    setCondenserSizingStatus("");
     setError("");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, ceilingHeight, numPeople, measurementSystem, rooms]);
@@ -566,7 +598,7 @@ useEffect(() => {
                 price: 0,
                 slug: `placeholder-${room.name.toLowerCase().replace(/\s+/g, '-')}-${btu}-btu`,
                 displayName: "No product available",
-                image: "/images/p1.jpg",
+                image: "",
                 category: "Placeholder",
                 brand: "Custom",
                 description: `Product not available for ${room.name}`,
@@ -584,7 +616,7 @@ useEffect(() => {
             price: 0,
             slug: `placeholder-${room.name.toLowerCase().replace(/\s+/g, '-')}-${btu}-btu`,
             displayName: "No product available",
-            image: "/images/p1.jpg",
+            image: "",
             category: "Placeholder",
             brand: "Custom",
             description: `Product not available for ${room.name}`,
@@ -682,7 +714,7 @@ useEffect(() => {
             price: estimatedPrice,
             discount: 0,
             slug: `custom-condenser-${Math.round(requiredBTU)}-btu`,
-            image: "/images/p1.jpg",
+            image: "",
             category: "Custom Condenser",
             brand: "Custom",
             description: `Custom VRF condenser for ${Math.round(requiredBTU)} BTU requirement`,
@@ -715,7 +747,7 @@ useEffect(() => {
             price: estimatedPrice,
             discount: 0,
             slug: `custom-condenser-${Math.round(requiredBTU)}-btu`,
-            image: "/images/p1.jpg",
+            image: "",
             category: "Custom Condenser",
             brand: "Custom",
             description: `Custom VRF condenser for ${Math.round(requiredBTU)} BTU requirement`,
@@ -818,7 +850,27 @@ useEffect(() => {
       condenser = selectedCondensers.length > 0 ? selectedCondensers[0] : null;
     }
 
+    setCondenser(condenser);
+    setCondenserSizingStatus(sizingStatus);
+    setBtuResults(results);
+    getError("");
+    setProducts(acProducts);
+    setSelectedCondensers(selectedCondensers);
+    setTotalBTU(totalBTU);
 
+    if (acProducts.length > 0) {
+      const minBTU = Math.min(...acProducts.map((p) => p.btu));
+      const maxBTU = Math.max(...acProducts.map((p) => p.btu));
+
+      const optimalProducts = acProducts.filter(
+        (product) => product.btu >= minBTU && product.btu <= maxBTU
+      );
+
+      setOptimalProductCount(optimalProducts.length);
+    } else {
+      setOptimalProductCount(0);
+    }
+    setShowCondenser(totalBTU >= 10000);
 
     // Prepare BTU data for recommendations page
     const condensersForDisplay =
@@ -913,70 +965,69 @@ useEffect(() => {
       equipmentCost: totalEquipmentCost,
       estimatedProjectCost: estimatedProjectSize,
       estimatedInstallationDays: estimatedDays,
-      rooms: productResults
-        .filter(({ product }) => product && !product.isCondenser)
-        .map(({ room, product, btu }, index) => ({
+      rooms: actualRooms.map((room, index) => {
+        const product = acProducts[index] || {};
+        return {
           name: room.name,
           size: room.size,
-          btu: btu,
+          btu: results[index],
           product: {
             ...product,
             name: product.name || "No product available",
             price: typeof product.price === "number" ? product.price : null,
           },
-        }))
-        .concat(
-          totalBTU >= 10000 && condensersForDisplay.length > 0
-            ? condensersForDisplay.map((cond, idx) => {
-                let condenserBtuRequirement = 0;
-                if (cond?.flatName && isMultiFlatProperty) {
-                  const flatKeyword = cond.flatName.match(/\d+/)?.[0];
-                  if (flatKeyword) {
-                    condenserBtuRequirement = rooms.reduce(
-                      (sum, room, roomIdx) => {
-                        const roomNameLower = room.name.toLowerCase();
-                        const searchKey = `flat ${flatKeyword}:`;
-                        const matches = roomNameLower.includes(searchKey);
-                        if (matches) {
-                          return sum + (results[roomIdx] || 0);
-                        }
-                        return sum;
-                      },
-                      0
-                    );
-                  }
-                } else {
-                  condenserBtuRequirement = results.reduce(
-                    (sum, btu) => sum + (btu || 0),
+        };
+      }).concat(
+        totalBTU >= 10000 && condensersForDisplay.length > 0
+          ? condensersForDisplay.map((cond, idx) => {
+              let condenserBtuRequirement = 0;
+              if (cond?.flatName && isMultiFlatProperty) {
+                const flatKeyword = cond.flatName.match(/\d+/)?.[0];
+                if (flatKeyword) {
+                  condenserBtuRequirement = rooms.reduce(
+                    (sum, room, roomIdx) => {
+                      const roomNameLower = room.name.toLowerCase();
+                      const searchKey = `flat ${flatKeyword}:`;
+                      const matches = roomNameLower.includes(searchKey);
+                      if (matches) {
+                        return sum + (results[roomIdx] || 0);
+                      }
+                      return sum;
+                    },
                     0
                   );
                 }
+              } else {
+                condenserBtuRequirement = results.reduce(
+                  (sum, btu) => sum + (btu || 0),
+                  0
+                );
+              }
 
-                const displayBtu = Math.round(condenserBtuRequirement * 1.0);
+              const displayBtu = Math.round(condenserBtuRequirement * 1.0);
 
-                return {
-                  name: cond?.flatName
-                    ? `${cond.flatName} Condenser`
-                    : condensersForDisplay.length > 1
-                    ? `Condenser ${idx + 1}`
-                    : "Condenser",
-                  size: "—",
-                  btu: displayBtu,
-                  product: {
-                    _id: cond._id,
-                    name: cond.name || cond.model,
-                    model: cond.model,
-                    btu: cond.btu,
-                    price: cond.price,
-                    discount: cond.discount || 0,
-                    slug: cond.slug,
-                    image: cond.image || "/images/p1.jpg",
-                    isCondenser: true,
-                  },
-                };
-              })
-            : []
-        ),
+              return {
+                name: cond?.flatName
+                  ? `${cond.flatName} Condenser`
+                  : condensersForDisplay.length > 1
+                  ? `Condenser ${idx + 1}`
+                  : "Condenser",
+                size: "—",
+                btu: displayBtu,
+                product: {
+                  _id: cond._id,
+                  name: cond.name || cond.model,
+                  model: cond.model,
+                  btu: cond.btu,
+                  price: cond.price,
+                  discount: cond.discount || 0,
+                  slug: cond.slug,
+                  isCondenser: true,
+                },
+              };
+            })
+          : []
+      ),
       inputParams: {
         measurementSystem,
         ceilingHeight,
@@ -999,11 +1050,6 @@ useEffect(() => {
     };
 
     // Save BTU data to Store and navigate to recommendations
-    console.log('BTU Data being saved to Store:', btuData);
-    console.log('Total BTU:', totalBTU);
-    console.log('Number of rooms:', actualRooms.length);
-    console.log('Rooms with products:', btuData.rooms);
-    
     ctxDispatch({
       type: "BTU_SET_CURRENT_PROJECT",
       payload: btuData,
@@ -1080,6 +1126,10 @@ useEffect(() => {
       },
     });
 
+    setBtuResults([]);
+    setProducts([]);
+    setTotalBTU(0);
+    setCondenser(null);
     setError("");
   };
 
@@ -1141,7 +1191,29 @@ useEffect(() => {
   )}
 </Form.Group>
 
-
+        {products.length > 0 && (
+          <div className="alert alert-info mb-4">
+            <strong>📊 System Type Detected:</strong>{" "}
+            VRF Heat Recovery System (${rooms.length} Zones)
+            <br />
+            <small className="text-muted">
+              Condenser sizing: 100% of total indoor capacity (1.0x ratio) - Supports up to ${MAX_VRF_INDOOR_UNITS} zones
+            </small>
+            <div className="mt-2">
+              <small className="text-success">
+                ✨ <strong>VRF Advantages:</strong> Superior efficiency (SEER
+                16-30+), simultaneous heating/cooling, longer piping runs,
+                quieter operation
+                </small>
+                <br />
+                <small className="text-warning">
+                  💰 <strong>Note:</strong> VRF systems typically have 20-50%
+                  higher upfront costs but provide significant long-term savings
+                  through superior efficiency.
+                </small>
+              </div>
+          </div>
+        )}
 
         <Row>
           <Col xs={12} md={6} lg={4} className="my-4">

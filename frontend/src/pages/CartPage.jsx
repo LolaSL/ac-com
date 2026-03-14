@@ -305,9 +305,18 @@ export default function CartPage() {
                 const discountedPrice = item.discount > 0
                   ? item.price * (1 - item.discount / 100)
                   : item.price;
+                const imageUrl = item.image || "/images/p1.jpg";
                 return (
                   <div className="cp-item" key={index}>
-                    <img src={item.image} alt={item.name} className="cp-item__img" />
+                    <img 
+                      src={imageUrl} 
+                      alt={item.name} 
+                      className="cp-item__img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/images/p1.jpg";
+                      }}
+                    />
 
                     <div className="cp-item__info">
                       <Link to={`/product/${item.slug}`} className="cp-item__name">{item.name}</Link>

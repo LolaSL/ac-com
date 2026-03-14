@@ -1,11 +1,10 @@
 import axios from "axios";
 import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
-import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import Alert from "react-bootstrap/Alert";
 import "./AdminLoginPage.css";
@@ -75,58 +74,76 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="sidebar d-none d-md-flex">
-        <div style={{ padding: "1rem" }}>
-          <h3>Admin Portal</h3>
-          <div>
-            <i className="fas fa-shield-alt"></i>
-            Secure Access
+    <div className="admin-login-page">
+      <Link to="/" className="auth-home-link">
+        <i className="fas fa-home"></i>
+        <span>Home</span>
+      </Link>
+      <Container fluid className="admin-login-container">
+        <div className="admin-login-wrapper">
+          {/* Left Side - Branding & Info */}
+          <div className="admin-login-left">
+            <div className="admin-branding">
+              <div className="admin-logo-container">
+                <i className="fas fa-shield-alt admin-logo-icon"></i>
+              </div>
+              <h1 className="admin-brand-title">AC-Commerce</h1>
+              <h2 className="admin-brand-subtitle">Admin Portal</h2>
+              <p className="admin-brand-description">
+                Secure access to your administration dashboard. Manage products, orders, and analytics.
+              </p>
+              
+              <div className="admin-features">
+                <div className="admin-feature-item">
+                  <i className="fas fa-chart-line"></i>
+                  <span>Advanced Analytics</span>
+                </div>
+                <div className="admin-feature-item">
+                  <i className="fas fa-users-cog"></i>
+                  <span>User Management</span>
+                </div>
+                <div className="admin-feature-item">
+                  <i className="fas fa-cube"></i>
+                  <span>Product Control</span>
+                </div>
+                <div className="admin-feature-item">
+                  <i className="fas fa-lock"></i>
+                  <span>Secure Platform</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <i className="fas fa-user-cog"></i>
-            Administration
-          </div>
-          <div>
-            <i className="fas fa-chart-line"></i>
-            Dashboard
-          </div>
-        </div>
-      </div>
 
-      <div className="main-content">
-        <Container className="d-flex justify-content-center align-items-center min-vh-100">
-          <Card className="admin-card shadow-sm">
-            <Card.Body className="admin-card-body">
-              <div className="text-center mb-4">
-                <i className="fas fa-user-shield fa-3x admin-icon mb-3"></i>
-                <h2 className="fw-bold admin-title fs-1">Admin Login</h2>
-                <p className="admin-subtitle">
-                  Access the administration dashboard
-                </p>
+          {/* Right Side - Login Form */}
+          <div className="admin-login-right">
+            <div className="admin-form-container">
+              <div className="admin-form-header">
+                <i className="fas fa-user-shield admin-form-icon"></i>
+                <h2 className="admin-form-title">Admin Login</h2>
+                <p className="admin-form-subtitle">Enter your credentials to continue</p>
               </div>
 
-              <Form onSubmit={handleAdminLogin} noValidate>
+              <Form onSubmit={handleAdminLogin} noValidate className="admin-login-form">
                 {loginError && (
                   <Alert
                     variant="danger"
                     dismissible
                     onClose={() => setLoginError("")}
-                    className="mb-3"
+                    className="admin-error-alert"
                   >
                     <i className="fas fa-exclamation-circle me-2"></i>
                     {loginError}
                   </Alert>
                 )}
 
-                <Form.Group controlId="email" className="mb-3">
-                  <Form.Label className="form-label">
-                    <i className="fas fa-envelope"></i>
+                <Form.Group controlId="email" className="admin-form-group">
+                  <Form.Label className="admin-form-label">
+                    <i className="fas fa-envelope me-2"></i>
                     Email Address
                   </Form.Label>
                   <Form.Control
                     type="email"
-                    placeholder="xxxxxx@xxxxxx.xxx"
+                    placeholder="admin@accommerce.com"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -135,21 +152,21 @@ export default function AdminLoginPage() {
                       if (loginError) setLoginError("");
                     }}
                     isInvalid={!!fieldErrors.email}
-                    className="form-control-lg"
+                    className="admin-form-input"
                   />
                   <Form.Control.Feedback type="invalid">
                     {fieldErrors.email}
                   </Form.Control.Feedback>
                 </Form.Group>
 
-                <Form.Group controlId="password" className="mb-4">
-                  <Form.Label className="form-label">
-                    <i className="fas fa-lock"></i>
+                <Form.Group controlId="password" className="admin-form-group">
+                  <Form.Label className="admin-form-label">
+                    <i className="fas fa-lock me-2"></i>
                     Password
                   </Form.Label>
                   <Form.Control
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder="Enter your secure password"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -158,7 +175,7 @@ export default function AdminLoginPage() {
                       if (loginError) setLoginError("");
                     }}
                     isInvalid={!!fieldErrors.password}
-                    className="form-control-lg"
+                    className="admin-form-input"
                   />
                   <Form.Control.Feedback type="invalid">
                     {fieldErrors.password}
@@ -168,7 +185,7 @@ export default function AdminLoginPage() {
                 <div className="d-grid">
                   <Button
                     type="submit"
-                    className="btn btn-primary btn-lg fw-semibold btn-admin-login"
+                    className="admin-login-button"
                     disabled={submitting}
                   >
                     {submitting ? (
@@ -182,23 +199,21 @@ export default function AdminLoginPage() {
                     ) : (
                       <>
                         <i className="fas fa-sign-in-alt me-2"></i>
-                        Login as Admin
+                        Sign In to Dashboard
                       </>
                     )}
                   </Button>
                 </div>
               </Form>
 
-              <div className="admin-footer">
-                <small>
-                  <i className="fas fa-info-circle"></i>
-                  Authorized personnel only
-                </small>
+              <div className="admin-form-footer">
+                <i className="fas fa-info-circle me-2"></i>
+                <small>Authorized personnel only • Protected by encryption</small>
               </div>
-            </Card.Body>
-          </Card>
-        </Container>
-      </div>
+            </div>
+          </div>
+        </div>
+      </Container>
     </div>
   );
 }

@@ -2,8 +2,9 @@ import React, { useContext, useEffect, useCallback } from "react";
 import { Store } from "../Store";
 import { Card, Table, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaPrint } from "react-icons/fa";
+import { FaEye, FaPrint, FaShoppingCart } from "react-icons/fa";
 import printJS from "print-js";
+import { toast } from "react-toastify";
 import "./Recommendations.css";
 import SystemSummary from "./shared/SystemSummary";
 import DetectedSystems from "./shared/DetectedSystems";
@@ -11,7 +12,7 @@ import InstallationAccessories from "./shared/InstallationAccessories";
 import { getName, getPrice } from "./shared/productHelpers";
 
 export default function Recommendations() {
-  const { state } = useContext(Store);
+  const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
 
   // Extract BTU/ROI project data (must be before handlePrint)
@@ -20,10 +21,17 @@ export default function Recommendations() {
     state?.btuData?.currentProject ||
     null;
 
+  console.log('Recommendations - Full state:', state);
+  console.log('Recommendations - state.btuData:', state?.btuData);
+  console.log('Recommendations - state.btuData.currentProject:', state?.btuData?.currentProject);
+  console.log('Recommendations - btuProject:', btuProject);
+
   const perRoomResults =
     Array.isArray(btuProject?.rooms) && btuProject.rooms.length > 0
       ? btuProject.rooms
       : null;
+
+  console.log('Recommendations - perRoomResults:', perRoomResults);
 
   const handlePrint = useCallback(() => {
     if (!perRoomResults || perRoomResults.length === 0) {
@@ -76,7 +84,7 @@ export default function Recommendations() {
 
     const tableHtml = `
       <div class="print-container">
-        <h1>HVAC System Recommendations</h1>
+        <h1>HVAC System Quote</h1>
         <div class="print-meta">
           <p><strong>Generated:</strong> ${printDate}</p>
           <p><strong>Total Rooms:</strong> ${perRoomResults.length} | <strong>Total BTU:</strong> ${totalBTU.toLocaleString()} | <strong>Total Area:</strong> ${btuProject?.totalSquareFootage || 'N/A'} m²</p>
@@ -213,6 +221,167 @@ export default function Recommendations() {
     ? btuProject.recommendedUnits
     : [];
 
+  // Handler: Save to Cart
+  const handleSaveToCart = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (!perRoomResults || perRoomResults.length === 0) {
+      toast.error("No products available to add to cart. Please complete a BTU calculation first.");
+      return;
+    }
+
+    const addItemToCart = (product, quantity = 1) => {
+      if (!product || !product._id) return;
+
+      const existItem = state.cart.cartItems.find((x) => x._id === product._id);
+      const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+
+      ctxDispatch({
+        type: "CART_ADD_ITEM",
+        payload: { ...product, quantity: newQuantity },
+      });
+    };
+
+    // Group products by BTU to avoid duplicates
+    const productCount = {};
+    perRoomResults.forEach((room) => {
+      const product = room.product;
+      if (!product || !product._id || product.isCondenser) return;
+
+      const key = product._id;
+      if (!productCount[key]) {
+        productCount[key] = { product, quantity: 0 };
+      }
+      productCount[key].quantity += 1;
+    });
+
+    // Add indoor units to cart
+    Object.values(productCount).forEach(({ product, quantity }) => {
+      addItemToCart(product, quantity);
+    });
+
+    // Add condensers to cart
+    const condensers = perRoomResults.filter(room => room.product?.isCondenser);
+    condensers.forEach((room) => {
+      const condenser = room.product;
+      if (condenser && condenser._id) {
+        // Make unique per flat if flatName exists
+        const uniqueCond = condenser.flatName
+          ? {
+              ...condenser,
+              _id: `${condenser._id}_${condenser.flatName.replace(/\s+/g, '_')}`,
+              name: `${condenser.flatName}: ${condenser.name}`,
+            }
+          : condenser;
+        addItemToCart(uniqueCond, 1);
+      }
+    });
+
+    toast.success("Products added to cart successfully!");
+    navigate("/cart");
+  };
+
+  // Handler: Calculate ROI
+  const handleCalculateROI = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (!btuProject) {
+      toast.error("No BTU data available. Please complete a BTU calculation first.");
+      return;
+    }
+
+    // BTU project already contains all necessary data
+    ctxDispatch({
+      type: "BTU_SET_CURRENT_PROJECT",
+      payload: btuProject,
+    });
+
+    toast.success("Navigating to ROI Calculator...");
+    // Pass BTU data in navigation state so ROI calculator can capture it
+    navigate("/roi-calculator", {
+      state: { btuData: btuProject, fromBTU: true }
+    });
+  };
+
+  // Handler: Do Both (Save to Cart + Navigate to ROI)
+  const handleDoBoth = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (!perRoomResults || perRoomResults.length === 0) {
+      toast.error("No products available. Please complete a BTU calculation first.");
+      return;
+    }
+
+    const addItemToCart = (product, quantity = 1) => {
+      if (!product || !product._id) return;
+
+      const existItem = state.cart.cartItems.find((x) => x._id === product._id);
+      const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+
+      ctxDispatch({
+        type: "CART_ADD_ITEM",
+        payload: { ...product, quantity: newQuantity },
+      });
+    };
+
+    // Group products by BTU to avoid duplicates
+    const productCount = {};
+    perRoomResults.forEach((room) => {
+      const product = room.product;
+      if (!product || !product._id || product.isCondenser) return;
+
+      const key = product._id;
+      if (!productCount[key]) {
+        productCount[key] = { product, quantity: 0 };
+      }
+      productCount[key].quantity += 1;
+    });
+
+    // Add indoor units to cart
+    Object.values(productCount).forEach(({ product, quantity }) => {
+      addItemToCart(product, quantity);
+    });
+
+    // Add condensers to cart
+    const condensers = perRoomResults.filter(room => room.product?.isCondenser);
+    condensers.forEach((room) => {
+      const condenser = room.product;
+      if (condenser && condenser._id) {
+        // Make unique per flat if flatName exists
+        const uniqueCond = condenser.flatName
+          ? {
+              ...condenser,
+              _id: `${condenser._id}_${condenser.flatName.replace(/\s+/g, '_')}`,
+              name: `${condenser.flatName}: ${condenser.name}`,
+            }
+          : condenser;
+        addItemToCart(uniqueCond, 1);
+      }
+    });
+
+    toast.success("Products added to cart! Navigating to ROI Calculator...");
+
+    // Save BTU data to store
+    ctxDispatch({
+      type: "BTU_SET_CURRENT_PROJECT",
+      payload: btuProject,
+    });
+
+    // Pass BTU data in navigation state so ROI calculator can capture it
+    navigate("/roi-calculator", {
+      state: { btuData: btuProject, fromBTU: true }
+    });
+  };
+
   return (
     <div className="recommendations-page-container">
       {/* Page Header */}
@@ -232,14 +401,14 @@ export default function Recommendations() {
               marginBottom: '0.5rem',
               textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
             }}>
-              🎯 HVAC System Recommendations
+              🎯 HVAC System Quote
             </h1>
             <p style={{ 
               fontSize: '1.1rem', 
               marginBottom: '0',
               opacity: 0.95
             }}>
-              Complete installation guide with product recommendations and required accessories
+              Complete installation guide with quote, product recommendations and required accessories
             </p>
             {/* Print-only metadata */}
             <div className="print-only-info">
@@ -287,15 +456,6 @@ export default function Recommendations() {
           </div>
         </div>
       </div>
-
-      {/* ============================
-          SYSTEM SUMMARY
-      ============================= */}
-      <SystemSummary 
-        btuProject={btuProject} 
-        perRoomResults={perRoomResults} 
-        recommendedUnits={recommendedUnits} 
-      />
 
       {/* ============================
           DETECTED SYSTEMS
@@ -405,6 +565,103 @@ export default function Recommendations() {
                 ))}
               </tbody>
             </Table>
+          )}
+
+          {/* ============================
+              SYSTEM SUMMARY
+          ============================= */}
+          {perRoomResults && perRoomResults.length > 0 && (
+            <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+              <SystemSummary 
+                btuProject={btuProject} 
+                perRoomResults={perRoomResults} 
+                recommendedUnits={recommendedUnits} 
+              />
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          {perRoomResults && perRoomResults.length > 0 && (
+            <div className="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4">
+              <Button
+                onClick={handleSaveToCart}
+                variant="info"
+                className="w-75 w-md-auto py-2"
+                style={{
+                  fontWeight: '600',
+                  padding: '0.7rem 1.5rem',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <FaShoppingCart size={18} />
+                <span>Save to Cart</span>
+              </Button>
+
+              <Button
+                onClick={handleCalculateROI}
+                variant="primary"
+                className="w-75 w-md-auto py-2"
+                style={{
+                  fontWeight: '600',
+                  padding: '0.7rem 1.5rem',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Calculate ROI for this Project</span>
+              </Button>
+
+              <Button
+                onClick={handleDoBoth}
+                variant="success"
+                className="w-75 w-md-auto py-2"
+                style={{
+                  fontWeight: '600',
+                  padding: '0.7rem 1.5rem',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Do Both</span>
+              </Button>
+            </div>
           )}
         </Card.Body>
       </Card>

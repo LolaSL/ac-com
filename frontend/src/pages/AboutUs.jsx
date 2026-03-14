@@ -45,7 +45,7 @@ const AboutUs = () => {
     },
     {
       icon: "fas fa-pencil-ruler",
-      title: "Professional Annotation Tools",
+      title: "Professional Notation Tools",
       text: "Browser-based PDF notifications with coloured rectangles, text comments, VRF refrigerant lines, (ducted air diffusers -comming soon).",
     },
     {

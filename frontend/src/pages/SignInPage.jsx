@@ -3,8 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
-import InputGroup from "react-bootstrap/InputGroup";
 import Alert from "react-bootstrap/Alert";
 import { useContext, useEffect, useState } from "react";
 import { Store } from "../Store.js";
@@ -54,89 +52,168 @@ export default function SignInPage() {
   }, [navigate, redirect, userInfo]);
 
   return (
-    <Container className="d-flex justify-content-center align-items-center min-vh-100">
-      <Card
-        className="shadow-lg p-4"
-        style={{ maxWidth: "600px", width: "100%" }}
-      >
-        <Card.Body>
-          <h1 className="page-title text-center text-primary">
-            User Login
-          </h1>
-          <Form onSubmit={submitHandler}>
-            <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Email Address</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email"
-                required
-                className="w-100"
-                id="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setError("");
-                }}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="password">
-              <Form.Label>Password</Form.Label>
-              <InputGroup className="w-100">
-                <Form.Control
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
-                  required
-                  id="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setError("");
-                  }}
-                />
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  <i
-                    className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}
-                  ></i>
-                </Button>
-              </InputGroup>
-            </Form.Group>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <div className="d-grid mb-3">
-              <Button
-                type="submit"
-                className="go-to-btn btn-lg  btn-text"
-                disabled={loading}
+    <div className="signin-page">
+      <Link to="/" className="auth-home-link">
+        <i className="fas fa-home"></i>
+        <span>Home</span>
+      </Link>
+      <Container fluid className="signin-container">
+        <div className="signin-wrapper">
+          {/* Left Side - Branding */}
+          <div className="signin-left">
+            <div className="signin-branding">
+              <div className="signin-logo-container">
+                <i className="fas fa-snowflake signin-logo-icon"></i>
+              </div>
+              <h1 className="signin-brand-title">AC-Commerce</h1>
+              <h2 className="signin-brand-subtitle">Welcome Back</h2>
+              <p className="signin-brand-description">
+              The smarter way to shop for HVAC. Browse your apartment plan, design your system, calculate your needs, and get expert quote guidance — from planning to installation.
+              </p>
+   
+              <div className="signin-features">
+                  <div className="signin-feature-item">
+                  <i className="fas fa-ruler-combined"></i>
+                  <span>Measurement System</span>
+                </div>
+                <div className="signin-feature-item">
+                  <i className="fas fa-shopping-cart"></i>
+                  <span>Smart Shopping</span>
+                </div>
+                <div className="signin-feature-item">
+                  <i className="fas fa-truck"></i>
+                  <span>Fast Delivery</span>
+                </div>
+           
+                <div className="signin-feature-item">
+                  <i className="fas fa-headset"></i>
+                  <span>24/7 Support</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Login Form */}
+          <div className="signin-right">
+            <div className="signin-form-container">
+              <div className="signin-form-header">
+                <i className="fas fa-user-circle signin-form-icon"></i>
+                <h2 className="signin-form-title">User Login</h2>
+                <p className="signin-form-subtitle">
+                  Sign in to access your account
+                </p>
+              </div>
+
+              <Form
+                onSubmit={submitHandler}
+                noValidate
+                className="signin-form"
               >
-                {loading ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign In"
+                {error && (
+                  <Alert
+                    variant="danger"
+                    dismissible
+                    onClose={() => setError("")}
+                    className="signin-error-alert"
+                  >
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {error}
+                  </Alert>
                 )}
-              </Button>
+
+                <Form.Group controlId="email" className="signin-form-group">
+                  <Form.Label className="signin-form-label">
+                    <i className="fas fa-envelope me-2"></i>
+                    Email Address
+                  </Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setError("");
+                    }}
+                    className="signin-form-input"
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="password" className="signin-form-group">
+                  <Form.Label className="signin-form-label">
+                    <i className="fas fa-lock me-2"></i>
+                    Password
+                  </Form.Label>
+                  <div className="signin-password-wrapper">
+                    <Form.Control
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      required
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setError("");
+                      }}
+                      className="signin-form-input"
+                    />
+                    <button
+                      type="button"
+                      className="signin-toggle-pw"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      <i
+                        className={
+                          showPassword ? "fas fa-eye-slash" : "fas fa-eye"
+                        }
+                      ></i>
+                    </button>
+                  </div>
+                </Form.Group>
+
+                <div className="signin-forgot-row">
+                  <Link to="/forget-password" className="signin-forgot-link">
+                    Forgot password?
+                  </Link>
+                </div>
+
+                <div className="d-grid">
+                  <Button
+                    type="submit"
+                    className="signin-button"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                        ></span>
+                        Signing in...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-sign-in-alt me-2"></i>
+                        Sign In
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Form>
+
+              <div className="signin-form-footer">
+                <span>New customer? </span>
+                <Link
+                  to={`/signup?redirect=${redirect}`}
+                  className="signin-signup-link"
+                >
+                  Create your account
+                </Link>
+              </div>
             </div>
-            <div className="text-center">
-              New customer?{" "}
-              <Link to={`/signup?redirect=${redirect}`}>
-                Create your account
-              </Link>
-            </div>
-            <div className="text-center">
-              Forget Password?{" "}
-              <Link to={`/forget-password`}>Reset Password</Link>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+          </div>
+        </div>
+      </Container>
+    </div>
   );
 }

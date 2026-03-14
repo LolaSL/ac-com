@@ -4,6 +4,13 @@ import { Card } from 'react-bootstrap';
 export default function SystemSummary({ btuProject, perRoomResults, recommendedUnits }) {
   if (!btuProject) return null;
 
+  // Calculate total product sum from all rooms
+  const totalProductSum = perRoomResults?.reduce((sum, room) => {
+    const productPrice = room.product?.price || 0;
+    const condenserPrice = room.condenser?.price || 0;
+    return sum + productPrice + condenserPrice;
+  }, 0) || 0;
+
   return (
     <Card className="recommendations-card" style={{ backgroundColor: '#f8f9fa', marginBottom: '2rem' }}>
       <Card.Body>
@@ -11,23 +18,7 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
           🏗️ System Summary
         </Card.Title>
         <div className="row g-3">
-          <div className="col-lg-3 col-md-6">
-            <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total BTU</div>
-              <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
-                {btuProject.totalBTU?.toLocaleString() || 'N/A'}
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-3 col-md-6">
-            <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total Area</div>
-              <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
-                {btuProject.totalSquareFootage ? `${btuProject.totalSquareFootage} m²` : 'N/A'}
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-3 col-md-6">
+            <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
               <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Rooms</div>
               <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
@@ -35,11 +26,37 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
               </div>
             </div>
           </div>
-          <div className="col-lg-3 col-md-6">
+            <div className="col-xl col-lg-4 col-md-6">
+            <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total Area</div>
+              <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
+                {btuProject.totalSquareFootage ? `${Number(btuProject.totalSquareFootage).toFixed(2)} m²` : 'N/A'}
+              </div>
+            </div>
+          </div>
+          <div className="col-xl col-lg-4 col-md-6">
+            <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total BTU</div>
+              <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
+                {btuProject.totalBTU?.toLocaleString() || 'N/A'}
+              </div>
+            </div>
+          </div>
+        
+        
+          <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
               <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Units</div>
               <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
                 {perRoomResults ? perRoomResults.length : (recommendedUnits?.length || 'N/A')}
+              </div>
+            </div>
+          </div>
+          <div className="col-xl col-lg-4 col-md-6">
+            <div className="p-3 rounded" style={{ background: 'rgba(40, 199, 111, 0.1)', border: '1px solid rgba(40, 199, 111, 0.2)' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total Product Sum</div>
+              <div className="text-success" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
+                ${totalProductSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>
           </div>
