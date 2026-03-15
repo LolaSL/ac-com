@@ -1,12 +1,15 @@
+/* ==========================================
+   Header — Modern Dark Theme
+   ========================================== */
+
 .header-nav {
   width: 100%;
   max-width: 100%;
   margin: 0;
   padding: 0;
-  background: #868d9c;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
-  /* position + z-index ensures dropdowns stack above all page content */
   position: relative;
   z-index: 1030;
 }
@@ -46,32 +49,34 @@
   text-align: left;
 }
 
+/* ── Sidebar toggle button ── */
 .btn-toggle {
   text-align: left;
   left: 0;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
-  border: 3px solid #322a50;
-  background-color: #f5f5f5;
-  color: #322a50;
+  padding: 10px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
   font-weight: 600;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   font-family: sans-serif;
   min-width: 45px;
-  opacity: 0.6;
+  border-radius: 8px;
   text-decoration: none;
 }
 
 .btn-toggle:hover {
-  background-color: #f5f5f5;
-  opacity: 0.8;
-  border: 3px solid #ec2222;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
 }
 
+/* ── Navbar toggler (mobile hamburger) ── */
 .navbar-toggler {
   text-align: left;
   left: 0;
@@ -79,29 +84,34 @@
   align-items: center;
   justify-content: center;
   padding: 6px 10px;
-  border: 2px solid #322a50;
-  background-color: #f5f5f5;
-  color: #322a50;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   font-family: sans-serif;
-  opacity: 0.6;
+  border-radius: 8px;
 }
 
 .navbar-toggler:hover {
-  background-color: #f5f5f5;
-  opacity: 0.8;
-  border: 2px solid #ec2222;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
 }
 
+.navbar-toggler-icon {
+  filter: brightness(0) invert(1);
+}
+
+/* ── Brand ── */
 .handwritten {
   font-family: system-ui;
-  font-size: 12px !important;
-  color: #ea2e2e;
-  text-shadow: 1px 1px 1px rgb(188, 158, 173);
-  font-weight: bold !important;
+  font-size: 11px !important;
+  color: #67e8f9;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
 }
 
 .navbar-brand h3 {
@@ -109,32 +119,128 @@
   font-family: "Roboto", sans-serif;
   letter-spacing: 2px;
   padding: 0.5rem 0;
-  color: white;
-  text-shadow: 1px 1px 1px black;
+  color: #fff;
+  text-shadow: none;
 }
 
+/* ── User avatar ── */
 .user-avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid white;
+  border: 2px solid rgba(255, 255, 255, 0.4);
   display: block;
+  transition: border-color 0.2s;
+}
+
+.user-avatar:hover {
+  border-color: #67e8f9;
 }
 
 .user-icon {
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1;
+  color: #e2e8f0;
 }
 
 .user-name {
   line-height: 1;
+  color: #e2e8f0;
 }
 
 .heart-icon {
-  color: #ff6b35;
+  color: #f472b6;
 }
 
+/* ── Nav links in header ── */
+.header-nav .nav-link {
+  color: #cbd5e1 !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.header-nav .nav-link:hover {
+  color: #67e8f9 !important;
+}
+
+/* ── Dropdown menus ── */
+.header-nav .dropdown-toggle::after {
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.header-nav .dropdown-toggle:hover::after {
+  color: #67e8f9;
+}
+
+.header-nav .dropdown-menu {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  padding: 0.5rem 0;
+  min-width: 220px;
+  animation: headerDropFade 0.2s ease;
+  overflow: hidden;
+}
+
+@keyframes headerDropFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.header-nav .dropdown-item {
+  color: #cbd5e1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.55rem 1.15rem;
+  transition: background 0.18s, color 0.18s, padding-left 0.18s;
+  border-radius: 0;
+}
+
+.header-nav .dropdown-item:hover,
+.header-nav .dropdown-item:focus {
+  background: rgba(103, 232, 249, 0.08);
+  color: #67e8f9;
+  padding-left: 1.4rem;
+}
+
+.header-nav .dropdown-item i {
+  opacity: 0.7;
+  transition: opacity 0.18s;
+}
+
+.header-nav .dropdown-item:hover i {
+  opacity: 1;
+}
+
+.header-nav .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.08);
+  margin: 0.35rem 0;
+}
+
+/* Sign-out items (red accent) */
+.header-nav .dropdown-item[href="#signout"],
+.header-nav .dropdown-item[href="#adminlogout"] {
+  color: #f87171;
+}
+
+.header-nav .dropdown-item[href="#signout"]:hover,
+.header-nav .dropdown-item[href="#adminlogout"]:hover {
+  background: rgba(248, 113, 113, 0.1);
+  color: #fca5a5;
+}
+
+/* ── Cart badge ── */
+.header-nav .badge {
+  font-size: 0.72rem !important;
+  letter-spacing: 0.3px;
+}
+
+/* ── Desktop layout ── */
 @media (min-width: 992px) {
   .header-container {
     max-width: 1400px;
@@ -151,21 +257,24 @@
   }
 }
 
+/* ── Btn text (sidebar label) ── */
 .btn-text {
   margin-right: 12px;
   text-decoration: none;
-  color: #322a50;
-  font-size: 18px;
-  font-weight: bold;
+  color: #e2e8f0;
+  font-size: 16px;
+  font-weight: 600;
   z-index: 100;
+  transition: color 0.2s;
 }
 
 .btn-text:hover {
   margin-right: 12px;
   text-decoration: none;
-  color: #ec2222;
+  color: #67e8f9;
 }
 
+/* ── Search responsive ── */
 @media (min-width: 769px) and (max-width: 1440px) {
   .search-box {
     max-width: 80%;
@@ -231,7 +340,6 @@
     font-size: 14px;
   }
 
-  /* Ensure collapsed nav items have comfortable tap targets */
   .navbar-collapse .nav-link,
   .navbar-collapse .dropdown-item {
     padding-top: 0.6rem;
@@ -239,5 +347,11 @@
     min-height: 44px;
     display: flex;
     align-items: center;
+  }
+
+  /* Dropdown on mobile: full-width, slightly lighter */
+  .header-nav .dropdown-menu {
+    border-radius: 8px;
+    margin: 0.25rem 0;
   }
 }

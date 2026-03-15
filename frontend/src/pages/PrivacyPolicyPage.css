@@ -6,7 +6,7 @@
 }
 
 .prv-hero {
-  background: linear-gradient(135deg, #5b6070, #2563a8);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: 0 0 16px 16px;
   padding: 2.2rem 1.5rem 2rem;
   text-align: center;

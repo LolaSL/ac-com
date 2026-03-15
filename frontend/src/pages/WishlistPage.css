@@ -6,7 +6,7 @@
 }
 
 .wl-hero {
-  background: linear-gradient(135deg, #5b6070, #2563a8);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: 0 0 16px 16px;
   padding: 2.2rem 1.5rem 2rem;
   text-align: center;
@@ -43,40 +43,186 @@
   padding: 0 1.25rem;
 }
 
-/* existing */
-.heart-icon {
-  color: #ff6b35;
+/* ── Card ────────────────────────────────────────────────── */
+.wl-card {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(26, 26, 46, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.wishlist-card-relative {
+.wl-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(26, 26, 46, 0.14);
+}
+
+/* ── Image area ──────────────────────────────────────────── */
+.wl-card__img-wrap {
   position: relative;
+  background: #f0f4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  min-height: 160px;
 }
 
-.remove-wishlist-btn {
+.wl-card__img {
+  width: 100%;
+  height: auto;
+  max-height: 140px;
+  object-fit: contain;
+}
+
+.wl-card__remove {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: white;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: #fff;
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: background 0.2s ease;
 }
 
-.remove-wishlist-icon {
-  color: #ff6b35;
+.wl-card__remove:hover {
+  background: #fee2e2;
+}
+
+.wl-card__remove-icon {
+  color: #ef4444;
+  font-size: 1rem;
+}
+
+.wl-card__discount {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 2rem;
+  letter-spacing: 0.03em;
+}
+
+/* ── Card body ───────────────────────────────────────────── */
+.wl-card__body {
+  padding: 1rem 1.1rem 1.2rem;
+}
+
+.wl-card__brand {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: teal;
+  background: rgba(26, 26, 46, 0.06);
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.wl-card__name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.35;
+  margin-bottom: 0.45rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s ease;
+}
+
+.wl-card__name:hover {
+  color: #0f3460;
+}
+
+.wl-card__rating {
+  margin-bottom: 0.5rem;
+}
+
+/* ── Price ────────────────────────────────────────────────── */
+.wl-card__price {
+  margin-bottom: 0.3rem;
+}
+
+.wl-card__price--old {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+}
+
+.wl-card__price--sale {
   font-size: 1.2rem;
+  font-weight: 700;
+  color: #ef4444;
 }
 
-.wishlist-card-img {
-  width: 100%;
-  height: auto;
-  max-height: 100px;
-  object-fit: contain;
-  display: block;
+.wl-card__price--current {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* ── Out of stock button ─────────────────────────────────── */
+.wl-card__oos-btn {
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+/* ── View Product button ─────────────────────────────────── */
+.wl-view-product-btn {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+  color: #67e8f9 !important;
+  border: 1.5px solid #67e8f9 !important;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.wl-view-product-btn:hover {
+  background: linear-gradient(135deg, #67e8f9 0%, #22d3ee 100%) !important;
+  color: #0f172a !important;
+  border-color: #67e8f9 !important;
+  box-shadow: 0 4px 14px rgba(103, 232, 249, 0.35);
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .wl-card__img-wrap {
+    min-height: 130px;
+    padding: 0.75rem;
+  }
+
+  .wl-card__img {
+    max-height: 110px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wl-card__body {
+    padding: 0.85rem 0.9rem 1rem;
+  }
+
+  .wl-card__name {
+    font-size: 0.85rem;
+  }
+
+  .wl-card__price--sale,
+  .wl-card__price--current {
+    font-size: 1.05rem;
+  }
 }

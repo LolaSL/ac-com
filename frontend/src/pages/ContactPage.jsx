@@ -186,7 +186,8 @@ const ContactPage = () => {
             <h3 className="ct-info-card__title">Quick Links</h3>
             <Link to="/" className="ct-quick-link">🏠 Home</Link>
             <Link to="/search" className="ct-quick-link">🛒 Products</Link>
-            <Link to="/demo-request" className="ct-quick-link">💻 Request a Demo</Link>
+            <Link to="/measurement" className="ct-quick-link">💻 Get A Quote</Link>
+            <Link to="/roi-calculator" className="ct-quick-link">📊 ROI Calculator</Link>
           </div>
         </div>
       </div>

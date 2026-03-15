@@ -9,7 +9,6 @@ import {
   Row,
   Col,
   Card,
-  Badge,
   Spinner,
   Alert,
   Button,
@@ -183,6 +182,7 @@ function UserReviewsPage() {
             variant="outline-danger"
             onClick={clearAllReviews}
             disabled={loading || actionLoading}
+            className="urv-clear-btn"
           >
             Clear All My Reviews
           </Button>
@@ -200,40 +200,41 @@ function UserReviewsPage() {
       ) : (
         <Row>
           <Col md={6} className="mb-4">
-            <h3 className="mb-3">Product Reviews</h3>
+            <h3 className="urv-section-title">Product Reviews</h3>
             {productReviews.length === 0 ? (
               <Alert variant="info">
                 You haven't reviewed any products yet.
               </Alert>
             ) : (
               productReviews.map((r) => (
-                <Card key={`${r.productId}-${r.createdAt}`} className="mb-3">
-                  <Card.Body>
+                <Card key={`${r.productId}-${r.createdAt}`} className="mb-3 urv-card">
+                  <Card.Body className="urv-card__body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <Card.Title className="mb-1">
-                          <Link to={`/product/${r.productSlug}`}>
+                        <Card.Title className="mb-1 urv-card__title">
+                          <Link to={`/product/${r.productSlug}`} className="urv-card__link">
                             {r.productName}
                           </Link>
                         </Card.Title>
-                        <div className="small text-muted">
+                        <div className="urv-card__date">
                           Reviewed on{" "}
                           {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </div>
                       <div className="d-flex align-items-center gap-2">
-                        <Badge bg="primary">{r.rating} ★</Badge>
+                        <span className="urv-card__rating">{r.rating} ★</span>
                         <Button
                           size="sm"
                           variant="outline-danger"
                           onClick={() => deleteProductReview(r.productId)}
                           disabled={actionLoading}
+                          className="urv-remove-btn"
                         >
                           Clear
                         </Button>
                       </div>
                     </div>
-                    <Card.Text className="mt-2">{r.comment}</Card.Text>
+                    <Card.Text className="mt-2 urv-card__comment">{r.comment}</Card.Text>
                   </Card.Body>
                 </Card>
               ))
@@ -241,36 +242,37 @@ function UserReviewsPage() {
           </Col>
 
           <Col md={6} className="mb-4">
-            <h3 className="mb-3">Seller Reviews</h3>
+            <h3 className="urv-section-title">Seller Reviews</h3>
             {sellerReviews.length === 0 ? (
               <Alert variant="info">
                 You haven't reviewed any sellers yet.
               </Alert>
             ) : (
               sellerReviews.map((r, idx) => (
-                <Card key={idx} className="mb-3">
-                  <Card.Body>
+                <Card key={idx} className="mb-3 urv-card">
+                  <Card.Body className="urv-card__body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <Card.Title className="mb-1">{r.sellerName}</Card.Title>
-                        <div className="small text-muted">
+                        <Card.Title className="mb-1 urv-card__title">{r.sellerName}</Card.Title>
+                        <div className="urv-card__date">
                           Reviewed on{" "}
                           {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </div>
                       <div className="d-flex align-items-center gap-2">
-                        <Badge bg="success">{r.rating} ★</Badge>
+                        <span className="urv-card__rating urv-card__rating--seller">{r.rating} ★</span>
                         <Button
                           size="sm"
                           variant="outline-danger"
                           onClick={() => deleteSellerReview(r.sellerId)}
                           disabled={actionLoading}
+                          className="urv-remove-btn"
                         >
-                          Remove
+                          Clear
                         </Button>
                       </div>
                     </div>
-                    <Card.Text className="mt-2">{r.comment}</Card.Text>
+                    <Card.Text className="mt-2 urv-card__comment">{r.comment}</Card.Text>
                   </Card.Body>
                 </Card>
               ))

@@ -17,7 +17,7 @@
   left: 0;
   right: 0;
   height: 300px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.05) 0%, rgba(15, 52, 96, 0.05) 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -81,10 +81,10 @@
 .recommendations-card .card-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1a3c5e;
+  color: #1a1a2e;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 3px solid #0d6efd;
+  border-bottom: 3px solid #67e8f9;
   position: relative;
 }
 
@@ -95,7 +95,7 @@
   left: 0;
   width: 80px;
   height: 3px;
-  background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+  background: linear-gradient(90deg, #1a1a2e, #67e8f9);
 }
 
 /* ============================
@@ -105,7 +105,7 @@
 .recommendations-card[style*="background: #f8f9fa"] .card-body,
 .recommendations-card[style*="background-color: #f8f9fa"] .card-body,
 .recommendations-card[style*="background-color: rgb(248, 249, 250)"] .card-body {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
   color: #fff;
   border-radius: 16px;
 }
@@ -242,7 +242,7 @@
 }
 
 .recommendations-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
 }
 
 .recommendations-table th {
@@ -265,7 +265,7 @@
 }
 
 .recommendations-table tbody tr:hover {
-  background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background: linear-gradient(90deg, rgba(26, 26, 46, 0.05) 0%, rgba(15, 52, 96, 0.05) 100%);
   transform: scale(1.01);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -427,12 +427,12 @@
 }
 
 .recommendations-page-container ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
   border-radius: 10px;
 }
 
 .recommendations-page-container ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
 }
 
 /* ============================
@@ -440,7 +440,7 @@
 ============================ */
 
 .recommendations-page-container .text-gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -558,7 +558,7 @@
 
   /* Header styling for print */
   .recommendations-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%) !important;
     color: white !important;
     padding: 1.5rem !important;
     page-break-after: avoid;
@@ -623,7 +623,7 @@
     font-size: 1.2rem !important;
     font-weight: bold !important;
     margin-bottom: 1rem !important;
-    border-bottom: 2px solid #667eea !important;
+    border-bottom: 2px solid #1a1a2e !important;
     padding-bottom: 0.5rem !important;
     display: block !important;
     visibility: visible !important;
@@ -635,7 +635,7 @@
   }
 
   .recommendations-card[style*="background"] .card-body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%) !important;
     color: white !important;
   }
 
@@ -669,14 +669,14 @@
   table thead,
   .table thead {
     display: table-header-group !important;
-    background: #667eea !important;
+    background: #1a1a2e !important;
     visibility: visible !important;
   }
 
   .recommendations-table th,
   table th,
   .table th {
-    background: #667eea !important;
+    background: #1a1a2e !important;
     color: white !important;
     padding: 0.5rem !important;
     border: 1px solid #333 !important;

@@ -20,7 +20,7 @@
 
 /* FeaturedPage Styles */
 .featured-hero {
-  background: linear-gradient(135deg, #5b6070, #2563a8);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: 0 0 18px 18px;
   padding: 2.5rem 1.5rem 2.2rem;
   margin-bottom: 2.5rem;

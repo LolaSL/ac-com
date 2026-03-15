@@ -5,7 +5,14 @@ import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { Link } from "react-router-dom";
 import { Row, Col, Card, Badge } from "react-bootstrap";
-import { FaNetworkWired } from "react-icons/fa";
+import {
+  FaNetworkWired,
+  FaShieldAlt,
+  FaBuilding,
+  FaIndustry,
+  FaCertificate,
+  FaGlobeAmericas,
+} from "react-icons/fa";
 import "./OurNetworkPage.css";
 
 const reducer = (state, action) => {
@@ -99,7 +106,38 @@ export default function OurNetworkPage() {
         <div className="on-hero__inner">
           <div className="on-hero__icon"><FaNetworkWired /></div>
           <h1 className="on-hero__title">Our Network</h1>
-          <p className="on-hero__sub">Trusted suppliers, service providers, and manufacturer partnerships.</p>
+          <p className="on-hero__sub">
+            Trusted suppliers, service providers, and manufacturer partnerships
+            powering HVAC excellence across the region.
+          </p>
+          <div className="on-hero__badges">
+            <span className="on-hero__badge"><FaCertificate /> Certified Partners</span>
+            <span className="on-hero__badge"><FaGlobeAmericas /> Global Reach</span>
+            <span className="on-hero__badge"><FaShieldAlt /> Quality Assured</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="on-stats">
+        <div className="on-stats__item">
+          <span className="on-stats__number">{sellers.length || '8+'}</span>
+          <span className="on-stats__label">Industry Partners</span>
+        </div>
+        <div className="on-stats__divider" />
+        <div className="on-stats__item">
+          <span className="on-stats__number">10,000+</span>
+          <span className="on-stats__label">Projects Completed</span>
+        </div>
+        <div className="on-stats__divider" />
+        <div className="on-stats__item">
+          <span className="on-stats__number">500+</span>
+          <span className="on-stats__label">Service Providers</span>
+        </div>
+        <div className="on-stats__divider" />
+        <div className="on-stats__item">
+          <span className="on-stats__number">50,000+</span>
+          <span className="on-stats__label">Active Users</span>
         </div>
       </div>
 
@@ -107,18 +145,11 @@ export default function OurNetworkPage() {
 
       {/* Sellers Section */}
       <div className="mb-5">
-        <h2
-          className="section-title text-center mb-4 "
-          style={{
-            background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            borderBottom: "none"
-          }}
-        >
-          Our Suppliers
-        </h2>
+        <div className="on-section-header">
+          <FaBuilding className="on-section-header__icon" />
+          <h2 className="on-section-header__title">Our Suppliers</h2>
+          <p className="on-section-header__sub">Browse verified HVAC suppliers in our network</p>
+        </div>
         {loading ? (
           <LoadingBox />
         ) : error ? (
@@ -170,14 +201,10 @@ export default function OurNetworkPage() {
                       </p>
                       <Link
                         to={`/sellers/${seller._id}`}
-                        className="btn go-to-btn btn-text  btn-sm d-flex align-items-center gap-2"
-                        style={{
-                          borderRadius: "0.5rem", // slightly rounded
-                          fontWeight: "500",
-                          padding: "0.35rem 0.75rem",
-                        }}
+                        className="btn on-view-seller-btn btn-sm d-flex align-items-center gap-2"
                       >
                         View Seller
+                        <i className="fas fa-arrow-right"></i>
                       </Link>
                     </Card.Body>
                   </Card>
@@ -199,18 +226,11 @@ export default function OurNetworkPage() {
 
       {/* Partners Section */}
       <div className="mb-5">
-        <h2
-          className="section-title text-center mb-4 "
-          style={{
-            background: "linear-gradient(135deg, #ff6b35 0%, #ff5722 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            borderBottom: "none"
-          }}
-        >
-          Our Manufacturer Partners
-        </h2>
+        <div className="on-section-header">
+          <FaIndustry className="on-section-header__icon" />
+          <h2 className="on-section-header__title">Our Manufacturer Partners</h2>
+          <p className="on-section-header__sub">World-class brands we collaborate with</p>
+        </div>
         <Row className="g-4">
           {partners.map((partner, index) => (
             <Col lg={3} md={4} sm={12} key={index}>
@@ -233,7 +253,7 @@ export default function OurNetworkPage() {
                   </div>
                   <h5 className="card-title fw-bold mb-2">{partner.name}</h5>
                   <p className="text-muted small mb-2">{partner.description}</p>
-                  <Badge bg="primary">
+                  <Badge className="on-partner-badge">
                     {partner.partnership}
                   </Badge>
                 </Card.Body>
@@ -243,48 +263,33 @@ export default function OurNetworkPage() {
         </Row>
       </div>
 
-      {/* Combined Benefits Section */}
-      <Row className="mt-5">
-        <Col lg={10} className="mx-auto">
-          <Card className="border-0 shadow-sm bg-light">
-            <Card.Body className="text-center p-5">
-              <h3 className="mb-3">Why Choose Our Network?</h3>
-              <Row className="g-4">
-                <Col md={4}>
-                  <div className="mb-3">
-                    <i className="fas fa-shield-alt fa-3x text-primary"></i>
-                  </div>
-                  <h5>Verified Quality</h5>
-                  <p className="text-muted">
-                    All partners and suppliers are verified and meet our quality
-                    standards
-                  </p>
-                </Col>
-                <Col md={4}>
-                  <div className="mb-3">
-                    <i className="fas fa-tools fa-3x text-primary"></i>
-                  </div>
-                  <h5>Expert Service</h5>
-                  <p className="text-muted">
-                    Professional installation, maintenance, and technical
-                    support
-                  </p>
-                </Col>
-                <Col md={4}>
-                  <div className="mb-3">
-                    <i className="fas fa-handshake fa-3x text-primary"></i>
-                  </div>
-                  <h5>Comprehensive Solutions</h5>
-                  <p className="text-muted">
-                    From local service to global partnerships, we cover all your
-                    HVAC needs
-                  </p>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      {/* Certifications & Benefits */}
+      <div className="on-benefits">
+        <h3 className="on-benefits__title">Why Choose Our Network?</h3>
+        <Row className="g-4">
+          <Col md={4}>
+            <div className="on-benefits__card">
+              <div className="on-benefits__emoji">🔒</div>
+              <h5 className="on-benefits__heading">Enterprise Security</h5>
+              <p className="on-benefits__text">ISO 27001 Certified</p>
+            </div>
+          </Col>
+          <Col md={4}>
+            <div className="on-benefits__card">
+              <div className="on-benefits__emoji">✅</div>
+              <h5 className="on-benefits__heading">Industry Certified</h5>
+              <p className="on-benefits__text">HVAC Standards Compliant</p>
+            </div>
+          </Col>
+          <Col md={4}>
+            <div className="on-benefits__card">
+              <div className="on-benefits__emoji">⭐</div>
+              <h5 className="on-benefits__heading">Top Rated</h5>
+              <p className="on-benefits__text">4.8/5 Average Rating</p>
+            </div>
+          </Col>
+        </Row>
+      </div>
 
       <div className="on-home-row">
         <Link to="/" className="home-btn">

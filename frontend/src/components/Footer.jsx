@@ -74,7 +74,7 @@ const Footer = () => {
               ROI Calculator
             </NavLink>
             <NavLink className="text-white d-block" href="/offers">
-              Offers
+              Special Offers
             </NavLink>
           </Col>
           <Col xs={12} sm={6} lg={2} className="ft-2">

@@ -153,7 +153,8 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     Order Messages
                   </Link>
                   <Link to="/offers" className="dropdown-item">
-                    Offers
+                    <i className="fas fa-tag me-2"></i>
+                    Special Offers
                   </Link>
                   <Link to="/browsing-history" className="dropdown-item">
                     Browsing History

@@ -174,13 +174,13 @@ function BrowsingHistoryPage() {
           <Button
             variant={filterPriceDrops ? "primary" : "outline-primary"}
             onClick={() => setFilterPriceDrops(!filterPriceDrops)}
-            className="me-2"
+            className="me-2 bh-filter-btn"
           >
             <FaArrowDown className="me-1" />
             {filterPriceDrops ? "Show All" : "Price Drops Only"}
           </Button>
           {browsingHistory.length > 0 && (
-            <Button variant="outline-danger" onClick={clearAllHistory}>
+            <Button variant="outline-danger" onClick={clearAllHistory} className="bh-clear-btn">
               <FaTrash className="me-1" />
               Clear All
             </Button>
@@ -206,102 +206,95 @@ function BrowsingHistoryPage() {
         <Row className="g-3 mx-0">
           {filteredHistory.map((item) => (
             <Col key={item._id} xs={12} sm={6} md={4} lg={3} className="p-2">
-              <Card className="h-100 shadow-sm position-relative">
-                {item.priceDropped && (
-                  <Badge
-                    bg="success"
-                    className="position-absolute top-0 end-0 m-2"
-                    style={{ zIndex: 1 }}
+              <Card className="h-100 bh-card">
+                <div className="bh-card__img-wrap">
+                  <Link to={`/product/${item.product?.slug}`}>
+                    <Card.Img
+                      variant="top"
+                      src={item.product?.image}
+                      alt={item.product?.name}
+                      className="bh-card__img"
+                    />
+                  </Link>
+                  <button
+                    onClick={() => deleteHandler(item._id)}
+                    disabled={loadingDelete}
+                    className="bh-card__remove"
                   >
-                    <FaArrowDown className="me-1" />
-                    {calculateDiscount(item.priceAtView, item.currentPrice)}%
-                    OFF
-                  </Badge>
-                )}
+                    <FaTrash className="bh-card__remove-icon" />
+                  </button>
+                  {item.priceDropped && (
+                    <span className="bh-card__discount">
+                      <FaArrowDown className="me-1" />
+                      {calculateDiscount(item.priceAtView, item.currentPrice)}%
+                      OFF
+                    </span>
+                  )}
+                  {item.product && item.product.discount > 0 && !item.priceDropped && (
+                    <span className="bh-card__discount">
+                      {item.product.discount}% OFF
+                    </span>
+                  )}
+                </div>
 
-                <Link to={`/product/${item.product?.slug}`}>
-                  <Card.Img
-                    variant="top"
-                    src={item.product?.image}
-                    alt={item.product?.name}
-                    style={{ height: "200px", objectFit: "cover" }}
-                  />
-                </Link>
+                <Card.Body className="d-flex flex-column bh-card__body">
+                  <span className="bh-card__brand">{item.product?.brand}</span>
 
-                <Card.Body className="d-flex flex-column">
                   <Link
                     to={`/product/${item.product?.slug}`}
-                    className="text-decoration-none text-dark"
+                    className="text-decoration-none"
                   >
-                    <Card.Title className="fs-6" style={{ minHeight: "48px" }}>
+                    <Card.Title className="bh-card__name">
                       {item.product?.name}
                     </Card.Title>
                   </Link>
 
-                  <div className="mt-auto">
-                    <div className="mb-2">
-                      <small className="text-muted">
-                        <FaClock className="me-1" />
-                        Viewed {formatDate(item.viewedAt)}
-                      </small>
-                    </div>
+                  <div className="bh-card__viewed">
+                    <FaClock className="me-1" />
+                    Viewed {formatDate(item.viewedAt)}
+                  </div>
 
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <div>
-                        {/* Show price drop or discount visually */}
-                        {item.product && item.product.discount > 0 ? (
-                          <>
-                            <div className="text-muted text-decoration-line-through small">
-                              ${item.product.price.toFixed(2)}
-                            </div>
-                            <div className="fw-bold text-success fs-5">
-                              $
-                              {(
-                                (item.product.price *
-                                  (100 - item.product.discount)) /
-                                100
-                              ).toFixed(2)}
-                            </div>
-                            <span className="ms-2 discount-text fw-bold text-danger">
-                              Save {item.product.discount}%
-                            </span>
-                          </>
-                        ) : item.priceAtView > item.currentPrice ? (
-                          <>
-                            <div className="text-muted text-decoration-line-through small">
-                              ${item.priceAtView.toFixed(2)}
-                            </div>
-                            <div className="fw-bold text-success fs-5">
-                              ${item.currentPrice.toFixed(2)}
-                            </div>
-                          </>
-                        ) : (
-                          <div className="fw-bold fs-5">
-                            ${item.currentPrice.toFixed(2)}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  <div className="bh-card__price">
+                    {item.product && item.product.discount > 0 ? (
+                      <>
+                        <span className="bh-card__price--old">
+                          ${item.product.price.toFixed(2)}
+                        </span>
+                        <span className="bh-card__price--sale">
+                          $
+                          {(
+                            (item.product.price *
+                              (100 - item.product.discount)) /
+                            100
+                          ).toFixed(2)}
+                        </span>
+                      </>
+                    ) : item.priceAtView > item.currentPrice ? (
+                      <>
+                        <span className="bh-card__price--old">
+                          ${item.priceAtView.toFixed(2)}
+                        </span>
+                        <span className="bh-card__price--sale">
+                          ${item.currentPrice.toFixed(2)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="bh-card__price--current">
+                        ${item.currentPrice.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
 
-                    <div className="d-flex gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        as={Link}
-                        to={`/product/${item.product?.slug}`}
-                        className="flex-grow-1"
-                      >
-                        View Product
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => deleteHandler(item._id)}
-                        disabled={loadingDelete}
-                      >
-                        <FaTrash />
-                      </Button>
-                    </div>
+                  <div className="mt-auto pt-2">
+                    <Button
+                      variant="primary"
+                      as={Link}
+                      to={`/product/${item.product?.slug}`}
+                      className="w-100 bh-view-product-btn"
+                    >
+                      View Product
+                      <i className="fas fa-arrow-right ms-2"></i>
+                    </Button>
                   </div>
                 </Card.Body>
               </Card>

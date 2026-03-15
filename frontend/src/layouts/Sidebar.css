@@ -1,3 +1,7 @@
+/* ==========================================
+   Sidebar — Modern Dark Theme
+   ========================================== */
+
 /* ── Overlay: only covers below the header ── */
 .sidebar-overlay {
   position: fixed;
@@ -5,8 +9,9 @@
   left: 0;
   width: 100%;
   height: calc(100% - var(--header-height, 68px));
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: rgba(0, 0, 0, 0.45);
   z-index: 1040;
+  backdrop-filter: blur(2px);
 }
 
 /* ── Dropdown panel ── */
@@ -14,25 +19,40 @@
   position: fixed;
   top: var(--header-height, 68px);
   left: 0;
-  width: 260px;
+  width: 270px;
   max-height: calc(100vh - var(--header-height, 68px) - 1rem);
-  background-color: #868d9c;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
   z-index: 1050;
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.25);
-  border-radius: 0 0 10px 0;
-  /* hidden state: slide up + fade out */
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+  border-radius: 0 0 12px 0;
+  border-right: 1px solid rgba(103, 232, 249, 0.08);
+  /* hidden state */
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateX(-12px);
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
 .sidebar-modal.active {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
   pointer-events: auto;
+}
+
+/* Scrollbar styling */
+.sidebar-modal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 /* ── Regular nav links ── */
@@ -41,31 +61,31 @@
 }
 
 .nav-link-side {
-  color: white;
+  color: #cbd5e1;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.25rem;
-  min-height: 40px;
+  padding: 0.55rem 0.35rem;
+  min-height: 42px;
   width: 100%;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  transition: color 0.2s, background 0.2s;
-  border-radius: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: color 0.2s, background 0.2s, padding-left 0.2s;
+  border-radius: 6px;
 }
 
 .nav-link-side:hover {
-  color: #ec2222;
-  background: rgba(255,255,255,0.08);
-  text-shadow: 1px 1px 1px black;
-  padding-left: 0.5rem;
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.06);
+  padding-left: 0.65rem;
+  text-shadow: none;
 }
 
 /* ── Accordion (Categories) ── */
 .sidebar-accordion {
   width: 100%;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-accordion-toggle {
@@ -75,21 +95,21 @@
   justify-content: space-between;
   background: none;
   border: none;
-  padding: 0.5rem 0.25rem;
-  color: white;
-  font-size: 0.95rem;
+  padding: 0.55rem 0.35rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  min-height: 40px;
-  transition: color 0.2s, background 0.2s;
-  border-radius: 4px;
+  min-height: 42px;
+  transition: color 0.2s, background 0.2s, padding-left 0.2s;
+  border-radius: 6px;
 }
 
 .sidebar-accordion-toggle:hover {
-  color: #ec2222;
-  background: rgba(255,255,255,0.08);
-  text-shadow: 1px 1px 1px black;
-  padding-left: 0.5rem;
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.06);
+  padding-left: 0.65rem;
+  text-shadow: none;
 }
 
 .sidebar-accordion-toggle:focus {
@@ -98,19 +118,20 @@
 }
 
 .sidebar-chevron {
-  font-size: 0.7rem;
-  transition: transform 0.2s;
+  font-size: 0.65rem;
+  transition: transform 0.25s;
   flex-shrink: 0;
   margin-left: 0.5rem;
+  color: #64748b;
 }
 
 .sidebar-accordion-body {
   display: flex;
   flex-direction: column;
-  border-left: 3px solid rgba(255,255,255,0.2);
-  margin: 0 0 0.25rem 0.5rem;
+  border-left: 2px solid rgba(103, 232, 249, 0.15);
+  margin: 0 0 0.35rem 0.6rem;
   padding-left: 0.75rem;
-  animation: sideSlideDown 0.15s ease;
+  animation: sideSlideDown 0.18s ease;
 }
 
 @keyframes sideSlideDown {
@@ -119,28 +140,29 @@
 }
 
 .sidebar-accordion-item {
-  color: rgba(255,255,255,0.85);
+  color: #94a3b8;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.84rem;
   font-weight: 500;
-  padding: 0.4rem 0.25rem;
+  padding: 0.4rem 0.35rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-radius: 4px;
-  min-height: 38px;
-  transition: color 0.15s, background 0.15s;
+  border-radius: 6px;
+  min-height: 36px;
+  transition: color 0.18s, background 0.18s, padding-left 0.18s;
 }
 
 .sidebar-accordion-item:hover {
-  color: #ec2222;
-  background: rgba(255,255,255,0.08);
-  text-shadow: 1px 1px 1px black;
-  padding-left: 0.4rem;
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.06);
+  padding-left: 0.55rem;
+  text-shadow: none;
 }
 
 .sidebar-tag-icon {
-  font-size: 0.65rem;
-  opacity: 0.6;
+  font-size: 0.6rem;
+  opacity: 0.5;
   flex-shrink: 0;
+  color: #67e8f9;
 }

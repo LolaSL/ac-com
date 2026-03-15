@@ -46,6 +46,8 @@
 .bd-hero__img {
   width: 100%;
   height: auto;
+  max-height: 50vh;
+  object-fit: contain;
   display: block;
   transition: transform 8s ease;
 }
@@ -158,6 +160,7 @@
 
 .bd-content img {
   max-width: 100%;
+  border: 1.5px solid rgba(26, 26, 46, 0.12);
   border-radius: 10px;
   margin: 1.25rem 0;
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
@@ -264,6 +267,5 @@
 
 /* Responsive */
 @media (max-width: 576px) {
-  .bd-hero__img { height: auto; }
   .bd-hero { max-height: 260px; }
 }

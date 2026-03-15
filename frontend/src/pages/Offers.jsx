@@ -8,36 +8,52 @@ export default function Offers() {
 
   const offers = [
     {
-      title: "Spring Sales!",
-      description: "Units on sale!",
-      imageSrc: "/images/offer-spring1.png",
-      linkTo:
-        "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",
-      linkText: "Learn More",
-    },
-    {
-      title: "Spring Deals!",
-      description: "Save money!",
+      title: "Half Price Sale",
+      description: "Premium units at 50% off — limited time only.",
       imageSrc: "/images/offer-spring2.png",
       linkTo:
         "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1",
-      linkText: "Learn More",
+      linkText: "Shop Now",
     },
-    // {
-    //   title: "New Year deal!",
-    //   description: "Save energy!",
-    //   imageSrc: "/images/offer-crist4.jpg",
-    //   linkTo:
-    //     "/search?category=all&query=all&price=all&discount=21-30&rating=all&btu=all&brand=all&order=newest&page=1",
-    //   linkText: "Learn More",
-    // },
     {
-      title: "Premium Comfort Offer",
-      description: "5-star and discount!",
+      title: "Up to 40% Off",
+      description: "Save big on select HVAC units — 31-40% discount on top brands.",
+      imageSrc: "/images/offer-spring1.png",
+      linkTo:
+        "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",
+      linkText: "Shop Now",
+    },
+    {
+      title: "Smart Savings",
+      description: "Quality units with 21-30% off — best value for your budget.",
+      imageSrc: "/images/offer02.png",
+      linkTo:
+        "/search?category=all&query=all&price=all&discount=21-30&rating=all&btu=all&brand=all&order=newest&page=1",
+      linkText: "View Deals",
+    },
+    {
+      title: "Top-Rated Picks",
+      description: "5-star rated units with 10-20% off — comfort guaranteed.",
       imageSrc: "/images/offer-spring3.png",
       linkTo:
         "/search?category=all&query=all&price=all&discount=10-20&rating=5&btu=all&brand=all&order=newest&page=1",
-      linkText: "Learn More",
+      linkText: "Shop Now",
+    },
+    {
+      title: "Premium Systems",
+      description: "High-end HVAC systems $1,000+ — professional grade equipment.",
+      imageSrc: "/images/offer01.jpg",
+      linkTo:
+        "/search?category=all&query=all&price=1001-10000&discount=any&rating=all&btu=all&brand=all&order=newest&page=1",
+      linkText: "Explore",
+    },
+    {
+      title: "Best Sellers",
+      description: "Most popular 4-star+ rated units — trusted by thousands.",
+      imageSrc: "/images/offer03.png",
+      linkTo:
+        "/search?category=all&query=all&price=all&discount=any&rating=4&btu=all&brand=all&order=toprated&page=1",
+      linkText: "See Top Rated",
     },
   ];
 

@@ -117,54 +117,54 @@ export default function WishlistPage() {
         <Row className="g-3 mx-0">
           {validWishlistItems.map((item) => (
             <Col key={item._id} xs={12} sm={6} md={4} lg={3} className="p-2">
-              <Card className="h-100">
-                <div className="wishlist-card-relative">
+              <Card className="h-100 wl-card">
+                <div className="wl-card__img-wrap">
                   <Link to={`/product/${item.product.slug}`}>
                     <Image
                       src={item.product.image}
                       alt={item.product.name}
-                      className="card-img-top wishlist-card-img"
+                      className="wl-card__img"
                     />
                   </Link>
                   <button
                     onClick={() => removeFromWishlistHandler(item.product._id)}
-                    className="remove-wishlist-btn"
+                    className="wl-card__remove"
                   >
-                    <i className="fas fa-heart remove-wishlist-icon" />
+                    <i className="fas fa-heart wl-card__remove-icon" />
                   </button>
+                  {item.product.discount > 0 && (
+                    <span className="wl-card__discount">
+                      {item.product.discount}% OFF
+                    </span>
+                  )}
                 </div>
 
-                <Card.Body className="d-flex flex-column">
+                <Card.Body className="d-flex flex-column wl-card__body">
+                  <span className="wl-card__brand">{item.product.brand}</span>
+
                   <Link
                     to={`/product/${item.product.slug}`}
-                    className="text-decoration-none text-dark"
+                    className="text-decoration-none"
                   >
-                    <Card.Title className="fs-6">
+                    <Card.Title className="wl-card__name">
                       {item.product.name}
                     </Card.Title>
                   </Link>
 
-                  <div className="mb-2">
-                    <span className="fw-semibold">{item.product.brand}</span>
-                    {item.product.discount > 0 && (
-                      <span className="badge bg-danger ms-2">
-                        {item.product.discount}% OFF
-                      </span>
-                    )}
+                  <div className="wl-card__rating">
+                    <Rating
+                      rating={item.product.rating}
+                      numReviews={item.product.numReviews}
+                    />
                   </div>
 
-                  <Rating
-                    rating={item.product.rating}
-                    numReviews={item.product.numReviews}
-                  />
-
-                  <div className="mt-2 mb-3">
+                  <div className="wl-card__price">
                     {item.product.discount > 0 ? (
                       <>
-                        <span className="text-decoration-line-through text-muted me-2">
+                        <span className="wl-card__price--old">
                           ${item.product.price.toFixed(2)}
                         </span>
-                        <span className="fw-bold text-danger fs-5">
+                        <span className="wl-card__price--sale">
                           $
                           {(
                             (item.product.price *
@@ -174,24 +174,25 @@ export default function WishlistPage() {
                         </span>
                       </>
                     ) : (
-                      <span className="fw-bold fs-5">
+                      <span className="wl-card__price--current">
                         ${item.product.price.toFixed(2)}
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-auto">
+                  <div className="mt-auto pt-2">
                     {item.product.countInStock === 0 ? (
-                      <Button variant="secondary" disabled className="w-100">
+                      <Button variant="secondary" disabled className="w-100 wl-card__oos-btn">
                         Out of Stock
                       </Button>
                     ) : (
                       <Button
                         variant="primary"
                         onClick={() => addToCartHandler(item.product)}
-                        className="w-100"
+                        className="w-100 wl-view-product-btn"
                       >
                         View Product
+                        <i className="fas fa-arrow-right ms-2"></i>
                       </Button>
                     )}
                   </div>

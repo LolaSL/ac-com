@@ -136,7 +136,7 @@ export default function Recommendations() {
           overflow: hidden;
         }
         .print-container > h1 {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
           color: #fff;
           text-align: center;
           padding: 1.4rem 1rem;
@@ -149,7 +149,7 @@ export default function Recommendations() {
         .print-meta {
           padding: 1rem 1.5rem;
           background: #f8f9fa;
-          border-bottom: 2px solid #667eea;
+          border-bottom: 2px solid #1a1a2e;
         }
         .print-meta p {
           margin: 0.25rem 0;
@@ -165,7 +165,7 @@ export default function Recommendations() {
           box-shadow: 0 2px 10px rgba(0,0,0,0.07);
         }
         th {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
           color: #fff;
           padding: 12px 14px;
           font-size: 0.8rem;
@@ -188,7 +188,7 @@ export default function Recommendations() {
           background: #eff6ff;
         }
         .total-row td {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
           color: #fff !important;
           font-weight: 700;
           font-size: 0.9rem;
@@ -386,7 +386,7 @@ export default function Recommendations() {
     <div className="recommendations-page-container">
       {/* Page Header */}
       <div className="recommendations-header" style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)',
         color: '#fff',
         padding: '2.5rem 2rem',
         borderRadius: '16px',

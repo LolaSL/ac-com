@@ -9,7 +9,7 @@
 
 /* ── Hero ───────────────────────────────────────────────── */
 .bl-hero {
-  background: linear-gradient(135deg, #5b6070, #2563a8);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: 0 0 16px 16px;
   padding: 2.2rem 1.5rem 2rem;
   margin-bottom: 2rem;
@@ -154,20 +154,22 @@
 .blog-link {
   display: inline-block;
   padding: 8px 18px;
-  background: linear-gradient(135deg, #a8112a, #ec133e);
-  color: #fff;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #67e8f9;
   text-decoration: none;
   font-weight: 700;
   font-size: 0.88rem;
+  border: 1.5px solid #67e8f9;
   border-radius: 7px;
-  box-shadow: 0 3px 10px rgba(236, 19, 62, 0.35);
-  transition: opacity 0.18s, transform 0.12s;
+  box-shadow: 0 3px 10px rgba(26, 26, 46, 0.25);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.12s;
 }
 
 .blog-link:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
   color: #fff;
+  border-color: #22d3ee;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {

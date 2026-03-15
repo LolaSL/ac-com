@@ -6,7 +6,7 @@
 }
 
 .urv-hero {
-  background: linear-gradient(135deg, #5b6070, #2563a8);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: 0 0 16px 16px;
   padding: 2.2rem 1.5rem 2rem;
   text-align: center;
@@ -43,7 +43,132 @@
   padding: 0 1.25rem;
 }
 
-/* existing */
+/* ── Clear All button ────────────────────────────────────── */
+.urv-clear-btn {
+  background: transparent !important;
+  color: #ef4444 !important;
+  border: 1.5px solid #ef4444 !important;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.urv-clear-btn:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: #fff !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+/* ── Section titles ──────────────────────────────────────── */
+.urv-section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #67e8f9;
+  display: inline-block;
+}
+
+/* ── Review cards ────────────────────────────────────────── */
+.urv-card {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(26, 26, 46, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.urv-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 22px rgba(26, 26, 46, 0.13);
+}
+
+.urv-card__body {
+  padding: 1.1rem 1.2rem;
+}
+
+.urv-card__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.urv-card__link {
+  text-decoration: none;
+  color: #0f3460;
+  transition: color 0.2s ease;
+}
+
+.urv-card__link:hover {
+  color: #67e8f9;
+}
+
+.urv-card__date {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.urv-card__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #67e8f9;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 2rem;
+}
+
+.urv-card__rating--seller {
+  background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+  color: #22c55e;
+}
+
+.urv-card__comment {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.5;
+}
+
+/* ── Remove / Clear button on each card ──────────────────── */
+.urv-remove-btn {
+  background: transparent !important;
+  color: #ef4444 !important;
+  border: 1.5px solid #ef4444 !important;
+  border-radius: 0.4rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.urv-remove-btn:hover {
+  background: #ef4444 !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* ── Undo toast ──────────────────────────────────────────── */
 .undo-toast {
   min-width: 260px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .urv-card__body {
+    padding: 0.9rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .urv-card__title {
+    font-size: 0.88rem;
+  }
+
+  .urv-card__comment {
+    font-size: 0.82rem;
+  }
 }

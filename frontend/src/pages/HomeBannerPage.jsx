@@ -9,7 +9,8 @@ import NewsletterSignup from "../components/NewsletterSignup";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaHome } from "react-icons/fa";
+// import { FaHome } from "react-icons/fa";
+import bannerVideo from "../assets/videos/banner-video.mp4";
 import "./HomeBannerPage.css";
 
 export default function HomeBannerPage() {
@@ -174,12 +175,23 @@ export default function HomeBannerPage() {
         />
       )}
    <div className="home-page">
-      {/* Hero */}
-      <div className="home-hero">
+      {/* Hero with video background */}
+      <div className="home-hero rounded shadow">
+        <video
+          className="home-hero__video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/images/hero.jpg"
+        >
+          <source src={bannerVideo} type="video/mp4" />
+        </video>
+        <div className="home-hero__overlay" />
         <div className="home-hero__inner">
-          <div className="home-hero__icon"><FaHome /></div>
+          {/* <div className="home-hero__icon"><FaHome /></div> */}
           <h1 className="home-hero__title">Welcome to AC-Commerce</h1>
-          <p className="home-hero__sub">Smarter HVAC  designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
+          <p className="home-hero__sub">Smarter HVAC designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
       </div>
       {/* Premium Hero Cards Grid */}

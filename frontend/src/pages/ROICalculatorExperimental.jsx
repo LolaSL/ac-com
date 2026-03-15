@@ -1972,7 +1972,7 @@ export default function ROICalculatorExperimental() {
                     <Button
                       variant="outline-secondary"
                       size="lg"
-                      className="w-100 mb-3"
+                      className="w-100 mb-3 roi-clear-btn"
                       onClick={handleClearForm}
                     >
                       🗑️ Clear All Inputs
@@ -2649,7 +2649,7 @@ export default function ROICalculatorExperimental() {
                             <Button
                               size="sm"
                               variant="outline-primary"
-                              className="me-2 w-auto btn-admin-edit"
+                              className="me-2 w-auto roi-action-btn"
                               title="Load calculation"
                               onClick={() => handleLoadCalculation(calc)}
                             >
@@ -2658,7 +2658,7 @@ export default function ROICalculatorExperimental() {
                             <Button
                               size="sm"
                               variant="outline-info"
-                              className="me-2 w-auto btn-admin-edit"
+                              className="me-2 w-auto roi-action-btn"
                               title="Download as PDF"
                               onClick={() => handleGenerateSavedReport(calc)}
                             >
@@ -2667,7 +2667,7 @@ export default function ROICalculatorExperimental() {
                             <Button
                               size="sm"
                               variant="outline-danger"
-                              className="w-auto btn-admin-delete"
+                              className="w-auto roi-delete-btn"
                               title="Delete calculation"
                               onClick={() => handleDeleteCalculation(calc._id)}
                             >
@@ -2696,7 +2696,7 @@ export default function ROICalculatorExperimental() {
             <Button
               variant="primary"
               size="lg"
-              className="me-3"
+              className="me-3 roi-download-btn"
               onClick={handleDownloadReport}
             >
               📥 Download Report
@@ -2705,7 +2705,7 @@ export default function ROICalculatorExperimental() {
               <Button
                 variant="success"
                 size="lg"
-                className="me-3"
+                className="me-3 roi-save-btn"
                 onClick={handleOpenSaveModal}
               >
                 💾 Save Calculation
@@ -2787,10 +2787,10 @@ export default function ROICalculatorExperimental() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowSaveModal(false)}>
+          <Button variant="secondary" onClick={() => setShowSaveModal(false)} className="roi-modal-cancel-btn">
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSaveCalculation}>
+          <Button variant="primary" onClick={handleSaveCalculation} className="roi-modal-save-btn">
             Save Calculation
           </Button>
         </Modal.Footer>

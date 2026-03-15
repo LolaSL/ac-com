@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState, useMemo } from "react";
 import { Link, useNavigate, useLocation, NavLink } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -11,7 +11,7 @@ import MessageBox from "../components/MessageBox.jsx";
 import Button from "react-bootstrap/Button";
 import Product from "../components/Product.jsx";
 import { useParams } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import "./SearchPage.css";
 
 const reducer = (state, action) => {
@@ -80,6 +80,34 @@ export default function SearchPage() {
       error: "",
     });
 
+  const [categories, setCategories] = useState([]);
+  const [brandsList, setBrandsList] = useState([]);
+
+  const [expandedSections, setExpandedSections] = useState({
+    categories: false,
+    brands: false,
+  });
+
+  const PREVIEW_COUNT = 5;
+
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const visibleCategories = useMemo(
+    () =>
+      expandedSections.categories
+        ? categories
+        : categories.slice(0, PREVIEW_COUNT),
+    [categories, expandedSections.categories]
+  );
+
+  const visibleBrands = useMemo(
+    () =>
+      expandedSections.brands ? brandsList : brandsList.slice(0, PREVIEW_COUNT),
+    [brandsList, expandedSections.brands]
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -96,9 +124,6 @@ export default function SearchPage() {
     };
     fetchData();
   }, [category, order, page, price, query, rating, btu, brand, discount]);
-
-  const [categories, setCategories] = useState([]);
-  const [brandsList, setBrandsList] = useState([]);
 
   useEffect(() => {
     const fetchCategoriesAndBrands = async () => {
@@ -146,24 +171,25 @@ export default function SearchPage() {
         <div className="search">
           <Row className="mt-4 p-4">
             <Col md={3}>
-              <h3>AC Unit</h3>
-              <div>
-                <ul className="all">
+              {/* AC Equipment */}
+              <div className="srch-filter-group">
+                <h3 className="srch-filter-group__title">AC Equipment</h3>
+                <ul className="srch-filter-group__list">
                   <li>
                     <Link
-                      className={`text-decoration-none ${
-                        "all" === category ? "text-bold" : ""
+                      className={`srch-filter-link ${
+                        "all" === category ? "srch-filter-link--active" : ""
                       }`}
                       to={getFilterUrl({ category: "all" })}
                     >
                       Any
                     </Link>
                   </li>
-                  {categories.map((c) => (
+                  {visibleCategories.map((c) => (
                     <li key={c}>
                       <Link
-                        className={`text-decoration-none ${
-                          c === category ? "text-bold" : ""
+                        className={`srch-filter-link ${
+                          c === category ? "srch-filter-link--active" : ""
                         }`}
                         to={getFilterUrl({ category: c })}
                       >
@@ -172,14 +198,28 @@ export default function SearchPage() {
                     </li>
                   ))}
                 </ul>
+                {categories.length > PREVIEW_COUNT && (
+                  <button
+                    className="srch-filter-toggle"
+                    onClick={() => toggleSection("categories")}
+                  >
+                    {expandedSections.categories ? (
+                      <>Show Less <FaChevronUp /></>
+                    ) : (
+                      <>+{categories.length - PREVIEW_COUNT} more <FaChevronDown /></>
+                    )}
+                  </button>
+                )}
               </div>
-              <div>
-                <h3>Price</h3>
-                <ul>
+
+              {/* Price */}
+              <div className="srch-filter-group">
+                <h3 className="srch-filter-group__title">Price</h3>
+                <ul className="srch-filter-group__list">
                   <li>
                     <Link
-                      className={`text-decoration-none ${
-                        "all" === price ? "text-bold" : ""
+                      className={`srch-filter-link ${
+                        "all" === price ? "srch-filter-link--active" : ""
                       }`}
                       to={getFilterUrl({ price: "all" })}
                     >
@@ -190,8 +230,8 @@ export default function SearchPage() {
                     <li key={p.value}>
                       <Link
                         to={getFilterUrl({ price: p.value })}
-                        className={`text-decoration-none ${
-                          p.value === price ? "text-bold" : ""
+                        className={`srch-filter-link ${
+                          p.value === price ? "srch-filter-link--active" : ""
                         }`}
                       >
                         {p.name}
@@ -200,15 +240,17 @@ export default function SearchPage() {
                   ))}
                 </ul>
               </div>
-              <div>
-                <h3>Discount</h3>
-                <ul>
+
+              {/* Discount */}
+              <div className="srch-filter-group">
+                <h3 className="srch-filter-group__title">Discount</h3>
+                <ul className="srch-filter-group__list">
                   {discounts.map((d) => (
                     <li key={d.value}>
                       <Link
                         to={getFilterUrl({ discount: d.value })}
-                        className={`text-decoration-none ${
-                          discount === d.value ? "text-bold" : ""
+                        className={`srch-filter-link ${
+                          discount === d.value ? "srch-filter-link--active" : ""
                         }`}
                       >
                         {d.name}
@@ -217,25 +259,27 @@ export default function SearchPage() {
                   ))}
                 </ul>
               </div>
-              <div>
-                <h3>Brands</h3>
-                <ul>
+
+              {/* Brands */}
+              <div className="srch-filter-group">
+                <h3 className="srch-filter-group__title">Brands</h3>
+                <ul className="srch-filter-group__list">
                   <li>
                     <Link
                       to={getFilterUrl({ brand: "all" })}
-                      className={`text-decoration-none ${
-                        brand === "all" ? "text-bold" : ""
+                      className={`srch-filter-link ${
+                        brand === "all" ? "srch-filter-link--active" : ""
                       }`}
                     >
                       Any
                     </Link>
                   </li>
-                  {brandsList.map((b) => (
+                  {visibleBrands.map((b) => (
                     <li key={b}>
                       <Link
                         to={getFilterUrl({ brand: b })}
-                        className={`text-decoration-none ${
-                          brand === b ? "text-bold" : ""
+                        className={`srch-filter-link ${
+                          brand === b ? "srch-filter-link--active" : ""
                         }`}
                       >
                         {b}
@@ -243,16 +287,30 @@ export default function SearchPage() {
                     </li>
                   ))}
                 </ul>
+                {brandsList.length > PREVIEW_COUNT && (
+                  <button
+                    className="srch-filter-toggle"
+                    onClick={() => toggleSection("brands")}
+                  >
+                    {expandedSections.brands ? (
+                      <>Show Less <FaChevronUp /></>
+                    ) : (
+                      <>+{brandsList.length - PREVIEW_COUNT} more <FaChevronDown /></>
+                    )}
+                  </button>
+                )}
               </div>
-              <div>
-                <h3>Customer Review</h3>
-                <ul>
+
+              {/* Customer Review */}
+              <div className="srch-filter-group">
+                <h3 className="srch-filter-group__title">Customer Review</h3>
+                <ul className="srch-filter-group__list">
                   {ratings.map((r) => (
                     <li key={r.name}>
                       <Link
-                        to={getFilterUrl({ rating: "all" })}
-                        className={`text-decoration-none ${
-                          rating === "all" ? "text-bold" : ""
+                        to={getFilterUrl({ rating: r.rating })}
+                        className={`srch-filter-link ${
+                          `${r.rating}` === rating ? "srch-filter-link--active" : ""
                         }`}
                       >
                         <Rating caption={" & up"} rating={r.rating}></Rating>
@@ -262,7 +320,9 @@ export default function SearchPage() {
                   <li>
                     <Link
                       to={getFilterUrl({ rating: "all" })}
-                      className={rating === "all" ? "text-bold" : ""}
+                      className={`srch-filter-link ${
+                        rating === "all" ? "srch-filter-link--active" : ""
+                      }`}
                     >
                       <Rating caption={" & up"} rating={0}></Rating>
                     </Link>

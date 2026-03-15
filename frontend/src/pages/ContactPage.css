@@ -9,7 +9,7 @@
 
 /* ── Hero ────────────────────────────────────────────────── */
 .ct-hero {
-  background: linear-gradient(135deg, #5b6070, #2563a8);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: 0 0 16px 16px;
   padding: 2.2rem 1.5rem 2rem;
   margin-bottom: 2rem;
@@ -166,15 +166,15 @@
   width: 100%;
   margin-top: 1.25rem;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #a8112a, #ec133e);
-  color: #fff;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #67e8f9;
   font-size: 1rem;
   font-weight: 700;
-  border: none;
+  border: 1.5px solid #67e8f9;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(236, 19, 62, 0.35);
-  transition: opacity 0.18s, transform 0.12s;
+  box-shadow: 0 4px 14px rgba(26, 26, 46, 0.25);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.12s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,7 +182,9 @@
 }
 
 .ct-submit:hover:not(:disabled) {
-  opacity: 0.9;
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
+  color: #fff;
+  border-color: #22d3ee;
   transform: translateY(-1px);
 }
 
@@ -271,11 +273,12 @@
 
 /* ── Links ───────────────────────────────────────────────── */
 .ct-link {
-  color: #2563a8;
+  color: #22d3ee;
   text-decoration: none;
 }
 
 .ct-link:hover {
+  color: #67e8f9;
   text-decoration: underline;
 }
 
@@ -284,13 +287,14 @@
   display: block;
   padding: 0.55rem 0.9rem;
   border-radius: 8px;
-  background: rgba(37, 99, 168, 0.08);
-  color: #1e3a5f;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #67e8f9;
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  transition: background 0.15s;
+  border: 1px solid rgba(103, 232, 249, 0.15);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .ct-quick-link:last-child {
@@ -298,5 +302,7 @@
 }
 
 .ct-quick-link:hover {
-  background: rgba(37, 99, 168, 0.16);
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
+  color: #fff;
+  border-color: #22d3ee;
 }
