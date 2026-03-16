@@ -1227,7 +1227,7 @@ useEffect(() => {
   </div>
 )}
         <hr className="ms-2 mt-1 mb-5 btu-hr" />
-        <Row className="g-6">
+        <Row className="g-3">
           <Col md={6}>
             <CheckboxGroup
               title="Outdoor Unit Location"

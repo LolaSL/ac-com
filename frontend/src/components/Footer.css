@@ -175,12 +175,29 @@
 
 /* Mobile (≤575px) */
 @media (max-width: 575px) {
+  .footer {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .footer.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .footer > .row {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
   .footer hr {
     width: 50px;
   }
 
   .ft-1 p {
-    padding: 0rem 1rem 0.8rem 0;
+    padding: 0rem 0.5rem 0.8rem 0;
   }
 
   .footer-icons {
@@ -188,8 +205,14 @@
   }
 
   .footer .row > [class*="col-"] {
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    text-align: left;
+    /* Override Bootstrap col width so grid controls sizing */
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .footer .row {

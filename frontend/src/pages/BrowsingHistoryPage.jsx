@@ -4,7 +4,6 @@ import {
   Col,
   Card,
   Button,
-  Badge,
   Spinner,
   Alert,
 } from "react-bootstrap";

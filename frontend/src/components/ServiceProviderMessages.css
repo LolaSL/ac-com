@@ -3,6 +3,10 @@
 .spm-page {
   min-height: 100vh;
   background: #f4f7fb;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Hero */
@@ -36,6 +40,15 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem 2.5rem;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Table wrapper */
+.spm-body .table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 /* Table */
@@ -117,5 +130,28 @@
     letter-spacing: 0.03em;
     margin-right: 0.5rem;
     white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .spm-table td[data-label="Message"] {
+    flex-direction: column;
+    align-items: flex-start;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    text-align: left;
+  }
+  .spm-table td {
+    text-align: left;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+  .spm-body {
+    padding: 0 0.75rem 2rem;
+  }
+  .spm-hero {
+    padding: 1.5rem 1rem 1.2rem;
+    margin-bottom: 1.25rem;
+  }
+  .spm-hero__title {
+    font-size: 1.3rem;
   }
 }

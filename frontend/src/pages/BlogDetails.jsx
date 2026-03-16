@@ -67,9 +67,9 @@ function BlogDetails() {
           {blog.author && (
             <span className="bd-meta__item">✍️ {blog.author}</span>
           )}
-          {blog.createdAt && (
+          {(blog.updatedAt || blog.createdAt) && (
             <span className="bd-meta__item">
-              📅 {new Date(blog.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+              📅 {new Date(blog.updatedAt || blog.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
             </span>
           )}
           <span className="bd-meta__item">⏱️ {readingTime} min read</span>

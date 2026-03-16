@@ -380,7 +380,7 @@ export default function AdminROICalculationsPage() {
               <tbody>
                 {displayed.map((calc) => (
                   <tr key={calc._id}>
-                    <td>
+                    <td data-label="Name">
                       <strong>{calc.name}</strong>
                       {calc.isPinned && (
                         <Badge bg="secondary" className="ms-1">
@@ -388,31 +388,31 @@ export default function AdminROICalculationsPage() {
                         </Badge>
                       )}
                     </td>
-                    <td>
+                    <td data-label="User">
                       <div>{calc.userId?.name || "—"}</div>
                       <small className="text-muted">
                         {calc.userId?.email || "—"}
                       </small>
                     </td>
-                    <td>{calc.serviceType}</td>
-                    <td>
+                    <td data-label="Service">{calc.serviceType}</td>
+                    <td data-label="Property">
                       <Badge bg="light" text="dark">
                         {PROPERTY_LABELS[calc.propertyType] || calc.propertyType}
                       </Badge>
                     </td>
-                    <td>${Number(calc.projectSize).toLocaleString()}</td>
-                    <td>{roiBadge(calc.roi)}</td>
-                    <td>{paybackBadge(calc.paybackMonths)}</td>
-                    <td>
+                    <td data-label="Project $">${Number(calc.projectSize).toLocaleString()}</td>
+                    <td data-label="ROI">{roiBadge(calc.roi)}</td>
+                    <td data-label="Payback">{paybackBadge(calc.paybackMonths)}</td>
+                    <td data-label="Total Savings">
                       $
                       {Number(calc.annualSavings || 0).toLocaleString("en-US", {
                         maximumFractionDigits: 0,
                       })}
                     </td>
-                    <td>
+                    <td data-label="Created">
                       {new Date(calc.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="text-center">
+                    <td data-label="BTU" className="text-center">
                       {isBtuSourced(calc) ? (
                         <Badge bg="info">
                           {Number(calc.btuProjectData?.totalBTU || 0).toLocaleString("de-DE")} BTU
@@ -421,7 +421,7 @@ export default function AdminROICalculationsPage() {
                         <span className="text-muted">—</span>
                       )}
                     </td>
-                    <td style={{ whiteSpace: "nowrap" }}>
+                    <td data-label="Actions" style={{ whiteSpace: "nowrap" }}>
                       <div className="d-flex gap-1">
                       <Button
                         type="button"

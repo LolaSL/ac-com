@@ -66,7 +66,7 @@ export default function Notifications() {
     userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
   const isAdmin = adminInfo !== null;
 
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('admin');
 
   useEffect(() => {
     if (!token) {
@@ -222,10 +222,7 @@ export default function Notifications() {
 
           {isAdmin && (
             <Nav variant="tabs" className="mb-3" activeKey={activeTab} onSelect={setActiveTab}>
-              <Nav.Item><Nav.Link eventKey="all">All</Nav.Link></Nav.Item>
               <Nav.Item><Nav.Link eventKey="admin">Admin</Nav.Link></Nav.Item>
-              <Nav.Item><Nav.Link eventKey="user">Users</Nav.Link></Nav.Item>
-              <Nav.Item><Nav.Link eventKey="serviceProvider">Service Providers</Nav.Link></Nav.Item>
             </Nav>
           )}
 

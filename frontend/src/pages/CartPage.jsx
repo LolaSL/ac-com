@@ -183,8 +183,8 @@ export default function CartPage() {
         return;
       }
 
-      // For custom condensers created by BTU calculator, skip database validation
-      if (item._id.startsWith("condenser-")) {
+      // For custom condensers or placeholder products from BTU calculator, skip database validation
+      if (item._id.startsWith("condenser-") || item._id.startsWith("placeholder-")) {
         ctxDispatch({
           type: "CART_ADD_ITEM",
           payload: { ...item, quantity },
@@ -230,8 +230,12 @@ export default function CartPage() {
 
   // ── derived totals ──────────────────────────────────────────
   const itemCount   = cartItems.reduce((a, c) => a + c.quantity, 0);
-  const subtotal    = cartItems.reduce((a, c) => a + c.quantity * (c.discount > 0 ? c.price * (1 - c.discount / 100) : c.price), 0);
-  const originalTotal = cartItems.reduce((a, c) => a + c.quantity * c.price, 0);
+  const subtotal    = cartItems.reduce((a, c) => {
+    const p = typeof c.price === 'number' ? c.price : 0;
+    const d = typeof c.discount === 'number' ? c.discount : 0;
+    return a + c.quantity * (d > 0 ? p * (1 - d / 100) : p);
+  }, 0);
+  const originalTotal = cartItems.reduce((a, c) => a + c.quantity * (typeof c.price === 'number' ? c.price : 0), 0);
   const totalSavings  = originalTotal - subtotal;
 
   // ── condenser banner config ──────────────────────────────────
@@ -302,9 +306,11 @@ export default function CartPage() {
           ) : (
             <div className="cp-items-list">
               {cartItems.map((item, index) => {
-                const discountedPrice = item.discount > 0
-                  ? item.price * (1 - item.discount / 100)
-                  : item.price;
+                const price = typeof item.price === 'number' ? item.price : 0;
+                const discount = typeof item.discount === 'number' ? item.discount : 0;
+                const discountedPrice = discount > 0
+                  ? price * (1 - discount / 100)
+                  : price;
                 const imageUrl = item.image || "/images/p1.jpg";
                 return (
                   <div className="cp-item" key={index}>
@@ -335,12 +341,12 @@ export default function CartPage() {
                     </div>
 
                     <div className="cp-item__price">
-                      {item.discount > 0 && (
-                        <span className="cp-item__price-original">${item.price.toFixed(2)}</span>
+                      {discount > 0 && (
+                        <span className="cp-item__price-original">${price.toFixed(2)}</span>
                       )}
                       <span className="cp-item__price-final">${discountedPrice.toFixed(2)}</span>
-                      {item.discount > 0 && (
-                        <span className="cp-item__price-discount">−{item.discount}% off</span>
+                      {discount > 0 && (
+                        <span className="cp-item__price-discount">−{discount}% off</span>
                       )}
                     </div>
 

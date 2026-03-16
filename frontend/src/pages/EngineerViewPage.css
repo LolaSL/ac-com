@@ -27,3 +27,80 @@
 }
 
 /* EngineerViewPage uses Bootstrap classes and inline styles; no custom styles to extract from index.css */
+
+/* Responsive canvas wrapper for mobile */
+.pdf-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.pdf-scroll-wrapper canvas {
+  display: block;
+  max-width: none; /* Allow horizontal scroll rather than squish */
+}
+
+@media (max-width: 767px) {
+  .pdf-scroll-wrapper {
+    max-height: 60vh;
+  }
+
+  /* Ensure toolbar buttons are finger-friendly */
+  .adm-inner .btn {
+    min-height: 44px;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+}
+
+/* ── Zoom controls ──────────────────────────────────────── */
+.sb-zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.sb-zoom-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a3c5e;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  touch-action: manipulation;
+}
+
+.sb-zoom-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.sb-zoom-btn:active {
+  background: #d1d5db;
+}
+
+.sb-zoom-level {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  min-width: 44px;
+  text-align: center;
+}

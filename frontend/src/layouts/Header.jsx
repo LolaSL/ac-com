@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
@@ -17,6 +17,24 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
+  const navRef = useRef(null);
+
+  // Close dropdowns on outside click/touch (mobile fix for onMouseLeave)
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setUserDropdownOpen(false);
+        setProviderDropdownOpen(false);
+        setAdminDropdownOpen(false);
+      }
+    };
+    document.addEventListener('touchstart', handleOutside);
+    document.addEventListener('mousedown', handleOutside);
+    return () => {
+      document.removeEventListener('touchstart', handleOutside);
+      document.removeEventListener('mousedown', handleOutside);
+    };
+  }, []);
 
   const userSignoutHandler = () => {
     ctxDispatch({ type: "USER_SIGNOUT" });
@@ -40,7 +58,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
 
   return (
     <header className="header-nav">
-      <Navbar className="navbar" expand="lg">
+      <Navbar className="navbar" expand="lg" ref={navRef}>
         <Container fluid className="header-container">
           <Button
             variant="secondary"

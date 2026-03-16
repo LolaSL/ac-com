@@ -102,7 +102,7 @@ function BlogList() {
                   backgroundImage: `url(${blog.image})`,
                   backgroundRepeat: "no-repeat",
                   backgroundSize: "cover",
-                  backgroundPosition: "center",
+                  backgroundPosition: "center top",
                 }}
               >
                 <div className="blog-content">

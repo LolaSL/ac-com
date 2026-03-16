@@ -800,6 +800,11 @@ const Annotator = ({
   const [downloadedFiles, setDownloadedFiles] = useState([]);
   const [pdfRotation, setPdfRotation] = useState(0); // Store rotation in degrees
 
+  // Mobile-friendly prompt modal state (replaces window.prompt)
+  const [showAcUnitModal, setShowAcUnitModal] = useState(false);
+  const [acUnitInput, setAcUnitInput] = useState('');
+  const [pendingAnnotationPos, setPendingAnnotationPos] = useState(null);
+
   // const clearResults = () => {
   //   setResults([]);
   // };
@@ -1151,88 +1156,106 @@ const Annotator = ({
     // Trigger BTU Calculator update
     setFilteredRoomsTrigger((prev) => prev + 1);
   };
+
+  // Confirm the AC unit annotation after modal input
+  const confirmAcUnitAnnotation = useCallback((commentText, position) => {
+    if (!commentText) return;
+    const existingComment = comments.some(
+      (comment) => comment.text.toLowerCase() === commentText.toLowerCase()
+    );
+    if (existingComment) {
+      toast.error('This comment already exists.');
+      return;
+    }
+    const newRectId = Date.now();
+    const newRect = {
+      id: newRectId,
+      x: position.x,
+      y: position.y,
+      width: 48,
+      height: 16,
+      fill: 'rgba(20, 205, 230, 0.7)',
+      rotation: 0,
+    };
+    setRectangles((prevRects) => [...prevRects, newRect]);
+    const newCommentId = `comment-${Date.now()}`;
+    const newComment = {
+      id: newCommentId,
+      rectId: newRectId,
+      text: commentText,
+      x: position.x + 60,
+      y: position.y - 10,
+      fill: 'rgba(226, 218, 228, 0.3)',
+    };
+    setComments((prevComments) => [...prevComments, newComment]);
+    const newLine = {
+      id: `line-${Date.now()}`,
+      rectId: newRectId,
+      commentId: newCommentId,
+      points: [
+        newRect.x + newRect.width / 2,
+        newRect.y + newRect.height / 2,
+        newComment.x,
+        newComment.y,
+      ],
+      stroke: 'black',
+      strokeWidth: 1,
+    };
+    setLines((prevLines) => [...prevLines, newLine]);
+  }, [comments]);
+
   const handleStageClick = (event) => {
     if (event.target === event.target.getStage() && !isRotating) {
       const pointerPosition = stageRef.current.getPointerPosition();
       if (!pointerPosition) return;
-      const commentText = prompt("Enter your ac unit number (ac1, ac2, ...):");
 
-      if (commentText) {
-        const existingComment = comments.some(
-          (comment) => comment.text.toLowerCase() === commentText.toLowerCase()
-        );
-
-        if (existingComment) {
-          alert("This comment already exists.");
-          return;
-        }
-
-        const newRectId = Date.now();
-
-        const newRect = {
-          id: newRectId,
-          x: pointerPosition.x,
-          y: pointerPosition.y,
-          width: 48,
-          height: 16,
-          fill: "rgba(20, 205, 230, 0.7)",
-          rotation: 0,
-        };
-        setRectangles((prevRects) => [...prevRects, newRect]);
-
-        const newCommentId = `comment-${Date.now()}`;
-        const newComment = {
-          id: newCommentId,
-          rectId: newRectId,
-          text: commentText,
-          x: pointerPosition.x + 60,
-          y: pointerPosition.y - 10,
-          fill: "rgba(226, 218, 228, 0.3)",
-        };
-        setComments((prevComments) => [...prevComments, newComment]);
-
-        const newLine = {
-          id: `line-${Date.now()}`,
-          rectId: newRectId,
-          commentId: newCommentId,
-          points: [
-            newRect.x + newRect.width / 2,
-            newRect.y + newRect.height / 2,
-            newComment.x,
-            newComment.y,
-          ],
-          stroke: "black",
-          strokeWidth: 1,
-        };
-        setLines((prevLines) => [...prevLines, newLine]);
-      }
+      // Use mobile-friendly modal instead of prompt()
+      setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
+      setAcUnitInput('');
+      setShowAcUnitModal(true);
     }
   };
 
   const handleTouchStart = (e) => {
-    console.log("Touch started!", e.target.attrs.id);
     const clickedRectId = e.target.attrs.id;
+    const touchStartTime = Date.now();
+    let moved = false;
+
+    const handleTouchMove = () => {
+      moved = true;
+    };
 
     const handleTouchEnd = () => {
+      window.removeEventListener('touchmove', handleTouchMove);
       const touchDuration = Date.now() - touchStartTime;
-      if (touchDuration >= 800) {
-        console.log("Tap-and-hold detected for:", clickedRectId);
+      // Tap-and-hold (800ms+) to delete, only if finger didn't move (not a drag)
+      if (!moved && touchDuration >= 800) {
         setRectangles((prevRects) =>
           prevRects.filter((r) => r.id !== clickedRectId)
         );
-
         setComments((prevComments) =>
           prevComments.filter((comment) => comment.rectId !== clickedRectId)
         );
-
         setLines((prevLines) =>
           prevLines.filter((line) => line.rectId !== clickedRectId)
         );
       }
     };
 
-    const touchStartTime = Date.now();
-    window.addEventListener("touchend", handleTouchEnd, { once: true });
+    window.addEventListener('touchmove', handleTouchMove, { once: true });
+    window.addEventListener('touchend', handleTouchEnd, { once: true });
+  };
+
+  // Handle touch tap on stage for placing annotations (mobile equivalent of click)
+  const handleStageTouchEnd = (event) => {
+    // Only act on taps on blank stage area, not on shapes
+    if (event.target !== event.target.getStage()) return;
+    if (isRotating) return;
+    const pointerPosition = stageRef.current.getPointerPosition();
+    if (!pointerPosition) return;
+    setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
+    setAcUnitInput('');
+    setShowAcUnitModal(true);
   };
 
   const handleRectangleRightClick = (event) => {
@@ -2017,7 +2040,7 @@ const Annotator = ({
   };
 
   return (
-    <div>
+    <div style={{ maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
       <Form className="btu-calculation-measure mt-4">
         <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
         <Form.Control
@@ -2555,6 +2578,7 @@ const Annotator = ({
                   width={pdfSize.width}
                   height={pdfSize.height}
                   onClick={handleStageClick}
+                  onTap={handleStageTouchEnd}
                   onContextMenu={handleRectangleRightClick}
                   className="konva-stage"
                 >
@@ -2609,10 +2633,13 @@ const Annotator = ({
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
                           onClick={(event) => {
-                            console.log(
-                              "Rectangle clicked",
-                              event.target.attrs.id
-                            );
+                            event.cancelBubble = true;
+                            const clickedRectId = event.target.attrs.id;
+                            setIsRotating(true);
+                            rotateRectangle(clickedRectId);
+                            setTimeout(() => setIsRotating(false), 100);
+                          }}
+                          onTap={(event) => {
                             event.cancelBubble = true;
                             const clickedRectId = event.target.attrs.id;
                             setIsRotating(true);
@@ -2641,6 +2668,73 @@ const Annotator = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Mobile-friendly AC Unit annotation modal (replaces window.prompt) */}
+      {showAcUnitModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+          onClick={() => setShowAcUnitModal(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '24px',
+              minWidth: '280px',
+              maxWidth: '90vw',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h5 style={{ marginBottom: '12px' }}>Enter AC unit number</h5>
+            <Form.Control
+              type="text"
+              placeholder="ac1, ac2, ..."
+              value={acUnitInput}
+              onChange={(e) => setAcUnitInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  confirmAcUnitAnnotation(acUnitInput.trim(), pendingAnnotationPos);
+                  setShowAcUnitModal(false);
+                }
+              }}
+              autoFocus
+              style={{ marginBottom: '16px', fontSize: '16px' }}
+            />
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowAcUnitModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => {
+                  confirmAcUnitAnnotation(acUnitInput.trim(), pendingAnnotationPos);
+                  setShowAcUnitModal(false);
+                }}
+                disabled={!acUnitInput.trim()}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

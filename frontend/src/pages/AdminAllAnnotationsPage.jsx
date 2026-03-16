@@ -83,12 +83,12 @@ const AdminAllAnnotationsPage = () => {
           <tbody>
             {annotations.map((a) => (
               <tr key={a._id}>
-                <td>{a.filename}</td>
-                <td>{a.userId}</td>
-                <td>{a.pdfId}</td>
-                <td>{new Date(a.createdAt).toLocaleString()}</td>
-                <td>{a.isPaid ? "Yes" : "No"}</td>
-                <td>
+                <td data-label="Filename">{a.filename}</td>
+                <td data-label="User ID">{a.userId}</td>
+                <td data-label="PDF ID">{a.pdfId}</td>
+                <td data-label="Created At">{new Date(a.createdAt).toLocaleString()}</td>
+                <td data-label="Paid">{a.isPaid ? "Yes" : "No"}</td>
+                <td data-label="Actions">
                   <Button
                     type="button"
                     className="btn-admin-edit"

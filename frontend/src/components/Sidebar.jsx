@@ -75,6 +75,12 @@ const Sidebar = () => {
   const [engineerAnnotationsLoading, setEngineerAnnotationsLoading] =
     useState(false);
 
+  // Mobile-friendly delete confirmation state (replaces window.confirm)
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, pdfId: null, filename: '' });
+
+  // PDF zoom scale
+  const [pdfScale, setPdfScale] = useState(1.5);
+
   // Determine user role
   const isAdmin = !!state?.adminInfo && !!state?.adminInfo.token;
   const userId = state?.userInfo?._id || state?.adminInfo?._id;
@@ -219,6 +225,17 @@ const Sidebar = () => {
     }
   }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType]);
 
+  // Re-render PDF at new scale when zoom changes
+  useEffect(() => {
+    if (!selectedPdf) return;
+    if (currentPdfType === "user") {
+      viewPdfWithAnnotations(selectedPdf);
+    } else if (currentPdfType === "engineer") {
+      viewEngineerAnnotationPdf(selectedPdf);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfScale]);
+
   const viewPdfWithAnnotations = async (pdf) => {
     console.log("Viewing PDF:", pdf);
     if (!token) return setError("User not authenticated.");
@@ -268,7 +285,7 @@ const Sidebar = () => {
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
       const page = await pdfDoc.getPage(1);
-      const scale = 1.5;
+      const scale = pdfScale;
       const viewport = page.getViewport({ scale });
       const canvas = document.createElement("canvas");
       canvas.width = viewport.width;
@@ -365,7 +382,7 @@ const Sidebar = () => {
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
       const numPages = pdfDoc.numPages;
-      const scale = 1.5;
+      const scale = pdfScale;
 
       for (let pageNum = 1; pageNum <= numPages; pageNum++) {
         const page = await pdfDoc.getPage(pageNum);
@@ -389,8 +406,14 @@ const Sidebar = () => {
     }
   };
 
-  const handleDeletePdf = async (pdfId, filename) => {
-    if (!window.confirm(`Delete "${filename}"?`)) return;
+  const handleDeletePdf = (pdfId, filename) => {
+    // Show mobile-friendly confirmation modal instead of window.confirm
+    setDeleteConfirm({ show: true, pdfId, filename });
+  };
+
+  const confirmDeletePdf = async () => {
+    const { pdfId } = deleteConfirm;
+    setDeleteConfirm({ show: false, pdfId: null, filename: '' });
     if (!token) return setError("User not authenticated.");
 
     try {
@@ -608,6 +631,23 @@ const Sidebar = () => {
                     )}
 
                     <div className="sb-pdf-canvas">
+                      <div className="sb-zoom-controls">
+                        <button
+                          className="sb-zoom-btn"
+                          onClick={() => setPdfScale((s) => Math.max(0.5, +(s - 0.25).toFixed(2)))}
+                          title="Zoom out"
+                        >
+                          −
+                        </button>
+                        <span className="sb-zoom-level">{Math.round(pdfScale * 100)}%</span>
+                        <button
+                          className="sb-zoom-btn"
+                          onClick={() => setPdfScale((s) => Math.min(3, +(s + 0.25).toFixed(2)))}
+                          title="Zoom in"
+                        >
+                          +
+                        </button>
+                      </div>
                       <div id="pdf-container" style={{ position: "relative" }}></div>
                     </div>
                   </>
@@ -621,6 +661,54 @@ const Sidebar = () => {
               <button className="phv-close-btn" onClick={toggleSidebar}>Close</button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Mobile-friendly delete confirmation modal */}
+      {deleteConfirm.show && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+          }}
+          onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '' })}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '24px',
+              minWidth: '280px',
+              maxWidth: '90vw',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h5 style={{ marginBottom: '12px' }}>Delete PDF</h5>
+            <p>Are you sure you want to delete &quot;{deleteConfirm.filename}&quot;?</p>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '' })}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={confirmDeletePdf}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

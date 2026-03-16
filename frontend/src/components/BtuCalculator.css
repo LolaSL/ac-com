@@ -1,11 +1,15 @@
 /* BtuCalculator.css */
 
 .btu-calculator-container {
-  /* Add any container styles if needed */
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  word-wrap: break-word;
 }
 
 .btu-form {
-  /* Form styles */
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .title {
@@ -54,6 +58,42 @@
   .btu-calculator-container {
     margin-top: 1rem;
     margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-width: 3px !important;
+  }
+
+  .btu-form {
+    padding: 0;
+  }
+
+  .btu-form .form-control,
+  .btu-form .form-select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+    min-height: 44px;
+  }
+
+  .btu-form .form-check {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding-left: 1.75em;
+  }
+
+  .btu-form .form-check-input {
+    width: 1.25em;
+    height: 1.25em;
+    margin-top: 0;
+  }
+
+  .btu-form .form-check-label {
+    padding-left: 0.4em;
+    font-size: 0.95rem;
+  }
+
+  .btu-form .btn {
+    min-height: 44px;
+    font-size: 1rem;
+    width: 100%;
   }
 
   .title {
@@ -65,11 +105,28 @@
   }
 
   /* Stack columns on small screens */
-  .g-6 .col-md-6 {
+  .g-3 .col-md-6 {
     margin-bottom: 1rem;
   }
 
   /* Table responsiveness is handled by table-responsive class */
+}
+
+@media (max-width: 480px) {
+  .btu-calculator-container {
+    padding: 0.5rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    border-width: 2px !important;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .btu-form .btn {
+    padding: 0.6rem 0.75rem;
+  }
 }
 
 /* Animation for expanding sections */

@@ -1,7 +1,8 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { Spinner, Alert, Button } from "react-bootstrap";
+import { Spinner, Alert, Button, Form } from "react-bootstrap";
 import { Store } from "../Store.js";
+import { toast } from "react-toastify";
 import { PDFDocument } from "pdf-lib";
 import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols } from "../utils/annotationUtils.js";
 import * as pdfjsLib from "pdfjs-dist";
@@ -25,6 +26,14 @@ const EngineerViewPage = () => {
   const [saveError, setSaveError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const pdfContainerRef = useRef(null);
+
+  // Mobile-friendly comment modal state (replaces window.prompt)
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [commentInput, setCommentInput] = useState('');
+  const [pendingCommentPos, setPendingCommentPos] = useState(null);
+
+  // PDF zoom scale
+  const [pdfScale, setPdfScale] = useState(1.5);
 
   // Fetch and render PDF + annotations
   // Fetch annotation and PDF only once (on mount or id/token change)
@@ -110,7 +119,7 @@ const EngineerViewPage = () => {
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
       const page = await pdfDoc.getPage(1);
-      const scale = 1.5;
+      const scale = pdfScale;
       const viewport = page.getViewport({ scale });
       const container = pdfContainerRef.current;
       if (!container) return;
@@ -152,15 +161,27 @@ const EngineerViewPage = () => {
         );
       }
       // Add click handler for interactive placement
-      overlayCanvas.onclick = (e) => {
+      // Unified handler for both click and touch on overlay canvas
+      const handleOverlayInteraction = (e) => {
         if (!addMode) {
           e.stopPropagation();
           return;
         }
 
         const rect = overlayCanvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / overlayCanvas.width;
-        const y = (e.clientY - rect.top) / overlayCanvas.height;
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+          clientX = e.changedTouches[0].clientX;
+          clientY = e.changedTouches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+        const x = (clientX - rect.left) / overlayCanvas.width;
+        const y = (clientY - rect.top) / overlayCanvas.height;
 
         if (addMode === "duct") {
           const newDuct = {
@@ -213,26 +234,11 @@ const EngineerViewPage = () => {
         }
 
         if (addMode === "comment") {
-          const text = prompt("Enter comment text:");
-          if (text) {
-            const newComment = {
-              id: `comment-${Date.now()}`,
-              xPercent: x,
-              yPercent: y,
-              text: text,
-              fill: "rgba(252, 252, 243, 0.2)",
-              textColor: "#FF1493",
-              acType: acType, // Store which mode this comment was created in
-            };
-
-            setAnnotation((prev) => ({
-              ...prev,
-              annotations: {
-                ...(prev.annotations || {}),
-                comments: [...(prev.annotations?.comments || []), newComment],
-              },
-            }));
-          }
+          // Use mobile-friendly modal instead of prompt()
+          setPendingCommentPos({ x, y });
+          setCommentInput('');
+          setShowCommentModal(true);
+          return; // Don't reset addMode yet — modal handles it
         }
 
         if (addMode === "markCondenser") {
@@ -272,7 +278,7 @@ const EngineerViewPage = () => {
               };
             });
           } else {
-            alert(
+            toast.warn(
               "No rectangle near click — try clicking closer to a rectangle."
             );
           }
@@ -280,9 +286,14 @@ const EngineerViewPage = () => {
 
         setAddMode(null);
       };
+      overlayCanvas.onclick = handleOverlayInteraction;
+      overlayCanvas.ontouchend = (e) => {
+        e.preventDefault(); // Prevent ghost click
+        handleOverlayInteraction(e);
+      };
     };
     renderOverlays();
-  }, [pdfFile, annotation, showHVAC, addMode, acType]);
+  }, [pdfFile, annotation, showHVAC, addMode, acType, pdfScale]);
 
   // Save handler (save full annotation, not just hvac)
   const handleSave = async () => {
@@ -295,7 +306,29 @@ const EngineerViewPage = () => {
       },
       body: JSON.stringify({ ...annotation, acType }),
     });
-    alert("Annotation (including HVAC) saved!");
+    toast.success("Annotation (including HVAC) saved!");
+  };
+
+  // Confirm comment from modal (replaces prompt() callback)
+  const confirmComment = (text) => {
+    if (!text || !pendingCommentPos) return;
+    const newComment = {
+      id: `comment-${Date.now()}`,
+      xPercent: pendingCommentPos.x,
+      yPercent: pendingCommentPos.y,
+      text: text,
+      fill: 'rgba(252, 252, 243, 0.2)',
+      textColor: '#FF1493',
+      acType: acType,
+    };
+    setAnnotation((prev) => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        comments: [...(prev.annotations?.comments || []), newComment],
+      },
+    }));
+    setAddMode(null);
   };
 
   // Save engineer annotations to MongoDB so they appear in Sidebar > Engineer Reviews
@@ -931,6 +964,25 @@ const EngineerViewPage = () => {
         </div>
 
         <div className="pdf-scroll-wrapper">
+          <div className="sb-zoom-controls">
+            <button
+              className="sb-zoom-btn"
+              type="button"
+              onClick={() => setPdfScale((s) => Math.max(0.5, +(s - 0.25).toFixed(2)))}
+              title="Zoom out"
+            >
+              −
+            </button>
+            <span className="sb-zoom-level">{Math.round(pdfScale * 100)}%</span>
+            <button
+              className="sb-zoom-btn"
+              type="button"
+              onClick={() => setPdfScale((s) => Math.min(3, +(s + 0.25).toFixed(2)))}
+              title="Zoom in"
+            >
+              +
+            </button>
+          </div>
           <div
             ref={pdfContainerRef}
             id="pdf-container"
@@ -962,6 +1014,73 @@ const EngineerViewPage = () => {
         )}
       </div>
       </div>
+
+      {/* Mobile-friendly comment modal (replaces window.prompt) */}
+      {showCommentModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+          onClick={() => { setShowCommentModal(false); setAddMode(null); }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '24px',
+              minWidth: '280px',
+              maxWidth: '90vw',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h5 style={{ marginBottom: '12px' }}>Enter comment text</h5>
+            <Form.Control
+              type="text"
+              placeholder="Comment..."
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  confirmComment(commentInput.trim());
+                  setShowCommentModal(false);
+                }
+              }}
+              autoFocus
+              style={{ marginBottom: '16px', fontSize: '16px' }}
+            />
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => { setShowCommentModal(false); setAddMode(null); }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => {
+                  confirmComment(commentInput.trim());
+                  setShowCommentModal(false);
+                }}
+                disabled={!commentInput.trim()}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

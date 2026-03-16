@@ -233,23 +233,43 @@ export default function Recommendations() {
       return;
     }
 
-    const addItemToCart = (product, quantity = 1) => {
-      if (!product || !product._id) return;
+    // Check if product is a real (purchasable) product vs a placeholder
+    const isRealProduct = (product) => {
+      if (!product || !product._id) return false;
+      if (String(product._id).startsWith('placeholder-')) return false;
+      if (product.category === 'Placeholder') return false;
+      if (product.price === null || product.price === undefined || product.price <= 0) return false;
+      return true;
+    };
 
-      const existItem = state.cart.cartItems.find((x) => x._id === product._id);
+    // Normalize product to include all cart-required fields
+    const normalizeForCart = (product) => ({
+      ...product,
+      price: typeof product.price === 'number' ? product.price : 0,
+      discount: typeof product.discount === 'number' ? product.discount : 0,
+      countInStock: product.countInStock ?? 99,
+      image: product.image || '/images/p1.jpg',
+      slug: product.slug || product._id,
+    });
+
+    const addItemToCart = (product, quantity = 1) => {
+      if (!isRealProduct(product)) return;
+
+      const normalized = normalizeForCart(product);
+      const existItem = state.cart.cartItems.find((x) => x._id === normalized._id);
       const newQuantity = existItem ? existItem.quantity + quantity : quantity;
 
       ctxDispatch({
         type: "CART_ADD_ITEM",
-        payload: { ...product, quantity: newQuantity },
+        payload: { ...normalized, quantity: newQuantity },
       });
     };
 
-    // Group products by BTU to avoid duplicates
+    // Group products by _id to avoid duplicates
     const productCount = {};
     perRoomResults.forEach((room) => {
       const product = room.product;
-      if (!product || !product._id || product.isCondenser) return;
+      if (!isRealProduct(product) || product.isCondenser) return;
 
       const key = product._id;
       if (!productCount[key]) {
@@ -259,8 +279,10 @@ export default function Recommendations() {
     });
 
     // Add indoor units to cart
+    let addedCount = 0;
     Object.values(productCount).forEach(({ product, quantity }) => {
       addItemToCart(product, quantity);
+      addedCount++;
     });
 
     // Add condensers to cart
@@ -277,10 +299,16 @@ export default function Recommendations() {
             }
           : condenser;
         addItemToCart(uniqueCond, 1);
+        addedCount++;
       }
     });
 
-    toast.success("Products added to cart successfully!");
+    if (addedCount === 0) {
+      toast.warn("No purchasable products found. Products may not be available in the store yet.");
+      return;
+    }
+
+    toast.success(`${addedCount} product(s) added to cart!`);
     navigate("/cart");
   };
 
@@ -321,23 +349,43 @@ export default function Recommendations() {
       return;
     }
 
-    const addItemToCart = (product, quantity = 1) => {
-      if (!product || !product._id) return;
+    // Check if product is a real (purchasable) product vs a placeholder
+    const isRealProduct = (product) => {
+      if (!product || !product._id) return false;
+      if (String(product._id).startsWith('placeholder-')) return false;
+      if (product.category === 'Placeholder') return false;
+      if (product.price === null || product.price === undefined || product.price <= 0) return false;
+      return true;
+    };
 
-      const existItem = state.cart.cartItems.find((x) => x._id === product._id);
+    // Normalize product to include all cart-required fields
+    const normalizeForCart = (product) => ({
+      ...product,
+      price: typeof product.price === 'number' ? product.price : 0,
+      discount: typeof product.discount === 'number' ? product.discount : 0,
+      countInStock: product.countInStock ?? 99,
+      image: product.image || '/images/p1.jpg',
+      slug: product.slug || product._id,
+    });
+
+    const addItemToCart = (product, quantity = 1) => {
+      if (!isRealProduct(product)) return;
+
+      const normalized = normalizeForCart(product);
+      const existItem = state.cart.cartItems.find((x) => x._id === normalized._id);
       const newQuantity = existItem ? existItem.quantity + quantity : quantity;
 
       ctxDispatch({
         type: "CART_ADD_ITEM",
-        payload: { ...product, quantity: newQuantity },
+        payload: { ...normalized, quantity: newQuantity },
       });
     };
 
-    // Group products by BTU to avoid duplicates
+    // Group products by _id to avoid duplicates
     const productCount = {};
     perRoomResults.forEach((room) => {
       const product = room.product;
-      if (!product || !product._id || product.isCondenser) return;
+      if (!isRealProduct(product) || product.isCondenser) return;
 
       const key = product._id;
       if (!productCount[key]) {
@@ -347,8 +395,10 @@ export default function Recommendations() {
     });
 
     // Add indoor units to cart
+    let addedCount = 0;
     Object.values(productCount).forEach(({ product, quantity }) => {
       addItemToCart(product, quantity);
+      addedCount++;
     });
 
     // Add condensers to cart
@@ -365,10 +415,15 @@ export default function Recommendations() {
             }
           : condenser;
         addItemToCart(uniqueCond, 1);
+        addedCount++;
       }
     });
 
-    toast.success("Products added to cart! Navigating to ROI Calculator...");
+    if (addedCount > 0) {
+      toast.success(`${addedCount} product(s) added to cart! Navigating to ROI Calculator...`);
+    } else {
+      toast.info("No purchasable products to add. Navigating to ROI Calculator...");
+    }
 
     // Save BTU data to store
     ctxDispatch({

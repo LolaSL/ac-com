@@ -61,11 +61,25 @@
 @media (max-width: 768px) {
   .notifications-container {
     padding: 1rem 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 
   .notifications-container h1 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 0;
+  }
+
+  .notifications-container > .row > div > .d-flex.justify-content-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+  }
+
+  .notifications-container > .row > div > .d-flex.justify-content-between .btn {
+    white-space: nowrap;
+    width: auto;
+    align-self: flex-start;
   }
 
   .notifications-container .notification-card .card-body {
@@ -73,10 +87,14 @@
   }
 
   .notifications-container .notification-actions {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .notifications-container .notification-actions .btn {
-    width: 100%;
+    width: auto;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
   }
 }

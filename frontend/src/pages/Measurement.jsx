@@ -205,6 +205,7 @@ const Measurement = () => {
                 </div>
                 <button
                   onClick={() => setShowStoredCalculation(false)}
+                  className="ms-clear-calc-btn"
                   style={{
                     background: 'rgba(255,255,255,0.2)',
                     border: '1px solid rgba(255,255,255,0.3)',
@@ -213,10 +214,9 @@ const Measurement = () => {
                     borderRadius: '8px',
                     cursor: 'pointer',
                     fontWeight: '600',
-                    transition: 'all 0.3s'
+                    transition: 'all 0.3s',
+                    minHeight: '44px',
                   }}
-                  onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.3)'}
-                  onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
                 >
                   Clear
                 </button>

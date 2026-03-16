@@ -5,6 +5,9 @@
   min-height: 100vh;
   background: #f5f6fa;
   padding-bottom: 3rem;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* ── Hero ───────────────────────────────────────────────── */
@@ -45,6 +48,8 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.25rem;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* ── Alert ──────────────────────────────────────────────── */
@@ -91,4 +96,45 @@
 .ms-home-row {
   margin-top: 2rem;
   text-align: left;
+}
+
+/* Clear calculation button — CSS hover replaces JS onMouseOver/onMouseOut for mobile */
+.ms-clear-calc-btn:hover,
+.ms-clear-calc-btn:active {
+  background: rgba(255,255,255,0.3) !important;
+}
+
+/* ── Mobile Responsive ───────────────────────────────────── */
+@media (max-width: 767px) {
+  .ms-hero {
+    padding: 1.5rem 1rem 1.2rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .ms-hero__title {
+    font-size: 1.3rem;
+  }
+
+  .ms-hero__sub {
+    font-size: 0.82rem;
+  }
+
+  .ms-inner {
+    padding: 0 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ms-hero {
+    padding: 1.2rem 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .ms-hero__title {
+    font-size: 1.15rem;
+  }
+
+  .ms-inner {
+    padding: 0 0.5rem;
+  }
 }

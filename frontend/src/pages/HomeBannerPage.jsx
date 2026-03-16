@@ -2,14 +2,12 @@ import { useState, useEffect, useContext } from "react";
 import NotificationPopUp from "../components/NotificationPopUp";
 import TrustSection from "../components/TrustSection";
 import ValuePropositionSection from "../components/ValuePropositionSection";
-// import HowItWorksSection from "../components/HowItWorksSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ROICalculatorPreview from "../components/ROICalculatorPreview";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-// import { FaHome } from "react-icons/fa";
 import bannerVideo from "../assets/videos/banner-video.mp4";
 import "./HomeBannerPage.css";
 
@@ -146,13 +144,9 @@ export default function HomeBannerPage() {
 
   const handleSlideClick = (index) => {
     const banner = banners[index];
-    const requiresLogin =
-      banner.linkText ===
-      "Redefining Air Conditioning Design — Smart. Fast. Certified";
-
     const isLoggedIn = userInfo || adminInfo || serviceProviderInfo;
 
-    if (requiresLogin && !isLoggedIn) {
+    if (banner.linkTo === "/measurement" && !isLoggedIn) {
       navigate("/signin?redirect=/measurement");
     } else {
       navigate(banner.linkTo);
@@ -189,8 +183,7 @@ export default function HomeBannerPage() {
         </video>
         <div className="home-hero__overlay" />
         <div className="home-hero__inner">
-          {/* <div className="home-hero__icon"><FaHome /></div> */}
-          <h1 className="home-hero__title">Welcome to AC-Commerce</h1>
+          <h1 className="home-hero__title fs-1">Welcome to AC-Commerce</h1>
           <p className="home-hero__sub">Smarter HVAC designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
       </div>

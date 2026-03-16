@@ -312,18 +312,25 @@
   .search-box {
     max-width: 100%;
     width: 100%;
+    flex-wrap: nowrap !important;
   }
 
   .search-wrapper {
     width: 100%;
-    padding: 0.5rem 0;
+    padding: 0.25rem 0;
+  }
+
+  .search-form {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .btn-search {
     padding: 8px 12px;
-    min-width: 28px;
-    min-height: 34px;
+    min-width: 44px;
+    min-height: 44px;
     font-size: 14px;
+    flex-shrink: 0;
   }
 
   .navbar-brand h3 {

@@ -767,7 +767,7 @@ h3 {
 }
 @media (max-width: 480px) {
   .navbar {
-    width: 110%;
+    width: 100%;
   }
   .side-navbar {
     width: 40%;
@@ -1208,6 +1208,8 @@ hr {
 .btu-calculator-container,
 .square-container {
   border: 5px double grey;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .square-form input {
@@ -2139,7 +2141,7 @@ h2 {
   margin-bottom: 20px;
 }
 
-.d-flex {
+.btu-calculation-measure .d-flex {
   display: flex;
   justify-content: center;
   gap: 10px;

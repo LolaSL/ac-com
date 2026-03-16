@@ -384,9 +384,13 @@
   }
 
   .spl-left {
-    padding: 3rem 2rem 2rem;
+    padding: 1.5rem 2rem 0.5rem;
     text-align: center;
     align-items: center;
+  }
+
+  .spl-brand {
+    margin-bottom: 0.5rem;
   }
 
   .spl-brand__desc {
@@ -399,7 +403,7 @@
 
   .spl-right {
     background: transparent;
-    padding: 0 1.5rem 2.5rem;
+    padding: 0 1.5rem 1.5rem;
   }
 
   .spl-form-box {
@@ -417,7 +421,7 @@
 
 @media (max-width: 576px) {
   .spl-left {
-    padding: 2.5rem 1.25rem 1.5rem;
+    padding: 1.25rem 1.25rem 0.5rem;
   }
 
   .spl-brand__icon {
