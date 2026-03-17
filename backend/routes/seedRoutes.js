@@ -9,14 +9,11 @@ import Message from '../models/messageModel.js';
 import Earnings from '../models/earningModel.js';
 import Blog from '../models/blogModel.js';
 import Notification from '../models/notificationModel.js';
-import Annotation from '../models/annotationModel.js';
-import EngineerAnnotation from '../models/engineerAnnotationModel.js';
 import Order from '../models/orderModel.js';
 import Payment from '../models/paymentModel.js';
 import BrowsingHistory from '../models/browsingHistoryModel.js';
 import DemoRequest from '../models/demoRequestModel.js';
 import Newsletter from '../models/newsletterModel.js';
-import { PDFDocument, rgb } from 'pdf-lib';
 import data from '../data.js';
 
 const seedRouter = express.Router();
@@ -35,8 +32,6 @@ seedRouter.get('/', async (req, res) => {
     await Earnings.deleteMany({});
     await Blog.deleteMany({});
     await Notification.deleteMany({});
-    await Annotation.deleteMany({});
-    await EngineerAnnotation.deleteMany({});
     await Payment.deleteMany({});
     await BrowsingHistory.deleteMany({});
     await DemoRequest.deleteMany({});
@@ -255,74 +250,7 @@ seedRouter.get('/', async (req, res) => {
       }
     }
 
-    // Seed Annotations with required fields
-    const annotationsWithIds = data.annotations.map((annotation) => ({
-      ...annotation,
-      userId: createdUsers[0]._id,
-      pdfData: Buffer.from('%PDF-1.4\n% Dummy PDF content\n'),
-      originalImageWidth: 800,
-      originalImageHeight: 1000,
-      isPaid: Math.random() < 0.5, // 50% chance to be true (paid) or false (free)
-    }));
 
-    const createdAnnotations = await Annotation.insertMany(annotationsWithIds)
-
-    // Seed EngineerAnnotations
-    const engineerAnnotationsWithIds = [];
-    for (const ea of data.engineerAnnotations) {
-      // Define systemConfig first before using it
-      const systemConfig = {
-        systemType: ea.systemConfig?.systemType || 'vrf-ductless',
-      };
-
-      // Create a simple PDF with 4 pages for testing
-      const pdfDoc = await PDFDocument.create();
-      const pages = [];
-      for (let i = 0; i < 4; i++) {
-        const page = pdfDoc.addPage();
-        pages.push(page);
-      }
-      const { width, height } = pages[0].getSize();
-      const fontSize = 30;
-      pages.forEach((page, index) => {
-        page.drawText(`Engineer Review PDF - Page ${index + 1}`, {
-          x: 50,
-          y: height - 4 * fontSize,
-          size: fontSize,
-          color: rgb(0, 0.53, 0.71),
-        });
-        page.drawText(`System Type: ${systemConfig.systemType}`, {
-          x: 50,
-          y: height - 6 * fontSize,
-          size: 20,
-          color: rgb(0, 0, 0),
-        });
-        page.drawText(`Engineer Notes: ${ea.engineerNotes}`, {
-          x: 50,
-          y: height - 8 * fontSize,
-          size: 20,
-          color: rgb(0, 0, 0),
-        });
-      });
-      const pdfBytes = await pdfDoc.save();
-      const pdfBuffer = Buffer.from(pdfBytes);
-
-    engineerAnnotationsWithIds.push({
-  annotations: ea.annotations,
-  status: 'reviewed',
-  engineerNotes: ea.notes,
-  userId: createdUsers[1]._id,
-  engineerId: createdUsers[0]._id,
-  userAnnotationId: createdAnnotations[0]._id,
-  pdfData: pdfBuffer,
-  filename: 'engineer-review.pdf',
-  originalImageWidth: 800,
-  originalImageHeight: 1000,
-  systemConfig: systemConfig,
-});
-    }
-
-    const createdEngineerAnnotations = await EngineerAnnotation.insertMany(engineerAnnotationsWithIds);
 
     res.send({
       createdProducts,
@@ -337,8 +265,6 @@ seedRouter.get('/', async (req, res) => {
       createdBlogs,
       createdNotifications,
       createdOrders,
-      createdAnnotations,
-      createdEngineerAnnotations,
       createdNewsletters,
       message:
         ordersMode === 'reset'

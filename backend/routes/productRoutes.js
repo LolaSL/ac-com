@@ -400,7 +400,7 @@ productRouter.get(
           : order === 'highest'
             ? { price: -1 }
             : order === 'toprated'
-              ? { rating: -1 }
+              ? { rating: -1, numReviews: -1 }
               : order === 'newest'
                 ? { createdAt: -1 }
                 : { _id: -1 };

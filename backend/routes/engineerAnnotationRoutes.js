@@ -693,13 +693,13 @@ router.delete(
             return res.status(404).json({ message: "Engineer annotation not found" });
         }
 
-        // Only the engineer who created it or admin can delete
-        if (annotation.engineerId.toString() !== req.user._id.toString()) {
-            if (!req.user.isAdmin) {
-                return res
-                    .status(403)
-                    .json({ message: "Unauthorized to delete this annotation" });
-            }
+        // Allow the engineer who created it, the user who owns it, or admin to delete
+        const isEngineer = annotation.engineerId.toString() === req.user._id.toString();
+        const isOwner = annotation.userId.toString() === req.user._id.toString();
+        if (!isEngineer && !isOwner && !req.user.isAdmin) {
+            return res
+                .status(403)
+                .json({ message: "Unauthorized to delete this annotation" });
         }
 
         await EngineerAnnotationModel.findByIdAndDelete(req.params.id);
