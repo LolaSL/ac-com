@@ -224,7 +224,7 @@ const Sidebar = () => {
         pdfScale
       );
     }
-  }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType]);
+  }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType, pdfScale]);
 
   // Re-render PDF at new scale when zoom changes
   useEffect(() => {
