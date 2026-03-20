@@ -1,0 +1,314 @@
+/* ─── Seller Dashboard ─── */
+.sd-page { background: #f5f6fa; }
+
+.sd-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+/* ─── Referral Link Card ─── */
+.sd-referral-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #22d3ee;
+}
+
+.sd-referral-label {
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #1a3c5e;
+  margin-bottom: 0.6rem;
+}
+
+.sd-referral-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sd-referral-code {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  word-break: break-all;
+  color: #334155;
+}
+
+.sd-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
+  color: #0f172a;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.sd-copy-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.sd-copy-btn--copied {
+  background: linear-gradient(135deg, #86efac, #22c55e);
+  color: #052e16;
+}
+
+.sd-referral-hint {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+/* ─── KPI Cards ─── */
+.sd-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 1.5rem;
+}
+
+.sd-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sd-kpi-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.sd-kpi-icon--blue   { background: #dbeafe; color: #2563eb; }
+.sd-kpi-icon--green  { background: #dcfce7; color: #16a34a; }
+.sd-kpi-icon--cyan   { background: #cffafe; color: #0891b2; }
+.sd-kpi-icon--amber  { background: #fef3c7; color: #d97706; }
+.sd-kpi-icon--purple { background: #ede9fe; color: #7c3aed; }
+
+.sd-kpi-info { min-width: 0; }
+
+.sd-kpi-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a3c5e;
+  line-height: 1.2;
+}
+
+.sd-kpi-label {
+  font-size: 0.78rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.sd-kpi-sub {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+/* ─── Action Buttons ─── */
+.sd-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.sd-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sd-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sd-action-btn--primary {
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
+  color: #0f172a;
+}
+
+.sd-action-btn--primary:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.sd-action-btn--secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.sd-action-btn--secondary:hover:not(:disabled) {
+  background: #d1d5db;
+}
+
+/* ─── Table Sections ─── */
+.sd-section {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sd-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.sd-section__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a3c5e;
+  margin: 0 0 0.75rem;
+}
+
+.sd-section__header .sd-section__title {
+  margin-bottom: 0;
+}
+
+.sd-section__subtitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-left: 0.75rem;
+}
+
+.sd-order-link {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.sd-order-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* ─── Filter Toggle & Panel ─── */
+.sd-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sd-filter-toggle:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.sd-filters {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sd-filter-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.sd-filter-input {
+  font-size: 0.85rem;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 767px) {
+  .sd-inner {
+    padding: 0 10px 2rem;
+  }
+
+  .sd-referral-card {
+    padding: 1rem;
+  }
+
+  .sd-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .sd-kpi-card {
+    padding: 0.9rem;
+    gap: 10px;
+  }
+
+  .sd-kpi-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
+
+  .sd-kpi-value {
+    font-size: 1.15rem;
+  }
+
+  .sd-section {
+    padding: 1rem;
+  }
+
+  .sd-section__title {
+    font-size: 1rem;
+  }
+
+  .sd-section__subtitle {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sd-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
