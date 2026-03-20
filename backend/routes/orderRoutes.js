@@ -3,7 +3,7 @@ import expressAsyncHandler from 'express-async-handler';
 import Order from '../models/orderModel.js';
 import User from '../models/userModel.js';
 import Product from '../models/productModel.js';
-import { isAuth, isAdmin } from '../utils.js';
+import { isAuth, isAdmin, sendEmail, payOrderEmailTemplate } from '../utils.js';
 import ServiceProvider from '../models/serviceProviderModel.js';
 import Earnings from '../models/earningModel.js';
 import Project from '../models/projectModel.js';
@@ -486,6 +486,17 @@ orderRouter.put(
         recipientType: 'admin',
         link: `/admin/order/${order._id}`,
       });
+
+      // Send order confirmation email
+      try {
+        await sendEmail({
+          to: order.user.email,
+          subject: `Order Confirmation - Order ${order._id}`,
+          html: payOrderEmailTemplate(order),
+        });
+      } catch (emailErr) {
+        console.log('Order confirmation email failed:', emailErr.message);
+      }
 
       res.send({ message: 'Order Paid', order: updatedOrder });
     } else {

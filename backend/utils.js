@@ -1,21 +1,37 @@
 import jwt from 'jsonwebtoken';
-import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Configure SendGrid only if API key is provided
-if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.')) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-}
+// Configure Nodemailer with Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
-export const mailgun = () => sgMail;
+// sendEmail helper — matches the shape { to, from, subject, html }
+export const sendEmail = async ({ to, subject, html }) => {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.log('Gmail not configured — skipping email to', to);
+    return null;
+  }
+  return transporter.sendMail({
+    from: `"AC Commerce" <${process.env.GMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  });
+};
 
 export const baseUrl = () =>
   process.env.BASE_URL
     ? process.env.BASE_URL
     : process.env.NODE_ENV !== 'production'
-      ? 'http://localhost:5020'
+      ? 'http://localhost:3000'
       : 'https://ac-commerce.onrender.com';
 
 

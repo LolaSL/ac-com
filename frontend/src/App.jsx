@@ -9,6 +9,7 @@ import MainLayout from "./layouts/MainLayout.jsx";
 import AppRoutes from "./routes/AppRoutes.jsx";
 import Footer from "./components/Footer.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
+import WhatsAppButton from "./components/WhatsAppButton.jsx";
 
 function AppContent() {
   const [searchParams] = useSearchParams();
@@ -43,6 +44,7 @@ function AppContent() {
       </MainLayout>
       <Footer />
       <CookieConsent />
+      <WhatsAppButton />
     </>
   );
 }

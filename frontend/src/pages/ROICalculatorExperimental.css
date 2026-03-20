@@ -533,3 +533,48 @@
     transition: none;
   }
 }
+
+/* Mobile card layout for saved calculations table */
+@media (max-width: 768px) {
+  .saved-calculations-card .table thead {
+    display: none;
+  }
+
+  .saved-calculations-card .table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    background: #fff;
+  }
+
+  .saved-calculations-card .table td {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    white-space: normal !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    border: none;
+    border-bottom: 1px solid #f0f2f6;
+    text-align: left;
+  }
+
+  .saved-calculations-card .table td:last-child {
+    border-bottom: none;
+  }
+
+  .saved-calculations-card .table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 90px;
+  }
+}

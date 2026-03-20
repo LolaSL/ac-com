@@ -2,50 +2,164 @@
 // You can expand or localize this list as needed for your market
 
 export const COMMON_AC_RECOMMENDATIONS = [
-  // ========== Indoor Units ==========
+  // ========== Mini Split AC ==========
   {
-    category: "Indoor Unit",
+    category: "Mini Split AC",
     name: "Wall-Mounted Split AC (12,000 BTU)",
     description: "Standard indoor air handler for residential rooms.",
     typicalUse: "Living rooms, bedrooms, offices",
   },
   {
-    category: "Indoor Unit",
+    category: "Mini Split AC",
+    name: "Floor-Standing AC Unit (18,000 BTU)",
+    description: "Freestanding unit for larger rooms or spaces.",
+    typicalUse: "Server rooms, large offices, retail spaces",
+  },
+
+  // ========== Wall-Mounted AC ==========
+  {
+    category: "Wall-Mounted AC",
+    name: "High-Wall Mounted AC (9,000 BTU)",
+    description: "Compact wall unit for small to medium rooms.",
+    typicalUse: "Bedrooms, small offices, apartments",
+  },
+  {
+    category: "Wall-Mounted AC",
+    name: "Wall-Mounted Inverter AC (18,000 BTU)",
+    description: "Energy-efficient inverter for medium to large rooms.",
+    typicalUse: "Living rooms, master bedrooms, open offices",
+  },
+
+  // ========== Cassette Indoor Unit ==========
+  {
+    category: "Cassette Indoor Unit",
     name: "Ceiling Cassette AC (24,000 BTU)",
     description: "Flush-mounted for commercial or large open spaces.",
     typicalUse: "Shops, restaurants, open-plan offices",
   },
   {
-    category: "Indoor Unit",
-    name: "Floor-Standing AC Unit (18,000 BTU)",
-    description: "Freestanding unit for larger rooms or spaces.",
-    typicalUse: "Server rooms, large offices, retail spaces",
-  },
-  {
-    category: "Indoor Unit",
-    name: "Ducted Indoor Unit (36,000 BTU)",
-    description: "Hidden in ceiling with ductwork distribution.",
-    typicalUse: "Multi-room systems, large homes, commercial buildings",
+    category: "Cassette Indoor Unit",
+    name: "4-Way Cassette AC (36,000 BTU)",
+    description: "360-degree airflow distribution for large areas.",
+    typicalUse: "Conference rooms, retail floors, lobbies",
   },
 
-  // ========== Outdoor Units ==========
+  // ========== Wind-Free TM Cooling ==========
   {
-    category: "Outdoor Unit",
-    name: "Inverter Outdoor Condenser (Multi-Split)",
-    description: "Variable-speed compressor for energy efficiency.",
-    typicalUse: "Supports multiple indoor units",
+    category: "Wind-Free TM Cooling",
+    name: "Wind-Free Wall Unit (12,000 BTU)",
+    description: "Micro-hole dispersed cooling without direct wind.",
+    typicalUse: "Bedrooms, nurseries, offices",
   },
   {
-    category: "Outdoor Unit",
+    category: "Wind-Free TM Cooling",
+    name: "Wind-Free 2.0 (18,000 BTU)",
+    description: "Advanced wind-free technology for larger spaces.",
+    typicalUse: "Living rooms, master suites",
+  },
+
+  // ========== VRF Heat Recovery ==========
+  {
+    category: "VRF Heat Recovery",
     name: "VRF Outdoor Unit (High Capacity)",
     description: "Variable Refrigerant Flow for large commercial installations.",
     typicalUse: "Multi-floor buildings, hotels, large commercial spaces",
   },
   {
-    category: "Outdoor Unit",
+    category: "VRF Heat Recovery",
+    name: "Inverter Outdoor Condenser (Multi-Split)",
+    description: "Variable-speed compressor for energy efficiency.",
+    typicalUse: "Supports multiple indoor units",
+  },
+  {
+    category: "VRF Heat Recovery",
     name: "Single Split Outdoor Condenser",
     description: "Standard outdoor unit for single indoor unit.",
     typicalUse: "Residential single-room installations",
+  },
+
+  // ========== Controller ==========
+  {
+    category: "Controller",
+    name: "Wi-Fi Smart Controller",
+    description: "Enables app-based and remote control of AC units.",
+    typicalUse: "Smart home integration, remote management",
+  },
+  {
+    category: "Controller",
+    name: "Wired Wall Controller",
+    description: "Hard-wired thermostat and control panel.",
+    typicalUse: "Ducted systems, commercial installations",
+  },
+
+  // ========== Fan Motor ==========
+  {
+    category: "Fan Motor",
+    name: "Indoor Fan Motor",
+    description: "Replacement motor for indoor unit blower fan.",
+    typicalUse: "Repair of non-functioning indoor fans",
+  },
+  {
+    category: "Fan Motor",
+    name: "Outdoor Fan Motor",
+    description: "Replacement motor for outdoor condenser fan.",
+    typicalUse: "Repair of non-functioning outdoor fans",
+  },
+
+  // ========== Fans ==========
+  {
+    category: "Fans",
+    name: "Cross-Flow Fan Blade",
+    description: "Replacement blower wheel for indoor units.",
+    typicalUse: "Indoor unit fan replacement",
+  },
+  {
+    category: "Fans",
+    name: "Axial Fan Blade (Outdoor)",
+    description: "Replacement propeller fan for condenser units.",
+    typicalUse: "Outdoor unit fan replacement",
+  },
+
+  // ========== Filters ==========
+  {
+    category: "Filters",
+    name: "Air Filter Set (Washable)",
+    description: "Replacement filters for indoor units.",
+    typicalUse: "Regular maintenance, all indoor units",
+  },
+  {
+    category: "Filters",
+    name: "Carbon Activated Filter",
+    description: "Odor and VOC removal filter.",
+    typicalUse: "Air quality improvement, allergy relief",
+  },
+
+  // ========== Knobs ==========
+  {
+    category: "Knobs",
+    name: "Temperature Control Knob",
+    description: "Replacement dial for manual AC controls.",
+    typicalUse: "Older window/wall units",
+  },
+  {
+    category: "Knobs",
+    name: "Mode Selection Knob",
+    description: "Replacement knob for mode/fan speed selector.",
+    typicalUse: "Manual control panel replacements",
+  },
+
+  // ========== Power Cords ==========
+  {
+    category: "Power Cords",
+    name: "AC Power Cord (Standard)",
+    description: "Replacement power cable for AC units.",
+    typicalUse: "Damaged cord replacement, new installations",
+  },
+  {
+    category: "Power Cords",
+    name: "Heavy-Duty Power Cord (20A)",
+    description: "High-capacity power cable for larger units.",
+    typicalUse: "Commercial units, high-BTU systems",
   },
 
   // ========== Mounting & Installation ==========
@@ -167,27 +281,9 @@ export const COMMON_AC_RECOMMENDATIONS = [
   },
   {
     category: "Accessories",
-    name: "Wi-Fi Smart Controller",
-    description: "Enables app-based and remote control.",
-    typicalUse: "Smart home integration",
-  },
-  {
-    category: "Accessories",
-    name: "Wired Wall Controller",
-    description: "Hard-wired thermostat and control panel.",
-    typicalUse: "Ducted systems, commercial installations",
-  },
-  {
-    category: "Accessories",
     name: "Decorative Line Set Cover",
     description: "Covers exposed refrigerant pipes for aesthetics.",
     typicalUse: "Indoor pipe runs, visible installations",
-  },
-  {
-    category: "Accessories",
-    name: "Air Filter Set (Washable)",
-    description: "Replacement filters for indoor units.",
-    typicalUse: "Regular maintenance, all indoor units",
   },
 
   // ========== Consumables ==========
@@ -228,12 +324,6 @@ export const COMMON_AC_RECOMMENDATIONS = [
     name: "AC Capacitor",
     description: "Common replacement part for outdoor units.",
     typicalUse: "Maintenance and repair",
-  },
-  {
-    category: "Spare Parts",
-    name: "Fan Motor",
-    description: "Replacement for indoor/outdoor unit fans.",
-    typicalUse: "Repair of non-functioning fans",
   },
   {
     category: "Spare Parts",

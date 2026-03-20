@@ -148,9 +148,10 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
   }
 };
 
-export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, acType = null) => {
+export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, acType = null, pdfScale = 1.5) => {
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
+  const scaleFactor = pdfScale / 1.5;
 
   const getNearestCommentText = (x, y, comments) => {
     if (!comments) return null;
@@ -181,7 +182,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.rect(0, 0, width, height);
     context.fillStyle = duct.fill || "rgba(0,120,255,0.3)";
     context.fill();
-    context.lineWidth = 2;
+    context.lineWidth = 2 * scaleFactor;
     context.strokeStyle = duct.stroke || "blue";
     context.stroke();
     context.restore();
@@ -192,7 +193,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       img.onload = () => {
         context.save();
         context.translate(x, y);
-        context.drawImage(img, -10, -10, 20, 20);
+        context.drawImage(img, -10 * scaleFactor, -10 * scaleFactor, 20 * scaleFactor, 20 * scaleFactor);
         context.restore();
       };
     }
@@ -210,7 +211,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     }
     context.fillStyle = "rgba(0, 255, 0, 0.5)";
     context.fill();
-    context.lineWidth = 2;
+    context.lineWidth = 2 * scaleFactor;
     context.strokeStyle = "lime";
     context.stroke();
     // Draw diffuser SVG if available
@@ -244,13 +245,13 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       sortedDucts.forEach((duct, index) => {
         const diffuser = sortedDiffusers[index];
         if (diffuser) {
-          const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
-          const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
+          const ductCenterX = duct.xPercent * canvasWidth + 20 * scaleFactor;
+          const ductCenterY = duct.yPercent * canvasHeight + 10 * scaleFactor;
           const dx = diffuser.xPercent * canvasWidth;
           const dy = diffuser.yPercent * canvasHeight;
           context.save();
-          context.setLineDash([5, 5]);
-          context.lineWidth = 2;
+          context.setLineDash([5 * scaleFactor, 5 * scaleFactor]);
+          context.lineWidth = 2 * scaleFactor;
           context.strokeStyle = "gray";
           context.beginPath();
           context.moveTo(ductCenterX, ductCenterY);
@@ -268,8 +269,8 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
         let nearestDuct = null;
         let minDist = Infinity;
         hvacAnnotations.ducts.forEach((duct) => {
-          const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
-          const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
+          const ductCenterX = duct.xPercent * canvasWidth + 20 * scaleFactor;
+          const ductCenterY = duct.yPercent * canvasHeight + 10 * scaleFactor;
           const ductGroup = getNearestCommentText(
             ductCenterX,
             ductCenterY,
@@ -288,8 +289,8 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
         // Fallback to nearest duct if no matching group
         if (!nearestDuct) {
           hvacAnnotations.ducts.forEach((duct) => {
-            const ductCenterX = duct.xPercent * canvasWidth + 20; // fixed duct width 40, center at +20
-            const ductCenterY = duct.yPercent * canvasHeight + 10; // fixed duct height 20, center at +10
+            const ductCenterX = duct.xPercent * canvasWidth + 20 * scaleFactor;
+            const ductCenterY = duct.yPercent * canvasHeight + 10 * scaleFactor;
             const dist = Math.sqrt(
               (dx - ductCenterX) ** 2 + (dy - ductCenterY) ** 2
             );
@@ -301,8 +302,8 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
         }
         if (nearestDuct) {
           context.save();
-          context.setLineDash([5, 5]);
-          context.lineWidth = 2;
+          context.setLineDash([5 * scaleFactor, 5 * scaleFactor]);
+          context.lineWidth = 2 * scaleFactor;
           context.strokeStyle = "gray";
           context.beginPath();
           context.moveTo(dx, dy);
@@ -316,7 +317,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
 };
 
 export const overlayAnnotations = (context, annotations, acType, options = {}) => {
-  const { skipRefrigerantLines = false } = options;
+  const { skipRefrigerantLines = false, pdfScale = 1.5 } = options;
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
 
@@ -383,8 +384,9 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
 
     const x = comment.xPercent * canvasWidth;
     const y = comment.yPercent * canvasHeight;
-    const padding = 10;
-    const fontSize = 17;
+    const scaleFactor = pdfScale / 1.5;
+    const padding = 10 * scaleFactor;
+    const fontSize = 17 * scaleFactor;
     const text = comment.text;
     context.font = `bold ${fontSize}px Arial`;
     const textWidth = context.measureText(text).width;

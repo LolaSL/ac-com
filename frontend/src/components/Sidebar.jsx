@@ -211,7 +211,7 @@ const Sidebar = () => {
     context.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
     // redraw normal annotations
-    overlayAnnotations(context, selectedAnnotations, selectedAcType, { skipRefrigerantLines: true });
+    overlayAnnotations(context, selectedAnnotations, selectedAcType, { skipRefrigerantLines: true, pdfScale });
 
     // draw HVAC layer if toggled
     if (showHVAC) {
@@ -220,7 +220,8 @@ const Sidebar = () => {
         selectedAnnotations.hvac || { ducts: [], diffusers: [] },
         hvacSymbols,
         selectedAnnotations.comments,
-        selectedAcType
+        selectedAcType,
+        pdfScale
       );
     }
   }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType]);
@@ -310,7 +311,7 @@ const Sidebar = () => {
 
         const overlayContext = overlayCanvas.getContext("2d");
         // draw the normalized annotations immediately
-        overlayAnnotations(overlayContext, normalizedAnnotations, acType, { skipRefrigerantLines: true });
+        overlayAnnotations(overlayContext, normalizedAnnotations, acType, { skipRefrigerantLines: true, pdfScale });
         // HVAC overlay if enabled
         if (showHVAC) {
           overlayHVAC(
@@ -318,7 +319,8 @@ const Sidebar = () => {
             normalizedAnnotations.hvac || { ducts: [], diffusers: [] },
             hvacSymbols,
             normalizedAnnotations.comments,
-            acType
+            acType,
+            pdfScale
           );
         }
       }

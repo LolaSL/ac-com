@@ -2,7 +2,7 @@ import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import crypto from 'crypto';
 import Newsletter from '../models/newsletterModel.js';
-import { mailgun } from '../utils.js';
+import { sendEmail } from '../utils.js';
 
 const newsletterRouter = express.Router();
 
@@ -63,15 +63,11 @@ newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
 
         await subscriber.save();
 
-        // Send welcome email (only if SendGrid is configured)
-        if (process.env.SENDGRID_API_KEY) {
+        // Send welcome email (only if Gmail is configured)
+        if (process.env.GMAIL_USER) {
             try {
-                const welcomeData = {
+                await sendEmail({
                     to: subscriber.email,
-                    from: {
-                        email: 'your-gmail@gmail.com', // Replace with your verified Gmail address
-                        name: 'AC Commerce'
-                    },
                     subject: 'Welcome to AC Commerce Newsletter!',
                     html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -86,15 +82,13 @@ newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
             <p>Best regards,<br>The AC Commerce Team</p>
           </div>
         `
-                };
-
-                await mailgun().send(welcomeData);
+                });
             } catch (emailError) {
                 console.error('Failed to send welcome email:', emailError);
                 // Don't fail the subscription if email fails
             }
         } else {
-            console.log('SendGrid not configured - skipping welcome email');
+            console.log('Gmail not configured - skipping welcome email');
         }
 
         res.status(201).json({
@@ -142,15 +136,11 @@ newsletterRouter.post('/unsubscribe', expressAsyncHandler(async (req, res) => {
 
         await subscriber.save();
 
-        // Send confirmation email (only if SendGrid is configured)
-        if (process.env.SENDGRID_API_KEY) {
+        // Send confirmation email (only if Gmail is configured)
+        if (process.env.GMAIL_USER) {
             try {
-                const confirmationData = {
+                await sendEmail({
                     to: subscriber.email,
-                    from: {
-                        email: 'your-gmail@gmail.com', // Replace with your verified Gmail address
-                        name: 'AC Commerce'
-                    },
                     subject: 'Newsletter Unsubscription Confirmed',
                     html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -161,14 +151,12 @@ newsletterRouter.post('/unsubscribe', expressAsyncHandler(async (req, res) => {
             <p>Best regards,<br>The AC Commerce Team</p>
           </div>
         `
-                };
-
-                await mailgun().send(confirmationData);
+                });
             } catch (emailError) {
                 console.error('Failed to send unsubscription confirmation:', emailError);
             }
         } else {
-            console.log('SendGrid not configured - skipping unsubscription confirmation email');
+            console.log('Gmail not configured - skipping unsubscription confirmation email');
         }
 
         res.json({

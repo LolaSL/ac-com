@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Button, ButtonGroup } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { FaEye } from 'react-icons/fa';
 import { getName, getCategoryIcon } from './productHelpers';
 import { COMMON_AC_RECOMMENDATIONS } from '../acRecommendationData.js';
 
@@ -26,7 +28,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
       return name.includes('split') || name.includes('cassette') || 
              name.includes('wall') || name.includes('indoor') ||
              name.includes('ducted') || name.includes('ac') || 
-             !name.includes('condenser'); // Most units without "condenser" are indoor
+             !name.includes('condenser');
     });
 
     // Always include these if ANY HVAC products exist
@@ -37,17 +39,26 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
       categories.add('Accessories');
       categories.add('Consumables');
       categories.add('Spare Parts');
+      categories.add('Controller');
+      categories.add('Filters');
+      categories.add('Power Cords');
     }
 
     // Add condenser-specific categories
     if (hasCondenser) {
-      categories.add('Outdoor Unit');
+      categories.add('VRF Heat Recovery');
       categories.add('Mounting');
+      categories.add('Fan Motor');
+      categories.add('Fans');
     }
 
     // Add indoor unit categories
     if (hasIndoorUnits) {
-      categories.add('Indoor Unit');
+      categories.add('Mini Split AC');
+      categories.add('Wall-Mounted AC');
+      categories.add('Cassette Indoor Unit');
+      categories.add('Wind-Free TM Cooling');
+      categories.add('Knobs');
     }
 
     return categories;
@@ -137,6 +148,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
               <th>Name</th>
               <th>Description</th>
               <th>Typical Use</th>
+              <th>View</th>
             </tr>
           </thead>
           <tbody>
@@ -149,6 +161,15 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
                 <td><strong>{item.name}</strong></td>
                 <td>{item.description}</td>
                 <td>{item.typicalUse}</td>
+                <td style={{ textAlign: 'center' }}>
+                  <Link
+                    to={`/search?category=${encodeURIComponent(item.category)}&query=all&price=all&rating=all&order=newest&page=1`}
+                    title={`View ${item.category} products`}
+                    style={{ color: '#0d6efd', fontSize: '1.1rem' }}
+                  >
+                    <FaEye />
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>

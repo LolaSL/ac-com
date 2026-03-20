@@ -2618,17 +2618,17 @@ export default function ROICalculatorExperimental() {
                           calc.description?.includes("BTU Project:");
                         return (
                         <tr key={calc._id}>
-                          <td>{calc.name}</td>
-                          <td>
+                          <td data-label="Name">{calc.name}</td>
+                          <td data-label="Savings">
                             $
                             {Number(calc.annualSavings || 0).toLocaleString(
                               "en-US",
                               { maximumFractionDigits: 0 }
                             )}
                           </td>
-                          <td>{parseFloat(calc.roi).toFixed(1)}%</td>
-                          <td>{calc.paybackMonths} mo</td>
-                          <td className="text-center">
+                          <td data-label="ROI">{parseFloat(calc.roi).toFixed(1)}%</td>
+                          <td data-label="Payback">{calc.paybackMonths} mo</td>
+                          <td data-label="BTU" className="text-center">
                             {fromBtu ? (
                               <span
                                 className="badge bg-info"
@@ -2642,10 +2642,10 @@ export default function ROICalculatorExperimental() {
                               <span className="text-muted">—</span>
                             )}
                           </td>
-                          <td>
+                          <td data-label="Created">
                             {new Date(calc.createdAt).toLocaleDateString()}
                           </td>
-                          <td>
+                          <td data-label="Actions">
                             <Button
                               size="sm"
                               variant="outline-primary"

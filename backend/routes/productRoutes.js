@@ -578,6 +578,23 @@ productRouter.get('/btu/:btu', async (req, res) => {
       .sort({ btu: 1 }); // Finds the smallest suitable product first
 
     if (candidates.length === 0) {
+      // Fallback: no product with btu >= target, find the highest-BTU indoor AC available
+      console.log('⚠️ No product with BTU >=', targetBTU, '— falling back to highest available');
+      const fallback = await Product.findOne({
+        category: { $in: INDOOR_AC_CATEGORIES },
+        $and: [
+          { $or: [{ count: { $exists: false } }, { count: { $gt: 0 } }] },
+          { $or: [{ quantity: { $exists: false } }, { quantity: { $gt: 0 } }] }
+        ],
+        price: { $gt: 0 },
+      }).sort({ btu: -1 });
+
+      if (fallback) {
+        const fname = fallback.displayName || fallback.name || `Product ID: ${fallback._id}`;
+        console.log('✅ FALLBACK PRODUCT (highest BTU indoor AC):', fname, fallback.btu);
+        return res.json(fallback);
+      }
+
       console.log('❌ PRODUCT NOT FOUND for BTU:', targetBTU);
       return res.status(404).send({ message: 'No suitable product found with available stock.' });
     }

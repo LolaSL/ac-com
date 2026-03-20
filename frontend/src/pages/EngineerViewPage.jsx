@@ -142,14 +142,15 @@ const EngineerViewPage = () => {
       container.style.position = "relative";
       container.appendChild(overlayCanvas);
       const overlayContext = overlayCanvas.getContext("2d");
-      overlayAnnotations(overlayContext, annotation.annotations, acType);
+      overlayAnnotations(overlayContext, annotation.annotations, acType, { pdfScale });
       if (showHVAC && annotation.annotations.hvac && (acType === "ducted" || acType === "vrf-ducted")) {
         overlayHVAC(
           overlayContext,
           annotation.annotations.hvac,
           hvacSymbols,
           annotation.annotations.comments,
-          acType
+          acType,
+          pdfScale
         );
       }
       if (annotation.annotations.vrf && acType.startsWith("vrf")) {

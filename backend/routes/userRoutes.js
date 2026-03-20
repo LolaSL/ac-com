@@ -9,7 +9,7 @@ import Payment from '../models/paymentModel.js';
 import Notification from '../models/notificationModel.js';
 import {
   isAuth, isAdmin, generateToken, baseUrl,
-  mailgun
+  sendEmail
 } from '../utils.js';
 
 
@@ -109,15 +109,11 @@ userRouter.post(
       console.log(resetLink);
       console.log('===================================');
 
-      // Only send email if SendGrid is configured
-      if (process.env.SENDGRID_API_KEY) {
+      // Only send email if Gmail is configured
+      if (process.env.GMAIL_USER) {
         try {
-          await mailgun().send({
+          await sendEmail({
             to: user.email,
-            from: {
-              email: 'your-gmail@gmail.com', // Replace with your verified Gmail address
-              name: 'AC Commerce'
-            },
             subject: 'Reset Password',
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -134,10 +130,10 @@ userRouter.post(
             `
           });
         } catch (error) {
-          console.log('Email sending failed (SendGrid not configured):', error.message);
+          console.log('Email sending failed:', error.message);
         }
       } else {
-        console.log('SendGrid not configured - skipping password reset email');
+        console.log('Gmail not configured - skipping password reset email');
       }
 
       res.send({ message: 'We sent reset password link to your email.' });
@@ -158,6 +154,7 @@ userRouter.post(
         if (user) {
           if (req.body.password) {
             user.password = bcrypt.hashSync(req.body.password, 8);
+            user.resetToken = undefined;
             await user.save();
             res.send({
               message: 'Password reseted successfully',

@@ -4,10 +4,11 @@ import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Alert from "react-bootstrap/Alert";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store";
 import { getError } from "../utils";
+import "./ResetPasswordPage.css";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function ResetPasswordPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -33,10 +35,10 @@ export default function ResetPasswordPage() {
 
     const levels = [
       { strength: 0, label: "", color: "" },
-      { strength: 1, label: "Weak", color: "danger" },
-      { strength: 2, label: "Fair", color: "warning" },
-      { strength: 3, label: "Good", color: "info" },
-      { strength: 4, label: "Strong", color: "success" },
+      { strength: 1, label: "Weak", color: "#ef4444" },
+      { strength: 2, label: "Fair", color: "#f59e0b" },
+      { strength: 3, label: "Good", color: "#06b6d4" },
+      { strength: 4, label: "Strong", color: "#10b981" },
     ];
     return levels[strength];
   };
@@ -64,10 +66,11 @@ export default function ResetPasswordPage() {
         password,
         token,
       });
-      toast.success("Password updated successfully! Redirecting...");
+      setSuccess(true);
+      toast.success("Password updated successfully!");
       setTimeout(() => {
         navigate("/signin");
-      }, 1500);
+      }, 3000);
     } catch (err) {
       setFormError(getError(err));
     } finally {
@@ -76,146 +79,183 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <Container className="small-container">
-      <h1 className="my-3">Reset Password</h1>
-      <Form onSubmit={submitHandler}>
-        <Form.Group className="mb-3" controlId="password">
-          <Form.Label>New Password</Form.Label>
-          <div className="position-relative">
-            <Form.Control
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button
-              variant="link"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                padding: "0",
-                border: "none",
-                background: "none",
-                color: "#6c757d",
-              }}
-            >
-              <i
-                className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}
-              ></i>
-            </Button>
+    <div className="rp-page">
+      {/* Left Panel */}
+      <div className="rp-left">
+        <div className="rp-left-content">
+          <div className="rp-icon-circle">
+            <i className="fas fa-shield-alt"></i>
           </div>
-          {password && (
-            <div className="mt-2">
-              <div className="d-flex align-items-center gap-2">
-                <div
-                  style={{
-                    flex: 1,
-                    height: "8px",
-                    backgroundColor: "#e9ecef",
-                    borderRadius: "4px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${
-                        (getPasswordStrength(password).strength / 4) * 100
-                      }%`,
-                      height: "100%",
-                      backgroundColor:
-                        getPasswordStrength(password).color === "danger"
-                          ? "#dc3545"
-                          : getPasswordStrength(password).color === "warning"
-                          ? "#ffc107"
-                          : getPasswordStrength(password).color === "info"
-                          ? "#0dcaf0"
-                          : "#198754",
-                      transition: "width 0.3s ease",
-                    }}
-                  />
-                </div>
-                <small
-                  className={`text-${getPasswordStrength(password).color}`}
-                  style={{ minWidth: "60px" }}
-                >
-                  {getPasswordStrength(password).label}
-                </small>
+          <h1 className="rp-brand">AC-Commerce</h1>
+          <p className="rp-tagline">Create a strong, secure password</p>
+
+          <div className="rp-tips">
+            <div className="rp-tip">
+              <div className="rp-tip-icon">
+                <i className="fas fa-lock"></i>
               </div>
-              <Form.Text className="text-muted">
-                Use 8+ characters with mix of letters, numbers & symbols
-              </Form.Text>
+              <div>
+                <strong>Use 8+ Characters</strong>
+                <p>Longer passwords are harder to crack</p>
+              </div>
             </div>
-          )}
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="confirmPassword">
-          <Form.Label>Confirm New Password</Form.Label>
-          <div className="position-relative">
-            <Form.Control
-              type={showConfirmPassword ? "text" : "password"}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              value={confirmPassword}
-              required
-            />
-            <Button
-              variant="link"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                padding: "0",
-                border: "none",
-                background: "none",
-                color: "#6c757d",
-              }}
-            >
-              <i
-                className={
-                  showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"
-                }
-              ></i>
-            </Button>
+            <div className="rp-tip">
+              <div className="rp-tip-icon">
+                <i className="fas fa-random"></i>
+              </div>
+              <div>
+                <strong>Mix It Up</strong>
+                <p>Combine letters, numbers &amp; symbols</p>
+              </div>
+            </div>
+            <div className="rp-tip">
+              <div className="rp-tip-icon">
+                <i className="fas fa-fingerprint"></i>
+              </div>
+              <div>
+                <strong>Make It Unique</strong>
+                <p>Don't reuse passwords from other sites</p>
+              </div>
+            </div>
           </div>
-          {confirmPassword && password !== confirmPassword && (
-            <Form.Text className="text-danger">
-              Passwords do not match
-            </Form.Text>
-          )}
-        </Form.Group>
-
-        {formError && (
-          <Alert variant="danger" dismissible onClose={() => setFormError("")} className="mb-3">
-            <i className="fas fa-exclamation-circle me-2"></i>{formError}
-          </Alert>
-        )}
-
-        <div className="mb-3">
-          <Button
-            className="go-to-btn btn-text"
-            variant="btn-outline"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span
-                  className="spinner-border spinner-border-sm me-2"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                Resetting...
-              </>
-            ) : (
-              "Reset Password"
-            )}
-          </Button>
         </div>
-      </Form>
-    </Container>
+      </div>
+
+      {/* Right Panel */}
+      <div className="rp-right">
+        <div className="rp-form-container">
+          {success ? (
+            <div className="rp-success">
+              <div className="rp-success-icon">
+                <i className="fas fa-check-circle"></i>
+              </div>
+              <h2>Password Updated!</h2>
+              <p>Your password has been reset successfully.</p>
+              <p className="rp-redirect-text">
+                Redirecting to sign in<span className="rp-dots">...</span>
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="rp-form-header">
+                <div className="rp-header-icon">
+                  <i className="fas fa-lock"></i>
+                </div>
+                <h2>Reset Password</h2>
+                <p>Enter your new password below</p>
+              </div>
+
+              <Form onSubmit={submitHandler}>
+                <div className="rp-field">
+                  <label className="rp-label">New Password</label>
+                  <div className="rp-input-wrapper">
+                    <i className="fas fa-lock rp-input-icon"></i>
+                    <input
+                      className="rp-input"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter new password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="rp-eye-btn"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                    </button>
+                  </div>
+                  {password && (
+                    <div className="rp-strength">
+                      <div className="rp-strength-bar">
+                        <div
+                          className="rp-strength-fill"
+                          style={{
+                            width: `${(getPasswordStrength(password).strength / 4) * 100}%`,
+                            backgroundColor: getPasswordStrength(password).color,
+                          }}
+                        />
+                      </div>
+                      <span
+                        className="rp-strength-label"
+                        style={{ color: getPasswordStrength(password).color }}
+                      >
+                        {getPasswordStrength(password).label}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="rp-field">
+                  <label className="rp-label">Confirm Password</label>
+                  <div className="rp-input-wrapper">
+                    <i className="fas fa-lock rp-input-icon"></i>
+                    <input
+                      className="rp-input"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm new password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="rp-eye-btn"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      <i className={showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                    </button>
+                  </div>
+                  {confirmPassword && (
+                    <div className="rp-match-indicator">
+                      {password === confirmPassword ? (
+                        <span className="rp-match">
+                          <i className="fas fa-check-circle"></i> Passwords match
+                        </span>
+                      ) : (
+                        <span className="rp-no-match">
+                          <i className="fas fa-times-circle"></i> Passwords do not match
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {formError && (
+                  <Alert variant="danger" dismissible onClose={() => setFormError("")} className="rp-alert">
+                    <i className="fas fa-exclamation-circle me-2"></i>{formError}
+                  </Alert>
+                )}
+
+                <button
+                  type="submit"
+                  className="rp-submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Resetting...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-check me-2"></i>
+                      Reset Password
+                    </>
+                  )}
+                </button>
+              </Form>
+
+              <div className="rp-footer-link">
+                <Link to="/signin">
+                  <i className="fas fa-arrow-left me-1"></i> Back to Sign In
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

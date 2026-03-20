@@ -30,8 +30,17 @@ export const getPrice = (obj) => {
 // Helper: get category icon
 export const getCategoryIcon = (category) => {
   const icons = {
-    'Indoor Unit': '❄️',
-    'Outdoor Unit': '🔧',
+    'Mini Split AC': '❄️',
+    'Wall-Mounted AC': '🧊',
+    'Cassette Indoor Unit': '🔲',
+    'Wind-Free TM Cooling': '🌬️',
+    'VRF Heat Recovery': '🔧',
+    'Controller': '🎛️',
+    'Fan Motor': '🔄',
+    'Fans': '🌀',
+    'Filters': '🫧',
+    'Knobs': '🎚️',
+    'Power Cords': '🔌',
     'Mounting': '🔩',
     'Refrigerant Piping': '🔄',
     'Drainage': '💧',
