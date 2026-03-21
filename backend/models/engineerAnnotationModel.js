@@ -82,16 +82,28 @@ const engineerAnnotationSchema = new Schema(
                         height: { type: Number },
                         fill: { type: String },
                         stroke: { type: String },
+                        ductType: { type: String, enum: ['supply', 'return', 'flex', 'exhaust', 'default'], default: 'default' },
+                        sizeLabel: { type: String },
                     },
                 ],
                 diffusers: [
                     {
                         id: { type: String, required: true },
-                        shape: { type: String, required: true }, // "circle", "square"
+                        shape: { type: String, required: true },
                         xPercent: { type: Number, required: true },
                         yPercent: { type: Number, required: true },
                         sizePercent: { type: Number, required: true },
-                        airflow: { type: Number }, // optional CFM
+                        airflow: { type: Number },
+                        diffuserType: { type: String, enum: ['supply-4way', 'round', 'linear-slot', 'return-grille', 'exhaust', 'circle', 'square', 'default'], default: 'default' },
+                    },
+                ],
+                dampers: [
+                    {
+                        id: { type: String, required: true },
+                        xPercent: { type: Number, required: true },
+                        yPercent: { type: Number, required: true },
+                        sizePercent: { type: Number },
+                        damperType: { type: String, enum: ['fire', 'volume'], default: 'volume' },
                     },
                 ],
                 refrigerantLines: [

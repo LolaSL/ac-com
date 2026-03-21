@@ -1,0 +1,14 @@
+<svg width="60" height="16" viewBox="0 0 60 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Linear slot diffuser (standard HVAC symbol) -->
+  <rect x="1" y="1" width="58" height="14" stroke="#0055CC" fill="none" stroke-width="2"/>
+  <!-- Slot lines -->
+  <line x1="10" y1="3" x2="10" y2="13" stroke="#0055CC" stroke-width="1"/>
+  <line x1="20" y1="3" x2="20" y2="13" stroke="#0055CC" stroke-width="1"/>
+  <line x1="30" y1="3" x2="30" y2="13" stroke="#0055CC" stroke-width="1"/>
+  <line x1="40" y1="3" x2="40" y2="13" stroke="#0055CC" stroke-width="1"/>
+  <line x1="50" y1="3" x2="50" y2="13" stroke="#0055CC" stroke-width="1"/>
+  <!-- Downward airflow arrows -->
+  <polygon points="14,14 16,18 12,18" fill="#0055CC" opacity="0.6"/>
+  <polygon points="34,14 36,18 32,18" fill="#0055CC" opacity="0.6"/>
+  <polygon points="54,14 56,18 52,18" fill="#0055CC" opacity="0.6"/>
+</svg>

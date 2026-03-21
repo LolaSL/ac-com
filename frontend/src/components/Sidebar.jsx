@@ -277,7 +277,7 @@ const Sidebar = () => {
       const acType = annotationsData?.acType || "ducted"; // Get acType from backend response
       setSelectedAcType(acType); // Store for use in overlay rendering
       console.log("Fetched annotations for", pdf._id, normalizedAnnotations);
-      setSelectedAnnotations(annotationsData); // Store full annotation data including roomData
+      setSelectedAnnotations(normalizedAnnotations); // Store normalized annotations (rectangles, comments, etc.)
 
       const container = document.getElementById("pdf-container");
       if (!container) return;

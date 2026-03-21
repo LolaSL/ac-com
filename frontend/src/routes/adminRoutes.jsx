@@ -18,6 +18,7 @@ import Notifications from "../components/Notifications.jsx";
 import TotalSellerDashboard from "../pages/TotalSellerDashboard.jsx";
 import PaymentsPage from "../pages/PaymentsPage.jsx";
 import OrderPage from "../pages/OrderPage.jsx";
+import AdminNewsletterPage from "../pages/AdminNewsletterPage.jsx";
 import AdminRoute from "../components/AdminRoute.js";
 
 export const adminRoutes = [
@@ -178,6 +179,14 @@ export const adminRoutes = [
     element: (
       <AdminRoute>
         <Notifications />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/newsletter",
+    element: (
+      <AdminRoute>
+        <AdminNewsletterPage />
       </AdminRoute>
     ),
   },

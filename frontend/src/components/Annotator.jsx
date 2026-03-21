@@ -1183,8 +1183,8 @@ const Annotator = ({
       id: newCommentId,
       rectId: newRectId,
       text: commentText,
-      x: position.x + 60,
-      y: position.y - 10,
+      x: position.x + 35,
+      y: position.y - 5,
       fill: 'rgba(226, 218, 228, 0.3)',
     };
     setComments((prevComments) => [...prevComments, newComment]);
@@ -1593,6 +1593,7 @@ const Annotator = ({
     formData.append("comments", JSON.stringify(comments));
     formData.append("lines", JSON.stringify(lines));
     formData.append("pdfId", pdfId);
+    formData.append("acType", "ductless");
     formData.append("roomData", JSON.stringify(roomsToSave)); // Save room data with flat prefixes
 
     const canvas = document.getElementById("my-canvas");
@@ -2713,15 +2714,7 @@ const Annotator = ({
               }}
               autoFocus
               style={{ marginBottom: '16px', fontSize: '16px' }}
-            />
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowAcUnitModal(false)}
-              >
-                Cancel
-              </Button>
+            />  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
               <Button
                 variant="primary"
                 size="sm"
@@ -2733,6 +2726,14 @@ const Annotator = ({
               >
                 Add
               </Button>
+          <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowAcUnitModal(false)}
+              >
+                Cancel
+              </Button>
+          
             </div>
           </div>
         </div>

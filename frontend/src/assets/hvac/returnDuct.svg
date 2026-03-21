@@ -1,0 +1,10 @@
+<svg width="60" height="20" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+  <!-- Return duct (standard HVAC symbol - dashed double line) -->
+  <line x1="0" y1="2" x2="60" y2="2" stroke="#CC4400" stroke-width="2" stroke-dasharray="6,4"/>
+  <line x1="0" y1="18" x2="60" y2="18" stroke="#CC4400" stroke-width="2" stroke-dasharray="6,4"/>
+  <!-- Size tick marks -->
+  <line x1="0" y1="0" x2="0" y2="20" stroke="#CC4400" stroke-width="1.5"/>
+  <line x1="60" y1="0" x2="60" y2="20" stroke="#CC4400" stroke-width="1.5"/>
+  <!-- Return airflow arrow (reverse direction) -->
+  <polygon points="8,6 2,10 8,14" fill="#CC4400" opacity="0.6"/>
+</svg>

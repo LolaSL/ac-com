@@ -4,7 +4,7 @@ import { Spinner, Alert, Button, Form } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { PDFDocument } from "pdf-lib";
-import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols } from "../utils/annotationUtils.js";
+import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols, drawCanvasLegend } from "../utils/annotationUtils.js";
 import * as pdfjsLib from "pdfjs-dist";
 import { FaDraftingCompass } from "react-icons/fa";
 import "./EngineerViewPage.css";
@@ -20,7 +20,7 @@ const EngineerViewPage = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showHVAC, setShowHVAC] = useState(false);
-  const [addMode, setAddMode] = useState(null); // 'duct' | 'diffuser' | 'indoor' | 'outdoor' | null
+  const [addMode, setAddMode] = useState(null); // 'supply-duct' | 'return-duct' | 'flex-duct' | 'supply-4way' | 'round-diffuser' | 'linear-slot' | 'return-grille' | 'exhaust-grille' | 'fire-damper' | 'volume-damper' | 'comment' | null
   const [acType, setAcType] = useState("vrf-ducted"); // 'vrf-ducted' | 'vrf-ductless'
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -68,7 +68,15 @@ const EngineerViewPage = () => {
         const data = await response.json();
         console.log("Fetched annotation data:", data);
         setAnnotation(data);
-        setAcType(data.acType || "ducted");
+        // Engineer view always uses VRF modes; map basic acTypes to their VRF equivalents
+        const fetchedAcType = data.acType || "ducted";
+        if (fetchedAcType === "vrf-ducted" || fetchedAcType === "vrf-ductless") {
+          setAcType(fetchedAcType);
+        } else if (fetchedAcType === "ductless") {
+          setAcType("vrf-ductless");
+        } else {
+          setAcType("vrf-ducted");
+        }
         // Fetch PDF file
         const pdfResponse = await fetch(`/api/annotated-pdf/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -161,6 +169,8 @@ const EngineerViewPage = () => {
           acType
         );
       }
+      // Draw professional legend on the canvas
+      drawCanvasLegend(overlayContext, acType);
       // Add click handler for interactive placement
       // Unified handler for both click and touch on overlay canvas
       const handleOverlayInteraction = (e) => {
@@ -191,8 +201,9 @@ const EngineerViewPage = () => {
             yPercent: y,
             width: 0.08,
             height: 0.025,
-            fill: "rgba(0,120,255,0.3)",
-            stroke: "blue",
+            ductType: "supply",
+            fill: "rgba(0,85,204,0.15)",
+            stroke: "#0055CC",
           };
 
           setAnnotation((prev) => ({
@@ -200,9 +211,42 @@ const EngineerViewPage = () => {
             annotations: {
               ...(prev.annotations || {}),
               hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [] }),
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
                 ducts: [...(prev.annotations?.hvac?.ducts || []), newDuct],
                 diffusers: prev.annotations?.hvac?.diffusers || [],
+                dampers: prev.annotations?.hvac?.dampers || [],
+              },
+            },
+          }));
+        }
+
+        if (addMode === "supply-duct" || addMode === "return-duct" || addMode === "flex-duct") {
+          const ductTypeMap = {
+            "supply-duct": { ductType: "supply", fill: "rgba(0,85,204,0.15)", stroke: "#0055CC" },
+            "return-duct": { ductType: "return", fill: "rgba(204,68,0,0.15)", stroke: "#CC4400" },
+            "flex-duct":   { ductType: "flex",   fill: "rgba(150,150,150,0.1)", stroke: "#888" },
+          };
+          const cfg = ductTypeMap[addMode];
+          const newDuct = {
+            id: `duct-${Date.now()}`,
+            xPercent: x,
+            yPercent: y,
+            width: addMode === "flex-duct" ? 0.06 : 0.08,
+            height: 0.025,
+            ductType: cfg.ductType,
+            fill: cfg.fill,
+            stroke: cfg.stroke,
+          };
+
+          setAnnotation((prev) => ({
+            ...prev,
+            annotations: {
+              ...(prev.annotations || {}),
+              hvac: {
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ducts: [...(prev.annotations?.hvac?.ducts || []), newDuct],
+                diffusers: prev.annotations?.hvac?.diffusers || [],
+                dampers: prev.annotations?.hvac?.dampers || [],
               },
             },
           }));
@@ -213,9 +257,10 @@ const EngineerViewPage = () => {
             id: `diffuser-${Date.now()}`,
             xPercent: x,
             yPercent: y,
-            sizePercent: 0.08,
+            sizePercent: 0.04,
             shape: "circle",
-            airflow: 100,
+            diffuserType: "round",
+            airflow: 250,
           };
 
           setAnnotation((prev) => ({
@@ -223,12 +268,72 @@ const EngineerViewPage = () => {
             annotations: {
               ...(prev.annotations || {}),
               hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [] }),
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
                 ducts: prev.annotations?.hvac?.ducts || [],
                 diffusers: [
                   ...(prev.annotations?.hvac?.diffusers || []),
                   newDiffuser,
                 ],
+                dampers: prev.annotations?.hvac?.dampers || [],
+              },
+            },
+          }));
+        }
+
+        if (addMode === "supply-4way" || addMode === "round-diffuser" || addMode === "linear-slot" || addMode === "return-grille" || addMode === "exhaust-grille") {
+          const diffuserMap = {
+            "supply-4way":     { diffuserType: "supply-4way",   shape: "square", airflow: 400 },
+            "round-diffuser":  { diffuserType: "round",         shape: "circle", airflow: 250 },
+            "linear-slot":     { diffuserType: "linear-slot",   shape: "linear", airflow: 300 },
+            "return-grille":   { diffuserType: "return-grille", shape: "square", airflow: 350 },
+            "exhaust-grille":  { diffuserType: "exhaust",       shape: "square", airflow: 200 },
+          };
+          const cfg = diffuserMap[addMode];
+          const newDiffuser = {
+            id: `diffuser-${Date.now()}`,
+            xPercent: x,
+            yPercent: y,
+            sizePercent: addMode === "linear-slot" ? 0.03 : 0.04,
+            shape: cfg.shape,
+            diffuserType: cfg.diffuserType,
+            airflow: cfg.airflow,
+          };
+
+          setAnnotation((prev) => ({
+            ...prev,
+            annotations: {
+              ...(prev.annotations || {}),
+              hvac: {
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ducts: prev.annotations?.hvac?.ducts || [],
+                diffusers: [
+                  ...(prev.annotations?.hvac?.diffusers || []),
+                  newDiffuser,
+                ],
+                dampers: prev.annotations?.hvac?.dampers || [],
+              },
+            },
+          }));
+        }
+
+        if (addMode === "fire-damper" || addMode === "volume-damper") {
+          const newDamper = {
+            id: `damper-${Date.now()}`,
+            xPercent: x,
+            yPercent: y,
+            sizePercent: 0.025,
+            damperType: addMode === "fire-damper" ? "fire" : "volume",
+          };
+
+          setAnnotation((prev) => ({
+            ...prev,
+            annotations: {
+              ...(prev.annotations || {}),
+              hvac: {
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ducts: prev.annotations?.hvac?.ducts || [],
+                diffusers: prev.annotations?.hvac?.diffusers || [],
+                dampers: [...(prev.annotations?.hvac?.dampers || []), newDamper],
               },
             },
           }));
@@ -332,6 +437,120 @@ const EngineerViewPage = () => {
     setAddMode(null);
   };
 
+  // Auto-place ducts & diffusers near every indoor unit rectangle
+  const handleAutoPlaceDucts = () => {
+    const ann = annotation?.annotations;
+    if (!ann) return;
+
+    // Gather indoor-unit rectangles (non-condenser user rects)
+    const rects = (ann.rectangles || []).filter((r) => !r.isCondenser);
+    if (rects.length === 0) {
+      toast.warn('No indoor unit rectangles found. Draw blue rects first.');
+      return;
+    }
+
+    const newDucts = [];
+    const newDiffusers = [];
+    const newDampers = [];
+    const ts = Date.now();
+
+    // Compute floor-plan centre from all rects to decide duct direction
+    const avgX = rects.reduce((s, r) => s + r.xPercent, 0) / rects.length;
+
+    // Duct sizing constants (normalised 0-1)
+    const DUCT_LEN = 0.08;
+    const DUCT_H   = 0.02;
+    const GAP       = 0.005;   // small gap between rect edge and duct
+    const DIFF_SIZE = 0.03;
+    const DAMP_SIZE = 0.018;
+
+    rects.forEach((rect, i) => {
+      const cx = rect.xPercent;
+      const cy = rect.yPercent;
+      const rw = rect.widthPercent || 0.06;
+
+      // Pick horizontal direction: extend ducts toward the centre of the layout
+      const toRight = cx <= avgX;
+
+      // --- Supply duct: offset from unit in chosen direction ---
+      const sDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
+      const sDuctY = cy - DUCT_H - 0.003;
+      newDucts.push({
+        id: `duct-auto-s-${ts}-${i}`,
+        xPercent: Math.max(0.01, Math.min(0.89, sDuctX)),
+        yPercent: Math.max(0.01, Math.min(0.95, sDuctY)),
+        width: DUCT_LEN,
+        height: DUCT_H,
+        ductType: 'supply',
+        fill: 'rgba(0,85,204,0.15)',
+        stroke: '#0055CC',
+      });
+
+      // --- Return duct: same direction, stacked below the unit ---
+      const rDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
+      const rDuctY = cy + 0.003;
+      newDucts.push({
+        id: `duct-auto-r-${ts}-${i}`,
+        xPercent: Math.max(0.01, Math.min(0.89, rDuctX)),
+        yPercent: Math.max(0.01, Math.min(0.95, rDuctY)),
+        width: DUCT_LEN,
+        height: DUCT_H,
+        ductType: 'return',
+        fill: 'rgba(204,68,0,0.15)',
+        stroke: '#CC4400',
+      });
+
+      // --- Supply diffuser (4-way) at the far end of supply duct ---
+      const sdX = toRight ? sDuctX + DUCT_LEN + GAP + DIFF_SIZE / 2 : sDuctX - GAP - DIFF_SIZE / 2;
+      newDiffusers.push({
+        id: `diffuser-auto-sd-${ts}-${i}`,
+        xPercent: Math.max(0.02, Math.min(0.98, sdX)),
+        yPercent: sDuctY + DUCT_H / 2,
+        sizePercent: DIFF_SIZE,
+        shape: 'square',
+        diffuserType: 'supply-4way',
+        airflow: 400,
+      });
+
+      // --- Return grille at the far end of return duct ---
+      const rgX = toRight ? rDuctX + DUCT_LEN + GAP + DIFF_SIZE / 2 : rDuctX - GAP - DIFF_SIZE / 2;
+      newDiffusers.push({
+        id: `diffuser-auto-rg-${ts}-${i}`,
+        xPercent: Math.max(0.02, Math.min(0.98, rgX)),
+        yPercent: rDuctY + DUCT_H / 2,
+        sizePercent: DIFF_SIZE,
+        shape: 'square',
+        diffuserType: 'return-grille',
+        airflow: 350,
+      });
+
+      // --- Volume damper near the branch origin of the supply duct ---
+      const vdX = toRight ? sDuctX + DUCT_LEN * 0.4 : sDuctX + DUCT_LEN * 0.6;
+      newDampers.push({
+        id: `damper-auto-vd-${ts}-${i}`,
+        xPercent: vdX,
+        yPercent: sDuctY - 0.012,
+        sizePercent: DAMP_SIZE,
+        damperType: 'volume',
+      });
+    });
+
+    setAnnotation((prev) => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        hvac: {
+          ...(prev.annotations?.hvac || {}),
+          ducts: [...(prev.annotations?.hvac?.ducts || []), ...newDucts],
+          diffusers: [...(prev.annotations?.hvac?.diffusers || []), ...newDiffusers],
+          dampers: [...(prev.annotations?.hvac?.dampers || []), ...newDampers],
+        },
+      },
+    }));
+    setShowHVAC(true);
+    toast.success(`Auto-placed ducts & diffusers for ${rects.length} indoor units!`);
+  };
+
   // Save engineer annotations to MongoDB so they appear in Sidebar > Engineer Reviews
   const handleSaveToMongoDB = async () => {
     setSaveError(null);
@@ -387,6 +606,9 @@ const EngineerViewPage = () => {
             mode
           );
         }
+
+        // Draw legend on the overlay
+        drawCanvasLegend(overlayCtx, mode);
 
         // Composite base + overlay
         const composite = document.createElement("canvas");
@@ -516,134 +738,114 @@ const EngineerViewPage = () => {
       </div>
 
       {/* Refrigerant Lines Legend - Always Visible */}
-      <div
-        className="mb-4 p-3 border rounded"
-        style={{ backgroundColor: "#f8f9fa" }}
-      >
+      <div className="ev-legend-panel">
         <strong className="d-block mb-2">
-          📋 Refrigerant Line Types (Current Mode:{" "}
-          {acType === "vrf-ducted"
-            ? "VRF System - Ducted"
-            : "VRF System - Ductless"}
-          )
+          📋 Mechanical Drawing Legend — {acType === "vrf-ducted" ? "VRF Ducted" : "VRF Ductless"}
         </strong>
-        {acType === "ducted" && (
-          <div className="d-flex flex-wrap gap-3 flex-column">
-            <span>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "40px",
-                  height: "2px",
-                  backgroundColor: "blue",
-                  position: "relative",
-                  top: "2px",
-                }}
-              />
-              <span style={{ marginLeft: "8px" }}>
-                Blue Dashed: Refrigerant Lines (Star Topology - Each AC unit
-                directly to Condenser)
+
+        {/* Ductwork Legend (ducted modes) */}
+        {(acType === "ducted" || acType === "vrf-ducted") && (
+          <div className="ev-legend-section">
+            <div className="ev-legend-title">Ductwork</div>
+            <div className="ev-legend-items">
+              <span className="ev-legend-item">
+                <span className="ev-legend-line" style={{ borderTop: "3px solid #0055CC" }}></span>
+                <span>Supply Duct (SA)</span>
               </span>
-            </span>
-            <span>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "40px",
-                  height: "2px",
-                  position: "relative",
-                  top: "2px",
-                  borderTop: "2px dashed grey",
-                  backgroundColor: "transparent",
-                }}
-              />
-              <span style={{ marginLeft: "8px" }}>
-                Grey Dashed: Ducts & Diffusers
+              <span className="ev-legend-item">
+                <span className="ev-legend-line" style={{ borderTop: "3px dashed #CC4400" }}></span>
+                <span>Return Duct (RA)</span>
               </span>
-            </span>
-          </div>
-        )}
-        {acType === "ductless" && (
-          <div className="d-flex flex-wrap gap-3">
-            <span>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "40px",
-                  height: "2px",
-                  position: "relative",
-                  top: "2px",
-                  borderTop: "2px dotted blue",
-                  backgroundColor: "transparent",
-                }}
-              />
-              <span style={{ marginLeft: "8px" }}>
-                Blue Dotted: Refrigerant Lines (Star Topology - Each AC unit to
-                nearest Condenser)
-              </span>
-            </span>
-          </div>
-        )}
-        {acType === "vrf-ducted" && (
-          <div>
-            <div className="d-flex flex-wrap gap-3 mb-2">
-              <span>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "40px",
-                    height: "2px",
-                    backgroundColor: "red",
-                    position: "relative",
-                    top: "2px",
-                    borderTop: "2px dashed red",
-                  }}
-                />
-                <span style={{ marginLeft: "8px", color: "red" }}>
-                  Red Dashed: Supply Line (Sequential Chain)
-                </span>
-              </span>
-            </div>
-            <div className="d-flex flex-wrap gap-3">
-              <span>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "40px",
-                    height: "2px",
-                    backgroundColor: "#0066FF",
-                    position: "relative",
-                    top: "2px",
-                    borderTop: "2px dashed #0066FF",
-                  }}
-                />
-                <span style={{ marginLeft: "8px", color: "#0066FF" }}>
-                  Blue Dashed: Return Line (Sequential Chain)
-                </span>
+              <span className="ev-legend-item">
+                <span className="ev-legend-line ev-legend-wavy" style={{ borderTop: "2px dotted #888" }}></span>
+                <span>Flex Duct (FD)</span>
               </span>
             </div>
           </div>
         )}
-        {acType === "vrf-ductless" && (
-          <div className="d-flex flex-wrap gap-3">
-            <span>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "40px",
-                  height: "2px",
-                  backgroundColor: "#008B8B",
-                  position: "relative",
-                  top: "2px",
-                }}
-              />
-              <span style={{ marginLeft: "8px", color: "#008B8B" }}>
-                Teal Solid: Refrigerant Lines (Star Topology - Each AC unit to
-                Condenser)
+
+        {/* Diffusers & Grilles Legend */}
+        {(acType === "ducted" || acType === "vrf-ducted") && (
+          <div className="ev-legend-section">
+            <div className="ev-legend-title">Diffusers & Grilles</div>
+            <div className="ev-legend-items">
+              <span className="ev-legend-item">
+                <span className="ev-legend-symbol" style={{ border: "2px solid #0055CC", width: 16, height: 16 }}>✕</span>
+                <span>Supply Diffuser 4-Way (SD)</span>
               </span>
-            </span>
+              <span className="ev-legend-item">
+                <span className="ev-legend-symbol" style={{ border: "2px solid #0055CC", borderRadius: "50%", width: 16, height: 16 }}></span>
+                <span>Round Diffuser (SD)</span>
+              </span>
+              <span className="ev-legend-item">
+                <span className="ev-legend-symbol" style={{ border: "2px solid #0055CC", width: 28, height: 10, borderRadius: 0 }}></span>
+                <span>Linear Slot Diffuser (LD)</span>
+              </span>
+              <span className="ev-legend-item">
+                <span className="ev-legend-symbol" style={{ border: "2px solid #CC4400", width: 16, height: 16 }}>≡</span>
+                <span>Return Grille (RG)</span>
+              </span>
+              <span className="ev-legend-item">
+                <span className="ev-legend-symbol" style={{ border: "2px solid #228B22", width: 16, height: 16, background: "repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(34,139,34,0.3) 2px, rgba(34,139,34,0.3) 4px)" }}></span>
+                <span>Exhaust Grille (EG)</span>
+              </span>
+            </div>
           </div>
         )}
+
+        {/* Dampers Legend */}
+        {(acType === "ducted" || acType === "vrf-ducted") && (
+          <div className="ev-legend-section">
+            <div className="ev-legend-title">Accessories</div>
+            <div className="ev-legend-items">
+              <span className="ev-legend-item">
+                <span className="ev-legend-symbol" style={{ border: "2px solid #CC0000", width: 16, height: 16, transform: "rotate(45deg)", fontSize: "7px", lineHeight: "12px" }}>FD</span>
+                <span>Fire Damper</span>
+              </span>
+              <span className="ev-legend-item">
+                <span className="ev-legend-symbol" style={{ border: "2px solid #555", width: 16, height: 16, borderRadius: "50%", fontSize: "7px", lineHeight: "12px" }}>VD</span>
+                <span>Volume Damper</span>
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Refrigerant Lines */}
+        <div className="ev-legend-section">
+          <div className="ev-legend-title">Refrigerant Lines</div>
+          <div className="ev-legend-items">
+            {acType === "vrf-ducted" && (
+              <>
+                <span className="ev-legend-item">
+                  <span className="ev-legend-line" style={{ borderTop: "2px dashed red" }}></span>
+                  <span style={{ color: "red" }}>Supply Line (Sequential Chain)</span>
+                </span>
+                <span className="ev-legend-item">
+                  <span className="ev-legend-line" style={{ borderTop: "2px dashed #0066FF" }}></span>
+                  <span style={{ color: "#0066FF" }}>Return Line (Sequential Chain)</span>
+                </span>
+              </>
+            )}
+            {acType === "vrf-ductless" && (
+              <span className="ev-legend-item">
+                <span className="ev-legend-line" style={{ borderTop: "2.5px solid #008B8B" }}></span>
+                <span style={{ color: "#008B8B" }}>Refrigerant Lines (Star Topology)</span>
+              </span>
+            )}
+            {acType === "ducted" && (
+              <>
+                <span className="ev-legend-item">
+                  <span className="ev-legend-line" style={{ borderTop: "2px dashed blue" }}></span>
+                  <span>Refrigerant Lines (Star Topology)</span>
+                </span>
+                <span className="ev-legend-item">
+                  <span className="ev-legend-line" style={{ borderTop: "2px dashed grey" }}></span>
+                  <span>Duct Branches</span>
+                </span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
@@ -655,314 +857,235 @@ const EngineerViewPage = () => {
             >
               {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
             </Button>
-            {showHVAC && acType === "ducted" && (
-              <div className="mb-2">
-                <strong>Legend (Minisplit HVAC):</strong>
-                <span className="ms-2" style={{ color: "blue" }}>
-                  ■ Ducts (Blue)
-                </span>
-                <span className="ms-3" style={{ color: "lime" }}>
-                  ● Diffusers (Green/Lime)
-                </span>
-              </div>
-            )}
-            {showHVAC && acType === "vrf-ducted" && (
-              <div className="mb-2">
-                <strong>Legend (VRF HVAC):</strong>
-                <span className="ms-2" style={{ color: "blue" }}>
-                  ■ Ducts (Blue)
-                </span>
-                <span className="ms-3" style={{ color: "lime" }}>
-                  ● Diffusers (Green/Lime)
-                </span>
-              </div>
-            )}
           </>
         )}
-        {acType === "vrf-ductless" && (
-          <div className="mb-2">
-            <strong>Legend (VRF Ductless):</strong>
-            <span className="ms-2" style={{ color: "#008B8B" }}>
-              — Teal Lines: Refrigerant Connections
-            </span>
+      </div>
+
+      {/* Professional Engineering Toolbar */}
+      <div className="ev-toolbar">
+        {(acType === "ducted" || acType === "vrf-ducted") && (
+          <>
+            {/* Ductwork Section */}
+            <div className="ev-toolbar-group">
+              <span className="ev-toolbar-label">Ductwork</span>
+              <div className="ev-toolbar-btns">
+                <Button
+                  size="sm"
+                  variant={addMode === "supply-duct" ? "primary" : "outline-primary"}
+                  onClick={() => setAddMode(addMode === "supply-duct" ? null : "supply-duct")}
+                  title="Supply Duct — solid blue parallel lines"
+                >
+                  Supply Duct
+                </Button>
+                <Button
+                  size="sm"
+                  variant={addMode === "return-duct" ? "warning" : "outline-warning"}
+                  onClick={() => setAddMode(addMode === "return-duct" ? null : "return-duct")}
+                  title="Return Duct — dashed orange parallel lines"
+                >
+                  Return Duct
+                </Button>
+                <Button
+                  size="sm"
+                  variant={addMode === "flex-duct" ? "secondary" : "outline-secondary"}
+                  onClick={() => setAddMode(addMode === "flex-duct" ? null : "flex-duct")}
+                  title="Flex Duct — wavy lines"
+                >
+                  Flex Duct
+                </Button>
+              </div>
+            </div>
+
+            {/* Diffusers & Grilles Section */}
+            <div className="ev-toolbar-group">
+              <span className="ev-toolbar-label">Diffusers & Grilles</span>
+              <div className="ev-toolbar-btns">
+                <Button
+                  size="sm"
+                  variant={addMode === "supply-4way" ? "primary" : "outline-primary"}
+                  onClick={() => setAddMode(addMode === "supply-4way" ? null : "supply-4way")}
+                  title="4-Way Supply Diffuser"
+                >
+                  4-Way SD
+                </Button>
+                <Button
+                  size="sm"
+                  variant={addMode === "round-diffuser" ? "primary" : "outline-primary"}
+                  onClick={() => setAddMode(addMode === "round-diffuser" ? null : "round-diffuser")}
+                  title="Round Ceiling Diffuser"
+                >
+                  Round SD
+                </Button>
+                <Button
+                  size="sm"
+                  variant={addMode === "linear-slot" ? "primary" : "outline-primary"}
+                  onClick={() => setAddMode(addMode === "linear-slot" ? null : "linear-slot")}
+                  title="Linear Slot Diffuser"
+                >
+                  Linear Slot
+                </Button>
+                <Button
+                  size="sm"
+                  variant={addMode === "return-grille" ? "warning" : "outline-warning"}
+                  onClick={() => setAddMode(addMode === "return-grille" ? null : "return-grille")}
+                  title="Return Air Grille"
+                >
+                  Return Grille
+                </Button>
+                <Button
+                  size="sm"
+                  variant={addMode === "exhaust-grille" ? "success" : "outline-success"}
+                  onClick={() => setAddMode(addMode === "exhaust-grille" ? null : "exhaust-grille")}
+                  title="Exhaust Air Grille"
+                >
+                  Exhaust
+                </Button>
+              </div>
+            </div>
+
+            {/* Accessories Section */}
+            <div className="ev-toolbar-group">
+              <span className="ev-toolbar-label">Accessories</span>
+              <div className="ev-toolbar-btns">
+                <Button
+                  size="sm"
+                  variant={addMode === "fire-damper" ? "danger" : "outline-danger"}
+                  onClick={() => setAddMode(addMode === "fire-damper" ? null : "fire-damper")}
+                  title="Fire Damper"
+                >
+                  Fire Damper
+                </Button>
+                <Button
+                  size="sm"
+                  variant={addMode === "volume-damper" ? "secondary" : "outline-secondary"}
+                  onClick={() => setAddMode(addMode === "volume-damper" ? null : "volume-damper")}
+                  title="Volume Damper"
+                >
+                  Vol. Damper
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Auto-placement */}
+        {(acType === "ducted" || acType === "vrf-ducted") && (
+          <div className="ev-toolbar-group">
+            <span className="ev-toolbar-label">Auto Layout</span>
+            <div className="ev-toolbar-btns">
+              <Button
+                size="sm"
+                variant="outline-info"
+                onClick={handleAutoPlaceDucts}
+                title="Auto-generate supply duct + diffuser + return duct + grille near every indoor unit rect"
+              >
+                🔧 Auto-Place Ducts
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Comment (all modes) */}
+        <div className="ev-toolbar-group">
+          <span className="ev-toolbar-label">Annotations</span>
+          <div className="ev-toolbar-btns">
+            <Button
+              size="sm"
+              variant={addMode === "comment" ? "warning" : "outline-warning"}
+              onClick={() => setAddMode(addMode === "comment" ? null : "comment")}
+            >
+              Add Comment
+            </Button>
+            {acType === "vrf-ductless" && (
+              <Button
+                size="sm"
+                variant="outline-secondary"
+                onClick={() => setAddMode("markCondenser")}
+              >
+                Mark Condenser
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Active mode indicator */}
+        {addMode && (
+          <div className="ev-active-mode">
+            <span>Placing: <strong>{addMode.replace(/-/g, ' ')}</strong></span>
+            <Button size="sm" variant="light" onClick={() => setAddMode(null)}>Cancel</Button>
           </div>
         )}
       </div>
-      <div className="mb-2 d-flex flex-wrap align-items-center gap-2">
-        <div className="d-flex flex-wrap align-items-center gap-2">
-          {(acType === "ducted" || acType === "vrf-ducted") && (
-            <>
-              <Button
-                onClick={() => setAddMode("duct")}
-                variant="info"
-                className="me-2"
-              >
-                Add Duct
-              </Button>
-              <Button
-                onClick={() => setAddMode("diffuser")}
-                variant="success"
-                className="me-2"
-              >
-                Add Diffuser
-              </Button>
-              <Button
-                onClick={() => setAddMode("comment")}
-                variant="warning"
-                className="me-2"
-              >
-                Add Comment
-              </Button>
-            </>
-          )}
-          {acType === "vrf-ductless" && (
-            <>
-              <Button
-                onClick={() => setAddMode("comment")}
-                variant="warning"
-                className="me-2"
-              >
-                Add Comment
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setAnnotation((prev) => {
-                    let allItems = [];
 
-                    // Handle VRF units
-                    if (prev?.annotations?.vrf) {
-                      const outdoorUnits = [
-                        ...(prev.annotations.vrf.outdoorUnits || []),
-                      ];
-                      const indoorUnits = [
-                        ...(prev.annotations.vrf.indoorUnits || []),
-                      ];
-                      allItems.push(
-                        ...outdoorUnits.map((d) => ({
-                          ...d,
-                          type: "outdoor",
-                          subType: "vrf",
-                        })),
-                        ...indoorUnits.map((d) => ({
-                          ...d,
-                          type: "indoor",
-                          subType: "vrf",
-                        }))
-                      );
-                    }
+      {/* Undo & Save Actions */}
+      <div className="ev-actions-bar">
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            onClick={() => {
+              setAnnotation((prev) => {
+                let allItems = [];
 
-                    // Handle comments
-                    if (prev?.annotations?.comments) {
-                      const comments = [...(prev.annotations.comments || [])];
-                      allItems.push(
-                        ...comments.map((c) => ({
-                          ...c,
-                          type: "comment",
-                          subType: "annotation",
-                        }))
-                      );
-                    }
+                // Collect HVAC items (ducts, diffusers, dampers)
+                if (prev?.annotations?.hvac) {
+                  allItems.push(
+                    ...(prev.annotations.hvac.ducts || []).map((d) => ({ ...d, type: "duct", subType: "hvac" })),
+                    ...(prev.annotations.hvac.diffusers || []).map((d) => ({ ...d, type: "diffuser", subType: "hvac" })),
+                    ...(prev.annotations.hvac.dampers || []).map((d) => ({ ...d, type: "damper", subType: "hvac" }))
+                  );
+                }
 
-                    if (allItems.length === 0) return prev;
+                // Collect VRF units
+                if (prev?.annotations?.vrf && acType.startsWith("vrf")) {
+                  allItems.push(
+                    ...(prev.annotations.vrf.outdoorUnits || []).map((d) => ({ ...d, type: "outdoor", subType: "vrf" })),
+                    ...(prev.annotations.vrf.indoorUnits || []).map((d) => ({ ...d, type: "indoor", subType: "vrf" }))
+                  );
+                }
 
-                    const mostRecent = allItems.reduce((max, item) => {
-                      const maxTime = parseInt(max.id.split("-")[1]);
-                      const itemTime = parseInt(item.id.split("-")[1]);
-                      return itemTime > maxTime ? item : max;
-                    });
+                // Collect comments
+                if (prev?.annotations?.comments) {
+                  allItems.push(
+                    ...(prev.annotations.comments || []).map((c) => ({ ...c, type: "comment", subType: "annotation" }))
+                  );
+                }
 
-                    // Remove comments
-                    if (mostRecent.subType === "annotation") {
-                      return {
-                        ...prev,
-                        annotations: {
-                          ...(prev.annotations || {}),
-                          comments: (prev.annotations?.comments || []).filter(
-                            (c) => c.id !== mostRecent.id
-                          ),
-                        },
-                      };
-                    }
+                if (allItems.length === 0) return prev;
 
-                    // Remove VRF units
-                    if (mostRecent.subType === "vrf") {
-                      const vrf = { ...prev.annotations.vrf };
-                      if (mostRecent.type === "outdoor") {
-                        vrf.outdoorUnits = vrf.outdoorUnits.filter(
-                          (d) => d.id !== mostRecent.id
-                        );
-                      }
-                      if (mostRecent.type === "indoor") {
-                        vrf.indoorUnits = vrf.indoorUnits.filter(
-                          (d) => d.id !== mostRecent.id
-                        );
-                      }
-                      return {
-                        ...prev,
-                        annotations: {
-                          ...(prev.annotations || {}),
-                          vrf,
-                        },
-                      };
-                    }
-
-                    return prev;
-                  });
-
-                  setAddMode(null);
-                }}
-              >
-                Undo Last
-              </Button>
-            </>
-          )}
-          {acType === "ductless" && (
-            <p className="text-muted">
-              Ductless system: No ducts or diffusers needed. Use separate units
-              per room.
-            </p>
-          )}
-          {(acType === "ducted" || acType === "vrf-ducted") && (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setAnnotation((prev) => {
-                  let allItems = [];
-
-                  // Handle VRF ducts and diffusers
-                  if (prev?.annotations?.hvac) {
-                    const ducts = [...(prev.annotations.hvac.ducts || [])];
-                    const diffusers = [
-                      ...(prev.annotations.hvac.diffusers || []),
-                    ];
-                    allItems.push(
-                      ...ducts.map((d) => ({
-                        ...d,
-                        type: "duct",
-                        subType: "hvac",
-                      })),
-                      ...diffusers.map((d) => ({
-                        ...d,
-                        type: "diffuser",
-                        subType: "hvac",
-                      }))
-                    );
-                  }
-
-                  // Handle VRF units
-                  if (prev?.annotations?.vrf && acType.startsWith("vrf")) {
-                    const outdoorUnits = [
-                      ...(prev.annotations.vrf.outdoorUnits || []),
-                    ];
-                    const indoorUnits = [
-                      ...(prev.annotations.vrf.indoorUnits || []),
-                    ];
-                    allItems.push(
-                      ...outdoorUnits.map((d) => ({
-                        ...d,
-                        type: "outdoor",
-                        subType: "vrf",
-                      })),
-                      ...indoorUnits.map((d) => ({
-                        ...d,
-                        type: "indoor",
-                        subType: "vrf",
-                      }))
-                    );
-                  }
-
-                  // Handle comments
-                  if (prev?.annotations?.comments) {
-                    const comments = [...(prev.annotations.comments || [])];
-                    allItems.push(
-                      ...comments.map((c) => ({
-                        ...c,
-                        type: "comment",
-                        subType: "annotation",
-                      }))
-                    );
-                  }
-
-                  if (allItems.length === 0) return prev;
-
-                  const mostRecent = allItems.reduce((max, item) => {
-                    const maxTime = parseInt(max.id.split("-")[1]);
-                    const itemTime = parseInt(item.id.split("-")[1]);
-                    return itemTime > maxTime ? item : max;
-                  });
-
-                  // Remove comments
-                  if (mostRecent.subType === "annotation") {
-                    return {
-                      ...prev,
-                      annotations: {
-                        ...(prev.annotations || {}),
-                        comments: (prev.annotations?.comments || []).filter(
-                          (c) => c.id !== mostRecent.id
-                        ),
-                      },
-                    };
-                  }
-
-                  // Remove minisplit ducts/diffusers
-                  if (mostRecent.subType === "hvac") {
-                    const hvac = { ...prev.annotations.hvac };
-                    if (mostRecent.type === "duct") {
-                      hvac.ducts = hvac.ducts.filter(
-                        (d) => d.id !== mostRecent.id
-                      );
-                    }
-                    if (mostRecent.type === "diffuser") {
-                      hvac.diffusers = hvac.diffusers.filter(
-                        (d) => d.id !== mostRecent.id
-                      );
-                    }
-                    return {
-                      ...prev,
-                      annotations: {
-                        ...(prev.annotations || {}),
-                        hvac,
-                      },
-                    };
-                  }
-
-                  // Remove VRF units
-                  if (mostRecent.subType === "vrf") {
-                    const vrf = { ...prev.annotations.vrf };
-                    if (mostRecent.type === "outdoor") {
-                      vrf.outdoorUnits = vrf.outdoorUnits.filter(
-                        (d) => d.id !== mostRecent.id
-                      );
-                    }
-                    if (mostRecent.type === "indoor") {
-                      vrf.indoorUnits = vrf.indoorUnits.filter(
-                        (d) => d.id !== mostRecent.id
-                      );
-                    }
-                    return {
-                      ...prev,
-                      annotations: {
-                        ...(prev.annotations || {}),
-                        vrf,
-                      },
-                    };
-                  }
-
-                  return prev;
+                const mostRecent = allItems.reduce((max, item) => {
+                  const maxTime = parseInt(max.id.split("-")[1]);
+                  const itemTime = parseInt(item.id.split("-")[1]);
+                  return itemTime > maxTime ? item : max;
                 });
 
-                setAddMode(null);
-              }}
-            >
-              Undo Last
-            </Button>
-          )}
+                if (mostRecent.subType === "annotation") {
+                  return { ...prev, annotations: { ...(prev.annotations || {}), comments: (prev.annotations?.comments || []).filter((c) => c.id !== mostRecent.id) } };
+                }
+                if (mostRecent.subType === "hvac") {
+                  const hvac = { ...(prev.annotations?.hvac || {}) };
+                  if (mostRecent.type === "duct") hvac.ducts = (hvac.ducts || []).filter((d) => d.id !== mostRecent.id);
+                  if (mostRecent.type === "diffuser") hvac.diffusers = (hvac.diffusers || []).filter((d) => d.id !== mostRecent.id);
+                  if (mostRecent.type === "damper") hvac.dampers = (hvac.dampers || []).filter((d) => d.id !== mostRecent.id);
+                  return { ...prev, annotations: { ...(prev.annotations || {}), hvac } };
+                }
+                if (mostRecent.subType === "vrf") {
+                  const vrf = { ...(prev.annotations?.vrf || {}) };
+                  if (mostRecent.type === "outdoor") vrf.outdoorUnits = (vrf.outdoorUnits || []).filter((d) => d.id !== mostRecent.id);
+                  if (mostRecent.type === "indoor") vrf.indoorUnits = (vrf.indoorUnits || []).filter((d) => d.id !== mostRecent.id);
+                  return { ...prev, annotations: { ...(prev.annotations || {}), vrf } };
+                }
+                return prev;
+              });
+              setAddMode(null);
+            }}
+          >
+            Undo Last
+          </Button>
 
-          <Button onClick={handleSave} variant="primary" className="me-2">
+          <Button onClick={handleSave} variant="primary" size="sm">
             Save HVAC Items
           </Button>
-        </div>
+      </div>
 
         <div className="pdf-scroll-wrapper">
           <div className="sb-zoom-controls">
@@ -1014,9 +1137,7 @@ const EngineerViewPage = () => {
           </div>
         )}
       </div>
-      </div>
 
-      {/* Mobile-friendly comment modal (replaces window.prompt) */}
       {showCommentModal && (
         <div
           style={{

@@ -313,6 +313,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/admin/all-annotations" className="dropdown-item">
                     Users Drawings
                   </Link>
+                  <Link to="/admin/newsletter" className="dropdown-item">
+                    Newsletter
+                  </Link>
                   <NavDropdown.Divider />
                   <Link
                     className="dropdown-item"

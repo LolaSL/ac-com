@@ -3610,7 +3610,7 @@ const data = {
         source: 'website'
       },
       {
-        email: 'jane.smith@company.com',
+        email: 'jane.smith@example.com',
         preferences: {
           newFeatures: true,
           pricingUpdates: false,
@@ -3622,7 +3622,7 @@ const data = {
         source: 'website'
       },
       {
-        email: 'mike.wilson@techcorp.com',
+        email: 'mike.wilson@example.com',
         preferences: {
           newFeatures: true,
           pricingUpdates: true,
@@ -3634,7 +3634,7 @@ const data = {
         source: 'website'
       },
       {
-        email: 'sarah.davis@startup.io',
+        email: 'sarah.davis@example.com',
         preferences: {
           newFeatures: true,
           pricingUpdates: true,

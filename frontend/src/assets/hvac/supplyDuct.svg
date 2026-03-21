@@ -1,0 +1,10 @@
+<svg width="60" height="20" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+  <!-- Supply duct (standard HVAC symbol - solid double line with arrow) -->
+  <line x1="0" y1="2" x2="60" y2="2" stroke="#0055CC" stroke-width="2"/>
+  <line x1="0" y1="18" x2="60" y2="18" stroke="#0055CC" stroke-width="2"/>
+  <!-- Size tick marks at ends -->
+  <line x1="0" y1="0" x2="0" y2="20" stroke="#0055CC" stroke-width="1.5"/>
+  <line x1="60" y1="0" x2="60" y2="20" stroke="#0055CC" stroke-width="1.5"/>
+  <!-- Airflow direction arrow -->
+  <polygon points="52,6 58,10 52,14" fill="#0055CC" opacity="0.6"/>
+</svg>

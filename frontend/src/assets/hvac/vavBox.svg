@@ -1,0 +1,9 @@
+<svg width="40" height="30" viewBox="0 0 40 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- VAV box (Variable Air Volume - standard HVAC symbol) -->
+  <rect x="2" y="2" width="36" height="26" stroke="#0055CC" fill="none" stroke-width="2"/>
+  <text x="20" y="18" font-size="10" font-family="Arial" font-weight="bold" fill="#0055CC" text-anchor="middle">VAV</text>
+  <!-- Inlet arrow -->
+  <polygon points="0,15 5,11 5,19" fill="#0055CC"/>
+  <!-- Outlet arrow -->
+  <polygon points="40,15 35,11 35,19" fill="#0055CC"/>
+</svg>

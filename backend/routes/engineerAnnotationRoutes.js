@@ -144,18 +144,28 @@ router.post(
                 id: duct.id,
                 xPercent: duct.xPercent || duct.x / width || 0,
                 yPercent: duct.yPercent || duct.y / height || 0,
-                width: duct.width || 0.2,
-                height: duct.height || 0.04,
+                width: duct.width || 0.08,
+                height: duct.height || 0.025,
                 fill: duct.fill || "transparent",
-                stroke: duct.stroke || "#0078d4",
+                stroke: duct.stroke || "#0055CC",
+                ductType: duct.ductType || "default",
+                sizeLabel: duct.sizeLabel || "",
             })),
             diffusers: (parsedHvac.diffusers || []).map((diffuser) => ({
                 id: diffuser.id,
                 shape: diffuser.shape || "circle",
                 xPercent: diffuser.xPercent || diffuser.x / width || 0,
                 yPercent: diffuser.yPercent || diffuser.y / height || 0,
-                sizePercent: diffuser.sizePercent || 0.08,
+                sizePercent: diffuser.sizePercent || 0.04,
                 airflow: diffuser.airflow,
+                diffuserType: diffuser.diffuserType || "default",
+            })),
+            dampers: (parsedHvac.dampers || []).map((damper) => ({
+                id: damper.id,
+                xPercent: damper.xPercent || damper.x / width || 0,
+                yPercent: damper.yPercent || damper.y / height || 0,
+                sizePercent: damper.sizePercent || 0.025,
+                damperType: damper.damperType || "volume",
             })),
             refrigerantLines: (parsedHvac.refrigerantLines || []).map((line) => ({
                 id: line.id,
@@ -420,37 +430,114 @@ router.get(
             if (ann.hvac) {
                 const hvac = ann.hvac;
 
-                // Draw ducts (for ducted systems)
+                // Draw ducts (for ducted systems) — color by ductType
                 if (hvac.ducts && Array.isArray(hvac.ducts)) {
+                    const ductColors = {
+                        supply:  rgb(0, 0.333, 0.8),   // #0055CC
+                        return:  rgb(0.8, 0.267, 0),    // #CC4400
+                        flex:    rgb(0.533, 0.533, 0.533), // #888
+                        exhaust: rgb(0.133, 0.545, 0.133), // #228B22
+                        default: rgb(0, 0.5, 1),
+                    };
                     hvac.ducts.forEach((duct) => {
                         const x = duct.xPercent * width;
                         const y = height - duct.yPercent * height - (duct.height || 0.04) * height;
                         const w = (duct.width || 0.2) * width;
                         const h = (duct.height || 0.04) * height;
+                        const color = ductColors[duct.ductType] || ductColors.default;
+                        const isDashed = duct.ductType === 'return';
                         firstPage.drawRectangle({
                             x,
                             y,
                             width: w,
                             height: h,
-                            borderColor: rgb(0, 0.5, 1),
+                            borderColor: color,
                             borderWidth: 2,
+                            dashArray: isDashed ? [6, 4] : undefined,
                         });
                     });
                 }
 
-                // Draw diffusers
+                // Draw diffusers — shape/color by diffuserType
                 if (hvac.diffusers && Array.isArray(hvac.diffusers)) {
+                    const diffuserColors = {
+                        'supply-4way':    { border: rgb(0, 0.333, 0.8), fill: rgb(0.88, 0.93, 1) },
+                        'round':          { border: rgb(0, 0.333, 0.8), fill: rgb(0.88, 0.93, 1) },
+                        'linear-slot':    { border: rgb(0, 0.333, 0.8), fill: rgb(0.88, 0.93, 1) },
+                        'return-grille':  { border: rgb(0.8, 0.267, 0), fill: rgb(1, 0.95, 0.88) },
+                        'exhaust':        { border: rgb(0.133, 0.545, 0.133), fill: rgb(0.88, 1, 0.88) },
+                        'default':        { border: rgb(0, 0.5, 1), fill: undefined },
+                    };
                     hvac.diffusers.forEach((diffuser) => {
                         const x = diffuser.xPercent * width;
                         const y = height - diffuser.yPercent * height;
                         const size = (diffuser.sizePercent || 0.08) * width;
-                        firstPage.drawCircle({
-                            x,
-                            y,
-                            size: size / 2,
-                            borderColor: rgb(0, 1, 0),
-                            borderWidth: 2,
-                        });
+                        const dt = diffuser.diffuserType || 'default';
+                        const colors = diffuserColors[dt] || diffuserColors.default;
+
+                        if (dt === 'linear-slot') {
+                            // Wide thin rectangle for linear slot
+                            firstPage.drawRectangle({
+                                x: x - size * 0.75,
+                                y: y - size * 0.15,
+                                width: size * 1.5,
+                                height: size * 0.3,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                        } else if (dt === 'supply-4way' || dt === 'square' || dt === 'return-grille' || dt === 'exhaust') {
+                            // Square shape for 4-way, return grille, exhaust
+                            firstPage.drawRectangle({
+                                x: x - size / 2,
+                                y: y - size / 2,
+                                width: size,
+                                height: size,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                        } else {
+                            // Circle for round and default
+                            firstPage.drawCircle({
+                                x,
+                                y,
+                                size: size / 2,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                        }
+                    });
+                }
+
+                // Draw dampers
+                if (hvac.dampers && Array.isArray(hvac.dampers)) {
+                    hvac.dampers.forEach((damper) => {
+                        const cx = damper.xPercent * width;
+                        const cy = height - damper.yPercent * height;
+                        const sz = (damper.sizePercent || 0.03) * width;
+                        if (damper.damperType === 'fire') {
+                            // Red diamond for fire damper
+                            firstPage.drawRectangle({
+                                x: cx - sz / 2,
+                                y: cy - sz / 2,
+                                width: sz,
+                                height: sz,
+                                borderColor: rgb(0.8, 0, 0),
+                                borderWidth: 2,
+                                rotate: { type: 'degrees', angle: 45 },
+                            });
+                        } else {
+                            // Circle for volume damper
+                            firstPage.drawCircle({
+                                x: cx,
+                                y: cy,
+                                size: sz / 2,
+                                borderColor: rgb(0.4, 0.4, 0.4),
+                                borderWidth: 2,
+                            });
+                        }
                     });
                 }
 

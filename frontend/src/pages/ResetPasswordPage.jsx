@@ -1,5 +1,7 @@
 import Axios from "axios";
 import { useContext, useEffect, useState } from "react";
+import Container from "react-bootstrap/Container";
+import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Alert from "react-bootstrap/Alert";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -78,182 +80,222 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="rp-page">
-      {/* Left Panel */}
-      <div className="rp-left">
-        <div className="rp-left-content">
-          <div className="rp-icon-circle">
-            <i className="fas fa-shield-alt"></i>
-          </div>
-          <h1 className="rp-brand">AC-Commerce</h1>
-          <p className="rp-tagline">Create a strong, secure password</p>
-
-          <div className="rp-tips">
-            <div className="rp-tip">
-              <div className="rp-tip-icon">
-                <i className="fas fa-lock"></i>
+      <Link to="/" className="auth-home-link">
+        <i className="fas fa-home"></i>
+        <span>Home</span>
+      </Link>
+      <Container fluid className="rp-container">
+        <div className="rp-wrapper">
+          {/* Left Side - Branding */}
+          <div className="rp-left">
+            <div className="rp-branding">
+              <div className="rp-logo-container">
+                <i className="fas fa-shield-alt rp-logo-icon"></i>
               </div>
-              <div>
-                <strong>Use 8+ Characters</strong>
-                <p>Longer passwords are harder to crack</p>
-              </div>
-            </div>
-            <div className="rp-tip">
-              <div className="rp-tip-icon">
-                <i className="fas fa-random"></i>
-              </div>
-              <div>
-                <strong>Mix It Up</strong>
-                <p>Combine letters, numbers &amp; symbols</p>
-              </div>
-            </div>
-            <div className="rp-tip">
-              <div className="rp-tip-icon">
-                <i className="fas fa-fingerprint"></i>
-              </div>
-              <div>
-                <strong>Make It Unique</strong>
-                <p>Don't reuse passwords from other sites</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel */}
-      <div className="rp-right">
-        <div className="rp-form-container">
-          {success ? (
-            <div className="rp-success">
-              <div className="rp-success-icon">
-                <i className="fas fa-check-circle"></i>
-              </div>
-              <h2>Password Updated!</h2>
-              <p>Your password has been reset successfully.</p>
-              <p className="rp-redirect-text">
-                Redirecting to sign in<span className="rp-dots">...</span>
+              <h1 className="rp-brand-title">AC-Commerce</h1>
+              <h2 className="rp-brand-subtitle">Create New Password</h2>
+              <p className="rp-brand-description">
+                Choose a strong, secure password to protect your account.
+                A good password is the first line of defense.
               </p>
+
+              <div className="rp-tips">
+                <div className="rp-tip">
+                  <div className="rp-tip-num">
+                    <i className="fas fa-lock"></i>
+                  </div>
+                  <div className="rp-tip-text">
+                    <strong>Use 8+ Characters</strong>
+                    <span>Longer passwords are harder to crack</span>
+                  </div>
+                </div>
+                <div className="rp-tip">
+                  <div className="rp-tip-num">
+                    <i className="fas fa-random"></i>
+                  </div>
+                  <div className="rp-tip-text">
+                    <strong>Mix It Up</strong>
+                    <span>Combine letters, numbers &amp; symbols</span>
+                  </div>
+                </div>
+                <div className="rp-tip">
+                  <div className="rp-tip-num">
+                    <i className="fas fa-fingerprint"></i>
+                  </div>
+                  <div className="rp-tip-text">
+                    <strong>Make It Unique</strong>
+                    <span>Don&apos;t reuse passwords from other sites</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <>
-              <div className="rp-form-header">
-                <div className="rp-header-icon">
-                  <i className="fas fa-lock"></i>
-                </div>
-                <h2>Reset Password</h2>
-                <p>Enter your new password below</p>
-              </div>
+          </div>
 
-              <Form onSubmit={submitHandler}>
-                <div className="rp-field">
-                  <label className="rp-label">New Password</label>
-                  <div className="rp-input-wrapper">
-                    <i className="fas fa-lock rp-input-icon"></i>
-                    <input
-                      className="rp-input"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter new password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="rp-eye-btn"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-                    </button>
+          {/* Right Side - Form */}
+          <div className="rp-right">
+            <div className="rp-form-container">
+              {success ? (
+                <div className="rp-success-card">
+                  <i className="fas fa-check-circle rp-success-icon"></i>
+                  <h2 className="rp-success-title">Password Updated!</h2>
+                  <p className="rp-success-text">
+                    Your password has been reset successfully.
+                    You&apos;ll be redirected to sign in shortly.
+                  </p>
+                  <p className="rp-success-hint">
+                    Redirecting to sign in
+                    <span className="rp-dots">...</span>
+                  </p>
+                  <Link to="/signin" className="rp-back-link">
+                    <i className="fas fa-arrow-left me-2"></i>
+                    Go to Sign In
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div className="rp-form-header">
+                    <i className="fas fa-lock rp-form-icon"></i>
+                    <h2 className="rp-form-title">Reset Password</h2>
+                    <p className="rp-form-subtitle">
+                      Enter your new password below
+                    </p>
                   </div>
-                  {password && (
-                    <div className="rp-strength">
-                      <div className="rp-strength-bar">
-                        <div
-                          className="rp-strength-fill"
-                          style={{
-                            width: `${(getPasswordStrength(password).strength / 4) * 100}%`,
-                            backgroundColor: getPasswordStrength(password).color,
-                          }}
-                        />
-                      </div>
-                      <span
-                        className="rp-strength-label"
-                        style={{ color: getPasswordStrength(password).color }}
+
+                  <Form
+                    onSubmit={submitHandler}
+                    noValidate
+                    className="rp-form"
+                  >
+                    {formError && (
+                      <Alert
+                        variant="danger"
+                        dismissible
+                        onClose={() => setFormError("")}
+                        className="rp-error-alert"
                       >
-                        {getPasswordStrength(password).label}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                        <i className="fas fa-exclamation-circle me-2"></i>
+                        {formError}
+                      </Alert>
+                    )}
 
-                <div className="rp-field">
-                  <label className="rp-label">Confirm Password</label>
-                  <div className="rp-input-wrapper">
-                    <i className="fas fa-lock rp-input-icon"></i>
-                    <input
-                      className="rp-input"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm new password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="rp-eye-btn"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      <i className={showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-                    </button>
-                  </div>
-                  {confirmPassword && (
-                    <div className="rp-match-indicator">
-                      {password === confirmPassword ? (
-                        <span className="rp-match">
-                          <i className="fas fa-check-circle"></i> Passwords match
-                        </span>
-                      ) : (
-                        <span className="rp-no-match">
-                          <i className="fas fa-times-circle"></i> Passwords do not match
-                        </span>
+                    <Form.Group className="rp-form-group">
+                      <Form.Label className="rp-form-label">
+                        <i className="fas fa-lock me-2"></i>
+                        New Password
+                      </Form.Label>
+                      <div className="rp-input-wrapper">
+                        <Form.Control
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter new password"
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="rp-form-input"
+                        />
+                        <button
+                          type="button"
+                          className="rp-eye-btn"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                        </button>
+                      </div>
+                      {password && (
+                        <div className="rp-strength-row">
+                          <div className="rp-strength-bar">
+                            <div
+                              className="rp-strength-fill"
+                              style={{
+                                width: `${(getPasswordStrength(password).strength / 4) * 100}%`,
+                                backgroundColor: getPasswordStrength(password).color,
+                              }}
+                            />
+                          </div>
+                          <span
+                            className="rp-strength-label"
+                            style={{ color: getPasswordStrength(password).color }}
+                          >
+                            {getPasswordStrength(password).label}
+                          </span>
+                        </div>
                       )}
+                    </Form.Group>
+
+                    <Form.Group className="rp-form-group">
+                      <Form.Label className="rp-form-label">
+                        <i className="fas fa-lock me-2"></i>
+                        Confirm Password
+                      </Form.Label>
+                      <div className="rp-input-wrapper">
+                        <Form.Control
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm new password"
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="rp-form-input"
+                        />
+                        <button
+                          type="button"
+                          className="rp-eye-btn"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          <i className={showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                        </button>
+                      </div>
+                      {confirmPassword && (
+                        <div className="rp-match-indicator">
+                          {password === confirmPassword ? (
+                            <span className="rp-match-ok">
+                              <i className="fas fa-check-circle me-1"></i>
+                              Passwords match
+                            </span>
+                          ) : (
+                            <span className="rp-match-err">
+                              <i className="fas fa-times-circle me-1"></i>
+                              Passwords do not match
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </Form.Group>
+
+                    <div className="d-grid">
+                      <Button
+                        type="submit"
+                        className="rp-button"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                            ></span>
+                            Resetting...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-check me-2"></i>
+                            Reset Password
+                          </>
+                        )}
+                      </Button>
                     </div>
-                  )}
-                </div>
+                  </Form>
 
-                {formError && (
-                  <Alert variant="danger" dismissible onClose={() => setFormError("")} className="rp-alert">
-                    <i className="fas fa-exclamation-circle me-2"></i>{formError}
-                  </Alert>
-                )}
-
-                <button
-                  type="submit"
-                  className="rp-submit-btn"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Resetting...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-check me-2"></i>
-                      Reset Password
-                    </>
-                  )}
-                </button>
-              </Form>
-
-              <div className="rp-footer-link">
-                <Link to="/signin">
-                  <i className="fas fa-arrow-left me-1"></i> Back to Sign In
-                </Link>
-              </div>
-            </>
-          )}
+                  <div className="rp-form-footer">
+                    <Link to="/signin" className="rp-signin-link">
+                      <i className="fas fa-arrow-left me-1"></i>
+                      Back to Sign In
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

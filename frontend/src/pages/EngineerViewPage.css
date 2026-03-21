@@ -93,6 +93,154 @@
   border-color: #9ca3af;
 }
 
+/* ── Professional Legend Panel ──────────────────────────── */
+.ev-legend-panel {
+  background: #f8f9fb;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.ev-legend-section {
+  margin-top: 0.75rem;
+}
+
+.ev-legend-title {
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #555;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.2rem;
+}
+
+.ev-legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  padding-top: 0.35rem;
+}
+
+.ev-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #333;
+}
+
+.ev-legend-line {
+  display: inline-block;
+  width: 36px;
+  height: 0;
+  position: relative;
+  top: 0;
+}
+
+.ev-legend-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+/* ── Professional Toolbar ──────────────────────────────── */
+.ev-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e8ecf1 100%);
+  border: 1px solid #c9d1dc;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.ev-toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ev-toolbar-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  padding-left: 2px;
+}
+
+.ev-toolbar-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.ev-toolbar-btns .btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.ev-active-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+/* ── Actions Bar ───────────────────────────────────────── */
+.ev-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Mobile responsive ─────────────────────────────────── */
+@media (max-width: 767px) {
+  .ev-toolbar {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .ev-toolbar-btns .btn {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    min-height: 38px;
+  }
+
+  .ev-legend-items {
+    gap: 0.4rem 0.8rem;
+  }
+
+  .ev-active-mode {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ev-legend-panel {
+    font-size: 0.78rem;
+    padding: 0.75rem;
+  }
+}
+
 .sb-zoom-btn:active {
   background: #d1d5db;
 }

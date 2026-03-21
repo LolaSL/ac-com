@@ -1,0 +1,8 @@
+<svg width="60" height="20" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flex duct (standard HVAC symbol - wavy lines) -->
+  <path d="M0,4 Q5,2 10,4 Q15,6 20,4 Q25,2 30,4 Q35,6 40,4 Q45,2 50,4 Q55,6 60,4" stroke="#666" fill="none" stroke-width="1.5"/>
+  <path d="M0,16 Q5,14 10,16 Q15,18 20,16 Q25,14 30,16 Q35,18 40,16 Q45,14 50,16 Q55,18 60,16" stroke="#666" fill="none" stroke-width="1.5"/>
+  <!-- Center airflow arrow -->
+  <line x1="5" y1="10" x2="48" y2="10" stroke="#999" stroke-width="1" stroke-dasharray="3,3"/>
+  <polygon points="48,7 55,10 48,13" fill="#999"/>
+</svg>
