@@ -6,7 +6,7 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 0.35rem 0;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
@@ -106,11 +106,11 @@
 }
 
 /* ── Brand ── */
-.handwritten {
+.header-nav .handwritten {
   font-family: system-ui;
-  font-size: 11px !important;
+  font-size: 11px;
   color: #67e8f9;
-  font-weight: 600 !important;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 
@@ -184,7 +184,8 @@
   padding: 0.5rem 0;
   min-width: 220px;
   animation: headerDropFade 0.2s ease;
-  overflow: hidden;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 @keyframes headerDropFade {
@@ -232,6 +233,49 @@
 .header-nav .dropdown-item[href="#adminlogout"]:hover {
   background: rgba(248, 113, 113, 0.1);
   color: #fca5a5;
+}
+
+/* ── Cart area ── */
+.cart-wrapper {
+  flex-wrap: nowrap;
+}
+
+.cart-link {
+  white-space: nowrap;
+}
+
+.cart-badge-checkout {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.cart-badge-empty {
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+
+/* ── User dropdown title ── */
+.user-dropdown-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Active route highlighting ── */
+.header-nav .nav-link.active-link {
+  color: #67e8f9 !important;
+}
+
+.header-nav .dropdown-item.active-link {
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.08);
+}
+
+/* ── Login dropdown ── */
+.header-nav .login-dropdown .dropdown-item i {
+  width: 20px;
+  text-align: center;
 }
 
 /* ── Cart badge ── */
@@ -339,7 +383,7 @@
   }
 
   .navbar-brand .handwritten {
-    font-size: 10px !important;
+    font-size: 10px;
   }
 
   .btn-toggle {

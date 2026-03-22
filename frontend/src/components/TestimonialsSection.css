@@ -1,80 +1,242 @@
-.testimonials-section {
-  padding: 3rem 0;
+/* ==========================================
+   Testimonials Section — Modern Dark Theme
+   ========================================== */
+
+.ts-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 4rem 0;
 }
 
-.testimonials-section .testimonial-card {
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  background-color: #fff;
-  height: 100%;
-  border-left: 4px solid #007bff;
+.ts-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
 }
 
-.testimonials-section .testimonial-rating {
+/* ── Header ── */
+.ts-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.ts-badge {
+  display: inline-block;
+  background: rgba(103, 232, 249, 0.1);
+  color: #67e8f9;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(103, 232, 249, 0.2);
+  margin-bottom: 0.75rem;
+}
+
+.ts-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0.5rem 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.ts-subtitle {
+  font-size: 1.05rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ── Card grid ── */
+.ts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+/* ── Card ── */
+.ts-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  overflow: hidden;
+}
+
+.ts-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  border-color: rgba(103, 232, 249, 0.15);
+}
+
+.ts-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #67e8f9, #3b82f6);
+  border-radius: 16px 16px 0 0;
+}
+
+/* ── Stars ── */
+.ts-stars {
   margin-bottom: 1rem;
+  display: flex;
+  gap: 3px;
 }
 
-.testimonials-section .testimonial-quote {
-  color: #6c757d;
-  margin-bottom: 1.5rem;
+.ts-stars i {
+  color: #fbbf24;
+  font-size: 0.85rem;
+}
+
+/* ── Quote ── */
+.ts-quote {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  line-height: 1.65;
   font-style: italic;
+  flex: 1;
+  margin-bottom: 1.25rem;
 }
 
-.testimonials-section .testimonial-author {
+/* ── Author ── */
+.ts-author {
   display: flex;
   align-items: center;
-  margin-top: 1.5rem;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.testimonials-section .testimonial-avatar {
-  font-size: 2.5rem;
-  margin-right: 0.75rem;
+.ts-avatar {
+  font-size: 2.2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(103, 232, 249, 0.08);
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.testimonials-section .testimonial-name {
-  font-weight: bold;
-  margin-bottom: 0;
+.ts-author-info {
+  display: flex;
+  flex-direction: column;
 }
 
-.testimonials-section .testimonial-role,
-.testimonials-section .testimonial-company {
-  color: #6c757d;
-  font-size: 0.875rem;
+.ts-name {
+  font-weight: 700;
+  color: #f1f5f9;
+  font-size: 0.92rem;
+  line-height: 1.3;
 }
 
-.testimonials-section .stats-section {
-  margin-top: 3rem;
-  padding-top: 3rem;
-  border-top: 1px solid #dee2e6;
+.ts-role {
+  color: #67e8f9;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.ts-company {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+/* ── Stats ── */
+.ts-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ts-stat {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.testimonials-section .stat-number {
-  font-weight: bold;
-  color: #007bff;
+.ts-stat-icon {
+  font-size: 1.4rem;
+  color: #67e8f9;
+  margin-bottom: 0.25rem;
 }
 
-.testimonials-section .stat-description {
-  color: #6c757d;
+.ts-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
 }
 
-@media (max-width: 768px) {
-  .testimonials-section {
-    padding: 2rem 0;
+.ts-stat-label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* ── Tablet ── */
+@media (max-width: 992px) {
+  .ts-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .testimonials-section .testimonial-card {
-    padding: 1rem;
+  .ts-grid .ts-card:last-child {
+    grid-column: 1 / -1;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .ts-section {
+    padding: 2.5rem 0;
   }
 
-  .testimonials-section .testimonial-avatar {
-    font-size: 2rem;
-    margin-right: 0.5rem;
+  .ts-header {
+    margin-bottom: 2rem;
   }
 
-  .testimonials-section .stats-section {
-    margin-top: 2rem;
+  .ts-title {
+    font-size: 1.5rem;
+  }
+
+  .ts-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .ts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .ts-grid .ts-card:last-child {
+    max-width: 100%;
+  }
+
+  .ts-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .ts-stats {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 2.5rem;
     padding-top: 2rem;
+  }
+
+  .ts-stat-value {
+    font-size: 1.6rem;
   }
 }

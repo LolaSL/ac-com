@@ -172,6 +172,15 @@ export default function SignInPage() {
                 </Form.Group>
 
                 <div className="signin-forgot-row">
+                  <div className="signin-new-customer">
+                    <span>New customer? </span>
+                    <Link
+                      to={`/signup?redirect=${redirect}`}
+                      className="signin-signup-link"
+                    >
+                      Create your account
+                    </Link>
+                  </div>
                   <Link to="/forget-password" className="signin-forgot-link">
                     Forgot password?
                   </Link>
@@ -201,15 +210,7 @@ export default function SignInPage() {
                 </div>
               </Form>
 
-              <div className="signin-form-footer">
-                <span>New customer? </span>
-                <Link
-                  to={`/signup?redirect=${redirect}`}
-                  className="signin-signup-link"
-                >
-                  Create your account
-                </Link>
-              </div>
+
             </div>
           </div>
         </div>

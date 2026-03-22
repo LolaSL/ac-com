@@ -2414,7 +2414,7 @@ button:disabled {
   min-height: 100vh;
 }
 
-.sidebar {
+.dashboard-container .sidebar {
   width: 250px;
   min-height: 100vh;
   position: fixed;
@@ -2423,18 +2423,18 @@ button:disabled {
   z-index: 1000;
 }
 
-.main-content {
+.dashboard-container .main-content {
   flex: 1;
   margin-left: 250px;
   min-height: 100vh;
 }
 
 @media (max-width: 768px) {
-  .sidebar {
+  .dashboard-container .sidebar {
     transform: translateX(-100%);
   }
 
-  .main-content {
+  .dashboard-container .main-content {
     margin-left: 0;
   }
 }

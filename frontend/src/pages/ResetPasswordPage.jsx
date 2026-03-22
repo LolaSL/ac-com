@@ -260,6 +260,13 @@ export default function ResetPasswordPage() {
                       )}
                     </Form.Group>
 
+                    <div className="rp-form-footer">
+                      <Link to="/signin" className="rp-signin-link">
+                        <i className="fas fa-arrow-left me-1"></i>
+                        Back to Sign In
+                      </Link>
+                    </div>
+
                     <div className="d-grid">
                       <Button
                         type="submit"
@@ -283,13 +290,6 @@ export default function ResetPasswordPage() {
                       </Button>
                     </div>
                   </Form>
-
-                  <div className="rp-form-footer">
-                    <Link to="/signin" className="rp-signin-link">
-                      <i className="fas fa-arrow-left me-1"></i>
-                      Back to Sign In
-                    </Link>
-                  </div>
                 </>
               )}
             </div>

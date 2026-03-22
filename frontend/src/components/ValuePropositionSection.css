@@ -1,25 +1,128 @@
-.value-proposition-section {
-  padding: 3rem 0;
+/* ==========================================
+   Value Proposition — Modern Dark Theme
+   ========================================== */
+
+.vp-section {
+  background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
+  padding: 4rem 0;
 }
 
-.value-card {
-  background-color: #f8f9fa;
-  transition: transform 0.3s, box-shadow 0.3s;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.vp-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
 }
 
-.value-card:hover {
+/* ── Header ── */
+.vp-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.vp-badge {
+  display: inline-block;
+  background: rgba(103, 232, 249, 0.1);
+  color: #67e8f9;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(103, 232, 249, 0.2);
+  margin-bottom: 0.75rem;
+}
+
+.vp-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0.5rem 0 0.4rem;
+}
+
+.vp-subtitle {
+  font-size: 1.05rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ── Card grid ── */
+.vp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.vp-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.vp-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(103, 232, 249, 0.12);
 }
 
-@media (max-width: 768px) {
-  .value-proposition-section {
-    padding: 2rem 0;
+.vp-icon-wrap {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.vp-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 0.5rem;
+}
+
+.vp-card-desc {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 992px) {
+  .vp-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .vp-section {
+    padding: 2.5rem 0;
   }
 
-  .value-card {
-    margin-bottom: 1rem;
+  .vp-header {
+    margin-bottom: 2rem;
+  }
+
+  .vp-title {
+    font-size: 1.5rem;
+  }
+
+  .vp-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .vp-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .vp-card {
+    padding: 1.25rem 1rem;
   }
 }

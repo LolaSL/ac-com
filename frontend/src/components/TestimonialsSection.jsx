@@ -1,5 +1,4 @@
 import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
 import "./TestimonialsSection.css";
 
 export default function TestimonialsSection() {
@@ -30,65 +29,53 @@ export default function TestimonialsSection() {
     },
   ];
 
+  const stats = [
+    { value: "60%", label: "Increase in Project Volume", icon: "fas fa-chart-line" },
+    { value: "50%", label: "Faster Quote Turnaround", icon: "fas fa-bolt" },
+    { value: "4.8/5", label: "Average Customer Rating", icon: "fas fa-star" },
+  ];
+
   return (
-    <section className="testimonials-section py-5">
-      <Container>
-        <Row className="mb-5 text-center">
-          <Col>
-            <h2 className="section-title">What Our Customers Say</h2>
-            <p className="text-muted lead">
-              Real results from industry professionals
-            </p>
-          </Col>
-        </Row>
+    <section className="ts-section">
+      <div className="ts-container">
+        <div className="ts-header">
+          <span className="ts-badge">Testimonials</span>
+          <h2 className="ts-title">What Our Customers Say</h2>
+          <p className="ts-subtitle">Real results from industry professionals</p>
+        </div>
 
-        <Row>
-          {testimonials.map((testimonial, index) => (
-            <Col md={4} sm={6} xs={12} key={index} className="mb-4">
-              <div className="testimonial-card">
-                {/* Rating */}
-                <div className="testimonial-rating">
-                  {"⭐".repeat(testimonial.rating)}
-                </div>
-
-                {/* Quote */}
-                <p className="testimonial-quote">"{testimonial.text}"</p>
-
-                {/* Author */}
-                <div className="testimonial-author">
-                  <div className="testimonial-avatar">{testimonial.image}</div>
-                  <div>
-                    <h6 className="testimonial-name">{testimonial.name}</h6>
-                    <small className="testimonial-role">
-                      {testimonial.role}
-                    </small>
-                    <br />
-                    <small className="testimonial-company">
-                      {testimonial.company}
-                    </small>
-                  </div>
+        <div className="ts-grid">
+          {testimonials.map((t, i) => (
+            <div className="ts-card" key={i}>
+              <div className="ts-card-accent" />
+              <div className="ts-stars">
+                {Array.from({ length: t.rating }, (_, j) => (
+                  <i className="fas fa-star" key={j} />
+                ))}
+              </div>
+              <p className="ts-quote">&ldquo;{t.text}&rdquo;</p>
+              <div className="ts-author">
+                <div className="ts-avatar">{t.image}</div>
+                <div className="ts-author-info">
+                  <span className="ts-name">{t.name}</span>
+                  <span className="ts-role">{t.role}</span>
+                  <span className="ts-company">{t.company}</span>
                 </div>
               </div>
-            </Col>
+            </div>
           ))}
-        </Row>
+        </div>
 
-        {/* Stats from testimonials */}
-        <Row className="stats-section">
-          <Col md={4} xs={12} className="mb-3">
-            <h4 className="stat-number">60%</h4>
-            <p className="stat-description">Increase in Project Volume</p>
-          </Col>
-          <Col md={4} xs={12} className="mb-3">
-            <h4 className="stat-number">50%</h4>
-            <p className="stat-description">Faster Quote Turnaround</p>
-          </Col>
-          <Col md={4} xs={12} className="mb-3">
-            <h4 className="stat-number">4.8/5</h4>
-            <p className="stat-description">Average Customer Rating</p>
-          </Col>
-        </Row>
-      </Container>
+        <div className="ts-stats">
+          {stats.map((s, i) => (
+            <div className="ts-stat" key={i}>
+              <i className={`${s.icon} ts-stat-icon`} />
+              <span className="ts-stat-value">{s.value}</span>
+              <span className="ts-stat-label">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

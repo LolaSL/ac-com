@@ -183,7 +183,7 @@ export default function HomeBannerPage() {
         </video>
         <div className="home-hero__overlay" />
         <div className="home-hero__inner">
-          <h1 className="home-hero__title fs-1">Welcome to AC-Commerce</h1>
+          <h1 className="home-hero__title">Welcome to AC-Commerce</h1>
           <p className="home-hero__sub">Smarter HVAC designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
       </div>

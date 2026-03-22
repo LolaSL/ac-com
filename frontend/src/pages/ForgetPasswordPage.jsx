@@ -162,6 +162,13 @@ export default function ForgetPasswordPage() {
                       />
                     </Form.Group>
 
+                    <div className="fp-form-footer">
+                      <span>Remember your password?  </span>
+                       <Link to="/signin" className="fp-signin-link">
+                         Sign In
+                      </Link>
+                    </div>
+
                     <div className="d-grid">
                       <Button
                         type="submit"
@@ -185,13 +192,6 @@ export default function ForgetPasswordPage() {
                       </Button>
                     </div>
                   </Form>
-
-                  <div className="fp-form-footer">
-                    <span>Remember your password? </span>
-                    <Link to="/signin" className="fp-signin-link">
-                      Sign In
-                    </Link>
-                  </div>
                 </>
               )}
             </div>

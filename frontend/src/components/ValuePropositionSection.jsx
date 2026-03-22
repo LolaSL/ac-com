@@ -1,81 +1,73 @@
 import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
-import {
-  FaDollarSign,
-  FaClock,
-  FaCheckCircle,
-  FaChartLine,
-} from "react-icons/fa";
 import "./ValuePropositionSection.css";
 
 export default function ValuePropositionSection() {
   const values = [
     {
-      icon: <FaDollarSign size={32} />,
+      icon: "fas fa-dollar-sign",
       title: "Save 40% on Costs",
       description:
         "Competitive pricing and automated design reduce project expenses significantly",
-      color: "success",
+      color: "#34d399",
     },
     {
-      icon: <FaClock size={32} />,
+      icon: "fas fa-clock",
       title: "10x Faster Quotes",
       description:
         "Engineer-powered instant calculations vs traditional manual processes",
-      color: "info",
+      color: "#67e8f9",
     },
     {
-      icon: <FaCheckCircle size={32} />,
+      icon: "fas fa-check-circle",
       title: "Verified Professionals",
       description:
         "Certified, vetted service providers with proven track records",
-      color: "primary",
+      color: "#3b82f6",
     },
     {
-      icon: <FaChartLine size={32} />,
+      icon: "fas fa-chart-line",
       title: "Real-Time Analytics",
       description:
         "Dashboard insights for project tracking and ROI measurement",
-      color: "warning",
+      color: "#fbbf24",
     },
     {
-      icon: <span style={{ fontSize: "2rem" }}>🌍</span>,
+      icon: "fas fa-globe",
       title: "Global Coverage",
       description: "Access to thousands of providers across the World",
-      color: "danger",
+      color: "#f472b6",
     },
     {
-      icon: <span style={{ fontSize: "2rem" }}>📱</span>,
+      icon: "fas fa-mobile-alt",
       title: "Mobile Optimized",
       description: "Full functionality on any device for on-site management",
-      color: "secondary",
+      color: "#a78bfa",
     },
   ];
 
   return (
-    <section className="value-proposition-section py-5">
-      <Container>
-        <Row className="mb-5 text-center">
-          <Col>
-            <h2 className="section-title">Why Choose Our Platform?</h2>
-            <p className="text-muted lead">
-              Transforming how HVAC projects are designed, quoted, and executed
-            </p>
-          </Col>
-        </Row>
+    <section className="vp-section">
+      <div className="vp-container">
+        <div className="vp-header">
+          <span className="vp-badge">Why Us</span>
+          <h2 className="vp-title">Why Choose Our Platform?</h2>
+          <p className="vp-subtitle">
+            Transforming how HVAC projects are designed, quoted, and executed
+          </p>
+        </div>
 
-        <Row>
+        <div className="vp-grid">
           {values.map((value, index) => (
-            <Col md={4} sm={6} xs={12} key={index} className="mb-4">
-              <div className="value-card p-4 rounded h-100 border-0">
-                <div className={`text-${value.color} mb-3`}>{value.icon}</div>
-                <h5 className="fw-bold mb-3">{value.title}</h5>
-                <p className="text-muted small">{value.description}</p>
+            <div className="vp-card" key={index}>
+              <div className="vp-icon-wrap" style={{ color: value.color }}>
+                <i className={value.icon} />
               </div>
-            </Col>
+              <h5 className="vp-card-title">{value.title}</h5>
+              <p className="vp-card-desc">{value.description}</p>
+            </div>
           ))}
-        </Row>
-      </Container>
+        </div>
+      </div>
     </section>
   );
 }

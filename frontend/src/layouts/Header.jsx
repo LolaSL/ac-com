@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
@@ -18,6 +18,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
   const navRef = useRef(null);
+  const location = useLocation();
 
   // Close dropdowns on outside click/touch (mobile fix for onMouseLeave)
   useEffect(() => {
@@ -82,16 +83,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
               <SearchBox />
             </div>
             <Nav className=" align-items-center gap-3 ms-auto me-4">
-              <div
-                className="d-flex align-items-center gap-1"
-                style={{
-                  flexWrap: "nowrap",
-                }}
-              >
+              <div className="d-flex align-items-center gap-1 cart-wrapper">
                 <Link
                   to="/cart"
-                  className="text-decoration-none d-flex nav-link "
-                  style={{ whiteSpace: "nowrap" }}
+                  className={`text-decoration-none d-flex nav-link cart-link${location.pathname === '/cart' ? ' active-link' : ''}`}
                 >
                   Cart
                 </Link>
@@ -102,11 +97,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     onClick={() =>
                       (window.location.href = "/signin?redirect=/shipping")
                     }
-                    style={{
-                      whiteSpace: "nowrap",
-                      fontSize: "0.75rem",
-                      padding: "0.25rem 0.5rem",
-                    }}
+                    className="cart-badge-checkout"
                   >
                     Checkout
                   </Badge>
@@ -114,7 +105,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Badge
                     pill
                     bg="secondary"
-                    style={{ whiteSpace: "nowrap", fontSize: "0.75rem" }}
+                    className="cart-badge-empty"
                   >
                     Empty
                   </Badge>
@@ -126,13 +117,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   onToggle={setUserDropdownOpen}
                   onMouseLeave={() => setUserDropdownOpen(false)}
                   title={
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
+                    <span className="user-dropdown-title">
                       {userInfo.avatar ? (
                         <img
                           src={userInfo.avatar}
@@ -198,16 +183,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     Sign Out
                   </Link>
                 </NavDropdown>
-              ) : (
-                <Link
-                  className="nav-link"
-                  to={`/signin?redirect=${encodeURIComponent(
-                    window.location.pathname + window.location.search
-                  )}`}
-                >
-                  User Login
-                </Link>
-              )}
+              ) : null}
               {serviceProviderInfo ? (
                 <NavDropdown
                   show={providerDropdownOpen}
@@ -258,11 +234,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     Log Out
                   </Link>
                 </NavDropdown>
-              ) : (
-                <Link className="nav-link" to="/serviceprovider/login">
-                  Service Provider Login
-                </Link>
-              )}
+              ) : null}
               {adminInfo ? (
                 <NavDropdown
                   show={adminDropdownOpen}
@@ -325,10 +297,31 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     Admin Log Out
                   </Link>
                 </NavDropdown>
-              ) : (
-                <Link className="nav-link" to="/admin-login">
-                  Admin Login
-                </Link>
+              ) : null}
+              {!userInfo && !serviceProviderInfo && !adminInfo && (
+                <NavDropdown
+                  title="Login"
+                  id="login-nav-dropdown"
+                  className="login-dropdown"
+                >
+                  <Link
+                    className="dropdown-item"
+                    to={`/signin?redirect=${encodeURIComponent(
+                      location.pathname + location.search
+                    )}`}
+                  >
+                    <i className="fas fa-user me-2"></i>
+                    User Login
+                  </Link>
+                  <Link className="dropdown-item" to="/serviceprovider/login">
+                    <i className="fas fa-hard-hat me-2"></i>
+                    Service Provider Login
+                  </Link>
+                  <Link className="dropdown-item" to="/admin-login">
+                    <i className="fas fa-shield-alt me-2"></i>
+                    Admin Login
+                  </Link>
+                </NavDropdown>
               )}
             </Nav>
           </Navbar.Collapse>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Spinner } from "react-bootstrap";
 import "./TrustSection.css";
 
 export default function TrustSection() {
@@ -23,94 +22,72 @@ export default function TrustSection() {
   }, []);
 
   const metrics = [
-    { label: "Industry Partners", value: sellers.length || "8+" },
-    { label: "Projects Completed", value: "10,000+" },
-    { label: "Service Providers", value: "500+" },
-    { label: "Active Users", value: "50,000+" },
+    { label: "Industry Partners", value: sellers.length || "8+", icon: "fas fa-handshake" },
+    { label: "Projects Completed", value: "10,000+", icon: "fas fa-project-diagram" },
+    { label: "Service Providers", value: "500+", icon: "fas fa-hard-hat" },
+    { label: "Active Users", value: "50,000+", icon: "fas fa-users" },
+  ];
+
+  const certifications = [
+    { icon: "fas fa-lock", title: "Enterprise Security", description: "ISO 27001 Certified", color: "#67e8f9" },
+    { icon: "fas fa-certificate", title: "Industry Certified", description: "HVAC Standards Compliant", color: "#34d399" },
+    { icon: "fas fa-star", title: "Top Rated", description: "4.8/5 Average Rating", color: "#fbbf24" },
   ];
 
   return (
-    <section className="trust-section">
-      <Container>
-        {/* Metrics Cards */}
-        <Row className="metrics-container">
+    <section className="trs-section">
+      <div className="trs-container">
+        {/* Metrics */}
+        <div className="trs-metrics">
           {metrics.map((metric, index) => (
-            <Col md={3} sm={6} xs={12} key={index} className="mb-3 mb-sm-4">
-              <div className="metric-card">
-                <div className="metric-value fs-4">{metric.value}</div>
-                <p className="metric-label">{metric.label}</p>
-              </div>
-            </Col>
+            <div className="trs-metric" key={index}>
+              <i className={`${metric.icon} trs-metric-icon`} />
+              <span className="trs-metric-value">{metric.value}</span>
+              <span className="trs-metric-label">{metric.label}</span>
+            </div>
           ))}
-        </Row>
+        </div>
 
-        {/* Partner Logos Section */}
-        <div className="partners-section">
-          <h3 className="section-title text-center">
-            <span>Trusted By</span> Industry Leaders
-          </h3>
+        {/* Partner Logos */}
+        <div className="trs-partners">
+          <div className="trs-partners-header">
+            <span className="trs-badge">Partners</span>
+            <h3 className="trs-title">
+              Trusted By <span>Industry Leaders</span>
+            </h3>
+          </div>
 
           {loading ? (
-            <div className="spinner-container">
-              <Spinner animation="border" variant="primary" />
+            <div className="trs-spinner">
+              <i className="fas fa-circle-notch fa-spin" />
             </div>
           ) : (
-            <Row>
+            <div className="trs-logos-grid">
               {sellers.map((seller) => (
-                <Col
-                  md={2}
-                  sm={4}
-                  xs={6}
-                  key={seller._id}
-                  className="mb-3 mb-md-4"
-                >
-                  <div className="partner-logo-container">
-                    {seller.logo &&
-                    seller.logo !== "undefined" &&
-                    seller.logo !== "" ? (
-                      <img
-                        src={seller.logo}
-                        alt={seller.name}
-                        className="partner-logo-img"
-                      />
-                    ) : (
-                      <div className="partner-brand-name">{seller.name}</div>
-                    )}
-                  </div>
-                  <p className="partner-brand-name text-center">
-                    {seller.brand || seller.name}
-                  </p>
-                </Col>
+                <div className="trs-logo-card" key={seller._id}>
+                  {seller.logo && seller.logo !== "undefined" && seller.logo !== "" ? (
+                    <img src={seller.logo} alt={seller.name} className="trs-logo-img" />
+                  ) : (
+                    <span className="trs-logo-fallback">{seller.name}</span>
+                  )}
+                  <span className="trs-logo-name">{seller.brand || seller.name}</span>
+                </div>
               ))}
-            </Row>
+            </div>
           )}
         </div>
 
-        {/* Certification Badges */}
-        <Row className="certifications-section">
-          <Col md={4} xs={12} className="mb-3">
-            <div className="badge-item">
-              <div className="badge-icon">🔒</div>
-              <h6 className="badge-title">Enterprise Security</h6>
-              <p className="badge-description">ISO 27001 Certified</p>
+        {/* Certifications */}
+        <div className="trs-certs">
+          {certifications.map((cert, index) => (
+            <div className="trs-cert" key={index}>
+              <i className={`${cert.icon} trs-cert-icon`} style={{ color: cert.color }} />
+              <h6 className="trs-cert-title">{cert.title}</h6>
+              <p className="trs-cert-desc">{cert.description}</p>
             </div>
-          </Col>
-          <Col md={4} xs={12} className="mb-3">
-            <div className="badge-item">
-              <div className="badge-icon">✅</div>
-              <h6 className="badge-title">Industry Certified</h6>
-              <p className="badge-description">HVAC Standards Compliant</p>
-            </div>
-          </Col>
-          <Col md={4} xs={12} className="mb-3">
-            <div className="badge-item">
-              <div className="badge-icon">⭐</div>
-              <h6 className="badge-title">Top Rated</h6>
-              <p className="badge-description">4.8/5 Average Rating</p>
-            </div>
-          </Col>
-        </Row>
-      </Container>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

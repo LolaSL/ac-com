@@ -46,9 +46,9 @@
 .bd-hero__img {
   width: 100%;
   height: auto;
-  max-height: 50vh;
-  object-fit: contain;
   display: block;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   transition: transform 8s ease;
 }
 
@@ -266,6 +266,13 @@
 }
 
 /* Responsive */
+@media (min-width: 992px) {
+  .bd-hero {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 576px) {
-  .bd-hero { max-height: 260px; }
+  .bd-hero { max-height: 260px; overflow: hidden; }
 }

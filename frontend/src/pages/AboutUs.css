@@ -276,6 +276,7 @@ text-align: justify;
   font-size: 0.77rem;
   color: #6b7280;
   line-height: 1.4;
+  text-align: justify;
 }
 
 /* ── Home row ────────────────────────────────────────────── */
@@ -288,10 +289,6 @@ text-align: justify;
 @media (max-width: 575px) {
   .au-section {
     margin-bottom: 1.75rem;
-  }
-
-  .au-audience__desc {
-    display: none;
   }
 
   .au-audience-tile {

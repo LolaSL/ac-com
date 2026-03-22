@@ -269,6 +269,18 @@ export default function SignUpPage() {
                   )}
                 </Form.Group>
 
+                <div className="signup-action-row">
+                  <div className="signup-have-account">
+                    <span>Already have an account? </span>
+                    <Link
+                      to={`/signin?redirect=${redirect}`}
+                      className="signup-signin-link"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                </div>
+
                 <div className="d-grid">
                   <Button
                     type="submit"
@@ -292,16 +304,6 @@ export default function SignUpPage() {
                   </Button>
                 </div>
               </Form>
-
-              <div className="signup-form-footer">
-                <span>Already have an account? </span>
-                <Link
-                  to={`/signin?redirect=${redirect}`}
-                  className="signup-signin-link"
-                >
-                  Sign In
-                </Link>
-              </div>
             </div>
           </div>
         </div>
