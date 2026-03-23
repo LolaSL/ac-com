@@ -145,7 +145,7 @@ const Measurement = () => {
         <div className="ms-hero__inner">
           <div className="ms-hero__icon"><FaRulerCombined /></div>
           <h1 className="ms-hero__title">Measurement Service System</h1>
-          <p className="ms-hero__sub">Upload your floor plan, annotate rooms and export to BTU calculator.</p>
+          <p className="ms-hero__sub">Upload your floor plan, notate rooms and export to BTU calculator.</p>
           {storedBtuProject && !roomData?.length && (
             <div style={{
               marginTop: '1rem',
@@ -200,7 +200,7 @@ const Measurement = () => {
                 <div>
                   <strong>📊 Previous Calculation Loaded</strong>
                   <p style={{ margin: '0.25rem 0 0', opacity: 0.9, fontSize: '0.9rem' }}>
-                    Showing your last BTU calculation. Start a new annotation above to create a fresh calculation.
+                    Showing your last BTU calculation. Start a new notation above to create a fresh calculation.
                   </p>
                 </div>
                 <button

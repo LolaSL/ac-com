@@ -437,7 +437,7 @@ const EngineerViewPage = () => {
     setAddMode(null);
   };
 
-  // Auto-place ducts & diffusers near every indoor unit rectangle
+  // Auto-place ducts, diffusers, accessories near every indoor unit rectangle
   const handleAutoPlaceDucts = () => {
     const ann = annotation?.annotations;
     if (!ann) return;
@@ -452,22 +452,31 @@ const EngineerViewPage = () => {
     const newDucts = [];
     const newDiffusers = [];
     const newDampers = [];
+    const newThermostats = [];
     const ts = Date.now();
 
     // Compute floor-plan centre from all rects to decide duct direction
     const avgX = rects.reduce((s, r) => s + r.xPercent, 0) / rects.length;
 
     // Duct sizing constants (normalised 0-1)
-    const DUCT_LEN = 0.08;
-    const DUCT_H   = 0.02;
-    const GAP       = 0.005;   // small gap between rect edge and duct
-    const DIFF_SIZE = 0.03;
-    const DAMP_SIZE = 0.018;
+    const DUCT_LEN   = 0.08;
+    const DUCT_H     = 0.02;
+    const GAP        = 0.005;
+    const FLEX_LEN   = 0.025;  // short flex connector
+    const FLEX_H     = 0.015;
+    const DIFF_SIZE  = 0.03;
+    const DAMP_SIZE  = 0.018;
+    const THERM_SIZE = 0.02;
+
+    // Detect wet rooms from comments for exhaust grille placement
+    const WET_ROOM_RE = /\b(bath|wc|toilet|shower|laundry|kitchen|kitc?hen|ktcn|restroom|powder)\b/i;
+    const comments = ann.comments || [];
 
     rects.forEach((rect, i) => {
       const cx = rect.xPercent;
       const cy = rect.yPercent;
       const rw = rect.widthPercent || 0.06;
+      const rh = rect.heightPercent || 0.04;
 
       // Pick horizontal direction: extend ducts toward the centre of the layout
       const toRight = cx <= avgX;
@@ -500,8 +509,35 @@ const EngineerViewPage = () => {
         stroke: '#CC4400',
       });
 
-      // --- Supply diffuser (4-way) at the far end of supply duct ---
-      const sdX = toRight ? sDuctX + DUCT_LEN + GAP + DIFF_SIZE / 2 : sDuctX - GAP - DIFF_SIZE / 2;
+      // --- Flex duct connectors (between main duct end and diffuser) ---
+      const sFlexX = toRight ? sDuctX + DUCT_LEN + GAP : sDuctX - GAP - FLEX_LEN;
+      newDucts.push({
+        id: `duct-auto-sf-${ts}-${i}`,
+        xPercent: Math.max(0.01, Math.min(0.92, sFlexX)),
+        yPercent: Math.max(0.01, Math.min(0.95, sDuctY + (DUCT_H - FLEX_H) / 2)),
+        width: FLEX_LEN,
+        height: FLEX_H,
+        ductType: 'flex',
+        fill: 'rgba(150,150,150,0.1)',
+        stroke: '#888',
+      });
+
+      const rFlexX = toRight ? rDuctX + DUCT_LEN + GAP : rDuctX - GAP - FLEX_LEN;
+      newDucts.push({
+        id: `duct-auto-rf-${ts}-${i}`,
+        xPercent: Math.max(0.01, Math.min(0.92, rFlexX)),
+        yPercent: Math.max(0.01, Math.min(0.95, rDuctY + (DUCT_H - FLEX_H) / 2)),
+        width: FLEX_LEN,
+        height: FLEX_H,
+        ductType: 'flex',
+        fill: 'rgba(150,150,150,0.1)',
+        stroke: '#888',
+      });
+
+      // --- Supply diffuser (4-way) at the far end of flex duct ---
+      const sdX = toRight
+        ? sFlexX + FLEX_LEN + GAP + DIFF_SIZE / 2
+        : sFlexX - GAP - DIFF_SIZE / 2;
       newDiffusers.push({
         id: `diffuser-auto-sd-${ts}-${i}`,
         xPercent: Math.max(0.02, Math.min(0.98, sdX)),
@@ -512,8 +548,10 @@ const EngineerViewPage = () => {
         airflow: 400,
       });
 
-      // --- Return grille at the far end of return duct ---
-      const rgX = toRight ? rDuctX + DUCT_LEN + GAP + DIFF_SIZE / 2 : rDuctX - GAP - DIFF_SIZE / 2;
+      // --- Return grille at the far end of flex duct ---
+      const rgX = toRight
+        ? rFlexX + FLEX_LEN + GAP + DIFF_SIZE / 2
+        : rFlexX - GAP - DIFF_SIZE / 2;
       newDiffusers.push({
         id: `diffuser-auto-rg-${ts}-${i}`,
         xPercent: Math.max(0.02, Math.min(0.98, rgX)),
@@ -533,6 +571,46 @@ const EngineerViewPage = () => {
         sizePercent: DAMP_SIZE,
         damperType: 'volume',
       });
+
+      // --- Fire damper at duct origin (where duct exits the unit / crosses wall) ---
+      const fdX = toRight ? sDuctX + 0.002 : sDuctX + DUCT_LEN - 0.002;
+      newDampers.push({
+        id: `damper-auto-fd-${ts}-${i}`,
+        xPercent: fdX,
+        yPercent: sDuctY + DUCT_H / 2,
+        sizePercent: DAMP_SIZE,
+        damperType: 'fire',
+      });
+
+      // --- Thermostat: placed to the side of the indoor unit (opposite to ducts) ---
+      const thermX = toRight
+        ? cx - rw / 2 - GAP - THERM_SIZE
+        : cx + rw / 2 + GAP + THERM_SIZE;
+      newThermostats.push({
+        id: `thermo-auto-${ts}-${i}`,
+        xPercent: Math.max(0.02, Math.min(0.98, thermX)),
+        yPercent: cy,
+        sizePercent: THERM_SIZE,
+        label: `T${i + 1}`,
+      });
+
+      // --- Exhaust grille: if nearest comment suggests a wet room ---
+      const nearestComment = comments.reduce((best, c) => {
+        const dist = Math.sqrt((c.xPercent - cx) ** 2 + (c.yPercent - cy) ** 2);
+        return dist < (best.dist || Infinity) ? { ...c, dist } : best;
+      }, {});
+      if (nearestComment.text && WET_ROOM_RE.test(nearestComment.text)) {
+        const exhY = cy + rh / 2 + GAP + DIFF_SIZE;
+        newDiffusers.push({
+          id: `diffuser-auto-exh-${ts}-${i}`,
+          xPercent: cx,
+          yPercent: Math.max(0.02, Math.min(0.98, exhY)),
+          sizePercent: DIFF_SIZE,
+          shape: 'square',
+          diffuserType: 'exhaust',
+          airflow: 200,
+        });
+      }
     });
 
     setAnnotation((prev) => ({
@@ -544,11 +622,14 @@ const EngineerViewPage = () => {
           ducts: [...(prev.annotations?.hvac?.ducts || []), ...newDucts],
           diffusers: [...(prev.annotations?.hvac?.diffusers || []), ...newDiffusers],
           dampers: [...(prev.annotations?.hvac?.dampers || []), ...newDampers],
+          thermostats: [...(prev.annotations?.hvac?.thermostats || []), ...newThermostats],
         },
       },
     }));
     setShowHVAC(true);
-    toast.success(`Auto-placed ducts & diffusers for ${rects.length} indoor units!`);
+    toast.success(
+      `Auto-placed ${newDucts.length} ducts, ${newDiffusers.length} diffusers/grilles, ${newDampers.length} dampers & ${newThermostats.length} thermostats for ${rects.length} units`
+    );
   };
 
   // Save engineer annotations to MongoDB so they appear in Sidebar > Engineer Reviews
@@ -977,9 +1058,9 @@ const EngineerViewPage = () => {
                 size="sm"
                 variant="outline-info"
                 onClick={handleAutoPlaceDucts}
-                title="Auto-generate supply duct + diffuser + return duct + grille near every indoor unit rect"
+                title="Auto-generate ducts, diffusers, grilles, dampers & thermostats for every indoor unit"
               >
-                🔧 Auto-Place Ducts
+                🔧 Auto-Place HVAC
               </Button>
             </div>
           </div>
@@ -1181,14 +1262,7 @@ const EngineerViewPage = () => {
               style={{ marginBottom: '16px', fontSize: '16px' }}
             />
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => { setShowCommentModal(false); setAddMode(null); }}
-              >
-                Cancel
-              </Button>
-              <Button
+                <Button
                 variant="primary"
                 size="sm"
                 onClick={() => {
@@ -1199,6 +1273,14 @@ const EngineerViewPage = () => {
               >
                 Add
               </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => { setShowCommentModal(false); setAddMode(null); }}
+              >
+                Cancel
+              </Button>
+            
             </div>
           </div>
         </div>

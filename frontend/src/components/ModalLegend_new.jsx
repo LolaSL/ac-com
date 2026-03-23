@@ -34,9 +34,10 @@ const ModalLegend = () => {
             {/* BUTTON LEGEND TAB */}
             <Tab eventKey="buttons" title="🔘 Button Legend">
               <div className="mt-3">
-                <h6 className="mb-2 text-primary">🖼️ PDF Annotator Buttons</h6>
+                <h6 className="mb-2 text-primary">🖼️ PDF Mark Buttons</h6>
                 <ul className="list-unstyled fs-6">
                   <li><strong>📤 Upload PDF:</strong> Select and upload floor plan PDF</li>
+                  <li><strong>✏️ Mark ON / 🖐️ Scroll:</strong> Toggle between notation mode and scroll mode. <em>Mark ON</em> — tap/click on the canvas to place AC unit rectangles. <em>Scroll</em> — freely pan and scroll the drawing without placing notations.</li>
                   <li><strong>🔄 Rotate 0°/90°/180°/270°:</strong> Rotate PDF if uploaded incorrectly</li>
                   <li><strong>➕ Add Rectangle:</strong> Place AC unit locations on drawing</li>
                   <li><strong>💬 Add Comment:</strong> Label AC units (e.g., "ac-1", "ac-2")</li>
@@ -192,7 +193,7 @@ const ModalLegend = () => {
               <div className="mt-3">
                 <h6 className="mb-2 text-primary">📊 Step 1: Review Rooms</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>View rooms imported from Annotator</li>
+                  <li>View rooms imported from <strong>PDF Mark</strong></li>
                   <li>Each room shows area in m²</li>
                   <li>
                     Multi-flat properties show rooms prefixed with flat number

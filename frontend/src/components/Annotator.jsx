@@ -804,6 +804,7 @@ const Annotator = ({
   const [showAcUnitModal, setShowAcUnitModal] = useState(false);
   const [acUnitInput, setAcUnitInput] = useState('');
   const [pendingAnnotationPos, setPendingAnnotationPos] = useState(null);
+  const [annotateMode, setAnnotateMode] = useState(window.innerWidth >= 768);
 
   // const clearResults = () => {
   //   setResults([]);
@@ -965,35 +966,61 @@ const Annotator = ({
     const isMultiFlat = flatNumsArray.length > 1;
 
     // Format rooms, adding flat prefixes when multi-flat
-    let formattedRooms = validRooms.map((room, idx) => {
-      const base = room.roomType || "Room";
-      const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
-      let name = base;
-      
-      if (isMultiFlat && !alreadyPrefixed) {
-        const numFlats = flatNumsArray.length;
-        const roomsPerFlat = Math.floor(validRooms.length / numFlats);
-        
-        if (validRooms.length % numFlats === 0 && roomsPerFlat > 0) {
-          const flatIndex = Math.floor(idx / roomsPerFlat);
-          const flatNum = flatNumsArray[Math.min(flatIndex, numFlats - 1)];
-          name = `Flat ${flatNum}: ${base}`;
-        } else {
-          const flatNum = flatNumsArray[idx % numFlats];
+    // Strategy: group duplicate room types and distribute them round-robin
+    // across flats. e.g. Kitchen#1 → Flat 1, Kitchen#2 → Flat 2
+    let formattedRooms = [];
+    if (isMultiFlat) {
+      const numFlats = flatNumsArray.length;
+      // Count how many times each room type appears
+      const typeCounters = {};
+      validRooms.forEach((room) => {
+        const base = room.roomType || "Room";
+        const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
+        if (alreadyPrefixed) return; // skip, handled below
+        const key = base.toLowerCase();
+        typeCounters[key] = (typeCounters[key] || 0);
+      });
+
+      // Assign each room to a flat based on its occurrence index among same type
+      const typeOccurrence = {};
+      formattedRooms = validRooms.map((room) => {
+        const base = room.roomType || "Room";
+        const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
+        let name = base;
+
+        if (!alreadyPrefixed) {
+          const key = base.toLowerCase();
+          const occurrence = typeOccurrence[key] || 0;
+          typeOccurrence[key] = occurrence + 1;
+          const flatIndex = Math.min(occurrence, numFlats - 1);
+          const flatNum = flatNumsArray[flatIndex];
           name = `Flat ${flatNum}: ${base}`;
         }
-      }
-      
-      return {
-        name,
-        size:
-          parseFloat(
-            (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-          ) || 0,
-        btu: 0,
-        unit: "meters",
-      };
-    });
+
+        return {
+          name,
+          size:
+            parseFloat(
+              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+            ) || 0,
+          btu: 0,
+          unit: "meters",
+        };
+      });
+    } else {
+      formattedRooms = validRooms.map((room) => {
+        const base = room.roomType || "Room";
+        return {
+          name: base,
+          size:
+            parseFloat(
+              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+            ) || 0,
+          btu: 0,
+          unit: "meters",
+        };
+      });
+    }
 
     // When multi-flat: sort by flat number so flats are grouped
     if (isMultiFlat) {
@@ -1168,13 +1195,15 @@ const Annotator = ({
       return;
     }
     const newRectId = Date.now();
+    const isCondenser = /^condenser/i.test(commentText.trim());
     const newRect = {
       id: newRectId,
       x: position.x,
       y: position.y,
       width: 48,
       height: 16,
-      fill: 'rgba(20, 205, 230, 0.7)',
+      fill: isCondenser ? 'rgba(255, 140, 50, 0.7)' : 'rgba(20, 205, 230, 0.7)',
+      stroke: isCondenser ? '#cc5500' : undefined,
       rotation: 0,
     };
     setRectangles((prevRects) => [...prevRects, newRect]);
@@ -1205,6 +1234,7 @@ const Annotator = ({
   }, [comments]);
 
   const handleStageClick = (event) => {
+    if (!annotateMode) return;
     if (event.target === event.target.getStage() && !isRotating) {
       const pointerPosition = stageRef.current.getPointerPosition();
       if (!pointerPosition) return;
@@ -1248,6 +1278,7 @@ const Annotator = ({
 
   // Handle touch tap on stage for placing annotations (mobile equivalent of click)
   const handleStageTouchEnd = (event) => {
+    if (!annotateMode) return;
     // Only act on taps on blank stage area, not on shapes
     if (event.target !== event.target.getStage()) return;
     if (isRotating) return;
@@ -1622,7 +1653,7 @@ const Annotator = ({
       if (response.ok) {
         const data = await response.json();
         console.log("Data saved to backend:", data);
-        alert("PDF and annotations saved successfully!");
+        toast.success("PDF and annotations saved successfully!", { autoClose: 3000 });
 
         setIsSaved(true);
         // Keep the PDF and annotations on canvas after saving
@@ -1630,11 +1661,11 @@ const Annotator = ({
       } else {
         const errorData = await response.json();
         console.error("Error saving data:", errorData);
-        alert(`Failed to save data: ${errorData.message || "Unknown error"}`);
+        toast.error(`Failed to save: ${errorData.message || "Unknown error"}`, { autoClose: 5000 });
       }
     } catch (error) {
       console.error("Network error while saving:", error);
-      alert("Network error occurred while saving.");
+        toast.error("Network error occurred while saving.", { autoClose: 5000 });
     } finally {
       setIsSaving(false);
     }
@@ -2469,6 +2500,21 @@ const Annotator = ({
       >
         {file && file.type === "application/pdf" && (
           <>
+            <ButtonGroup size="sm" className="me-2 annotate-toggle-mobile">
+              <Button
+                variant={annotateMode ? "primary" : "outline-primary"}
+                onClick={() => setAnnotateMode((m) => !m)}
+                title={annotateMode ? "Switch to scroll mode" : "Switch to annotate mode"}
+              >
+                {annotateMode ? (
+                  <><i className="fas fa-pen" /> Mark ON</>
+                ) : (
+                  <><i className="fas fa-hand-paper" /> Scroll</>
+                )}
+              </Button>
+            </ButtonGroup>
+            <ButtonGroup size="sm" className="me-2">
+            </ButtonGroup>
             <ButtonGroup size="sm" className="me-2">
               <Button
                 variant="outline-primary"
@@ -2605,6 +2651,8 @@ const Annotator = ({
                           width={rect.width}
                           height={rect.height}
                           fill={rect.fill}
+                          stroke={rect.stroke}
+                          strokeWidth={rect.stroke ? 2 : 0}
                           draggable={true}
                           rotation={rect.rotation}
                           onContextMenu={(event) => {
@@ -2703,7 +2751,7 @@ const Annotator = ({
             <h5 style={{ marginBottom: '12px' }}>Enter AC unit number</h5>
             <Form.Control
               type="text"
-              placeholder="ac1, ac2, ..."
+              placeholder="ac-1, ac-2, condenser, condenser-1, etc."
               value={acUnitInput}
               onChange={(e) => setAcUnitInput(e.target.value)}
               onKeyDown={(e) => {

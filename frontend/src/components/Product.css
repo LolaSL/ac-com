@@ -244,7 +244,18 @@
    Rating Section
    ======================================== */
 .product-rating-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 4px 0;
+}
+
+.product-views {
+  font-size: 0.78rem;
+  color: #6c757d;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ========================================

@@ -567,6 +567,50 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     }
   });
 
+  // ─── RENDER THERMOSTATS ───
+  hvacAnnotations?.thermostats?.forEach((thermo) => {
+    const x = thermo.xPercent * canvasWidth;
+    const y = thermo.yPercent * canvasHeight;
+    const size = (thermo.sizePercent || 0.02) * canvasWidth;
+
+    // Draw thermostat: rounded rectangle with T label
+    context.save();
+    const r = size * 0.3;
+    context.beginPath();
+    context.moveTo(x - size / 2 + r, y - size / 2);
+    context.arcTo(x + size / 2, y - size / 2, x + size / 2, y + size / 2, r);
+    context.arcTo(x + size / 2, y + size / 2, x - size / 2, y + size / 2, r);
+    context.arcTo(x - size / 2, y + size / 2, x - size / 2, y - size / 2, r);
+    context.arcTo(x - size / 2, y - size / 2, x + size / 2, y - size / 2, r);
+    context.closePath();
+    context.fillStyle = "rgba(139,92,246,0.2)";
+    context.fill();
+    context.lineWidth = 1.5 * scaleFactor;
+    context.strokeStyle = "#8B5CF6";
+    context.stroke();
+
+    // Label
+    context.fillStyle = "#8B5CF6";
+    context.font = `bold ${Math.max(8, size * 0.45) * scaleFactor}px Arial`;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(thermo.label || "T", x, y);
+    context.restore();
+
+    // SVG overlay
+    if (symbolImages.thermostat) {
+      const img = new window.Image();
+      img.src = symbolImages.thermostat;
+      img.onload = () => {
+        context.save();
+        context.globalAlpha = 0.3;
+        context.drawImage(img, x - size / 2, y - size / 2, size, size);
+        context.globalAlpha = 1.0;
+        context.restore();
+      };
+    }
+  });
+
   // ─── DUCT-TO-DIFFUSER CONNECTION LINES ───
   // Connect diffusers to nearest matching duct with professional dashed branch lines
   if (hvacAnnotations?.ducts && hvacAnnotations?.diffusers && (!acType || acType !== "vrf-ductless")) {
@@ -1367,6 +1411,8 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
     entries.push({ type: "line", color: "#0055CC",  dash: [],     label: "Supply Duct (SA)" });
     entries.push({ type: "line", color: "#CC4400",  dash: [5, 3], label: "Return Duct (RA)" });
     entries.push({ type: "line", color: "#888",     dash: [2, 2], label: "Flex Duct (FD)" });
+    entries.push({ type: "line", color: "#228B22",  dash: [4, 4], label: "Exhaust Duct (EA)" });
+    entries.push({ type: "line", color: "#0055CC",  dash: [4, 3], label: "Branch Connection Line" });
   }
 
   // ── Diffusers & Grilles (ducted modes) ──
@@ -1384,9 +1430,14 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
     entries.push({ type: "symbol", shape: "circle-vd", color: "#555",  label: "Volume Damper (VD)" });
   }
 
+  // ── Thermostat (ducted modes) ──
+  if (acType === "ducted" || acType === "vrf-ducted") {
+    entries.push({ type: "symbol", shape: "thermostat", color: "#8B5CF6", label: "Thermostat (T)" });
+  }
+
   // ── Units ──
   entries.push({ type: "symbol", shape: "rect-fill", color: "rgba(20,205,230,0.6)", label: "Indoor Unit (User-placed)" });
-  entries.push({ type: "symbol", shape: "rect-fill", color: "rgba(200,100,100,0.6)", label: "Condenser / Outdoor Unit" });
+  entries.push({ type: "symbol", shape: "rect-fill", color: "rgba(255,140,50,0.6)", label: "Condenser / Outdoor Unit" });
 
   if (entries.length === 0) return;
 
@@ -1530,6 +1581,26 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
         ctx.font = "bold 6px Arial";
         ctx.textAlign = "center";
         ctx.fillText("VD", cx, ey + 1);
+      } else if (entry.shape === "thermostat") {
+        // Thermostat: rounded rectangle with T
+        const r = sz * 0.3;
+        ctx.beginPath();
+        ctx.moveTo(cx - sz / 2 + r, ey - sz / 2);
+        ctx.arcTo(cx + sz / 2, ey - sz / 2, cx + sz / 2, ey + sz / 2, r);
+        ctx.arcTo(cx + sz / 2, ey + sz / 2, cx - sz / 2, ey + sz / 2, r);
+        ctx.arcTo(cx - sz / 2, ey + sz / 2, cx - sz / 2, ey - sz / 2, r);
+        ctx.arcTo(cx - sz / 2, ey - sz / 2, cx + sz / 2, ey - sz / 2, r);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(139,92,246,0.2)";
+        ctx.fill();
+        ctx.strokeStyle = entry.color;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = entry.color;
+        ctx.font = "bold 7px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("T", cx, ey);
       } else if (entry.shape === "rect-fill") {
         // Filled rect for units
         ctx.fillStyle = entry.color;

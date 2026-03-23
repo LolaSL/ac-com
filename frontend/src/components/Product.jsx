@@ -192,6 +192,9 @@ const Product = memo(({ product }) => {
         {/* Rating */}
         <div className="product-rating-section">
           <Rating rating={product.rating} numReviews={product.numReviews} />
+          <span className="product-views">
+            <i className="fas fa-eye"></i> {product.views || 0}
+          </span>
         </div>
 
         {/* Price Section */}

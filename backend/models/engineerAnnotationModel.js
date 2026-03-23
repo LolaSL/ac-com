@@ -53,7 +53,7 @@ const engineerAnnotationSchema = new Schema(
             comments: [
                 {
                     id: { type: String, required: true },
-                    rectId: { type: String, required: true },
+                    rectId: { type: String },
                     text: { type: String, required: true },
                     acType: { type: String },
                     xPercent: { type: Number, required: true },
@@ -65,8 +65,8 @@ const engineerAnnotationSchema = new Schema(
             lines: [
                 {
                     id: { type: String, required: true },
-                    rectId: { type: String, required: true },
-                    commentId: { type: String, required: true },
+                    rectId: { type: String },
+                    commentId: { type: String },
                     points: [{ type: Number }],
                     stroke: { type: String },
                     strokeWidth: { type: Number },
@@ -104,6 +104,15 @@ const engineerAnnotationSchema = new Schema(
                         yPercent: { type: Number, required: true },
                         sizePercent: { type: Number },
                         damperType: { type: String, enum: ['fire', 'volume'], default: 'volume' },
+                    },
+                ],
+                thermostats: [
+                    {
+                        id: { type: String, required: true },
+                        xPercent: { type: Number, required: true },
+                        yPercent: { type: Number, required: true },
+                        sizePercent: { type: Number },
+                        label: { type: String },
                     },
                 ],
                 refrigerantLines: [

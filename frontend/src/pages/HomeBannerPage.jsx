@@ -191,7 +191,9 @@ export default function HomeBannerPage() {
       <div className="premium-cards-grid">
         {banners.map((banner, idx) => (
           <div className="premium-card" key={idx}>
-            <div className="premium-card-image" style={{ backgroundImage: `url(${banner.imageSrc})` }} />
+            <div className="premium-card-image">
+              <img src={banner.imageSrc} alt={banner.title} className="premium-card-img" />
+            </div>
             <div className="premium-card-content">
               <h1 className="premium-card-title">{banner.title}</h1>
               <p className="premium-card-description">{banner.description}</p>

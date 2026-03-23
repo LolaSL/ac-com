@@ -81,6 +81,7 @@ const CONDENSER_REGEX =
 
 function ProductPage() {
   const reviewsRef = useRef();
+  const viewRecorded = useRef(false);
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -137,6 +138,13 @@ function ProductPage() {
     };
     fetchData();
   }, [slug]);
+
+  useEffect(() => {
+    if (product._id && !viewRecorded.current) {
+      viewRecorded.current = true;
+      axios.post(`/api/products/${product._id}/view`).catch(() => {});
+    }
+  }, [product._id]);
 
   useEffect(() => {
     if (ref) {
@@ -417,6 +425,10 @@ function ProductPage() {
                 rating={product.rating}
                 numReviews={product.numReviews}
               ></Rating>
+              <div className="text-muted mt-1" style={{ fontSize: '0.85rem' }}>
+                <i className="fas fa-eye me-1"></i>
+                {product.views || 0} views
+              </div>
             </ListGroup.Item>
             <ListGroup.Item>
               <Row>

@@ -493,6 +493,22 @@ productRouter.get('/slug/:slug', async (req, res) => {
   }
 });
 
+productRouter.post("/:id/view", expressAsyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid product ID" });
+  }
+  const product = await Product.findByIdAndUpdate(
+    id,
+    { $inc: { views: 1 } },
+    { new: true, select: 'views' }
+  );
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+  res.json({ views: product.views });
+}));
+
 productRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
 

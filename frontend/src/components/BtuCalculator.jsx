@@ -972,6 +972,7 @@ useEffect(() => {
                     slug: cond.slug,
                     image: cond.image || "/images/p1.jpg",
                     isCondenser: true,
+                    flatName: cond.flatName || undefined,
                   },
                 };
               })
