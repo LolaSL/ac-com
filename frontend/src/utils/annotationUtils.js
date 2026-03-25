@@ -39,6 +39,41 @@ export const hvacSymbols = {
   condenserUnit: condenserUnitSVG,
 };
 
+/**
+ * Preload all SVG symbol images so they can be drawn synchronously on canvas.
+ * Returns a new object with the same keys but loaded HTMLImageElement values.
+ */
+export const preloadSymbolImages = (symbolUrls) => {
+  const entries = Object.entries(symbolUrls);
+  const promises = entries.map(
+    ([key, url]) =>
+      new Promise((resolve) => {
+        const img = new window.Image();
+        img.onload = () => resolve([key, img]);
+        img.onerror = () => resolve([key, null]);
+        img.src = url;
+      })
+  );
+  return Promise.all(promises).then((results) =>
+    Object.fromEntries(results.filter(([, img]) => img !== null))
+  );
+};
+
+/**
+ * Draw an SVG symbol image on canvas. Supports both preloaded Image elements
+ * (drawn synchronously) and URL strings (drawn via async onload).
+ */
+const drawSymbolImage = (src, drawFn) => {
+  if (!src) return;
+  if (typeof src === "object" && src.complete && src.src) {
+    drawFn(src);
+  } else if (typeof src === "string") {
+    const img = new window.Image();
+    img.onload = () => drawFn(img);
+    img.src = src;
+  }
+};
+
 // ─── Orthogonal (L-shaped) refrigerant line routing ───
 // Real engineering drawings use Manhattan routing: horizontal → vertical (or vice-versa)
 // instead of diagonal point-to-point lines.
@@ -144,16 +179,12 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
     context.restore();
 
     // Draw outdoor unit SVG if available
-    if (symbolImages.outdoor) {
-      const img = new window.Image();
-      img.src = symbolImages.outdoor;
-      img.onload = () => {
-        context.save();
-        context.translate(x, y);
-        context.drawImage(img, -size / 2, -size / 2, size, size);
-        context.restore();
-      };
-    }
+    drawSymbolImage(symbolImages.outdoor, (img) => {
+      context.save();
+      context.translate(x, y);
+      context.drawImage(img, -size / 2, -size / 2, size, size);
+      context.restore();
+    });
 
     // Draw capacity label if available
     if (unit.capacity) {
@@ -188,16 +219,12 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
     context.restore();
 
     // Draw indoor unit SVG if available
-    if (symbolImages.indoor) {
-      const img = new window.Image();
-      img.src = symbolImages.indoor;
-      img.onload = () => {
-        context.save();
-        context.translate(x, y);
-        context.drawImage(img, -size / 2, -size / 2, size, size);
-        context.restore();
-      };
-    }
+    drawSymbolImage(symbolImages.indoor, (img) => {
+      context.save();
+      context.translate(x, y);
+      context.drawImage(img, -size / 2, -size / 2, size, size);
+      context.restore();
+    });
   });
 
   // Draw refrigerant lines connecting outdoor to indoor units
@@ -361,19 +388,15 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
 
     // Draw duct type SVG icon
     const svgKey = ductType === "supply" ? "supplyDuct" : ductType === "return" ? "returnDuct" : ductType === "flex" ? "flexDuct" : "duct";
-    if (symbolImages[svgKey]) {
-      const img = new window.Image();
-      img.src = symbolImages[svgKey];
-      img.onload = () => {
-        context.save();
-        context.translate(x, y);
-        const iconSize = 14 * scaleFactor;
-        context.globalAlpha = 0.4;
-        context.drawImage(img, 2, (height - iconSize) / 2, iconSize * 2, iconSize);
-        context.globalAlpha = 1.0;
-        context.restore();
-      };
-    }
+    drawSymbolImage(symbolImages[svgKey], (img) => {
+      context.save();
+      context.translate(x, y);
+      const iconSize = 14 * scaleFactor;
+      context.globalAlpha = 0.4;
+      context.drawImage(img, 2, (height - iconSize) / 2, iconSize * 2, iconSize);
+      context.globalAlpha = 1.0;
+      context.restore();
+    });
   });
 
   // ─── RENDER DIFFUSERS ───
@@ -385,6 +408,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     const style = DIFFUSER_STYLES[diffuserType] || DIFFUSER_STYLES.default;
 
     context.save();
+    context.globalAlpha = 0.55;
 
     if (diffuserType === "linear-slot") {
       // Linear slot: wide thin rectangle with slot lines
@@ -428,14 +452,14 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       }
       // For exhaust, add diagonal hatching
       if (diffuserType === "exhaust") {
-        context.globalAlpha = 0.3;
+        context.globalAlpha = 0.2;
         for (let i = 0; i < size; i += 5 * scaleFactor) {
           context.beginPath();
           context.moveTo(x - size / 2 + i, y - size / 2);
           context.lineTo(x - size / 2, y - size / 2 + i);
           context.stroke();
         }
-        context.globalAlpha = 1.0;
+        context.globalAlpha = 0.55;
       }
     } else if (diffuserType === "supply-4way" || diffuserType === "square") {
       // 4-way supply: square with X pattern and directional arrows
@@ -496,17 +520,13 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.restore();
 
     // Draw SVG symbol overlay (semi-transparent)
-    if (symbolImages[style.svgKey]) {
-      const img = new window.Image();
-      img.src = symbolImages[style.svgKey];
-      img.onload = () => {
-        context.save();
-        context.globalAlpha = 0.35;
-        context.drawImage(img, x - size / 2, y - size / 2, size, size);
-        context.globalAlpha = 1.0;
-        context.restore();
-      };
-    }
+    drawSymbolImage(symbolImages[style.svgKey], (img) => {
+      context.save();
+      context.globalAlpha = 0.2;
+      context.drawImage(img, x - size / 2, y - size / 2, size, size);
+      context.globalAlpha = 1.0;
+      context.restore();
+    });
   });
 
   // ─── RENDER DAMPERS ───
@@ -554,17 +574,13 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
 
     // SVG overlay
     const svgKey = damperType === "fire" ? "fireDamper" : "volumeDamper";
-    if (symbolImages[svgKey]) {
-      const img = new window.Image();
-      img.src = symbolImages[svgKey];
-      img.onload = () => {
-        context.save();
-        context.globalAlpha = 0.3;
-        context.drawImage(img, x - size / 2, y - size / 2, size, size);
-        context.globalAlpha = 1.0;
-        context.restore();
-      };
-    }
+    drawSymbolImage(symbolImages[svgKey], (img) => {
+      context.save();
+      context.globalAlpha = 0.3;
+      context.drawImage(img, x - size / 2, y - size / 2, size, size);
+      context.globalAlpha = 1.0;
+      context.restore();
+    });
   });
 
   // ─── RENDER THERMOSTATS ───
@@ -598,17 +614,13 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.restore();
 
     // SVG overlay
-    if (symbolImages.thermostat) {
-      const img = new window.Image();
-      img.src = symbolImages.thermostat;
-      img.onload = () => {
-        context.save();
-        context.globalAlpha = 0.3;
-        context.drawImage(img, x - size / 2, y - size / 2, size, size);
-        context.globalAlpha = 1.0;
-        context.restore();
-      };
-    }
+    drawSymbolImage(symbolImages.thermostat, (img) => {
+      context.save();
+      context.globalAlpha = 0.3;
+      context.drawImage(img, x - size / 2, y - size / 2, size, size);
+      context.globalAlpha = 1.0;
+      context.restore();
+    });
   });
 
   // ─── DUCT-TO-DIFFUSER CONNECTION LINES ───

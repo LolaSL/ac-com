@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 import { Store } from "../Store.js";
 import SaveAsPDF from "./SaveAsPDF.jsx";
-import { overlayAnnotations, overlayHVAC, hvacSymbols } from "../utils/annotationUtils.js";
+import { overlayAnnotations, overlayHVAC, overlayVRFSystem, drawCanvasLegend, hvacSymbols } from "../utils/annotationUtils.js";
 import "./Sidebar.css";
 
 // SVG icons
@@ -194,12 +194,9 @@ const Sidebar = () => {
     setIsOpen((prev) => !prev);
   };
 
-  // Remove HVAC overlay from rendering
+  // Redraw overlays when HVAC toggle or annotations change
   useEffect(() => {
     if (!selectedAnnotations || !selectedPdfFile) return;
-    // Engineer PDFs are fully baked images — overlaying again would double-draw
-    // comments and other elements on top of what's already burned into the PNG.
-    if (currentPdfType === "engineer") return;
 
     const container = document.getElementById("pdf-container");
     if (!container) return;
@@ -210,20 +207,35 @@ const Sidebar = () => {
     const context = overlayCanvas.getContext("2d");
     context.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
+    const acType = selectedAcType;
+
     // redraw normal annotations
-    overlayAnnotations(context, selectedAnnotations, selectedAcType, { skipRefrigerantLines: true, pdfScale });
+    overlayAnnotations(context, selectedAnnotations, acType, { skipRefrigerantLines: currentPdfType !== "engineer", pdfScale });
 
     // draw HVAC layer if toggled
-    if (showHVAC) {
+    if (showHVAC && (acType === "ducted" || acType === "vrf-ducted")) {
       overlayHVAC(
         context,
         selectedAnnotations.hvac || { ducts: [], diffusers: [] },
         hvacSymbols,
         selectedAnnotations.comments,
-        selectedAcType,
+        acType,
         pdfScale
       );
     }
+
+    // draw VRF system if applicable
+    if (selectedAnnotations.vrf && acType && acType.startsWith("vrf")) {
+      overlayVRFSystem(
+        context,
+        selectedAnnotations.vrf,
+        hvacSymbols,
+        acType
+      );
+    }
+
+    // draw legend
+    drawCanvasLegend(context, acType);
   }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType, pdfScale]);
 
   // Re-render PDF at new scale when zoom changes
@@ -336,69 +348,115 @@ const Sidebar = () => {
     try {
       setCurrentPdfType("engineer");
       setSelectedPdf(engineerAnnotation);
-      const pdfResponse = await fetch(
-        `/api/engineer-annotations/annotated-pdf/${engineerAnnotation._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (!pdfResponse.ok)
-        throw new Error(`Failed to fetch engineer PDF: ${pdfResponse.status}`);
-      const pdfBlob = await pdfResponse.blob();
-      const pdfFile = new File(
-        [pdfBlob],
-        engineerAnnotation.filename || "untitled.pdf",
-        {
-          type: "application/pdf",
-        }
-      );
-      setSelectedPdfFile(pdfFile);
 
-      const pdfUrl = window.URL.createObjectURL(pdfBlob);
+      // Fetch the engineer annotation data (includes annotations JSON + userAnnotationId)
       const annotationsResponse = await fetch(
         `/api/engineer-annotations/${engineerAnnotation._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!annotationsResponse.ok)
-        throw new Error(
-          `Failed to fetch engineer annotations: ${annotationsResponse.status}`
-        );
+        throw new Error(`Failed to fetch engineer annotations: ${annotationsResponse.status}`);
       const annotationsData = await annotationsResponse.json();
       const normalizedAnnotations =
         annotationsData && annotationsData.annotations
           ? annotationsData.annotations
           : annotationsData;
-      console.log(
-        "Fetched engineer annotations for",
-        engineerAnnotation._id,
-        normalizedAnnotations
-      );
+
+      // Extract acType from systemConfig
+      const acType = annotationsData.systemConfig?.systemType || "vrf-ducted";
+      setSelectedAcType(acType);
       setSelectedAnnotations(normalizedAnnotations);
 
+      // Auto-enable HVAC layer when engineer review contains HVAC data
+      const hasHvac = normalizedAnnotations.hvac && (normalizedAnnotations.hvac.ducts?.length || normalizedAnnotations.hvac.diffusers?.length);
+      if (hasHvac) setShowHVAC(true);
+
+      // Fetch the ORIGINAL base PDF (from user annotation) — clean, no baked overlays
+      const userAnnotationId = annotationsData.userAnnotationId;
+      let pdfBlob;
+      if (userAnnotationId) {
+        const pdfResponse = await fetch(`/api/annotated-pdf/${userAnnotationId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (pdfResponse.ok) {
+          pdfBlob = await pdfResponse.blob();
+        }
+      }
+      // Fallback: use baked engineer PDF if original is unavailable
+      if (!pdfBlob) {
+        const pdfResponse = await fetch(
+          `/api/engineer-annotations/annotated-pdf/${engineerAnnotation._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!pdfResponse.ok)
+          throw new Error(`Failed to fetch engineer PDF: ${pdfResponse.status}`);
+        pdfBlob = await pdfResponse.blob();
+      }
+
+      const pdfFile = new File(
+        [pdfBlob],
+        engineerAnnotation.filename || "untitled.pdf",
+        { type: "application/pdf" }
+      );
+      setSelectedPdfFile(pdfFile);
+
+      const pdfUrl = window.URL.createObjectURL(pdfBlob);
       const container = document.getElementById("pdf-container");
       if (!container) return;
       container.innerHTML = "";
 
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
-      const numPages = pdfDoc.numPages;
+      const page = await pdfDoc.getPage(1);
       const scale = pdfScale;
+      const viewport = page.getViewport({ scale });
 
-      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-        const page = await pdfDoc.getPage(pageNum);
-        const viewport = page.getViewport({ scale });
-        const canvas = document.createElement("canvas");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        const context = canvas.getContext("2d");
-        container.appendChild(canvas);
+      // Base PDF canvas
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const context = canvas.getContext("2d");
+      container.appendChild(canvas);
+      await page.render({ canvasContext: context, viewport }).promise;
 
-        await page.render({ canvasContext: context, viewport }).promise;
-        // Engineer PDFs already have all annotations baked into the image
-        // (rendered by handleSaveToMongoDB). No overlay needed — adding one
-        // would draw everything twice in conflicting colors.
+      // Overlay canvas for dynamic annotations (same as EngineerViewPage)
+      if (normalizedAnnotations) {
+        const overlayCanvas = document.createElement("canvas");
+        overlayCanvas.width = viewport.width;
+        overlayCanvas.height = viewport.height;
+        overlayCanvas.style.position = "absolute";
+        overlayCanvas.style.top = "0";
+        overlayCanvas.style.left = "0";
+        overlayCanvas.style.pointerEvents = "none";
+        container.style.position = "relative";
+        container.appendChild(overlayCanvas);
+
+        const overlayContext = overlayCanvas.getContext("2d");
+        overlayAnnotations(overlayContext, normalizedAnnotations, acType, { pdfScale });
+
+        // Always draw HVAC for engineer reviews (showHVAC state update hasn't
+        // flushed yet, so use hasHvac local check instead of the state flag)
+        if (normalizedAnnotations.hvac && (acType === "ducted" || acType === "vrf-ducted")) {
+          overlayHVAC(
+            overlayContext,
+            normalizedAnnotations.hvac,
+            hvacSymbols,
+            normalizedAnnotations.comments,
+            acType,
+            pdfScale
+          );
+        }
+
+        if (normalizedAnnotations.vrf && acType.startsWith("vrf")) {
+          overlayVRFSystem(
+            overlayContext,
+            normalizedAnnotations.vrf,
+            hvacSymbols,
+            acType
+          );
+        }
+
+        drawCanvasLegend(overlayContext, acType);
       }
     } catch (err) {
       console.error(err);

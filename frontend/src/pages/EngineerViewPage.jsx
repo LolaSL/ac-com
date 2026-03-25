@@ -4,7 +4,7 @@ import { Spinner, Alert, Button, Form } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { PDFDocument } from "pdf-lib";
-import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols, drawCanvasLegend } from "../utils/annotationUtils.js";
+import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols, drawCanvasLegend, preloadSymbolImages } from "../utils/annotationUtils.js";
 import * as pdfjsLib from "pdfjs-dist";
 import { FaDraftingCompass } from "react-icons/fa";
 import "./EngineerViewPage.css";
@@ -437,13 +437,49 @@ const EngineerViewPage = () => {
     setAddMode(null);
   };
 
+  // Clear all auto-placed HVAC elements (ducts, diffusers, dampers, thermostats)
+  const handleClearHvac = () => {
+    setAnnotation((prev) => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        hvac: { ducts: [], diffusers: [], dampers: [], thermostats: [] },
+      },
+    }));
+    toast.info('Cleared all HVAC elements.');
+  };
+
   // Auto-place ducts, diffusers, accessories near every indoor unit rectangle
   const handleAutoPlaceDucts = () => {
     const ann = annotation?.annotations;
     if (!ann) return;
 
+    // Build a set of rectangle IDs that are condensers.
+    // isCondenser is NOT persisted to MongoDB, so we reconstruct it from:
+    //   1. Explicit isCondenser flag (in-memory toggle)
+    //   2. Linked comment text starting with "condenser" / "outdoor" / "compressor"
+    //   3. Orange fill color (set by Annotator when label starts with "condenser")
+    const condenserSynonyms = /^(condenser|outdoor|compressor|heat\s*pump|outside\s*unit)/i;
+    const condenserIds = new Set();
+    (ann.rectangles || []).forEach((r) => {
+      if (r.isCondenser) {
+        condenserIds.add(r.id);
+        return;
+      }
+      // Check linked comment label
+      const comment = (ann.comments || []).find((c) => String(c.rectId) === String(r.id));
+      if (comment && condenserSynonyms.test(comment.text.trim())) {
+        condenserIds.add(r.id);
+        return;
+      }
+      // Fallback: orange fill = condenser (rgba(255, 140, 50, …))
+      if (r.fill && /rgba?\(\s*255\s*,\s*140\s*,\s*50/.test(r.fill)) {
+        condenserIds.add(r.id);
+      }
+    });
+
     // Gather indoor-unit rectangles (non-condenser user rects)
-    const rects = (ann.rectangles || []).filter((r) => !r.isCondenser);
+    const rects = (ann.rectangles || []).filter((r) => !condenserIds.has(r.id));
     if (rects.length === 0) {
       toast.warn('No indoor unit rectangles found. Draw blue rects first.');
       return;
@@ -483,7 +519,7 @@ const EngineerViewPage = () => {
 
       // --- Supply duct: offset from unit in chosen direction ---
       const sDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
-      const sDuctY = cy - DUCT_H - 0.003;
+      const sDuctY = cy - DUCT_H - 0.008;
       newDucts.push({
         id: `duct-auto-s-${ts}-${i}`,
         xPercent: Math.max(0.01, Math.min(0.89, sDuctX)),
@@ -497,7 +533,7 @@ const EngineerViewPage = () => {
 
       // --- Return duct: same direction, stacked below the unit ---
       const rDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
-      const rDuctY = cy + 0.003;
+      const rDuctY = cy + 0.008;
       newDucts.push({
         id: `duct-auto-r-${ts}-${i}`,
         xPercent: Math.max(0.01, Math.min(0.89, rDuctX)),
@@ -619,10 +655,10 @@ const EngineerViewPage = () => {
         ...(prev.annotations || {}),
         hvac: {
           ...(prev.annotations?.hvac || {}),
-          ducts: [...(prev.annotations?.hvac?.ducts || []), ...newDucts],
-          diffusers: [...(prev.annotations?.hvac?.diffusers || []), ...newDiffusers],
-          dampers: [...(prev.annotations?.hvac?.dampers || []), ...newDampers],
-          thermostats: [...(prev.annotations?.hvac?.thermostats || []), ...newThermostats],
+          ducts: [...newDucts],
+          diffusers: [...newDiffusers],
+          dampers: [...newDampers],
+          thermostats: [...newThermostats],
         },
       },
     }));
@@ -650,6 +686,9 @@ const EngineerViewPage = () => {
       const cw = viewport.width;
       const ch = viewport.height;
 
+      // Preload all SVG symbol images so they render synchronously on the baked canvas
+      const preloadedSymbols = await preloadSymbolImages(hvacSymbols);
+
       // Helper: render base page + overlays to an off-screen canvas, return PNG dataURL
       const renderMode = async (mode) => {
         const baseCanvas = document.createElement("canvas");
@@ -674,7 +713,7 @@ const EngineerViewPage = () => {
           overlayHVAC(
             overlayCtx,
             annotation.annotations.hvac,
-            hvacSymbols,
+            preloadedSymbols,
             annotation.annotations.comments,
             mode
           );
@@ -683,7 +722,7 @@ const EngineerViewPage = () => {
           overlayVRFSystem(
             overlayCtx,
             annotation.annotations.vrf,
-            hvacSymbols,
+            preloadedSymbols,
             mode
           );
         }
@@ -1061,6 +1100,14 @@ const EngineerViewPage = () => {
                 title="Auto-generate ducts, diffusers, grilles, dampers & thermostats for every indoor unit"
               >
                 🔧 Auto-Place HVAC
+              </Button>
+              <Button
+                size="sm"
+                variant="outline-danger"
+                onClick={handleClearHvac}
+                title="Remove all auto-placed HVAC elements"
+              >
+                🗑 Clear HVAC
               </Button>
             </div>
           </div>
