@@ -814,6 +814,7 @@ const EngineerViewPage = () => {
       formData.append("comments", JSON.stringify(comments));
       formData.append("lines", JSON.stringify(lines));
       formData.append("hvac", JSON.stringify(ann.hvac || {}));
+      formData.append("vrf", JSON.stringify(ann.vrf || {}));
       formData.append("refrigerantLinesAuto", "false");
       formData.append("engineerNotes", "");
       formData.append("imageWidth", "1");

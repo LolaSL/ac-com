@@ -201,7 +201,46 @@ const Sidebar = () => {
     const container = document.getElementById("pdf-container");
     if (!container) return;
 
-    const overlayCanvas = container.querySelector("canvas:nth-child(2)"); // overlay canvas
+    // For engineer reviews, there are two wrapper divs (ducted + ductless)
+    if (currentPdfType === "engineer") {
+      const wrappers = container.querySelectorAll("div");
+      const modes = ["vrf-ducted", "vrf-ductless"];
+      wrappers.forEach((wrapper, idx) => {
+        const overlayCanvas = wrapper.querySelector("canvas:nth-child(2)");
+        if (!overlayCanvas) return;
+        const ctx = overlayCanvas.getContext("2d");
+        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        const mode = modes[idx] || "vrf-ducted";
+
+        overlayAnnotations(ctx, selectedAnnotations, mode, { pdfScale });
+
+        if (showHVAC && selectedAnnotations.hvac && (mode === "ducted" || mode === "vrf-ducted")) {
+          overlayHVAC(ctx, selectedAnnotations.hvac, hvacSymbols, selectedAnnotations.comments, mode, pdfScale);
+        }
+
+        if (selectedAnnotations.vrf && mode.startsWith("vrf")) {
+          overlayVRFSystem(ctx, selectedAnnotations.vrf, hvacSymbols, mode);
+        }
+
+        drawCanvasLegend(ctx, mode);
+
+        // Mode label
+        ctx.save();
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText(
+          mode === "vrf-ducted"
+            ? "VRF System \u2014 Ducted Indoor Units"
+            : "VRF System \u2014 Ductless Indoor Units",
+          10, 20
+        );
+        ctx.restore();
+      });
+      return;
+    }
+
+    // For user annotations: single overlay canvas
+    const overlayCanvas = container.querySelector("canvas:nth-child(2)");
     if (!overlayCanvas) return;
 
     const context = overlayCanvas.getContext("2d");
@@ -210,7 +249,7 @@ const Sidebar = () => {
     const acType = selectedAcType;
 
     // redraw normal annotations
-    overlayAnnotations(context, selectedAnnotations, acType, { skipRefrigerantLines: currentPdfType !== "engineer", pdfScale });
+    overlayAnnotations(context, selectedAnnotations, acType, { skipRefrigerantLines: true, pdfScale });
 
     // draw HVAC layer if toggled
     if (showHVAC && (acType === "ducted" || acType === "vrf-ducted")) {
@@ -404,6 +443,7 @@ const Sidebar = () => {
       const container = document.getElementById("pdf-container");
       if (!container) return;
       container.innerHTML = "";
+      container.style.position = "relative";
 
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
@@ -411,53 +451,68 @@ const Sidebar = () => {
       const scale = pdfScale;
       const viewport = page.getViewport({ scale });
 
-      // Base PDF canvas
-      const canvas = document.createElement("canvas");
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      const context = canvas.getContext("2d");
-      container.appendChild(canvas);
-      await page.render({ canvasContext: context, viewport }).promise;
+      // Helper: render one page with a given mode
+      const renderPage = async (mode) => {
+        const wrapper = document.createElement("div");
+        wrapper.style.position = "relative";
+        wrapper.style.marginBottom = "12px";
+        container.appendChild(wrapper);
 
-      // Overlay canvas for dynamic annotations (same as EngineerViewPage)
-      if (normalizedAnnotations) {
-        const overlayCanvas = document.createElement("canvas");
-        overlayCanvas.width = viewport.width;
-        overlayCanvas.height = viewport.height;
-        overlayCanvas.style.position = "absolute";
-        overlayCanvas.style.top = "0";
-        overlayCanvas.style.left = "0";
-        overlayCanvas.style.pointerEvents = "none";
-        container.style.position = "relative";
-        container.appendChild(overlayCanvas);
+        // Base PDF canvas
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext("2d");
+        wrapper.appendChild(canvas);
+        await page.render({ canvasContext: ctx, viewport }).promise;
 
-        const overlayContext = overlayCanvas.getContext("2d");
-        overlayAnnotations(overlayContext, normalizedAnnotations, acType, { pdfScale });
+        if (normalizedAnnotations) {
+          const overlayCanvas = document.createElement("canvas");
+          overlayCanvas.width = viewport.width;
+          overlayCanvas.height = viewport.height;
+          overlayCanvas.style.position = "absolute";
+          overlayCanvas.style.top = "0";
+          overlayCanvas.style.left = "0";
+          overlayCanvas.style.pointerEvents = "none";
+          wrapper.appendChild(overlayCanvas);
 
-        // Always draw HVAC for engineer reviews (showHVAC state update hasn't
-        // flushed yet, so use hasHvac local check instead of the state flag)
-        if (normalizedAnnotations.hvac && (acType === "ducted" || acType === "vrf-ducted")) {
-          overlayHVAC(
-            overlayContext,
-            normalizedAnnotations.hvac,
-            hvacSymbols,
-            normalizedAnnotations.comments,
-            acType,
-            pdfScale
+          const overlayCtx = overlayCanvas.getContext("2d");
+          overlayAnnotations(overlayCtx, normalizedAnnotations, mode, { pdfScale });
+
+          if (normalizedAnnotations.hvac && (mode === "ducted" || mode === "vrf-ducted")) {
+            overlayHVAC(
+              overlayCtx,
+              normalizedAnnotations.hvac,
+              hvacSymbols,
+              normalizedAnnotations.comments,
+              mode,
+              pdfScale
+            );
+          }
+
+          if (normalizedAnnotations.vrf && mode.startsWith("vrf")) {
+            overlayVRFSystem(overlayCtx, normalizedAnnotations.vrf, hvacSymbols, mode);
+          }
+
+          drawCanvasLegend(overlayCtx, mode);
+
+          // Mode label
+          overlayCtx.save();
+          overlayCtx.fillStyle = "rgba(0,0,0,0.75)";
+          overlayCtx.font = "bold 14px Arial";
+          overlayCtx.fillText(
+            mode === "vrf-ducted"
+              ? "VRF System \u2014 Ducted Indoor Units"
+              : "VRF System \u2014 Ductless Indoor Units",
+            10, 20
           );
+          overlayCtx.restore();
         }
+      };
 
-        if (normalizedAnnotations.vrf && acType.startsWith("vrf")) {
-          overlayVRFSystem(
-            overlayContext,
-            normalizedAnnotations.vrf,
-            hvacSymbols,
-            acType
-          );
-        }
-
-        drawCanvasLegend(overlayContext, acType);
-      }
+      // Render both modes
+      await renderPage("vrf-ducted");
+      await renderPage("vrf-ductless");
     } catch (err) {
       console.error(err);
       setError(
@@ -669,6 +724,7 @@ const Sidebar = () => {
                         pdfId={selectedPdf?._id}
                         token={token}
                         annotations={selectedAnnotations}
+                        acType={selectedAcType}
                         annotationType="engineer"
                       />
                     )}
