@@ -62,7 +62,6 @@ function SaveAsPDF({
         if (!annRes.ok) throw new Error("Failed to fetch engineer annotations");
         const annData = await annRes.json();
         const engAnnotations = annData.annotations || annData;
-        const engAcType = annData.systemConfig?.systemType || acType || "vrf-ducted";
 
         // Fetch original base PDF (from user annotation)
         let baseBuffer;

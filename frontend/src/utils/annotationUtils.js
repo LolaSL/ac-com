@@ -763,25 +763,23 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
     context.stroke();
     context.restore();
   });
-  // lines - skip when callout lines or refrigerant lines already connect rects to comments
-  if (acType !== "ducted" && acType !== "ductless" && acType !== "vrf-ducted" && acType !== "vrf-ductless") {
-    annotations?.lines?.forEach((line) => {
-      const lineReductionFactor = 0.985;
-      context.beginPath();
-      const points = line.points.map((val, idx) =>
-        idx % 2 === 0
-          ? val * canvasWidth * lineReductionFactor
-          : val * canvasHeight * lineReductionFactor
-      );
-      context.moveTo(points[0], points[1]);
-      for (let i = 2; i < points.length; i += 2) {
-        context.lineTo(points[i], points[i + 1]);
-      }
-      context.lineWidth = line.strokeWidth || 2;
-      context.strokeStyle = line.stroke || "black";
-      context.stroke();
-    });
-  }
+  // lines - draw stored connector lines (user-created callout lines linking rectangles to comments)
+  annotations?.lines?.forEach((line) => {
+    const lineReductionFactor = 0.985;
+    context.beginPath();
+    const points = line.points.map((val, idx) =>
+      idx % 2 === 0
+        ? val * canvasWidth * lineReductionFactor
+        : val * canvasHeight * lineReductionFactor
+    );
+    context.moveTo(points[0], points[1]);
+    for (let i = 2; i < points.length; i += 2) {
+      context.lineTo(points[i], points[i + 1]);
+    }
+    context.lineWidth = line.strokeWidth || 2;
+    context.strokeStyle = line.stroke || "black";
+    context.stroke();
+  });
   // comments - filter by acType to show only comments created in current mode
   annotations?.comments?.forEach((comment) => {
     // Only render comment if it matches current acType or has no acType (legacy comments)

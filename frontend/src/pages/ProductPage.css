@@ -185,6 +185,24 @@
   }
 }
 
+/* ── Rating select (matches seller page style) ─────── */
+.product-page-container .sp-form-label {
+  font-weight: 600;
+  color: #1a3c5e;
+  font-size: 0.9rem;
+}
+
+.product-page-container .sp-select {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.product-page-container .sp-select:focus {
+  border-color: #2563a8;
+  box-shadow: 0 0 0 3px rgba(37, 99, 168, 0.15);
+}
+
 /* ── Large screens (≥ 992 px) ───────────────────────── */
 @media (min-width: 992px) {
   .product-info-card {

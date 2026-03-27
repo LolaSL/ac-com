@@ -778,18 +778,19 @@ function ProductPage() {
             <form onSubmit={submitHandler}>
               <h3 className="product-title">Write a customer review</h3>
               <Form.Group className="mb-3" controlId="rating">
-                <Form.Label>Rating</Form.Label>
+                <Form.Label className="sp-form-label">Your Rating</Form.Label>
                 <Form.Control
                   as="select"
                   value={rating}
                   onChange={(e) => setRating(e.target.value)}
+                  className="sp-select"
                 >
-                  <option value="">Select...</option>
-                  <option value="1">1- Poor</option>
-                  <option value="2">2- Fair</option>
-                  <option value="3">3- Good</option>
-                  <option value="4">4- Very good</option>
-                  <option value="5">5- Excellent</option>
+                  <option value="">Select a rating…</option>
+                  <option value="1">⭐ Poor</option>
+                  <option value="2">⭐⭐ Fair</option>
+                  <option value="3">⭐⭐⭐ Good</option>
+                  <option value="4">⭐⭐⭐⭐ Very Good</option>
+                  <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
                 </Form.Control>
               </Form.Group>
               <FloatingLabel
