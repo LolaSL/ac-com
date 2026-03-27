@@ -200,27 +200,27 @@ export default function UserListPage() {
           <Table striped bordered hover className="admin-table">
             <thead className="admin-table-header">
               <tr>
-                <th>
-                  <button type="button" onClick={() => handleSort("_id")}>
+                <th >
+                  <button type="button" className="text-white" onClick={() => handleSort("_id")}>
                     ID{" "}
                     {sortColumn === "_id" && (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
-                <th>
-                  <button type="button" onClick={() => handleSort("name")}>
+                <th >
+                  <button type="button" className="text-white"onClick={() => handleSort("name")}>
                     NAME{" "}
                     {sortColumn === "name" && (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
-                <th>
-                  <button type="button" onClick={() => handleSort("email")}>
+                <th >
+                  <button type="button" className="text-white" onClick={() => handleSort("email")}>
                     EMAIL{" "}
                     {sortColumn === "email" &&
                       (sortOrder === "asc" ? "↑" : "↓")}
                   </button>
                 </th>
-                <th>ROLE</th>
-                <th>ACTIONS</th>
+                <th className="text-white">ROLE</th>
+                 <th className="text-white" style={{ width: "200px" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -236,7 +236,7 @@ export default function UserListPage() {
                       {user.isAdmin ? "Admin" : "User"}
                     </Badge>
                   </td>
-                  <td className="actions-cell">
+                  <td data-label="Actions" className="actions-cell">
                     <Button
                       variant="sm"
                       className="btn-admin-edit"

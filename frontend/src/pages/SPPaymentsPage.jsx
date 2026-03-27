@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import { Badge } from "react-bootstrap";
+import { Badge, Table } from "react-bootstrap";
 import { FaMoneyBillWave, FaBoxOpen, FaCheckCircle, FaClock, FaTimesCircle, FaExclamationCircle } from "react-icons/fa";
 import LoadingBox from "../components/LoadingBox.jsx";
 import MessageBox from "../components/MessageBox.jsx";
@@ -106,7 +106,7 @@ const SPPaymentsPage = () => {
         {/* ── Table ── */}
         {payments.length > 0 ? (
           <div className="table-responsive">
-            <table className="spp-table">
+            <Table striped bordered hover >
               <thead>
                 <tr>
                   <th>#</th>
@@ -150,7 +150,7 @@ const SPPaymentsPage = () => {
                   );
                 })}
               </tbody>
-            </table>
+            </Table>
           </div>
         ) : (
           <div className="spp-empty">

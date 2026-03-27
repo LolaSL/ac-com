@@ -185,6 +185,7 @@
     white-space: nowrap;
     flex-shrink: 0;
     min-width: 90px;
+    display: block;
   }
 
   .adm-inner .table td .d-flex.gap-1 {

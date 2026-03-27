@@ -274,14 +274,14 @@ export default function PaymentsPage() {
             <tbody>
               {payments.map((payment) => (
                 <tr key={payment._id}>
-                  <td>{payment._id}</td>
-                  <td>{payment.serviceProvider?.name || "N/A"}</td>
-                  <td>${payment.amount}</td>
-                  <td>{payment.currency || "USD"}</td>
-                  <td>{payment.status}</td>
-                  <td>{payment.paymentMethod}</td>
-                  <td>{payment.description}</td>
-                  <td style={{ whiteSpace: "nowrap" }}>
+                  <td data-label="ID">{payment._id}</td>
+                  <td data-label="Service Provider">{payment.serviceProvider?.name || "N/A"}</td>
+                  <td data-label="Amount">${payment.amount}</td>
+                  <td data-label="Currency">{payment.currency || "USD"}</td>
+                  <td data-label="Status">{payment.status}</td>
+                  <td data-label="Payment Method">{payment.paymentMethod}</td>
+                  <td data-label="Description">{payment.description}</td>
+                  <td data-label="Actions" style={{ whiteSpace: "nowrap" }}>
                     <div className="d-flex gap-1">
                     {payment.status === "pending" && (
                       <>

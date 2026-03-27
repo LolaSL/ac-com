@@ -380,18 +380,18 @@ export default function OrderListPage() {
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <div className="table-responsive">
-          <Table className="admin-table">
+          <Table striped bordered hover className="admin-table">
             <thead className="admin-table-header">
-              <tr>
-                <th
+              <tr >
+                <th className="text-white"
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSort("_id")}
                 >
                   ID {sortColumn === "_id" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
-                <th>TRANSACTION ID</th>
-                <th>CUSTOMER</th>
-                <th
+                <th className="text-white">TRANSACTION ID</th>
+                <th className="text-white">CUSTOMER</th>
+                <th className="text-white"
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSort("createdAt")}
                 >
@@ -399,7 +399,7 @@ export default function OrderListPage() {
                   {sortColumn === "createdAt" &&
                     (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
-                <th
+                <th className="text-white"
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSort("totalPrice")}
                 >
@@ -407,14 +407,14 @@ export default function OrderListPage() {
                   {sortColumn === "totalPrice" &&
                     (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
-                <th
+                <th className="text-white"
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSort("paidAt")}
                 >
                   PAID{" "}
                   {sortColumn === "paidAt" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
-                <th
+                <th className="text-white"
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSort("deliveredAt")}
                 >
@@ -422,7 +422,7 @@ export default function OrderListPage() {
                   {sortColumn === "deliveredAt" &&
                     (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
-                <th>ACTIONS</th>
+                <th className="text-white">ACTIONS</th>
               </tr>
             </thead>
             <tbody>

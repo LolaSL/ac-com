@@ -189,12 +189,12 @@ const SellersListPage = () => {
           <Table striped bordered hover className="admin-table">
             <thead className="admin-table-header">
               <tr>
-                <th>ID</th>
-                <th>LOGO</th>
-                <th>NAME</th>
-                <th>BRAND</th>
-                <th>COMPANY LINK</th>
-                <th>ACTIONS</th>
+                <th className="text-white">ID</th>
+                <th className="text-white">LOGO</th>
+                <th className="text-white">NAME</th>
+                <th className="text-white">BRAND</th>
+                <th className="text-white">COMPANY LINK</th>
+                <th className="text-white">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
@@ -251,7 +251,7 @@ const SellersListPage = () => {
                         Visit
                       </a>
                     </td>
-                    <td className="actions-cell">
+                    <td data-label="Actions" className="actions-cell">
                       <Button
                         variant="sm"
                         className="btn-admin-edit"

@@ -287,7 +287,7 @@ export default function ProductListPage() {
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <div className="table-responsive">
-          <Table striped bordered hover responsive>
+          <Table striped bordered hover >
             <thead>
               <tr>
                 <th style={{ width: "80px" }}>Image</th>
@@ -295,7 +295,7 @@ export default function ProductListPage() {
                   <button
                     type="button"
                     onClick={() => handleSort("name")}
-                    className="btn btn-link p-0"
+                    className="btn text-white"
                   >
                     Name{" "}
                     {sortColumn === "name" && (sortOrder === "asc" ? "↑" : "↓")}
@@ -305,7 +305,7 @@ export default function ProductListPage() {
                   <button
                     type="button"
                     onClick={() => handleSort("price")}
-                    className="btn btn-link p-0"
+                       className="btn text-white"
                   >
                     Price{" "}
                     {sortColumn === "price" &&
@@ -316,7 +316,7 @@ export default function ProductListPage() {
                   <button
                     type="button"
                     onClick={() => handleSort("category")}
-                    className="btn btn-link p-0"
+                           className="btn text-white"
                   >
                     Category{" "}
                     {sortColumn === "category" &&
@@ -327,7 +327,7 @@ export default function ProductListPage() {
                   <button
                     type="button"
                     onClick={() => handleSort("brand")}
-                    className="btn btn-link p-0"
+                       className="btn text-white"
                   >
                     Brand{" "}
                     {sortColumn === "brand" &&
@@ -338,7 +338,7 @@ export default function ProductListPage() {
                   <button
                     type="button"
                     onClick={() => handleSort("countInStock")}
-                    className="btn btn-link p-0"
+                       className="btn text-white"
                   >
                     Stock{" "}
                     {sortColumn === "countInStock" &&

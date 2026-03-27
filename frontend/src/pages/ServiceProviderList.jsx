@@ -209,15 +209,15 @@ export default function ServiceProviderList() {
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <div className="table-responsive">
-          <Table className="admin-table">
+          <Table striped bordered hover className="admin-table">
             <thead className="admin-table-header">
               <tr>
-                <th>ID</th>
-                <th>NAME</th>
-                <th>EMAIL</th>
-                <th>PHONE</th>
-                <th>STATUS</th>
-                <th>ACTIONS</th>
+                <th className="text-white">ID</th>
+                <th className="text-white">NAME</th>
+                <th className="text-white">EMAIL</th>
+                <th className="text-white">PHONE</th>
+                <th className="text-white">STATUS</th>
+                <th className="text-white">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
@@ -242,20 +242,20 @@ export default function ServiceProviderList() {
                 })
                 .map((serviceProvider) => (
                   <tr key={serviceProvider._id} className="admin-table-row">
-                    <td className="small-text">
+                    <td data-label="ID" className="small-text">
                       {serviceProvider._id}
                     </td>
-                    <td>{serviceProvider.name}</td>
-                    <td>{serviceProvider.email}</td>
-                    <td>{serviceProvider.phone || "N/A"}</td>
-                    <td>
+                    <td data-label="Name">{serviceProvider.name}</td>
+                    <td data-label="Email">{serviceProvider.email}</td>
+                    <td data-label="Phone">{serviceProvider.phone || "N/A"}</td>
+                    <td data-label="Status">
                       <Badge
                         bg={serviceProvider.isActive ? "success" : "secondary"}
                       >
                         {serviceProvider.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
-                    <td className="actions-cell">
+                    <td data-label="Actions" className="actions-cell">
                       <Button
                         type="button"
                         className="btn-admin-edit"

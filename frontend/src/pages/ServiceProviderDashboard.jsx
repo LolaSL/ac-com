@@ -12,6 +12,7 @@ import { FaFolderOpen, FaCheckCircle, FaSpinner, FaDollarSign,
          FaStar, FaExternalLinkAlt, FaMoneyBillWave,
          FaLinkedin, FaInstagram, FaTwitter, FaFacebook } from "react-icons/fa";
 import "./ServiceProviderDashboard.css";
+import { Table } from "react-bootstrap";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -216,7 +217,7 @@ export default function ServiceProviderDashboard() {
           <div className="spd-empty">No projects assigned yet.</div>
         ) : (
           <div className="spd-table-wrap">
-            <table className="spd-table">
+            <Table striped bordered hover responsive className="spd-projects-table">
               <thead>
                 <tr>
                   <th>Project</th>
@@ -229,11 +230,11 @@ export default function ServiceProviderDashboard() {
               <tbody>
                 {recentProjects.map(p => (
                   <tr key={p._id}>
-                    <td className="spd-td-name">{p.name}</td>
-                    <td>{p.client}</td>
-                    <td>{new Date(p.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
-                    <td>{p.hoursWorked}</td>
-                    <td>
+                    <td data-label="ID" className="spd-td-name">{p.name}</td>
+                    <td data-label="Client">{p.client}</td>
+                    <td data-label="Due Date">{new Date(p.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                    <td data-label="Hours">{p.hoursWorked}</td>
+                    <td data-label="Status">
                       <span className={`spd-status-chip spd-status-chip--${p.status === "Completed" ? "green" : p.status === "In Progress" ? "amber" : "grey"}`}>
                         {p.status}
                       </span>
@@ -241,7 +242,7 @@ export default function ServiceProviderDashboard() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           </div>
         )}
       </div>

@@ -179,19 +179,17 @@ const MessagesServiceProviders = () => {
     <Container className="messages-service-providers">
       <div className="mb-4 mt-4 header-section">
         <h1 className="mb-2 fw-bold">Admin - Service Provider Messages</h1>
-        <p className="text-muted mb-0">
-          Monitor and moderate communications between clients and service
-          providers for quality assurance and support.
+        <p className="text-center mb-0 fs-6">
+          Monitor and moderate all communications between clients and service providers to ensure quality and compliance.
         </p>
-        <small className="text-muted">
-          Access to messages is granted for platform moderation, dispute
-          resolution, and customer support in accordance with Terms of Service.
+        <small className="text-center d-block mt-1 ">
+          Message access is restricted to platform moderation, dispute resolution, and support, as outlined in the Terms of Service.
         </small>
       </div>
       {messages.length === 0 ? (
         <div>
-          <p>No messages available</p>
-          <p>Check API response and ensure messages exist in the database.</p>
+          <p className="text-center">No messages available</p>
+          <p className="text-center">Check API response and ensure messages exist in the database.</p>
         </div>
       ) : (
         <div className="table-responsive">

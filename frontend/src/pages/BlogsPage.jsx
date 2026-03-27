@@ -171,13 +171,13 @@ export default function BlogsPage() {
       ) : (
         <>
         <div className="table-responsive admin-table-wrapper">
-          <Table striped bordered hover className="admin-table">
+          <Table striped bordered hover >
             <thead className="admin-table-header">
               <tr>
-                <th>ID</th>
-                <th>TITLE</th>
-                <th>DESCRIPTION</th>
-                <th>ACTIONS</th>
+                <th className="text-white">ID</th>
+                <th className="text-white">TITLE</th>
+                <th className="text-white">DESCRIPTION</th>
+                <th className="text-white">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
@@ -197,7 +197,7 @@ export default function BlogsPage() {
                       {blog.shortDescription?.substring(0, 60)}
                       {blog.shortDescription?.length > 60 ? "..." : ""}
                     </td>
-                    <td className="actions-cell">
+                    <td data-label="Actions" className="actions-cell">
                       <Button
                         variant="sm"
                         className="btn-admin-edit"

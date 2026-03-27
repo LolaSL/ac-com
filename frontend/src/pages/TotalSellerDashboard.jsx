@@ -162,44 +162,44 @@ export default function TotalSellerDashboard() {
                 <tbody>
                   {data.sellers?.map((item) => {
                     return (
-                      <tr key={item.seller._id}>
-                        <td>
+                      <tr data-label="ID" key={item.seller._id}>
+                        <td data-label="Seller">
                           <strong>{item.seller.name}</strong>
                         </td>
-                        <td>{item.seller.brand}</td>
-                        <td>
+                        <td data-label="Brand">{item.seller.brand}</td>
+                        <td data-label="Referral Code">
                           <Badge bg="secondary">
                             {item.seller.referralCode}
                           </Badge>
                         </td>
-                        <td className="text-center">
+                        <td data-label="Referred Users" className="text-center">
                           <Badge bg="primary">
                             {item.stats?.referredUsersCount || 0}
                           </Badge>
                         </td>
-                        <td className="text-center">
+                        <td data-label="Referred Orders" className="text-center">
                           <Badge bg="success">
                             {item.stats?.totalReferredOrders || 0}
                           </Badge>
                         </td>
-                        <td className="text-end">
+                        <td data-label="Total Sales" className="text-end">
                           <strong>
                             $
                             {item.stats?.totalReferredSales?.toFixed(2) ||
                               "0.00"}
                           </strong>
                         </td>
-                        <td className="text-end">
+                        <td data-label="Commission" className="text-end">
                           <strong className="text-warning">
                             ${item.stats?.totalCommission?.toFixed(2) || "0.00"}
                           </strong>
                         </td>
-                        <td className="text-center">
+                        <td data-label="Clicks" className="text-center">
                           <Badge bg="secondary" style={{ background: '#8b5cf6' }}>
                             {item.seller?.outboundClicks || 0}
                           </Badge>
                         </td>
-                        <td style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                        <td data-label="Last Click" style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                           {item.seller?.lastClickAt
                             ? new Date(item.seller.lastClickAt).toLocaleString()
                             : <span className="text-muted">—</span>}

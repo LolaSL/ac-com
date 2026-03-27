@@ -1,3 +1,9 @@
+@media (max-width: 576px) {
+  .messages-service-providers .header-section p,
+  .messages-service-providers .header-section small {
+    text-align: justify;
+  }
+}
 .messages-service-providers {
   padding: 2rem 0;
   width: 100%;
@@ -53,18 +59,70 @@
   .messages-service-providers .header-section {
     margin-bottom: 1rem;
   }
+  .messages-service-providers .messages {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0 1.2rem;
+  }
 
-  .messages-service-providers .header-section h1 {
-    font-size: 1.4rem;
+  .messages-service-providers .messages tbody tr {
+    background: #f8fafc;
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(30,41,59,0.08), 0 1.5px 4px rgba(16, 185, 129, 0.07);
+    transition: box-shadow 0.18s;
+    border: none;
+    overflow: hidden;
+  }
+  .messages-service-providers .messages tbody tr:hover {
+    box-shadow: 0 4px 24px rgba(16,185,129,0.13), 0 2px 8px rgba(30,41,59,0.10);
+  }
+
+  .messages-service-providers .messages td {
+    padding: 1.1rem 1.4rem;
+    border: none;
+    color: #334155;
+    font-size: 1rem;
+    background: transparent;
+  }
+  .messages-service-providers .messages th {
+    background: #e0f2fe;
+    color: #0e7490;
+    font-weight: 700;
+    font-size: 1.02rem;
+    border: none;
+    padding: 1rem 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   .messages-service-providers .btn-admin-edit,
   .messages-service-providers .btn-admin-delete {
-    margin-right: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.97rem;
+    box-shadow: 0 1px 4px rgba(16,185,129,0.07);
+    transition: box-shadow 0.18s, background 0.18s;
+  }
+  .messages-service-providers .btn-admin-edit:hover,
+  .messages-service-providers .btn-admin-delete:hover {
+    box-shadow: 0 2px 8px rgba(16,185,129,0.13);
   }
 
-  /* Card layout for table on mobile */
+  /* Responsive: Card layout for mobile */
+
+  .messages-service-providers .header-section h1 {
+    font-size: 1.4rem;
+  }
+    .messages-service-providers .messages tbody tr {
+      display: block;
+      margin-bottom: 1.2rem;
+      border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(30,41,59,0.08), 0 1.5px 4px rgba(16, 185, 129, 0.07);
+      background: #f8fafc;
+      padding: 0.7rem 0.2rem;
+      border: none;
+      overflow: hidden;
+    }
   .messages-service-providers .messages thead {
     display: none;
   }
@@ -82,13 +140,16 @@
     display: flex;
     justify-content: flex-start;
     gap: 0.5rem;
-    padding: 0.4rem 0.75rem;
+    padding: 0.9rem 1.1rem;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: break-word;
     border: none;
-    border-bottom: 1px solid #f0f2f6;
+    border-bottom: 1px solid #e0f2fe;
     text-align: left;
+    background: transparent;
+    font-size: 1rem;
+    color: #334155;
   }
 
   .messages-service-providers .messages td:last-child {

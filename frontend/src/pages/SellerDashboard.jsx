@@ -384,7 +384,7 @@ export default function SellerDashboard() {
                   </div>
                 )}
                 <Card.Body>
-                  <Table striped bordered hover responsive>
+                  <Table striped bordered hover responsiveclassName="admin-table" >
                     <thead>
                       <tr>
                         <th>Order ID</th>
@@ -396,20 +396,20 @@ export default function SellerDashboard() {
                     </thead>
                     <tbody>
                       {getFilteredOrders().map((order) => (
-                        <tr key={order._id}>
-                          <td>
+                        <tr data-label="ID" key={order._id}>
+                          <td data-label="Order ID">
                             <Link to={`/order/${order._id}`}>
                               {order._id.substring(-8)}
                             </Link>
                           </td>
-                          <td>{order.user.name}</td>
-                          <td>${order.totalPrice.toFixed(2)}</td>
-                          <td>
+                          <td data-label="Customer">{order.user.name}</td>
+                          <td data-label="Amount">${order.totalPrice.toFixed(2)}</td>
+                          <td data-label="Status">
                             <Badge bg={order.isPaid ? "success" : "warning"}>
                               {order.isPaid ? "Paid" : "Pending"}
                             </Badge>
                           </td>
-                          <td>
+                          <td data-label="Date">
                             {new Date(order.createdAt).toLocaleDateString()}
                           </td>
                         </tr>

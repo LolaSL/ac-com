@@ -365,37 +365,65 @@ h1.contacts-title {
 /* Mobile table header labels for small screens */
 /* Transform admin table into label-value rows on small screens */
 @media (max-width: 576px) {
-  .admin-table thead {
+  /* Unify mobile table header rules for all admin tables */
+  .admin-table thead,
+  .table.admin-table thead,
+  .table thead {
     display: none;
   }
-  .admin-table tbody tr {
+  .admin-table tbody tr,
+  .table.admin-table tbody tr,
+  .table tbody tr {
     display: block;
     border: 1px solid #e9ecef;
     border-radius: 6px;
     margin-bottom: 10px;
     overflow: hidden;
   }
-  .admin-table tbody td {
+  .admin-table tbody td,
+  .table.admin-table tbody td,
+  .table tbody td {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0.75rem;
     border-bottom: 1px solid #f1f3f5;
   }
-  .admin-table tbody td:last-child {
+  .admin-table tbody td:last-child,
+  .table.admin-table tbody td:last-child,
+  .table tbody td:last-child {
     border-bottom: 0;
   }
-  .admin-table tbody td::before {
+  .admin-table tbody td::before,
+  .table.admin-table tbody td::before,
+  .table tbody td::before {
     content: attr(data-label);
     font-weight: 600;
     color: #6c757d;
     margin-right: 1rem;
+    display: block;
+    min-width: 90px;
+    text-align: left;
   }
-  .admin-table tbody td.actions-cell {
-    justify-content: space-between;
+  .admin-table tbody td.actions-cell,
+  .table.admin-table tbody td.actions-cell,
+  .table tbody td.actions-cell {
+    justify-content: flex-start;
+    flex-direction: row !important;
+    gap: 0.5rem;
   }
-  .admin-table tbody td.actions-cell .btn {
-    margin-left: 6px;
+  .admin-table tbody td.actions-cell .btn,
+  .table.admin-table tbody td.actions-cell .btn,
+  .table tbody td.actions-cell .btn {
+    margin-left: 0;
+    margin-right: 0.5rem;
+    display: inline-flex;
+    vertical-align: middle;
+  }
+  .admin-table tbody td.actions-cell .btn:last-child,
+  .table.admin-table tbody td.actions-cell .btn:last-child,
+  .table tbody td.actions-cell .btn:last-child {
+    margin-right: 0;
   }
 }
 
