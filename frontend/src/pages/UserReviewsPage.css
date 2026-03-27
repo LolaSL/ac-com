@@ -118,14 +118,16 @@
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #67e8f9;
   font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.25rem 0.65rem;
+  font-weight:700;
+  padding: 0.3rem 0.7rem;
   border-radius: 2rem;
+  width:auto;
 }
 
 .urv-card__rating--seller {
   background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
   color: #22c55e;
+  font-weight: 700;
 }
 
 .urv-card__comment {
@@ -134,15 +136,28 @@
   line-height: 1.5;
 }
 
+.urv-card__actions {
+  display: flex;
+  align-items: center;
+  flex-direction: row ;
+  flex-wrap: wrap ;
+  width: auto;
+}
+
+.urv-card__actions > .urv-card__rating {
+  margin-right: 0.65rem;
+}
+
 /* ── Remove / Clear button on each card ──────────────────── */
 .urv-remove-btn {
   background: transparent !important;
   color: #ef4444 !important;
   border: 1.5px solid #ef4444 !important;
   border-radius: 0.4rem;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.75rem;
   transition: all 0.3s ease;
+  width: auto;
 }
 
 .urv-remove-btn:hover {

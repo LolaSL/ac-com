@@ -221,8 +221,8 @@ function UserReviewsPage() {
                           {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="d-flex align-items-center gap-2">
-                        <span className="urv-card__rating">{r.rating} ★</span>
+                      <div className="urv-card__actions">
+                        <span className="urv-card__rating ">{r.rating} ★</span>
                         <Button
                           size="sm"
                           variant="outline-danger"
@@ -259,8 +259,8 @@ function UserReviewsPage() {
                           {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="d-flex align-items-center gap-2">
-                        <span className="urv-card__rating urv-card__rating--seller">{r.rating} ★</span>
+                      <div className="urv-card__actions">
+                        <span className="urv-card__rating urv-card__rating--seller ">{r.rating} ★</span>
                         <Button
                           size="sm"
                           variant="outline-danger"

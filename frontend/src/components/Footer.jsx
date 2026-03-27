@@ -28,8 +28,7 @@ const Footer = () => {
             <h4>AC-Commerce</h4>
             <hr />
             <p>
-              We believe innovation transforms how we manage indoor and outdoor
-              spaces.
+             We make spaces smarter through innovation.
             </p>
             <h5 className="follow-us">Follow Us</h5>
             <div className="footer-icons d-flex gap-2">
