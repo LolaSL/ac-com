@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import { Button } from "react-bootstrap";
+import { Button, Table } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaTrash, FaEnvelope, FaBoxOpen } from "react-icons/fa";
 import "./ServiceProviderMessages.css";
@@ -109,7 +109,7 @@ const ServiceProviderMessages = () => {
           </div>
         ) : (
           <div className="table-responsive">
-            <table className="spm-table">
+            <Table className="spm-table" striped bordered hover responsive>
               <thead>
                 <tr>
                   <th>#</th>
@@ -141,7 +141,7 @@ const ServiceProviderMessages = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           </div>
         )}
       </div>

@@ -1618,18 +1618,37 @@ const Annotator = ({
     
     console.log(`Saving ${roomsToSave.length} unique rooms:`, roomsToSave.map(r => r.name));
     
-    const formData = new FormData();
-    formData.append("pdfFile", file);
-    formData.append("rectangles", JSON.stringify(rectangles));
-    formData.append("comments", JSON.stringify(comments));
-    formData.append("lines", JSON.stringify(lines));
-    formData.append("pdfId", pdfId);
-    formData.append("acType", "ductless");
-    formData.append("roomData", JSON.stringify(roomsToSave)); // Save room data with flat prefixes
 
     const canvas = document.getElementById("my-canvas");
     const imageWidth = canvas?.width;
     const imageHeight = canvas?.height;
+
+    // Convert all line points to percentages of canvas size before saving, but only if not already percent
+    const linesPercent = lines.map((line) => {
+      const isPercent = line.points.every((p) => Math.abs(p) <= 1.5);
+      if (isPercent) {
+        return { ...line };
+      }
+      const percentPoints = line.points.map((p, i) => {
+        if (i % 2 === 0) {
+          // x coordinate
+          return imageWidth ? p / imageWidth : 0;
+        } else {
+          // y coordinate
+          return imageHeight ? p / imageHeight : 0;
+        }
+      });
+      return { ...line, points: percentPoints };
+    });
+
+    const formData = new FormData();
+    formData.append("pdfFile", file);
+    formData.append("rectangles", JSON.stringify(rectangles));
+    formData.append("comments", JSON.stringify(comments));
+    formData.append("lines", JSON.stringify(linesPercent));
+    formData.append("pdfId", pdfId);
+    formData.append("acType", "ductless");
+    formData.append("roomData", JSON.stringify(roomsToSave)); // Save room data with flat prefixes
 
     formData.append("imageWidth", imageWidth);
     formData.append("imageHeight", imageHeight);
@@ -2630,14 +2649,24 @@ const Annotator = ({
                   className="konva-stage"
                 >
                   <Layer>
-                    {lines.map((line) => (
-                      <Line
-                        key={line.id}
-                        points={line.points}
-                        stroke={line.stroke}
-                        strokeWidth={line.strokeWidth}
-                      />
-                    ))}
+                    {lines.map((line) => {
+                      // Convert points from percent to pixels if needed
+                      let pixelPoints = line.points;
+                      const isPercent = pixelPoints.every((p) => Math.abs(p) <= 1.5);
+                      if (isPercent && pdfSize?.width && pdfSize?.height) {
+                        pixelPoints = pixelPoints.map((p, i) =>
+                          i % 2 === 0 ? p * pdfSize.width : p * pdfSize.height
+                        );
+                      }
+                      return (
+                        <Line
+                          key={line.id}
+                          points={pixelPoints}
+                          stroke={line.stroke}
+                          strokeWidth={line.strokeWidth}
+                        />
+                      );
+                    })}
                   </Layer>
                   <Layer>
                     {rectangles.map((rect) => (

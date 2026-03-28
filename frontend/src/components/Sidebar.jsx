@@ -550,6 +550,7 @@ const Sidebar = () => {
     } catch (err) {
       console.error(err);
       setError(err.message);
+      toast.error(err.message || "Failed to delete PDF.");
     }
   };
 

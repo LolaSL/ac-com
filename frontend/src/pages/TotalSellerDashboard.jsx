@@ -204,7 +204,7 @@ export default function TotalSellerDashboard() {
                             ? new Date(item.seller.lastClickAt).toLocaleString()
                             : <span className="text-muted">—</span>}
                         </td>
-                        <td>
+                        <td data-label="Actions" className="text-center">
                           <Button
                             type="button"
                             className={`btn-copy-link me-2${copiedId === item.seller._id ? ' copied' : ''}`}

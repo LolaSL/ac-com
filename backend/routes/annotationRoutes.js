@@ -770,16 +770,29 @@ router.delete('/annotations/:id', isAuth, async (req, res) => {
   try {
     const annotation = await AnnotationModel.findById(req.params.id);
     if (!annotation) {
+      console.error('[DELETE] Annotation not found for id:', req.params.id);
       return res.status(404).json({ message: 'Annotation not found.' });
     }
 
     const tokenUserId = req.user._id?.toString() || req.user.id?.toString() || req.user.userId?.toString();
-    // Only allow if user owns the annotation (admins cannot delete user annotations)
-    if (!tokenUserId || annotation.userId.toString() !== tokenUserId) {
-      return res.status(403).json({ message: 'Unauthorized to delete these annotations.' });
+    const annotationUserId = annotation.userId?.toString();
+    console.log('[DELETE] tokenUserId:', tokenUserId, '| annotationUserId:', annotationUserId);
+
+    if (!tokenUserId) {
+      console.error('[DELETE] No user id in token');
+      return res.status(403).json({ message: 'No user id in token.' });
+    }
+    if (!annotationUserId) {
+      console.error('[DELETE] No userId on annotation');
+      return res.status(500).json({ message: 'No userId on annotation.' });
+    }
+    if (annotationUserId !== tokenUserId) {
+      console.error('[DELETE] User id mismatch. Not authorized.');
+      return res.status(403).json({ message: `Unauthorized: userId mismatch. Your id: ${tokenUserId}, annotation userId: ${annotationUserId}` });
     }
 
     await AnnotationModel.findByIdAndDelete(req.params.id);
+    console.log('[DELETE] Annotation deleted for id:', req.params.id);
     return res.json({ message: 'Annotation deleted successfully.' });
   } catch (error) {
     console.error('Error deleting annotation:', error);

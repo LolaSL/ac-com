@@ -4,7 +4,6 @@ import ductSVG from "../assets/hvac/duct.svg";
 import indoorSVG from "../assets/hvac/indoor.svg";
 import outdoorSVG from "../assets/hvac/outdoor.svg";
 import thermostatSVG from "../assets/hvac/thermostat.svg";
-// Professional engineering symbols
 import supplyDiffuser4WaySVG from "../assets/hvac/supplyDiffuser4Way.svg";
 import roundDiffuserSVG from "../assets/hvac/roundDiffuser.svg";
 import linearSlotDiffuserSVG from "../assets/hvac/linearSlotDiffuser.svg";
@@ -767,11 +766,15 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
   annotations?.lines?.forEach((line) => {
     const lineReductionFactor = 0.985;
     context.beginPath();
-    const points = line.points.map((val, idx) =>
-      idx % 2 === 0
-        ? val * canvasWidth * lineReductionFactor
-        : val * canvasHeight * lineReductionFactor
-    );
+    // Only convert percent to pixel if all points are <= 1.5 (percent-based)
+    const isPercent = line.points.every((p) => Math.abs(p) <= 1.5);
+    const points = isPercent
+      ? line.points.map((val, idx) =>
+          idx % 2 === 0
+            ? val * canvasWidth * lineReductionFactor
+            : val * canvasHeight * lineReductionFactor
+        )
+      : line.points;
     context.moveTo(points[0], points[1]);
     for (let i = 2; i < points.length; i += 2) {
       context.lineTo(points[i], points[i + 1]);
@@ -815,7 +818,8 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
     context.fillText(text, x, y);
   });
 
-  // Draw lines from rectangles to nearest comments (callout style)
+  // Draw lines from rectangles to nearest comments (callout style),
+  // but only if a user-created line does NOT already exist between those points.
   // Skip only for vrf-ducted — its chain lines already connect everything visually
   if (acType !== "vrf-ducted") annotations?.rectangles?.forEach((rect) => {
     const rectCenter = getRotatedCenter(
@@ -843,18 +847,46 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
       }
     });
     if (nearestComment && minDist < 150) {
-      // threshold in pixels for relevance
+      // Check if a user-created line already exists between this rect and comment
       const cx = nearestComment.xPercent * canvasWidth;
       const cy = nearestComment.yPercent * canvasHeight;
-      context.save();
-      context.setLineDash([5, 5]); // dotted line
-      context.lineWidth = 1;
-      context.strokeStyle = "gray";
-      context.beginPath();
-      context.moveTo(rx, ry);
-      context.lineTo(cx, cy);
-      context.stroke();
-      context.restore();
+      const hasUserLine = (annotations.lines || []).some((line) => {
+        // Compare start/end points (allowing for small floating point error)
+        const points = line.points;
+        if (!points || points.length < 4) return false;
+        const [x1, y1, x2, y2] = points;
+        // Round all coordinates to nearest integer to avoid sub-pixel mismatch
+        const rxR = Math.round(rx), ryR = Math.round(ry), cxR = Math.round(cx), cyR = Math.round(cy);
+        const x1R = Math.round(x1), y1R = Math.round(y1), x2R = Math.round(x2), y2R = Math.round(y2);
+        const close = (a, b) => Math.abs(a - b) < 8; // 8px tolerance
+        const match1 = close(x1R, rxR) && close(y1R, ryR) && close(x2R, cxR) && close(y2R, cyR);
+        const match2 = close(x2R, rxR) && close(y2R, ryR) && close(x1R, cxR) && close(y1R, cyR);
+        if (match1 || match2) {
+          console.log('[overlayAnnotations] User line matches callout:', {
+            userLine: { x1: x1R, y1: y1R, x2: x2R, y2: y2R },
+            callout: { rx: rxR, ry: ryR, cx: cxR, cy: cyR },
+            match1, match2
+          });
+        } else {
+          console.log('[overlayAnnotations] User line does NOT match callout:', {
+            userLine: { x1: x1R, y1: y1R, x2: x2R, y2: y2R },
+            callout: { rx: rxR, ry: ryR, cx: cxR, cy: cyR },
+            match1, match2
+          });
+        }
+        return match1 || match2;
+      });
+      if (!hasUserLine) {
+        context.save();
+        context.setLineDash([5, 5]); // dotted line
+        context.lineWidth = 1;
+        context.strokeStyle = "gray";
+        context.beginPath();
+        context.moveTo(rx, ry);
+        context.lineTo(cx, cy);
+        context.stroke();
+        context.restore();
+      }
     }
   }); // end callout lines (skipped for vrf-ducted)
 
