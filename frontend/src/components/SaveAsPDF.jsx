@@ -106,7 +106,7 @@ function SaveAsPDF({
           overlayCanvas.height = ch;
           const overlayCtx = overlayCanvas.getContext("2d");
 
-          overlayAnnotations(overlayCtx, engAnnotations, mode, { pdfScale: scale });
+          overlayAnnotations(overlayCtx, engAnnotations, mode, { pdfScale: scale, pdfExport: true });
           if (engAnnotations.hvac && (mode === "ducted" || mode === "vrf-ducted")) {
             overlayHVAC(overlayCtx, engAnnotations.hvac, preloaded, engAnnotations.comments, mode, scale);
           }

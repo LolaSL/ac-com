@@ -723,7 +723,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
 };
 
 export const overlayAnnotations = (context, annotations, acType, options = {}) => {
-  const { skipRefrigerantLines = false, pdfScale = 1.5 } = options;
+  const { skipRefrigerantLines = false, pdfScale = 1.5, pdfExport = false } = options;
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
 
@@ -740,6 +740,28 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
     const rotatedCx = cx * cos - cy * sin;
     const rotatedCy = cx * sin + cy * cos;
     return { x: x + rotatedCx, y: y + rotatedCy };
+  };
+
+  /**
+   * Check if a point is near a rectangle's rotated center.
+   * Uses distance from rotated center to handle rotated rectangles correctly.
+   */
+  const isPointNearRect = (px, py, rect, tolerance = 100) => {
+    // Use the rotated center to correctly handle rotated rectangles
+    const rotatedCenter = getRotatedCenter(
+      rect.xPercent * canvasWidth,
+      rect.yPercent * canvasHeight,
+      rect.widthPercent * canvasWidth,
+      rect.heightPercent * canvasHeight,
+      rect.rotation
+    );
+    // Check distance from point to rotated center
+    const dist = Math.sqrt((px - rotatedCenter.x) ** 2 + (py - rotatedCenter.y) ** 2);
+    // Use tolerance plus half the diagonal of the rectangle for loose matching
+    const rw = rect.widthPercent * canvasWidth;
+    const rh = rect.heightPercent * canvasHeight;
+    const halfDiag = Math.sqrt(rw * rw + rh * rh) / 2;
+    return dist <= tolerance + halfDiag;
   };
 
   // rectangles - ALWAYS render user-drawn rectangles (engineer annotations)
@@ -846,39 +868,44 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
         nearestComment = comment;
       }
     });
-    if (nearestComment && minDist < 150) {
+    if (nearestComment && minDist < 150 * pdfScale) {
       // Check if a user-created line already exists between this rect and comment
       const cx = nearestComment.xPercent * canvasWidth;
       const cy = nearestComment.yPercent * canvasHeight;
       const hasUserLine = (annotations.lines || []).some((line) => {
-        // Compare start/end points (allowing for small floating point error)
+        // Normalize stored line points (percent or pixel) before comparing endpoints.
+        // IMPORTANT: Do NOT apply lineReductionFactor (0.985) here — that factor is
+        // only for visual rendering offset. Rect centers and comment positions are
+        // computed without any reduction, so line points must match that scale.
         const points = line.points;
         if (!points || points.length < 4) return false;
-        const [x1, y1, x2, y2] = points;
+        const isPercent = points.every((p) => Math.abs(p) <= 1.5);
+        const normalizedPoints = isPercent
+          ? points.map((val, idx) =>
+              idx % 2 === 0 ? val * canvasWidth : val * canvasHeight
+            )
+          : points;
+        const x1 = normalizedPoints[0];
+        const y1 = normalizedPoints[1];
+        const x2 = normalizedPoints[normalizedPoints.length - 2];
+        const y2 = normalizedPoints[normalizedPoints.length - 1];
+
         // Round all coordinates to nearest integer to avoid sub-pixel mismatch
         const rxR = Math.round(rx), ryR = Math.round(ry), cxR = Math.round(cx), cyR = Math.round(cy);
         const x1R = Math.round(x1), y1R = Math.round(y1), x2R = Math.round(x2), y2R = Math.round(y2);
-        const close = (a, b) => Math.abs(a - b) < 8; // 8px tolerance
+        // Use generous tolerance scaled with pdfScale since user-drawn lines often start from
+        // rectangle edges/corners rather than exact rotated center
+        const scaledTol = 50 * pdfScale;
+        const close = (a, b) => Math.abs(a - b) < scaledTol;
         const match1 = close(x1R, rxR) && close(y1R, ryR) && close(x2R, cxR) && close(y2R, cyR);
         const match2 = close(x2R, rxR) && close(y2R, ryR) && close(x1R, cxR) && close(y1R, cyR);
-        if (match1 || match2) {
-          console.log('[overlayAnnotations] User line matches callout:', {
-            userLine: { x1: x1R, y1: y1R, x2: x2R, y2: y2R },
-            callout: { rx: rxR, ry: ryR, cx: cxR, cy: cyR },
-            match1, match2
-          });
-        } else {
-          console.log('[overlayAnnotations] User line does NOT match callout:', {
-            userLine: { x1: x1R, y1: y1R, x2: x2R, y2: y2R },
-            callout: { rx: rxR, ry: ryR, cx: cxR, cy: cyR },
-            match1, match2
-          });
-        }
         return match1 || match2;
       });
       if (!hasUserLine) {
+        // Render a single dotted auto-connector only when no user line exists.
         context.save();
-        context.setLineDash([5, 5]); // dotted line
+        const dash = pdfExport ? [4 * (pdfScale / 1.5), 4 * (pdfScale / 1.5)] : [5, 5];
+        context.setLineDash(dash);
         context.lineWidth = 1;
         context.strokeStyle = "gray";
         context.beginPath();
@@ -970,8 +997,9 @@ if (
       const unitX = unitCenter.x;
       const unitY = unitCenter.y;
 
-      // Find nearest condenser
+      // Find nearest condenser (track both rect and center)
       let nearestCondenser = null;
+      let nearestCondRect = null;
       let minDist = Infinity;
       condensers.forEach((cond) => {
         const condCenter = getRotatedCenter(
@@ -987,13 +1015,40 @@ if (
         if (dist < minDist) {
           minDist = dist;
           nearestCondenser = condCenter;
+          nearestCondRect = cond;
         }
       });
 
-      if (nearestCondenser) {
-        drawOrthogonalLine(context, unitX, unitY, nearestCondenser.x, nearestCondenser.y, {
-          color: "blue", dash: [5, 5], lineWidth: 2
+      if (nearestCondenser && nearestCondRect) {
+        // Check if ANY user line connects this unit to the condenser
+        // Must check BOTH endpoints to avoid false positives from callout lines
+        const hasUserRefrigerantLine = (annotations.lines || []).some((line) => {
+          const points = line.points;
+          if (!points || points.length < 4) return false;
+          const isPercent = points.every((p) => Math.abs(p) <= 1.5);
+          const normalizedPoints = isPercent
+            ? points.map((val, idx) =>
+                idx % 2 === 0 ? val * canvasWidth : val * canvasHeight
+              )
+            : points;
+          const x1 = normalizedPoints[0];
+          const y1 = normalizedPoints[1];
+          const x2 = normalizedPoints[normalizedPoints.length - 2];
+          const y2 = normalizedPoints[normalizedPoints.length - 1];
+          // Check if line connects this unit to the condenser (either direction)
+          const scaledTol = 80 * pdfScale;
+          const ep1NearUnit = isPointNearRect(x1, y1, unit, scaledTol);
+          const ep2NearUnit = isPointNearRect(x2, y2, unit, scaledTol);
+          const ep1NearCond = isPointNearRect(x1, y1, nearestCondRect, scaledTol);
+          const ep2NearCond = isPointNearRect(x2, y2, nearestCondRect, scaledTol);
+          return (ep1NearUnit && ep2NearCond) || (ep2NearUnit && ep1NearCond);
         });
+        
+        if (!hasUserRefrigerantLine) {
+          drawOrthogonalLine(context, unitX, unitY, nearestCondenser.x, nearestCondenser.y, {
+            color: "blue", dash: [5, 5], lineWidth: 2
+          });
+        }
       }
     });
   }
@@ -1110,6 +1165,7 @@ if (
         const rx = rectCenter.x;
         const ry = rectCenter.y;
         let nearestCondenser = null;
+        let nearestCondRect = null;
         let minDist = Infinity;
         condensers.forEach((cond) => {
           const condCenter = getRotatedCenter(
@@ -1125,21 +1181,47 @@ if (
           if (dist < minDist) {
             minDist = dist;
             nearestCondenser = { cx, cy };
+            nearestCondRect = cond;
           }
         });
-        if (nearestCondenser) {
+        if (nearestCondenser && nearestCondRect) {
           const cx = nearestCondenser.cx;
           const cy = nearestCondenser.cy;
-          drawOrthogonalLine(context, rx, ry, cx, cy, {
-            color: "blue", dash: [5, 5], lineWidth: 2
+          // Check if ANY user line connects this rectangle to the condenser
+          // Must check BOTH endpoints to avoid false positives from callout lines
+          const hasUserRefrigerantLine = (annotations.lines || []).some((line) => {
+            const points = line.points;
+            if (!points || points.length < 4) return false;
+            const isPercent = points.every((p) => Math.abs(p) <= 1.5);
+            const normalizedPoints = isPercent
+              ? points.map((val, idx) =>
+                  idx % 2 === 0 ? val * canvasWidth : val * canvasHeight
+                )
+              : points;
+            const x1 = normalizedPoints[0];
+            const y1 = normalizedPoints[1];
+            const x2 = normalizedPoints[normalizedPoints.length - 2];
+            const y2 = normalizedPoints[normalizedPoints.length - 1];
+            // Check if line connects this rect to the condenser (either direction)
+            const scaledTol = 80 * pdfScale;
+            const ep1NearRect = isPointNearRect(x1, y1, rect, scaledTol);
+            const ep2NearRect = isPointNearRect(x2, y2, rect, scaledTol);
+            const ep1NearCond = isPointNearRect(x1, y1, nearestCondRect, scaledTol);
+            const ep2NearCond = isPointNearRect(x2, y2, nearestCondRect, scaledTol);
+            return (ep1NearRect && ep2NearCond) || (ep2NearRect && ep1NearCond);
           });
+          if (!hasUserRefrigerantLine) {
+            drawOrthogonalLine(context, rx, ry, cx, cy, {
+              color: "blue", dash: [5, 5], lineWidth: 2
+            });
+          }
         }
       }
     });
   }
 
   // For VRF ductless systems, draw teal refrigerant lines connecting rectangles to their nearest condenser
-  if (!skipRefrigerantLines && acType === "vrf-ductless") {
+  if (!skipRefrigerantLines && acType === "vrf-ductless" && annotations?.rectangles && annotations.rectangles.length > 1) {
     // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
     let condensers = [];
 
@@ -1230,6 +1312,7 @@ if (
         const rx = rectCenter.x;
         const ry = rectCenter.y;
         let nearestCondenser = null;
+        let nearestCondRect = null;
         let minDist = Infinity;
         condensers.forEach((cond) => {
           const condCenter = getRotatedCenter(
@@ -1245,10 +1328,36 @@ if (
           if (dist < minDist) {
             minDist = dist;
             nearestCondenser = { cx, cy };
+            nearestCondRect = cond;
           }
         });
-        if (nearestCondenser) {
-          drawSingleOrthogonalLine(context, rx, ry, nearestCondenser.cx, nearestCondenser.cy, "#008B8B", []);
+        if (nearestCondenser && nearestCondRect) {
+          // Check if ANY user line connects this rectangle to the condenser
+          // Must check BOTH endpoints to avoid false positives from callout lines
+          const hasUserRefrigerantLine = (annotations.lines || []).some((line) => {
+            const points = line.points;
+            if (!points || points.length < 4) return false;
+            const isPercent = points.every((p) => Math.abs(p) <= 1.5);
+            const normalizedPoints = isPercent
+              ? points.map((val, idx) =>
+                  idx % 2 === 0 ? val * canvasWidth : val * canvasHeight
+                )
+              : points;
+            const x1 = normalizedPoints[0];
+            const y1 = normalizedPoints[1];
+            const x2 = normalizedPoints[normalizedPoints.length - 2];
+            const y2 = normalizedPoints[normalizedPoints.length - 1];
+            // Check if line connects this rect to the condenser (either direction)
+            const scaledTol = 80 * pdfScale;
+            const ep1NearRect = isPointNearRect(x1, y1, rect, scaledTol);
+            const ep2NearRect = isPointNearRect(x2, y2, rect, scaledTol);
+            const ep1NearCond = isPointNearRect(x1, y1, nearestCondRect, scaledTol);
+            const ep2NearCond = isPointNearRect(x2, y2, nearestCondRect, scaledTol);
+            return (ep1NearRect && ep2NearCond) || (ep2NearRect && ep1NearCond);
+          });
+          if (!hasUserRefrigerantLine) {
+            drawSingleOrthogonalLine(context, rx, ry, nearestCondenser.cx, nearestCondenser.cy, "#008B8B", []);
+          }
         }
       }
     });

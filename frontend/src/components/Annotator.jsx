@@ -1217,20 +1217,27 @@ const Annotator = ({
       fill: 'rgba(226, 218, 228, 0.3)',
     };
     setComments((prevComments) => [...prevComments, newComment]);
-    const newLine = {
-      id: `line-${Date.now()}`,
-      rectId: newRectId,
-      commentId: newCommentId,
-      points: [
-        newRect.x + newRect.width / 2,
-        newRect.y + newRect.height / 2,
-        newComment.x,
-        newComment.y,
-      ],
-      stroke: 'black',
-      strokeWidth: 1,
-    };
-    setLines((prevLines) => [...prevLines, newLine]);
+    // Prevent duplicate connector lines for this rect/comment pair
+    setLines((prevLines) => {
+      const exists = prevLines.some(
+        (l) => l.rectId === newRectId && l.commentId === newCommentId
+      );
+      if (exists) return prevLines;
+      const newLine = {
+        id: `line-${Date.now()}`,
+        rectId: newRectId,
+        commentId: newCommentId,
+        points: [
+          newRect.x + newRect.width / 2,
+          newRect.y + newRect.height / 2,
+          newComment.x,
+          newComment.y,
+        ],
+        stroke: 'black',
+        strokeWidth: 1,
+      };
+      return [...prevLines, newLine];
+    });
   }, [comments]);
 
   const handleStageClick = (event) => {
@@ -2748,8 +2755,6 @@ const Annotator = ({
           )}
         </div>
       )}
-
-      {/* Mobile-friendly AC Unit annotation modal (replaces window.prompt) */}
       {showAcUnitModal && (
         <div
           style={{
@@ -2810,7 +2815,6 @@ const Annotator = ({
               >
                 Cancel
               </Button>
-          
             </div>
           </div>
         </div>

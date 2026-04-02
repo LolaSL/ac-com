@@ -80,7 +80,7 @@ const Footer = () => {
             <h5>Policies</h5>
             <hr />
 
-            <NavLink className="text-white d-block" href="/shippment">
+            <NavLink className="text-white d-block" href="/shipment">
               Shipment & Delivery
             </NavLink>
 
