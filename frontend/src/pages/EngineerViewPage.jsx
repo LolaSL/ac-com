@@ -170,7 +170,7 @@ const EngineerViewPage = () => {
         );
       }
       // Draw professional legend on the canvas
-      drawCanvasLegend(overlayContext, acType);
+      drawCanvasLegend(overlayContext, acType, { pdfScale });
       // Add click handler for interactive placement
       // Unified handler for both click and touch on overlay canvas
       const handleOverlayInteraction = (e) => {
@@ -728,7 +728,7 @@ const EngineerViewPage = () => {
         }
 
         // Draw legend on the overlay
-        drawCanvasLegend(overlayCtx, mode);
+        drawCanvasLegend(overlayCtx, mode, { pdfScale });
 
         // Composite base + overlay
         const composite = document.createElement("canvas");

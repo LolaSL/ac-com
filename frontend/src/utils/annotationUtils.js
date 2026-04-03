@@ -1540,7 +1540,10 @@ if (
 export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
   const cw = ctx.canvas.width;
   const ch = ctx.canvas.height;
-  const { position = "bottom-left" } = options;
+  const { position = "bottom-left", pdfScale = 1.5 } = options;
+
+  // Scale factor relative to default scale (1.5)
+  const scaleFactor = pdfScale / 1.5;
 
   // Build legend entries based on acType
   const entries = [];
@@ -1593,27 +1596,29 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
   if (entries.length === 0) return;
 
   // ── Layout constants (wide 2-column layout to minimize height) ──
-  const rowH = 14;
-  const padX = 8;
-  const padY = 6;
-  const iconW = 24;
-  const gap = 5;
-  const titleH = 16;
-  const colW = 230;    // width per column
+  // All dimensions scale with pdfScale
+  const rowH = 14 * scaleFactor;
+  const padX = 8 * scaleFactor;
+  const padY = 6 * scaleFactor;
+  const iconW = 24 * scaleFactor;
+  const gap = 5 * scaleFactor;
+  const titleH = 16 * scaleFactor;
+  const colW = 230 * scaleFactor;    // width per column
   const cols = 2;
-  const colGap = 10;
+  const colGap = 10 * scaleFactor;
   const rowsPerCol = Math.ceil(entries.length / cols);
   const boxW = cols * colW + (cols - 1) * colGap + padX * 2;
   const boxH = titleH + padY + rowsPerCol * rowH + padY;
 
-  // Position
+  // Position (margins also scale)
+  const margin = 10 * scaleFactor;
   let bx, by;
   if (position === "bottom-left") {
-    bx = 10;
-    by = ch - boxH - 10;
+    bx = margin;
+    by = ch - boxH - margin;
   } else {
-    bx = cw - boxW - 10;
-    by = ch - boxH - 10;
+    bx = cw - boxW - margin;
+    by = ch - boxH - margin;
   }
 
   // ── Background ──
@@ -1629,22 +1634,22 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
 
   // ── Title ──
   ctx.fillStyle = "#111";
-  ctx.font = "bold 11px Arial";
+  ctx.font = `bold ${11 * scaleFactor}px Arial`;
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.fillText("LEGEND", bx + padX, by + padY);
 
   // Separator line under title
   ctx.beginPath();
-  ctx.moveTo(bx + padX, by + padY + 12);
-  ctx.lineTo(bx + boxW - padX, by + padY + 12);
+  ctx.moveTo(bx + padX, by + padY + 12 * scaleFactor);
+  ctx.lineTo(bx + boxW - padX, by + padY + 12 * scaleFactor);
   ctx.strokeStyle = "#bbb";
-  ctx.lineWidth = 0.5;
+  ctx.lineWidth = 0.5 * scaleFactor;
   ctx.stroke();
 
   // ── Entries (2 columns) ──
   const startY = by + titleH + padY;
-  ctx.font = "9.5px Arial";
+  ctx.font = `${9.5 * scaleFactor}px Arial`;
   ctx.textBaseline = "middle";
 
   entries.forEach((entry, i) => {
@@ -1658,8 +1663,8 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
     if (entry.type === "line") {
       ctx.save();
       ctx.strokeStyle = entry.color;
-      ctx.lineWidth = 2;
-      ctx.setLineDash(entry.dash);
+      ctx.lineWidth = 2 * scaleFactor;
+      ctx.setLineDash(entry.dash.map(d => d * scaleFactor));
       ctx.beginPath();
       ctx.moveTo(ix, ey);
       ctx.lineTo(ix + iconW, ey);
@@ -1667,14 +1672,14 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
       ctx.restore();
     } else if (entry.type === "symbol") {
       const cx = ix + iconW / 2;
-      const sz = 10;
+      const sz = 10 * scaleFactor;
 
       ctx.save();
       ctx.setLineDash([]);
       if (entry.shape === "square-x") {
         // 4-way diffuser: square with X
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scaleFactor;
         ctx.strokeRect(cx - sz / 2, ey - sz / 2, sz, sz);
         ctx.beginPath();
         ctx.moveTo(cx - sz / 2, ey - sz / 2); ctx.lineTo(cx + sz / 2, ey + sz / 2);
@@ -1682,30 +1687,30 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
         ctx.stroke();
       } else if (entry.shape === "circle") {
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scaleFactor;
         ctx.beginPath();
         ctx.arc(cx, ey, sz / 2, 0, Math.PI * 2);
         ctx.stroke();
       } else if (entry.shape === "slot") {
         // Linear slot: wide thin rect
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(cx - 10, ey - 3, 20, 6);
+        ctx.lineWidth = 1.5 * scaleFactor;
+        ctx.strokeRect(cx - 10 * scaleFactor, ey - 3 * scaleFactor, 20 * scaleFactor, 6 * scaleFactor);
       } else if (entry.shape === "square-eq") {
         // Return grille: square with ≡
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scaleFactor;
         ctx.strokeRect(cx - sz / 2, ey - sz / 2, sz, sz);
         for (let li = -2; li <= 2; li += 2) {
           ctx.beginPath();
-          ctx.moveTo(cx - 3, ey + li);
-          ctx.lineTo(cx + 3, ey + li);
+          ctx.moveTo(cx - 3 * scaleFactor, ey + li * scaleFactor);
+          ctx.lineTo(cx + 3 * scaleFactor, ey + li * scaleFactor);
           ctx.stroke();
         }
       } else if (entry.shape === "square-h") {
         // Exhaust grille: square with hatching
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scaleFactor;
         ctx.strokeRect(cx - sz / 2, ey - sz / 2, sz, sz);
         ctx.beginPath();
         ctx.moveTo(cx - sz / 2, ey + sz / 2); ctx.lineTo(cx + sz / 2, ey - sz / 2);
@@ -1713,7 +1718,7 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
       } else if (entry.shape === "diamond") {
         // Fire damper: red diamond
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scaleFactor;
         ctx.beginPath();
         ctx.moveTo(cx, ey - sz / 2);
         ctx.lineTo(cx + sz / 2, ey);
@@ -1724,14 +1729,14 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
       } else if (entry.shape === "circle-vd") {
         // Volume damper: circle
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scaleFactor;
         ctx.beginPath();
         ctx.arc(cx, ey, sz / 2, 0, Math.PI * 2);
         ctx.stroke();
         ctx.fillStyle = entry.color;
-        ctx.font = "bold 6px Arial";
+        ctx.font = `bold ${6 * scaleFactor}px Arial`;
         ctx.textAlign = "center";
-        ctx.fillText("VD", cx, ey + 1);
+        ctx.fillText("VD", cx, ey + 1 * scaleFactor);
       } else if (entry.shape === "thermostat") {
         // Thermostat: rounded rectangle with T
         const r = sz * 0.3;
@@ -1745,20 +1750,20 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
         ctx.fillStyle = "rgba(139,92,246,0.2)";
         ctx.fill();
         ctx.strokeStyle = entry.color;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scaleFactor;
         ctx.stroke();
         ctx.fillStyle = entry.color;
-        ctx.font = "bold 7px Arial";
+        ctx.font = `bold ${7 * scaleFactor}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("T", cx, ey);
       } else if (entry.shape === "rect-fill") {
         // Filled rect for units
         ctx.fillStyle = entry.color;
-        ctx.fillRect(cx - sz / 2, ey - sz / 2 + 1, sz, sz - 2);
+        ctx.fillRect(cx - sz / 2, ey - sz / 2 + 1 * scaleFactor, sz, sz - 2 * scaleFactor);
         ctx.strokeStyle = "#333";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(cx - sz / 2, ey - sz / 2 + 1, sz, sz - 2);
+        ctx.lineWidth = 1 * scaleFactor;
+        ctx.strokeRect(cx - sz / 2, ey - sz / 2 + 1 * scaleFactor, sz, sz - 2 * scaleFactor);
       }
       ctx.restore();
     }
@@ -1767,7 +1772,7 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
     ctx.save();
     ctx.setLineDash([]);
     ctx.fillStyle = "#222";
-    ctx.font = "9.5px Arial";
+    ctx.font = `${9.5 * scaleFactor}px Arial`;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillText(entry.label, tx, ey);

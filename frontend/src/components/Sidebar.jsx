@@ -222,7 +222,7 @@ const Sidebar = () => {
           overlayVRFSystem(ctx, selectedAnnotations.vrf, hvacSymbols, mode);
         }
 
-        drawCanvasLegend(ctx, mode);
+        drawCanvasLegend(ctx, mode, { pdfScale });
 
         // Mode label
         ctx.save();
@@ -274,7 +274,7 @@ const Sidebar = () => {
     }
 
     // draw legend
-    drawCanvasLegend(context, acType);
+    drawCanvasLegend(context, acType, { pdfScale });
   }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType, pdfScale]);
 
   // Re-render PDF at new scale when zoom changes
@@ -494,7 +494,7 @@ const Sidebar = () => {
             overlayVRFSystem(overlayCtx, normalizedAnnotations.vrf, hvacSymbols, mode);
           }
 
-          drawCanvasLegend(overlayCtx, mode);
+          drawCanvasLegend(overlayCtx, mode, { pdfScale });
 
           // Mode label
           overlayCtx.save();

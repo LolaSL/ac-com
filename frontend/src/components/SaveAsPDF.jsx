@@ -113,7 +113,7 @@ function SaveAsPDF({
           if (engAnnotations.vrf && mode.startsWith("vrf")) {
             overlayVRFSystem(overlayCtx, engAnnotations.vrf, preloaded, mode);
           }
-          drawCanvasLegend(overlayCtx, mode);
+          drawCanvasLegend(overlayCtx, mode, { pdfScale: scale });
 
           // Mode label
           overlayCtx.save();
