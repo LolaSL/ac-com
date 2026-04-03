@@ -73,6 +73,18 @@ const engineerAnnotationSchema = new Schema(
                 },
             ],
             hvac: {
+                zones: [
+                    {
+                        id: { type: String },
+                        xPercent: { type: Number },
+                        yPercent: { type: Number },
+                        widthPercent: { type: Number },
+                        heightPercent: { type: Number },
+                        fill: { type: String },
+                        stroke: { type: String },
+                        zoneNumber: { type: Number },
+                    },
+                ],
                 ducts: [
                     {
                         id: { type: String, required: true },
@@ -82,7 +94,7 @@ const engineerAnnotationSchema = new Schema(
                         height: { type: Number },
                         fill: { type: String },
                         stroke: { type: String },
-                        ductType: { type: String, enum: ['supply', 'return', 'flex', 'exhaust', 'default'], default: 'default' },
+                        ductType: { type: String, enum: ['supply', 'return', 'flex', 'exhaust', 'insulated', 'default'], default: 'default' },
                         sizeLabel: { type: String },
                     },
                 ],
@@ -94,7 +106,7 @@ const engineerAnnotationSchema = new Schema(
                         yPercent: { type: Number, required: true },
                         sizePercent: { type: Number, required: true },
                         airflow: { type: Number },
-                        diffuserType: { type: String, enum: ['supply-4way', 'round', 'linear-slot', 'return-grille', 'exhaust', 'circle', 'square', 'default'], default: 'default' },
+                        diffuserType: { type: String, enum: ['supply-4way', 'round', 'linear-slot', 'return-grille', 'exhaust', 'circle', 'square', 'jet', 'wall-diffuser', 'transfer-grille', 'drain-point', 'default'], default: 'default' },
                     },
                 ],
                 dampers: [

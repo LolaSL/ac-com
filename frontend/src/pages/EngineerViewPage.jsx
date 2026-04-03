@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { Spinner, Alert, Button, Form } from "react-bootstrap";
+import { Spinner, Alert, Button, Form, Dropdown } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { PDFDocument } from "pdf-lib";
@@ -26,6 +26,16 @@ const EngineerViewPage = () => {
   const [saveError, setSaveError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const pdfContainerRef = useRef(null);
+
+  // Mobile responsive toolbar dropdown state
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
+
+  // Track window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 767);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Mobile-friendly comment modal state (replaces window.prompt)
   const [showCommentModal, setShowCommentModal] = useState(false);
@@ -211,20 +221,23 @@ const EngineerViewPage = () => {
             annotations: {
               ...(prev.annotations || {}),
               hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
                 ducts: [...(prev.annotations?.hvac?.ducts || []), newDuct],
                 diffusers: prev.annotations?.hvac?.diffusers || [],
                 dampers: prev.annotations?.hvac?.dampers || [],
+                thermostats: prev.annotations?.hvac?.thermostats || [],
               },
             },
           }));
         }
 
-        if (addMode === "supply-duct" || addMode === "return-duct" || addMode === "flex-duct") {
+        if (addMode === "supply-duct" || addMode === "return-duct" || addMode === "flex-duct" || addMode === "exhaust-duct" || addMode === "insulated-duct") {
           const ductTypeMap = {
-            "supply-duct": { ductType: "supply", fill: "rgba(0,85,204,0.15)", stroke: "#0055CC" },
-            "return-duct": { ductType: "return", fill: "rgba(204,68,0,0.15)", stroke: "#CC4400" },
-            "flex-duct":   { ductType: "flex",   fill: "rgba(150,150,150,0.1)", stroke: "#888" },
+            "supply-duct":    { ductType: "supply",    fill: "rgba(0,85,204,0.15)",   stroke: "#0055CC" },
+            "return-duct":    { ductType: "return",    fill: "rgba(204,68,0,0.15)",   stroke: "#CC4400" },
+            "flex-duct":      { ductType: "flex",      fill: "rgba(150,150,150,0.1)", stroke: "#888" },
+            "exhaust-duct":   { ductType: "exhaust",   fill: "rgba(34,139,34,0.15)",  stroke: "#228B22" },
+            "insulated-duct": { ductType: "insulated", fill: "rgba(255,200,100,0.2)", stroke: "#CC9900" },
           };
           const cfg = ductTypeMap[addMode];
           const newDuct = {
@@ -243,10 +256,11 @@ const EngineerViewPage = () => {
             annotations: {
               ...(prev.annotations || {}),
               hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
                 ducts: [...(prev.annotations?.hvac?.ducts || []), newDuct],
                 diffusers: prev.annotations?.hvac?.diffusers || [],
                 dampers: prev.annotations?.hvac?.dampers || [],
+                thermostats: prev.annotations?.hvac?.thermostats || [],
               },
             },
           }));
@@ -268,25 +282,30 @@ const EngineerViewPage = () => {
             annotations: {
               ...(prev.annotations || {}),
               hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
                 ducts: prev.annotations?.hvac?.ducts || [],
                 diffusers: [
                   ...(prev.annotations?.hvac?.diffusers || []),
                   newDiffuser,
                 ],
                 dampers: prev.annotations?.hvac?.dampers || [],
+                thermostats: prev.annotations?.hvac?.thermostats || [],
               },
             },
           }));
         }
 
-        if (addMode === "supply-4way" || addMode === "round-diffuser" || addMode === "linear-slot" || addMode === "return-grille" || addMode === "exhaust-grille") {
+        if (addMode === "supply-4way" || addMode === "round-diffuser" || addMode === "linear-slot" || addMode === "return-grille" || addMode === "exhaust-grille" || addMode === "jet-diffuser" || addMode === "wall-diffuser" || addMode === "transfer-grille" || addMode === "drain-point") {
           const diffuserMap = {
-            "supply-4way":     { diffuserType: "supply-4way",   shape: "square", airflow: 400 },
-            "round-diffuser":  { diffuserType: "round",         shape: "circle", airflow: 250 },
-            "linear-slot":     { diffuserType: "linear-slot",   shape: "linear", airflow: 300 },
-            "return-grille":   { diffuserType: "return-grille", shape: "square", airflow: 350 },
-            "exhaust-grille":  { diffuserType: "exhaust",       shape: "square", airflow: 200 },
+            "supply-4way":     { diffuserType: "supply-4way",     shape: "square", airflow: 400 },
+            "round-diffuser":  { diffuserType: "round",           shape: "circle", airflow: 250 },
+            "linear-slot":     { diffuserType: "linear-slot",     shape: "linear", airflow: 300 },
+            "return-grille":   { diffuserType: "return-grille",   shape: "square", airflow: 350 },
+            "exhaust-grille":  { diffuserType: "exhaust",         shape: "square", airflow: 200 },
+            "jet-diffuser":    { diffuserType: "jet",             shape: "jet",    airflow: 500 },
+            "wall-diffuser":   { diffuserType: "wall-diffuser",   shape: "wall",   airflow: 300 },
+            "transfer-grille": { diffuserType: "transfer-grille", shape: "square", airflow: 150 },
+            "drain-point":     { diffuserType: "drain-point",     shape: "drain",  airflow: 0   },
           };
           const cfg = diffuserMap[addMode];
           const newDiffuser = {
@@ -304,13 +323,14 @@ const EngineerViewPage = () => {
             annotations: {
               ...(prev.annotations || {}),
               hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
                 ducts: prev.annotations?.hvac?.ducts || [],
                 diffusers: [
                   ...(prev.annotations?.hvac?.diffusers || []),
                   newDiffuser,
                 ],
                 dampers: prev.annotations?.hvac?.dampers || [],
+                thermostats: prev.annotations?.hvac?.thermostats || [],
               },
             },
           }));
@@ -330,10 +350,11 @@ const EngineerViewPage = () => {
             annotations: {
               ...(prev.annotations || {}),
               hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [] }),
+                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
                 ducts: prev.annotations?.hvac?.ducts || [],
                 diffusers: prev.annotations?.hvac?.diffusers || [],
                 dampers: [...(prev.annotations?.hvac?.dampers || []), newDamper],
+                thermostats: prev.annotations?.hvac?.thermostats || [],
               },
             },
           }));
@@ -463,23 +484,23 @@ const EngineerViewPage = () => {
     const condenserIds = new Set();
     (ann.rectangles || []).forEach((r) => {
       if (r.isCondenser) {
-        condenserIds.add(r.id);
+        condenserIds.add(String(r.id));
         return;
       }
       // Check linked comment label
       const comment = (ann.comments || []).find((c) => String(c.rectId) === String(r.id));
       if (comment && condenserSynonyms.test(comment.text.trim())) {
-        condenserIds.add(r.id);
+        condenserIds.add(String(r.id));
         return;
       }
       // Fallback: orange fill = condenser (rgba(255, 140, 50, …))
       if (r.fill && /rgba?\(\s*255\s*,\s*140\s*,\s*50/.test(r.fill)) {
-        condenserIds.add(r.id);
+        condenserIds.add(String(r.id));
       }
     });
 
     // Gather indoor-unit rectangles (non-condenser user rects)
-    const rects = (ann.rectangles || []).filter((r) => !condenserIds.has(r.id));
+    const rects = (ann.rectangles || []).filter((r) => !condenserIds.has(String(r.id)));
     if (rects.length === 0) {
       toast.warn('No indoor unit rectangles found. Draw blue rects first.');
       return;
@@ -489,165 +510,313 @@ const EngineerViewPage = () => {
     const newDiffusers = [];
     const newDampers = [];
     const newThermostats = [];
+    const newZones = [];  // Zone shading rectangles
+    let zoneCounter = 0;  // Track zone numbers across all groups
     const ts = Date.now();
 
-    // Compute floor-plan centre from all rects to decide duct direction
-    const avgX = rects.reduce((s, r) => s + r.xPercent, 0) / rects.length;
-
-    // Duct sizing constants (normalised 0-1)
-    const DUCT_LEN   = 0.08;
-    const DUCT_H     = 0.02;
-    const GAP        = 0.005;
-    const FLEX_LEN   = 0.025;  // short flex connector
-    const FLEX_H     = 0.015;
-    const DIFF_SIZE  = 0.03;
-    const DAMP_SIZE  = 0.018;
-    const THERM_SIZE = 0.02;
-
-    // Detect wet rooms from comments for exhaust grille placement
-    const WET_ROOM_RE = /\b(bath|wc|toilet|shower|laundry|kitchen|kitc?hen|ktcn|restroom|powder)\b/i;
+    // Group indoor units by flat number (ac-N.M → flat N)
+    // This ensures HVAC equipment stays within each flat's area
     const comments = ann.comments || [];
+    const flatGroups = new Map(); // flatNum -> [rects]
+    const ungroupedRects = [];
 
-    rects.forEach((rect, i) => {
-      const cx = rect.xPercent;
-      const cy = rect.yPercent;
-      const rw = rect.widthPercent || 0.06;
-      const rh = rect.heightPercent || 0.04;
+    rects.forEach((rect) => {
+      const comment = comments.find((c) => String(c.rectId) === String(rect.id));
+      if (comment) {
+        const match = comment.text.match(/ac-(\d+)/i);
+        if (match) {
+          const flatNum = match[1];
+          if (!flatGroups.has(flatNum)) flatGroups.set(flatNum, []);
+          flatGroups.get(flatNum).push(rect);
+          return;
+        }
+      }
+      ungroupedRects.push(rect);
+    });
 
-      // Pick horizontal direction: extend ducts toward the centre of the layout
-      const toRight = cx <= avgX;
+    // Helper to compute avgX for a group of rectangles
+    const computeAvgX = (rectGroup) => {
+      if (rectGroup.length === 0) return 0.5;
+      return rectGroup.reduce((s, r) => s + r.xPercent, 0) / rectGroup.length;
+    };
 
-      // --- Supply duct: offset from unit in chosen direction ---
-      const sDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
-      const sDuctY = cy - DUCT_H - 0.008;
-      newDucts.push({
-        id: `duct-auto-s-${ts}-${i}`,
-        xPercent: Math.max(0.01, Math.min(0.89, sDuctX)),
-        yPercent: Math.max(0.01, Math.min(0.95, sDuctY)),
-        width: DUCT_LEN,
-        height: DUCT_H,
-        ductType: 'supply',
-        fill: 'rgba(0,85,204,0.15)',
-        stroke: '#0055CC',
-      });
+    // Process each flat group separately (each flat has its own center)
+    const processRectGroup = (rectGroup, groupAvgX) => {
+      // Duct sizing constants (normalised 0-1)
+      const DUCT_LEN   = 0.08;
+      const DUCT_H     = 0.02;
+      const GAP        = 0.005;
+      const FLEX_LEN   = 0.025;  // short flex connector
+      const FLEX_H     = 0.015;
+      const DIFF_SIZE  = 0.03;
+      const DAMP_SIZE  = 0.018;
+      const THERM_SIZE = 0.02;
 
-      // --- Return duct: same direction, stacked below the unit ---
-      const rDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
-      const rDuctY = cy + 0.008;
-      newDucts.push({
-        id: `duct-auto-r-${ts}-${i}`,
-        xPercent: Math.max(0.01, Math.min(0.89, rDuctX)),
-        yPercent: Math.max(0.01, Math.min(0.95, rDuctY)),
-        width: DUCT_LEN,
-        height: DUCT_H,
-        ductType: 'return',
-        fill: 'rgba(204,68,0,0.15)',
-        stroke: '#CC4400',
-      });
+      // Detect wet rooms from comments for exhaust grille placement
+      const WET_ROOM_RE = /\b(bath|wc|toilet|shower|laundry|kitchen|kitc?hen|ktcn|restroom|powder)\b/i;
 
-      // --- Flex duct connectors (between main duct end and diffuser) ---
-      const sFlexX = toRight ? sDuctX + DUCT_LEN + GAP : sDuctX - GAP - FLEX_LEN;
-      newDucts.push({
-        id: `duct-auto-sf-${ts}-${i}`,
-        xPercent: Math.max(0.01, Math.min(0.92, sFlexX)),
-        yPercent: Math.max(0.01, Math.min(0.95, sDuctY + (DUCT_H - FLEX_H) / 2)),
-        width: FLEX_LEN,
-        height: FLEX_H,
-        ductType: 'flex',
-        fill: 'rgba(150,150,150,0.1)',
-        stroke: '#888',
-      });
+      // Zone shading size (coverage area per unit)
+      const ZONE_W = 0.15;  // Width of zone shading
+      const ZONE_H = 0.12;  // Height of zone shading
 
-      const rFlexX = toRight ? rDuctX + DUCT_LEN + GAP : rDuctX - GAP - FLEX_LEN;
-      newDucts.push({
-        id: `duct-auto-rf-${ts}-${i}`,
-        xPercent: Math.max(0.01, Math.min(0.92, rFlexX)),
-        yPercent: Math.max(0.01, Math.min(0.95, rDuctY + (DUCT_H - FLEX_H) / 2)),
-        width: FLEX_LEN,
-        height: FLEX_H,
-        ductType: 'flex',
-        fill: 'rgba(150,150,150,0.1)',
-        stroke: '#888',
-      });
+      rectGroup.forEach((rect, i) => {
+        const cx = rect.xPercent;
+        const cy = rect.yPercent;
+        const rw = rect.widthPercent || 0.06;
+        const rh = rect.heightPercent || 0.04;
 
-      // --- Supply diffuser (4-way) at the far end of flex duct ---
-      const sdX = toRight
-        ? sFlexX + FLEX_LEN + GAP + DIFF_SIZE / 2
-        : sFlexX - GAP - DIFF_SIZE / 2;
-      newDiffusers.push({
-        id: `diffuser-auto-sd-${ts}-${i}`,
-        xPercent: Math.max(0.02, Math.min(0.98, sdX)),
-        yPercent: sDuctY + DUCT_H / 2,
-        sizePercent: DIFF_SIZE,
-        shape: 'square',
-        diffuserType: 'supply-4way',
-        airflow: 400,
-      });
+        // Pick horizontal direction: extend ducts toward the centre of THIS flat's layout
+        const toRight = cx <= groupAvgX;
 
-      // --- Return grille at the far end of flex duct ---
-      const rgX = toRight
-        ? rFlexX + FLEX_LEN + GAP + DIFF_SIZE / 2
-        : rFlexX - GAP - DIFF_SIZE / 2;
-      newDiffusers.push({
-        id: `diffuser-auto-rg-${ts}-${i}`,
-        xPercent: Math.max(0.02, Math.min(0.98, rgX)),
-        yPercent: rDuctY + DUCT_H / 2,
-        sizePercent: DIFF_SIZE,
-        shape: 'square',
-        diffuserType: 'return-grille',
-        airflow: 350,
-      });
+        // --- Zone shading: light blue area showing HVAC coverage ---
+        const zoneX = cx - ZONE_W / 2;
+        const zoneY = cy - ZONE_H / 2;
+        zoneCounter += 1;
+        newZones.push({
+          id: `zone-auto-${ts}-${rect.id}`,
+          xPercent: Math.max(0.01, Math.min(0.85, zoneX)),
+          yPercent: Math.max(0.01, Math.min(0.88, zoneY)),
+          widthPercent: ZONE_W,
+          heightPercent: ZONE_H,
+          fill: 'rgba(0,150,255,0.12)',
+          stroke: 'rgba(0,100,200,0.3)',
+          zoneNumber: zoneCounter,
+        });
 
-      // --- Volume damper near the branch origin of the supply duct ---
-      const vdX = toRight ? sDuctX + DUCT_LEN * 0.4 : sDuctX + DUCT_LEN * 0.6;
-      newDampers.push({
-        id: `damper-auto-vd-${ts}-${i}`,
-        xPercent: vdX,
-        yPercent: sDuctY - 0.012,
-        sizePercent: DAMP_SIZE,
-        damperType: 'volume',
-      });
+        // --- Supply duct: offset from unit in chosen direction ---
+        const sDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
+        const sDuctY = cy - DUCT_H - 0.008;
+        newDucts.push({
+          id: `duct-auto-s-${ts}-${rect.id}`,
+          xPercent: Math.max(0.01, Math.min(0.89, sDuctX)),
+          yPercent: Math.max(0.01, Math.min(0.95, sDuctY)),
+          width: DUCT_LEN,
+          height: DUCT_H,
+          ductType: 'supply',
+          fill: 'rgba(0,120,255,0.45)',
+          stroke: '#0055CC',
+        });
 
-      // --- Fire damper at duct origin (where duct exits the unit / crosses wall) ---
-      const fdX = toRight ? sDuctX + 0.002 : sDuctX + DUCT_LEN - 0.002;
-      newDampers.push({
-        id: `damper-auto-fd-${ts}-${i}`,
-        xPercent: fdX,
-        yPercent: sDuctY + DUCT_H / 2,
-        sizePercent: DAMP_SIZE,
-        damperType: 'fire',
-      });
+        // --- Return duct: same direction, stacked below the unit ---
+        const rDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
+        const rDuctY = cy + 0.008;
+        newDucts.push({
+          id: `duct-auto-r-${ts}-${rect.id}`,
+          xPercent: Math.max(0.01, Math.min(0.89, rDuctX)),
+          yPercent: Math.max(0.01, Math.min(0.95, rDuctY)),
+          width: DUCT_LEN,
+          height: DUCT_H,
+          ductType: 'return',
+          fill: 'rgba(255,120,50,0.40)',
+          stroke: '#CC4400',
+        });
 
-      // --- Thermostat: placed to the side of the indoor unit (opposite to ducts) ---
-      const thermX = toRight
-        ? cx - rw / 2 - GAP - THERM_SIZE
-        : cx + rw / 2 + GAP + THERM_SIZE;
-      newThermostats.push({
-        id: `thermo-auto-${ts}-${i}`,
-        xPercent: Math.max(0.02, Math.min(0.98, thermX)),
-        yPercent: cy,
-        sizePercent: THERM_SIZE,
-        label: `T${i + 1}`,
-      });
+        // --- Flex duct connectors (between main duct end and diffuser) ---
+        const sFlexX = toRight ? sDuctX + DUCT_LEN + GAP : sDuctX - GAP - FLEX_LEN;
+        newDucts.push({
+          id: `duct-auto-sf-${ts}-${rect.id}`,
+          xPercent: Math.max(0.01, Math.min(0.92, sFlexX)),
+          yPercent: Math.max(0.01, Math.min(0.95, sDuctY + (DUCT_H - FLEX_H) / 2)),
+          width: FLEX_LEN,
+          height: FLEX_H,
+          ductType: 'flex',
+          fill: 'rgba(150,150,150,0.35)',
+          stroke: '#888',
+        });
 
-      // --- Exhaust grille: if nearest comment suggests a wet room ---
-      const nearestComment = comments.reduce((best, c) => {
-        const dist = Math.sqrt((c.xPercent - cx) ** 2 + (c.yPercent - cy) ** 2);
-        return dist < (best.dist || Infinity) ? { ...c, dist } : best;
-      }, {});
-      if (nearestComment.text && WET_ROOM_RE.test(nearestComment.text)) {
-        const exhY = cy + rh / 2 + GAP + DIFF_SIZE;
+        const rFlexX = toRight ? rDuctX + DUCT_LEN + GAP : rDuctX - GAP - FLEX_LEN;
+        newDucts.push({
+          id: `duct-auto-rf-${ts}-${rect.id}`,
+          xPercent: Math.max(0.01, Math.min(0.92, rFlexX)),
+          yPercent: Math.max(0.01, Math.min(0.95, rDuctY + (DUCT_H - FLEX_H) / 2)),
+          width: FLEX_LEN,
+          height: FLEX_H,
+          ductType: 'flex',
+          fill: 'rgba(150,150,150,0.35)',
+          stroke: '#888',
+        });
+
+        // --- Supply diffuser (4-way) at the far end of flex duct ---
+        const sdX = toRight
+          ? sFlexX + FLEX_LEN + GAP + DIFF_SIZE / 2
+          : sFlexX - GAP - DIFF_SIZE / 2;
         newDiffusers.push({
-          id: `diffuser-auto-exh-${ts}-${i}`,
-          xPercent: cx,
-          yPercent: Math.max(0.02, Math.min(0.98, exhY)),
+          id: `diffuser-auto-sd-${ts}-${rect.id}`,
+          xPercent: Math.max(0.02, Math.min(0.98, sdX)),
+          yPercent: sDuctY + DUCT_H / 2,
           sizePercent: DIFF_SIZE,
           shape: 'square',
-          diffuserType: 'exhaust',
-          airflow: 200,
+          diffuserType: 'supply-4way',
+          airflow: 400,
         });
-      }
+
+        // --- Return grille at the far end of flex duct ---
+        const rgX = toRight
+          ? rFlexX + FLEX_LEN + GAP + DIFF_SIZE / 2
+          : rFlexX - GAP - DIFF_SIZE / 2;
+        newDiffusers.push({
+          id: `diffuser-auto-rg-${ts}-${rect.id}`,
+          xPercent: Math.max(0.02, Math.min(0.98, rgX)),
+          yPercent: rDuctY + DUCT_H / 2,
+          sizePercent: DIFF_SIZE,
+          shape: 'square',
+          diffuserType: 'return-grille',
+          airflow: 350,
+        });
+
+        // --- Volume damper near the branch origin of the supply duct ---
+        const vdX = toRight ? sDuctX + DUCT_LEN * 0.4 : sDuctX + DUCT_LEN * 0.6;
+        newDampers.push({
+          id: `damper-auto-vd-${ts}-${rect.id}`,
+          xPercent: vdX,
+          yPercent: sDuctY - 0.012,
+          sizePercent: DAMP_SIZE,
+          damperType: 'volume',
+        });
+
+        // --- Fire damper at duct origin (where duct exits the unit / crosses wall) ---
+        const fdX = toRight ? sDuctX + 0.002 : sDuctX + DUCT_LEN - 0.002;
+        newDampers.push({
+          id: `damper-auto-fd-${ts}-${rect.id}`,
+          xPercent: fdX,
+          yPercent: sDuctY + DUCT_H / 2,
+          sizePercent: DAMP_SIZE,
+          damperType: 'fire',
+        });
+
+        // --- Thermostat: placed to the side of the indoor unit (opposite to ducts) ---
+        const thermX = toRight
+          ? cx - rw / 2 - GAP - THERM_SIZE
+          : cx + rw / 2 + GAP + THERM_SIZE;
+        
+        // Extract thermostat label from ac-N.M comment (e.g., ac-1.2 → T1.2)
+        const rectComment = comments.find((c) => String(c.rectId) === String(rect.id));
+        let thermLabel = 'T';
+        if (rectComment) {
+          const acMatch = rectComment.text.match(/ac-(\d+(?:\.\d+)?)/i);
+          if (acMatch) {
+            thermLabel = `T${acMatch[1]}`;
+          }
+        }
+        
+        newThermostats.push({
+          id: `thermo-auto-${ts}-${rect.id}`,
+          xPercent: Math.max(0.02, Math.min(0.98, thermX)),
+          yPercent: cy,
+          sizePercent: THERM_SIZE,
+          label: thermLabel,
+        });
+
+        // --- Drain point: placed below the indoor unit for condensate collection ---
+        const drainX = cx;
+        const drainY = cy + rh / 2 + GAP * 2;
+        newDiffusers.push({
+          id: `diffuser-auto-drain-${ts}-${rect.id}`,
+          xPercent: Math.max(0.02, Math.min(0.98, drainX)),
+          yPercent: Math.max(0.02, Math.min(0.98, drainY)),
+          sizePercent: DIFF_SIZE * 0.7,
+          shape: 'drain',
+          diffuserType: 'drain-point',
+          airflow: 0,
+        });
+
+        // --- JET Diffuser: high-velocity nozzle for long throws (placed diagonally from unit) ---
+        const jetX = toRight ? cx + rw + GAP * 8 : cx - rw - GAP * 8;
+        const jetY = cy - rh / 2 - GAP * 4;
+        newDiffusers.push({
+          id: `diffuser-auto-jet-${ts}-${rect.id}`,
+          xPercent: Math.max(0.02, Math.min(0.98, jetX)),
+          yPercent: Math.max(0.02, Math.min(0.98, jetY)),
+          sizePercent: DIFF_SIZE * 0.85,
+          shape: 'jet',
+          diffuserType: 'jet',
+          airflow: 500,
+        });
+
+        // --- Wall Diffuser: side-wall mounted supply (placed on opposite side from ducts) ---
+        const wallDiffX = toRight ? cx - rw / 2 - GAP * 6 : cx + rw / 2 + GAP * 6;
+        const wallDiffY = cy - rh / 2;
+        newDiffusers.push({
+          id: `diffuser-auto-wall-${ts}-${rect.id}`,
+          xPercent: Math.max(0.02, Math.min(0.98, wallDiffX)),
+          yPercent: Math.max(0.02, Math.min(0.98, wallDiffY)),
+          sizePercent: DIFF_SIZE * 0.9,
+          shape: 'wall',
+          diffuserType: 'wall-diffuser',
+          airflow: 300,
+        });
+
+        // --- Insulated Duct: main trunk duct running vertically from unit ---
+        const insDuctX = cx - DUCT_LEN / 2;
+        const insDuctY = cy - rh / 2 - GAP - DUCT_H * 1.5;
+        newDucts.push({
+          id: `duct-auto-ins-${ts}-${rect.id}`,
+          xPercent: Math.max(0.01, Math.min(0.89, insDuctX)),
+          yPercent: Math.max(0.01, Math.min(0.95, insDuctY)),
+          width: DUCT_LEN,
+          height: DUCT_H,
+          ductType: 'insulated',
+          fill: 'rgba(255,180,50,0.45)',
+          stroke: '#CC9900',
+        });
+
+        // --- Exhaust grille: if nearest comment suggests a wet room ---
+        const nearestComment = comments.reduce((best, c) => {
+          const dist = Math.sqrt((c.xPercent - cx) ** 2 + (c.yPercent - cy) ** 2);
+          return dist < (best.dist || Infinity) ? { ...c, dist } : best;
+        }, {});
+        if (nearestComment.text && WET_ROOM_RE.test(nearestComment.text)) {
+          // --- Exhaust Duct: connects to exhaust grille in wet rooms ---
+          const exhDuctX = toRight ? cx - rw / 2 - GAP - DUCT_LEN : cx + rw / 2 + GAP;
+          const exhDuctY = cy + rh / 2 + GAP;
+          newDucts.push({
+            id: `duct-auto-exh-${ts}-${rect.id}`,
+            xPercent: Math.max(0.01, Math.min(0.89, exhDuctX)),
+            yPercent: Math.max(0.01, Math.min(0.95, exhDuctY)),
+            width: DUCT_LEN * 0.7,
+            height: DUCT_H,
+            ductType: 'exhaust',
+            fill: 'rgba(34,180,34,0.40)',
+            stroke: '#228B22',
+          });
+
+          const exhY = cy + rh / 2 + GAP + DIFF_SIZE;
+          newDiffusers.push({
+            id: `diffuser-auto-exh-${ts}-${rect.id}`,
+            xPercent: cx,
+            yPercent: Math.max(0.02, Math.min(0.98, exhY)),
+            sizePercent: DIFF_SIZE,
+            shape: 'square',
+            diffuserType: 'exhaust',
+            airflow: 200,
+          });
+
+          // --- Transfer grille: for pressure balancing in wet rooms ---
+          const transferX = toRight ? cx - rw / 2 - GAP * 3 : cx + rw / 2 + GAP * 3;
+          newDiffusers.push({
+            id: `diffuser-auto-tg-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.98, transferX)),
+            yPercent: cy,
+            sizePercent: DIFF_SIZE * 0.9,
+            shape: 'square',
+            diffuserType: 'transfer-grille',
+            airflow: 150,
+          });
+        }
+      });
+    };
+
+    // Process grouped flats (each flat has its own center)
+    flatGroups.forEach((rectGroup, flatNum) => {
+      const groupAvgX = computeAvgX(rectGroup);
+      processRectGroup(rectGroup, groupAvgX);
     });
+
+    // Process ungrouped rectangles (fallback: use their own center)
+    if (ungroupedRects.length > 0) {
+      const ungroupedAvgX = computeAvgX(ungroupedRects);
+      processRectGroup(ungroupedRects, ungroupedAvgX);
+    }
 
     setAnnotation((prev) => ({
       ...prev,
@@ -655,6 +824,7 @@ const EngineerViewPage = () => {
         ...(prev.annotations || {}),
         hvac: {
           ...(prev.annotations?.hvac || {}),
+          zones: [...newZones],
           ducts: [...newDucts],
           diffusers: [...newDiffusers],
           dampers: [...newDampers],
@@ -664,7 +834,7 @@ const EngineerViewPage = () => {
     }));
     setShowHVAC(true);
     toast.success(
-      `Auto-placed ${newDucts.length} ducts, ${newDiffusers.length} diffusers/grilles, ${newDampers.length} dampers & ${newThermostats.length} thermostats for ${rects.length} units`
+      `Auto-placed ${newZones.length} zones, ${newDucts.length} ducts, ${newDiffusers.length} diffusers, ${newDampers.length} dampers & ${newThermostats.length} thermostats`
     );
   };
 
@@ -858,117 +1028,6 @@ const EngineerViewPage = () => {
         </select>
       </div>
 
-      {/* Refrigerant Lines Legend - Always Visible */}
-      <div className="ev-legend-panel">
-        <strong className="d-block mb-2">
-          📋 Mechanical Drawing Legend — {acType === "vrf-ducted" ? "VRF Ducted" : "VRF Ductless"}
-        </strong>
-
-        {/* Ductwork Legend (ducted modes) */}
-        {(acType === "ducted" || acType === "vrf-ducted") && (
-          <div className="ev-legend-section">
-            <div className="ev-legend-title">Ductwork</div>
-            <div className="ev-legend-items">
-              <span className="ev-legend-item">
-                <span className="ev-legend-line" style={{ borderTop: "3px solid #0055CC" }}></span>
-                <span>Supply Duct (SA)</span>
-              </span>
-              <span className="ev-legend-item">
-                <span className="ev-legend-line" style={{ borderTop: "3px dashed #CC4400" }}></span>
-                <span>Return Duct (RA)</span>
-              </span>
-              <span className="ev-legend-item">
-                <span className="ev-legend-line ev-legend-wavy" style={{ borderTop: "2px dotted #888" }}></span>
-                <span>Flex Duct (FD)</span>
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Diffusers & Grilles Legend */}
-        {(acType === "ducted" || acType === "vrf-ducted") && (
-          <div className="ev-legend-section">
-            <div className="ev-legend-title">Diffusers & Grilles</div>
-            <div className="ev-legend-items">
-              <span className="ev-legend-item">
-                <span className="ev-legend-symbol" style={{ border: "2px solid #0055CC", width: 16, height: 16 }}>✕</span>
-                <span>Supply Diffuser 4-Way (SD)</span>
-              </span>
-              <span className="ev-legend-item">
-                <span className="ev-legend-symbol" style={{ border: "2px solid #0055CC", borderRadius: "50%", width: 16, height: 16 }}></span>
-                <span>Round Diffuser (SD)</span>
-              </span>
-              <span className="ev-legend-item">
-                <span className="ev-legend-symbol" style={{ border: "2px solid #0055CC", width: 28, height: 10, borderRadius: 0 }}></span>
-                <span>Linear Slot Diffuser (LD)</span>
-              </span>
-              <span className="ev-legend-item">
-                <span className="ev-legend-symbol" style={{ border: "2px solid #CC4400", width: 16, height: 16 }}>≡</span>
-                <span>Return Grille (RG)</span>
-              </span>
-              <span className="ev-legend-item">
-                <span className="ev-legend-symbol" style={{ border: "2px solid #228B22", width: 16, height: 16, background: "repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(34,139,34,0.3) 2px, rgba(34,139,34,0.3) 4px)" }}></span>
-                <span>Exhaust Grille (EG)</span>
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Dampers Legend */}
-        {(acType === "ducted" || acType === "vrf-ducted") && (
-          <div className="ev-legend-section">
-            <div className="ev-legend-title">Accessories</div>
-            <div className="ev-legend-items">
-              <span className="ev-legend-item">
-                <span className="ev-legend-symbol" style={{ border: "2px solid #CC0000", width: 16, height: 16, transform: "rotate(45deg)", fontSize: "7px", lineHeight: "12px" }}>FD</span>
-                <span>Fire Damper</span>
-              </span>
-              <span className="ev-legend-item">
-                <span className="ev-legend-symbol" style={{ border: "2px solid #555", width: 16, height: 16, borderRadius: "50%", fontSize: "7px", lineHeight: "12px" }}>VD</span>
-                <span>Volume Damper</span>
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Refrigerant Lines */}
-        <div className="ev-legend-section">
-          <div className="ev-legend-title">Refrigerant Lines</div>
-          <div className="ev-legend-items">
-            {acType === "vrf-ducted" && (
-              <>
-                <span className="ev-legend-item">
-                  <span className="ev-legend-line" style={{ borderTop: "2px dashed red" }}></span>
-                  <span style={{ color: "red" }}>Supply Line (Sequential Chain)</span>
-                </span>
-                <span className="ev-legend-item">
-                  <span className="ev-legend-line" style={{ borderTop: "2px dashed #0066FF" }}></span>
-                  <span style={{ color: "#0066FF" }}>Return Line (Sequential Chain)</span>
-                </span>
-              </>
-            )}
-            {acType === "vrf-ductless" && (
-              <span className="ev-legend-item">
-                <span className="ev-legend-line" style={{ borderTop: "2.5px solid #008B8B" }}></span>
-                <span style={{ color: "#008B8B" }}>Refrigerant Lines (Star Topology)</span>
-              </span>
-            )}
-            {acType === "ducted" && (
-              <>
-                <span className="ev-legend-item">
-                  <span className="ev-legend-line" style={{ borderTop: "2px dashed blue" }}></span>
-                  <span>Refrigerant Lines (Star Topology)</span>
-                </span>
-                <span className="ev-legend-item">
-                  <span className="ev-legend-line" style={{ borderTop: "2px dashed grey" }}></span>
-                  <span>Duct Branches</span>
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
       <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
         {(acType === "ducted" || acType === "vrf-ducted") && (
           <>
@@ -989,102 +1048,234 @@ const EngineerViewPage = () => {
             {/* Ductwork Section */}
             <div className="ev-toolbar-group">
               <span className="ev-toolbar-label">Ductwork</span>
-              <div className="ev-toolbar-btns">
-                <Button
-                  size="sm"
-                  variant={addMode === "supply-duct" ? "primary" : "outline-primary"}
-                  onClick={() => setAddMode(addMode === "supply-duct" ? null : "supply-duct")}
-                  title="Supply Duct — solid blue parallel lines"
-                >
-                  Supply Duct
-                </Button>
-                <Button
-                  size="sm"
-                  variant={addMode === "return-duct" ? "warning" : "outline-warning"}
-                  onClick={() => setAddMode(addMode === "return-duct" ? null : "return-duct")}
-                  title="Return Duct — dashed orange parallel lines"
-                >
-                  Return Duct
-                </Button>
-                <Button
-                  size="sm"
-                  variant={addMode === "flex-duct" ? "secondary" : "outline-secondary"}
-                  onClick={() => setAddMode(addMode === "flex-duct" ? null : "flex-duct")}
-                  title="Flex Duct — wavy lines"
-                >
-                  Flex Duct
-                </Button>
-              </div>
+              {isMobile ? (
+                <Dropdown>
+                  <Dropdown.Toggle size="sm" variant="outline-primary" className="ev-dropdown-toggle">
+                    {addMode?.includes('duct') ? addMode.replace(/-/g, ' ') : 'Select Duct'}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item active={addMode === "supply-duct"} onClick={() => setAddMode(addMode === "supply-duct" ? null : "supply-duct")}>
+                      Supply Duct
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "return-duct"} onClick={() => setAddMode(addMode === "return-duct" ? null : "return-duct")}>
+                      Return Duct
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "flex-duct"} onClick={() => setAddMode(addMode === "flex-duct" ? null : "flex-duct")}>
+                      Flex Duct
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "exhaust-duct"} onClick={() => setAddMode(addMode === "exhaust-duct" ? null : "exhaust-duct")}>
+                      Exhaust Duct
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "insulated-duct"} onClick={() => setAddMode(addMode === "insulated-duct" ? null : "insulated-duct")}>
+                      Insulated
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <div className="ev-toolbar-btns">
+                  <Button
+                    size="sm"
+                    variant={addMode === "supply-duct" ? "primary" : "outline-primary"}
+                    onClick={() => setAddMode(addMode === "supply-duct" ? null : "supply-duct")}
+                    title="Supply Duct — solid blue parallel lines"
+                  >
+                    Supply Duct
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "return-duct" ? "warning" : "outline-warning"}
+                    onClick={() => setAddMode(addMode === "return-duct" ? null : "return-duct")}
+                    title="Return Duct — dashed orange parallel lines"
+                  >
+                    Return Duct
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "flex-duct" ? "secondary" : "outline-secondary"}
+                    onClick={() => setAddMode(addMode === "flex-duct" ? null : "flex-duct")}
+                    title="Flex Duct — wavy lines"
+                  >
+                    Flex Duct
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "exhaust-duct" ? "success" : "outline-success"}
+                    onClick={() => setAddMode(addMode === "exhaust-duct" ? null : "exhaust-duct")}
+                    title="Exhaust Duct — dashed green lines"
+                  >
+                    Exhaust Duct
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "insulated-duct" ? "info" : "outline-info"}
+                    onClick={() => setAddMode(addMode === "insulated-duct" ? null : "insulated-duct")}
+                    title="Insulated Duct — dash-dot amber lines"
+                  >
+                    Insulated
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Diffusers & Grilles Section */}
             <div className="ev-toolbar-group">
               <span className="ev-toolbar-label">Diffusers & Grilles</span>
-              <div className="ev-toolbar-btns">
-                <Button
-                  size="sm"
-                  variant={addMode === "supply-4way" ? "primary" : "outline-primary"}
-                  onClick={() => setAddMode(addMode === "supply-4way" ? null : "supply-4way")}
-                  title="4-Way Supply Diffuser"
-                >
-                  4-Way SD
-                </Button>
-                <Button
-                  size="sm"
-                  variant={addMode === "round-diffuser" ? "primary" : "outline-primary"}
-                  onClick={() => setAddMode(addMode === "round-diffuser" ? null : "round-diffuser")}
-                  title="Round Ceiling Diffuser"
-                >
-                  Round SD
-                </Button>
-                <Button
-                  size="sm"
-                  variant={addMode === "linear-slot" ? "primary" : "outline-primary"}
-                  onClick={() => setAddMode(addMode === "linear-slot" ? null : "linear-slot")}
-                  title="Linear Slot Diffuser"
-                >
-                  Linear Slot
-                </Button>
-                <Button
-                  size="sm"
-                  variant={addMode === "return-grille" ? "warning" : "outline-warning"}
-                  onClick={() => setAddMode(addMode === "return-grille" ? null : "return-grille")}
-                  title="Return Air Grille"
-                >
-                  Return Grille
-                </Button>
-                <Button
-                  size="sm"
-                  variant={addMode === "exhaust-grille" ? "success" : "outline-success"}
-                  onClick={() => setAddMode(addMode === "exhaust-grille" ? null : "exhaust-grille")}
-                  title="Exhaust Air Grille"
-                >
-                  Exhaust
-                </Button>
-              </div>
+              {isMobile ? (
+                <Dropdown>
+                  <Dropdown.Toggle size="sm" variant="outline-primary" className="ev-dropdown-toggle">
+                    {['supply-4way', 'round-diffuser', 'linear-slot', 'jet-diffuser', 'wall-diffuser', 'return-grille', 'transfer-grille', 'exhaust-grille', 'drain-point'].includes(addMode) 
+                      ? addMode.replace(/-/g, ' ') 
+                      : 'Select Diffuser'}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Header>Supply Diffusers</Dropdown.Header>
+                    <Dropdown.Item active={addMode === "supply-4way"} onClick={() => setAddMode(addMode === "supply-4way" ? null : "supply-4way")}>
+                      4-Way SD
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "round-diffuser"} onClick={() => setAddMode(addMode === "round-diffuser" ? null : "round-diffuser")}>
+                      Round SD
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "linear-slot"} onClick={() => setAddMode(addMode === "linear-slot" ? null : "linear-slot")}>
+                      Linear Slot
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "jet-diffuser"} onClick={() => setAddMode(addMode === "jet-diffuser" ? null : "jet-diffuser")}>
+                      JET
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "wall-diffuser"} onClick={() => setAddMode(addMode === "wall-diffuser" ? null : "wall-diffuser")}>
+                      Wall SD
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Header>Return & Exhaust</Dropdown.Header>
+                    <Dropdown.Item active={addMode === "return-grille"} onClick={() => setAddMode(addMode === "return-grille" ? null : "return-grille")}>
+                      Return Grille
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "transfer-grille"} onClick={() => setAddMode(addMode === "transfer-grille" ? null : "transfer-grille")}>
+                      Transfer
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "exhaust-grille"} onClick={() => setAddMode(addMode === "exhaust-grille" ? null : "exhaust-grille")}>
+                      Exhaust
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item active={addMode === "drain-point"} onClick={() => setAddMode(addMode === "drain-point" ? null : "drain-point")}>
+                      Drain Point
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <div className="ev-toolbar-btns">
+                  <Button
+                    size="sm"
+                    variant={addMode === "supply-4way" ? "primary" : "outline-primary"}
+                    onClick={() => setAddMode(addMode === "supply-4way" ? null : "supply-4way")}
+                    title="4-Way Supply Diffuser"
+                  >
+                    4-Way SD
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "round-diffuser" ? "primary" : "outline-primary"}
+                    onClick={() => setAddMode(addMode === "round-diffuser" ? null : "round-diffuser")}
+                    title="Round Ceiling Diffuser"
+                  >
+                    Round SD
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "linear-slot" ? "primary" : "outline-primary"}
+                    onClick={() => setAddMode(addMode === "linear-slot" ? null : "linear-slot")}
+                    title="Linear Slot Diffuser"
+                  >
+                    Linear Slot
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "jet-diffuser" ? "primary" : "outline-primary"}
+                    onClick={() => setAddMode(addMode === "jet-diffuser" ? null : "jet-diffuser")}
+                    title="JET Diffuser (High Velocity)"
+                  >
+                    JET
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "wall-diffuser" ? "primary" : "outline-primary"}
+                    onClick={() => setAddMode(addMode === "wall-diffuser" ? null : "wall-diffuser")}
+                    title="Wall-Mounted Supply Diffuser"
+                  >
+                    Wall SD
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "return-grille" ? "warning" : "outline-warning"}
+                    onClick={() => setAddMode(addMode === "return-grille" ? null : "return-grille")}
+                    title="Return Air Grille"
+                  >
+                    Return Grille
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "transfer-grille" ? "warning" : "outline-warning"}
+                    onClick={() => setAddMode(addMode === "transfer-grille" ? null : "transfer-grille")}
+                    title="Transfer Grille (Pressure Balance)"
+                  >
+                    Transfer
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "exhaust-grille" ? "success" : "outline-success"}
+                    onClick={() => setAddMode(addMode === "exhaust-grille" ? null : "exhaust-grille")}
+                    title="Exhaust Air Grille"
+                  >
+                    Exhaust
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "drain-point" ? "info" : "outline-info"}
+                    onClick={() => setAddMode(addMode === "drain-point" ? null : "drain-point")}
+                    title="Condensate Drain Point"
+                  >
+                    Drain
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Accessories Section */}
             <div className="ev-toolbar-group">
               <span className="ev-toolbar-label">Accessories</span>
-              <div className="ev-toolbar-btns">
-                <Button
-                  size="sm"
-                  variant={addMode === "fire-damper" ? "danger" : "outline-danger"}
-                  onClick={() => setAddMode(addMode === "fire-damper" ? null : "fire-damper")}
-                  title="Fire Damper"
-                >
-                  Fire Damper
-                </Button>
-                <Button
-                  size="sm"
-                  variant={addMode === "volume-damper" ? "secondary" : "outline-secondary"}
-                  onClick={() => setAddMode(addMode === "volume-damper" ? null : "volume-damper")}
-                  title="Volume Damper"
-                >
-                  Vol. Damper
-                </Button>
-              </div>
+              {isMobile ? (
+                <Dropdown>
+                  <Dropdown.Toggle size="sm" variant="outline-secondary" className="ev-dropdown-toggle">
+                    {['fire-damper', 'volume-damper'].includes(addMode) ? addMode.replace(/-/g, ' ') : 'Select'}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item active={addMode === "fire-damper"} onClick={() => setAddMode(addMode === "fire-damper" ? null : "fire-damper")}>
+                      Fire Damper
+                    </Dropdown.Item>
+                    <Dropdown.Item active={addMode === "volume-damper"} onClick={() => setAddMode(addMode === "volume-damper" ? null : "volume-damper")}>
+                      Vol. Damper
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <div className="ev-toolbar-btns">
+                  <Button
+                    size="sm"
+                    variant={addMode === "fire-damper" ? "danger" : "outline-danger"}
+                    onClick={() => setAddMode(addMode === "fire-damper" ? null : "fire-damper")}
+                    title="Fire Damper"
+                  >
+                    Fire Damper
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={addMode === "volume-damper" ? "secondary" : "outline-secondary"}
+                    onClick={() => setAddMode(addMode === "volume-damper" ? null : "volume-damper")}
+                    title="Volume Damper"
+                  >
+                    Vol. Damper
+                  </Button>
+                </div>
+              )}
             </div>
           </>
         )}
@@ -1093,48 +1284,82 @@ const EngineerViewPage = () => {
         {(acType === "ducted" || acType === "vrf-ducted") && (
           <div className="ev-toolbar-group">
             <span className="ev-toolbar-label">Auto Layout</span>
-            <div className="ev-toolbar-btns">
-              <Button
-                size="sm"
-                variant="outline-info"
-                onClick={handleAutoPlaceDucts}
-                title="Auto-generate ducts, diffusers, grilles, dampers & thermostats for every indoor unit"
-              >
-                🔧 Auto-Place HVAC
-              </Button>
-              <Button
-                size="sm"
-                variant="outline-danger"
-                onClick={handleClearHvac}
-                title="Remove all auto-placed HVAC elements"
-              >
-                🗑 Clear HVAC
-              </Button>
-            </div>
+            {isMobile ? (
+              <Dropdown>
+                <Dropdown.Toggle size="sm" variant="outline-info" className="ev-dropdown-toggle">
+                  🔧 Auto
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={handleAutoPlaceDucts}>
+                    🔧 Auto-Place HVAC
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={handleClearHvac} className="text-danger">
+                    🗑 Clear HVAC
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <div className="ev-toolbar-btns">
+                <Button
+                  size="sm"
+                  variant="outline-info"
+                  onClick={handleAutoPlaceDucts}
+                  title="Auto-generate ducts, diffusers, grilles, dampers & thermostats for every indoor unit"
+                >
+                  🔧 Auto-Place HVAC
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline-danger"
+                  onClick={handleClearHvac}
+                  title="Remove all auto-placed HVAC elements"
+                >
+                  🗑 Clear HVAC
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
         {/* Comment (all modes) */}
         <div className="ev-toolbar-group">
           <span className="ev-toolbar-label">Annotations</span>
-          <div className="ev-toolbar-btns">
-            <Button
-              size="sm"
-              variant={addMode === "comment" ? "warning" : "outline-warning"}
-              onClick={() => setAddMode(addMode === "comment" ? null : "comment")}
-            >
-              Add Comment
-            </Button>
-            {acType === "vrf-ductless" && (
+          {isMobile ? (
+            <Dropdown>
+              <Dropdown.Toggle size="sm" variant="outline-warning" className="ev-dropdown-toggle">
+                {addMode === 'comment' ? 'Comment' : addMode === 'markCondenser' ? 'Condenser' : 'Add'}
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item active={addMode === "comment"} onClick={() => setAddMode(addMode === "comment" ? null : "comment")}>
+                  Add Comment
+                </Dropdown.Item>
+                {acType === "vrf-ductless" && (
+                  <Dropdown.Item onClick={() => setAddMode("markCondenser")}>
+                    Mark Condenser
+                  </Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
+          ) : (
+            <div className="ev-toolbar-btns">
               <Button
                 size="sm"
-                variant="outline-secondary"
-                onClick={() => setAddMode("markCondenser")}
+                variant={addMode === "comment" ? "warning" : "outline-warning"}
+                onClick={() => setAddMode(addMode === "comment" ? null : "comment")}
               >
-                Mark Condenser
+                Add Comment
               </Button>
-            )}
-          </div>
+              {acType === "vrf-ductless" && (
+                <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  onClick={() => setAddMode("markCondenser")}
+                >
+                  Mark Condenser
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Active mode indicator */}

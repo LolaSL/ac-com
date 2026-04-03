@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0055CC" stroke-width="2">
+  <!-- JET Diffuser - high velocity nozzle -->
+  <rect x="8" y="16" width="12" height="16" rx="2" fill="rgba(0,85,204,0.2)"/>
+  <path d="M20 20 L36 14 L36 34 L20 28 Z" fill="rgba(0,85,204,0.15)"/>
+  <line x1="36" y1="24" x2="44" y2="24" stroke-width="3"/>
+  <line x1="40" y1="20" x2="44" y2="24"/>
+  <line x1="40" y1="28" x2="44" y2="24"/>
+</svg>

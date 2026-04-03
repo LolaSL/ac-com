@@ -140,6 +140,16 @@ router.post(
 
         // Normalize HVAC data
         const hvacData = {
+            zones: (parsedHvac.zones || []).map((zone) => ({
+                id: zone.id,
+                xPercent: zone.xPercent || 0,
+                yPercent: zone.yPercent || 0,
+                widthPercent: zone.widthPercent || 0.15,
+                heightPercent: zone.heightPercent || 0.12,
+                fill: zone.fill || 'rgba(0,150,255,0.12)',
+                stroke: zone.stroke || 'rgba(0,100,200,0.3)',
+                zoneNumber: zone.zoneNumber || null,
+            })),
             ducts: (parsedHvac.ducts || []).map((duct) => ({
                 id: duct.id,
                 xPercent: duct.xPercent || duct.x / width || 0,
@@ -166,6 +176,13 @@ router.post(
                 yPercent: damper.yPercent || damper.y / height || 0,
                 sizePercent: damper.sizePercent || 0.025,
                 damperType: damper.damperType || "volume",
+            })),
+            thermostats: (parsedHvac.thermostats || []).map((thermo) => ({
+                id: thermo.id,
+                xPercent: thermo.xPercent || thermo.x / width || 0,
+                yPercent: thermo.yPercent || thermo.y / height || 0,
+                sizePercent: thermo.sizePercent || 0.02,
+                label: thermo.label || "T",
             })),
             refrigerantLines: (parsedHvac.refrigerantLines || []).map((line) => ({
                 id: line.id,
@@ -430,30 +447,65 @@ router.get(
             if (ann.hvac) {
                 const hvac = ann.hvac;
 
-                // Draw ducts (for ducted systems) — color by ductType
+                // Draw zones (light blue service area rectangles behind everything)
+                if (hvac.zones && Array.isArray(hvac.zones)) {
+                    hvac.zones.forEach((zone) => {
+                        const x = zone.xPercent * width;
+                        const y = height - zone.yPercent * height - zone.heightPercent * height;
+                        const w = zone.widthPercent * width;
+                        const h = zone.heightPercent * height;
+                        firstPage.drawRectangle({
+                            x,
+                            y,
+                            width: w,
+                            height: h,
+                            color: rgb(0.75, 0.9, 1),       // Light blue fill
+                            borderColor: rgb(0.4, 0.7, 0.9), // Subtle border
+                            borderWidth: 1,
+                            opacity: 0.15,
+                            borderOpacity: 0.35,
+                        });
+                        // Draw zone number in top-left corner
+                        if (zone.zoneNumber) {
+                            firstPage.drawText(`Zone ${zone.zoneNumber}`, {
+                                x: x + 6,
+                                y: y + h - 16,
+                                size: 11,
+                                color: rgb(0, 0.31, 0.63),
+                            });
+                        }
+                    });
+                }
+
+                // Draw ducts (for ducted systems) — color by ductType with shaded fills
                 if (hvac.ducts && Array.isArray(hvac.ducts)) {
-                    const ductColors = {
-                        supply:  rgb(0, 0.333, 0.8),   // #0055CC
-                        return:  rgb(0.8, 0.267, 0),    // #CC4400
-                        flex:    rgb(0.533, 0.533, 0.533), // #888
-                        exhaust: rgb(0.133, 0.545, 0.133), // #228B22
-                        default: rgb(0, 0.5, 1),
+                    const ductStyles = {
+                        supply:    { border: rgb(0, 0.333, 0.8),      fill: rgb(0.7, 0.85, 1) },
+                        return:    { border: rgb(0.8, 0.267, 0),      fill: rgb(1, 0.85, 0.7) },
+                        flex:      { border: rgb(0.533, 0.533, 0.533), fill: rgb(0.85, 0.85, 0.85) },
+                        exhaust:   { border: rgb(0.133, 0.545, 0.133), fill: rgb(0.7, 0.92, 0.7) },
+                        insulated: { border: rgb(0.8, 0.6, 0),         fill: rgb(1, 0.92, 0.7) },
+                        default:   { border: rgb(0, 0.5, 1),           fill: rgb(0.8, 0.9, 1) },
                     };
                     hvac.ducts.forEach((duct) => {
                         const x = duct.xPercent * width;
                         const y = height - duct.yPercent * height - (duct.height || 0.04) * height;
                         const w = (duct.width || 0.2) * width;
                         const h = (duct.height || 0.04) * height;
-                        const color = ductColors[duct.ductType] || ductColors.default;
-                        const isDashed = duct.ductType === 'return';
+                        const style = ductStyles[duct.ductType] || ductStyles.default;
+                        const isDashed = duct.ductType === 'return' || duct.ductType === 'exhaust';
+                        const isInsulated = duct.ductType === 'insulated';
                         firstPage.drawRectangle({
                             x,
                             y,
                             width: w,
                             height: h,
-                            borderColor: color,
-                            borderWidth: 2,
-                            dashArray: isDashed ? [6, 4] : undefined,
+                            color: style.fill,
+                            borderColor: style.border,
+                            borderWidth: 1.5,
+                            opacity: 0.25,
+                            borderOpacity: 0.6,
+                            dashArray: isDashed ? [6, 4] : isInsulated ? [8, 2, 2, 2] : undefined,
                         });
                     });
                 }
@@ -466,6 +518,10 @@ router.get(
                         'linear-slot':    { border: rgb(0, 0.333, 0.8), fill: rgb(0.88, 0.93, 1) },
                         'return-grille':  { border: rgb(0.8, 0.267, 0), fill: rgb(1, 0.95, 0.88) },
                         'exhaust':        { border: rgb(0.133, 0.545, 0.133), fill: rgb(0.88, 1, 0.88) },
+                        'jet':            { border: rgb(0, 0.333, 0.8), fill: rgb(0.88, 0.93, 1) },
+                        'wall-diffuser':  { border: rgb(0, 0.333, 0.8), fill: rgb(0.88, 0.93, 1) },
+                        'transfer-grille':{ border: rgb(0.8, 0.267, 0), fill: rgb(1, 0.95, 0.88) },
+                        'drain-point':    { border: rgb(0, 0.533, 0.667), fill: rgb(0.88, 0.97, 1) },
                         'default':        { border: rgb(0, 0.5, 1), fill: undefined },
                     };
                     hvac.diffusers.forEach((diffuser) => {
@@ -485,6 +541,73 @@ router.get(
                                 borderColor: colors.border,
                                 borderWidth: 2,
                                 color: colors.fill,
+                            });
+                        } else if (dt === 'jet') {
+                            // JET diffuser: nozzle shape (triangle + rectangle)
+                            firstPage.drawRectangle({
+                                x: x - size * 0.35,
+                                y: y - size * 0.2,
+                                width: size * 0.25,
+                                height: size * 0.4,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                            // Arrow/nozzle direction indicator
+                            firstPage.drawCircle({
+                                x: x + size * 0.2,
+                                y,
+                                size: size * 0.15,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                        } else if (dt === 'wall-diffuser') {
+                            // Wall diffuser: rectangle with wall indicator
+                            firstPage.drawRectangle({
+                                x: x - size * 0.45,
+                                y: y - size * 0.3,
+                                width: size * 0.12,
+                                height: size * 0.6,
+                                borderColor: rgb(0.4, 0.4, 0.4),
+                                borderWidth: 1,
+                                color: rgb(0.7, 0.7, 0.7),
+                            });
+                            firstPage.drawRectangle({
+                                x: x - size * 0.3,
+                                y: y - size * 0.25,
+                                width: size * 0.5,
+                                height: size * 0.5,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                        } else if (dt === 'transfer-grille') {
+                            // Transfer grille: wide rectangle with arrows
+                            firstPage.drawRectangle({
+                                x: x - size * 0.45,
+                                y: y - size * 0.25,
+                                width: size * 0.9,
+                                height: size * 0.5,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                        } else if (dt === 'drain-point') {
+                            // Drain point: circle with down indicator
+                            firstPage.drawCircle({
+                                x,
+                                y: y + size * 0.1,
+                                size: size * 0.3,
+                                borderColor: colors.border,
+                                borderWidth: 2,
+                                color: colors.fill,
+                            });
+                            firstPage.drawCircle({
+                                x,
+                                y: y + size * 0.1,
+                                size: size * 0.1,
+                                color: colors.border,
                             });
                         } else if (dt === 'supply-4way' || dt === 'square' || dt === 'return-grille' || dt === 'exhaust') {
                             // Square shape for 4-way, return grille, exhaust
@@ -538,6 +661,32 @@ router.get(
                                 borderWidth: 2,
                             });
                         }
+                    });
+                }
+
+                // Draw thermostats
+                if (hvac.thermostats && Array.isArray(hvac.thermostats)) {
+                    hvac.thermostats.forEach((thermo) => {
+                        const cx = thermo.xPercent * width;
+                        const cy = height - thermo.yPercent * height;
+                        const sz = (thermo.sizePercent || 0.02) * width;
+                        // Purple rounded rectangle for thermostat
+                        firstPage.drawRectangle({
+                            x: cx - sz / 2,
+                            y: cy - sz / 2,
+                            width: sz,
+                            height: sz,
+                            borderColor: rgb(0.545, 0.361, 0.965), // #8B5CF6
+                            borderWidth: 2,
+                            color: rgb(0.545, 0.361, 0.965, 0.2),
+                        });
+                        // Draw label
+                        firstPage.drawText(thermo.label || 'T', {
+                            x: cx - sz * 0.25,
+                            y: cy - sz * 0.15,
+                            size: sz * 0.5,
+                            color: rgb(0.545, 0.361, 0.965),
+                        });
                     });
                 }
 

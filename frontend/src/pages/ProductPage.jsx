@@ -26,7 +26,6 @@ import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
 import { Store } from "../Store";
-import FloatingLabel from "react-bootstrap/FloatingLabel";
 import { toast } from "react-toastify";
 import Image from "react-bootstrap/Image";
 import { FaFilePdf } from "react-icons/fa";
@@ -793,16 +792,14 @@ function ProductPage() {
                   <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
                 </Form.Control>
               </Form.Group>
-              <FloatingLabel
-                controlId="floatingTextarea"
-                label="Comments (minimum 10 characters)"
-                className="mb-3"
-              >
+              <Form.Group className="mb-3" controlId="comment">
+                <Form.Label className="sp-form-label">Comments (minimum 10 characters)</Form.Label>
                 <Form.Control
                   as="textarea"
-                  placeholder="Leave a comment here"
+                  placeholder="Share your experience... 😊"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
+                  onInput={(e) => setComment(e.target.value)}
                   rows={4}
                   maxLength={500}
                   style={{ minHeight: "100px" }}
@@ -810,7 +807,7 @@ function ProductPage() {
                 <Form.Text className="text-muted">
                   {comment.length}/500 characters
                 </Form.Text>
-              </FloatingLabel>
+              </Form.Group>
 
               <div className="mb-2">
                 <Button

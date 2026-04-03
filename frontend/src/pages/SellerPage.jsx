@@ -14,7 +14,6 @@ import MessageBox from "../components/MessageBox";
 import Rating from "../components/Rating";
 import { Store } from "../Store";
 import Form from "react-bootstrap/Form";
-import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Button from "react-bootstrap/Button";
 import "./SellerPage.css";
 
@@ -239,15 +238,17 @@ export default function SellerPage() {
                     <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
                   </Form.Control>
                 </Form.Group>
-                <FloatingLabel controlId="floatingTextarea" label="Your comment" className="mb-3">
+                <Form.Group className="mb-3" controlId="comment">
+                  <Form.Label className="sp-form-label">Your Comment</Form.Label>
                   <Form.Control
                     as="textarea"
-                    placeholder="Leave a comment here"
+                    placeholder="Share your experience... 😊"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
+                    onInput={(e) => setComment(e.target.value)}
                     style={{ minHeight: "120px" }}
                   />
-                </FloatingLabel>
+                </Form.Group>
                 <Button
                   disabled={loadingCreateReview}
                   className="sp-submit-btn"

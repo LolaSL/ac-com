@@ -16,6 +16,11 @@ import fireDamperSVG from "../assets/hvac/fireDamper.svg";
 import volumeDamperSVG from "../assets/hvac/volumeDamper.svg";
 import vavBoxSVG from "../assets/hvac/vavBox.svg";
 import condenserUnitSVG from "../assets/hvac/condenserUnit.svg";
+import jetDiffuserSVG from "../assets/hvac/jetDiffuser.svg";
+import transferGrilleSVG from "../assets/hvac/transferGrille.svg";
+import drainPointSVG from "../assets/hvac/drainPoint.svg";
+import wallDiffuserSVG from "../assets/hvac/wallDiffuser.svg";
+import insulatedDuctSVG from "../assets/hvac/insulatedDuct.svg";
 
 export const hvacSymbols = {
   supply: supplySVG,
@@ -36,6 +41,11 @@ export const hvacSymbols = {
   volumeDamper: volumeDamperSVG,
   vavBox: vavBoxSVG,
   condenserUnit: condenserUnitSVG,
+  jetDiffuser: jetDiffuserSVG,
+  transferGrille: transferGrilleSVG,
+  drainPoint: drainPointSVG,
+  wallDiffuser: wallDiffuserSVG,
+  insulatedDuct: insulatedDuctSVG,
 };
 
 /**
@@ -264,23 +274,28 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
 
   // ─── DUCT TYPE CONFIG (professional engineering colors & styles) ───
   const DUCT_STYLES = {
-    supply:  { fill: "rgba(0,85,204,0.15)", stroke: "#0055CC", dash: [],       label: "SA" },
-    return:  { fill: "rgba(204,68,0,0.15)",  stroke: "#CC4400", dash: [6,4],   label: "RA" },
-    flex:    { fill: "rgba(150,150,150,0.1)", stroke: "#888",    dash: [3,3],   label: "FD" },
-    exhaust: { fill: "rgba(34,139,34,0.15)",  stroke: "#228B22", dash: [4,4],   label: "EA" },
-    default: { fill: "rgba(0,120,255,0.2)",   stroke: "#0066FF", dash: [],      label: "" },
+    supply:    { fill: "rgba(0,120,255,0.25)",   stroke: "#0055CC", dash: [],       label: "SA" },
+    return:    { fill: "rgba(255,120,50,0.22)",  stroke: "#CC4400", dash: [6,4],    label: "RA" },
+    flex:      { fill: "rgba(150,150,150,0.20)", stroke: "#888",    dash: [3,3],    label: "FD" },
+    exhaust:   { fill: "rgba(34,180,34,0.22)",   stroke: "#228B22", dash: [4,4],    label: "EA" },
+    insulated: { fill: "rgba(255,180,50,0.25)",  stroke: "#CC9900", dash: [8,2,2,2],label: "ID" },
+    default:   { fill: "rgba(0,150,255,0.22)",   stroke: "#0066FF", dash: [],       label: "" },
   };
 
   // ─── DIFFUSER TYPE CONFIG ───
   const DIFFUSER_STYLES = {
-    "supply-4way":  { fill: "rgba(0,85,204,0.25)", stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
-    "round":        { fill: "rgba(0,85,204,0.25)", stroke: "#0055CC", svgKey: "roundDiffuser" },
-    "linear-slot":  { fill: "rgba(0,85,204,0.2)",  stroke: "#0055CC", svgKey: "linearSlotDiffuser" },
-    "return-grille":{ fill: "rgba(204,68,0,0.2)",  stroke: "#CC4400", svgKey: "returnGrille" },
-    "exhaust":      { fill: "rgba(34,139,34,0.2)", stroke: "#228B22", svgKey: "exhaustGrille" },
-    "circle":       { fill: "rgba(0,85,204,0.25)", stroke: "#0055CC", svgKey: "roundDiffuser" },
-    "square":       { fill: "rgba(0,85,204,0.25)", stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
-    "default":      { fill: "rgba(0,255,0,0.3)",   stroke: "#00AA00", svgKey: "supply" },
+    "supply-4way":    { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
+    "round":          { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "roundDiffuser" },
+    "linear-slot":    { fill: "rgba(0,85,204,0.12)",  stroke: "#0055CC", svgKey: "linearSlotDiffuser" },
+    "return-grille":  { fill: "rgba(204,68,0,0.12)",  stroke: "#CC4400", svgKey: "returnGrille" },
+    "exhaust":        { fill: "rgba(34,139,34,0.12)", stroke: "#228B22", svgKey: "exhaustGrille" },
+    "circle":         { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "roundDiffuser" },
+    "square":         { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
+    "jet":            { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "jetDiffuser" },
+    "transfer-grille":{ fill: "rgba(204,68,0,0.12)",  stroke: "#CC4400", svgKey: "transferGrille" },
+    "drain-point":    { fill: "rgba(0,136,170,0.12)", stroke: "#0088AA", svgKey: "drainPoint" },
+    "wall-diffuser":  { fill: "rgba(0,85,204,0.12)",  stroke: "#0055CC", svgKey: "wallDiffuser" },
+    "default":        { fill: "rgba(0,255,0,0.18)",   stroke: "#00AA00", svgKey: "supply" },
   };
 
   const getNearestCommentText = (x, y, comments) => {
@@ -298,6 +313,34 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     });
     return nearest && minDist <= 50 ? nearest.text.toLowerCase() : null;
   };
+
+  // ─── RENDER ZONES (light blue shading behind everything) ───
+  hvacAnnotations?.zones?.forEach((zone) => {
+    const x = zone.xPercent * canvasWidth;
+    const y = zone.yPercent * canvasHeight;
+    const w = (zone.widthPercent || 0.15) * canvasWidth;
+    const h = (zone.heightPercent || 0.12) * canvasHeight;
+
+    context.save();
+    context.beginPath();
+    context.rect(x, y, w, h);
+    context.fillStyle = zone.fill || 'rgba(0,150,255,0.12)';
+    context.fill();
+    context.lineWidth = 1 * scaleFactor;
+    context.strokeStyle = zone.stroke || 'rgba(0,100,200,0.3)';
+    context.stroke();
+
+    // Draw zone number in top-left corner
+    if (zone.zoneNumber) {
+      const fontSize = Math.max(12, 16 * scaleFactor);
+      context.font = `bold ${fontSize}px Arial`;
+      context.fillStyle = 'rgba(0,80,160,0.9)';
+      context.textAlign = 'left';
+      context.textBaseline = 'top';
+      context.fillText(`Zone ${zone.zoneNumber}`, x + 6 * scaleFactor, y + 6 * scaleFactor);
+    }
+    context.restore();
+  });
 
   // ─── RENDER DUCTS ───
   hvacAnnotations?.ducts?.forEach((duct) => {
@@ -336,6 +379,37 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
         context.quadraticCurveTo(cx1, cy1, (i + 1) * segWidth, height);
       }
       context.stroke();
+    } else if (ductType === "insulated") {
+      // Insulated duct: double-wall with insulation pattern
+      // Outer insulation layer (dashed)
+      context.beginPath();
+      context.rect(-2 * scaleFactor, -2 * scaleFactor, width + 4 * scaleFactor, height + 4 * scaleFactor);
+      context.fillStyle = "rgba(255,200,100,0.15)";
+      context.fill();
+      context.lineWidth = 1.5 * scaleFactor;
+      context.strokeStyle = "#CC9900";
+      context.setLineDash([4 * scaleFactor, 2 * scaleFactor]);
+      context.stroke();
+      context.setLineDash([]);
+      // Inner duct
+      context.beginPath();
+      context.rect(0, 0, width, height);
+      context.fillStyle = style.fill;
+      context.fill();
+      context.lineWidth = 2 * scaleFactor;
+      context.strokeStyle = style.stroke;
+      context.stroke();
+      // Cross-hatch insulation pattern
+      context.strokeStyle = "#CC9900";
+      context.lineWidth = 0.5 * scaleFactor;
+      context.globalAlpha = 0.25;
+      for (let i = 0; i < width; i += 10 * scaleFactor) {
+        context.beginPath();
+        context.moveTo(i, -2 * scaleFactor);
+        context.lineTo(i + 6 * scaleFactor, height + 2 * scaleFactor);
+        context.stroke();
+      }
+      context.globalAlpha = 1.0;
     } else {
       // Standard rectangular duct
       context.beginPath();
@@ -359,7 +433,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       context.lineTo(arrowX + arrowSize, arrowY);
       context.lineTo(arrowX - arrowSize, arrowY + arrowSize);
       context.fillStyle = style.stroke;
-      context.globalAlpha = 0.5;
+      context.globalAlpha = 0.3;
       context.fill();
       context.globalAlpha = 1.0;
 
@@ -386,12 +460,15 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.restore();
 
     // Draw duct type SVG icon
-    const svgKey = ductType === "supply" ? "supplyDuct" : ductType === "return" ? "returnDuct" : ductType === "flex" ? "flexDuct" : "duct";
+    const svgKeyMap = {
+      supply: "supplyDuct", return: "returnDuct", flex: "flexDuct", exhaust: "exhaustGrille", insulated: "insulatedDuct", default: "duct"
+    };
+    const svgKey = svgKeyMap[ductType] || svgKeyMap.default;
     drawSymbolImage(symbolImages[svgKey], (img) => {
       context.save();
       context.translate(x, y);
       const iconSize = 14 * scaleFactor;
-      context.globalAlpha = 0.4;
+      context.globalAlpha = 0.25;
       context.drawImage(img, 2, (height - iconSize) / 2, iconSize * 2, iconSize);
       context.globalAlpha = 1.0;
       context.restore();
@@ -407,7 +484,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     const style = DIFFUSER_STYLES[diffuserType] || DIFFUSER_STYLES.default;
 
     context.save();
-    context.globalAlpha = 0.55;
+    context.globalAlpha = 0.35;
 
     if (diffuserType === "linear-slot") {
       // Linear slot: wide thin rectangle with slot lines
@@ -451,14 +528,14 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       }
       // For exhaust, add diagonal hatching
       if (diffuserType === "exhaust") {
-        context.globalAlpha = 0.2;
+        context.globalAlpha = 0.15;
         for (let i = 0; i < size; i += 5 * scaleFactor) {
           context.beginPath();
           context.moveTo(x - size / 2 + i, y - size / 2);
           context.lineTo(x - size / 2, y - size / 2 + i);
           context.stroke();
         }
-        context.globalAlpha = 0.55;
+        context.globalAlpha = 0.35;
       }
     } else if (diffuserType === "supply-4way" || diffuserType === "square") {
       // 4-way supply: square with X pattern and directional arrows
@@ -476,6 +553,121 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       context.moveTo(x + size / 2, y - size / 2);
       context.lineTo(x - size / 2, y + size / 2);
       context.lineWidth = 1 * scaleFactor;
+      context.stroke();
+    } else if (diffuserType === "jet") {
+      // JET diffuser: nozzle with arrow (high velocity)
+      context.beginPath();
+      context.rect(x - size * 0.35, y - size * 0.25, size * 0.25, size * 0.5);
+      context.fillStyle = style.fill;
+      context.fill();
+      context.lineWidth = 2 * scaleFactor;
+      context.strokeStyle = style.stroke;
+      context.stroke();
+      // Nozzle cone
+      context.beginPath();
+      context.moveTo(x - size * 0.1, y - size * 0.2);
+      context.lineTo(x + size * 0.35, y);
+      context.lineTo(x - size * 0.1, y + size * 0.2);
+      context.closePath();
+      context.fillStyle = style.fill;
+      context.fill();
+      context.stroke();
+      // Arrow
+      context.beginPath();
+      context.moveTo(x + size * 0.3, y);
+      context.lineTo(x + size * 0.5, y);
+      context.moveTo(x + size * 0.42, y - size * 0.1);
+      context.lineTo(x + size * 0.5, y);
+      context.lineTo(x + size * 0.42, y + size * 0.1);
+      context.lineWidth = 2.5 * scaleFactor;
+      context.stroke();
+    } else if (diffuserType === "wall-diffuser") {
+      // Wall diffuser: rectangle with wall representation and airflow lines
+      // Wall section
+      context.beginPath();
+      context.rect(x - size * 0.5, y - size * 0.35, size * 0.15, size * 0.7);
+      context.fillStyle = "rgba(100,100,100,0.3)";
+      context.fill();
+      context.lineWidth = 1 * scaleFactor;
+      context.strokeStyle = "#666";
+      context.stroke();
+      // Diffuser body
+      context.beginPath();
+      context.rect(x - size * 0.35, y - size * 0.25, size * 0.55, size * 0.5);
+      context.fillStyle = style.fill;
+      context.fill();
+      context.lineWidth = 2 * scaleFactor;
+      context.strokeStyle = style.stroke;
+      context.stroke();
+      // Louver lines
+      for (let i = 1; i < 4; i++) {
+        const ly = y - size * 0.2 + (size * 0.4 / 4) * i;
+        context.beginPath();
+        context.moveTo(x - size * 0.3, ly);
+        context.lineTo(x + size * 0.15, ly);
+        context.lineWidth = 0.8 * scaleFactor;
+        context.stroke();
+      }
+      // Airflow arrows
+      context.beginPath();
+      context.moveTo(x + size * 0.2, y - size * 0.15);
+      context.lineTo(x + size * 0.45, y - size * 0.25);
+      context.moveTo(x + size * 0.2, y);
+      context.lineTo(x + size * 0.5, y);
+      context.moveTo(x + size * 0.2, y + size * 0.15);
+      context.lineTo(x + size * 0.45, y + size * 0.25);
+      context.lineWidth = 1.5 * scaleFactor;
+      context.stroke();
+    } else if (diffuserType === "transfer-grille") {
+      // Transfer grille: rectangle with bi-directional arrows
+      context.beginPath();
+      context.rect(x - size * 0.45, y - size * 0.3, size * 0.9, size * 0.6);
+      context.fillStyle = style.fill;
+      context.fill();
+      context.lineWidth = 2 * scaleFactor;
+      context.strokeStyle = style.stroke;
+      context.stroke();
+      // Horizontal bars
+      for (let i = 1; i < 4; i++) {
+        const ly = y - size * 0.25 + (size * 0.5 / 4) * i;
+        context.beginPath();
+        context.moveTo(x - size * 0.4, ly);
+        context.lineTo(x + size * 0.4, ly);
+        context.lineWidth = 0.8 * scaleFactor;
+        context.stroke();
+      }
+      // Up/down transfer arrows
+      context.beginPath();
+      context.moveTo(x - size * 0.15, y - size * 0.45);
+      context.lineTo(x, y - size * 0.32);
+      context.lineTo(x + size * 0.15, y - size * 0.45);
+      context.moveTo(x - size * 0.15, y + size * 0.45);
+      context.lineTo(x, y + size * 0.32);
+      context.lineTo(x + size * 0.15, y + size * 0.45);
+      context.lineWidth = 1.5 * scaleFactor;
+      context.stroke();
+    } else if (diffuserType === "drain-point") {
+      // Drain point: circle with down arrow
+      context.beginPath();
+      context.arc(x, y - size * 0.1, size * 0.3, 0, 2 * Math.PI);
+      context.fillStyle = style.fill;
+      context.fill();
+      context.lineWidth = 2 * scaleFactor;
+      context.strokeStyle = style.stroke;
+      context.stroke();
+      // Inner filled circle
+      context.beginPath();
+      context.arc(x, y - size * 0.1, size * 0.12, 0, 2 * Math.PI);
+      context.fillStyle = style.stroke;
+      context.fill();
+      // Down arrow for drainage
+      context.beginPath();
+      context.moveTo(x, y + size * 0.1);
+      context.lineTo(x, y + size * 0.45);
+      context.moveTo(x - size * 0.12, y + size * 0.3);
+      context.lineTo(x, y + size * 0.45);
+      context.lineTo(x + size * 0.12, y + size * 0.3);
+      context.lineWidth = 2.5 * scaleFactor;
       context.stroke();
     } else {
       // Default round diffuser (with concentric circles)
@@ -507,7 +699,10 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     }
 
     // Diffuser type tag
-    const tagMap = { "supply-4way": "SD", "round": "SD", "linear-slot": "LD", "return-grille": "RG", "exhaust": "EG" };
+    const tagMap = { 
+      "supply-4way": "SD", "round": "SD", "linear-slot": "LD", "return-grille": "RG", "exhaust": "EG",
+      "jet": "JD", "wall-diffuser": "WD", "transfer-grille": "TG", "drain-point": "DP"
+    };
     const tag = tagMap[diffuserType];
     if (tag) {
       context.font = `bold ${8 * scaleFactor}px Arial`;
@@ -521,7 +716,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     // Draw SVG symbol overlay (semi-transparent)
     drawSymbolImage(symbolImages[style.svgKey], (img) => {
       context.save();
-      context.globalAlpha = 0.2;
+      context.globalAlpha = 0.15;
       context.drawImage(img, x - size / 2, y - size / 2, size, size);
       context.globalAlpha = 1.0;
       context.restore();
@@ -575,7 +770,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     const svgKey = damperType === "fire" ? "fireDamper" : "volumeDamper";
     drawSymbolImage(symbolImages[svgKey], (img) => {
       context.save();
-      context.globalAlpha = 0.3;
+      context.globalAlpha = 0.2;
       context.drawImage(img, x - size / 2, y - size / 2, size, size);
       context.globalAlpha = 1.0;
       context.restore();
@@ -598,7 +793,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.arcTo(x - size / 2, y + size / 2, x - size / 2, y - size / 2, r);
     context.arcTo(x - size / 2, y - size / 2, x + size / 2, y - size / 2, r);
     context.closePath();
-    context.fillStyle = "rgba(139,92,246,0.2)";
+    context.fillStyle = "rgba(139,92,246,0.12)";
     context.fill();
     context.lineWidth = 1.5 * scaleFactor;
     context.strokeStyle = "#8B5CF6";
@@ -615,7 +810,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     // SVG overlay
     drawSymbolImage(symbolImages.thermostat, (img) => {
       context.save();
-      context.globalAlpha = 0.3;
+      context.globalAlpha = 0.2;
       context.drawImage(img, x - size / 2, y - size / 2, size, size);
       context.globalAlpha = 1.0;
       context.restore();
@@ -650,7 +845,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
           context.setLineDash([4 * scaleFactor, 3 * scaleFactor]);
           context.lineWidth = 1.5 * scaleFactor;
           context.strokeStyle = branchColor;
-          context.globalAlpha = 0.6;
+          context.globalAlpha = 0.4;
           context.beginPath();
           context.moveTo(ductCenterX, ductCenterY);
           context.lineTo(dx, dy);
@@ -709,7 +904,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
           context.setLineDash([4 * scaleFactor, 3 * scaleFactor]);
           context.lineWidth = 1.5 * scaleFactor;
           context.strokeStyle = branchColor;
-          context.globalAlpha = 0.6;
+          context.globalAlpha = 0.4;
           context.beginPath();
           context.moveTo(dx, dy);
           context.lineTo(nearestDuct.x, nearestDuct.y);
@@ -1220,70 +1415,30 @@ if (
     });
   }
 
-  // For VRF ductless systems, draw teal refrigerant lines connecting rectangles to their nearest condenser
+  // For VRF ductless systems, draw teal refrigerant lines (star topology per flat)
+  // Multi-flat support: condenser-N connects to all ac-N.M units in that flat
   if (!skipRefrigerantLines && acType === "vrf-ductless" && annotations?.rectangles && annotations.rectangles.length > 1) {
-    // Find condensers: prefer explicit `isCondenser` flags, then comment matches, then largest rectangle fallback
+    // Find all condensers by comments containing "condenser"
     let condensers = [];
+    if (annotations.comments) {
+      condensers = annotations.comments
+        .filter((c) => c.text.toLowerCase().includes("condenser"))
+        .map((comment) => {
+          // Use String() for ID comparison to handle type mismatch (string vs number)
+          const rect = annotations.rectangles.find((r) => String(r.id) === String(comment.rectId));
+          return rect ? { ...rect, comment: comment.text } : null;
+        })
+        .filter(Boolean);
+    }
 
-    // 1) explicit flag
-    annotations.rectangles.forEach((rect) => {
-      if (rect.isCondenser) condensers.push(rect);
-    });
-
-    // 2) comment-based matching using simple synonyms if no explicit flags
-    const synonyms = [
-      "condenser",
-      "outdoor",
-      "outdoor unit",
-      "outdoor-unit",
-      "compressor",
-      "outside unit",
-      "heat pump",
-    ];
-    const normalizeText = (s) =>
-      (s || "")
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, " ")
-        .trim();
-
-    if (condensers.length === 0 && annotations.comments) {
-      annotations.comments.forEach((comment) => {
-        const t = normalizeText(comment.text);
-        for (const syn of synonyms) {
-          const re = new RegExp(
-            "\\b" + syn.replace(/[-]/g, "\\-") + "\\b",
-            "i"
-          );
-          if (re.test(t)) {
-            // Find the closest rectangle to this comment
-            let closestRect = null;
-            let minDist = Infinity;
-            annotations.rectangles.forEach((rect) => {
-              const rectCenterX =
-                rect.xPercent * canvasWidth +
-                (rect.widthPercent * canvasWidth) / 2;
-              const rectCenterY =
-                rect.yPercent * canvasHeight +
-                (rect.heightPercent * canvasHeight) / 2;
-              const dist = Math.sqrt(
-                (comment.xPercent * canvasWidth - rectCenterX) ** 2 +
-                  (comment.yPercent * canvasHeight - rectCenterY) ** 2
-              );
-              if (dist < minDist) {
-                minDist = dist;
-                closestRect = rect;
-              }
-            });
-            if (closestRect && !condensers.includes(closestRect)) {
-              condensers.push(closestRect);
-            }
-            break;
-          }
-        }
+    // Fallback: explicit isCondenser flag
+    if (condensers.length === 0) {
+      annotations.rectangles.forEach((rect) => {
+        if (rect.isCondenser) condensers.push(rect);
       });
     }
 
-    // 3) largest rectangle fallback
+    // Fallback: largest rectangle
     if (condensers.length === 0) {
       let maxArea = -Infinity;
       let largestRect = null;
@@ -1294,73 +1449,93 @@ if (
           largestRect = rect;
         }
       });
-      if (largestRect) {
-        condensers.push(largestRect);
-      }
+      if (largestRect) condensers.push(largestRect);
     }
 
-    // Now, for each rectangle not a condenser, connect to the nearest condenser with teal refrigerant line
-    annotations.rectangles.forEach((rect) => {
-      if (!condensers.includes(rect)) {
-        const rectCenter = getRotatedCenter(
-          rect.xPercent * canvasWidth,
-          rect.yPercent * canvasHeight,
-          rect.widthPercent * canvasWidth,
-          rect.heightPercent * canvasHeight,
-          rect.rotation
+    if (condensers.length > 0) {
+      // Group indoor units by condenser (based on comment: condenser-N → ac-N.M)
+      const groups = condensers.map((cond) => {
+        const condComment = cond.comment || "";
+        const match = condComment.match(/condenser-(\d+)/i);
+        const groupNum = match ? match[1] : null;
+
+        let indoorRects = [];
+        if (groupNum && annotations.comments) {
+          // Find indoor units with matching comments (e.g., "ac-1.1", "ac-1.2" for condenser-1)
+          indoorRects = annotations.rectangles
+            .filter((rect) => !rect.isCondenser && String(rect.id) !== String(cond.id))
+            .filter((rect) => {
+              const comment = annotations.comments.find((c) => String(c.rectId) === String(rect.id));
+              return comment && comment.text.match(new RegExp(`ac-${groupNum}(\\.\\d+)?`, "i"));
+            });
+        }
+        return { condenser: cond, indoorRects };
+      });
+
+      // Draw star topology lines for each group (condenser → each indoor unit)
+      groups.forEach(({ condenser, indoorRects }) => {
+        if (indoorRects.length === 0) return;
+
+        const condCenter = getRotatedCenter(
+          condenser.xPercent * canvasWidth,
+          condenser.yPercent * canvasHeight,
+          condenser.widthPercent * canvasWidth,
+          condenser.heightPercent * canvasHeight,
+          condenser.rotation
         );
-        const rx = rectCenter.x;
-        const ry = rectCenter.y;
-        let nearestCondenser = null;
-        let nearestCondRect = null;
-        let minDist = Infinity;
-        condensers.forEach((cond) => {
-          const condCenter = getRotatedCenter(
-            cond.xPercent * canvasWidth,
-            cond.yPercent * canvasHeight,
-            cond.widthPercent * canvasWidth,
-            cond.heightPercent * canvasHeight,
-            cond.rotation
+
+        indoorRects.forEach((rect) => {
+          const rectCenter = getRotatedCenter(
+            rect.xPercent * canvasWidth,
+            rect.yPercent * canvasHeight,
+            rect.widthPercent * canvasWidth,
+            rect.heightPercent * canvasHeight,
+            rect.rotation
           );
-          const cx = condCenter.x;
-          const cy = condCenter.y;
-          const dist = Math.sqrt((rx - cx) ** 2 + (ry - cy) ** 2);
-          if (dist < minDist) {
-            minDist = dist;
-            nearestCondenser = { cx, cy };
-            nearestCondRect = cond;
+          drawSingleOrthogonalLine(context, rectCenter.x, rectCenter.y, condCenter.x, condCenter.y, "#008B8B", []);
+        });
+      });
+
+      // Fallback: if no groups matched (no condenser-N naming), use nearest condenser logic
+      if (groups.every((g) => g.indoorRects.length === 0)) {
+        const condenserIds = new Set(condensers.map((c) => String(c.id)));
+        annotations.rectangles.forEach((rect) => {
+          if (condenserIds.has(String(rect.id))) return;
+
+          const rectCenter = getRotatedCenter(
+            rect.xPercent * canvasWidth,
+            rect.yPercent * canvasHeight,
+            rect.widthPercent * canvasWidth,
+            rect.heightPercent * canvasHeight,
+            rect.rotation
+          );
+          const rx = rectCenter.x;
+          const ry = rectCenter.y;
+
+          // Find nearest condenser
+          let nearestCondCenter = null;
+          let minDist = Infinity;
+          condensers.forEach((cond) => {
+            const condCenter = getRotatedCenter(
+              cond.xPercent * canvasWidth,
+              cond.yPercent * canvasHeight,
+              cond.widthPercent * canvasWidth,
+              cond.heightPercent * canvasHeight,
+              cond.rotation
+            );
+            const dist = Math.sqrt((rx - condCenter.x) ** 2 + (ry - condCenter.y) ** 2);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestCondCenter = condCenter;
+            }
+          });
+
+          if (nearestCondCenter) {
+            drawSingleOrthogonalLine(context, rx, ry, nearestCondCenter.x, nearestCondCenter.y, "#008B8B", []);
           }
         });
-        if (nearestCondenser && nearestCondRect) {
-          // Check if ANY user line connects this rectangle to the condenser
-          // Must check BOTH endpoints to avoid false positives from callout lines
-          const hasUserRefrigerantLine = (annotations.lines || []).some((line) => {
-            const points = line.points;
-            if (!points || points.length < 4) return false;
-            const isPercent = points.every((p) => Math.abs(p) <= 1.5);
-            const normalizedPoints = isPercent
-              ? points.map((val, idx) =>
-                  idx % 2 === 0 ? val * canvasWidth : val * canvasHeight
-                )
-              : points;
-            const x1 = normalizedPoints[0];
-            const y1 = normalizedPoints[1];
-            const x2 = normalizedPoints[normalizedPoints.length - 2];
-            const y2 = normalizedPoints[normalizedPoints.length - 1];
-            // Check if line connects this rect to the condenser (either direction)
-            const scaledTol = 80 * pdfScale;
-            const ep1NearRect = isPointNearRect(x1, y1, rect, scaledTol);
-            const ep2NearRect = isPointNearRect(x2, y2, rect, scaledTol);
-            const ep1NearCond = isPointNearRect(x1, y1, nearestCondRect, scaledTol);
-            const ep2NearCond = isPointNearRect(x2, y2, nearestCondRect, scaledTol);
-            return (ep1NearRect && ep2NearCond) || (ep2NearRect && ep1NearCond);
-          });
-          if (!hasUserRefrigerantLine) {
-            drawSingleOrthogonalLine(context, rx, ry, nearestCondenser.cx, nearestCondenser.cy, "#008B8B", []);
-          }
-        }
       }
-    });
+    }
   }
 
   // For VRF ducted systems, draw red/blue dashed supply/return lines between user rectangles
@@ -1377,7 +1552,8 @@ if (
     condensers = annotations.comments
       .filter((c) => c.text.toLowerCase().includes("condenser"))
       .map((comment) => {
-        const rect = annotations.rectangles.find((r) => r.id === comment.rectId);
+        // Use String() for ID comparison to handle type mismatch (string vs number)
+        const rect = annotations.rectangles.find((r) => String(r.id) === String(comment.rectId));
         return rect ? { ...rect, comment: comment.text } : null;
       })
       .filter(Boolean);
@@ -1406,17 +1582,18 @@ if (
 
       let indoorRects = [];
       if (groupNum && annotations.comments) {
-        // Find indoor units with matching comments (e.g., "ac-1", "ac-1.1")
+        // Find indoor units with matching comments (e.g., "ac-1.1", "ac-1.2" for condenser-1)
         indoorRects = annotations.rectangles
-          .filter((rect) => !rect.isCondenser && rect !== cond)
+          .filter((rect) => !rect.isCondenser && String(rect.id) !== String(cond.id))
           .filter((rect) => {
-            const comment = annotations.comments.find((c) => c.rectId === rect.id);
+            // Use String() for ID comparison to handle type mismatch
+            const comment = annotations.comments.find((c) => String(c.rectId) === String(rect.id));
             return comment && comment.text.match(new RegExp(`ac-${groupNum}(\\.\\d+)?`, "i"));
           })
           .sort((a, b) => {
-            // Sort by sub-number (e.g., ac-1 before ac-1.1)
-            const aComment = annotations.comments.find((c) => c.rectId === a.id)?.text || "";
-            const bComment = annotations.comments.find((c) => c.rectId === b.id)?.text || "";
+            // Sort by sub-number (e.g., ac-1.1 before ac-1.2)
+            const aComment = annotations.comments.find((c) => String(c.rectId) === String(a.id))?.text || "";
+            const bComment = annotations.comments.find((c) => String(c.rectId) === String(b.id))?.text || "";
             const aMatch = aComment.match(/ac-\d+(\.(\d+))?/i);
             const bMatch = bComment.match(/ac-\d+(\.(\d+))?/i);
             const aSub = aMatch && aMatch[2] ? parseInt(aMatch[2]) : 0;
@@ -1471,14 +1648,14 @@ if (
 
     // If no groups formed (e.g., no matching comments), fall back to original single-chain logic
     if (groups.every((g) => g.indoorRects.length === 0)) {
-      // condensers[] contains spread copies, so compare by id not reference
-      const condenserIds = new Set(condensers.map((c) => c.id));
+      // condensers[] contains spread copies, so compare by id (as string) not reference
+      const condenserIds = new Set(condensers.map((c) => String(c.id)));
       const allIndoorRects = annotations.rectangles
-        .filter((rect) => !rect.isCondenser && !condenserIds.has(rect.id))
+        .filter((rect) => !rect.isCondenser && !condenserIds.has(String(rect.id)))
         .sort((a, b) => {
           const getNum = (rect) => {
             if (!annotations.comments) return 0;
-            const comment = annotations.comments.find((c) => c.rectId === rect.id);
+            const comment = annotations.comments.find((c) => String(c.rectId) === String(rect.id));
             if (comment) {
               const match = comment.text.match(/ac-(\d+)/i);
               return match ? parseInt(match[1]) : 0;
@@ -1566,6 +1743,7 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
     entries.push({ type: "line", color: "#CC4400",  dash: [5, 3], label: "Return Duct (RA)" });
     entries.push({ type: "line", color: "#888",     dash: [2, 2], label: "Flex Duct (FD)" });
     entries.push({ type: "line", color: "#228B22",  dash: [4, 4], label: "Exhaust Duct (EA)" });
+    entries.push({ type: "line", color: "#CC9900",  dash: [8, 2, 2, 2], label: "Insulated Duct (ID)" });
     entries.push({ type: "line", color: "#0055CC",  dash: [4, 3], label: "Branch Connection Line" });
   }
 
@@ -1574,8 +1752,12 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
     entries.push({ type: "symbol", shape: "square-x",  color: "#0055CC", label: "Supply Diffuser 4-Way (SD)" });
     entries.push({ type: "symbol", shape: "circle",    color: "#0055CC", label: "Round Diffuser (SD)" });
     entries.push({ type: "symbol", shape: "slot",      color: "#0055CC", label: "Linear Slot Diffuser (LD)" });
+    entries.push({ type: "symbol", shape: "jet",       color: "#0055CC", label: "JET Diffuser (JD)" });
+    entries.push({ type: "symbol", shape: "wall-diff", color: "#0055CC", label: "Wall Diffuser (WD)" });
     entries.push({ type: "symbol", shape: "square-eq", color: "#CC4400", label: "Return Grille (RG)" });
+    entries.push({ type: "symbol", shape: "transfer",  color: "#CC4400", label: "Transfer Grille (TG)" });
     entries.push({ type: "symbol", shape: "square-h",  color: "#228B22", label: "Exhaust Grille (EG)" });
+    entries.push({ type: "symbol", shape: "drain",     color: "#0088AA", label: "Drain Point (DP)" });
   }
 
   // ── Dampers (ducted modes) ──
@@ -1595,7 +1777,7 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
 
   if (entries.length === 0) return;
 
-  // ── Layout constants (wide 2-column layout to minimize height) ──
+  // ── Layout constants (3-column layout to minimize height) ──
   // All dimensions scale with pdfScale
   const rowH = 14 * scaleFactor;
   const padX = 8 * scaleFactor;
@@ -1603,9 +1785,9 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
   const iconW = 24 * scaleFactor;
   const gap = 5 * scaleFactor;
   const titleH = 16 * scaleFactor;
-  const colW = 230 * scaleFactor;    // width per column
-  const cols = 2;
-  const colGap = 10 * scaleFactor;
+  const colW = 145 * scaleFactor;    // width per column (reduced for 4 cols)
+  const cols = 4;
+  const colGap = 6 * scaleFactor;
   const rowsPerCol = Math.ceil(entries.length / cols);
   const boxW = cols * colW + (cols - 1) * colGap + padX * 2;
   const boxH = titleH + padY + rowsPerCol * rowH + padY;
@@ -1647,7 +1829,7 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
   ctx.lineWidth = 0.5 * scaleFactor;
   ctx.stroke();
 
-  // ── Entries (2 columns) ──
+  // ── Entries (3 columns) ──
   const startY = by + titleH + padY;
   ctx.font = `${9.5 * scaleFactor}px Arial`;
   ctx.textBaseline = "middle";
@@ -1696,6 +1878,37 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
         ctx.strokeStyle = entry.color;
         ctx.lineWidth = 1.5 * scaleFactor;
         ctx.strokeRect(cx - 10 * scaleFactor, ey - 3 * scaleFactor, 20 * scaleFactor, 6 * scaleFactor);
+      } else if (entry.shape === "jet") {
+        // JET diffuser: nozzle with arrow
+        ctx.strokeStyle = entry.color;
+        ctx.lineWidth = 1.5 * scaleFactor;
+        ctx.beginPath();
+        ctx.rect(cx - sz * 0.4, ey - sz * 0.3, sz * 0.3, sz * 0.6);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - sz * 0.1, ey - sz * 0.2);
+        ctx.lineTo(cx + sz * 0.4, ey);
+        ctx.lineTo(cx - sz * 0.1, ey + sz * 0.2);
+        ctx.stroke();
+      } else if (entry.shape === "wall-diff") {
+        // Wall diffuser: rectangle with airflow lines
+        ctx.strokeStyle = "#666";
+        ctx.lineWidth = 1 * scaleFactor;
+        ctx.fillStyle = "rgba(100,100,100,0.2)";
+        ctx.fillRect(cx - sz * 0.5, ey - sz * 0.4, sz * 0.2, sz * 0.8);
+        ctx.strokeRect(cx - sz * 0.5, ey - sz * 0.4, sz * 0.2, sz * 0.8);
+        ctx.strokeStyle = entry.color;
+        ctx.lineWidth = 1.5 * scaleFactor;
+        ctx.strokeRect(cx - sz * 0.3, ey - sz * 0.3, sz * 0.5, sz * 0.6);
+        // Airflow arrows
+        ctx.beginPath();
+        ctx.moveTo(cx + sz * 0.2, ey - sz * 0.15);
+        ctx.lineTo(cx + sz * 0.45, ey - sz * 0.25);
+        ctx.moveTo(cx + sz * 0.2, ey);
+        ctx.lineTo(cx + sz * 0.5, ey);
+        ctx.moveTo(cx + sz * 0.2, ey + sz * 0.15);
+        ctx.lineTo(cx + sz * 0.45, ey + sz * 0.25);
+        ctx.stroke();
       } else if (entry.shape === "square-eq") {
         // Return grille: square with ≡
         ctx.strokeStyle = entry.color;
@@ -1707,6 +1920,27 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
           ctx.lineTo(cx + 3 * scaleFactor, ey + li * scaleFactor);
           ctx.stroke();
         }
+      } else if (entry.shape === "transfer") {
+        // Transfer grille: rectangle with double arrow
+        ctx.strokeStyle = entry.color;
+        ctx.lineWidth = 1.5 * scaleFactor;
+        ctx.strokeRect(cx - sz * 0.5, ey - sz * 0.3, sz, sz * 0.6);
+        // Horizontal lines inside
+        ctx.beginPath();
+        ctx.moveTo(cx - sz * 0.35, ey - sz * 0.1);
+        ctx.lineTo(cx + sz * 0.35, ey - sz * 0.1);
+        ctx.moveTo(cx - sz * 0.35, ey + sz * 0.1);
+        ctx.lineTo(cx + sz * 0.35, ey + sz * 0.1);
+        ctx.stroke();
+        // Up/down arrows
+        ctx.beginPath();
+        ctx.moveTo(cx - sz * 0.15, ey - sz * 0.5);
+        ctx.lineTo(cx, ey - sz * 0.35);
+        ctx.lineTo(cx + sz * 0.15, ey - sz * 0.5);
+        ctx.moveTo(cx - sz * 0.15, ey + sz * 0.5);
+        ctx.lineTo(cx, ey + sz * 0.35);
+        ctx.lineTo(cx + sz * 0.15, ey + sz * 0.5);
+        ctx.stroke();
       } else if (entry.shape === "square-h") {
         // Exhaust grille: square with hatching
         ctx.strokeStyle = entry.color;
@@ -1714,6 +1948,26 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
         ctx.strokeRect(cx - sz / 2, ey - sz / 2, sz, sz);
         ctx.beginPath();
         ctx.moveTo(cx - sz / 2, ey + sz / 2); ctx.lineTo(cx + sz / 2, ey - sz / 2);
+        ctx.stroke();
+      } else if (entry.shape === "drain") {
+        // Drain point: circle with down arrow
+        ctx.strokeStyle = entry.color;
+        ctx.lineWidth = 1.5 * scaleFactor;
+        ctx.beginPath();
+        ctx.arc(cx, ey - sz * 0.15, sz * 0.35, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = entry.color;
+        ctx.beginPath();
+        ctx.arc(cx, ey - sz * 0.15, sz * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+        // Down arrow
+        ctx.strokeStyle = entry.color;
+        ctx.beginPath();
+        ctx.moveTo(cx, ey + sz * 0.1);
+        ctx.lineTo(cx, ey + sz * 0.45);
+        ctx.moveTo(cx - sz * 0.15, ey + sz * 0.3);
+        ctx.lineTo(cx, ey + sz * 0.45);
+        ctx.lineTo(cx + sz * 0.15, ey + sz * 0.3);
         ctx.stroke();
       } else if (entry.shape === "diamond") {
         // Fire damper: red diamond

@@ -76,7 +76,7 @@ const Sidebar = () => {
     useState(false);
 
   // Mobile-friendly delete confirmation state (replaces window.confirm)
-  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, pdfId: null, filename: '' });
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, pdfId: null, filename: '', isEngineerReview: false });
 
   // PDF zoom scale
   const [pdfScale, setPdfScale] = useState(1.5);
@@ -255,7 +255,7 @@ const Sidebar = () => {
     if (showHVAC && (acType === "ducted" || acType === "vrf-ducted")) {
       overlayHVAC(
         context,
-        selectedAnnotations.hvac || { ducts: [], diffusers: [] },
+        selectedAnnotations.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] },
         hvacSymbols,
         selectedAnnotations.comments,
         acType,
@@ -367,7 +367,7 @@ const Sidebar = () => {
         if (showHVAC) {
           overlayHVAC(
             overlayContext,
-            normalizedAnnotations.hvac || { ducts: [], diffusers: [] },
+            normalizedAnnotations.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] },
             hvacSymbols,
             normalizedAnnotations.comments,
             acType,
@@ -521,18 +521,22 @@ const Sidebar = () => {
     }
   };
 
-  const handleDeletePdf = (pdfId, filename) => {
+  const handleDeletePdf = (pdfId, filename, isEngineerReview = false) => {
     // Show mobile-friendly confirmation modal instead of window.confirm
-    setDeleteConfirm({ show: true, pdfId, filename });
+    setDeleteConfirm({ show: true, pdfId, filename, isEngineerReview });
   };
 
   const confirmDeletePdf = async () => {
-    const { pdfId } = deleteConfirm;
-    setDeleteConfirm({ show: false, pdfId: null, filename: '' });
+    const { pdfId, isEngineerReview } = deleteConfirm;
+    setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false });
     if (!token) return setError("User not authenticated.");
 
     try {
-      const response = await fetch(`/api/annotations/${pdfId}`, {
+      const endpoint = isEngineerReview 
+        ? `/api/engineer-annotations/${pdfId}`
+        : `/api/annotations/${pdfId}`;
+      
+      const response = await fetch(endpoint, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -540,8 +544,14 @@ const Sidebar = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to delete PDF.");
       }
-      toast.success("PDF deleted successfully!");
-      setSavedPdfs((prev) => prev.filter((pdf) => pdf._id !== pdfId));
+      toast.success(isEngineerReview ? "Engineer review deleted!" : "PDF deleted successfully!");
+      
+      if (isEngineerReview) {
+        setEngineerAnnotations((prev) => prev.filter((a) => a._id !== pdfId));
+      } else {
+        setSavedPdfs((prev) => prev.filter((pdf) => pdf._id !== pdfId));
+      }
+      
       const container = document.getElementById("pdf-container");
       if (container) container.innerHTML = "";
       setSelectedPdf(null);
@@ -666,6 +676,13 @@ const Sidebar = () => {
                               <small className="sb-item__meta">
                                 Engineer: {annotation.engineerId?.name || "Unknown"} | Reviewed: {new Date(annotation.createdAt).toLocaleString()}
                               </small>
+                              <button
+                                className="sb-item__delete"
+                                onClick={() => handleDeletePdf(annotation._id, annotation.filename, true)}
+                                title="Delete Engineer Review"
+                              >
+                                <FaTrash />
+                              </button>
                             </li>
                           ))}
                         </ul>
@@ -702,6 +719,15 @@ const Sidebar = () => {
                           className="sb-item__delete sb-pdfbar__delete"
                           onClick={() => handleDeletePdf(selectedPdf._id, selectedPdf.filename)}
                           title="Delete"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                      {activeTab === "engineer-reviews" && currentPdfType === "engineer" && (
+                        <button
+                          className="sb-item__delete sb-pdfbar__delete"
+                          onClick={() => handleDeletePdf(selectedPdf._id, selectedPdf.filename, true)}
+                          title="Delete Engineer Review"
                         >
                           <FaTrash />
                         </button>
@@ -797,7 +823,7 @@ const Sidebar = () => {
             justifyContent: 'center',
             zIndex: 99999,
           }}
-          onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '' })}
+          onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false })}
         >
           <div
             style={{
@@ -810,12 +836,14 @@ const Sidebar = () => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h5 style={{ marginBottom: '12px' }}>Delete PDF</h5>
+            <h5 style={{ marginBottom: '12px' }}>
+              {deleteConfirm.isEngineerReview ? 'Delete Engineer Review' : 'Delete PDF'}
+            </h5>
             <p>Are you sure you want to delete &quot;{deleteConfirm.filename}&quot;?</p>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
               <button
                 className="btn btn-secondary btn-sm"
-                onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '' })}
+                onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false })}
               >
                 Cancel
               </button>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#CC4400" stroke-width="2">
+  <!-- Transfer Grille - for pressure balancing between rooms -->
+  <rect x="6" y="12" width="36" height="24" rx="2" fill="rgba(204,68,0,0.15)"/>
+  <!-- Horizontal bars -->
+  <line x1="10" y1="18" x2="38" y2="18"/>
+  <line x1="10" y1="24" x2="38" y2="24"/>
+  <line x1="10" y1="30" x2="38" y2="30"/>
+  <!-- Double arrow for transfer -->
+  <path d="M14 36 L24 42 L34 36" stroke-width="1.5"/>
+  <path d="M14 12 L24 6 L34 12" stroke-width="1.5"/>
+</svg>

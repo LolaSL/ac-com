@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0055CC" stroke-width="2">
+  <!-- Wall Diffuser - side-wall mounted supply -->
+  <rect x="4" y="10" width="8" height="28" rx="1" fill="rgba(100,100,100,0.3)" stroke="#666"/>
+  <rect x="12" y="14" width="20" height="20" rx="2" fill="rgba(0,85,204,0.2)"/>
+  <!-- Airflow lines -->
+  <line x1="32" y1="18" x2="42" y2="14"/>
+  <line x1="32" y1="24" x2="44" y2="24"/>
+  <line x1="32" y1="30" x2="42" y2="34"/>
+  <!-- Louver slats -->
+  <line x1="14" y1="18" x2="30" y2="18"/>
+  <line x1="14" y1="24" x2="30" y2="24"/>
+  <line x1="14" y1="30" x2="30" y2="30"/>
+</svg>
