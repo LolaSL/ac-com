@@ -8,13 +8,7 @@
 }
 
 .annotate-toggle-mobile {
-  display: none;
-}
-
-@media (max-width: 767.98px) {
-  .annotate-toggle-mobile {
-    display: flex;
-  }
+  display: flex;
 }
 
 .export-success {

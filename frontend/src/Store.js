@@ -44,6 +44,13 @@ const initialState = {
     currentProject: null,
     products: [],
   },
+
+  // HVAC Zone Designer state
+  hvacData: {
+    zones: [],
+    currentZone: null,
+    loading: false,
+  },
 };
 
 function reducer(state, action) {
@@ -294,6 +301,63 @@ function reducer(state, action) {
         btuData: {
           currentProject: null,
           products: [],
+        },
+      };
+
+    // HVAC Zone Actions
+    case 'HVAC_SET_LOADING':
+      return {
+        ...state,
+        hvacData: {
+          ...state.hvacData,
+          loading: action.payload,
+        },
+      };
+
+    case 'HVAC_SET_ZONES':
+      return {
+        ...state,
+        hvacData: {
+          ...state.hvacData,
+          zones: action.payload,
+        },
+      };
+
+    case 'HVAC_ADD_ZONE':
+      return {
+        ...state,
+        hvacData: {
+          ...state.hvacData,
+          zones: [...state.hvacData.zones, action.payload],
+        },
+      };
+
+    case 'HVAC_UPDATE_ZONE':
+      return {
+        ...state,
+        hvacData: {
+          ...state.hvacData,
+          zones: state.hvacData.zones.map((zone) =>
+            zone._id === action.payload._id ? action.payload : zone
+          ),
+        },
+      };
+
+    case 'HVAC_DELETE_ZONE':
+      return {
+        ...state,
+        hvacData: {
+          ...state.hvacData,
+          zones: state.hvacData.zones.filter((zone) => zone._id !== action.payload),
+        },
+      };
+
+    case 'HVAC_SET_CURRENT_ZONE':
+      return {
+        ...state,
+        hvacData: {
+          ...state.hvacData,
+          currentZone: action.payload,
         },
       };
 

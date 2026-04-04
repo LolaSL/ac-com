@@ -1,6 +1,7 @@
 import RecommendationsPage from "../pages/RecommendationsPage.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import EngineerViewPage from "../pages/EngineerViewPage.jsx";
+import HvacZoneDesignerPage from "../pages/HvacZoneDesignerPage.jsx";
 import OrderHistoryPage from "../pages/OrderHistoryPage.jsx";
 import OrderPage from "../pages/OrderPage.jsx";
 import MapPage from "../pages/MapPage.jsx";
@@ -42,6 +43,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute adminOnly={true}>
         <AdminAllAnnotationsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/hvac-zone-designer",
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <HvacZoneDesignerPage />
       </ProtectedRoute>
     ),
   },

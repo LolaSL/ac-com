@@ -73,6 +73,9 @@ router.post(
       const width = parseFloat(imageWidth);
       const height = parseFloat(imageHeight);
 
+      console.log('Backend received dimensions:', { width, height });
+      console.log('Backend received rectangles (raw):', JSON.parse(rectangles || "[]"));
+
       const parsedRectangles = JSON.parse(rectangles || "[]");
       const parsedComments = JSON.parse(comments || "[]");
       const parsedLines = JSON.parse(lines || "[]");
@@ -85,6 +88,13 @@ router.post(
         const yPercent = rect.yPercent ?? (rect.y / height);
         const widthPercent = rect.widthPercent ?? (rect.width / width);
         const heightPercent = rect.heightPercent ?? (rect.height / height);
+
+        console.log('Converting rectangle to percentages:', {
+          id: rect.id,
+          original: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+          percentages: { xPercent, yPercent, widthPercent, heightPercent },
+          canvasDimensions: { width, height }
+        });
 
         return {
           id: rect.id,

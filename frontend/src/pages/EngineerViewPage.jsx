@@ -747,14 +747,16 @@ const EngineerViewPage = () => {
         });
 
         // --- Insulated Duct: main trunk duct running vertically from unit ---
-        const insDuctX = cx - DUCT_LEN / 2;
+        const insDuctWidth = DUCT_LEN * 0.5;  // Smaller insulated duct
+        const insDuctHeight = DUCT_H * 0.6;
+        const insDuctX = cx - insDuctWidth / 2;
         const insDuctY = cy - rh / 2 - GAP - DUCT_H * 1.5;
         newDucts.push({
           id: `duct-auto-ins-${ts}-${rect.id}`,
           xPercent: Math.max(0.01, Math.min(0.89, insDuctX)),
           yPercent: Math.max(0.01, Math.min(0.95, insDuctY)),
-          width: DUCT_LEN,
-          height: DUCT_H,
+          width: insDuctWidth,
+          height: insDuctHeight,
           ductType: 'insulated',
           fill: 'rgba(255,180,50,0.45)',
           stroke: '#CC9900',

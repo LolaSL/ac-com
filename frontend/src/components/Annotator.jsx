@@ -806,6 +806,11 @@ const Annotator = ({
   const [pendingAnnotationPos, setPendingAnnotationPos] = useState(null);
   const [annotateMode, setAnnotateMode] = useState(window.innerWidth >= 768);
 
+  // Debug modal state changes
+  useEffect(() => {
+    console.log('Modal state changed:', { showAcUnitModal, annotateMode });
+  }, [showAcUnitModal, annotateMode]);
+
   // const clearResults = () => {
   //   setResults([]);
   // };
@@ -1196,6 +1201,13 @@ const Annotator = ({
     }
     const newRectId = Date.now();
     const isCondenser = /^condenser/i.test(commentText.trim());
+    
+    console.log('Creating rectangle at position:', position);
+    console.log('Canvas dimensions:', { 
+      width: document.getElementById('my-canvas')?.width, 
+      height: document.getElementById('my-canvas')?.height 
+    });
+    
     const newRect = {
       id: newRectId,
       x: position.x,
@@ -1206,6 +1218,8 @@ const Annotator = ({
       stroke: isCondenser ? '#cc5500' : undefined,
       rotation: 0,
     };
+    
+    console.log('New rectangle created:', newRect);
     setRectangles((prevRects) => [...prevRects, newRect]);
     const newCommentId = `comment-${Date.now()}`;
     const newComment = {
@@ -1241,15 +1255,45 @@ const Annotator = ({
   }, [comments]);
 
   const handleStageClick = (event) => {
-    if (!annotateMode) return;
+    console.log('Stage clicked:', { 
+      annotateMode, 
+      isTarget: event.target === event.target.getStage(),
+      isRotating,
+      target: event.target.constructor.name 
+    });
+    
+    if (!annotateMode) {
+      console.log('Annotate mode is OFF - click ignored');
+      return;
+    }
     if (event.target === event.target.getStage() && !isRotating) {
-      const pointerPosition = stageRef.current.getPointerPosition();
-      if (!pointerPosition) return;
+      const stage = stageRef.current;
+      if (!stage) {
+        console.log('Stage ref not available');
+        return;
+      }
+      
+      // Get pointer position relative to the stage
+      const pointerPosition = stage.getPointerPosition();
+      if (!pointerPosition) {
+        console.log('Pointer position not available');
+        return;
+      }
+      
+      console.log('Raw pointer position from stage:', pointerPosition);
+      
+      // Stage coordinates should already be correct since Stage is absolutely positioned
+      // at top:0, left:0 within the canvas-wrapper. No additional offset needed.
+      const canvasX = pointerPosition.x;
+      const canvasY = pointerPosition.y;
+      
+      console.log('Opening modal at canvas coordinates:', { canvasX, canvasY });
 
       // Use mobile-friendly modal instead of prompt()
-      setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
+      setPendingAnnotationPos({ x: canvasX, y: canvasY });
       setAcUnitInput('');
       setShowAcUnitModal(true);
+      console.log('Modal state set to true');
     }
   };
 
@@ -1289,9 +1333,18 @@ const Annotator = ({
     // Only act on taps on blank stage area, not on shapes
     if (event.target !== event.target.getStage()) return;
     if (isRotating) return;
-    const pointerPosition = stageRef.current.getPointerPosition();
+    
+    const stage = stageRef.current;
+    if (!stage) return;
+    
+    const pointerPosition = stage.getPointerPosition();
     if (!pointerPosition) return;
-    setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
+    
+    // Stage coordinates are already correct (no transformation needed)
+    const canvasX = pointerPosition.x;
+    const canvasY = pointerPosition.y;
+    
+    setPendingAnnotationPos({ x: canvasX, y: canvasY });
     setAcUnitInput('');
     setShowAcUnitModal(true);
   };
@@ -1311,9 +1364,8 @@ const Annotator = ({
   };
 
   const handleCanvasEvent = (e) => {
-    if (window.innerWidth > 268) {
-      handleStageClick(e);
-    }
+    console.log('Canvas clicked, width:', window.innerWidth);
+    handleStageClick(e);
   };
 
   const handleDragMove = (e) => {
@@ -1327,11 +1379,22 @@ const Annotator = ({
   const handleDragEnd = (e) => {
     const draggedNode = e.target;
     const draggedId = draggedNode.id();
+    
+    const newX = draggedNode.x();
+    const newY = draggedNode.y();
+    
+    console.log('Rectangle dragged:', { 
+      id: draggedId, 
+      newX, 
+      newY,
+      nodeWidth: draggedNode.width(),
+      nodeHeight: draggedNode.height()
+    });
 
     setRectangles((prevRects) =>
       prevRects.map((rect) =>
         rect.id === draggedId
-          ? { ...rect, x: draggedNode.x(), y: draggedNode.y() }
+          ? { ...rect, x: newX, y: newY }
           : rect
       )
     );
@@ -1625,10 +1688,12 @@ const Annotator = ({
     
     console.log(`Saving ${roomsToSave.length} unique rooms:`, roomsToSave.map(r => r.name));
     
-
-    const canvas = document.getElementById("my-canvas");
-    const imageWidth = canvas?.width;
-    const imageHeight = canvas?.height;
+    // Use pdfSize dimensions which are the source of truth for both Stage and canvas
+    const imageWidth = pdfSize.width;
+    const imageHeight = pdfSize.height;
+    
+    console.log('Saving annotations with pdfSize dimensions:', { imageWidth, imageHeight });
+    console.log('Current rectangles state (should be in pixels):', rectangles);
 
     // Convert all line points to percentages of canvas size before saving, but only if not already percent
     const linesPercent = lines.map((line) => {

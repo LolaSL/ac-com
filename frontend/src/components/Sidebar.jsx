@@ -212,17 +212,17 @@ const Sidebar = () => {
         ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         const mode = modes[idx] || "vrf-ducted";
 
-        overlayAnnotations(ctx, selectedAnnotations, mode, { pdfScale });
+        overlayAnnotations(ctx, selectedAnnotations, mode, { pdfScale: 1 });
 
         if (showHVAC && selectedAnnotations.hvac && (mode === "ducted" || mode === "vrf-ducted")) {
-          overlayHVAC(ctx, selectedAnnotations.hvac, hvacSymbols, selectedAnnotations.comments, mode, pdfScale);
+          overlayHVAC(ctx, selectedAnnotations.hvac, hvacSymbols, selectedAnnotations.comments, mode, 1);
         }
 
         if (selectedAnnotations.vrf && mode.startsWith("vrf")) {
           overlayVRFSystem(ctx, selectedAnnotations.vrf, hvacSymbols, mode);
         }
 
-        drawCanvasLegend(ctx, mode, { pdfScale });
+        drawCanvasLegend(ctx, mode, { pdfScale: 1 });
 
         // Mode label
         ctx.save();
@@ -249,7 +249,7 @@ const Sidebar = () => {
     const acType = selectedAcType;
 
     // redraw normal annotations
-    overlayAnnotations(context, selectedAnnotations, acType, { skipRefrigerantLines: true, pdfScale });
+    overlayAnnotations(context, selectedAnnotations, acType, { skipRefrigerantLines: true, pdfScale: 1 });
 
     // draw HVAC layer if toggled
     if (showHVAC && (acType === "ducted" || acType === "vrf-ducted")) {
@@ -259,7 +259,7 @@ const Sidebar = () => {
         hvacSymbols,
         selectedAnnotations.comments,
         acType,
-        pdfScale
+        1
       );
     }
 
@@ -274,7 +274,7 @@ const Sidebar = () => {
     }
 
     // draw legend
-    drawCanvasLegend(context, acType, { pdfScale });
+    drawCanvasLegend(context, acType, { pdfScale: 1 });
   }, [showHVAC, selectedAnnotations, selectedPdfFile, currentPdfType, selectedAcType, pdfScale]);
 
   // Re-render PDF at new scale when zoom changes
@@ -337,13 +337,19 @@ const Sidebar = () => {
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
       const page = await pdfDoc.getPage(1);
-      const scale = pdfScale;
+      // Use scale=1 to match Annotator's rendering scale
+      const scale = 1;
       const viewport = page.getViewport({ scale });
       const canvas = document.createElement("canvas");
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       const context = canvas.getContext("2d");
       container.appendChild(canvas);
+
+      console.log('Sidebar rendering PDF with scale=1, dimensions:', { 
+        width: viewport.width, 
+        height: viewport.height 
+      });
 
       await page.render({ canvasContext: context, viewport }).promise;
 
@@ -361,8 +367,15 @@ const Sidebar = () => {
         container.appendChild(overlayCanvas);
 
         const overlayContext = overlayCanvas.getContext("2d");
-        // draw the normalized annotations immediately
-        overlayAnnotations(overlayContext, normalizedAnnotations, acType, { skipRefrigerantLines: true, pdfScale });
+        
+        console.log('Sidebar overlaying annotations on canvas:', {
+          canvasWidth: overlayCanvas.width,
+          canvasHeight: overlayCanvas.height,
+          rectangles: normalizedAnnotations.rectangles
+        });
+        
+        // draw the normalized annotations immediately - scale=1 matches Annotator
+        overlayAnnotations(overlayContext, normalizedAnnotations, acType, { skipRefrigerantLines: true, pdfScale: 1 });
         // HVAC overlay if enabled
         if (showHVAC) {
           overlayHVAC(
@@ -371,7 +384,7 @@ const Sidebar = () => {
             hvacSymbols,
             normalizedAnnotations.comments,
             acType,
-            pdfScale
+            1
           );
         }
       }
@@ -448,7 +461,7 @@ const Sidebar = () => {
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
       const page = await pdfDoc.getPage(1);
-      const scale = pdfScale;
+      const scale = 1;
       const viewport = page.getViewport({ scale });
 
       // Helper: render one page with a given mode
@@ -477,7 +490,7 @@ const Sidebar = () => {
           wrapper.appendChild(overlayCanvas);
 
           const overlayCtx = overlayCanvas.getContext("2d");
-          overlayAnnotations(overlayCtx, normalizedAnnotations, mode, { pdfScale });
+          overlayAnnotations(overlayCtx, normalizedAnnotations, mode, { pdfScale: 1 });
 
           if (normalizedAnnotations.hvac && (mode === "ducted" || mode === "vrf-ducted")) {
             overlayHVAC(
@@ -494,7 +507,7 @@ const Sidebar = () => {
             overlayVRFSystem(overlayCtx, normalizedAnnotations.vrf, hvacSymbols, mode);
           }
 
-          drawCanvasLegend(overlayCtx, mode, { pdfScale });
+          drawCanvasLegend(overlayCtx, mode, { pdfScale: 1 });
 
           // Mode label
           overlayCtx.save();

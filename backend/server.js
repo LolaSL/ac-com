@@ -22,6 +22,7 @@ import wishlistRouter from './routes/wishlistRoutes.js';
 import roiRouter from './routes/roiCalculationRoutes.js';
 import demoRequestRouter from './routes/demoRequestRoutes.js';
 import newsletterRouter from './routes/newsletterRoutes.js';
+import hvacZoneRouter from './routes/hvacZoneRoutes.js';
 import { isAuth } from './utils.js';
 import path from "path";
 import cors from 'cors';
@@ -167,6 +168,7 @@ app.use('/api/wishlist', wishlistRouter);
 app.use('/api/roi-calculations', roiRouter);
 app.use('/api/demo-requests', demoRequestRouter);
 app.use('/api/newsletter', newsletterRouter);
+app.use('/api/hvac-zones', hvacZoneRouter);
 
 
 

@@ -280,10 +280,14 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     Blogs
                   </Link>
                   <Link to="/admin/roi-calculations" className="dropdown-item">
-                    Users ROI Calculations
+                    User ROI Calculations
                   </Link>
                   <Link to="/admin/all-annotations" className="dropdown-item">
-                    Users Drawings
+                    User Floor Plans
+                  </Link>
+                  <Link to="/admin/hvac-zone-designer" className="dropdown-item">
+                    <i className="fas fa-drafting-compass me-2"></i>
+                    HVAC Zone Designer
                   </Link>
                   <Link to="/admin/newsletter" className="dropdown-item">
                     Newsletter

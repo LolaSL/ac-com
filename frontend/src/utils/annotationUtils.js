@@ -274,28 +274,28 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
 
   // ─── DUCT TYPE CONFIG (professional engineering colors & styles) ───
   const DUCT_STYLES = {
-    supply:    { fill: "rgba(0,120,255,0.25)",   stroke: "#0055CC", dash: [],       label: "SA" },
-    return:    { fill: "rgba(255,120,50,0.22)",  stroke: "#CC4400", dash: [6,4],    label: "RA" },
-    flex:      { fill: "rgba(150,150,150,0.20)", stroke: "#888",    dash: [3,3],    label: "FD" },
-    exhaust:   { fill: "rgba(34,180,34,0.22)",   stroke: "#228B22", dash: [4,4],    label: "EA" },
-    insulated: { fill: "rgba(255,180,50,0.25)",  stroke: "#CC9900", dash: [8,2,2,2],label: "ID" },
-    default:   { fill: "rgba(0,150,255,0.22)",   stroke: "#0066FF", dash: [],       label: "" },
+    supply:    { fill: "rgba(0,120,255,0.4)",   stroke: "#0055CC", dash: [],       label: "SA" },
+    return:    { fill: "rgba(255,120,50,0.4)",  stroke: "#CC4400", dash: [6,4],    label: "RA" },
+    flex:      { fill: "rgba(150,150,150,0.4)", stroke: "#888",    dash: [3,3],    label: "FD" },
+    exhaust:   { fill: "rgba(34,180,34,0.4)",   stroke: "#228B22", dash: [4,4],    label: "EA" },
+    insulated: { fill: "rgba(255,180,50,0.4)",  stroke: "#CC9900", dash: [8,2,2,2],label: "ID" },
+    default:   { fill: "rgba(0,150,255,0.4)",   stroke: "#0066FF", dash: [],       label: "" },
   };
 
   // ─── DIFFUSER TYPE CONFIG ───
   const DIFFUSER_STYLES = {
-    "supply-4way":    { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
-    "round":          { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "roundDiffuser" },
-    "linear-slot":    { fill: "rgba(0,85,204,0.12)",  stroke: "#0055CC", svgKey: "linearSlotDiffuser" },
-    "return-grille":  { fill: "rgba(204,68,0,0.12)",  stroke: "#CC4400", svgKey: "returnGrille" },
-    "exhaust":        { fill: "rgba(34,139,34,0.12)", stroke: "#228B22", svgKey: "exhaustGrille" },
-    "circle":         { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "roundDiffuser" },
-    "square":         { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
-    "jet":            { fill: "rgba(0,85,204,0.15)",  stroke: "#0055CC", svgKey: "jetDiffuser" },
-    "transfer-grille":{ fill: "rgba(204,68,0,0.12)",  stroke: "#CC4400", svgKey: "transferGrille" },
-    "drain-point":    { fill: "rgba(0,136,170,0.12)", stroke: "#0088AA", svgKey: "drainPoint" },
-    "wall-diffuser":  { fill: "rgba(0,85,204,0.12)",  stroke: "#0055CC", svgKey: "wallDiffuser" },
-    "default":        { fill: "rgba(0,255,0,0.18)",   stroke: "#00AA00", svgKey: "supply" },
+    "supply-4way":    { fill: "rgba(0,85,204,0.4)",  stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
+    "round":          { fill: "rgba(0,85,204,0.4)",  stroke: "#0055CC", svgKey: "roundDiffuser" },
+    "linear-slot":    { fill: "rgba(0,85,204,0.4)",  stroke: "#0055CC", svgKey: "linearSlotDiffuser" },
+    "return-grille":  { fill: "rgba(204,68,0,0.4)",  stroke: "#CC4400", svgKey: "returnGrille" },
+    "exhaust":        { fill: "rgba(34,139,34,0.4)", stroke: "#228B22", svgKey: "exhaustGrille" },
+    "circle":         { fill: "rgba(0,85,204,0.4)",  stroke: "#0055CC", svgKey: "roundDiffuser" },
+    "square":         { fill: "rgba(0,85,204,0.4)",  stroke: "#0055CC", svgKey: "supplyDiffuser4Way" },
+    "jet":            { fill: "rgba(0,85,204,0.4)",  stroke: "#0055CC", svgKey: "jetDiffuser" },
+    "transfer-grille":{ fill: "rgba(204,68,0,0.4)",  stroke: "#CC4400", svgKey: "transferGrille" },
+    "drain-point":    { fill: "rgba(0,136,170,0.4)", stroke: "#0088AA", svgKey: "drainPoint" },
+    "wall-diffuser":  { fill: "rgba(0,85,204,0.4)",  stroke: "#0055CC", svgKey: "wallDiffuser" },
+    "default":        { fill: "rgba(0,255,0,0.4)",   stroke: "#00AA00", svgKey: "supply" },
   };
 
   const getNearestCommentText = (x, y, comments) => {
@@ -384,7 +384,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       // Outer insulation layer (dashed)
       context.beginPath();
       context.rect(-2 * scaleFactor, -2 * scaleFactor, width + 4 * scaleFactor, height + 4 * scaleFactor);
-      context.fillStyle = "rgba(255,200,100,0.15)";
+      context.fillStyle = "rgba(255,200,100,0.4)";
       context.fill();
       context.lineWidth = 1.5 * scaleFactor;
       context.strokeStyle = "#CC9900";
@@ -402,7 +402,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       // Cross-hatch insulation pattern
       context.strokeStyle = "#CC9900";
       context.lineWidth = 0.5 * scaleFactor;
-      context.globalAlpha = 0.25;
+      context.globalAlpha = 0.4;
       for (let i = 0; i < width; i += 10 * scaleFactor) {
         context.beginPath();
         context.moveTo(i, -2 * scaleFactor);
@@ -433,7 +433,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       context.lineTo(arrowX + arrowSize, arrowY);
       context.lineTo(arrowX - arrowSize, arrowY + arrowSize);
       context.fillStyle = style.stroke;
-      context.globalAlpha = 0.3;
+      context.globalAlpha = 0.4;
       context.fill();
       context.globalAlpha = 1.0;
 
@@ -468,7 +468,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       context.save();
       context.translate(x, y);
       const iconSize = 14 * scaleFactor;
-      context.globalAlpha = 0.25;
+      context.globalAlpha = 0.4;
       context.drawImage(img, 2, (height - iconSize) / 2, iconSize * 2, iconSize);
       context.globalAlpha = 1.0;
       context.restore();
@@ -484,7 +484,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     const style = DIFFUSER_STYLES[diffuserType] || DIFFUSER_STYLES.default;
 
     context.save();
-    context.globalAlpha = 0.35;
+    context.globalAlpha = 0.4;
 
     if (diffuserType === "linear-slot") {
       // Linear slot: wide thin rectangle with slot lines
@@ -528,14 +528,14 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       }
       // For exhaust, add diagonal hatching
       if (diffuserType === "exhaust") {
-        context.globalAlpha = 0.15;
+        context.globalAlpha = 0.4;
         for (let i = 0; i < size; i += 5 * scaleFactor) {
           context.beginPath();
           context.moveTo(x - size / 2 + i, y - size / 2);
           context.lineTo(x - size / 2, y - size / 2 + i);
           context.stroke();
         }
-        context.globalAlpha = 0.35;
+        context.globalAlpha = 0.4;
       }
     } else if (diffuserType === "supply-4way" || diffuserType === "square") {
       // 4-way supply: square with X pattern and directional arrows
@@ -716,7 +716,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     // Draw SVG symbol overlay (semi-transparent)
     drawSymbolImage(symbolImages[style.svgKey], (img) => {
       context.save();
-      context.globalAlpha = 0.15;
+      context.globalAlpha = 0.4;
       context.drawImage(img, x - size / 2, y - size / 2, size, size);
       context.globalAlpha = 1.0;
       context.restore();
@@ -740,7 +740,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       context.lineTo(x, y + size / 2);
       context.lineTo(x - size / 2, y);
       context.closePath();
-      context.fillStyle = "rgba(204,0,0,0.15)";
+      context.fillStyle = "rgba(204,0,0,0.4)";
       context.fill();
       context.lineWidth = 2 * scaleFactor;
       context.strokeStyle = "#CC0000";
@@ -753,7 +753,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
       // Volume damper: circle with VD
       context.beginPath();
       context.arc(x, y, size / 2, 0, 2 * Math.PI);
-      context.fillStyle = "rgba(85,85,85,0.1)";
+      context.fillStyle = "rgba(85,85,85,0.4)";
       context.fill();
       context.lineWidth = 2 * scaleFactor;
       context.strokeStyle = "#555";
@@ -770,7 +770,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     const svgKey = damperType === "fire" ? "fireDamper" : "volumeDamper";
     drawSymbolImage(symbolImages[svgKey], (img) => {
       context.save();
-      context.globalAlpha = 0.2;
+      context.globalAlpha = 0.4;
       context.drawImage(img, x - size / 2, y - size / 2, size, size);
       context.globalAlpha = 1.0;
       context.restore();
@@ -793,7 +793,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.arcTo(x - size / 2, y + size / 2, x - size / 2, y - size / 2, r);
     context.arcTo(x - size / 2, y - size / 2, x + size / 2, y - size / 2, r);
     context.closePath();
-    context.fillStyle = "rgba(139,92,246,0.12)";
+    context.fillStyle = "rgba(139,92,246,0.4)";
     context.fill();
     context.lineWidth = 1.5 * scaleFactor;
     context.strokeStyle = "#8B5CF6";
@@ -810,7 +810,7 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     // SVG overlay
     drawSymbolImage(symbolImages.thermostat, (img) => {
       context.save();
-      context.globalAlpha = 0.2;
+      context.globalAlpha = 0.4;
       context.drawImage(img, x - size / 2, y - size / 2, size, size);
       context.globalAlpha = 1.0;
       context.restore();
@@ -962,10 +962,24 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
   // rectangles - ALWAYS render user-drawn rectangles (engineer annotations)
   // Rotate around top-left corner to match stored rectangle positioning
   annotations?.rectangles?.forEach((rect) => {
-    const x = rect.xPercent * canvasWidth;
-    const y = rect.yPercent * canvasHeight;
+    // Apply small offset correction to account for coordinate system differences
+    // Adjust x left by ~4% and y up by ~2% to better match original placement
+    const offsetX = -0.04; // Move left (negative = left)
+    const offsetY = -0.02; // Move up (negative = up)
+    
+    const x = rect.xPercent * canvasWidth * (1 + offsetX);
+    const y = rect.yPercent * canvasHeight * (1 + offsetY);
     const width = rect.widthPercent * canvasWidth;
     const height = rect.heightPercent * canvasHeight;
+    
+    console.log('Rendering rectangle:', {
+      id: rect.id,
+      percentages: { xPercent: rect.xPercent, yPercent: rect.yPercent },
+      canvasDimensions: { canvasWidth, canvasHeight },
+      pixels: { x, y, width, height },
+      offset: { offsetX, offsetY }
+    });
+    
     const angle = (rect.rotation || 0) * (Math.PI / 180);
     context.save();
     context.translate(x, y);
