@@ -222,6 +222,8 @@
   /* Touch targets - make buttons larger for easier tapping */
   .hvac-zone-designer-page .btn-sm {
     min-height: 36px;
+    min-width: auto;
+    padding: 0.3rem 0.6rem;
   }
   
   /* Card adjustments */

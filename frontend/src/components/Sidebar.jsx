@@ -61,6 +61,7 @@ const Sidebar = () => {
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [savedPdfs, setSavedPdfs] = useState([]);
+  const [savedPdfsLoading, setSavedPdfsLoading] = useState(false);
   const [engineerAnnotations, setEngineerAnnotations] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState(null);
@@ -94,6 +95,7 @@ const Sidebar = () => {
     }
 
     try {
+      setSavedPdfsLoading(true);
       setError(null);
       let response;
       response = await fetch("/api/user-annotations", {
@@ -111,9 +113,11 @@ const Sidebar = () => {
       }));
       setSavedPdfs(enhancedData);
       console.log("Saved PDFs:", enhancedData);
+      setSavedPdfsLoading(false);
     } catch (err) {
       console.error("Error fetching PDFs:", err);
       setError(err.message || "Error fetching saved PDFs. Please try again.");
+      setSavedPdfsLoading(false);
     }
   }, [token]);
 
@@ -641,7 +645,9 @@ const Sidebar = () => {
                 {!selectedPdf && (
                   <>
                     {activeTab === "my-annotations" && (
-                      savedPdfs.length > 0 ? (
+                      savedPdfsLoading ? (
+                        <p className="sb-empty">Loading your drawings…</p>
+                      ) : savedPdfs.length > 0 ? (
                         <ul className="sb-list">
                           {savedPdfs.map((pdf) => (
                             <li key={pdf._id} className="sb-item">

@@ -45,6 +45,35 @@ const EngineerViewPage = () => {
   // PDF zoom scale
   const [pdfScale, setPdfScale] = useState(1.5);
 
+  // Zone color palette (cycles through these colors)
+  const zoneColorPalette = [
+    { fill: 'rgba(0,150,255,0.12)', stroke: 'rgba(0,100,200,0.5)', name: 'Blue' },
+    { fill: 'rgba(255,100,100,0.12)', stroke: 'rgba(200,50,50,0.5)', name: 'Red' },
+    { fill: 'rgba(100,200,100,0.12)', stroke: 'rgba(50,150,50,0.5)', name: 'Green' },
+    { fill: 'rgba(255,200,0,0.12)', stroke: 'rgba(200,150,0,0.5)', name: 'Yellow' },
+    { fill: 'rgba(200,100,255,0.12)', stroke: 'rgba(150,50,200,0.5)', name: 'Purple' },
+    { fill: 'rgba(255,150,100,0.12)', stroke: 'rgba(200,100,50,0.5)', name: 'Orange' },
+    { fill: 'rgba(100,200,200,0.12)', stroke: 'rgba(50,150,150,0.5)', name: 'Cyan' },
+    { fill: 'rgba(255,100,200,0.12)', stroke: 'rgba(200,50,150,0.5)', name: 'Pink' },
+    { fill: 'rgba(150,100,50,0.12)', stroke: 'rgba(120,70,30,0.5)', name: 'Brown' },
+    { fill: 'rgba(180,255,100,0.12)', stroke: 'rgba(140,200,50,0.5)', name: 'Lime' },
+    { fill: 'rgba(0,180,180,0.12)', stroke: 'rgba(0,130,130,0.5)', name: 'Teal' },
+  ];
+
+  // Zone drawing state (manual zone creation)
+  const [isDrawingZone, setIsDrawingZone] = useState(false);
+  const zoneStartPointRef = useRef(null); // Use ref instead of state for immediate updates
+  const [currentZonePreview, setCurrentZonePreview] = useState(null);
+  const [selectedZoneIndex, setSelectedZoneIndex] = useState(null);
+  
+  // Ref to store overlay canvas for handlers
+  const overlayCanvasRef = useRef(null);
+
+  // Debug: Log when selectedZoneIndex changes
+  useEffect(() => {
+    console.log('🎯 selectedZoneIndex changed to:', selectedZoneIndex);
+  }, [selectedZoneIndex]);
+
   // Fetch and render PDF + annotations
   // Fetch annotation and PDF only once (on mount or id/token change)
   useEffect(() => {
@@ -76,7 +105,6 @@ const EngineerViewPage = () => {
           throw new Error(`Failed to fetch annotation: ${serverMsg}`);
         }
         const data = await response.json();
-        console.log("Fetched annotation data:", data);
         setAnnotation(data);
         // Engineer view always uses VRF modes; map basic acTypes to their VRF equivalents
         const fetchedAcType = data.acType || "ducted";
@@ -129,6 +157,224 @@ const EngineerViewPage = () => {
     fetchData();
   }, [id, token]);
 
+  // Helper: Convert screen coordinates to canvas percent coordinates (0-1)
+  // (Same pattern as screenToCanvas in HvacZoneDesignerPage but returns percent)
+  const screenToCanvasPercent = (screenX, screenY, rect, canvas) => {
+    if (!canvas) return { x: 0, y: 0 };
+    
+    // Account for CSS scaling (canvas actual size vs displayed size)
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Transform screen coordinates to canvas pixel coordinates
+    const canvasX = (screenX - rect.left) * scaleX;
+    const canvasY = (screenY - rect.top) * scaleY;
+    
+    // Convert to percent (0-1)
+    const x = canvasX / canvas.width;
+    const y = canvasY / canvas.height;
+    
+    return { x, y };
+  };
+
+  // Canvas mouse handlers for zone drawing (at component level, like HvacZoneDesignerPage)
+  const handleCanvasMouseDown = (e) => {
+    if (!overlayCanvasRef.current) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const coords = screenToCanvasPercent(e.clientX, e.clientY, rect, overlayCanvasRef.current);
+    zoneStartPointRef.current = coords;
+  };
+
+  const handleCanvasMouseMove = (e) => {
+    if (!zoneStartPointRef.current || !overlayCanvasRef.current) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const coords = screenToCanvasPercent(e.clientX, e.clientY, rect, overlayCanvasRef.current);
+    const startPoint = zoneStartPointRef.current;
+
+    setCurrentZonePreview({
+      x: Math.min(startPoint.x, coords.x),
+      y: Math.min(startPoint.y, coords.y),
+      width: Math.abs(coords.x - startPoint.x),
+      height: Math.abs(coords.y - startPoint.y),
+    });
+  };
+
+  const handleCanvasMouseUp = (e) => {
+    if (zoneStartPointRef.current) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const coords = screenToCanvasPercent(e.clientX, e.clientY, rect, overlayCanvasRef.current);
+      const startPoint = zoneStartPointRef.current;
+
+      const newZone = {
+        x: Math.min(startPoint.x, coords.x),
+        y: Math.min(startPoint.y, coords.y),
+        width: Math.abs(coords.x - startPoint.x),
+        height: Math.abs(coords.y - startPoint.y),
+      };
+
+      // Only save if zone is reasonably sized (at least 5% of canvas)
+      if (newZone.width > 0.05 && newZone.height > 0.05) {
+        saveDrawnZone(newZone);
+      } else {
+        toast.info('Zone too small - drag a larger area');
+      }
+    }
+
+    // Always clean up drawing state
+    zoneStartPointRef.current = null;
+    setCurrentZonePreview(null);
+    setIsDrawingZone(false);
+  };
+
+  // Touch event handlers for mobile zone drawing (like HvacZoneDesignerPage)
+  const handleCanvasTouchStart = (e) => {
+    if (!overlayCanvasRef.current) return;
+    e.preventDefault();
+    
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const rect = e.currentTarget.getBoundingClientRect();
+      const coords = screenToCanvasPercent(touch.clientX, touch.clientY, rect, overlayCanvasRef.current);
+      zoneStartPointRef.current = coords;
+    }
+  };
+
+  const handleCanvasTouchMove = (e) => {
+    if (!zoneStartPointRef.current || !overlayCanvasRef.current) return;
+    e.preventDefault();
+    
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const rect = e.currentTarget.getBoundingClientRect();
+      const coords = screenToCanvasPercent(touch.clientX, touch.clientY, rect, overlayCanvasRef.current);
+      const startPoint = zoneStartPointRef.current;
+
+      setCurrentZonePreview({
+        x: Math.min(startPoint.x, coords.x),
+        y: Math.min(startPoint.y, coords.y),
+        width: Math.abs(coords.x - startPoint.x),
+        height: Math.abs(coords.y - startPoint.y),
+      });
+    }
+  };
+
+  const handleCanvasTouchEnd = (e) => {
+    e.preventDefault();
+    
+    // If we completed a touch gesture, try to create the zone
+    if (e.touches.length === 0 && zoneStartPointRef.current) {
+      // Get the last touch position from changedTouches (since touches is now empty)
+      if (e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
+        const rect = e.currentTarget.getBoundingClientRect();
+        const coords = screenToCanvasPercent(touch.clientX, touch.clientY, rect, overlayCanvasRef.current);
+        const startPoint = zoneStartPointRef.current;
+
+        const newZone = {
+          x: Math.min(startPoint.x, coords.x),
+          y: Math.min(startPoint.y, coords.y),
+          width: Math.abs(coords.x - startPoint.x),
+          height: Math.abs(coords.y - startPoint.y),
+        };
+
+        // Only save if zone is reasonably sized (at least 5% of canvas)
+        if (newZone.width > 0.05 && newZone.height > 0.05) {
+          saveDrawnZone(newZone);
+        } else {
+          toast.info('Zone too small - drag a larger area');
+        }
+      }
+    }
+    
+    // Always clean up drawing state after touch ends
+    zoneStartPointRef.current = null;
+    setCurrentZonePreview(null);
+    setIsDrawingZone(false);
+  };
+
+  // Handle zone click for selection (like HvacZoneDesignerPage)
+  const handleZoneClickInternal = (e) => {
+    console.log('🖱️ handleZoneClickInternal called. isDrawingZone:', isDrawingZone, 'addMode:', addMode);
+    if (isDrawingZone || addMode) {
+      console.log('Exiting - drawing mode or addMode active');
+      return;
+    }
+    
+    const canvas = overlayCanvasRef.current;
+    if (!canvas) {
+      console.log('No canvas ref!');
+      return;
+    }
+    
+    const rect = canvas.getBoundingClientRect();
+    const coords = screenToCanvasPercent(e.clientX, e.clientY, rect, canvas);
+    console.log('Click coords:', coords);
+    
+    const zones = annotation?.annotations?.hvac?.zones || [];
+    let clickedIndex = -1;
+    
+    for (let i = zones.length - 1; i >= 0; i--) {
+      const zone = zones[i];
+      console.log(`Checking zone ${i}:`, {
+        zoneX: zone.xPercent,
+        zoneY: zone.yPercent,
+        zoneWidth: zone.widthPercent,
+        zoneHeight: zone.heightPercent,
+        clickX: coords.x,
+        clickY: coords.y
+      });
+      if (
+        coords.x >= zone.xPercent &&
+        coords.x <= zone.xPercent + zone.widthPercent &&
+        coords.y >= zone.yPercent &&
+        coords.y <= zone.yPercent + zone.heightPercent
+      ) {
+        clickedIndex = i;
+        console.log('✅ Zone hit! Index:', i);
+        break;
+      }
+    }
+    
+    console.log('Final clicked index:', clickedIndex, 'Total zones:', zones.length);
+    setSelectedZoneIndex(clickedIndex);
+  };
+
+  // Save manually drawn zone (simplified, like HvacZoneDesignerPage saveZone)
+  const saveDrawnZone = (zoneData) => {
+    const zoneNumber = (annotation?.annotations?.hvac?.zones?.length || 0) + 1;
+    const colorIndex = (zoneNumber - 1) % zoneColorPalette.length;
+    const colors = zoneColorPalette[colorIndex];
+
+    const newZone = {
+      id: `zone-manual-${Date.now()}`,
+      xPercent: zoneData.x,
+      yPercent: zoneData.y,
+      widthPercent: zoneData.width,
+      heightPercent: zoneData.height,
+      fill: colors.fill,
+      stroke: colors.stroke,
+      zoneNumber: zoneNumber,
+    };
+
+    setAnnotation((prev) => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        hvac: {
+          ducts: prev.annotations?.hvac?.ducts || [],
+          diffusers: prev.annotations?.hvac?.diffusers || [],
+          dampers: prev.annotations?.hvac?.dampers || [],
+          thermostats: prev.annotations?.hvac?.thermostats || [],
+          zones: [...(prev.annotations?.hvac?.zones || []), newZone],
+        }
+      }
+    }));
+    
+    toast.success(`Zone ${newZone.zoneNumber} created`);
+  };
+
   // Redraw overlays whenever annotation, showHVAC, or addMode changes
   useEffect(() => {
     const renderOverlays = async () => {
@@ -156,8 +402,15 @@ const EngineerViewPage = () => {
       overlayCanvas.style.position = "absolute";
       overlayCanvas.style.top = "0";
       overlayCanvas.style.left = "0";
-      overlayCanvas.style.pointerEvents = addMode ? "auto" : "none";
+      
+      // Enable pointer events if: drawing zones, in addMode, or zones exist (for clicking)
+      const hasZones = (annotation?.annotations?.hvac?.zones || []).length > 0;
+      overlayCanvas.style.pointerEvents = (addMode || isDrawingZone || hasZones) ? "auto" : "none";
+      overlayCanvas.style.touchAction = isDrawingZone ? "none" : "auto"; // Prevent PDF scroll when drawing
       container.style.position = "relative";
+      if (isDrawingZone) {
+        container.style.overflow = "hidden"; // Prevent scroll while drawing zones
+      }
       container.appendChild(overlayCanvas);
       const overlayContext = overlayCanvas.getContext("2d");
       overlayAnnotations(overlayContext, annotation.annotations, acType, { pdfScale });
@@ -181,6 +434,9 @@ const EngineerViewPage = () => {
       }
       // Draw professional legend on the canvas
       drawCanvasLegend(overlayContext, acType, { pdfScale });
+      
+      // Note: Zones are rendered by overlayHVAC() above, no need to render them again here
+      
       // Add click handler for interactive placement
       // Unified handler for both click and touch on overlay canvas
       const handleOverlayInteraction = (e) => {
@@ -413,14 +669,119 @@ const EngineerViewPage = () => {
 
         setAddMode(null);
       };
-      overlayCanvas.onclick = handleOverlayInteraction;
-      overlayCanvas.ontouchend = (e) => {
-        e.preventDefault(); // Prevent ghost click
-        handleOverlayInteraction(e);
-      };
-    };
+
+      // Store overlay canvas in ref for handlers
+      overlayCanvasRef.current = overlayCanvas;
+
+      // Attach event handlers based on mode
+      if (isDrawingZone) {
+        overlayCanvas.style.cursor = 'crosshair';
+        overlayCanvas.onmousedown = handleCanvasMouseDown;
+        overlayCanvas.onmousemove = handleCanvasMouseMove;
+        overlayCanvas.onmouseup = handleCanvasMouseUp;
+        overlayCanvas.ontouchstart = handleCanvasTouchStart;
+        overlayCanvas.ontouchmove = handleCanvasTouchMove;
+        overlayCanvas.ontouchend = handleCanvasTouchEnd;
+        overlayCanvas.onclick = null;
+      } else {
+        overlayCanvas.style.cursor = 'default';
+        overlayCanvas.onclick = (e) => {
+          handleOverlayInteraction(e);
+          handleZoneClickInternal(e);
+        };
+        overlayCanvas.onmousedown = null;
+        overlayCanvas.onmousemove = null;
+        overlayCanvas.onmouseup = null;
+        overlayCanvas.ontouchstart = (e) => {
+          e.preventDefault();
+          handleOverlayInteraction(e);
+        };
+        overlayCanvas.ontouchmove = null;
+        overlayCanvas.ontouchend = (e) => {
+          e.preventDefault();
+          handleOverlayInteraction(e);
+        };
+      }
+
+      // Highlight selected zone
+      if (selectedZoneIndex !== null && selectedZoneIndex !== -1) {
+        const zones = annotation?.annotations?.hvac?.zones || [];
+        const selectedZone = zones[selectedZoneIndex];
+        if (selectedZone) {
+          const x = selectedZone.xPercent * overlayCanvas.width;
+          const y = selectedZone.yPercent * overlayCanvas.height;
+          const w = selectedZone.widthPercent * overlayCanvas.width;
+          const h = selectedZone.heightPercent * overlayCanvas.height;
+          
+          overlayContext.strokeStyle = '#FF6B00';
+          overlayContext.lineWidth = 3;
+          overlayContext.strokeRect(x, y, w, h);
+        }
+      }
+    }; // Close renderOverlays function
+    
     renderOverlays();
-  }, [pdfFile, annotation, showHVAC, addMode, acType, pdfScale]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfFile, annotation, showHVAC, addMode, acType, pdfScale, isDrawingZone, selectedZoneIndex]);
+
+  // Separate effect for zone preview on dedicated canvas layer (prevents canvas shake)
+  useEffect(() => {
+    const container = pdfContainerRef.current;
+    if (!container || !isDrawingZone) {
+      // Remove preview canvas if not drawing
+      const existingPreview = container?.querySelector('.zone-preview-canvas');
+      if (existingPreview) existingPreview.remove();
+      return;
+    }
+    
+    // Get or create preview canvas
+    let previewCanvas = container.querySelector('.zone-preview-canvas');
+    if (!previewCanvas) {
+      previewCanvas = document.createElement('canvas');
+      previewCanvas.className = 'zone-preview-canvas';
+      previewCanvas.style.position = 'absolute';
+      previewCanvas.style.top = '0';
+      previewCanvas.style.left = '0';
+      previewCanvas.style.pointerEvents = 'none';
+      previewCanvas.style.zIndex = '1000';
+      
+      // Match overlay canvas size
+      const overlayCanvas = overlayCanvasRef.current;
+      if (overlayCanvas) {
+        previewCanvas.width = overlayCanvas.width;
+        previewCanvas.height = overlayCanvas.height;
+      }
+      
+      container.appendChild(previewCanvas);
+    }
+    
+    // Clear and draw preview
+    const ctx = previewCanvas.getContext('2d');
+    ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    
+    if (currentZonePreview) {
+      const x = currentZonePreview.x * previewCanvas.width;
+      const y = currentZonePreview.y * previewCanvas.height;
+      const w = currentZonePreview.width * previewCanvas.width;
+      const h = currentZonePreview.height * previewCanvas.height;
+      
+      ctx.fillStyle = 'rgba(0,150,255,0.3)';
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = 'rgba(0,100,200,0.8)';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
+    }
+    
+    return () => {
+      // Cleanup on unmount
+      const preview = container?.querySelector('.zone-preview-canvas');
+      if (preview && preview.parentNode) {
+        preview.remove();
+      }
+    };
+  }, [currentZonePreview, isDrawingZone]);
 
   // Save handler (save full annotation, not just hvac)
   const handleSave = async () => {
@@ -458,16 +819,66 @@ const EngineerViewPage = () => {
     setAddMode(null);
   };
 
-  // Clear all auto-placed HVAC elements (ducts, diffusers, dampers, thermostats)
+  // Clear all auto-placed HVAC elements (ducts, diffusers, dampers, thermostats) but keep zones
   const handleClearHvac = () => {
     setAnnotation((prev) => ({
       ...prev,
       annotations: {
         ...(prev.annotations || {}),
-        hvac: { ducts: [], diffusers: [], dampers: [], thermostats: [] },
+        hvac: { 
+          ducts: [], 
+          diffusers: [], 
+          dampers: [], 
+          thermostats: [], 
+          zones: prev.annotations?.hvac?.zones || [] // Preserve zones
+        },
       },
     }));
-    toast.info('Cleared all HVAC elements.');
+    toast.info('Cleared HVAC elements (zones preserved)');
+  };
+
+  // Delete a specific zone by index
+  const handleDeleteZone = (zoneIndex) => {
+    if (!window.confirm('Delete this zone?')) return;
+    
+    setAnnotation((prev) => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        hvac: {
+          ...(prev.annotations?.hvac || {}),
+          zones: (prev.annotations?.hvac?.zones || []).filter((_, i) => i !== zoneIndex)
+        }
+      }
+    }));
+    setSelectedZoneIndex(null);
+    toast.success('Zone deleted');
+  };
+
+  // Change color of a specific zone
+  const handleChangeZoneColor = (zoneIndex, colorIndex) => {
+    const zones = annotation?.annotations?.hvac?.zones || [];
+    if (zoneIndex < 0 || zoneIndex >= zones.length) return;
+
+    const colors = zoneColorPalette[colorIndex % zoneColorPalette.length];
+    const updatedZones = zones.map((zone, idx) => 
+      idx === zoneIndex 
+        ? { ...zone, fill: colors.fill, stroke: colors.stroke }
+        : zone
+    );
+
+    setAnnotation((prev) => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        hvac: {
+          ...(prev.annotations?.hvac || {}),
+          zones: updatedZones,
+        },
+      },
+    }));
+
+    toast.success(`Zone #${zoneIndex + 1} color changed to ${colors.name}`);
   };
 
   // Auto-place ducts, diffusers, accessories near every indoor unit rectangle
@@ -510,8 +921,6 @@ const EngineerViewPage = () => {
     const newDiffusers = [];
     const newDampers = [];
     const newThermostats = [];
-    const newZones = [];  // Zone shading rectangles
-    let zoneCounter = 0;  // Track zone numbers across all groups
     const ts = Date.now();
 
     // Group indoor units by flat number (ac-N.M → flat N)
@@ -555,10 +964,6 @@ const EngineerViewPage = () => {
       // Detect wet rooms from comments for exhaust grille placement
       const WET_ROOM_RE = /\b(bath|wc|toilet|shower|laundry|kitchen|kitc?hen|ktcn|restroom|powder)\b/i;
 
-      // Zone shading size (coverage area per unit)
-      const ZONE_W = 0.15;  // Width of zone shading
-      const ZONE_H = 0.12;  // Height of zone shading
-
       rectGroup.forEach((rect, i) => {
         const cx = rect.xPercent;
         const cy = rect.yPercent;
@@ -567,21 +972,6 @@ const EngineerViewPage = () => {
 
         // Pick horizontal direction: extend ducts toward the centre of THIS flat's layout
         const toRight = cx <= groupAvgX;
-
-        // --- Zone shading: light blue area showing HVAC coverage ---
-        const zoneX = cx - ZONE_W / 2;
-        const zoneY = cy - ZONE_H / 2;
-        zoneCounter += 1;
-        newZones.push({
-          id: `zone-auto-${ts}-${rect.id}`,
-          xPercent: Math.max(0.01, Math.min(0.85, zoneX)),
-          yPercent: Math.max(0.01, Math.min(0.88, zoneY)),
-          widthPercent: ZONE_W,
-          heightPercent: ZONE_H,
-          fill: 'rgba(0,150,255,0.12)',
-          stroke: 'rgba(0,100,200,0.3)',
-          zoneNumber: zoneCounter,
-        });
 
         // --- Supply duct: offset from unit in chosen direction ---
         const sDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
@@ -820,13 +1210,18 @@ const EngineerViewPage = () => {
       processRectGroup(ungroupedRects, ungroupedAvgX);
     }
 
+    // Preserve manually-drawn zones (keep those with 'zone-manual-' prefix)
+    const existingManualZones = (annotation?.annotations?.hvac?.zones || []).filter(
+      zone => zone.id && zone.id.startsWith('zone-manual-')
+    );
+
     setAnnotation((prev) => ({
       ...prev,
       annotations: {
         ...(prev.annotations || {}),
         hvac: {
           ...(prev.annotations?.hvac || {}),
-          zones: [...newZones],
+          zones: [...existingManualZones],
           ducts: [...newDucts],
           diffusers: [...newDiffusers],
           dampers: [...newDampers],
@@ -836,7 +1231,7 @@ const EngineerViewPage = () => {
     }));
     setShowHVAC(true);
     toast.success(
-      `Auto-placed ${newZones.length} zones, ${newDucts.length} ducts, ${newDiffusers.length} diffusers, ${newDampers.length} dampers & ${newThermostats.length} thermostats`
+      `Auto-placed ${newDucts.length} ducts, ${newDiffusers.length} diffusers, ${newDampers.length} dampers & ${newThermostats.length} thermostats`
     );
   };
 
@@ -1314,10 +1709,149 @@ const EngineerViewPage = () => {
                   size="sm"
                   variant="outline-danger"
                   onClick={handleClearHvac}
-                  title="Remove all auto-placed HVAC elements"
+                  title="Remove all auto-placed HVAC elements (zones will be preserved)"
                 >
                   🗑 Clear HVAC
                 </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Zone Management */}
+        {(acType === "ducted" || acType === "vrf-ducted") && (
+          <div className="ev-toolbar-group">
+            <span className="ev-toolbar-label">
+              Zone Management {annotation?.annotations?.hvac?.zones?.length > 0 && `(${annotation.annotations.hvac.zones.length})`}
+            </span>
+            {isMobile ? (
+              <Dropdown>
+                <Dropdown.Toggle size="sm" variant="outline-primary" className="ev-dropdown-toggle">
+                  🖊 Zones
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => setIsDrawingZone(!isDrawingZone)}>
+                    {isDrawingZone ? '🔲 Stop Drawing' : '🖊 Draw Zone'}
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={() => {
+                    const zoneCount = (annotation?.annotations?.hvac?.zones || []).length;
+                    if (zoneCount === 0) {
+                      toast.info('No zones to delete');
+                      return;
+                    }
+                    if (window.confirm(`Delete all ${zoneCount} zones?`)) {
+                      setAnnotation((prev) => ({
+                        ...prev,
+                        annotations: {
+                          ...(prev.annotations || {}),
+                          hvac: {
+                            ...(prev.annotations?.hvac || {}),
+                            zones: []
+                          }
+                        }
+                      }));
+                      setSelectedZoneIndex(null);
+                      toast.success('All zones deleted');
+                    }
+                  }} className="text-danger">
+                    🗑 Delete All Zones ({(annotation?.annotations?.hvac?.zones || []).length})
+                  </Dropdown.Item>
+                  {selectedZoneIndex !== null && selectedZoneIndex !== -1 && (
+                    <>
+                      <Dropdown.Divider />
+                      <Dropdown.Header>Change Zone #{selectedZoneIndex + 1} Color</Dropdown.Header>
+                      {zoneColorPalette.map((color, idx) => (
+                        <Dropdown.Item
+                          key={idx}
+                          onClick={() => handleChangeZoneColor(selectedZoneIndex, idx)}
+                          style={{
+                            background: `linear-gradient(to right, ${color.fill} 0%, ${color.stroke} 100%)`,
+                            borderLeft: `4px solid ${color.stroke}`,
+                          }}
+                        >
+                          🎨 {color.name}
+                        </Dropdown.Item>
+                      ))}
+                      <Dropdown.Divider />
+                      <Dropdown.Item onClick={() => handleDeleteZone(selectedZoneIndex)} className="text-danger">
+                        🗑 Delete Selected Zone ({selectedZoneIndex + 1})
+                      </Dropdown.Item>
+                    </>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <div className="ev-toolbar-btns">
+                <Button
+                  size="sm"
+                  variant={isDrawingZone ? "primary" : "outline-primary"}
+                  onClick={() => setIsDrawingZone(!isDrawingZone)}
+                  title="Draw HVAC zones manually by dragging on the canvas"
+                >
+                  {isDrawingZone ? '🔲 Stop Drawing' : '🖊 Draw Zone'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline-danger"
+                  onClick={() => {
+                    const zoneCount = (annotation?.annotations?.hvac?.zones || []).length;
+                    if (zoneCount === 0) {
+                      toast.info('No zones to delete');
+                      return;
+                    }
+                    if (window.confirm(`Delete all ${zoneCount} zones?`)) {
+                      setAnnotation((prev) => ({
+                        ...prev,
+                        annotations: {
+                          ...(prev.annotations || {}),
+                          hvac: {
+                            ...(prev.annotations?.hvac || {}),
+                            zones: []
+                          }
+                        }
+                      }));
+                      setSelectedZoneIndex(null);
+                      toast.success('All zones deleted');
+                    }
+                  }}
+                  title="Delete all manually drawn zones"
+                >
+                  🗑 Delete All Zones ({(annotation?.annotations?.hvac?.zones || []).length})
+                </Button>
+                {console.log('Rendering toolbar. selectedZoneIndex:', selectedZoneIndex, 'Type:', typeof selectedZoneIndex)}
+                {selectedZoneIndex !== null && selectedZoneIndex !== -1 && (
+                  <>
+                    {console.log('✅ Showing color picker for zone:', selectedZoneIndex)}
+                    <Dropdown>
+                      <Dropdown.Toggle size="sm" variant="outline-info" title="Change zone color">
+                        🎨 Zone #{selectedZoneIndex + 1} Color
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {zoneColorPalette.map((color, idx) => (
+                          <Dropdown.Item
+                            key={idx}
+                            onClick={() => handleChangeZoneColor(selectedZoneIndex, idx)}
+                            style={{
+                              background: `linear-gradient(to right, ${color.fill} 0%, ${color.stroke} 100%)`,
+                              borderLeft: `4px solid ${color.stroke}`,
+                            }}
+                          >
+                            {color.name}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                    <Button
+                      size="sm"
+                      variant="outline-warning"
+                      onClick={() => handleDeleteZone(selectedZoneIndex)}
+                      title="Delete the currently selected zone"
+                    >
+                      🗑 Delete Zone #{selectedZoneIndex + 1}
+                    </Button>
+                  </>
+                )}
               </div>
             )}
           </div>

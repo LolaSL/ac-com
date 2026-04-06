@@ -17,9 +17,9 @@ const equipmentSchema = new mongoose.Schema({
       'thermostat', 'sensor',
       // Indoor Units
       'fcu', 'ahu', 'vav', 'vrv', 'rtu', 'split-system', 'chiller', 'boiler',
-      'heat-pump', 'condensing-unit', 'exhaust-fan', 'make-up-air',
+      'heat-pump', 'condensing-unit', 'exhaust-fan', 'make-up-air', 'vrf-outdoor',
       // Legacy uppercase support
-      'FCU', 'AHU', 'VAV', 'SMD', 'VRV', 'DUCT',
+      'FCU', 'AHU', 'VAV', 'SMD', 'VRV', 'DUCT', 'VRF-OUTDOOR',
       'supply-diffuser', 'linear-diffuser',
       // Additional types
       'SUPPLY_DUCT', 'RETURN_DUCT', 'FLEX_DUCT', 'EXHAUST_DUCT', 'INSULATED_DUCT',

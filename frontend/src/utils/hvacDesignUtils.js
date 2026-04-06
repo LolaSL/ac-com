@@ -181,6 +181,14 @@ export const HVAC_EQUIPMENT_CATALOG = {
     defaultHeight: 0.035,
     color: '#4A90E2',
   },
+  VRF_OUTDOOR: {
+    type: 'VRF-OUTDOOR',
+    label: 'VRF Outdoor Unit',
+    category: 'unit',
+    defaultWidth: 0.07,
+    defaultHeight: 0.05,
+    color: '#2E5C8A',
+  },
   SMD: {
     type: 'SMD',
     label: 'Smoke Detector',
@@ -195,7 +203,7 @@ export const EQUIPMENT_BY_CATEGORY = {
   ductwork: ['SUPPLY_DUCT', 'RETURN_DUCT', 'FLEX_DUCT', 'EXHAUST_DUCT', 'INSULATED_DUCT'],
   diffuser: ['SUPPLY_4WAY', 'ROUND_DIFFUSER', 'LINEAR_SLOT', 'RETURN_GRILLE', 'EXHAUST_GRILLE', 'JET_DIFFUSER', 'WALL_DIFFUSER', 'TRANSFER_GRILLE'],
   damper: ['FIRE_DAMPER', 'VOLUME_DAMPER'],
-  unit: ['FCU', 'AHU', 'VAV', 'VRV'],
+  unit: ['FCU', 'AHU', 'VAV', 'VRV', 'VRF_OUTDOOR'],
   accessory: ['DRAIN_POINT', 'SMD'],
 };
 

@@ -3,7 +3,7 @@ import { Container, Card, Button, ButtonGroup, Form, Row, Col, Modal, Badge, Dro
 import { Store } from '../Store';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaDrawPolygon, FaPlus, FaTrash, FaSave, FaDownload } from 'react-icons/fa';
+import { FaDrawPolygon, FaPlus, FaTrash, FaSave, FaDownload, FaUndo } from 'react-icons/fa';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
 import {  drawCanvasLegend} from '../utils/annotationUtils.js';
@@ -120,28 +120,28 @@ function HvacZoneDesignerPage() {
 
   // Draw equipment specification callout
   const drawSpecsCallout = useCallback((ctx, equip, x, y) => {
-    const boxWidth = 140;
-    const boxHeight = 85;
+    const boxWidth = 200;
+    const boxHeight = 120;
     
     ctx.save();
     ctx.fillStyle = 'white';
     ctx.strokeStyle = '#4A90E2';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.fillRect(x, y, boxWidth, boxHeight);
     ctx.strokeRect(x, y, boxWidth, boxHeight);
     
     ctx.fillStyle = '#4A90E2';
-    ctx.font = 'bold 11px Arial';
+    ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(equip.label || equip.type, x + 5, y + 15);
+    ctx.fillText(equip.label || equip.type, x + 5, y + 22);
     
     ctx.fillStyle = '#333';
-    ctx.font = '9px Arial';
-    if (equip.btu) ctx.fillText(`${equip.btu} BTU`, x + 5, y + 28);
-    if (equip.cfm) ctx.fillText(`${equip.cfm} CFM`, x + 5, y + 40);
-    if (equip.voltage) ctx.fillText(`${equip.voltage}V/${equip.frequency}Hz/${equip.phase}Ph`, x + 5, y + 52);
-    if (equip.tolerance) ctx.fillText(`±${equip.tolerance}%`, x + 5, y + 64);
-    if (equip.amperage) ctx.fillText(`${equip.amperage}A`, x + 5, y + 76);
+    ctx.font = '14px Arial';
+    if (equip.btu) ctx.fillText(`${equip.btu} BTU`, x + 5, y + 40);
+    if (equip.cfm) ctx.fillText(`${equip.cfm} CFM`, x + 5, y + 58);
+    if (equip.voltage) ctx.fillText(`${equip.voltage}V/${equip.frequency}Hz/${equip.phase}Ph`, x + 5, y + 76);
+    if (equip.tolerance) ctx.fillText(`±${equip.tolerance}%`, x + 5, y + 94);
+    if (equip.amperage) ctx.fillText(`${equip.amperage}A`, x + 5, y + 112);
     
     ctx.restore();
   }, []);
@@ -202,18 +202,18 @@ function HvacZoneDesignerPage() {
       // Draw duct
       ctx.fillStyle = equip.fill || config.fill;
       ctx.strokeStyle = equip.stroke || config.stroke;
-      ctx.lineWidth = 2;
-      ctx.fillRect(equip.x, equip.y, equip.width || 50, equip.height || 20);
-      ctx.strokeRect(equip.x, equip.y, equip.width || 50, equip.height || 20);
+      ctx.lineWidth = 3;
+      ctx.fillRect(equip.x, equip.y, equip.width || 80, equip.height || 35);
+      ctx.strokeRect(equip.x, equip.y, equip.width || 80, equip.height || 35);
       
       // Label
       ctx.fillStyle = '#000';
-      ctx.font = 'bold 10px Arial';
+      ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'left';
-      ctx.fillText(equip.label || equip.type, equip.x + 2, equip.y - 4);
+      ctx.fillText(equip.label || equip.type, equip.x + 2, equip.y - 6);
     } else if (config.category === 'diffuser') {
       // Draw diffuser symbol
-      const size = equip.size || config.defaultSize * 100;
+      const size = equip.size || config.defaultSize * 180;
       const cx = equip.x;
       const cy = equip.y;
       
@@ -280,32 +280,32 @@ function HvacZoneDesignerPage() {
       // CFM label
       if (equip.cfm || config.airflow) {
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 9px Arial';
+        ctx.font = 'bold 16px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`${equip.cfm || config.airflow} CFM`, cx, cy + size / 2 + 12);
+        ctx.fillText(`${equip.cfm || config.airflow} CFM`, cx, cy + size / 2 + 20);
       }
     } else if (config.category === 'unit') {
       // Draw equipment unit
-      const w = equip.width || 50;
-      const h = equip.height || 35;
+      const w = equip.width || 80;
+      const h = equip.height || 60;
       
       ctx.fillStyle = config.color;
       ctx.strokeStyle = '#003366';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.fillRect(equip.x, equip.y, w, h);
       ctx.strokeRect(equip.x, equip.y, w, h);
       
       // Type label
       ctx.fillStyle = 'white';
-      ctx.font = 'bold 10px Arial';
+      ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(equip.type, equip.x + w / 2, equip.y + h / 2 + 3);
+      ctx.fillText(equip.type, equip.x + w / 2, equip.y + h / 2 + 5);
       
       // Specs callout box
       drawSpecsCallout(ctx, equip, equip.x + w + 10, equip.y - 60);
     } else if (config.category === 'damper') {
       // Draw damper symbol
-      const size = equip.size || config.defaultSize * 100;
+      const size = equip.size || config.defaultSize * 180;
       const cx = equip.x;
       const cy = equip.y;
       
@@ -326,12 +326,12 @@ function HvacZoneDesignerPage() {
       
       // Label
       ctx.fillStyle = '#000';
-      ctx.font = 'bold 8px Arial';
+      ctx.font = 'bold 14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(equip.label || config.label.split(' ')[0], cx, cy + size / 2 + 12);
+      ctx.fillText(equip.label || config.label.split(' ')[0], cx, cy + size / 2 + 20);
     } else if (config.category === 'accessory') {
       // Draw accessory symbols (drain points, smoke detectors, etc.)
-      const size = equip.size || config.defaultSize * 100;
+      const size = equip.size || config.defaultSize * 180;
       const cx = equip.x;
       const cy = equip.y;
       
@@ -348,9 +348,9 @@ function HvacZoneDesignerPage() {
       
       // Add label
       ctx.fillStyle = '#000';
-      ctx.font = 'bold 8px Arial';
+      ctx.font = 'bold 14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(equip.label || config.type, cx, cy + size / 2 + 10);
+      ctx.fillText(equip.label || config.type, cx, cy + size / 2 + 18);
     }
     
     ctx.restore();
@@ -374,7 +374,8 @@ function HvacZoneDesignerPage() {
       if (backgroundImage) {
         const img = new Image();
         img.onload = () => {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          // Draw at natural dimensions to preserve aspect ratio
+          ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
           drawZonesAndEquipment(ctx);
         };
         img.src = backgroundImage;
@@ -431,9 +432,10 @@ function HvacZoneDesignerPage() {
         setPdfFile(file);
         const result = await renderPdfToCanvas(file, pdfScale, pdfjsLib);
         setBackgroundImage(result.imageDataUrl);
+        // Set canvas to PDF's actual dimensions to preserve aspect ratio
         setCanvasSize({
-          width: Math.max(result.width, 1200),
-          height: Math.max(result.height, 800),
+          width: result.width,
+          height: result.height,
         });
         toast.success('PDF floor plan loaded successfully');
       } catch (error) {
@@ -443,8 +445,17 @@ function HvacZoneDesignerPage() {
     } else if (fileType.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setBackgroundImage(event.target.result);
-        toast.success('Image loaded successfully');
+        // Load image to get natural dimensions
+        const img = new Image();
+        img.onload = () => {
+          setCanvasSize({
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+          });
+          setBackgroundImage(event.target.result);
+          toast.success('Image loaded successfully');
+        };
+        img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     } else {
@@ -453,10 +464,18 @@ function HvacZoneDesignerPage() {
   };
 
   // Canvas mouse handlers
-  // Helper: Convert screen coordinates to canvas coordinates (accounting for zoom/pan)
+  // Helper: Convert screen coordinates to canvas coordinates (accounting for zoom/pan and CSS scaling)
   const screenToCanvas = (screenX, screenY, rect) => {
-    const x = (screenX - rect.left - pan.x) / zoom;
-    const y = (screenY - rect.top - pan.y) / zoom;
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    
+    // Account for CSS scaling (canvas actual size vs displayed size)
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Transform screen coordinates to canvas coordinates
+    const x = ((screenX - rect.left) * scaleX - pan.x) / zoom;
+    const y = ((screenY - rect.top) * scaleY - pan.y) / zoom;
     return { x, y };
   };
 
@@ -551,9 +570,13 @@ function HvacZoneDesignerPage() {
       
       if (isDrawingZone) {
         setZoneStartPoint(coords);
+        setIsPanning(false); // Disable panning when drawing zone
+        setLastPanPoint(null);
       } else if (addMode) {
         // Equipment placement via touch
         handleEquipmentPlacementTouch(touch, rect);
+        setIsPanning(false);
+        setLastPanPoint(null);
       } else {
         // Start panning
         setIsPanning(true);
@@ -594,14 +617,8 @@ function HvacZoneDesignerPage() {
     } else if (e.touches.length === 1) {
       const touch = e.touches[0];
       
-      if (isPanning && lastPanPoint) {
-        // Pan with one finger
-        const dx = touch.clientX - lastPanPoint.x;
-        const dy = touch.clientY - lastPanPoint.y;
-        setPan({ x: pan.x + dx, y: pan.y + dy });
-        setLastPanPoint({ x: touch.clientX, y: touch.clientY });
-      } else if (isDrawingZone && zoneStartPoint) {
-        // Draw zone preview
+      if (isDrawingZone && zoneStartPoint) {
+        // Draw zone preview - prioritize over panning
         const coords = screenToCanvas(touch.clientX, touch.clientY, rect);
         setCurrentZonePreview({
           x: Math.min(zoneStartPoint.x, coords.x),
@@ -609,6 +626,12 @@ function HvacZoneDesignerPage() {
           width: Math.abs(coords.x - zoneStartPoint.x),
           height: Math.abs(coords.y - zoneStartPoint.y),
         });
+      } else if (isPanning && lastPanPoint && !isDrawingZone) {
+        // Pan with one finger (only when not drawing zone)
+        const dx = touch.clientX - lastPanPoint.x;
+        const dy = touch.clientY - lastPanPoint.y;
+        setPan({ x: pan.x + dx, y: pan.y + dy });
+        setLastPanPoint({ x: touch.clientX, y: touch.clientY });
       }
     }
   };
@@ -820,6 +843,47 @@ function HvacZoneDesignerPage() {
       toast.success('Equipment added successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to add equipment');
+    }
+  };
+
+  // Undo last equipment addition
+  const undoLastEquipment = async () => {
+    if (selectedZoneIndex === null) {
+      toast.warn('Please select a zone first');
+      return;
+    }
+
+    const selectedZone = localZones[selectedZoneIndex];
+    if (!selectedZone._id) {
+      toast.error('Zone must be saved');
+      return;
+    }
+
+    if (!selectedZone.equipment || selectedZone.equipment.length === 0) {
+      toast.info('No equipment to remove');
+      return;
+    }
+
+    // Get the last equipment item
+    const lastEquipment = selectedZone.equipment[selectedZone.equipment.length - 1];
+    
+    if (!window.confirm(`Remove ${lastEquipment.label || lastEquipment.type}?`)) return;
+
+    try {
+      const { data } = await axios.delete(
+        `/api/hvac-zones/${selectedZone._id}/equipment/${lastEquipment._id}`,
+        {
+          headers: { Authorization: `Bearer ${adminInfo.token}` },
+        }
+      );
+
+      dispatch({ type: 'HVAC_UPDATE_ZONE', payload: data });
+      const updatedZones = [...localZones];
+      updatedZones[selectedZoneIndex] = data;
+      setLocalZones(updatedZones);
+      toast.success('Last equipment removed');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to remove equipment');
     }
   };
 
@@ -1087,59 +1151,118 @@ function HvacZoneDesignerPage() {
           <div className="mb-3">
             <label className="d-block mb-2 fw-bold">Zone Management</label>
             <div className="d-flex flex-column gap-2">
-              <ButtonGroup className={isMobile ? 'w-100 d-flex flex-wrap gap-1' : ''}>
-                <Button
-                  variant={isDrawingZone ? 'primary' : 'outline-primary'}
-                  onClick={() => setIsDrawingZone(!isDrawingZone)}
-                  disabled={!projectName.trim()}
-                  size={isMobile ? 'sm' : undefined}
-                  className={isMobile ? 'flex-fill' : ''}
-                >
-                  <FaDrawPolygon /> {isMobile ? 'Draw' : 'Draw HVAC Zone'}
-                </Button>
-                <Button
-                  variant="outline-danger"
-                  onClick={() => {
-                    if (selectedZoneIndex !== null) {
-                      const zone = localZones[selectedZoneIndex];
-                      if (!zone || !zone._id) {
-                        toast.error('Cannot delete this zone. Please refresh and try again.');
-                        return;
+              <div className={isMobile ? 'd-grid' : ''} style={isMobile ? {gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px'} : undefined}>
+                {isMobile ? (
+                  <>
+                    <Button
+                      variant={isDrawingZone ? 'primary' : 'outline-primary'}
+                      onClick={() => setIsDrawingZone(!isDrawingZone)}
+                      disabled={!projectName.trim()}
+                      size="sm"
+                    >
+                      <FaDrawPolygon /> Draw
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      onClick={() => {
+                        if (selectedZoneIndex !== null) {
+                          const zone = localZones[selectedZoneIndex];
+                          if (!zone || !zone._id) {
+                            toast.error('Cannot delete this zone. Please refresh and try again.');
+                            return;
+                          }
+                          deleteZone(zone._id, selectedZoneIndex);
+                        }
+                      }}
+                      disabled={
+                        selectedZoneIndex === null || 
+                        !localZones[selectedZoneIndex]?._id
                       }
-                      deleteZone(zone._id, selectedZoneIndex);
-                    }
-                  }}
-                  disabled={
-                    selectedZoneIndex === null || 
-                    !localZones[selectedZoneIndex]?._id
-                  }
-                  size={isMobile ? 'sm' : undefined}
-                  className={isMobile ? 'flex-fill' : ''}
-                  title={
-                    selectedZoneIndex !== null && !localZones[selectedZoneIndex]?._id
-                      ? 'Zone must be saved before deletion'
-                      : 'Delete selected zone'
-                  }
-                >
-                  <FaTrash /> {isMobile ? 'Delete' : 'Delete Zone'}
-                </Button>
+                      size="sm"
+                      title={
+                        selectedZoneIndex !== null && !localZones[selectedZoneIndex]?._id
+                          ? 'Zone must be saved before deletion'
+                          : 'Delete selected zone'
+                      }
+                    >
+                      <FaTrash /> Delete
+                    </Button>
+                    <Button 
+                      variant="outline-success" 
+                      onClick={() => loadZones(true)}
+                      size="sm"
+                    >
+                      <FaSave /> Refresh
+                    </Button>
+                    <Button 
+                      variant="outline-info" 
+                      onClick={exportToPDF}
+                      size="sm"
+                    >
+                      <FaDownload /> Export
+                    </Button>
+                  </>
+                ) : (
+                  <ButtonGroup>
+                    <Button
+                      variant={isDrawingZone ? 'primary' : 'outline-primary'}
+                      onClick={() => setIsDrawingZone(!isDrawingZone)}
+                      disabled={!projectName.trim()}
+                    >
+                      <FaDrawPolygon /> Draw HVAC Zone
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      onClick={() => {
+                        if (selectedZoneIndex !== null) {
+                          const zone = localZones[selectedZoneIndex];
+                          if (!zone || !zone._id) {
+                            toast.error('Cannot delete this zone. Please refresh and try again.');
+                            return;
+                          }
+                          deleteZone(zone._id, selectedZoneIndex);
+                        }
+                      }}
+                      disabled={
+                        selectedZoneIndex === null || 
+                        !localZones[selectedZoneIndex]?._id
+                      }
+                      title={
+                        selectedZoneIndex !== null && !localZones[selectedZoneIndex]?._id
+                          ? 'Zone must be saved before deletion'
+                          : 'Delete selected zone'
+                      }
+                    >
+                      <FaTrash /> Delete Zone
+                    </Button>
+                    <Button 
+                      variant="outline-success" 
+                      onClick={() => loadZones(true)}
+                    >
+                      <FaSave /> Refresh
+                    </Button>
+                    <Button 
+                      variant="outline-info" 
+                      onClick={exportToPDF}
+                    >
+                      <FaDownload /> Export PDF
+                    </Button>
+                  </ButtonGroup>
+                )}
+              </div>
+              
+              {/* Undo Last Equipment - Secondary Action */}
+              {selectedZoneIndex !== null && localZones[selectedZoneIndex]?.equipment?.length > 0 && (
                 <Button 
-                  variant="outline-success" 
-                  onClick={() => loadZones(true)}
-                  size={isMobile ? 'sm' : undefined}
-                  className={isMobile ? 'flex-fill' : ''}
+                  variant="outline-warning" 
+                  size="sm"
+                  onClick={undoLastEquipment}
+                  className={isMobile ? 'w-100' : 'align-self-start'}
+                  title="Remove the last added equipment from selected zone"
                 >
-                  <FaSave /> {isMobile ? 'Refresh' : 'Refresh'}
+                  <FaUndo /> Undo Last Equipment ({localZones[selectedZoneIndex].equipment.length})
                 </Button>
-                <Button 
-                  variant="outline-info" 
-                  onClick={exportToPDF}
-                  size={isMobile ? 'sm' : undefined}
-                  className={isMobile ? 'flex-fill' : ''}
-                >
-                  <FaDownload /> {isMobile ? 'Export' : 'Export PDF'}
-                </Button>
-              </ButtonGroup>
+              )}
               
               {/* Delete All Zones - Secondary Action */}
               {localZones.length > 1 && (
@@ -1147,7 +1270,7 @@ function HvacZoneDesignerPage() {
                   variant="outline-danger" 
                   size="sm"
                   onClick={deleteAllZones}
-                  className="w-100"
+                  className={isMobile ? 'w-100' : 'align-self-start'}
                 >
                   <FaTrash /> Delete All {localZones.length} Zones
                 </Button>
@@ -1417,18 +1540,62 @@ function HvacZoneDesignerPage() {
           
           {/* Zoom Controls */}
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <div className="d-flex gap-2 align-items-center">
-              <ButtonGroup size="sm">
-                <Button variant="outline-secondary" onClick={handleZoomOut} title="Zoom Out">
-                  <i className="bi bi-dash-lg"></i> −
-                </Button>
-                <Button variant="outline-secondary" onClick={handleZoomReset} title="Reset Zoom">
-                  {Math.round(zoom * 100)}%
-                </Button>
-                <Button variant="outline-secondary" onClick={handleZoomIn} title="Zoom In">
-                  <i className="bi bi-plus-lg"></i> +
-                </Button>
-              </ButtonGroup>
+            <div className={isMobile ? 'd-grid w-100' : 'd-flex gap-2 align-items-center'} style={isMobile ? {gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px'} : undefined}>
+              {isMobile ? (
+                <>
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handleZoomOut} 
+                    title="Zoom Out"
+                    size="sm"
+                  >
+                    −
+                  </Button>
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handleZoomReset} 
+                    title="Reset Zoom"
+                    size="sm"
+                  >
+                    {Math.round(zoom * 100)}%
+                  </Button>
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handleZoomIn} 
+                    title="Zoom In"
+                    size="sm"
+                  >
+                    +
+                  </Button>
+                </>
+              ) : (
+                <ButtonGroup size="sm">
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handleZoomOut} 
+                    title="Zoom Out"
+                    style={{minWidth: '60px'}}
+                  >
+                    −
+                  </Button>
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handleZoomReset} 
+                    title="Reset Zoom"
+                    style={{minWidth: '60px'}}
+                  >
+                    {Math.round(zoom * 100)}%
+                  </Button>
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handleZoomIn} 
+                    title="Zoom In"
+                    style={{minWidth: '60px'}}
+                  >
+                    +
+                  </Button>
+                </ButtonGroup>
+              )}
               {zoom !== 1 && (
                 <small className="text-muted">
                   {isMobile ? 'Pinch to zoom' : 'Shift+Drag to pan'}
