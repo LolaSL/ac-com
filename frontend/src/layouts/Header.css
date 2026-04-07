@@ -14,23 +14,32 @@
   z-index: 1030;
 }
 
+/* Override Bootstrap container padding */
+.header-nav .container-fluid {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  max-width: 100% !important;
+}
+
 .header-container {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  padding: 0 1rem;
+  padding: 0 !important;
 }
 
 .navbar {
   width: 100%;
   justify-content: flex-start !important;
   background: transparent !important;
+  overflow: visible !important;
 }
 
 .navbar > .container,
 .navbar > .container-fluid {
   justify-content: flex-start !important;
+  overflow: visible !important;
 }
 
 .navbar-brand {
@@ -42,11 +51,18 @@
   width: 100%;
   justify-content: flex-start !important;
   text-align: left;
+  overflow: visible !important;
 }
 
 .navbar-nav {
   align-items: flex-start !important;
   text-align: left;
+}
+
+/* ── Dropdown positioning ── */
+.header-nav .nav-item.dropdown,
+.header-nav .dropdown {
+  position: relative !important;
 }
 
 /* ── Sidebar toggle button ── */
@@ -186,6 +202,14 @@
   animation: headerDropFade 0.2s ease;
   max-height: 400px;
   overflow-y: auto;
+  position: absolute !important;
+  z-index: 1050 !important;
+}
+
+/* Ensure right-aligned dropdowns don't overflow */
+.header-nav .dropdown-menu.dropdown-menu-end {
+  right: 0 !important;
+  left: auto !important;
 }
 
 @keyframes headerDropFade {
@@ -404,5 +428,18 @@
   .header-nav .dropdown-menu {
     border-radius: 8px;
     margin: 0.25rem 0;
+    position: static !important;
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+  }
+
+  /* Override end alignment on mobile */
+  .header-nav .dropdown-menu.dropdown-menu-end {
+    right: 0 !important;
+    left: 0 !important;
   }
 }

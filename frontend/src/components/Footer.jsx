@@ -106,6 +106,9 @@ const Footer = () => {
             <NavLink className="text-white d-block" href="/sellers">
               Our Network
             </NavLink>
+            <NavLink className="text-white d-block" href="/advanced-ac">
+              Advanced AC
+            </NavLink>
             <NavLink className="text-white d-block" href="/blogs">
               Blogs
             </NavLink>

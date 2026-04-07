@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useCallback } from "react";
 import { Store } from "../Store";
 import { Card, Table, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaPrint, FaShoppingCart } from "react-icons/fa";
+import { FaEye, FaPrint, FaShoppingCart, FaStar } from "react-icons/fa";
 import printJS from "print-js";
 import { toast } from "react-toastify";
 import "./Recommendations.css";
@@ -440,77 +440,52 @@ export default function Recommendations() {
   return (
     <div className="recommendations-page-container">
       {/* Page Header */}
-      <div className="recommendations-header" style={{
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)',
-        color: '#fff',
-        padding: '2.5rem 2rem',
-        borderRadius: '16px',
-        marginBottom: '2rem',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
-          <div>
-            <h1 style={{ 
-              fontSize: '2.25rem', 
-              fontWeight: '700', 
-              marginBottom: '0.5rem',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-            }}>
-              🎯 HVAC System Quote
-            </h1>
-            <p style={{ 
-              fontSize: '1.1rem', 
-              marginBottom: '0',
-              opacity: 0.95
-            }}>
-              Complete installation guide with quote, product recommendations and required accessories
-            </p>
-            {/* Print-only metadata */}
-            <div className="print-only-info">
-              <p style={{ marginTop: '0.75rem', fontSize: '0.9rem', opacity: 0.9 }}>
-                <strong>Generated:</strong> {new Date().toLocaleString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric', 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })}
-              </p>
-              <p style={{ fontSize: '0.85rem', opacity: 0.85, margin: '0.25rem 0 0 0' }}>
-                AC Commerce - Professional HVAC Solutions | www.accommerce.com
-              </p>
-            </div>
-          </div>
+      <div className="recommendations-header">
+        <div className="rec-hero__inner">
+          <div className="rec-hero__icon"><FaStar /></div>
+          <h1 className="rec-hero__title">HVAC System Quote</h1>
+          <p className="rec-hero__sub">Complete installation guide with quote, product recommendations and required accessories</p>
+        </div>
+      </div>
+
+      <div className="rec-inner">
+        {/* Print-only metadata */}
+        <div className="print-only-info" style={{ display: 'none' }}>
+          <p style={{ marginTop: '0.75rem', fontSize: '0.9rem', opacity: 0.9 }}>
+            <strong>Generated:</strong> {new Date().toLocaleString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric', 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}
+          </p>
+          <p style={{ fontSize: '0.85rem', opacity: 0.85, margin: '0.25rem 0 0 0' }}>
+            AC Commerce - Professional HVAC Solutions | www.accommerce.com
+          </p>
+        </div>
+
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <div />
           <div className="d-flex gap-2">
             <Button 
-              variant="light" 
+              variant="outline-primary"
               onClick={() => navigate('/measurement')}
-              style={{
-                fontWeight: '600',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '8px'
-              }}
+              className="rec-action-btn"
             >
-              ← Back to Measurement
+              <span className="button-text-long">← Back to Measurement</span>
+              <span className="button-text-short">← Back</span>
             </Button>
             <Button 
-              variant="light" 
+              variant="primary"
               onClick={handlePrint}
-              style={{
-                fontWeight: '600',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
+              className="rec-action-btn rec-action-btn--print"
               title="Print recommendations"
             >
-              <FaPrint /> Print
+              <FaPrint /> <span>Print</span>
             </Button>
           </div>
         </div>
-      </div>
 
       {/* ============================
           DETECTED SYSTEMS
@@ -729,7 +704,7 @@ export default function Recommendations() {
         recommendedUnits={recommendedUnits}
       />
 
-
-      </div>
+      </div>{/* End rec-inner */}
+    </div>
   );
 }

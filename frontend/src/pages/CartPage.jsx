@@ -268,6 +268,9 @@ export default function CartPage() {
         </div>
       </div>
 
+      {/* Inner content wrapper */}
+      <div className="cp-inner">
+
       {/* ── Condenser recommendation banner ── */}
       {recBanner && (
         <div className={`cp-rec-banner ${recBanner.cls}`}>
@@ -422,6 +425,9 @@ export default function CartPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* End inner content wrapper */}
       </div>
     </div>
   );

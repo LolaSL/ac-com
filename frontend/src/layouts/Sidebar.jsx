@@ -34,6 +34,7 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
     { path: "/", label: "Home" },
     { path: "/about-us", label: "About Us" },
     { path: "/sellers", label: "Our Network" },
+    { path: "/advanced-ac", label: "Advanced AC" },
     { type: "categories", label: "Categories" }, // Categories marker
     { path: "/measurement", label: "Get A Quote" },
     { path: "/roi-calculator", label: "ROI Calculator" },

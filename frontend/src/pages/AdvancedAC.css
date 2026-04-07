@@ -1,11 +1,374 @@
 /* AdvancedAC Page Styles */
 
-.ac-conditioning {
-  text-align: justify;
-  padding: 20px;
+/* Override any parent container padding */
+.aac-page,
+.aac-page * .container,
+.aac-page * .container-fluid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
+/* ── Page wrapper ── */
+.aac-page,
+.advanced-ac-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding-bottom: 3rem;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
+}
+
+/* ── Hero ── */
+.aac-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 0 2rem 0 !important;
+}
+
+.aac-hero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(103, 232, 249, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.aac-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.aac-hero__icon {
+  font-size: 2.8rem;
+  color: #67e8f9;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 0 12px rgba(103, 232, 249, 0.4));
+}
+
+.aac-hero__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.aac-hero__sub {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── Content wrapper ── */
+.aac-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  position: relative;
+  left: 0;
+  right: 0;
+}
+.aac-content p{
+  text-align: justify;
+}
+/* ── Intro ── */
+.aac-intro {
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #67e8f9;
+}
+
+.aac-intro__text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #334155;
+  margin: 0;
+  text-align: left;
+}
+
+/* ── Feature Cards ── */
+.aac-feature-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.aac-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.aac-feature__header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.aac-feature__icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(103, 232, 249, 0.1);
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.aac-feature__icon-wrap i {
+  font-size: 1.8rem;
+}
+
+.aac-feature__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.25rem;
+}
+
+.aac-feature__subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.aac-feature__content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.aac-feature__image-wrap {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.aac-feature__image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.aac-feature-card:hover .aac-feature__image {
+  transform: scale(1.05);
+}
+
+.aac-feature__text {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #475569;
+  margin: 0;
+  text-align: left;
+}
+
+/* ── CTA Section ── */
+.aac-cta {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin: 3rem 0 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.aac-cta::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(103, 232, 249, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.aac-cta__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.5rem;
+  position: relative;
+}
+
+.aac-cta__text {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 0 0 1.75rem;
+  position: relative;
+}
+
+.aac-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, #67e8f9 0%, #22d3ee 100%);
+  color: #0f172a;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(103, 232, 249, 0.3);
+}
+
+.aac-cta__btn:hover {
+  background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(103, 232, 249, 0.4);
+  color: #0f172a;
+}
+
+/* ── Home button ── */
+.aac-home-row {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+/* ── Responsive Images for Original Layout ── */
 .responsive-image-advanced {
   max-width: 100%;
   height: auto;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Large screens: consistent image sizing */
+@media (min-width: 992px) {
+  .responsive-image-advanced {
+    width: 100%;
+    max-width: 800px;
+    height: 450px;
+    object-fit: cover;
+  }
+}
+
+/* ── Home button ── */
+.home-btn {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .aac-hero {
+    padding: 2rem 1.25rem 1.75rem;
+  }
+
+  .aac-hero__icon {
+    font-size: 2.2rem;
+  }
+
+  .aac-hero__title {
+    font-size: 1.5rem;
+  }
+
+  .aac-hero__sub {
+    font-size: 0.9rem;
+  }
+
+  .aac-intro {
+    padding: 1.5rem;
+  }
+
+  .aac-feature-card {
+    padding: 1.5rem;
+  }
+
+  .aac-feature__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .aac-feature__content {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .aac-feature__image {
+    height: 180px;
+  }
+
+  .aac-cta {
+    padding: 2rem 1.5rem;
+  }
+
+  .aac-cta__title {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .aac-hero__icon {
+    font-size: 2rem;
+  }
+
+  .aac-hero__title {
+    font-size: 1.3rem;
+  }
+
+  .aac-hero__sub {
+    font-size: 0.85rem;
+  }
+
+  .aac-feature__title {
+    font-size: 1.2rem;
+  }
+
+  .aac-feature__icon-wrap {
+    width: 52px;
+    height: 52px;
+  }
+
+  .aac-feature__icon-wrap i {
+    font-size: 1.4rem;
+  }
 }

@@ -46,7 +46,7 @@ function BlogDetails() {
   );
 
   return (
-    <>
+    <div className="bd-page">
       {/* Reading progress bar */}
       <div className="bd-progress" style={{ width: `${progress}%` }} />
 
@@ -100,7 +100,7 @@ function BlogDetails() {
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

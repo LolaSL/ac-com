@@ -2,11 +2,31 @@
    OurNetworkPage — Dark Theme
    ========================================== */
 
+/* Override any parent container padding */
+.on-page,
+.on-page * .container,
+.on-page * .container-fluid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 /* ── Page wrapper ── */
 .on-page {
   min-height: 100vh;
   background: #0b1120;
   padding-bottom: 3rem;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
 }
 
 /* ── Hero ── */
@@ -16,6 +36,9 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 !important;
 }
 
 .on-hero::before {
@@ -100,7 +123,9 @@
   align-items: center;
   gap: 2rem;
   max-width: 900px;
-  margin: -1.5rem auto 2.5rem;
+  margin: -1.5rem 1.5rem 2.5rem 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
   padding: 1.5rem 2rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -108,6 +133,8 @@
   backdrop-filter: blur(12px);
   position: relative;
   z-index: 2;
+  left: 0;
+  right: 0;
 }
 
 .on-stats__item {
@@ -144,6 +171,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.25rem;
+  position: relative;
+  left: 0;
+  right: 0;
 }
 
 /* ── Sections ── */
@@ -414,7 +444,9 @@
     flex-wrap: wrap;
     gap: 1rem 1.5rem;
     padding: 1.2rem 1.5rem;
-    margin: -1rem auto 2rem;
+    margin: -1rem 1rem 2rem 1rem;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .on-stats__divider {
@@ -438,5 +470,11 @@
 @media (max-width: 576px) {
   .on-grid--4 {
     grid-template-columns: 1fr;
+  }
+  
+  .on-stats {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+    padding: 1rem 1rem;
   }
 }

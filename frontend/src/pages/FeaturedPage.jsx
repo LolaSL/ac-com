@@ -65,41 +65,46 @@ const FeaturedPage = () => {
   }, []);
 
   return (
-    <div className="featured-page-wrapper">
-    
-            {/* Hero */}
-            <div className="featured-hero">
-              <div className="featured-hero__inner">
-                <div className="featured-hero__icon"><FaGem /></div>
-                <h1 className="featured-hero__title">Featured Products</h1>
-                <p className="featured-hero__sub">Discover our top-rated and special offer air conditioning units.</p>
-              </div>
-            </div>
-      <div className="featured-products-container">
-        {loading ? (
-          <LoadingBox />
-        ) : error ? (
-          <MessageBox variant="danger">{error}</MessageBox>
-        ) : products.length ? (
-          <Row className="g-3 mx-0">
-            {products.map((product) => (
-              <Col
-                key={product.slug}
-                xs={12}
-                sm={6}
-                md={4}
-                lg={3}
-                className="p-2"
-              >
-                <Product product={product} />
-              </Col>
-            ))}
-          </Row>
-        ) : (
-          <MessageBox variant="info">
-            No featured products available at the moment. Check back soon!
-          </MessageBox>
-        )}
+    <div className="featured-page">
+      {/* Full-Bleed Hero */}
+      <section className="fp-hero">
+        <div className="fp-hero__inner">
+          <FaGem className="fp-hero__icon" />
+          <h1 className="fp-hero__title">Featured Products</h1>
+          <p className="fp-hero__sub">
+            Discover our top-rated and special offer air conditioning units
+          </p>
+        </div>
+      </section>
+
+      {/* Content Wrapper */}
+      <div className="fp-content">
+        <div className="featured-products-container">
+          {loading ? (
+            <LoadingBox />
+          ) : error ? (
+            <MessageBox variant="danger">{error}</MessageBox>
+          ) : products.length ? (
+            <Row className="g-3 mx-0">
+              {products.map((product) => (
+                <Col
+                  key={product.slug}
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  className="p-2"
+                >
+                  <Product product={product} />
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <MessageBox variant="info">
+              No featured products available at the moment. Check back soon!
+            </MessageBox>
+          )}
+        </div>
       </div>
     </div>
   );

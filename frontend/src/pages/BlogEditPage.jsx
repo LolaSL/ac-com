@@ -4,11 +4,12 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import Button from "react-bootstrap/Button";
+import { FaBlog } from "react-icons/fa";
+import "./AdminHero.css";
 import "./BlogEditPage.css";
 
 const reducer = (state, action) => {
@@ -128,72 +129,151 @@ const BlogEditPage = () => {
   };
 
   return (
-    <Container className="small-container">
-      <h1 className="page-title">Edit Blog {blogId}</h1>
-      {loading ? (
-        <LoadingBox />
-      ) : error ? (
-        <MessageBox variant="danger">{error}</MessageBox>
-      ) : (
-        <Form onSubmit={submitHandler}>
-          <Form.Group className="mb-3" controlId="name">
-            <Form.Label>Title</Form.Label>
-            <Form.Control
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="slug">
-            <Form.Label>Slug</Form.Label>
-            <Form.Control
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="price">
-            <Form.Label>Content</Form.Label>
-            <Form.Control
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="image">
-            <Form.Label>Image File</Form.Label>
-            <Form.Control
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="imageFile">
-            <Form.Label>Upload Image</Form.Label>
-            <Form.Control type="file" onChange={(e) => uploadFileHandler(e)} />
-            {loadingUpload && <LoadingBox />}
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="description">
-            <Form.Label>Short Description</Form.Label>
-            <Form.Control
-              value={shortDescription}
-              onChange={(e) => setShortDescription(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <div className="mb-3">
-            <Button
-              disabled={loadingUpdate}
-              type="submit"
-              className="go-to-btn btn-text"
-            >
-              Update
-            </Button>
-            {loadingUpdate && <LoadingBox />}
+    <div className="adm-page">
+      {/* Hero Section */}
+      <div className="adm-hero">
+        <div className="adm-hero__inner">
+          <div className="adm-hero__icon">
+            <FaBlog />
           </div>
-        </Form>
-      )}
-    </Container>
+          <h1 className="adm-hero__title">Edit Blog Post</h1>
+          <p className="adm-hero__sub">
+            Update blog title, content, description, and featured image
+          </p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="blog-edit-content">
+        {loading ? (
+          <LoadingBox />
+        ) : error ? (
+          <MessageBox variant="danger">{error}</MessageBox>
+        ) : (
+          <Form onSubmit={submitHandler}>
+            <div className="blog-edit-grid">
+              {/* Basic Information */}
+              <div className="blog-edit-section">
+                <h3>
+                  <i className="fas fa-info-circle"></i>
+                  Basic Information
+                </h3>
+                <Form.Group className="mb-3" controlId="title">
+                  <Form.Label>Blog Title</Form.Label>
+                  <Form.Control
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    placeholder="Enter blog title"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="slug">
+                  <Form.Label>URL Slug</Form.Label>
+                  <Form.Control
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    required
+                    placeholder="blog-url-slug"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="shortDescription">
+                  <Form.Label>Short Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={shortDescription}
+                    onChange={(e) => setShortDescription(e.target.value)}
+                    required
+                    placeholder="Enter a brief description for preview cards"
+                  />
+                </Form.Group>
+              </div>
+
+              {/* Featured Image */}
+              <div className="blog-edit-section">
+                <h3>
+                  <i className="fas fa-image"></i>
+                  Featured Image
+                </h3>
+                <Form.Group className="mb-3" controlId="image">
+                  <Form.Label>Image URL</Form.Label>
+                  <Form.Control
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    required
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </Form.Group>
+                {image && (
+                  <img
+                    src={image}
+                    alt="Blog preview"
+                    className="blog-image-preview"
+                  />
+                )}
+                <Form.Group className="mb-3 mt-3" controlId="imageFile">
+                  <Form.Label>Upload New Image</Form.Label>
+                  <Form.Control
+                    type="file"
+                    onChange={(e) => uploadFileHandler(e, true)}
+                    accept="image/*"
+                  />
+                  {loadingUpload && <LoadingBox />}
+                </Form.Group>
+              </div>
+
+              {/* Blog Content */}
+              <div className="blog-edit-section full-width">
+                <h3>
+                  <i className="fas fa-align-left"></i>
+                  Blog Content
+                </h3>
+                <Form.Group className="mb-3" controlId="content">
+                  <Form.Label>Content</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={12}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    required
+                    placeholder="Enter the full blog content"
+                  />
+                </Form.Group>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="form-actions">
+              <Button
+                disabled={loadingUpdate}
+                type="submit"
+                className="btn-update-blog w-75"
+              >
+                {loadingUpdate ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin me-2"></i>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-save me-2"></i>
+                    Update Blog
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                className="btn-cancel w-75"
+                onClick={() => navigate("/admin/blogs-list")}
+              >
+                <i className="fas fa-times me-2"></i>
+                Cancel
+              </Button>
+            </div>
+          </Form>
+        )}
+      </div>
+    </div>
   );
 };
 

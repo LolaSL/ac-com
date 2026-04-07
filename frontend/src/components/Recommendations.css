@@ -2,34 +2,140 @@
    RECOMMENDATIONS PAGE STYLES
 ============================ */
 
+/* Override any parent container padding */
+.recommendations-page-container,
+.recommendations-page-container * .container,
+.recommendations-page-container * .container-fluid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 /* Page Container */
 .recommendations-page-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
-  padding: 2rem 1rem;
+  background: #f5f6fa;
+  padding-bottom: 3rem;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   position: relative;
-}
-
-.recommendations-page-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 300px;
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.05) 0%, rgba(15, 52, 96, 0.05) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.recommendations-page-container > * {
-  position: relative;
-  z-index: 1;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
 }
 
 /* Page Header */
 .recommendations-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 0 2rem 0 !important;
   animation: fadeInDown 0.6s ease;
+}
+
+.recommendations-header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -15%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.rec-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.rec-hero__icon {
+  font-size: 2.6rem;
+  color: #6366f1;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.4));
+}
+
+.rec-hero__title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.3px;
+}
+
+.rec-hero__sub {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.rec-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  position: relative;
+  left: 0;
+  right: 0;
+}
+
+/* Action Buttons */
+.rec-action-btn {
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.rec-action-btn--print {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Tablet Responsiveness */
+@media (max-width: 768px) {
+  .rec-action-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 576px) {
+  .rec-action-btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+  }
+  
+  .rec-action-btn .button-text-long {
+    display: none;
+  }
+  
+  .rec-action-btn .button-text-short {
+    display: inline;
+  }
+}
+
+/* Show full text on larger screens */
+@media (min-width: 577px) {
+  .rec-action-btn .button-text-short {
+    display: none;
+  }
 }
 
 @keyframes fadeInDown {

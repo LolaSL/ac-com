@@ -1,10 +1,23 @@
 /* ProductPage Styles */
 
-/* ── Page shell ─────────────────────────────────────── */
+/* Override any parent container padding */
+.product-page-container,
+.product-page-container * .container,
+.product-page-container * .container-fluid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* ── Page shell ─────────────────────────────────── */
 .product-page-container {
   padding: clamp(1rem, 3vw, 2rem);
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+  left: 0;
+  right: 0;
 }
 
 .product-page-container .product-title {

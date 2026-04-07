@@ -1,46 +1,92 @@
 /* UserReviewsPage */
+
+/* Override any parent container padding */
+.urv-page,
+.urv-page * .container,
+.urv-page * .container-fluid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 .urv-page {
   background: #f5f6fa;
   min-height: 100vh;
   padding-bottom: 3rem;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
 }
 
 .urv-hero {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border-radius: 0 0 16px 16px;
-  padding: 2.2rem 1.5rem 2rem;
+  padding: 2.5rem 1.5rem 2rem;
   text-align: center;
   color: #fff;
   margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 0 2rem 0 !important;
+}
+
+.urv-hero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -15%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(234, 179, 8, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .urv-hero__inner {
-  max-width: 700px;
+  max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .urv-hero__icon {
-  font-size: 2.4rem;
-  margin-bottom: 0.6rem;
-  opacity: 0.92;
+  font-size: 2.6rem;
+  color: #eab308;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.4));
 }
 
 .urv-hero__title {
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  color: #f1f5f9;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.3px;
 }
 
 .urv-hero__sub {
-  font-size: 1rem;
-  opacity: 0.85;
+  font-size: 0.95rem;
+  color: #94a3b8;
   margin: 0;
+  line-height: 1.6;
 }
 
 .urv-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.25rem;
+  position: relative;
+  left: 0;
+  right: 0;
 }
 
 /* ── Clear All button ────────────────────────────────────── */

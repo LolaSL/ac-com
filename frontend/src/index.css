@@ -4,6 +4,7 @@ html,
 body {
   height: 100%;
   margin: 0;
+  padding: 0;
   overflow-x: hidden;
   max-width: 100%;
 }
@@ -20,6 +21,9 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Admin Login Page - Hi-Tech Background */
@@ -1355,7 +1359,11 @@ iframe {
 }
 
 .main-content {
-  padding: 20px;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  position: relative;
 }
 .banner-card {
   border-radius: 0 !important;

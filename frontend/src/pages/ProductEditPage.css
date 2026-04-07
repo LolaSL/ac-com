@@ -1,18 +1,18 @@
-/* Blog Edit Page Styles */
+/* Product Edit Page Styles */
 
-.blog-edit-content {
+.product-edit-content {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 0.75rem 2rem;
 }
 
-.blog-edit-grid {
+.product-edit-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
-.blog-edit-section {
+.product-edit-section {
   background: #ffffff;
   border-radius: 12px;
   padding: 1.5rem;
@@ -20,7 +20,7 @@
   border: 1px solid #e2e8f0;
 }
 
-.blog-edit-section h3 {
+.product-edit-section h3 {
   font-size: 1.15rem;
   font-weight: 600;
   color: #1e293b;
@@ -32,18 +32,87 @@
   gap: 0.5rem;
 }
 
-.blog-edit-section h3 i {
+.product-edit-section h3 i {
   color: #6366f1;
   font-size: 1rem;
 }
 
-.blog-image-preview {
+.product-image-preview {
   width: 100%;
-  max-width: 300px;
+  max-width: 200px;
   height: auto;
   border-radius: 8px;
   margin-top: 0.5rem;
   border: 2px solid #e2e8f0;
+}
+
+.additional-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.image-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 0.5rem;
+}
+
+.image-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.image-item-url {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0.5rem 0 0.25rem;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.image-delete-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.4rem;
+}
+
+.document-list {
+  margin-top: 1rem;
+}
+
+.document-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.document-url {
+  font-size: 0.85rem;
+  color: #475569;
+  word-break: break-all;
+  line-height: 1.5;
+  display: block;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.dimension-inputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
 .form-actions {
@@ -55,7 +124,7 @@
   flex-wrap: wrap;
 }
 
-.btn-update-blog {
+.btn-update-product {
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   border: none;
   padding: 0.75rem 2rem;
@@ -69,13 +138,13 @@
   margin-right: 0.75rem;
 }
 
-.btn-update-blog:hover:not(:disabled) {
+.btn-update-product:hover:not(:disabled) {
   background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-.btn-update-blog:disabled {
+.btn-update-product:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -89,8 +158,8 @@
   font-size: 1rem;
   border-radius: 8px;
   transition: all 0.3s ease;
-  margin-left: 0.75rem;
-  margin-right: 0.75rem;
+   margin-left: 0.75rem;
+  margin-right: 1rem;
 }
 
 .btn-cancel:hover {
@@ -102,32 +171,40 @@
 
 /* Tablet screens */
 @media (min-width: 768px) {
-  .blog-edit-content {
+  .product-edit-content {
     padding: 0 1.5rem 3rem;
   }
 
-  .blog-edit-grid {
+  .product-edit-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
 
-  .blog-edit-section.full-width {
+  .product-edit-section.full-width {
     grid-column: 1 / -1;
+  }
+
+  .dimension-inputs {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 /* Large screens */
 @media (min-width: 992px) {
-  .blog-edit-content {
+  .product-edit-content {
     padding: 0 2rem 3rem;
   }
 
-  .blog-edit-grid {
+  .product-edit-grid {
     gap: 2rem;
   }
 
-  .blog-edit-section {
+  .product-edit-section {
     padding: 2rem;
+  }
+
+  .additional-images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 }
 
@@ -138,18 +215,18 @@
     padding-right: 0;
   }
 
-  .blog-edit-content {
+  .product-edit-content {
     padding: 0 0.5rem 1.5rem;
   }
 
-  .blog-edit-section {
+  .product-edit-section {
     padding: 1rem;
     border-radius: 8px;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
   }
 
-  .blog-edit-section h3 {
+  .product-edit-section h3 {
     font-size: 1rem;
   }
 
@@ -157,16 +234,13 @@
     flex-direction: column;
   }
 
-  .btn-update-blog {
-    width: 100%;
-    margin-left: 0.5rem;
-    margin-right: 0;
-  }
-
+  .btn-update-product,
   .btn-cancel {
     width: 100%;
-    margin-left: 0;
-    margin-right: 0;
+  }
+
+  .additional-images-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
 }
-

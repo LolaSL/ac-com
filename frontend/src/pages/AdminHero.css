@@ -1,46 +1,92 @@
 /* Shared Admin Hero Shell — imported by all admin list pages */
+
+/* Override any parent container padding */
+.adm-page,
+.adm-page * .container,
+.adm-page * .container-fluid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 .adm-page {
   background: #f5f6fa;
   min-height: 100vh;
   padding-bottom: 3rem;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
 }
 
 .adm-hero {
-  background: linear-gradient(135deg, #1a2e4a, #1e4d8c);
-  border-radius: 0 0 16px 16px;
-  padding: 2.2rem 1.5rem 2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 2.5rem 1.5rem 2rem;
   text-align: center;
   color: #fff;
   margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 0 2rem 0 !important;
+}
+
+.adm-hero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -15%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .adm-hero__inner {
-  max-width: 700px;
+  max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .adm-hero__icon {
-  font-size: 2.4rem;
-  margin-bottom: 0.6rem;
-  opacity: 0.92;
+  font-size: 2.6rem;
+  color: #6366f1;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.4));
 }
 
 .adm-hero__title {
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  color: #f1f5f9;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.3px;
 }
 
 .adm-hero__sub {
-  font-size: 1rem;
-  opacity: 0.85;
+  font-size: 0.95rem;
+  color: #94a3b8;
   margin: 0;
+  line-height: 1.6;
 }
 
 .adm-inner {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.25rem;
+  position: relative;
+  left: 0;
+  right: 0;
 }
 
 /* Shared icon action buttons for all admin tables */
@@ -113,15 +159,28 @@
 /* ── Mobile responsiveness ── */
 @media (max-width: 767px) {
   .adm-page {
-    width: 100%;
+    width: 100vw;
     max-width: 100vw;
     overflow-x: hidden;
     box-sizing: border-box;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
   }
 
   .adm-hero {
     padding: 1.5rem 1rem 1.2rem;
     margin-bottom: 1.25rem;
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden;
+    position: relative;
+    left: 0;
+    right: 0;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   .adm-hero__title {
@@ -132,16 +191,34 @@
     font-size: 0.85rem;
   }
 
+  .adm-hero__inner {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .adm-hero::before {
+    right: -25%;
+    width: 300px;
+    height: 300px;
+  }
+
   .adm-inner {
     padding: 0 0.75rem;
     overflow-x: hidden;
     box-sizing: border-box;
   }
 
+  /* Add margins to card-like elements for breathing room */
+  .adm-inner .card {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+  }
+
   .adm-inner .table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
+    margin: 0 0.25rem;
   }
 
   /* Card layout for admin tables */
@@ -151,11 +228,12 @@
 
   .adm-inner .table tbody tr {
     display: block;
-    margin-bottom: 1rem;
+    margin: 0 0.5rem 1rem 0.5rem;
     border: 1px solid #dee2e6;
     border-radius: 8px;
     padding: 0.5rem 0;
     background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   .adm-inner .table td {

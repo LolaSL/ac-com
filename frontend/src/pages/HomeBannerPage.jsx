@@ -168,9 +168,9 @@ export default function HomeBannerPage() {
           onButtonClick={handleNotificationClick}
         />
       )}
-   <div className="home-page">
-      {/* Hero with video background */}
-      <div className="home-hero rounded shadow">
+      
+      {/* Hero with video background - Full bleed */}
+      <div className="home-hero">
         <video
           className="home-hero__video"
           autoPlay
@@ -187,8 +187,11 @@ export default function HomeBannerPage() {
           <p className="home-hero__sub">Smarter HVAC designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
       </div>
-      {/* Premium Hero Cards Grid */}
-      <div className="premium-cards-grid">
+
+      {/* Content wrapper */}
+      <div className="home-page">
+        {/* Premium Hero Cards Grid */}
+        <div className="premium-cards-grid">
         {banners.map((banner, idx) => (
           <div className="premium-card" key={idx}>
             <div className="premium-card-image">
@@ -206,13 +209,15 @@ export default function HomeBannerPage() {
             </div>
           </div>
         ))}
-      </div>
-      {/* Investor-Ready Sections */}
-      <TrustSection />
-      <ValuePropositionSection />
+        ))}
+        </div>
+        
+        {/* Investor-Ready Sections */}
+        <TrustSection />
+        <ValuePropositionSection />
         <TestimonialsSection />
         <ROICalculatorPreview />
-      <NewsletterSignup />
+        <NewsletterSignup />
       </div>
     </div>
   );

@@ -6,6 +6,15 @@
   min-height: calc(100vh - 68px);
 }
 
+/* Add container spacing on large screens */
+@media (min-width: 768px) {
+  .adm-page .db-container {
+    padding-left: 0.75rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
 /* Desktop sidebar */
 .db-sidebar {
   width: 210px;
@@ -18,6 +27,7 @@
   max-height: calc(100vh - 68px);
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0,0,0,0.12);
+  border-radius: 8px;
 }
 
 .db-sidebar-title {
@@ -94,7 +104,9 @@
   background: #868d9c;
   padding: 0.6rem 1rem;
   border-bottom: 1px solid rgba(255,255,255,0.15);
-  width: 100%;
+  width: calc(100% - 1rem);
+  margin: 0 0.5rem;
+  border-radius: 8px 8px 0 0;
 }
 
 .db-toggle-btn {
@@ -130,11 +142,12 @@
 .db-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
-  width: 220px;
+  left: 0.5rem;
+  width: calc(100% - 1rem);
+  max-width: 220px;
   background: #868d9c;
   z-index: 1050;
-  border-radius: 0 0 10px 0;
+  border-radius: 0 0 10px 10px;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.25);
   padding: 0.5rem 0.5rem 0.75rem;
   display: flex;
@@ -181,10 +194,20 @@
 @media (max-width: 767px) {
   .db-container {
     flex-direction: column;
+    padding: 0 0.5rem;
   }
 
   .db-main {
     padding: 1rem 0.75rem;
     width: 100%;
+  }
+
+  /* Add margins to content elements within dashboard */
+  .db-main > *,
+  .db-main .card,
+  .db-main .table-responsive,
+  .db-main .alert {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
 }

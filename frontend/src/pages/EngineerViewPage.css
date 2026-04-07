@@ -40,6 +40,12 @@
 .pdf-scroll-wrapper canvas {
   display: block;
   max-width: none; /* Allow horizontal scroll rather than squish */
+  /* Allow scrolling by default - drawing mode handlers will prevent when needed */
+}
+
+/* When in drawing mode, prevent default touch behaviors */
+.pdf-scroll-wrapper canvas[style*="crosshair"] {
+  touch-action: none !important; /* Block scrolling only when actively drawing */
 }
 
 @media (max-width: 767px) {
@@ -215,6 +221,17 @@
 
 /* ── Mobile responsive ─────────────────────────────────── */
 @media (max-width: 767px) {
+  /* Add margins for content on small screens */
+  .adm-inner > div,
+  .adm-inner .ev-toolbar,
+  .adm-inner .d-flex,
+  .adm-inner .pdf-scroll-wrapper,
+  .adm-inner .ev-legend-panel,
+  .adm-inner .ev-actions-bar {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
   .ev-toolbar {
     gap: 0.5rem;
     padding: 0.5rem;
@@ -227,6 +244,24 @@
     white-space: normal;
     word-break: break-word;
     max-width: 100%;
+  }
+
+  /* Ensure dropdowns in button toolbar are visible */
+  .ev-toolbar-btns .dropdown-toggle {
+    min-height: 38px;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .ev-toolbar-btns .dropdown-menu {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  /* Highlight active drawing mode on mobile */
+  .ev-toolbar-btns .btn-primary {
+    font-weight: 700;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.3);
   }
 
   /* Mobile toolbar dropdown styling */

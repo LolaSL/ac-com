@@ -79,7 +79,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             id="basic-navbar-nav"
             className="justify-content-start"
           >
-            <div className="flex-grow-1 me-3 search-wrapper">
+            <div className="grow me-3 search-wrapper">
               <SearchBox />
             </div>
             <Nav className=" align-items-center gap-3 ms-auto me-4">
@@ -116,6 +116,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   show={userDropdownOpen}
                   onToggle={setUserDropdownOpen}
                   onMouseLeave={() => setUserDropdownOpen(false)}
+                  align="end"
                   title={
                     <span className="user-dropdown-title">
                       {userInfo.avatar ? (
@@ -189,6 +190,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   show={providerDropdownOpen}
                   onToggle={setProviderDropdownOpen}
                   onMouseLeave={() => setProviderDropdownOpen(false)}
+                  align="end"
                   title={serviceProviderInfo.name}
                   id="provider-nav-dropdown"
                 >
@@ -240,6 +242,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   show={adminDropdownOpen}
                   onToggle={setAdminDropdownOpen}
                   onMouseLeave={() => setAdminDropdownOpen(false)}
+                  align="end"
                   title="Admin"
                   id="admin-nav-dropdown"
                 >

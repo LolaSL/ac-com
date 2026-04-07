@@ -1,63 +1,49 @@
-.op-page { min-height: 100vh; background: #f5f6fa; overflow-x: hidden; width: 100%; box-sizing: border-box; }
-
-.op-hero {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border-radius: 0 0 16px 16px;
-  padding: 2.5rem 2rem 2rem;
-  color: #fff;
-  margin-bottom: 2rem;
-  box-sizing: border-box;
-}
-
-.op-hero__inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.op-hero__title {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  font-size: 1.6rem;
-  font-weight: 700;
-}
-
-.op-hero__id {
-  font-size: 1rem;
-  opacity: 0.8;
-  font-family: monospace;
-  letter-spacing: 0.04em;
-}
-
-.op-hero__badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-
+/* Keep op-badge styles for status badges in hero */
 .op-badge {
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
-.op-badge--green { background: rgba(34,197,94,.25); border: 1px solid rgba(34,197,94,.5); }
-.op-badge--yellow { background: rgba(234,179,8,.25); border: 1px solid rgba(234,179,8,.5); }
-.op-badge--grey { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); }
+.op-badge--green { 
+  background: rgba(34,197,94,.9); 
+  border: 1px solid rgba(34,197,94,1); 
+  color: #fff; 
+  box-shadow: 0 2px 8px rgba(34,197,94,.4);
+}
+.op-badge--yellow { 
+  background: rgba(234,179,8,.9); 
+  border: 1px solid rgba(234,179,8,1); 
+  color: #fff; 
+  box-shadow: 0 2px 8px rgba(234,179,8,.4);
+}
+.op-badge--grey { 
+  background: rgba(100,116,139,.85); 
+  border: 1px solid rgba(148,163,184,.8); 
+  color: #fff; 
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
 
 .op-grid {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.5rem 3rem;
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 360px;
   gap: 1.5rem;
   align-items: start;
   box-sizing: border-box;
   width: 100%;
+}
+
+/* Tablet and smaller screens */
+@media (max-width: 992px) {
+  .op-grid { 
+    grid-template-columns: 1fr; 
+    padding: 0 1rem 2.5rem;
+  }
 }
 
 @media (max-width: 860px) {
@@ -166,6 +152,15 @@
   top: 80px;
 }
 
+/* Tablet screens - optimize summary layout */
+@media (min-width: 768px) and (max-width: 992px) {
+  .op-summary {
+    position: static;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
 .op-summary__title {
   font-size: 1rem;
   font-weight: 700;
@@ -231,25 +226,9 @@
 
 /* ── Mobile ≤767px ─────────────────────────────────────── */
 @media (max-width: 767px) {
-  .op-hero {
-    padding: 1.5rem 1rem 1.2rem;
-    margin-bottom: 1.25rem;
-    border-radius: 0 0 12px 12px;
-  }
-
-  .op-hero__inner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .op-hero__title {
-    font-size: 1.2rem;
-    flex-wrap: wrap;
-  }
-
-  .op-hero__id {
-    font-size: 0.8rem;
-    word-break: break-all;
+  .adm-page {
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .op-grid {
@@ -263,6 +242,8 @@
     overflow-x: hidden;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
 
   .op-summary {
@@ -270,6 +251,8 @@
     padding: 1rem;
     border-radius: 10px;
     overflow-x: hidden;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
 
   .op-item {

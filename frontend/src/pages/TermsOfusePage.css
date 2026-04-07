@@ -1,46 +1,93 @@
-/* TermsOfusePage */
+/* TermsOfusePage — scoped .tou-* styles */
+
+/* Override any parent container padding */
+.tou-page,
+.tou-page * .container,
+.tou-page * .container-fluid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* ── Page wrapper ── */
 .tou-page {
   background: #f5f6fa;
   min-height: 100vh;
   padding-bottom: 3rem;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
 }
 
+/* ── Hero ── */
 .tou-hero {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border-radius: 0 0 16px 16px;
-  padding: 2.2rem 1.5rem 2rem;
+  padding: 2.5rem 1.5rem 2rem;
   text-align: center;
   color: #fff;
   margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 0 2rem 0 !important;
+}
+
+.tou-hero::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .tou-hero__inner {
   max-width: 700px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .tou-hero__icon {
-  font-size: 2.4rem;
-  margin-bottom: 0.6rem;
-  opacity: 0.92;
+  font-size: 2.6rem;
+  margin-bottom: 0.75rem;
+  color: #a855f7;
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
 }
 
 .tou-hero__title {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
+  color: #f1f5f9;
 }
 
 .tou-hero__sub {
   font-size: 1rem;
-  opacity: 0.85;
+  color: #94a3b8;
   margin: 0;
 }
 
+/* ── Content wrapper ── */
 .tou-inner {
   max-width: 900px;
   margin: 0 auto;
   padding: 0 1.25rem;
   text-align: justify;
+  position: relative;
+  left: 0;
+  right: 0;
 }
 

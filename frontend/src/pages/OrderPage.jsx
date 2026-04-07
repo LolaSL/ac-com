@@ -7,6 +7,8 @@ import { Store } from "../Store";
 import { getError } from "../utils";
 import { toast } from "react-toastify";
 import printJS from "print-js";
+import { FaFileInvoice } from "react-icons/fa";
+import "./AdminHero.css";
 import "./OrderPage.css";
 
 function printOrder() {
@@ -351,24 +353,30 @@ export default function OrderPage() {
   }
 
   return (
-    <div className="op-page" id="order-container">
-        <div className="op-hero">
-          <div className="op-hero__inner">
-            <div className="op-hero__title">
-              <span>Order</span>
-              <span className="op-hero__id">#{orderId}</span>
+    <div className="adm-page" id="order-container">
+        {/* Hero Banner */}
+        <div className="adm-hero">
+          <div className="adm-hero__inner">
+            <div className="adm-hero__icon">
+              <FaFileInvoice />
             </div>
-            <div className="op-hero__badges">
-              {order.isPaid ? (
-                <span className="op-badge op-badge--green">✓ Paid</span>
-              ) : (
-                <span className="op-badge op-badge--yellow">⏳ Unpaid</span>
-              )}
-              {order.isDelivered ? (
-                <span className="op-badge op-badge--green">✓ Delivered</span>
-              ) : (
-                <span className="op-badge op-badge--grey">🚚 Pending Delivery</span>
-              )}
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <h1 className="adm-hero__title">
+                Order <span style={{ fontFamily: 'monospace', opacity: 0.85 }}>#{orderId}</span>
+              </h1>
+              <div className="adm-hero__sub" style={{ marginTop: '0.5rem' }}>
+                {order.isPaid ? (
+                  <span className="op-badge op-badge--green">✓ Paid</span>
+                ) : (
+                  <span className="op-badge op-badge--yellow">⏳ Unpaid</span>
+                )}
+                {' '}
+                {order.isDelivered ? (
+                  <span className="op-badge op-badge--green">✓ Delivered</span>
+                ) : (
+                  <span className="op-badge op-badge--grey">🚚 Pending Delivery</span>
+                )}
+              </div>
             </div>
           </div>
         </div>

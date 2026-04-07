@@ -231,9 +231,13 @@ const EngineerViewPage = () => {
   // Touch event handlers for mobile zone drawing (like HvacZoneDesignerPage)
   const handleCanvasTouchStart = (e) => {
     if (!overlayCanvasRef.current) return;
-    e.preventDefault();
     
-    if (e.touches.length === 1) {
+    // Only prevent default when in drawing mode to allow scrolling otherwise
+    if (isDrawingZone) {
+      e.preventDefault();
+    }
+    
+    if (e.touches.length === 1 && isDrawingZone) {
       const touch = e.touches[0];
       const rect = e.currentTarget.getBoundingClientRect();
       const coords = screenToCanvasPercent(touch.clientX, touch.clientY, rect, overlayCanvasRef.current);
@@ -242,8 +246,12 @@ const EngineerViewPage = () => {
   };
 
   const handleCanvasTouchMove = (e) => {
-    if (!zoneStartPointRef.current || !overlayCanvasRef.current) return;
-    e.preventDefault();
+    if (!zoneStartPointRef.current || !overlayCanvasRef.current || !isDrawingZone) return;
+    
+    // Only prevent default when in drawing mode to allow scrolling otherwise
+    if (isDrawingZone) {
+      e.preventDefault();
+    }
     
     if (e.touches.length === 1) {
       const touch = e.touches[0];
@@ -261,10 +269,13 @@ const EngineerViewPage = () => {
   };
 
   const handleCanvasTouchEnd = (e) => {
-    e.preventDefault();
+    // Only prevent default when in drawing mode to allow scrolling otherwise
+    if (isDrawingZone) {
+      e.preventDefault();
+    }
     
     // If we completed a touch gesture, try to create the zone
-    if (e.touches.length === 0 && zoneStartPointRef.current) {
+    if (e.touches.length === 0 && zoneStartPointRef.current && isDrawingZone) {
       // Get the last touch position from changedTouches (since touches is now empty)
       if (e.changedTouches.length > 0) {
         const touch = e.changedTouches[0];
@@ -371,6 +382,9 @@ const EngineerViewPage = () => {
         }
       }
     }));
+    
+    // Auto-select the newly created zone to show color palette
+    setSelectedZoneIndex((annotation?.annotations?.hvac?.zones?.length || 0));
     
     toast.success(`Zone ${newZone.zoneNumber} created`);
   };
@@ -693,13 +707,37 @@ const EngineerViewPage = () => {
         overlayCanvas.onmousemove = null;
         overlayCanvas.onmouseup = null;
         overlayCanvas.ontouchstart = (e) => {
-          e.preventDefault();
+          // Don't prevent default - allow scrolling
           handleOverlayInteraction(e);
         };
         overlayCanvas.ontouchmove = null;
         overlayCanvas.ontouchend = (e) => {
-          e.preventDefault();
+          // Don't prevent default - allow scrolling
           handleOverlayInteraction(e);
+          // Handle zone selection on touch devices
+          if (e.changedTouches && e.changedTouches.length > 0) {
+            const touch = e.changedTouches[0];
+            const rect = e.currentTarget.getBoundingClientRect();
+            const coords = screenToCanvasPercent(touch.clientX, touch.clientY, rect, overlayCanvasRef.current);
+            
+            const zones = annotation?.annotations?.hvac?.zones || [];
+            let clickedIndex = -1;
+            
+            for (let i = zones.length - 1; i >= 0; i--) {
+              const zone = zones[i];
+              if (
+                coords.x >= zone.xPercent &&
+                coords.x <= zone.xPercent + zone.widthPercent &&
+                coords.y >= zone.yPercent &&
+                coords.y <= zone.yPercent + zone.heightPercent
+              ) {
+                clickedIndex = i;
+                break;
+              }
+            }
+            
+            setSelectedZoneIndex(clickedIndex);
+          }
         };
       }
 
