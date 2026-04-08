@@ -572,7 +572,7 @@ const ProductEditPage = () => {
               </Button>
               <Button
                 type="button"
-                className="btn-cancel w-75"
+                className="btn-cancel w-75 mx-2"
                 onClick={() => navigate("/admin/products")}
               >
                 <i className="fas fa-times me-2"></i>

@@ -4,11 +4,12 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { Store } from "../Store";
 import { getError } from "../utils";
-import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import Button from "react-bootstrap/Button";
+import { FaSellcast } from "react-icons/fa";
+
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -99,68 +100,112 @@ export default function SellerEditPage() {
   };
 
   return (
-    <Container className="small-container">
-      <h1 className="page-title">Edit Seller {id}</h1>
-      {loading ? (
-        <LoadingBox></LoadingBox>
-      ) : error ? (
-        <MessageBox variant="danger">{error}</MessageBox>
-      ) : (
-        <Form onSubmit={submitHandler}>
-          <Form.Group className="mb-3" controlId="logo">
-            <Form.Label>Logo</Form.Label>
-            <Form.Control
-              type="file"
-              accept="image/*"
-              required
-              onChange={(e) => setLogo(e.target.files[0])}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="companyLink">
-            <Form.Label>Company Link</Form.Label>
-            <Form.Control
-              type="text"
-              required
-              value={companyLink}
-              onChange={(e) => setCompanyLink(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="name">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="brand">
-            <Form.Label>Brand</Form.Label>
-            <Form.Control
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="info">
-            <Form.Label>Information</Form.Label>
-            <Form.Control
-              value={info}
-              onChange={(e) => setInfo(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <div className="mb-3">
-            <Button
-              disabled={loadingUpdate}
-              type="submit"
-              className="go-to-btn btn-text"
-            >
-              Update
-            </Button>
-            {loadingUpdate && <LoadingBox></LoadingBox>}
-          </div>
-        </Form>
-      )}
-    </Container>
+ <div className="adm-page">
+  <div className="adm-hero">
+    <div className="adm-hero__inner">
+      <div className="adm-hero__icon"><FaSellcast /></div>
+      <h1 className="adm-hero__title">Edit Seller</h1>
+      <p className="adm-hero__sub">
+        Update logo, company link, name, brand and seller information
+      </p>
+    </div>
+  </div>
+
+  <div className="adm-inner">
+      <div className="sl-edit-card mx-4">
+
+        {loading ? (
+          <LoadingBox />
+        ) : error ? (
+          <MessageBox variant="danger">{error}</MessageBox>
+        ) : (
+          <Form onSubmit={submitHandler} className="sl-edit-form">
+
+            {/* Logo Upload */}
+            <Form.Group className="mb-4" controlId="logo">
+              <Form.Label className="sl-edit-label">Logo</Form.Label>
+              <Form.Control
+                className="sl-edit-input file-input"
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => setLogo(e.target.files[0])}
+              />
+            </Form.Group>
+
+            {/* Grid Fields */}
+            <div className="sl-grid">
+              <Form.Group controlId="companyLink">
+                <Form.Label className="sl-edit-label">Company Link</Form.Label>
+                <Form.Control
+                  className="sl-edit-input"
+                  type="text"
+                  value={companyLink}
+                  onChange={(e) => setCompanyLink(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group controlId="name">
+                <Form.Label className="sl-edit-label">Name</Form.Label>
+                <Form.Control
+                  className="sl-edit-input"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group controlId="brand">
+                <Form.Label className="sl-edit-label">Brand</Form.Label>
+                <Form.Control
+                  className="sl-edit-input"
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  required
+                />
+              </Form.Group>
+            </div>
+
+            {/* Full width */}
+            <Form.Group className="mb-4" controlId="info">
+              <Form.Label className="sl-edit-label">Information</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                className="sl-edit-input"
+                value={info}
+                onChange={(e) => setInfo(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            {/* Actions */}
+            <div className="sl-edit-actions">
+              <Button
+                type="submit"
+                className="sl-edit-save-btn"
+                disabled={loadingUpdate}
+              >
+                {loadingUpdate ? "Saving…" : "Save Changes"}
+              </Button>
+
+              <Button
+                type="button"
+                className="sl-edit-cancel-btn"
+                onClick={() => navigate("/admin/sellers")}
+              >
+                Cancel
+              </Button>
+            </div>
+
+            {loadingUpdate && <LoadingBox />}
+          </Form>
+        )}
+
+      </div>
+
+  </div>
+ </div>
   );
 }

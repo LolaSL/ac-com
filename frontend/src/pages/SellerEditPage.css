@@ -1,0 +1,71 @@
+/* Reset problematic parents */
+.adm-page,
+.adm-inner,
+.adm-container {
+  overflow: visible !important; /* 🔥 allow shadows */
+}
+
+/* Proper centering */
+.adm-inner {
+  padding: 0 16px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Container fix */
+.adm-container {
+  max-width:800px;
+  width: 100%;
+}
+
+/* CARD (fully fixed) */
+.sl-edit-card {
+  width: 100%;
+  margin: 2rem 0;
+  outline: 3px solid red;
+  padding: 2rem;
+  border-radius: 20px;
+
+  /* ✅ glass */
+  background: rgba(255, 255, 255, 0.18);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  /* ✅ visible border */
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  /* ✅ strong shadow */
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255,255,255,0.15) inset;
+
+  position: relative;
+  z-index: 2;
+
+  animation: fadeUp 0.4s ease;
+}
+
+/* Glow edge (this makes glass POP) */
+.sl-edit-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0.6),
+    rgba(255,255,255,0.05)
+  );
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+
+  pointer-events: none;
+}

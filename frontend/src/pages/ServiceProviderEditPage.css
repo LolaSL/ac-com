@@ -3,9 +3,15 @@
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  padding: 2rem;
+  padding: 1rem 1.2rem;
   max-width: 560px;
   animation: spEditFade 0.35s ease both;
+  display: flexbox;
+  justify-content: center;
+  align-items: center;
+  position: center;
+  margin: 0 auto;
+
 }
 
 @keyframes spEditFade {

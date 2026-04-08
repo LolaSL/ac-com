@@ -209,7 +209,6 @@ export default function HomeBannerPage() {
             </div>
           </div>
         ))}
-        ))}
         </div>
         
         {/* Investor-Ready Sections */}
