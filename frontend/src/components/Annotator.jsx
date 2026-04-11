@@ -2275,13 +2275,13 @@ const Annotator = ({
                         placeholder="Filter by room type"
                         value={filterText}
                         onChange={(e) => setFilterText(e.target.value)}
-                        className="form-control flex-grow-1 my-2"
+                        className="form-control grow my-2"
                       />
 
                       <select
                         value={sortKey}
                         onChange={(e) => setSortKey(e.target.value)}
-                        className="form-select flex-grow-1"
+                        className="form-select grow"
                       >
                         <option value="roomType">Room Type</option>
                         <option value="width">Width</option>

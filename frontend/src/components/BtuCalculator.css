@@ -5,11 +5,13 @@
   overflow-x: hidden;
   box-sizing: border-box;
   word-wrap: break-word;
+  padding: 1.5rem;
 }
 
 .btu-form {
   max-width: 100%;
   overflow-x: hidden;
+  padding: 0.5rem;
 }
 
 .title {
@@ -58,12 +60,12 @@
   .btu-calculator-container {
     margin-top: 1rem;
     margin-bottom: 1rem;
-    padding: 0.75rem;
+    padding: 1rem;
     border-width: 3px !important;
   }
 
   .btu-form {
-    padding: 0;
+    padding: 0.5rem;
   }
 
   .btu-form .form-control,
@@ -114,10 +116,14 @@
 
 @media (max-width: 480px) {
   .btu-calculator-container {
-    padding: 0.5rem;
-    margin-left: -0.25rem;
-    margin-right: -0.25rem;
+    padding: 0.75rem;
+    margin-left: 0;
+    margin-right: 0;
     border-width: 2px !important;
+  }
+
+  .btu-form {
+    padding: 0.25rem;
   }
 
   .title {

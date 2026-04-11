@@ -10,6 +10,18 @@ import expressAsyncHandler from 'express-async-handler';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+const isInvestorUser = (user = {}) => {
+  const type = String(user.type || '').toLowerCase();
+  const role = String(user.role || '').toLowerCase();
+  const email = String(user.email || '').toLowerCase();
+  return Boolean(
+    user.isInvestor ||
+    type === 'investor' ||
+    role === 'investor' ||
+    email.includes('investor')
+  );
+};
+
 router.get('/all-annotations', isAuth, async (req, res) => {
   try {
     // Only allow admin users
@@ -59,9 +71,9 @@ router.post(
       }
 
       const userId = req.user._id;
-      const isPaid = req.user.isPaid; // <-- ensure user’s isPaid is used
+      const hasPaidAccess = Boolean(req.user.isPaid || isInvestorUser(req.user));
 
-      const { pdfId, rectangles, comments, lines, hvac, vrf, acType, imageWidth, imageHeight, rooms, roomData } =
+      const { pdfId, rectangles, comments, lines, hvac, vrf, acType, imageWidth, imageHeight, rooms, roomData, pdfRotation } =
         req.body;
 
       if (!imageWidth || !imageHeight) {
@@ -197,10 +209,11 @@ router.post(
         pdfData: req.file.buffer,
         userId,
         pdfId,
-        isPaid,
+        isPaid: hasPaidAccess,
         acType,
         originalImageWidth: width,
         originalImageHeight: height,
+        pdfRotation: Number.isFinite(parseInt(pdfRotation, 10)) ? parseInt(pdfRotation, 10) : 0,
         annotations: {
           rectangles: percentRectangles,
           comments: percentComments,
@@ -240,8 +253,10 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
     }
 
     const { email } = req.user;
-    const isPaid = annotation.isPaid !== undefined ? annotation.isPaid : false;
-    console.log(`Annotation isPaid: ${isPaid}, User Email: ${email}`);
+    const hasPaidAccess = Boolean(
+      (annotation.isPaid !== undefined ? annotation.isPaid : false) || isInvestorUser(req.user)
+    );
+    console.log(`Annotation isPaid: ${annotation.isPaid}, paidAccess: ${hasPaidAccess}, User Email: ${email}`);
     console.log('Annotation object:', annotation);
 
     // Ensure pdf data is a Buffer/Uint8Array for pdf-lib
@@ -292,7 +307,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
 
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    if (isPaid) {
+    if (hasPaidAccess) {
       console.log('Annotation is paid. Drawing annotations, watermark, and stamp.');
 
       const ann = annotation.annotations;
@@ -503,97 +518,6 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
   }
 });
 
-/* ---------------------------------------------------
-   Helpers
---------------------------------------------------- */
-
-// // Convert top-left (React/Konva) → bottom-left (PDF)
-// const normalizeY = (y, pageHeight, elementHeight = 0) => {
-//   return pageHeight - y - elementHeight;
-// };
-
-// // Normalize colors (0–255 → 0–1)
-// const normalizeColor = (v) => (v > 1 ? v / 255 : v);
-
-// // Draw annotations (multi-page safe)
-// const drawAnnotations = ({ pages, annotations, font }) => {
-//   if (!Array.isArray(annotations)) return;
-
-//   annotations.forEach((ann) => {
-//     const page = pages[ann.pageIndex] || pages[0];
-//     const { height } = page.getSize();
-
-//     switch (ann.type) {
-//       case 'text':
-//         page.drawText(ann.text || '', {
-//           x: ann.x,
-//           y: normalizeY(ann.y, height),
-//           size: ann.size || 12,
-//           font,
-//           color: ann.color
-//             ? rgb(
-//                 normalizeColor(ann.color.r),
-//                 normalizeColor(ann.color.g),
-//                 normalizeColor(ann.color.b)
-//               )
-//             : rgb(0, 0, 0),
-//         });
-//         break;
-
-//       case 'rectangle':
-//         page.drawRectangle({
-//           x: ann.x,
-//           y: normalizeY(ann.y, height, ann.height),
-//           width: ann.width,
-//           height: ann.height,
-//           borderWidth: ann.borderWidth || 1,
-//           borderColor: ann.borderColor
-//             ? rgb(
-//                 normalizeColor(ann.borderColor.r),
-//                 normalizeColor(ann.borderColor.g),
-//                 normalizeColor(ann.borderColor.b)
-//               )
-//             : rgb(1, 0, 0),
-//         });
-//         break;
-
-//       default:
-//         console.warn('Unknown annotation type:', ann.type);
-//     }
-//   });
-// };
-
-// // Draw watermark (paid vs free)
-// const drawWatermark = ({ pages, font, text, isPaid }) => {
-//   pages.forEach((page) => {
-//     const { width, height } = page.getSize();
-
-//     if (isPaid) {
-//       const fontSize = 12;
-//       const textWidth = font.widthOfTextAtSize(text, fontSize);
-
-//       page.drawText(text, {
-//         x: (width - textWidth) / 2,
-//         y: 25,
-//         size: fontSize,
-//         font,
-//         opacity: 0.35,
-//         color: rgb(0.5, 0.5, 0.5),
-//       });
-//     } else {
-//       page.drawText('UNPAID PREVIEW', {
-//         x: width / 4,
-//         y: height / 2,
-//         size: 40,
-//         font,
-//         rotate: { type: 'degrees', angle: -30 },
-//         opacity: 0.15,
-//         color: rgb(1, 0, 0),
-//       });
-//     }
-//   });
-// };
-
 
 // Draw approval stamp (paid only)
 const drawApprovalStamp = ({ page, font }) => {
@@ -646,7 +570,7 @@ router.get(
       }
 
       const { email } = req.user;
-      const isPaid = annotation.isPaid;
+      const hasPaidAccess = Boolean(annotation.isPaid || isInvestorUser(req.user));
 
       const pdfDoc = await PDFDocument.load(annotation.pdfData);
       const pages = pdfDoc.getPages();
@@ -667,12 +591,12 @@ router.get(
       drawWatermark({
         pages,
         font,
-        isPaid,
+        isPaid: hasPaidAccess,
         text: `AC Commerce — ${email || 'User'} — ${formattedDate}`,
       });
 
       // 3️⃣ Approval stamp (PAID ONLY)
-      if (isPaid) {
+      if (hasPaidAccess) {
         drawApprovalStamp({
           page: pages[0],
           font,
@@ -718,6 +642,11 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
       annotations: annotation.annotations,
       isPaid: annotation.isPaid,
       acType: annotation.acType,
+      pdfRotation: annotation.pdfRotation || 0,
+      offsetX: annotation.offsetX || 0,
+      offsetY: annotation.offsetY || 0,
+      originalImageWidth: annotation.originalImageWidth,
+      originalImageHeight: annotation.originalImageHeight,
       filename: annotation.filename,
       userId: annotation.userId,
       roomData: annotation.roomData || [], // Include room data for BTU Calculator export
@@ -749,6 +678,38 @@ router.put('/annotations/:id', isAuth, async (req, res) => {
     console.error('Error updating annotation:', error);
     if (!res.headersSent) {
       return res.status(500).json({ message: 'Failed to update annotation.', error: error.message });
+    }
+  }
+});
+
+// PATCH endpoint to update alignment offset
+router.patch('/annotations/:id/offset', isAuth, async (req, res) => {
+  try {
+    const annotation = await AnnotationModel.findById(req.params.id);
+    if (!annotation) {
+      return res.status(404).json({ message: 'Annotation not found.' });
+    }
+
+    // Verify ownership
+    if (annotation.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to update this annotation.' });
+    }
+
+    // Update offset values
+    annotation.offsetX = req.body.offsetX || 0;
+    annotation.offsetY = req.body.offsetY || 0;
+
+    await annotation.save();
+
+    res.json({ 
+      message: 'Alignment offset saved successfully.', 
+      offsetX: annotation.offsetX, 
+      offsetY: annotation.offsetY 
+    });
+  } catch (error) {
+    console.error('Error saving offset:', error);
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Failed to save offset.', error: error.message });
     }
   }
 });
@@ -821,7 +782,8 @@ router.get("/print-annotated-pdf/:id", isAuth, async (req, res) => {
       return res.status(404).json({ message: "PDF not found." });
     }
 
-    if (!annotation.isPaid) {
+    const hasPaidAccess = Boolean(annotation.isPaid || isInvestorUser(req.user));
+    if (!hasPaidAccess) {
       return res.status(403).json({
         message: "Printing is available only for paid documents.",
       });

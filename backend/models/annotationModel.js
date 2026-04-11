@@ -9,6 +9,9 @@ const annotationSchema = new Schema(
 
     originalImageWidth: { type: Number, required: true },
     originalImageHeight: { type: Number, required: true },
+    pdfRotation: { type: Number, default: 0 },
+    offsetX: { type: Number, default: 0 },
+    offsetY: { type: Number, default: 0 },
 
     annotations: {
       rectangles: [

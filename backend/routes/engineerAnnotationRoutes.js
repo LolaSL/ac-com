@@ -374,7 +374,9 @@ router.get(
     "/annotated-pdf/:id",
     isAuth,
     expressAsyncHandler(async (req, res) => {
-        const annotation = await EngineerAnnotationModel.findById(req.params.id);
+        const annotation = await EngineerAnnotationModel.findById(req.params.id)
+            .populate("userId", "name email")
+            .populate("engineerId", "name email");
 
         if (!annotation || !annotation.pdfData) {
             return res.status(404).json({ message: "Engineer annotation PDF not found" });
@@ -382,9 +384,9 @@ router.get(
 
         // Authorization check
         const tokenUserId = req.user._id.toString();
-        const isOwner =
-            annotation.userId.toString() === tokenUserId ||
-            annotation.engineerId.toString() === tokenUserId;
+        const ownerUserId = annotation.userId?._id?.toString() || annotation.userId?.toString();
+        const ownerEngineerId = annotation.engineerId?._id?.toString() || annotation.engineerId?.toString();
+        const isOwner = ownerUserId === tokenUserId || ownerEngineerId === tokenUserId;
         const isAdmin = req.user.isAdmin;
 
         if (!isOwner && !isAdmin) {
@@ -393,7 +395,6 @@ router.get(
                 .json({ message: "Unauthorized to download this PDF" });
         }
 
-        const { email } = req.user;
         let pdfDataForLoad = annotation.pdfData;
 
         // Coerce to Buffer if needed
@@ -411,6 +412,7 @@ router.get(
         const pages = pdfDoc.getPages();
         const firstPage = pages[0];
         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
         // Draw annotations on PDF
         const ann = annotation.annotations;
@@ -756,18 +758,13 @@ router.get(
             ? new Date(annotation.createdAt).toLocaleString()
             : "Unknown Date";
         const engineerName = annotation.engineerId?.name || "Engineer";
-        // Fetch user email for watermark
-        let userEmail = "User";
-        try {
-            const userAnnotation = await AnnotationModel.findById(annotation.userAnnotationId).populate('userId', 'email');
-            if (userAnnotation && userAnnotation.userId && userAnnotation.userId.email) {
-                userEmail = userAnnotation.userId.email;
-            }
-        } catch (e) {}
-        const watermarkText = `AC-Commerce — User: ${userEmail} — Engineer: ${engineerName} — Reviewed: ${formattedDate}`;
+        const engineerEmail = annotation.engineerId?.email || "No Engineer Email";
+        const userName = annotation.userId?.name || "User";
+        const userEmail = annotation.userId?.email || "No User Email";
+        const watermarkText = `AC-Commerce | User: ${userName} (${userEmail}) | Engineer: ${engineerName} (${engineerEmail}) | Reviewed: ${formattedDate}`;
 
         pages.forEach((page) => {
-            const fontSize = 12;
+            const fontSize = 9;
             const { width, height } = page.getSize();
             const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
             const xPos = (width - textWidth) / 2;
@@ -779,41 +776,70 @@ router.get(
                 font: helveticaFont,
                 opacity: 0.28,
                 color: rgb(0.4, 0.4, 0.4),
-                rotate: { type: 'degrees', angle: 30 },
             });
         });
 
-        // Add approval stamp
+        // Add circular seal-style stamp (clean/minimal)
         const { width, height } = firstPage.getSize();
-        const stampMarginX = 50;
-        const stampMarginY = height - 100;
-        const boxWidth = 150;
-        const boxHeight = 60;
+        const sealRadius = 58;
+        const sealX = Math.max(sealRadius + 16, width - sealRadius - 26);
+        const sealY = Math.max(sealRadius + 16, height - sealRadius - 30);
 
-        firstPage.drawRectangle({
-            x: stampMarginX - 10,
-            y: stampMarginY - 10,
-            width: boxWidth,
-            height: boxHeight,
-            borderColor: rgb(0.2, 0.6, 0.2),
-            borderWidth: 2,
+        // Outer ring
+        firstPage.drawCircle({
+            x: sealX,
+            y: sealY,
+            size: sealRadius,
+            borderColor: rgb(0.12, 0.35, 0.78),
+            borderWidth: 3,
+            opacity: 0.5,
         });
 
-        firstPage.drawText("ENGINEER REVIEW", {
-            x: stampMarginX,
-            y: stampMarginY + 30,
-            size: 14,
-            font: helveticaFont,
-            color: rgb(0.2, 0.6, 0.2),
-            opacity: 0.85,
+        // Inner soft fill
+        firstPage.drawCircle({
+            x: sealX,
+            y: sealY,
+            size: sealRadius - 8,
+            color: rgb(0.9, 0.95, 1),
+            opacity: 0.28,
+            borderColor: rgb(0.12, 0.35, 0.78),
+            borderWidth: 1,
+            borderOpacity: 0.35,
+        });
+
+        const approvedText = "APPROVED";
+        const approvedSize = 14;
+        const approvedWidth = helveticaBoldFont.widthOfTextAtSize(approvedText, approvedSize);
+
+        firstPage.drawText(approvedText, {
+            x: sealX - approvedWidth / 2,
+            y: sealY + 8,
+            size: approvedSize,
+            font: helveticaBoldFont,
+            color: rgb(0.1, 0.3, 0.75),
+            opacity: 0.66,
+        });
+
+        const reviewText = "ENGINEER REVIEW";
+        const reviewSize = 7;
+        const reviewWidth = helveticaBoldFont.widthOfTextAtSize(reviewText, reviewSize);
+
+        firstPage.drawText(reviewText, {
+            x: sealX - reviewWidth / 2,
+            y: sealY - 4,
+            size: reviewSize,
+            font: helveticaBoldFont,
+            color: rgb(0.16, 0.34, 0.68),
+            opacity: 0.62,
         });
 
         firstPage.drawText(engineerName, {
-            x: stampMarginX,
-            y: stampMarginY + 10,
-            size: 10,
+            x: sealX - 30,
+            y: sealY - 16,
+            size: 6.5,
             font: helveticaFont,
-            color: rgb(0.2, 0.6, 0.2),
+            color: rgb(0.18, 0.33, 0.62),
+            opacity: 0.56,
         });
 
         // Save and send PDF
@@ -821,7 +847,8 @@ router.get(
 
         res.set({
             "Content-Type": "application/pdf",
-            "Content-Disposition": `attachment; filename="${annotation.filename || "engineer-annotation.pdf"}"`,
+            // "Content-Disposition": `attachment; filename="${annotation.filename || "engineer-annotation.pdf"}"`,
+            "Content-Disposition": `inline; filename="engineer-annotation.pdf"`,
             "Content-Length": pdfBytes.length,
         });
 
@@ -870,6 +897,8 @@ router.get(
             annotations: annotation.annotations,
             status: annotation.status,
             engineerNotes: annotation.engineerNotes,
+            offsetX: annotation.offsetX || 0,
+            offsetY: annotation.offsetY || 0,
             createdAt: annotation.createdAt,
             updatedAt: annotation.updatedAt,
         });
@@ -940,6 +969,40 @@ router.delete(
 
         await EngineerAnnotationModel.findByIdAndDelete(req.params.id);
         return res.json({ message: "Engineer annotation deleted successfully" });
+    })
+);
+
+/**
+ * PATCH /api/engineer-annotations/:id/offset
+ * Update alignment offset for engineer annotation
+ * Requires: isAuth (user who owns the annotation)
+ */
+router.patch(
+    "/:id/offset",
+    isAuth,
+    expressAsyncHandler(async (req, res) => {
+        const annotation = await EngineerAnnotationModel.findById(req.params.id);
+
+        if (!annotation) {
+            return res.status(404).json({ message: "Engineer annotation not found" });
+        }
+
+        // Verify ownership (only the user who owns the annotation can update offset)
+        if (annotation.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Not authorized to update this annotation" });
+        }
+
+        // Update offset values
+        annotation.offsetX = req.body.offsetX || 0;
+        annotation.offsetY = req.body.offsetY || 0;
+
+        await annotation.save();
+
+        return res.json({
+            message: "Alignment offset saved successfully",
+            offsetX: annotation.offsetX,
+            offsetY: annotation.offsetY,
+        });
     })
 );
 

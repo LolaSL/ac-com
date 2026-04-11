@@ -2,19 +2,14 @@ import { useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 import { PDFDocument } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
-import { overlayAnnotations, overlayHVAC, overlayVRFSystem, drawCanvasLegend, hvacSymbols, preloadSymbolImages } from "../utils/annotationUtils.js";
 import "./SaveAsPDF.css";
 
 // This component now receives the 'annotations' object as a prop
 function SaveAsPDF({
   file,
-  isPaid,
   pdfId,
   token,
-  annotations,
-  acType,
   annotationType = "user",
-  userId,
 }) {
   const canvasRef = useRef(null);
   const [error, setError] = useState(null);
@@ -53,109 +48,13 @@ function SaveAsPDF({
     }
 
     try {
-      // ── ENGINEER: render base PDF + live overlays for BOTH modes (2-page PDF) ──
+      // ── ENGINEER: use backend-rendered PDF to preserve watermark/stamp and credentials ──
       if (annotationType === "engineer") {
-        // Fetch engineer annotation JSON (includes userAnnotationId + full annotations)
-        const annRes = await fetch(`/api/engineer-annotations/${pdfId}`, {
+        const response = await fetch(`/api/engineer-annotations/annotated-pdf/${pdfId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!annRes.ok) throw new Error("Failed to fetch engineer annotations");
-        const annData = await annRes.json();
-        const engAnnotations = annData.annotations || annData;
-
-        // Fetch original base PDF (from user annotation)
-        let baseBuffer;
-        if (annData.userAnnotationId) {
-          const baseRes = await fetch(`/api/annotated-pdf/${annData.userAnnotationId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (baseRes.ok) baseBuffer = await (await baseRes.blob()).arrayBuffer();
-        }
-        // Fallback: use baked engineer PDF
-        if (!baseBuffer) {
-          const fallbackRes = await fetch(
-            `/api/engineer-annotations/annotated-pdf/${pdfId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (!fallbackRes.ok) throw new Error("Failed to fetch engineer PDF");
-          baseBuffer = await (await fallbackRes.blob()).arrayBuffer();
-        }
-
-        // Render base PDF page
-        const loadingTask = pdfjsLib.getDocument(baseBuffer);
-        const pdfJsDoc = await loadingTask.promise;
-        const pdfJsPage = await pdfJsDoc.getPage(1);
-        const scale = 1.5;
-        const viewport = pdfJsPage.getViewport({ scale });
-        const cw = viewport.width;
-        const ch = viewport.height;
-
-        // Preload SVG symbols for synchronous drawing
-        const preloaded = await preloadSymbolImages(hvacSymbols);
-
-        // Helper: render base + overlays for a specific mode
-        const renderMode = async (mode) => {
-          const baseCanvas = document.createElement("canvas");
-          baseCanvas.width = cw;
-          baseCanvas.height = ch;
-          const baseCtx = baseCanvas.getContext("2d");
-          await pdfJsPage.render({ canvasContext: baseCtx, viewport }).promise;
-
-          const overlayCanvas = document.createElement("canvas");
-          overlayCanvas.width = cw;
-          overlayCanvas.height = ch;
-          const overlayCtx = overlayCanvas.getContext("2d");
-
-          overlayAnnotations(overlayCtx, engAnnotations, mode, { pdfScale: scale, pdfExport: true });
-          if (engAnnotations.hvac && (mode === "ducted" || mode === "vrf-ducted")) {
-            overlayHVAC(overlayCtx, engAnnotations.hvac, preloaded, engAnnotations.comments, mode, scale);
-          }
-          if (engAnnotations.vrf && mode.startsWith("vrf")) {
-            overlayVRFSystem(overlayCtx, engAnnotations.vrf, preloaded, mode);
-          }
-          drawCanvasLegend(overlayCtx, mode, { pdfScale: scale });
-
-          // Mode label
-          overlayCtx.save();
-          overlayCtx.fillStyle = "rgba(0,0,0,0.75)";
-          overlayCtx.font = "bold 14px Arial";
-          overlayCtx.fillText(
-            mode === "vrf-ducted"
-              ? "VRF System \u2014 Ducted Indoor Units"
-              : "VRF System \u2014 Ductless Indoor Units",
-            10, 20
-          );
-          overlayCtx.restore();
-
-          // Composite
-          const composite = document.createElement("canvas");
-          composite.width = cw;
-          composite.height = ch;
-          const ctx = composite.getContext("2d");
-          ctx.drawImage(baseCanvas, 0, 0);
-          ctx.drawImage(overlayCanvas, 0, 0);
-          return composite.toDataURL("image/png");
-        };
-
-        // Render both modes
-        const ductedImage = await renderMode("vrf-ducted");
-        const ductlessImage = await renderMode("vrf-ductless");
-
-        // Build 2-page PDF
-        const pdfDoc = await PDFDocument.load(baseBuffer);
-        const [pngDucted, pngDuctless] = await Promise.all([
-          pdfDoc.embedPng(ductedImage),
-          pdfDoc.embedPng(ductlessImage),
-        ]);
-
-        const firstPage = pdfDoc.getPages()[0];
-        const { width, height } = firstPage.getSize();
-        firstPage.drawImage(pngDucted, { x: 0, y: 0, width, height });
-
-        const page2 = pdfDoc.addPage([width, height]);
-        page2.drawImage(pngDuctless, { x: 0, y: 0, width, height });
-
-        const pdfBytes = await pdfDoc.save();
+        if (!response.ok) throw new Error("Failed to fetch engineer review PDF");
+        const pdfBytes = await (await response.blob()).arrayBuffer();
         triggerDownload(pdfBytes, file.name || "engineer-review.pdf");
         setIsSaved(true);
         return;

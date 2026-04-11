@@ -309,10 +309,11 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                 <NavDropdown
                   title="Login"
                   id="login-nav-dropdown"
+                  align="end"
                   className="login-dropdown"
                 >
                   <Link
-                    className="dropdown-item"
+                    className="dropdown-item flex"
                     to={`/signin?redirect=${encodeURIComponent(
                       location.pathname + location.search
                     )}`}

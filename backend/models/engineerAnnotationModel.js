@@ -22,6 +22,10 @@ const engineerAnnotationSchema = new Schema(
         // Original PDF dimensions for accurate percentage-based positioning
         originalImageWidth: { type: Number, required: true },
         originalImageHeight: { type: Number, required: true },
+        
+        // Alignment offset for compensating PDF internal margins
+        offsetX: { type: Number, default: 0 },
+        offsetY: { type: Number, default: 0 },
 
         // HVAC system configuration selected by engineer
         systemConfig: {
