@@ -1308,7 +1308,7 @@ const EngineerViewPage = () => {
         const overlayCtx = overlayCanvas.getContext("2d");
 
         // Render ALL annotations including rectangles, lines, comments, and VRF refrigerant lines
-        overlayAnnotations(overlayCtx, annotation.annotations, mode);
+        overlayAnnotations(overlayCtx, annotation.annotations, mode, { pdfScale: scale });
         // Only bake HVAC overlay if the engineer had it enabled — matches live view behaviour
         if (
           showHVAC &&
@@ -1320,7 +1320,8 @@ const EngineerViewPage = () => {
             annotation.annotations.hvac,
             preloadedSymbols,
             annotation.annotations.comments,
-            mode
+            mode,
+            scale
           );
         }
         if (annotation.annotations.vrf && mode.startsWith("vrf")) {
@@ -1333,7 +1334,7 @@ const EngineerViewPage = () => {
         }
 
         // Draw legend on the overlay
-        drawCanvasLegend(overlayCtx, mode, { pdfScale });
+        drawCanvasLegend(overlayCtx, mode, { pdfScale: scale });
 
         // Composite base + overlay
         const composite = document.createElement("canvas");

@@ -8,7 +8,13 @@
 }
 
 .annotate-toggle-mobile {
-  display: flex;
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .annotate-toggle-mobile {
+    display: flex;
+  }
 }
 
 .export-success {
@@ -81,25 +87,53 @@
   width: 100%;
   max-width: 100%;
   max-height: 80vh;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow-x: auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
-  /* Prevent accidental pull-to-refresh / page scroll while interacting with canvas */
-  touch-action: pan-x pan-y;
+  /* Allow smooth momentum scrolling on iOS */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Ensure scrolling captures pan events, not page scroll */
+  overscroll-behavior: contain;
 }
 
 .canvas-wrapper {
   position: relative;
   display: inline-block;
-  width: fit-content;
-  height: fit-content;
+  width: auto;
+  height: auto;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none;
+  /* Ensure no CSS scaling - canvas will be at native pixel size */
+  transform: none;
+  transform-origin: 0 0;
+}
+
+.canvas-wrapper canvas {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  /* Canvas must never be CSS-scaled or coordinates break */
 }
 
 .konva-stage {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* Match canvas display behavior */
+  max-width: 100%;
+  transform: none !important;
+  transform-origin: 0 0 !important;
 }
 
 .error-message {
@@ -110,7 +144,39 @@
 /* ========== Mobile Responsive ========== */
 @media (max-width: 767px) {
   .container-main {
-    max-height: 60vh;
+    max-height: 65vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .canvas-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Allow natural PDF size to overflow for scrolling */
+    min-width: fit-content;
+    min-height: fit-content;
+  }
+
+  .canvas-wrapper canvas {
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Native size, no scaling */
+    width: auto;
+    height: auto;
+  }
+
+  .konva-stage {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .button-toolbar-annotator {
@@ -132,6 +198,37 @@
 
 @media (max-width: 480px) {
   .container-main {
-    max-height: 50vh;
+    max-height: 55vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .canvas-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Allow natural PDF size to overflow for scrolling */
+    min-width: fit-content;
+    min-height: fit-content;
+  }
+
+  .canvas-wrapper canvas {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto;
+    height: auto;
+  }
+
+  .konva-stage {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }

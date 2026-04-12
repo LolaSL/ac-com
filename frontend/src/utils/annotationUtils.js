@@ -962,13 +962,10 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
   // rectangles - ALWAYS render user-drawn rectangles (engineer annotations)
   // Rotate around top-left corner to match stored rectangle positioning
   annotations?.rectangles?.forEach((rect) => {
-    // Apply small offset correction to account for coordinate system differences
-    // Adjust x left by ~4% and y up by ~2% to better match original placement
-    const offsetX = -0.04; // Move left (negative = left)
-    const offsetY = -0.02; // Move up (negative = up)
-    
-    const x = rect.xPercent * canvasWidth * (1 + offsetX);
-    const y = rect.yPercent * canvasHeight * (1 + offsetY);
+    // Convert percentage-based coordinates directly to pixel coordinates
+    // No offset needed — percentages saved to DB are accurate reference points
+    const x = rect.xPercent * canvasWidth;
+    const y = rect.yPercent * canvasHeight;
     const width = rect.widthPercent * canvasWidth;
     const height = rect.heightPercent * canvasHeight;
     
@@ -976,8 +973,7 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
       id: rect.id,
       percentages: { xPercent: rect.xPercent, yPercent: rect.yPercent },
       canvasDimensions: { canvasWidth, canvasHeight },
-      pixels: { x, y, width, height },
-      offset: { offsetX, offsetY }
+      pixels: { x, y, width, height }
     });
     
     const angle = (rect.rotation || 0) * (Math.PI / 180);
@@ -995,15 +991,14 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
   });
   // lines - draw stored connector lines (user-created callout lines linking rectangles to comments)
   annotations?.lines?.forEach((line) => {
-    const lineReductionFactor = 0.985;
     context.beginPath();
     // Only convert percent to pixel if all points are <= 1.5 (percent-based)
     const isPercent = line.points.every((p) => Math.abs(p) <= 1.5);
     const points = isPercent
       ? line.points.map((val, idx) =>
           idx % 2 === 0
-            ? val * canvasWidth * lineReductionFactor
-            : val * canvasHeight * lineReductionFactor
+            ? val * canvasWidth
+            : val * canvasHeight
         )
       : line.points;
     context.moveTo(points[0], points[1]);

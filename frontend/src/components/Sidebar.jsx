@@ -332,6 +332,8 @@ const Sidebar = () => {
       const acType = annotationsData?.acType || "ducted"; // Get acType from backend response
       setSelectedAcType(acType); // Store for use in overlay rendering
       console.log("Fetched annotations for", pdf._id, normalizedAnnotations);
+      console.log("Fetched rectangles (should be in %%):", normalizedAnnotations?.rectangles);
+      console.log("Fetched comments (should be in %%):", normalizedAnnotations?.comments);
       setSelectedAnnotations(normalizedAnnotations); // Store normalized annotations (rectangles, comments, etc.)
 
       const container = document.getElementById("pdf-container");
@@ -378,7 +380,7 @@ const Sidebar = () => {
           rectangles: normalizedAnnotations.rectangles
         });
         
-        // draw the normalized annotations immediately - scale=1 matches Annotator
+        // draw the normalized annotations immediately - use pdfScale: 1 to match PDF rendering scale
         overlayAnnotations(overlayContext, normalizedAnnotations, acType, { skipRefrigerantLines: true, pdfScale: 1 });
         // HVAC overlay if enabled
         if (showHVAC) {
@@ -503,7 +505,7 @@ const Sidebar = () => {
               hvacSymbols,
               normalizedAnnotations.comments,
               mode,
-              pdfScale
+              1
             );
           }
 
@@ -810,7 +812,7 @@ const Sidebar = () => {
                           +
                         </button>
                       </div>
-                      <div id="pdf-container" style={{ position: "relative" }}></div>
+                      <div id="pdf-container" style={{ position: "relative", transform: pdfScale !== 1.5 ? `scale(${pdfScale / 1.5})` : "none", transformOrigin: "top left", transition: "transform 0.2s ease" }}></div>
                     </div>
                   </>
                 )}

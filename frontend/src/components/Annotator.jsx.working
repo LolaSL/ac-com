@@ -804,14 +804,7 @@ const Annotator = ({
   const [showAcUnitModal, setShowAcUnitModal] = useState(false);
   const [acUnitInput, setAcUnitInput] = useState('');
   const [pendingAnnotationPos, setPendingAnnotationPos] = useState(null);
-  // Default to annotation mode (true) so users can create rectangles immediately
-  const [annotateMode, setAnnotateMode] = useState(true);
-
-  // Track last rectangle tap for double-tap deletion on mobile
-  const lastRectTapRef = useRef({});
-  
-  // Track if currently dragging to prevent modal from showing
-  const isDraggingRef = useRef(false);
+  const [annotateMode, setAnnotateMode] = useState(window.innerWidth >= 768);
 
   // const clearResults = () => {
   //   setResults([]);
@@ -1192,45 +1185,23 @@ const Annotator = ({
   };
 
   // Confirm the AC unit annotation after modal input
-  // Get responsive rectangle dimensions based on screen width
-  const getResponsiveRectSize = () => {
-    const width = window.innerWidth;
-    if (width < 480) {
-      return { width: 28, height: 10 };
-    } else if (width < 768) {
-      return { width: 36, height: 12 };
-    }
-    return { width: 48, height: 16 };
-  };
-
   const confirmAcUnitAnnotation = useCallback((commentText, position) => {
-    console.log('confirmAcUnitAnnotation called', { commentText, position });
-    
-    if (!commentText) {
-      console.log('confirmAcUnitAnnotation: no comment text, returning');
-      return;
-    }
-    
+    if (!commentText) return;
     const existingComment = comments.some(
       (comment) => comment.text.toLowerCase() === commentText.toLowerCase()
     );
     if (existingComment) {
-      console.log('confirmAcUnitAnnotation: comment already exists');
       toast.error('This comment already exists.');
       return;
     }
-    
     const newRectId = Date.now();
     const isCondenser = /^condenser/i.test(commentText.trim());
-    const rectSize = getResponsiveRectSize();
-    console.log('confirmAcUnitAnnotation: creating rect at position', position, 'with size', rectSize);
-    
     const newRect = {
       id: newRectId,
       x: position.x,
       y: position.y,
-      width: rectSize.width,
-      height: rectSize.height,
+      width: 48,
+      height: 16,
       fill: isCondenser ? 'rgba(255, 140, 50, 0.7)' : 'rgba(20, 205, 230, 0.7)',
       stroke: isCondenser ? '#cc5500' : undefined,
       rotation: 0,
@@ -1241,8 +1212,8 @@ const Annotator = ({
       id: newCommentId,
       rectId: newRectId,
       text: commentText,
-      x: position.x + rectSize.width + 2,
-      y: position.y + rectSize.height / 2 - 6,
+      x: position.x + 35,
+      y: position.y - 5,
       fill: 'rgba(226, 218, 228, 0.3)',
     };
     setComments((prevComments) => [...prevComments, newComment]);
@@ -1253,8 +1224,8 @@ const Annotator = ({
       points: [
         newRect.x + newRect.width / 2,
         newRect.y + newRect.height / 2,
-        newComment.x + 3,
-        newComment.y + 6,
+        newComment.x,
+        newComment.y,
       ],
       stroke: 'black',
       strokeWidth: 1,
@@ -1263,57 +1234,20 @@ const Annotator = ({
   }, [comments]);
 
   const handleStageClick = (event) => {
-    console.log('handleStageClick fired', { annotateMode, isRotating, isDragging: isDraggingRef.current, eventTarget: event.target?.constructor?.name });
-    if (!annotateMode) {
-      console.log('handleStageClick: annotateMode is false, returning');
-      return;
-    }
-    // Don't show modal during drag or rotation
-    if (isDraggingRef.current || isRotating) {
-      console.log('handleStageClick: currently dragging or rotating, returning');
-      return;
-    }
-    if (event.target === event.target.getStage()) {
-      console.log('handleStageClick: Getting pointer position...');
+    if (!annotateMode) return;
+    if (event.target === event.target.getStage() && !isRotating) {
       const pointerPosition = stageRef.current.getPointerPosition();
-      console.log('Pointer position:', pointerPosition);
       if (!pointerPosition) return;
 
       // Use mobile-friendly modal instead of prompt()
-      console.log('handleStageClick: Opening modal at position:', pointerPosition);
       setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
       setAcUnitInput('');
       setShowAcUnitModal(true);
-    } else {
-      console.log('handleStageClick: Condition not met', { isStageClick: event.target === event.target.getStage() });
     }
   };
 
   const handleTouchStart = (e) => {
     const clickedRectId = e.target.attrs.id;
-    const now = Date.now();
-    
-    // Check for double-tap: if same rect was tapped within 400ms, delete it
-    if (lastRectTapRef.current.id === clickedRectId && 
-        now - lastRectTapRef.current.timestamp < 400) {
-      // Double-tap detected - delete rectangle
-      setRectangles((prevRects) =>
-        prevRects.filter((r) => r.id !== clickedRectId)
-      );
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment.rectId !== clickedRectId)
-      );
-      setLines((prevLines) =>
-        prevLines.filter((line) => line.rectId !== clickedRectId)
-      );
-      lastRectTapRef.current = {}; // Reset
-      return;
-    }
-    
-    // Record this tap
-    lastRectTapRef.current = { id: clickedRectId, timestamp: now };
-    
-    // Also keep tap-and-hold as fallback (reduced to 500ms for better UX)
     const touchStartTime = Date.now();
     let moved = false;
 
@@ -1324,8 +1258,8 @@ const Annotator = ({
     const handleTouchEnd = () => {
       window.removeEventListener('touchmove', handleTouchMove);
       const touchDuration = Date.now() - touchStartTime;
-      // Tap-and-hold (500ms+) to delete, only if finger didn't move (not a drag)
-      if (!moved && touchDuration >= 500) {
+      // Tap-and-hold (800ms+) to delete, only if finger didn't move (not a drag)
+      if (!moved && touchDuration >= 800) {
         setRectangles((prevRects) =>
           prevRects.filter((r) => r.id !== clickedRectId)
         );
@@ -1335,7 +1269,6 @@ const Annotator = ({
         setLines((prevLines) =>
           prevLines.filter((line) => line.rectId !== clickedRectId)
         );
-        lastRectTapRef.current = {}; // Reset
       }
     };
 
@@ -1345,41 +1278,12 @@ const Annotator = ({
 
   // Handle touch tap on stage for placing annotations (mobile equivalent of click)
   const handleStageTouchEnd = (event) => {
-    console.log('handleStageTouchEnd fired', { 
-      annotateMode, 
-      isDragging: isDraggingRef.current, 
-      isRotating,
-      targetName: event.target?.name(),
-      targetIsStage: event.target === event.target.getStage()
-    });
-    
-    if (!annotateMode) {
-      console.log('handleStageTouchEnd: annotateMode is false, returning');
-      return;
-    }
-    
-    // Don't show modal during drag or rotation
-    if (isDraggingRef.current || isRotating) {
-      console.log('handleStageTouchEnd: currently dragging or rotating, returning');
-      return;
-    }
-    
-    // Only act on taps on blank stage area (not on shapes/rects)
-    // Check if tap was on stage or on a rect
-    if (event.target.name && event.target.name() === 'rect') {
-      console.log('handleStageTouchEnd: tap was on a rect, not blank stage');
-      return;
-    }
-    
+    if (!annotateMode) return;
+    // Only act on taps on blank stage area, not on shapes
+    if (event.target !== event.target.getStage()) return;
+    if (isRotating) return;
     const pointerPosition = stageRef.current.getPointerPosition();
-    console.log('handleStageTouchEnd: pointer position:', pointerPosition);
-    
-    if (!pointerPosition) {
-      console.log('handleStageTouchEnd: no pointer position, returning');
-      return;
-    }
-    
-    console.log('handleStageTouchEnd: opening modal at position:', pointerPosition);
+    if (!pointerPosition) return;
     setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
     setAcUnitInput('');
     setShowAcUnitModal(true);
@@ -1406,7 +1310,6 @@ const Annotator = ({
   };
 
   const handleDragMove = (e) => {
-    isDraggingRef.current = true;
     const draggedNode = e.target;
     const layer = draggedNode.getLayer();
     if (layer) {
@@ -1415,7 +1318,6 @@ const Annotator = ({
   };
 
   const handleDragEnd = (e) => {
-    isDraggingRef.current = false;
     const draggedNode = e.target;
     const draggedId = draggedNode.id();
 
@@ -1430,10 +1332,9 @@ const Annotator = ({
     setComments((prevComments) =>
       prevComments.map((comment) => {
         if (comment.rectId === draggedId) {
-          const rectSize = getResponsiveRectSize();
           const newCommentPos = {
-            x: draggedNode.x() + rectSize.width + 2,
-            y: draggedNode.y() + rectSize.height / 2 - 6,
+            x: draggedNode.x() + 60,
+            y: draggedNode.y() - 10,
           };
           return { ...comment, ...newCommentPos };
         }
@@ -1468,8 +1369,8 @@ const Annotator = ({
               points: [
                 rect.x + rect.width / 2,
                 rect.y + rect.height / 2,
-                comment.x + 3,
-                comment.y + 6,
+                comment.x,
+                comment.y,
               ],
             };
           }
@@ -2613,18 +2514,6 @@ const Annotator = ({
               </Button>
             </ButtonGroup>
             <ButtonGroup size="sm" className="me-2">
-              <Button
-                variant="warning"
-                size="sm"
-                onClick={() => {
-                  console.log('DEBUG: Manual test modal button clicked');
-                  setPendingAnnotationPos({ x: 100, y: 100 });
-                  setAcUnitInput('');
-                  setShowAcUnitModal(true);
-                }}
-              >
-                Test Modal
-              </Button>
             </ButtonGroup>
             <ButtonGroup size="sm" className="me-2">
               <Button
@@ -2719,7 +2608,7 @@ const Annotator = ({
       </ButtonToolbar>
       {error && <p className="error-message mt-4">{error}</p>}
       {previewUrl && (
-        <div>
+        <div className="text-center">
           {previewUrl && (
             <div className="container-main">
               <div className="canvas-wrapper">
@@ -2867,7 +2756,6 @@ const Annotator = ({
               onChange={(e) => setAcUnitInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  console.log('Modal Enter key pressed, pendingAnnotationPos:', pendingAnnotationPos);
                   confirmAcUnitAnnotation(acUnitInput.trim(), pendingAnnotationPos);
                   setShowAcUnitModal(false);
                 }
@@ -2879,7 +2767,6 @@ const Annotator = ({
                 variant="primary"
                 size="sm"
                 onClick={() => {
-                  console.log('Modal Add button clicked, pendingAnnotationPos:', pendingAnnotationPos);
                   confirmAcUnitAnnotation(acUnitInput.trim(), pendingAnnotationPos);
                   setShowAcUnitModal(false);
                 }}
