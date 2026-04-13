@@ -349,6 +349,8 @@ const Sidebar = () => {
       const canvas = document.createElement("canvas");
       canvas.width = viewport.width;
       canvas.height = viewport.height;
+      canvas.style.width = viewport.width + "px";
+      canvas.style.height = viewport.height + "px";
       const context = canvas.getContext("2d");
       container.appendChild(canvas);
 
@@ -369,6 +371,9 @@ const Sidebar = () => {
         overlayCanvas.style.top = "0";
         overlayCanvas.style.left = "0";
         overlayCanvas.style.pointerEvents = "none";
+        // Explicit CSS sizing to prevent responsive shrinking on small screens
+        overlayCanvas.style.width = viewport.width + "px";
+        overlayCanvas.style.height = viewport.height + "px";
         container.style.position = "relative";
         container.appendChild(overlayCanvas);
 
@@ -481,6 +486,8 @@ const Sidebar = () => {
         const canvas = document.createElement("canvas");
         canvas.width = viewport.width;
         canvas.height = viewport.height;
+        canvas.style.width = viewport.width + "px";
+        canvas.style.height = viewport.height + "px";
         const ctx = canvas.getContext("2d");
         wrapper.appendChild(canvas);
         await page.render({ canvasContext: ctx, viewport }).promise;
@@ -493,6 +500,9 @@ const Sidebar = () => {
           overlayCanvas.style.top = "0";
           overlayCanvas.style.left = "0";
           overlayCanvas.style.pointerEvents = "none";
+          // Explicit CSS sizing to prevent responsive shrinking on small screens
+          overlayCanvas.style.width = viewport.width + "px";
+          overlayCanvas.style.height = viewport.height + "px";
           wrapper.appendChild(overlayCanvas);
 
           const overlayCtx = overlayCanvas.getContext("2d");

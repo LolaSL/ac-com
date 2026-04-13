@@ -151,6 +151,8 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    scroll-behavior: smooth;
+    touch-action: pan-x pan-y;
   }
 
   .canvas-wrapper {
@@ -161,6 +163,8 @@
     /* Allow natural PDF size to overflow for scrolling */
     min-width: fit-content;
     min-height: fit-content;
+    width: auto;
+    height: auto;
   }
 
   .canvas-wrapper canvas {
@@ -205,6 +209,8 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    scroll-behavior: smooth;
+    touch-action: pan-x pan-y;
   }
 
   .canvas-wrapper {
@@ -215,6 +221,8 @@
     /* Allow natural PDF size to overflow for scrolling */
     min-width: fit-content;
     min-height: fit-content;
+    width: auto;
+    height: auto;
   }
 
   .canvas-wrapper canvas {
@@ -230,5 +238,26 @@
     left: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+}
+
+/* Scrollbar styling for better visibility on small screens */
+@media (max-width: 767px) {
+  .container-main::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .container-main::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .container-main::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+  }
+
+  .container-main::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.6);
   }
 }

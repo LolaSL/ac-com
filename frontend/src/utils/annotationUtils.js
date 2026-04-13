@@ -922,9 +922,18 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
 
-  // Helper function to get the center of a rectangle for chain line connections.
-  // Note: rectangles are rotated around their top-left corner (not center),
-  // so chain lines must connect from the top-left position adjusted by rotation offset.
+  console.log('overlayAnnotations: Converting percentages with canvas dimensions:', { canvasWidth, canvasHeight });
+  if (annotations?.rectangles?.length > 0) {
+    console.log('Sample rectangle percent coords:', {
+      xPercent: annotations.rectangles[0].xPercent,
+      yPercent: annotations.rectangles[0].yPercent,
+      willRenderAt: {
+        x: annotations.rectangles[0].xPercent * canvasWidth,
+        y: annotations.rectangles[0].yPercent * canvasHeight
+      }
+    });
+  }
+  
   const getRotatedCenter = (x, y, width, height, angleDeg) => {
     const angle = (angleDeg || 0) * (Math.PI / 180);
     // The center of the rotated rectangle (after rotation around top-left)

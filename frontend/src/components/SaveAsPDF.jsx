@@ -136,20 +136,28 @@ function SaveAsPDF({
         ctx.stroke();
       });
 
-      // Comments
+      // Comments - Match Annotator dimensions for consistency
       userAnnotations?.comments?.forEach((comment) => {
         const x = comment.xPercent * cw;
         const y = comment.yPercent * ch;
-        const padding = 6;
-        const fontSize = 12;
+        const padding = 4;
+        const fontSize = 11; // Match Annotator font size
+        const maxWidth = 106 * 1.5; // Match Annotator width at scale 1.5
         const text = comment.text;
+        
         ctx.font = `bold ${fontSize}px Arial`;
-        const tw = ctx.measureText(text).width;
+        const textWidth = Math.min(ctx.measureText(text).width, maxWidth);
+        const boxWidth = textWidth + padding * 2;
+        const boxHeight = fontSize + padding * 2;
+        
+        // Draw background box
         ctx.fillStyle = comment.fill || "rgba(226, 218, 228, 0.3)";
-        ctx.fillRect(x - padding, y - fontSize - padding, tw + padding * 2, fontSize + padding * 2);
+        ctx.fillRect(x - padding, y - fontSize - padding, boxWidth, boxHeight);
         ctx.strokeStyle = "black";
         ctx.lineWidth = 1;
-        ctx.strokeRect(x - padding, y - fontSize - padding, tw + padding * 2, fontSize + padding * 2);
+        ctx.strokeRect(x - padding, y - fontSize - padding, boxWidth, boxHeight);
+        
+        // Draw text
         ctx.fillStyle = comment.textColor || "#FF1493";
         ctx.fillText(text, x, y);
       });

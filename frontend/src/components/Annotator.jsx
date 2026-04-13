@@ -5,7 +5,7 @@ import React, {
   useContext,
   useCallback,
 } from "react";
-import { Stage, Layer, Rect, Line, Text } from "react-konva";
+import { Stage, Layer, Rect, Line, Text, Group } from "react-konva";
 import {
   Button,
   Form,
@@ -244,7 +244,23 @@ const extractImagesFromPdf = async (file) => {
   if (!pdfjsLib || !pdfjsLib.getDocument) {
     throw new Error("PDF.js library not available.");
   }
-  const typedArray = new Uint8Array(await file.arrayBuffer());
+  
+  // Use FileReader as fallback for better browser compatibility
+  let typedArray;
+  if (file.arrayBuffer) {
+    typedArray = new Uint8Array(await file.arrayBuffer());
+  } else {
+    // Fallback: use FileReader for older browsers
+    typedArray = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(new Uint8Array(reader.result));
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  
   const pdf = await pdfjsLib.getDocument(typedArray).promise;
   const images = [];
 
@@ -759,6 +775,7 @@ const Annotator = ({
   const [iconPositions, setIconPositions] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
   const canvasRef = useRef(null);
+  const pdfDataRef = useRef(null); // Store PDF data for responsive re-rendering
   const [file, setFile] = useState(null);
   const stageRef = useRef(null);
   const [pdfSize, setPdfSize] = useState({
@@ -799,19 +816,38 @@ const Annotator = ({
 
   const [downloadedFiles, setDownloadedFiles] = useState([]);
   const [pdfRotation, setPdfRotation] = useState(0); // Store rotation in degrees
+  const [pdfZoom, setPdfZoom] = useState(1); // Store pinch zoom level for small screens
 
   // Mobile-friendly prompt modal state (replaces window.prompt)
   const [showAcUnitModal, setShowAcUnitModal] = useState(false);
   const [acUnitInput, setAcUnitInput] = useState('');
   const [pendingAnnotationPos, setPendingAnnotationPos] = useState(null);
   // Default to annotation mode (true) so users can create rectangles immediately
-  const [annotateMode, setAnnotateMode] = useState(true);
-
   // Track last rectangle tap for double-tap deletion on mobile
   const lastRectTapRef = useRef({});
   
   // Track if currently dragging to prevent modal from showing
   const isDraggingRef = useRef(false);
+  
+  // Track touch movement to distinguish between tap and drag
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0, rectId: null });
+  const LONG_TAP_THRESHOLD = 800; // milliseconds - hold time for long press delete
+  const longPressTimeoutRef = useRef(null);
+  const longPressTriggeredRef = useRef(false); // Track if long-press actually fired
+  const isSavingRef = useRef(false); // Synchronous flag to prevent duplicate saves
+  
+  // Track pinch zoom on small screens
+  const pinchStartDistanceRef = useRef(0);
+  const pinchStartZoomRef = useRef(1);
+
+  // Cleanup long-press timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // const clearResults = () => {
   //   setResults([]);
@@ -948,7 +984,7 @@ const Annotator = ({
   }, [results]);
 
   // Helper function to format rooms with flat prefixes
-  const formatRoomsWithFlatPrefixes = (validRooms, acAnnotations) => {
+  const formatRoomsWithFlatPrefixes = useCallback((validRooms, acAnnotations) => {
     // Build AC annotations from current canvas comments if not provided
     const annotations = acAnnotations || comments
       .filter((c) => c.text)
@@ -1041,7 +1077,7 @@ const Annotator = ({
     }
 
     return { formattedRooms, isMultiFlat, annotations };
-  };
+  }, [comments]);
 
   // Auto-update BTU Calculator whenever filtered rooms change
   useEffect(() => {
@@ -1196,11 +1232,11 @@ const Annotator = ({
   const getResponsiveRectSize = () => {
     const width = window.innerWidth;
     if (width < 480) {
-      return { width: 28, height: 10 };
+      return { width: 36, height: 14 };
     } else if (width < 768) {
-      return { width: 36, height: 12 };
+      return { width: 48, height: 16 };
     }
-    return { width: 48, height: 16 };
+    return { width: 64, height: 22 };
   };
 
   const confirmAcUnitAnnotation = useCallback((commentText, position) => {
@@ -1221,9 +1257,10 @@ const Annotator = ({
     }
     
     const newRectId = Date.now();
-    const isCondenser = /^condenser/i.test(commentText.trim());
+    const trimmedText = commentText.trim().toLowerCase();
+    const isCondenser = /^condenser/i.test(trimmedText) || trimmedText.includes('condenser');
     const rectSize = getResponsiveRectSize();
-    console.log('confirmAcUnitAnnotation: creating rect at position', position, 'with size', rectSize);
+    console.log('confirmAcUnitAnnotation: creating rect at position', position, 'with size', rectSize, { trimmedText, isCondenser });
     
     const newRect = {
       id: newRectId,
@@ -1263,21 +1300,26 @@ const Annotator = ({
   }, [comments]);
 
   const handleStageClick = (event) => {
-    console.log('handleStageClick fired', { annotateMode, isRotating, isDragging: isDraggingRef.current, eventTarget: event.target?.constructor?.name });
-    if (!annotateMode) {
-      console.log('handleStageClick: annotateMode is false, returning');
-      return;
-    }
-    // Don't show modal during drag or rotation
+    console.log('handleStageClick fired', { isRotating, isDragging: isDraggingRef.current, eventTarget: event.target?.constructor?.name });    // Don't show modal during drag or rotation
     if (isDraggingRef.current || isRotating) {
       console.log('handleStageClick: currently dragging or rotating, returning');
       return;
     }
     if (event.target === event.target.getStage()) {
       console.log('handleStageClick: Getting pointer position...');
-      const pointerPosition = stageRef.current.getPointerPosition();
+      let pointerPosition = stageRef.current.getPointerPosition();
       console.log('Pointer position:', pointerPosition);
       if (!pointerPosition) return;
+
+      // On small screens with horizontal scrolling, adjust for scroll offset
+      const containerMain = document.querySelector('.container-main');
+      if (containerMain && window.innerWidth < 768) {
+        pointerPosition = {
+          x: pointerPosition.x + containerMain.scrollLeft,
+          y: pointerPosition.y + containerMain.scrollTop,
+        };
+        console.log('Adjusted pointer position (with scroll):', pointerPosition);
+      }
 
       // Use mobile-friendly modal instead of prompt()
       console.log('handleStageClick: Opening modal at position:', pointerPosition);
@@ -1290,8 +1332,34 @@ const Annotator = ({
   };
 
   const handleTouchStart = (e) => {
+    // Safety check: ensure event has valid target with ID
+    if (!e || !e.target || !e.target.attrs || !e.target.attrs.id) {
+      return;
+    }
+    
     const clickedRectId = e.target.attrs.id;
     const now = Date.now();
+    
+    // Record touch start position and time for drag detection
+    // Handle both native touch events and Konva touch events
+    let touchX = 0, touchY = 0;
+    if (e.evt && e.evt.touches && e.evt.touches.length > 0) {
+      // Native touch event
+      touchX = e.evt.touches[0].clientX;
+      touchY = e.evt.touches[0].clientY;
+    } else if (e.pointers && e.pointers.length > 0) {
+      // Konva pointer event
+      touchX = e.pointers[0].clientX || 0;
+      touchY = e.pointers[0].clientY || 0;
+    }
+    
+    touchStartRef.current = { x: touchX, y: touchY, time: now, rectId: clickedRectId };
+    longPressTriggeredRef.current = false; // Reset flag
+    
+    // Clear any existing long-press timeout
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+    }
     
     // Check for double-tap: if same rect was tapped within 400ms, delete it
     if (lastRectTapRef.current.id === clickedRectId && 
@@ -1313,19 +1381,11 @@ const Annotator = ({
     // Record this tap
     lastRectTapRef.current = { id: clickedRectId, timestamp: now };
     
-    // Also keep tap-and-hold as fallback (reduced to 500ms for better UX)
-    const touchStartTime = Date.now();
-    let moved = false;
-
-    const handleTouchMove = () => {
-      moved = true;
-    };
-
-    const handleTouchEnd = () => {
-      window.removeEventListener('touchmove', handleTouchMove);
-      const touchDuration = Date.now() - touchStartTime;
-      // Tap-and-hold (500ms+) to delete, only if finger didn't move (not a drag)
-      if (!moved && touchDuration >= 500) {
+    // Set up long-press timeout (800ms)
+    longPressTimeoutRef.current = setTimeout(() => {
+      if (touchStartRef.current.rectId === clickedRectId) {
+        longPressTriggeredRef.current = true; // Mark that long-press fired
+        // Long press detected - delete rectangle
         setRectangles((prevRects) =>
           prevRects.filter((r) => r.id !== clickedRectId)
         );
@@ -1335,29 +1395,18 @@ const Annotator = ({
         setLines((prevLines) =>
           prevLines.filter((line) => line.rectId !== clickedRectId)
         );
-        lastRectTapRef.current = {}; // Reset
+        touchStartRef.current = { x: 0, y: 0, time: 0, rectId: null };
       }
-    };
-
-    window.addEventListener('touchmove', handleTouchMove, { once: true });
-    window.addEventListener('touchend', handleTouchEnd, { once: true });
+    }, LONG_TAP_THRESHOLD);
   };
 
   // Handle touch tap on stage for placing annotations (mobile equivalent of click)
   const handleStageTouchEnd = (event) => {
-    console.log('handleStageTouchEnd fired', { 
-      annotateMode, 
-      isDragging: isDraggingRef.current, 
+    console.log('handleStageTouchEnd fired', { isDragging: isDraggingRef.current, 
       isRotating,
       targetName: event.target?.name(),
       targetIsStage: event.target === event.target.getStage()
-    });
-    
-    if (!annotateMode) {
-      console.log('handleStageTouchEnd: annotateMode is false, returning');
-      return;
-    }
-    
+    });    
     // Don't show modal during drag or rotation
     if (isDraggingRef.current || isRotating) {
       console.log('handleStageTouchEnd: currently dragging or rotating, returning');
@@ -1371,7 +1420,7 @@ const Annotator = ({
       return;
     }
     
-    const pointerPosition = stageRef.current.getPointerPosition();
+    let pointerPosition = stageRef.current.getPointerPosition();
     console.log('handleStageTouchEnd: pointer position:', pointerPosition);
     
     if (!pointerPosition) {
@@ -1379,6 +1428,16 @@ const Annotator = ({
       return;
     }
     
+    // On small screens with horizontal scrolling, adjust for scroll offset
+    const containerMain = document.querySelector('.container-main');
+    if (containerMain && window.innerWidth < 768) {
+      pointerPosition = {
+        x: pointerPosition.x + containerMain.scrollLeft,
+        y: pointerPosition.y + containerMain.scrollTop,
+      };
+      console.log('handleStageTouchEnd: adjusted position (with scroll):', pointerPosition);
+    }
+
     console.log('handleStageTouchEnd: opening modal at position:', pointerPosition);
     setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
     setAcUnitInput('');
@@ -1491,71 +1550,8 @@ const Annotator = ({
     );
   }, []);
 
-  const renderComments = useCallback(
-    (context) => {
-      context.font = "bold 17px Arial";
-      context.lineWidth = 2;
-      context.shadowColor = "grey";
-      context.shadowBlur = 1;
-      const canvasWidth = context.canvas.width;
-      const canvasHeight = context.canvas.height;
-      comments.forEach((comment) => {
-        const padding = 10;
-        const lineHeight = 20;
-        const maxWidth = 200;
-        const words = comment.text.split(" ");
-        let line = "";
-        let lines = [];
-        let yOffset = comment.y;
-        words.forEach((word) => {
-          const testLine = line + word + " ";
-          const testWidth = context.measureText(testLine).width;
-          if (testWidth > maxWidth) {
-            lines.push(line);
-            line = word + " ";
-          } else {
-            line = testLine;
-          }
-        });
-        lines.push(line);
-
-        const longestLineWidth = Math.max(
-          ...lines.map((line) => context.measureText(line).width)
-        );
-        const frameWidth = Math.min(longestLineWidth + padding * 2, maxWidth);
-        const textBlockHeight = lines.length * lineHeight;
-        const frameHeight = textBlockHeight + padding;
-
-        let adjustedX = comment.x;
-        let adjustedY = yOffset - textBlockHeight;
-
-        if (adjustedX + frameWidth > canvasWidth) {
-          adjustedX = canvasWidth - frameWidth - padding;
-        }
-
-        if (adjustedY + frameHeight > canvasHeight) {
-          adjustedY = canvasHeight - frameHeight - padding;
-        }
-
-        context.fillStyle = "rgba(252, 252, 243, 0.2)";
-        context.fillRect(adjustedX, adjustedY, frameWidth, frameHeight);
-
-        context.strokeStyle = "grey";
-        context.strokeRect(adjustedX, adjustedY, frameWidth, frameHeight);
-
-        context.fillStyle = "deeppink";
-        lines.forEach((line, index) => {
-          context.fillText(
-            line,
-            adjustedX + padding,
-            adjustedY + (index + 1) * lineHeight
-          );
-        });
-      });
-    },
-    [comments]
-  );
-
+  // Note: Comments are now rendered via Konva Stage text elements, not canvas
+  
   const memoizedCallback = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1588,7 +1584,24 @@ const Annotator = ({
       const pdf = await loadingTask.promise;
       const page = await pdf.getPage(1);
 
-      const scale = 1;
+      // On small screens, keep PDF at native size for horizontal scrolling
+      // On larger screens, scale to fit the viewport
+      let scale = 1;
+      const screenWidth = window.innerWidth;
+      
+      let initialViewport = page.getViewport({ scale: 1 });
+      const maxContainerWidth = screenWidth * 0.95;
+      
+      // Apply responsive scaling on all screens to prevent PDF from being too huge
+      // On small screens, this still allows horizontal scrolling if needed
+      if (initialViewport.width > maxContainerWidth) {
+        scale = maxContainerWidth / initialViewport.width;
+      }
+      // On small screens (< 768px), minimum scale is 0.8 to keep it manageable
+      if (screenWidth < 768 && scale > 0.8) {
+        scale = Math.min(scale, 0.85);
+      }
+      
       let viewport = page.getViewport({ scale });
 
       // Apply rotation to viewport
@@ -1596,26 +1609,34 @@ const Annotator = ({
         viewport = page.getViewport({ scale, rotation: pdfRotation });
       }
 
-      setPdfSize({ width: viewport.width, height: viewport.height });
+      // Set canvas size to viewport size (WITHOUT zoom - zoom applied visually only)
+      let finalWidth = viewport.width;
+      let finalHeight = viewport.height;
 
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+      setPdfSize({ width: finalWidth, height: finalHeight });
+
+      canvas.width = finalWidth;
+      canvas.height = finalHeight;
+
+      // Render at the calculated viewport (without zoom - zoom applied visually)
+      let renderViewport = viewport;
 
       const renderContext = {
         canvasContext: context,
-        viewport: viewport,
+        viewport: renderViewport,
       };
 
       await page.render(renderContext).promise;
 
+      // Scale for drawing on canvas (without zoom - zoom applied visually)
       const scaleX = scale;
       const scaleY = scale;
 
       iconPositions.forEach((icon) => {
         const scaledX = icon.x * scaleX;
         const scaledY = icon.y * scaleY;
-        const rectWidth = 45 * scaleX;
-        const rectHeight = 11 * scaleY;
+        const rectWidth = 60 * scaleX;
+        const rectHeight = 15 * scaleY;
         drawRotatedRectangle(
           context,
           scaledX,
@@ -1626,8 +1647,6 @@ const Annotator = ({
         );
       });
 
-      renderComments(context, scaleX, scaleY);
-
       memoizedCallback(context);
     },
     [
@@ -1635,7 +1654,6 @@ const Annotator = ({
       file,
       iconPositions,
       memoizedCallback,
-      renderComments,
       setPdfSize,
       pdfRotation,
     ]
@@ -1653,8 +1671,8 @@ const Annotator = ({
       img.onload = () => {
         context.drawImage(img, 0, 0, canvas.width, canvas.height);
         iconPositions.forEach((icon) => {
-          const rectWidth = 65;
-          const rectHeight = 15;
+          const rectWidth = 85;
+          const rectHeight = 20;
           drawRotatedRectangle(
             context,
             icon.x,
@@ -1664,7 +1682,6 @@ const Annotator = ({
             icon.angle
           );
         });
-        renderComments(context);
       };
     }
 
@@ -1672,6 +1689,7 @@ const Annotator = ({
       const reader = new FileReader();
       reader.onload = async (e) => {
         const pdfData = new Uint8Array(e.target.result);
+        pdfDataRef.current = pdfData; // Store for responsive re-rendering
         await renderPDFOnCanvas(pdfData);
       };
       reader.readAsArrayBuffer(file);
@@ -1681,14 +1699,45 @@ const Annotator = ({
     file,
     iconPositions,
     previewUrl,
-    renderComments,
     renderPDFOnCanvas,
+    pdfZoom,
   ]);
+
+  // Handle responsive PDF resizing when window is resized
+  useEffect(() => {
+    let resizeTimeout;
+    
+    const handleWindowResize = () => {
+      // Debounce resize events to avoid excessive re-renders
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (pdfDataRef.current && file?.type === "application/pdf") {
+          renderPDFOnCanvas(pdfDataRef.current);
+        }
+      }, 300);
+    };
+    
+    window.addEventListener("resize", handleWindowResize);
+    return () => {
+      window.removeEventListener("resize", handleWindowResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, [file, renderPDFOnCanvas]);
 
   const fileInputRef = useRef();
 
-  const saveToBackend = async () => {
+  const saveToBackend = useCallback(async () => {
+    // Prevent concurrent saves from multiple taps using synchronous ref
+    if (isSavingRef.current) {
+      console.warn('Save already in progress, blocking concurrent save');
+      return;
+    }
+    isSavingRef.current = true;
+    setIsSaving(true); // Update UI immediately to disable button
+    
     if (!file) {
+      isSavingRef.current = false;
+      setIsSaving(false);
       alert("Please select a PDF file to save.");
       return;
     }
@@ -1717,16 +1766,48 @@ const Annotator = ({
     
     console.log(`Saving ${roomsToSave.length} unique rooms:`, roomsToSave.map(r => r.name));
     
+    // Get canvas dimensions for converting to percentages
+    const canvas = document.getElementById("my-canvas");
+    const canvasWidth = canvas?.width || 1;
+    const canvasHeight = canvas?.height || 1;
+    console.log('Saving annotations with canvas dimensions:', { canvasWidth, canvasHeight, screenWidth: window.innerWidth, pdfRotation });
+    
+    // Convert rectangles to percentage-based coordinates
+    const rectanglesWithPercent = rectangles.map((rect) => ({
+      ...rect,
+      xPercent: rect.x / canvasWidth,
+      yPercent: rect.y / canvasHeight,
+      widthPercent: rect.width / canvasWidth,
+      heightPercent: rect.height / canvasHeight,
+    }));
+
+    // Convert comments to percentage-based coordinates
+    const commentsWithPercent = comments.map((comment) => ({
+      ...comment,
+      xPercent: comment.x / canvasWidth,
+      yPercent: comment.y / canvasHeight,
+    }));
+
+    // Convert lines to percentage-based coordinates (if they aren't already)
+    const linesWithPercent = lines.map((line) => ({
+      ...line,
+      points: line.points.map((val, idx) => {
+        // If points are already percentages (< 1.5), keep them
+        if (Math.abs(val) <= 1.5) return val;
+        // Otherwise convert from pixels to percentages
+        return idx % 2 === 0 ? val / canvasWidth : val / canvasHeight;
+      }),
+    }));
+    
     const formData = new FormData();
     formData.append("pdfFile", file);
-    formData.append("rectangles", JSON.stringify(rectangles));
-    formData.append("comments", JSON.stringify(comments));
-    formData.append("lines", JSON.stringify(lines));
+    formData.append("rectangles", JSON.stringify(rectanglesWithPercent));
+    formData.append("comments", JSON.stringify(commentsWithPercent));
+    formData.append("lines", JSON.stringify(linesWithPercent));
     formData.append("pdfId", pdfId);
     formData.append("acType", "ductless");
     formData.append("roomData", JSON.stringify(roomsToSave)); // Save room data with flat prefixes
 
-    const canvas = document.getElementById("my-canvas");
     const imageWidth = canvas?.width;
     const imageHeight = canvas?.height;
 
@@ -1734,13 +1815,13 @@ const Annotator = ({
     formData.append("imageHeight", imageHeight);
 
     if (!token) {
+      isSavingRef.current = false;
+      setIsSaving(false);
       alert("You must be signed in to save.");
       return;
     }
 
     try {
-      setIsSaving(true);
-
       const response = await fetch("/api/upload-annotate", {
         method: "POST",
         headers: {
@@ -1766,9 +1847,10 @@ const Annotator = ({
       console.error("Network error while saving:", error);
         toast.error("Network error occurred while saving.", { autoClose: 5000 });
     } finally {
+      isSavingRef.current = false;
       setIsSaving(false);
     }
-  };
+  }, [comments, rectangles, lines, file, token, filteredRoomsRef, formatRoomsWithFlatPrefixes, pdfId]);
 
   useEffect(() => {
     if (!results.length || !images.length) return;
@@ -2599,33 +2681,6 @@ const Annotator = ({
       >
         {file && file.type === "application/pdf" && (
           <>
-            <ButtonGroup size="sm" className="me-2 annotate-toggle-mobile">
-              <Button
-                variant={annotateMode ? "primary" : "outline-primary"}
-                onClick={() => setAnnotateMode((m) => !m)}
-                title={annotateMode ? "Switch to scroll mode" : "Switch to annotate mode"}
-              >
-                {annotateMode ? (
-                  <><i className="fas fa-pen" /> Mark ON</>
-                ) : (
-                  <><i className="fas fa-hand-paper" /> Scroll</>
-                )}
-              </Button>
-            </ButtonGroup>
-            <ButtonGroup size="sm" className="me-2">
-              <Button
-                variant="warning"
-                size="sm"
-                onClick={() => {
-                  console.log('DEBUG: Manual test modal button clicked');
-                  setPendingAnnotationPos({ x: 100, y: 100 });
-                  setAcUnitInput('');
-                  setShowAcUnitModal(true);
-                }}
-              >
-                Test Modal
-              </Button>
-            </ButtonGroup>
             <ButtonGroup size="sm" className="me-2">
               <Button
                 variant="outline-primary"
@@ -2714,6 +2769,34 @@ const Annotator = ({
                 )}
               </ButtonGroup>
             )}
+
+            {file && file.type === "application/pdf" && (
+              <ButtonGroup size="sm">
+                <Button
+                  variant="outline-info"
+                  onClick={() => setPdfZoom((prev) => Math.min(4, prev + 0.2))}
+                  title="Zoom in"
+                >
+                  🔍 +
+                </Button>
+                <Button
+                  variant="outline-info"
+                  onClick={() => setPdfZoom(1)}
+                  title="Reset zoom level"
+                  disabled={pdfZoom === 1}
+                >
+                  {(pdfZoom * 100).toFixed(0)}%
+                </Button>
+                <Button
+                  variant="outline-info"
+                  onClick={() => setPdfZoom((prev) => Math.max(1, prev - 0.2))}
+                  title="Zoom out"
+                  disabled={pdfZoom === 1}
+                >
+                  🔍 −
+                </Button>
+              </ButtonGroup>
+            )}
           </>
         )}
       </ButtonToolbar>
@@ -2721,8 +2804,53 @@ const Annotator = ({
       {previewUrl && (
         <div>
           {previewUrl && (
-            <div className="container-main">
-              <div className="canvas-wrapper">
+            <div 
+              className="container-main"
+              onTouchStart={(e) => {
+                // Support pinch zoom on small screens
+                if (e.touches.length === 2 && window.innerWidth < 768) {
+                  const touch1 = e.touches[0];
+                  const touch2 = e.touches[1];
+                  const distance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                  );
+                  pinchStartDistanceRef.current = distance;
+                  pinchStartZoomRef.current = pdfZoom;
+                }
+              }}
+              onTouchMove={(e) => {
+                // Handle pinch zoom
+                if (e.touches.length === 2 && window.innerWidth < 768 && pinchStartDistanceRef.current > 0) {
+                  const touch1 = e.touches[0];
+                  const touch2 = e.touches[1];
+                  const distance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                  );
+                  
+                  const ratio = distance / pinchStartDistanceRef.current;
+                  let newZoom = pinchStartZoomRef.current * ratio;
+                  
+                  // Constrain zoom between 1x and 4x
+                  newZoom = Math.max(1, Math.min(4, newZoom));
+                  
+                  setPdfZoom(newZoom);
+                  e.preventDefault();
+                }
+              }}
+              onTouchEnd={() => {
+                pinchStartDistanceRef.current = 0;
+              }}
+            >
+              <div 
+                className="canvas-wrapper"
+                style={window.innerWidth < 768 && pdfZoom > 1 ? {
+                  transform: `scale(${pdfZoom})`,
+                  transformOrigin: '0 0',
+                  display: 'inline-block',
+                } : {}}
+              >
                 <canvas
                   id="my-canvas"
                   ref={canvasRef}
@@ -2793,6 +2921,11 @@ const Annotator = ({
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
                           onClick={(event) => {
+                            // Don't rotate if a long-press is pending or just fired
+                            if (longPressTriggeredRef.current || longPressTimeoutRef.current) {
+                              longPressTriggeredRef.current = false; // Reset for next touch
+                              return;
+                            }
                             event.cancelBubble = true;
                             const clickedRectId = event.target.attrs.id;
                             setIsRotating(true);
@@ -2800,6 +2933,11 @@ const Annotator = ({
                             setTimeout(() => setIsRotating(false), 100);
                           }}
                           onTap={(event) => {
+                            // Don't rotate if a long-press is pending or just fired
+                            if (longPressTriggeredRef.current || longPressTimeoutRef.current) {
+                              longPressTriggeredRef.current = false; // Reset for next touch
+                              return;
+                            }
                             event.cancelBubble = true;
                             const clickedRectId = event.target.attrs.id;
                             setIsRotating(true);
@@ -2807,21 +2945,52 @@ const Annotator = ({
                             setTimeout(() => setIsRotating(false), 100);
                           }}
                           onTouchStart={handleTouchStart}
+                          onTouchEnd={() => {
+                            // Only cancel long-press if it hasn't fired yet
+                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
+                              clearTimeout(longPressTimeoutRef.current);
+                              longPressTimeoutRef.current = null;
+                            }
+                          }}
+                          onDragStart={() => {
+                            // Cancel long-press when dragging starts (but not if it already fired)
+                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
+                              clearTimeout(longPressTimeoutRef.current);
+                              longPressTimeoutRef.current = null;
+                            }
+                          }}
                         />
                       </React.Fragment>
                     ))}
                     {comments.map((comment) => (
-                      <Text
-                        key={comment.id}
-                        id={comment.id}
-                        x={comment.x}
-                        y={comment.y}
-                        text={""}
-                        fill={comment.fill}
-                        draggable={true}
-                        onDragMove={handleDragMove}
-                        onDragEnd={handleDragEnd}
-                      />
+                      <Group key={comment.id}>
+                        {/* Comment background box */}
+                        <Rect
+                          x={comment.x}
+                          y={comment.y - 10}
+                          width={60}
+                          height={16}
+                          fill="rgba(252, 252, 243, 0.3)"
+                          stroke="grey"
+                          strokeWidth={1}
+                        />
+                        {/* Comment text */}
+                        <Text
+                          key={comment.id}
+                          id={comment.id}
+                          x={comment.x + 2}
+                          y={comment.y - 9}
+                          text={comment.text}
+                          fontSize={10}
+                          fontFamily="Arial"
+                          fontStyle="bold"
+                          fill="deeppink"
+                          width={56}
+                          draggable={true}
+                          onDragMove={handleDragMove}
+                          onDragEnd={handleDragEnd}
+                        />
+                      </Group>
                     ))}
                   </Layer>
                 </Stage>
