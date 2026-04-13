@@ -357,110 +357,43 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
         if (annotation.acType === 'ducted' && ann.hvac) {
           const hvac = ann.hvac;
           // ...existing code for drawing ducts, diffusers, and connections...
-          // Draw watermark on all pages, centered and diagonal
-          const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${annotation.createdAt ? new Date(annotation.createdAt).toLocaleString() : 'Unknown Date'}`;
-          pages.forEach((page) => {
-            const fontSize = 18;
-            const { width, height } = page.getSize();
-            const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-            const xPos = (width - textWidth) / 2;
-            const yPos = height / 2 - fontSize / 2;
-            page.drawText(watermarkText, {
-              x: xPos,
-              y: yPos,
-              size: fontSize,
-              font: helveticaFont,
-              color: rgb(0.6, 0.6, 0.6),
-              opacity: 0.15,
-              rotate: degrees(45),
-            });
-          });
         }
 
         // For ductless, draw connections
         if (annotation.acType === 'ductless' && ann.rectangles && Array.isArray(ann.rectangles)) {
           // ...existing code for finding condensers and drawing lines...
-          // Draw watermark on all pages, centered and diagonal
-          const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${annotation.createdAt ? new Date(annotation.createdAt).toLocaleString() : 'Unknown Date'}`;
-          pages.forEach((page) => {
-            const fontSize = 18;
-            const { width, height } = page.getSize();
-            const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-            const xPos = (width - textWidth) / 2;
-            const yPos = height / 2 - fontSize / 2;
-            page.drawText(watermarkText, {
-              x: xPos,
-              y: yPos,
-              size: fontSize,
-              font: helveticaFont,
-              color: rgb(0.6, 0.6, 0.6),
-              opacity: 0.15,
-              rotate: degrees(45),
-            });
-          });
         }
       } else {
         console.log('No annotations found.');
       }
 
-      // Use annotation's createdAt date for the watermark
+      // ========== WATERMARK WITH USER CREDENTIALS ==========
+      // Draw watermark on all pages (ALWAYS for paid content, regardless of annotations or acType)
       let createdAtDate = annotation.createdAt;
       let formattedDate = createdAtDate
         ? new Date(createdAtDate).toLocaleString()
         : 'Unknown Date';
       const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${formattedDate}`;
 
-      if (annotation.annotatedImageUrl) {
-        console.log('Found annotatedImageUrl – using image + centered text watermark.');
+      console.log('Drawing watermark on all pages:', watermarkText);
+      pages.forEach((page) => {
+        const fontSize = 14;
+        const { width, height } = page.getSize();
 
-        const imageBytes = await fetch(annotation.annotatedImageUrl).then((res) =>
-          res.arrayBuffer()
-        );
-        const embeddedImage = await pdfDoc.embedPng(imageBytes);
+        const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+        const xPos = (width - textWidth) / 2;
+        const yPos = 30; // bottom padding
 
-        pages.forEach((page) => {
-          const fontSize = 18;
-          const { width, height } = page.getSize();
-
-          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-
-          const xPos = (width - textWidth) / 2;
-          const yPos = height / 2 - fontSize / 2;
-
-          page.drawText(watermarkText, {
-            x: xPos,
-            y: yPos,
-            size: fontSize,
-            font: helveticaFont,
-            color: rgb(0.6, 0.6, 0.6),
-            opacity: 0.15,
-            rotate: degrees(45),
-          });
-
+        page.drawText(watermarkText, {
+          x: xPos,
+          y: yPos,
+          size: fontSize,
+          font: helveticaFont,
+          opacity: 0.4,
+          color: rgb(0.5, 0.5, 0.5),
+          rotate: degrees(45),
         });
-      } else {
-        console.log('No annotatedImageUrl – drawing only centered text watermark.');
-
-        pages.forEach((page) => {
-          const { width, height } = page.getSize();
-          const fontSize = 14;
-
-          const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-          const xPos = (width - textWidth) / 2;
-          const yPos = 30; // ← bottom padding
-
-          page.drawText(watermarkText, {
-            x: xPos,
-            y: yPos,
-            size: fontSize,
-            font: helveticaFont,
-            opacity: 0.4,
-            color: rgb(0.5, 0.5, 0.5),
-            rotate: degrees(45),
-          });
-        });
-
-      }
+      });
 
       console.log('Drawing APPROVAL stamp.');
       const { width, height } = firstPage.getSize();

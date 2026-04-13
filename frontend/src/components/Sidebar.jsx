@@ -77,7 +77,7 @@ const Sidebar = () => {
     useState(false);
 
   // Mobile-friendly delete confirmation state (replaces window.confirm)
-  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, pdfId: null, filename: '', isEngineerReview: false });
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false });
 
   // PDF zoom scale
   const [pdfScale, setPdfScale] = useState(1.5);
@@ -526,22 +526,66 @@ const Sidebar = () => {
           drawCanvasLegend(overlayCtx, mode, { pdfScale: 1 });
 
           // Mode label
+          let modeLabel = "System";
+          if (mode.startsWith("vrf")) {
+            modeLabel = mode === "vrf-ducted"
+              ? "VRF System \u2014 Ducted Indoor Units"
+              : "VRF System \u2014 Ductless Indoor Units";
+          } else if (mode.startsWith("minisplit")) {
+            modeLabel = mode === "minisplit-ducted"
+              ? "Minisplit \u2014 Ducted Indoor Units"
+              : "Minisplit \u2014 Ductless Indoor Units";
+          }
           overlayCtx.save();
           overlayCtx.fillStyle = "rgba(0,0,0,0.75)";
           overlayCtx.font = "bold 14px Arial";
-          overlayCtx.fillText(
-            mode === "vrf-ducted"
-              ? "VRF System \u2014 Ducted Indoor Units"
-              : "VRF System \u2014 Ductless Indoor Units",
-            10, 20
-          );
+          overlayCtx.fillText(modeLabel, 10, 20);
+          overlayCtx.restore();
+
+          // Engineer Review Watermark - Always display on every page
+          const engineerName = engineerAnnotation.engineerId?.name || "Engineer";
+          const reviewDate = new Date(engineerAnnotation.createdAt).toLocaleDateString();
+          const stampX = viewport.width - 140;
+          const stampY = viewport.height - 120;
+
+          // Draw stamp circle background
+          overlayCtx.save();
+          overlayCtx.strokeStyle = "rgba(220, 20, 60, 0.6)";
+          overlayCtx.lineWidth = 2;
+          overlayCtx.beginPath();
+          overlayCtx.arc(stampX + 60, stampY + 40, 50, 0, 2 * Math.PI);
+          overlayCtx.stroke();
+          overlayCtx.restore();
+
+          // Draw "ENGINEER REVIEW" stamp text
+          overlayCtx.save();
+          overlayCtx.fillStyle = "rgba(220, 20, 60, 0.7)";
+          overlayCtx.font = "bold 10px Arial";
+          overlayCtx.textAlign = "center";
+          overlayCtx.fillText("ENGINEER", stampX + 60, stampY + 35);
+          overlayCtx.fillText("REVIEW", stampX + 60, stampY + 48);
+          overlayCtx.restore();
+
+          // Draw engineer credentials below stamp
+          overlayCtx.save();
+          overlayCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
+          overlayCtx.font = "11px Arial";
+          overlayCtx.textAlign = "center";
+          overlayCtx.fillText(`Engineer: ${engineerName}`, stampX + 60, stampY + 75);
+          overlayCtx.font = "10px Arial";
+          overlayCtx.fillStyle = "rgba(80, 80, 80, 0.6)";
+          overlayCtx.fillText(`Reviewed: ${reviewDate}`, stampX + 60, stampY + 90);
           overlayCtx.restore();
         }
       };
 
-      // Render both modes
-      await renderPage("vrf-ducted");
-      await renderPage("vrf-ductless");
+      // Render both modes based on system type
+      const systemPrefix = acType?.split('-')[0] || 'vrf'; // Extract 'vrf' or 'minisplit' from acType
+      const ducted = `${systemPrefix}-ducted`;
+      const ductless = `${systemPrefix}-ductless`;
+      
+      await renderPage(ducted);
+      await renderPage(ductless);
     } catch (err) {
       console.error(err);
       setError(
@@ -552,40 +596,118 @@ const Sidebar = () => {
 
   const handleDeletePdf = (pdfId, filename, isEngineerReview = false) => {
     // Show mobile-friendly confirmation modal instead of window.confirm
-    setDeleteConfirm({ show: true, pdfId, filename, isEngineerReview });
+    setDeleteConfirm({ show: true, pdfId, filename, isEngineerReview, deleteAll: false });
+  };
+
+  const handleDeleteAllMyDrawings = () => {
+    if (savedPdfs.length === 0) {
+      toast.warning('No drawings to delete.');
+      return;
+    }
+    setDeleteConfirm({ 
+      show: true, 
+      pdfId: null, 
+      filename: `all ${savedPdfs.length} drawings`,
+      isEngineerReview: false, 
+      deleteAll: true 
+    });
+  };
+
+  const handleDeleteAllEngineerReviews = () => {
+    if (engineerAnnotations.length === 0) {
+      toast.warning('No engineer reviews to delete.');
+      return;
+    }
+    setDeleteConfirm({ 
+      show: true, 
+      pdfId: null, 
+      filename: `all ${engineerAnnotations.length} reviews`,
+      isEngineerReview: true, 
+      deleteAll: true 
+    });
   };
 
   const confirmDeletePdf = async () => {
-    const { pdfId, isEngineerReview } = deleteConfirm;
-    setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false });
+    const { pdfId, isEngineerReview, deleteAll } = deleteConfirm;
+    setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false });
     if (!token) return setError("User not authenticated.");
 
     try {
-      const endpoint = isEngineerReview 
-        ? `/api/engineer-annotations/${pdfId}`
-        : `/api/annotations/${pdfId}`;
-      
-      const response = await fetch(endpoint, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete PDF.");
-      }
-      toast.success(isEngineerReview ? "Engineer review deleted!" : "PDF deleted successfully!");
-      
-      if (isEngineerReview) {
-        setEngineerAnnotations((prev) => prev.filter((a) => a._id !== pdfId));
+      if (deleteAll) {
+        // Delete all PDFs in the current tab
+        const pdfList = isEngineerReview ? engineerAnnotations : savedPdfs;
+        let successCount = 0;
+        let failureCount = 0;
+
+        for (const pdf of pdfList) {
+          try {
+            const endpoint = isEngineerReview 
+              ? `/api/engineer-annotations/${pdf._id}`
+              : `/api/annotations/${pdf._id}`;
+            
+            const response = await fetch(endpoint, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!response.ok) {
+              failureCount++;
+            } else {
+              successCount++;
+            }
+          } catch (err) {
+            console.error(`Failed to delete ${pdf.filename}:`, err);
+            failureCount++;
+          }
+        }
+
+        if (isEngineerReview) {
+          setEngineerAnnotations([]);
+        } else {
+          setSavedPdfs([]);
+        }
+
+        const container = document.getElementById("pdf-container");
+        if (container) container.innerHTML = "";
+        setSelectedPdf(null);
+        setSelectedPdfFile(null);
+        setSelectedAnnotations(null);
+
+        const message = isEngineerReview ? "engineer reviews" : "drawings";
+        if (successCount > 0 && failureCount === 0) {
+          toast.success(`Successfully deleted all ${successCount} ${message}!`);
+        } else if (successCount > 0) {
+          toast.success(`Deleted ${successCount} ${message}. ${failureCount} failed.`);
+        } else {
+          toast.error(`Failed to delete ${message}.`);
+        }
       } else {
-        setSavedPdfs((prev) => prev.filter((pdf) => pdf._id !== pdfId));
+        // Delete single PDF
+        const endpoint = isEngineerReview 
+          ? `/api/engineer-annotations/${pdfId}`
+          : `/api/annotations/${pdfId}`;
+        
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to delete PDF.");
+        }
+        toast.success(isEngineerReview ? "Engineer review deleted!" : "PDF deleted successfully!");
+        
+        if (isEngineerReview) {
+          setEngineerAnnotations((prev) => prev.filter((a) => a._id !== pdfId));
+        } else {
+          setSavedPdfs((prev) => prev.filter((pdf) => pdf._id !== pdfId));
+        }
+        
+        const container = document.getElementById("pdf-container");
+        if (container) container.innerHTML = "";
+        setSelectedPdf(null);
+        setSelectedPdfFile(null);
+        setSelectedAnnotations(null);
       }
-      
-      const container = document.getElementById("pdf-container");
-      if (container) container.innerHTML = "";
-      setSelectedPdf(null);
-      setSelectedPdfFile(null);
-      setSelectedAnnotations(null);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -660,7 +782,17 @@ const Sidebar = () => {
                       savedPdfsLoading ? (
                         <p className="sb-empty">Loading your drawings…</p>
                       ) : savedPdfs.length > 0 ? (
-                        <ul className="sb-list">
+                        <>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'flex-end' }}>
+                            <button
+                              className="btn btn-outline-danger btn-sm"
+                              onClick={handleDeleteAllMyDrawings}
+                              title="Delete all drawings"
+                            >
+                              <FaTrash /> Delete All
+                            </button>
+                          </div>
+                          <ul className="sb-list">
                           {savedPdfs.map((pdf) => (
                             <li key={pdf._id} className="sb-item">
                               <button
@@ -684,7 +816,8 @@ const Sidebar = () => {
                               </button>
                             </li>
                           ))}
-                        </ul>
+                          </ul>
+                        </>
                       ) : (
                         <p className="sb-empty sb-empty--danger">No saved documents yet.</p>
                       )
@@ -694,7 +827,17 @@ const Sidebar = () => {
                       engineerAnnotationsLoading ? (
                         <p className="sb-empty">Loading engineer reviews…</p>
                       ) : engineerAnnotations.length > 0 ? (
-                        <ul className="sb-list">
+                        <>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'flex-end' }}>
+                            <button
+                              className="btn btn-outline-danger btn-sm"
+                              onClick={handleDeleteAllEngineerReviews}
+                              title="Delete all engineer reviews"
+                            >
+                              <FaTrash /> Delete All
+                            </button>
+                          </div>
+                          <ul className="sb-list">
                           {engineerAnnotations.map((annotation) => (
                             <li key={annotation._id} className="sb-item">
                               <button
@@ -716,7 +859,8 @@ const Sidebar = () => {
                               </button>
                             </li>
                           ))}
-                        </ul>
+                          </ul>
+                        </>
                       ) : (
                         <p className="sb-empty sb-empty--info">No engineer reviews yet.</p>
                       )
@@ -854,7 +998,7 @@ const Sidebar = () => {
             justifyContent: 'center',
             zIndex: 99999,
           }}
-          onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false })}
+          onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false })}
         >
           <div
             style={{
@@ -868,13 +1012,21 @@ const Sidebar = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h5 style={{ marginBottom: '12px' }}>
-              {deleteConfirm.isEngineerReview ? 'Delete Engineer Review' : 'Delete PDF'}
+              {deleteConfirm.deleteAll 
+                ? (deleteConfirm.isEngineerReview ? 'Delete All Engineer Reviews' : 'Delete All Drawings')
+                : (deleteConfirm.isEngineerReview ? 'Delete Engineer Review' : 'Delete PDF')
+              }
             </h5>
-            <p>Are you sure you want to delete &quot;{deleteConfirm.filename}&quot;?</p>
+            <p>
+              {deleteConfirm.deleteAll 
+                ? `Are you sure you want to permanently delete ${deleteConfirm.filename}? This action cannot be undone.`
+                : `Are you sure you want to delete "${deleteConfirm.filename}"?`
+              }
+            </p>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
               <button
                 className="btn btn-secondary btn-sm"
-                onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false })}
+                onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false })}
               >
                 Cancel
               </button>
@@ -882,7 +1034,7 @@ const Sidebar = () => {
                 className="btn btn-danger btn-sm"
                 onClick={confirmDeletePdf}
               >
-                Delete
+                {deleteConfirm.deleteAll ? 'Delete All' : 'Delete'}
               </button>
             </div>
           </div>
