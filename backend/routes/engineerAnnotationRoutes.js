@@ -813,30 +813,34 @@ router.get(
 
         firstPage.drawText(approvedText, {
             x: sealX - approvedWidth / 2,
-            y: sealY + 8,
+            y: sealY + 14,
             size: approvedSize,
             font: helveticaBoldFont,
             color: rgb(0.1, 0.3, 0.75),
             opacity: 0.66,
         });
 
-        const reviewText = "ENGINEER REVIEW";
-        const reviewSize = 7;
+        const reviewText = "Engineer Review";
+        const reviewSize = 8;
         const reviewWidth = helveticaBoldFont.widthOfTextAtSize(reviewText, reviewSize);
 
         firstPage.drawText(reviewText, {
             x: sealX - reviewWidth / 2,
-            y: sealY - 4,
+            y: sealY + 1,
             size: reviewSize,
             font: helveticaBoldFont,
             color: rgb(0.16, 0.34, 0.68),
             opacity: 0.62,
         });
 
-        firstPage.drawText(engineerName, {
-            x: sealX - 30,
-            y: sealY - 16,
-            size: 6.5,
+        const dateText = formattedDate;
+        const dateSize = 6.5;
+        const dateWidth = helveticaFont.widthOfTextAtSize(dateText, dateSize);
+
+        firstPage.drawText(dateText, {
+            x: sealX - dateWidth / 2,
+            y: sealY - 12,
+            size: dateSize,
             font: helveticaFont,
             color: rgb(0.18, 0.33, 0.62),
             opacity: 0.56,

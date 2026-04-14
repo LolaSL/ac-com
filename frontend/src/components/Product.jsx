@@ -1,10 +1,11 @@
-import { memo, useCallback, useContext, useState, useEffect } from "react";
+import { memo, useCallback, useContext, useState, useEffect, useRef } from "react";
 import { Card, Button, Spinner, Image, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Rating from "./Rating";
 import axios from "axios";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
+import { FaPlus } from "react-icons/fa";
 import "./Product.css";
 
 const Product = memo(({ product }) => {
@@ -15,6 +16,14 @@ const Product = memo(({ product }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
   const [inWishlist, setInWishlist] = useState(false);
+
+  /* ── Collection picker (desktop) ── */
+  const [showColPicker, setShowColPicker] = useState(false);
+  const [wlCollections, setWlCollections] = useState([]);
+  const [colLoading, setColLoading] = useState(false);
+  const [newColName, setNewColName] = useState("");
+  const [showNewColInput, setShowNewColInput] = useState(false);
+  const pickerRef = useRef(null);
 
   useEffect(() => {
     if (userInfo) {
@@ -37,6 +46,89 @@ const Product = memo(({ product }) => {
       setAddingToCart(false);
     };
   }, [product._id, userInfo]);
+
+  /* ── Close picker on outside click ── */
+  useEffect(() => {
+    if (!showColPicker) return;
+    const handler = (e) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+        setShowColPicker(false);
+        setShowNewColInput(false);
+        setNewColName("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showColPicker]);
+
+  /* ── Fetch collections for picker ── */
+  const fetchCollections = useCallback(async () => {
+    if (!userInfo) return;
+    setColLoading(true);
+    try {
+      const { data } = await axios.get("/api/wishlist/collections", {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
+      });
+      setWlCollections(data);
+    } catch {
+      /* silent */
+    } finally {
+      setColLoading(false);
+    }
+  }, [userInfo]);
+
+  /* ── Add to specific collection ── */
+  const addToCollection = useCallback(
+    async (collectionId) => {
+      if (wishlistLoading) return;
+      setWishlistLoading(true);
+      setInWishlist(true);
+      setShowColPicker(false);
+      setShowNewColInput(false);
+      setNewColName("");
+      try {
+        await axios.post(
+          "/api/wishlist",
+          { productId: product._id, collectionId },
+          { headers: { Authorization: `Bearer ${userInfo.token}` } }
+        );
+        const col = wlCollections.find((c) => c._id === collectionId);
+        toast.success(`Added to "${col?.name || "wishlist"}"`);
+      } catch (error) {
+        const errorMsg = error.response?.data?.message || "";
+        if (errorMsg.toLowerCase().includes("already in wishlist")) {
+          setInWishlist(true);
+          toast.info("Product already in wishlist");
+        } else {
+          setInWishlist(false);
+          toast.error(errorMsg || "Failed to add to wishlist");
+        }
+      } finally {
+        setWishlistLoading(false);
+      }
+    },
+    [wishlistLoading, product._id, userInfo, wlCollections]
+  );
+
+  /* ── Create new collection from picker ── */
+  const createAndAdd = useCallback(async () => {
+    if (!newColName.trim() || wishlistLoading) return;
+    setWishlistLoading(true);
+    try {
+      const { data } = await axios.post(
+        "/api/wishlist/collections",
+        { name: newColName.trim() },
+        { headers: { Authorization: `Bearer ${userInfo.token}` } }
+      );
+      setWlCollections((prev) => [...prev, data]);
+      setNewColName("");
+      setShowNewColInput(false);
+      await addToCollection(data._id);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to create collection");
+      setWishlistLoading(false);
+    }
+  }, [newColName, wishlistLoading, userInfo, addToCollection]);
 
   const addToCartHandler = useCallback(
     async (item) => {
@@ -79,39 +171,29 @@ const Product = memo(({ product }) => {
 
       if (wishlistLoading) return;
 
-      setWishlistLoading(true);
-      const previousState = inWishlist;
-
-      // Optimistic update
-      setInWishlist(!inWishlist);
-
-      try {
-        if (previousState) {
+      // If already in wishlist → remove (same on all devices)
+      if (inWishlist) {
+        setWishlistLoading(true);
+        setInWishlist(false);
+        try {
           await axios.delete(`/api/wishlist/${product._id}`, {
             headers: { Authorization: `Bearer ${userInfo.token}` },
           });
           toast.success("Removed from wishlist");
-        } else {
-          await axios.post(
-            "/api/wishlist",
-            { productId: product._id },
-            {
-              headers: { Authorization: `Bearer ${userInfo.token}` },
-            }
-          );
-          toast.success("Added to wishlist");
+        } catch (error) {
+          setInWishlist(true);
+          toast.error(error.response?.data?.message || "Failed to remove");
+        } finally {
+          setWishlistLoading(false);
         }
-      } catch (error) {
-        // Revert optimistic update on error
-        setInWishlist(previousState);
-        toast.error(
-          error.response?.data?.message || "Failed to update wishlist"
-        );
-      } finally {
-        setWishlistLoading(false);
+        return;
       }
+
+      // Show collection picker (all devices)
+      await fetchCollections();
+      setShowColPicker(true);
     },
-    [userInfo, wishlistLoading, inWishlist, product._id]
+    [userInfo, wishlistLoading, inWishlist, product._id, fetchCollections]
   );
 
   return (
@@ -142,19 +224,74 @@ const Product = memo(({ product }) => {
           </Badge>
         )}
 
-        {/* Wishlist Button */}
-        <button
-          onClick={toggleWishlistHandler}
-          disabled={wishlistLoading}
-          aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-          className={`product-wishlist-btn ${inWishlist ? "active" : ""}`}
-        >
-          {wishlistLoading ? (
-            <Spinner animation="border" size="sm" />
-          ) : (
-            <i className={`${inWishlist ? "fas" : "far"} fa-heart`} />
+        {/* Wishlist Button + Collection Picker */}
+        <div className="product-wishlist-wrap" ref={pickerRef}>
+          <button
+            onClick={toggleWishlistHandler}
+            disabled={wishlistLoading}
+            aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+            className={`product-wishlist-btn ${inWishlist ? "active" : ""}`}
+          >
+            {wishlistLoading ? (
+              <Spinner animation="border" size="sm" />
+            ) : (
+              <i className={`${inWishlist ? "fas" : "far"} fa-heart`} />
+            )}
+          </button>
+
+          {showColPicker && (
+            <div className="wl-col-picker">
+              <div className="wl-col-picker__header">Add to collection</div>
+              {colLoading ? (
+                <div className="wl-col-picker__loading">
+                  <Spinner animation="border" size="sm" />
+                </div>
+              ) : (
+                <div className="wl-col-picker__list">
+                  {wlCollections.map((col) => (
+                    <button
+                      key={col._id}
+                      className="wl-col-picker__item"
+                      onClick={(e) => { e.stopPropagation(); addToCollection(col._id); }}
+                    >
+                      <span className="wl-col-picker__name">{col.name}</span>
+                      <span className="wl-col-picker__count">{col.itemCount}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showNewColInput ? (
+                <div className="wl-col-picker__new">
+                  <input
+                    className="wl-col-picker__input"
+                    type="text"
+                    placeholder="Collection name"
+                    maxLength={60}
+                    value={newColName}
+                    onChange={(e) => setNewColName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && createAndAdd()}
+                    onClick={(e) => e.stopPropagation()}
+                    autoFocus
+                  />
+                  <button
+                    className="wl-col-picker__create-btn"
+                    onClick={(e) => { e.stopPropagation(); createAndAdd(); }}
+                    disabled={!newColName.trim()}
+                  >
+                    Add
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="wl-col-picker__add-new"
+                  onClick={(e) => { e.stopPropagation(); setShowNewColInput(true); }}
+                >
+                  <FaPlus className="me-1" /> New collection
+                </button>
+              )}
+            </div>
           )}
-        </button>
+        </div>
 
         {/* Stock Badge */}
         {product.countInStock > 0 && product.countInStock <= 5 && (

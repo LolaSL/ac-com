@@ -155,11 +155,12 @@
 .home-hero {
   position: relative;
   overflow: hidden;
-  margin: 0 !important;
+  margin: 0 1.5rem !important;
   padding: 0 !important;
   aspect-ratio: 16 / 8;
-  width: 100vw;
-  max-width: 100vw;
+  width: calc(100vw - 3rem);
+  max-width: calc(100vw - 3rem);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;

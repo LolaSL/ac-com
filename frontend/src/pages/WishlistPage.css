@@ -89,6 +89,183 @@
   right: 0;
 }
 
+/* ── Collection tabs ─────────────────────────────────────── */
+.wl-tabs {
+  max-width: 1400px;
+  margin: 0 auto 1.25rem;
+  padding: 0 1.25rem;
+}
+
+.wl-tabs__scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 3.5rem;
+  margin-bottom: -3.5rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.wl-tabs__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.wl-tabs__tab-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.wl-tabs__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 2rem;
+  background: #fff;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wl-tabs__tab:hover {
+  border-color: #94a3b8;
+}
+
+.wl-tabs__tab--active {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #67e8f9;
+  border-color: transparent;
+}
+
+.wl-tabs__tab-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 0.1rem 0.45rem;
+  border-radius: 1rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.wl-tabs__tab--active .wl-tabs__tab-count {
+  background: rgba(103, 232, 249, 0.15);
+  color: #67e8f9;
+}
+
+.wl-tabs__tab-menu {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  margin-left: 0.2rem;
+  padding: 0.15rem;
+  transition: opacity 0.2s;
+}
+
+.wl-tabs__tab-menu:hover {
+  opacity: 1;
+}
+
+.wl-tabs__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  min-width: 150px;
+  animation: wlDropIn 0.15s ease;
+}
+
+@keyframes wlDropIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.wl-tabs__dropdown button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wl-tabs__dropdown button:first-child {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.wl-tabs__dropdown button:hover {
+  background: #f8fafc;
+}
+
+.wl-tabs__dropdown button:last-child {
+  color: #dc2626;
+}
+
+.wl-tabs__dropdown button:last-child:hover {
+  background: #fef2f2;
+}
+
+.wl-tabs__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 50%;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wl-tabs__add:hover {
+  border-color: #64748b;
+  color: #475569;
+  background: #f8fafc;
+}
+
+/* ── Empty collection message ── */
+.wl-empty-msg {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+/* ── New collection input ── */
+.wl-col-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.65rem;
+  font-size: 0.92rem;
+  color: #1a1a2e;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.wl-col-input:focus {
+  border-color: #67e8f9;
+  box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.15);
+}
+
 /* ── Card ────────────────────────────────────────────────── */
 .wl-card {
   border: none;
@@ -271,4 +448,133 @@
   .wl-card__price--current {
     font-size: 1.05rem;
   }
+}
+
+/* ── Long-press action modal ─────────────────────────────── */
+.wl-lp-modal .modal-content {
+  border: none;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.wl-lp-modal__body {
+  padding: 1.5rem 1.25rem 1.25rem;
+  text-align: center;
+  background: #fff;
+  position: relative;
+}
+
+.wl-lp-modal__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.wl-lp-modal__close:hover {
+  background: #e2e8f0;
+  color: #1a1a2e;
+}
+
+.wl-lp-modal__thumb {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 0.85rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #f0f4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wl-lp-modal__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.wl-lp-modal__name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 1.2rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wl-lp-modal__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.65rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.wl-lp-modal__btn:active {
+  transform: scale(0.97);
+}
+
+.wl-lp-modal__btn + .wl-lp-modal__btn {
+  margin-top: 0.6rem;
+}
+
+.wl-lp-modal__btn--delete {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.wl-lp-modal__btn--delete:hover {
+  background: #fee2e2;
+}
+
+.wl-lp-modal__btn--similar {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #67e8f9;
+}
+
+.wl-lp-modal__btn--similar:hover {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+}
+
+.wl-lp-modal__btn--move {
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.wl-lp-modal__btn--move:hover {
+  background: #e0f2fe;
+}
+
+.wl-lp-modal__btn--move-target {
+  background: #f8fafc;
+  color: #334155;
+  border: 1.5px solid #e2e8f0;
+}
+
+.wl-lp-modal__btn--move-target:hover {
+  background: #f0fdfa;
+  border-color: #67e8f9;
+  color: #0f3460;
 }

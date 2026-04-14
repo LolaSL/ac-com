@@ -1850,7 +1850,7 @@ const Annotator = ({
       isSavingRef.current = false;
       setIsSaving(false);
     }
-  }, [comments, rectangles, lines, file, token, filteredRoomsRef, formatRoomsWithFlatPrefixes, pdfId]);
+  }, [file, formatRoomsWithFlatPrefixes, pdfRotation, rectangles, comments, lines, pdfId, token]);
 
   useEffect(() => {
     if (!results.length || !images.length) return;
@@ -2371,7 +2371,7 @@ const Annotator = ({
                       <select
                         value={sortKey}
                         onChange={(e) => setSortKey(e.target.value)}
-                        className="form-select flex-grow-1"
+                        className="form-select flex-grow-1 m-1"
                       >
                         <option value="roomType">Room Type</option>
                         <option value="width">Width</option>
@@ -2962,13 +2962,17 @@ const Annotator = ({
                         />
                       </React.Fragment>
                     ))}
-                    {comments.map((comment) => (
+                    {comments.map((comment) => {
+                      const charWidth = 6; // approximate width per character at fontSize 10
+                      const textPadding = 6;
+                      const boxWidth = Math.max(48, comment.text.length * charWidth + textPadding);
+                      return (
                       <Group key={comment.id}>
                         {/* Comment background box */}
                         <Rect
                           x={comment.x}
                           y={comment.y - 10}
-                          width={60}
+                          width={boxWidth}
                           height={16}
                           fill="rgba(252, 252, 243, 0.3)"
                           stroke="grey"
@@ -2985,13 +2989,14 @@ const Annotator = ({
                           fontFamily="Arial"
                           fontStyle="bold"
                           fill="deeppink"
-                          width={56}
+                          width={boxWidth - 4}
                           draggable={true}
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
                         />
                       </Group>
-                    ))}
+                      );
+                    })}
                   </Layer>
                 </Stage>
               </div>

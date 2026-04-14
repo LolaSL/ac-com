@@ -114,6 +114,7 @@ export default function PlaceOrderPage() {
   }, [cart.cartItems, cart.itemsPrice, cart.paymentMethod, navigate]);
 
   return (
+    <div className="po-page-wrapper">
     <div className="po-page">
       <CheckoutSteps step1 step2 step3 step4 />
 
@@ -208,6 +209,7 @@ export default function PlaceOrderPage() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

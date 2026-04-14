@@ -484,6 +484,11 @@ productRouter.get('/slug/:slug', async (req, res) => {
   try {
     const product = await Product.findOne({ slug: req.params.slug }).lean();
     if (product) {
+      const activeReviews = (product.reviews || []).filter((r) => !r.deleted);
+      if (activeReviews.length > 0) {
+        product.numReviews = activeReviews.length;
+        product.rating = activeReviews.reduce((a, c) => c.rating + a, 0) / activeReviews.length;
+      }
       res.send(product);
     } else {
       res.status(404).send({ message: 'Product Not Found' });
@@ -520,6 +525,11 @@ productRouter.get("/:id", async (req, res) => {
     const product = await Product.findById(id).lean();
 
     if (product) {
+      const activeReviews = (product.reviews || []).filter((r) => !r.deleted);
+      if (activeReviews.length > 0) {
+        product.numReviews = activeReviews.length;
+        product.rating = activeReviews.reduce((a, c) => c.rating + a, 0) / activeReviews.length;
+      }
       res.json(product);
     } else {
       res.status(404).json({ message: "Product not found" });

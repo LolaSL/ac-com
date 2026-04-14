@@ -31,6 +31,7 @@ export default function PaymentMethodScreen() {
   };
 
   return (
+    <div className="pm-page-wrapper">
     <div className="pm-page">
       <CheckoutSteps step1 step2 step3 />
 
@@ -57,6 +58,7 @@ export default function PaymentMethodScreen() {
         <button type="submit" className="pm-submit">Continue to Place Order →</button>
         <Link to="/shipping" className="pm-back">← Back to Shipping</Link>
       </form>
+    </div>
     </div>
   );
 }

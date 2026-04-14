@@ -196,6 +196,7 @@ orderRouter.post(
       type: 'info',
       recipientType: 'user',
       userId: req.user._id,
+      orderId: order._id,
       link: `/order/${order._id}`,
     });
 
@@ -205,6 +206,7 @@ orderRouter.post(
       message: `New order #${order._id.toString().slice(-6)} from ${req.user.name}. Total: $${roundedTotalPrice.toFixed(2)}`,
       type: 'urgent',
       recipientType: 'admin',
+      orderId: order._id,
       link: `/admin/order/${order._id}`,
     });
 
@@ -387,6 +389,100 @@ orderRouter.get(
   })
 );
 
+// ── Order Messages: orders + their notifications ──
+orderRouter.get(
+  '/mine/messages',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const orders = await Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .select('_id orderItems totalPrice isPaid paidAt isDelivered deliveredAt isCancelled cancelledAt createdAt')
+      .lean();
+
+    const orderIds = orders.map((o) => o._id);
+
+    const notifications = await Notification.find({
+      recipientType: 'user',
+      userId: req.user._id,
+      orderId: { $in: orderIds },
+    })
+      .sort({ createdAt: -1 })
+      .select('title message type orderId isRead createdAt')
+      .lean();
+
+    // Group notifications by orderId
+    const notifMap = {};
+    for (const n of notifications) {
+      const key = n.orderId.toString();
+      if (!notifMap[key]) notifMap[key] = [];
+      notifMap[key].push(n);
+    }
+
+    // Build timeline per order
+    const result = orders.map((order) => {
+      const messages = notifMap[order._id.toString()] || [];
+      // Auto-generate status timeline from order fields
+      const timeline = [];
+      timeline.push({
+        title: 'Order Placed',
+        message: `Order created — ${order.orderItems.length} item${order.orderItems.length !== 1 ? 's' : ''}, Total: $${order.totalPrice.toFixed(2)}`,
+        type: 'info',
+        createdAt: order.createdAt,
+      });
+      if (order.isPaid) {
+        timeline.push({
+          title: 'Payment Confirmed',
+          message: 'Your payment has been processed successfully.',
+          type: 'info',
+          createdAt: order.paidAt,
+        });
+      }
+      if (order.isDelivered) {
+        timeline.push({
+          title: 'Delivered',
+          message: 'Your order has been delivered.',
+          type: 'info',
+          createdAt: order.deliveredAt,
+        });
+      }
+      if (order.isCancelled) {
+        timeline.push({
+          title: 'Order Cancelled',
+          message: 'This order has been cancelled.',
+          type: 'urgent',
+          createdAt: order.cancelledAt || order.createdAt,
+        });
+      }
+      // Merge DB notifications that aren't duplicates of timeline
+      const timelineTitles = new Set(timeline.map((t) => t.title));
+      for (const m of messages) {
+        if (!timelineTitles.has(m.title)) {
+          timeline.push(m);
+        }
+      }
+      timeline.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      return {
+        _id: order._id,
+        totalPrice: order.totalPrice,
+        isPaid: order.isPaid,
+        paidAt: order.paidAt,
+        isDelivered: order.isDelivered,
+        deliveredAt: order.deliveredAt,
+        isCancelled: order.isCancelled,
+        createdAt: order.createdAt,
+        itemCount: order.orderItems.length,
+        firstItemName: order.orderItems[0]?.name || 'Order',
+        firstItemImage: order.orderItems[0]?.image || '',
+        timeline,
+        unreadCount: messages.filter((m) => !m.isRead).length,
+      };
+    });
+
+    res.send(result);
+  })
+);
+
 
 orderRouter.get(
   '/:id',
@@ -437,6 +533,7 @@ orderRouter.put(
           type: 'info',
           recipientType: 'user',
           userId: order.user,
+          orderId: order._id,
           link: `/order/${order._id}`,
         });
       }
@@ -475,6 +572,7 @@ orderRouter.put(
         type: 'info',
         recipientType: 'user',
         userId: order.user._id,
+        orderId: order._id,
         link: `/order/${order._id}`,
       });
 
@@ -484,6 +582,7 @@ orderRouter.put(
         message: `Payment received for order #${order._id.toString().slice(-6)} from ${order.user.name}.`,
         type: 'info',
         recipientType: 'admin',
+        orderId: order._id,
         link: `/admin/order/${order._id}`,
       });
 

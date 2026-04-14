@@ -44,7 +44,7 @@
 
 .navbar-brand {
   text-align: left;
-  margin: 0;
+  margin: 0 1.5rem 0 0.5rem;
 }
 
 .navbar-collapse {
@@ -320,8 +320,8 @@
     align-items: center !important;
   }
 
-  .navbar-collapse .flex-grow-1 {
-    max-width: 520px;
+  .navbar-collapse .search-wrapper {
+    max-width: 900px;
   }
 }
 
@@ -345,19 +345,20 @@
 /* ── Search responsive ── */
 @media (min-width: 769px) and (max-width: 1440px) {
   .search-box {
-    max-width: 80%;
+    max-width: 100%;
   }
 }
 
 @media (min-width: 1441px) {
   .search-box {
-    max-width: 400px;
+    max-width: 100%;
   }
 }
 
 .search-wrapper {
   display: flex;
   justify-content: center;
+
 }
 
 /* iPad (768–991px) */

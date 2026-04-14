@@ -144,6 +144,7 @@ export default function ShippingAddressPage() {
   };
 
   return (
+    <div className="sa-page-wrapper">
     <div className="sa-page">
       <CheckoutSteps step1 step2 />
 
@@ -230,6 +231,7 @@ export default function ShippingAddressPage() {
 
         <button type="submit" className="sa-submit-btn">Continue to Payment →</button>
       </form>
+    </div>
     </div>
   );
 }

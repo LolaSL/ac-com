@@ -30,7 +30,8 @@ function printOrder() {
     a.replaceWith(span);
   });
 
-  const orderNumber = clone.querySelector(".op-hero__id")?.textContent?.trim() || "";
+  const heroTitle = clone.querySelector(".adm-hero__title")?.textContent?.trim() || "";
+  const orderNumber = heroTitle.replace(/^Order\s*#?\s*/i, "") || window.location.pathname.split("/").pop();
 
   // Build a standalone summary table from the live DOM (not cloned, which had summary removed)
   const liveRows = document.querySelectorAll(".op-summary__row");

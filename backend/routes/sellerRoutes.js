@@ -268,6 +268,15 @@ sellerRouter.get('/:id', expressAsyncHandler(async (req, res) => {
   const commissionRate = 0.1;
   const totalCommission = totalReferredSales * commissionRate;
 
+  // Use actual reviews if any exist, otherwise fall back to seeded values
+  const hasRealReviews = seller.reviews.length > 0;
+  const actualRating = hasRealReviews
+    ? seller.reviews.reduce((a, c) => c.rating + a, 0) / seller.reviews.length
+    : seller.rating;
+  const actualNumReviews = hasRealReviews
+    ? seller.reviews.length
+    : seller.numReviews;
+
   res.send({
     _id: seller._id,
     name: seller.name,
@@ -276,8 +285,8 @@ sellerRouter.get('/:id', expressAsyncHandler(async (req, res) => {
     info: seller.info,
     link: seller.link,
     companyLink: seller.companyLink,
-    rating: seller.rating,
-    numReviews: seller.numReviews,
+    rating: actualRating,
+    numReviews: actualNumReviews,
     reviews: seller.reviews,
     referralCode: seller.referralCode,
     outboundClicks: seller.outboundClicks || 0,

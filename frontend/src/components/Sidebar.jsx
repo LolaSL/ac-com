@@ -542,39 +542,53 @@ const Sidebar = () => {
           overlayCtx.fillText(modeLabel, 10, 20);
           overlayCtx.restore();
 
-          // Engineer Review Watermark - Always display on every page
-          const engineerName = engineerAnnotation.engineerId?.name || "Engineer";
+          // ========== USER CREDENTIALS WATERMARK (diagonal) ==========
+          const engineerName = annotationsData.engineerId?.name || engineerAnnotation.engineerId?.name || "Engineer";
+          const engineerEmail = annotationsData.engineerId?.email || "";
+          const userName = annotationsData.userId?.name || "User";
+          const userEmail = annotationsData.userId?.email || "";
           const reviewDate = new Date(engineerAnnotation.createdAt).toLocaleDateString();
+          const watermarkText = `AC-Commerce | User: ${userName} (${userEmail}) | Engineer: ${engineerName} (${engineerEmail}) | Reviewed: ${reviewDate}`;
+
+          overlayCtx.save();
+          overlayCtx.translate(viewport.width / 2, viewport.height / 2);
+          overlayCtx.rotate(-Math.PI / 6); // ~30 degrees
+          overlayCtx.font = "14px Arial";
+          overlayCtx.fillStyle = "rgba(100, 100, 100, 0.28)";
+          overlayCtx.textAlign = "center";
+          overlayCtx.fillText(watermarkText, 0, 0);
+          overlayCtx.restore();
+
+          // ========== ENGINEER REVIEW SEAL STAMP ==========
           const stampX = viewport.width - 140;
           const stampY = viewport.height - 120;
 
           // Draw stamp circle background
           overlayCtx.save();
-          overlayCtx.strokeStyle = "rgba(220, 20, 60, 0.6)";
-          overlayCtx.lineWidth = 2;
+          overlayCtx.strokeStyle = "rgba(30, 89, 199, 0.5)";
+          overlayCtx.lineWidth = 3;
           overlayCtx.beginPath();
           overlayCtx.arc(stampX + 60, stampY + 40, 50, 0, 2 * Math.PI);
           overlayCtx.stroke();
+          // Inner circle fill
+          overlayCtx.fillStyle = "rgba(230, 240, 255, 0.28)";
+          overlayCtx.beginPath();
+          overlayCtx.arc(stampX + 60, stampY + 40, 42, 0, 2 * Math.PI);
+          overlayCtx.fill();
           overlayCtx.restore();
 
-          // Draw "ENGINEER REVIEW" stamp text
+          // Draw "APPROVED", "Engineer Review", date stamp text
           overlayCtx.save();
-          overlayCtx.fillStyle = "rgba(220, 20, 60, 0.7)";
-          overlayCtx.font = "bold 10px Arial";
+          overlayCtx.fillStyle = "rgba(26, 77, 191, 0.66)";
+          overlayCtx.font = "bold 13px Arial";
           overlayCtx.textAlign = "center";
-          overlayCtx.fillText("ENGINEER", stampX + 60, stampY + 35);
-          overlayCtx.fillText("REVIEW", stampX + 60, stampY + 48);
-          overlayCtx.restore();
-
-          // Draw engineer credentials below stamp
-          overlayCtx.save();
-          overlayCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
-          overlayCtx.font = "11px Arial";
-          overlayCtx.textAlign = "center";
-          overlayCtx.fillText(`Engineer: ${engineerName}`, stampX + 60, stampY + 75);
-          overlayCtx.font = "10px Arial";
-          overlayCtx.fillStyle = "rgba(80, 80, 80, 0.6)";
-          overlayCtx.fillText(`Reviewed: ${reviewDate}`, stampX + 60, stampY + 90);
+          overlayCtx.fillText("APPROVED", stampX + 60, stampY + 30);
+          overlayCtx.font = "bold 9px Arial";
+          overlayCtx.fillStyle = "rgba(41, 87, 174, 0.62)";
+          overlayCtx.fillText("Engineer Review", stampX + 60, stampY + 45);
+          overlayCtx.font = "9px Arial";
+          overlayCtx.fillStyle = "rgba(80, 80, 80, 0.5)";
+          overlayCtx.fillText(reviewDate, stampX + 60, stampY + 60);
           overlayCtx.restore();
         }
       };

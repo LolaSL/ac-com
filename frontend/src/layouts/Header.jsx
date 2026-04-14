@@ -79,7 +79,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             id="basic-navbar-nav"
             className="justify-content-start"
           >
-            <div className="grow me-3 search-wrapper">
+            <div className="flex-grow-1 me-3 search-wrapper">
               <SearchBox />
             </div>
             <Nav className=" align-items-center gap-3 ms-auto me-4">
