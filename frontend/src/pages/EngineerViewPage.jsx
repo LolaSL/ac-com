@@ -25,6 +25,7 @@ const EngineerViewPage = () => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState("reviewed");
   const pdfContainerRef = useRef(null);
 
   // Mobile responsive toolbar dropdown state
@@ -1269,7 +1270,8 @@ const EngineerViewPage = () => {
     }));
     setShowHVAC(true);
     toast.success(
-      `Auto-placed ${newDucts.length} ducts, ${newDiffusers.length} diffusers, ${newDampers.length} dampers & ${newThermostats.length} thermostats`
+      `Auto-placed: ${newDucts.length} ducts, ${newDiffusers.length} diffusers,\n${newDampers.length} dampers, ${newThermostats.length} thermostats`,
+      { autoClose: 5000 }
     );
   };
 
@@ -1423,6 +1425,7 @@ const EngineerViewPage = () => {
       formData.append("vrf", JSON.stringify(ann.vrf || {}));
       formData.append("refrigerantLinesAuto", "false");
       formData.append("engineerNotes", "");
+      formData.append("status", reviewStatus);
       formData.append("imageWidth", "1");
       formData.append("imageHeight", "1");
 
@@ -2044,15 +2047,28 @@ const EngineerViewPage = () => {
         </div>
         {annotation && pdfFile && (
           <div className="mt-2">
-            <Button
-              variant="success"
-              size="sm"
-              className="w-auto"
-              onClick={handleSaveToMongoDB}
-              disabled={saveLoading}
-            >
-              {saveLoading ? "Saving..." : "💾 Save Engineer Review"}
-            </Button>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Form.Select
+                size="sm"
+                value={reviewStatus}
+                onChange={(e) => setReviewStatus(e.target.value)}
+                style={{ width: 'auto', minWidth: '140px' }}
+              >
+                <option value="reviewed">📋 Reviewed</option>
+                <option value="approved">✅ Approved</option>
+                <option value="rejected">❌ Rejected</option>
+                <option value="pending">⏳ Pending</option>
+              </Form.Select>
+              <Button
+                variant="success"
+                size="sm"
+                className="w-auto"
+                onClick={handleSaveToMongoDB}
+                disabled={saveLoading}
+              >
+                {saveLoading ? "Saving..." : "💾 Save Engineer Review"}
+              </Button>
+            </div>
             {saveSuccess && (
               <p className="text-success mt-1" style={{ fontSize: "0.875rem" }}>
                 ✅ Saved! The review is now visible in the user's Engineer Reviews tab.

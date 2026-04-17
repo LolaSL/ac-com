@@ -1,7 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from 'react-bootstrap';
 
+// Default: ~8 hours/day cooling, average US electricity rate
+const DEFAULT_HOURS_PER_DAY = 8;
+const DEFAULT_RATE_PER_KWH = 0.12;
+const DEFAULT_SEER = 14; // Fallback if product has no energyEfficiency
+
+function calcMonthlyCost(btu, seer, hoursPerDay, ratePerKwh) {
+  // Power in kW = BTU/h ÷ (SEER × 1000)
+  // SEER = BTU/h per Watt, so Watts = BTU / SEER, kW = BTU / (SEER * 1000)
+  const kw = btu / (seer * 1000);
+  return kw * hoursPerDay * 30 * ratePerKwh;
+}
+
 export default function SystemSummary({ btuProject, perRoomResults, recommendedUnits }) {
+  const [electricityRate, setElectricityRate] = useState(DEFAULT_RATE_PER_KWH);
+  const [hoursPerDay, setHoursPerDay] = useState(DEFAULT_HOURS_PER_DAY);
+
   if (!btuProject) return null;
 
   // Calculate total product sum from all rooms
@@ -72,6 +87,119 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
             </div>
           </div>
         )}
+
+        {/* Energy Cost Estimator */}
+        {perRoomResults && perRoomResults.length > 0 && (() => {
+          const roomCosts = perRoomResults
+            .filter(r => r.btu && !r.isCondenser && r.product && !r.product.isCondenser)
+            .map(r => {
+              const seer = r.product?.energyEfficiency || DEFAULT_SEER;
+              const monthly = calcMonthlyCost(r.btu, seer, hoursPerDay, electricityRate);
+              return { name: r.name, btu: r.btu, seer, monthly };
+            });
+
+          // Number duplicate room names
+          const nameCounts = {};
+          roomCosts.forEach(r => { nameCounts[r.name] = (nameCounts[r.name] || 0) + 1; });
+          const nameIdx = {};
+          roomCosts.forEach(r => {
+            if (nameCounts[r.name] > 1) {
+              nameIdx[r.name] = (nameIdx[r.name] || 0) + 1;
+              r.displayName = `${r.name} ${nameIdx[r.name]}`;
+            } else {
+              r.displayName = r.name;
+            }
+          });
+
+          const totalMonthly = Math.round(roomCosts.reduce((sum, r) => sum + r.monthly, 0) * 100) / 100;
+          const totalAnnual = Math.round(totalMonthly * 12 * 100) / 100;
+
+          return (
+            <div className="mt-4 pt-3 border-top">
+              <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem' }}>
+                ⚡ Energy Cost Estimator
+              </div>
+              <div className="row g-2 mb-3">
+                <div className="col-auto">
+                  <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '2px' }}>
+                    Electricity Rate ($/kWh)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max="1"
+                    value={electricityRate}
+                    onChange={(e) => setElectricityRate(Math.max(0.01, parseFloat(e.target.value) || 0.01))}
+                    style={{
+                      width: '100px', padding: '4px 8px', borderRadius: '6px',
+                      border: '1px solid #ccc', fontSize: '0.9rem',
+                    }}
+                  />
+                </div>
+                <div className="col-auto">
+                  <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '2px' }}>
+                    Daily Usage (hours)
+                  </label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    max="24"
+                    value={hoursPerDay}
+                    onChange={(e) => setHoursPerDay(Math.min(24, Math.max(1, parseInt(e.target.value) || 1)))}
+                    style={{
+                      width: '80px', padding: '4px 8px', borderRadius: '6px',
+                      border: '1px solid #ccc', fontSize: '0.9rem',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #dee2e6', background: 'rgba(102, 126, 234, 0.1)' }}>
+                    <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Room</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>BTU</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>SEER</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Monthly Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roomCosts.map((r, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '5px 8px' }}>{r.displayName}</td>
+                      <td style={{ padding: '5px 8px', textAlign: 'right' }}>{r.btu.toLocaleString()}</td>
+                      <td style={{ padding: '5px 8px', textAlign: 'right' }}>{r.seer}</td>
+                      <td style={{ padding: '5px 8px', textAlign: 'right', fontWeight: '600' }}>
+                        ${r.monthly.toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="row g-3 mt-2">
+                <div className="col-sm-6">
+                  <div className="p-3 rounded" style={{ background: 'rgba(255, 159, 67, 0.1)', border: '1px solid rgba(255, 159, 67, 0.3)' }}>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>Est. Monthly Cost</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#e67e22' }}>
+                      ${totalMonthly.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-sm-6">
+                  <div className="p-3 rounded" style={{ background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.3)' }}>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>Est. Annual Cost</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#e74c3c' }}>
+                      ${totalAnnual.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </Card.Body>
     </Card>
   );

@@ -41,8 +41,12 @@ const initialState = {
 
   // Linked BTU Calculator data
   btuData: {
-    currentProject: null,
-    products: [],
+    currentProject: localStorage.getItem('btuCurrentProject')
+      ? JSON.parse(localStorage.getItem('btuCurrentProject'))
+      : null,
+    products: localStorage.getItem('btuProducts')
+      ? JSON.parse(localStorage.getItem('btuProducts'))
+      : [],
   },
 
   // HVAC Zone Designer state
@@ -284,18 +288,25 @@ function reducer(state, action) {
 
     // BTU Data Actions (for linking)
     case 'BTU_SET_CURRENT_PROJECT':
+      localStorage.setItem(
+        'btuCurrentProject',
+        JSON.stringify(action.payload)
+      );
       return {
         ...state,
         btuData: { ...state.btuData, currentProject: action.payload },
       };
 
     case 'BTU_SET_PRODUCTS':
+      localStorage.setItem('btuProducts', JSON.stringify(action.payload));
       return {
         ...state,
         btuData: { ...state.btuData, products: action.payload },
       };
 
     case 'BTU_CLEAR':
+      localStorage.removeItem('btuCurrentProject');
+      localStorage.removeItem('btuProducts');
       return {
         ...state,
         btuData: {

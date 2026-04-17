@@ -1083,7 +1083,7 @@ export default function ROICalculatorExperimental() {
     multiplier.cost;
 
   const savingsPerProject =
-    traditionalCostPerProject - acCommerceCostPerProject;
+    Math.round((traditionalCostPerProject - acCommerceCostPerProject) * 100) / 100;
   const savingsPercentage = (
     (savingsPerProject / traditionalCostPerProject) *
     100
@@ -1094,9 +1094,9 @@ export default function ROICalculatorExperimental() {
     projectsPerMonth * multiplier.frequency
   );
   const projectsPerYear = adjustedProjectsPerMonth * monthsToAnalyze;
-  const annualTraditionalCost = traditionalCostPerProject * projectsPerYear;
-  const annualAcCommerceCost = acCommerceCostPerProject * projectsPerYear;
-  const annualSavings = annualTraditionalCost - annualAcCommerceCost;
+  const annualTraditionalCost = Math.round(traditionalCostPerProject * projectsPerYear * 100) / 100;
+  const annualAcCommerceCost = Math.round(acCommerceCostPerProject * projectsPerYear * 100) / 100;
+  const annualSavings = Math.round((annualTraditionalCost - annualAcCommerceCost) * 100) / 100;
   const roi = ((annualSavings / annualAcCommerceCost) * 100).toFixed(1);
 
   // Monthly breakdown data

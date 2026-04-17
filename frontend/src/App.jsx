@@ -30,7 +30,7 @@ function AppContent() {
       <ToastContainer
         position="bottom-center"
         limit={1}
-        autoClose={15000}
+        autoClose={5000}
         closeOnClick
         pauseOnHover
         pauseOnFocusLoss

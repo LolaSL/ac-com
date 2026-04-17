@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useCallback } from "react";
+import React, { useContext, useEffect, useCallback} from "react";
 import { Store } from "../Store";
 import { Card, Table, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaPrint, FaShoppingCart, FaStar } from "react-icons/fa";
+import { FaEye, FaPrint, FaShoppingCart, FaStar, FaShareAlt } from "react-icons/fa";
 import printJS from "print-js";
 import { toast } from "react-toastify";
 import "./Recommendations.css";
@@ -527,13 +527,26 @@ export default function Recommendations() {
                 </tr>
               </thead>
               <tbody>
-                {perRoomResults.map((room, idx) => {
-                  // fallback: if room.product doesn't exist, use room itself
-                  const product = room.product || room;
+                {(() => {
+                  // Number duplicate room names (e.g., Bedroom → Bedroom 1, Bedroom 2)
+                  const nameCounts = {};
+                  perRoomResults.forEach(r => {
+                    const n = r.name || 'Room';
+                    nameCounts[n] = (nameCounts[n] || 0) + 1;
+                  });
+                  const nameIndex = {};
+                  return perRoomResults.map((room, idx) => {
+                    const product = room.product || room;
+                    const baseName = room.name || `Room ${idx + 1}`;
+                    let displayName = baseName;
+                    if (nameCounts[baseName] > 1) {
+                      nameIndex[baseName] = (nameIndex[baseName] || 0) + 1;
+                      displayName = `${baseName} ${nameIndex[baseName]}`;
+                    }
 
-                  return (
-                    <tr key={idx}>
-                      <td>{room.name || `Room ${idx + 1}`}</td>
+                    return (
+                      <tr key={idx}>
+                        <td>{displayName}</td>
                       <td>{room.size}</td>
                       <td>{room.btu}</td>
                       <td>{getName(product)}</td>
@@ -557,7 +570,8 @@ export default function Recommendations() {
                       </td>
                     </tr>
                   );
-                })}
+                  });
+                })()}
               </tbody>
             </Table>
           ) : recommendedUnits.length === 0 ? (
@@ -690,6 +704,41 @@ export default function Recommendations() {
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 <span>Do Both</span>
+              </Button>
+
+              <Button
+                onClick={() => {
+                  const summary = perRoomResults
+                    ? `AC System: ${perRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || '—'} BTU total`
+                    : 'AC Unit Recommendations';
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'AC Commerce — System Recommendations',
+                      text: summary,
+                      url: window.location.href,
+                    }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                      toast.success('Link copied to clipboard!');
+                    }).catch(() => {
+                      toast.error('Could not copy link.');
+                    });
+                  }
+                }}
+                variant="outline-secondary"
+                className="w-75 w-md-auto py-2"
+                style={{
+                  fontWeight: '600',
+                  padding: '0.7rem 1.5rem',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <FaShareAlt size={16} />
+                <span>Share</span>
               </Button>
             </div>
           )}

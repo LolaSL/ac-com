@@ -1,10 +1,12 @@
 import { useState, useEffect, useContext, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 import { Store } from "../Store.js";
 import SaveAsPDF from "./SaveAsPDF.jsx";
 import { overlayAnnotations, overlayHVAC, overlayVRFSystem, drawCanvasLegend, hvacSymbols } from "../utils/annotationUtils.js";
 import "./Sidebar.css";
+import { Button } from "react-bootstrap";
 
 // SVG icons
 const FaFilePdf = () => (
@@ -57,7 +59,15 @@ const FaTimes = () => (
  * @param {Object} hvacAnnotations - Object with ducts and diffusers arrays.
  */
 
+const statusConfig = {
+  approved: { label: 'Approved', color: '#16a34a', bg: '#dcfce7' },
+  reviewed: { label: 'Reviewed', color: '#2563eb', bg: '#dbeafe' },
+  pending:  { label: 'Pending',  color: '#d97706', bg: '#fef3c7' },
+  rejected: { label: 'Rejected', color: '#dc2626', bg: '#fee2e2' },
+};
+
 const Sidebar = () => {
+  const navigate = useNavigate();
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [savedPdfs, setSavedPdfs] = useState([]);
@@ -553,42 +563,114 @@ const Sidebar = () => {
           overlayCtx.save();
           overlayCtx.translate(viewport.width / 2, viewport.height / 2);
           overlayCtx.rotate(-Math.PI / 6); // ~30 degrees
-          overlayCtx.font = "14px Arial";
+          overlayCtx.font = "10px Arial";
           overlayCtx.fillStyle = "rgba(100, 100, 100, 0.28)";
           overlayCtx.textAlign = "center";
           overlayCtx.fillText(watermarkText, 0, 0);
           overlayCtx.restore();
 
           // ========== ENGINEER REVIEW SEAL STAMP ==========
-          const stampX = viewport.width - 140;
-          const stampY = viewport.height - 120;
+          const cx = viewport.width - 80;
+          const cy = viewport.height - 80;
+          const outerR = 52;
+          const innerR = 44;
+          const coreR = 28;
 
-          // Draw stamp circle background
           overlayCtx.save();
-          overlayCtx.strokeStyle = "rgba(30, 89, 199, 0.5)";
+
+          // Outer ring — bold border
+          overlayCtx.strokeStyle = "rgba(20, 70, 180, 0.7)";
           overlayCtx.lineWidth = 3;
           overlayCtx.beginPath();
-          overlayCtx.arc(stampX + 60, stampY + 40, 50, 0, 2 * Math.PI);
+          overlayCtx.arc(cx, cy, outerR, 0, 2 * Math.PI);
           overlayCtx.stroke();
-          // Inner circle fill
-          overlayCtx.fillStyle = "rgba(230, 240, 255, 0.28)";
-          overlayCtx.beginPath();
-          overlayCtx.arc(stampX + 60, stampY + 40, 42, 0, 2 * Math.PI);
-          overlayCtx.fill();
-          overlayCtx.restore();
 
-          // Draw "APPROVED", "Engineer Review", date stamp text
-          overlayCtx.save();
-          overlayCtx.fillStyle = "rgba(26, 77, 191, 0.66)";
-          overlayCtx.font = "bold 13px Arial";
+          // Inner ring — thinner
+          overlayCtx.strokeStyle = "rgba(20, 70, 180, 0.45)";
+          overlayCtx.lineWidth = 1.5;
+          overlayCtx.beginPath();
+          overlayCtx.arc(cx, cy, innerR, 0, 2 * Math.PI);
+          overlayCtx.stroke();
+
+          // Ring fill between outer and inner
+          overlayCtx.fillStyle = "rgba(220, 235, 255, 0.18)";
+          overlayCtx.beginPath();
+          overlayCtx.arc(cx, cy, outerR, 0, 2 * Math.PI);
+          overlayCtx.arc(cx, cy, innerR, 0, 2 * Math.PI, true);
+          overlayCtx.fill();
+
+          // Curved text — "AC-COMMERCE" along top arc
+          const topText = "AC-COMMERCE";
+          overlayCtx.font = "bold 8px Arial";
+          overlayCtx.fillStyle = "rgba(20, 70, 180, 0.72)";
           overlayCtx.textAlign = "center";
-          overlayCtx.fillText("APPROVED", stampX + 60, stampY + 30);
+          overlayCtx.textBaseline = "middle";
+          const topArcR = (outerR + innerR) / 2;
+          const topStartAngle = -Math.PI / 2 - (topText.length * 0.09);
+          for (let i = 0; i < topText.length; i++) {
+            const angle = topStartAngle + i * 0.18;
+            const x = cx + topArcR * Math.cos(angle);
+            const y = cy + topArcR * Math.sin(angle);
+            overlayCtx.save();
+            overlayCtx.translate(x, y);
+            overlayCtx.rotate(angle + Math.PI / 2);
+            overlayCtx.fillText(topText[i], 0, 0);
+            overlayCtx.restore();
+          }
+
+          // Curved text — "ENGINEER REVIEW" along bottom arc
+          const bottomText = "ENGINEER REVIEW";
+          overlayCtx.font = "bold 7px Arial";
+          const botArcR = (outerR + innerR) / 2;
+          const botStartAngle = Math.PI / 2 + (bottomText.length * 0.08);
+          for (let i = 0; i < bottomText.length; i++) {
+            const angle = botStartAngle - i * 0.16;
+            const x = cx + botArcR * Math.cos(angle);
+            const y = cy + botArcR * Math.sin(angle);
+            overlayCtx.save();
+            overlayCtx.translate(x, y);
+            overlayCtx.rotate(angle - Math.PI / 2);
+            overlayCtx.fillText(bottomText[i], 0, 0);
+            overlayCtx.restore();
+          }
+
+          // Small stars separating top/bottom text
+          overlayCtx.font = "8px Arial";
+          overlayCtx.fillStyle = "rgba(20, 70, 180, 0.6)";
+          const starAngleL = -Math.PI / 2 - (topText.length * 0.09) - 0.2;
+          const starAngleR = -Math.PI / 2 + (topText.length * 0.09) + 0.2;
+          [starAngleL, starAngleR].forEach(a => {
+            overlayCtx.fillText("★", cx + topArcR * Math.cos(a) - 4, cy + topArcR * Math.sin(a) + 3);
+          });
+
+          // Core circle — light fill
+          overlayCtx.fillStyle = "rgba(230, 242, 255, 0.22)";
+          overlayCtx.beginPath();
+          overlayCtx.arc(cx, cy, coreR, 0, 2 * Math.PI);
+          overlayCtx.fill();
+
+          // Center — checkmark icon (shifted up to make room for date)
+          overlayCtx.strokeStyle = "rgba(20, 130, 50, 0.75)";
+          overlayCtx.lineWidth = 3;
+          overlayCtx.lineCap = "round";
+          overlayCtx.lineJoin = "round";
+          overlayCtx.beginPath();
+          overlayCtx.moveTo(cx - 10, cy - 8);
+          overlayCtx.lineTo(cx - 3, cy);
+          overlayCtx.lineTo(cx + 12, cy - 14);
+          overlayCtx.stroke();
+
+          // "APPROVED" text below checkmark
+          overlayCtx.fillStyle = "rgba(20, 70, 180, 0.8)";
           overlayCtx.font = "bold 9px Arial";
-          overlayCtx.fillStyle = "rgba(41, 87, 174, 0.62)";
-          overlayCtx.fillText("Engineer Review", stampX + 60, stampY + 45);
-          overlayCtx.font = "9px Arial";
-          overlayCtx.fillStyle = "rgba(80, 80, 80, 0.5)";
-          overlayCtx.fillText(reviewDate, stampX + 60, stampY + 60);
+          overlayCtx.textAlign = "center";
+          overlayCtx.fillText("APPROVED", cx, cy + 14);
+
+          // Date inside stamp, below APPROVED
+          overlayCtx.font = "7px Arial";
+          overlayCtx.fillStyle = "rgba(60, 60, 60, 0.65)";
+          overlayCtx.fillText(reviewDate, cx, cy + 24);
+
           overlayCtx.restore();
         }
       };
@@ -862,7 +944,18 @@ const Sidebar = () => {
                                 <span>{annotation.filename || "Untitled Document"}</span>
                               </button>
                               <small className="sb-item__meta">
-                                Engineer: {annotation.engineerId?.name || "Unknown"} | Reviewed: {new Date(annotation.createdAt).toLocaleString()}
+                                Engineer: {annotation.engineerId?.name || "Unknown"} | {new Date(annotation.createdAt).toLocaleString()}
+                                {annotation.status && (
+                                  <span
+                                    className="sb-status-badge"
+                                    style={{
+                                      color: (statusConfig[annotation.status] || statusConfig.pending).color,
+                                      background: (statusConfig[annotation.status] || statusConfig.pending).bg,
+                                    }}
+                                  >
+                                    {(statusConfig[annotation.status] || statusConfig.pending).label}
+                                  </span>
+                                )}
                               </small>
                               <button
                                 className="sb-item__delete"
@@ -934,15 +1027,28 @@ const Sidebar = () => {
                       />
                     )}
                     {activeTab === "engineer-reviews" && currentPdfType === "engineer" && (
-                      <SaveAsPDF
-                        file={selectedPdfFile}
-                        isPaid={false}
-                        pdfId={selectedPdf?._id}
-                        token={token}
-                        annotations={selectedAnnotations}
-                        acType={selectedAcType}
-                        annotationType="engineer"
-                      />
+                      <div className="sb-engineer-actions">
+                        <SaveAsPDF
+                          file={selectedPdfFile}
+                          isPaid={false}
+                          pdfId={selectedPdf?._id}
+                          token={token}
+                          annotations={selectedAnnotations}
+                          acType={selectedAcType}
+                          annotationType="engineer"
+                        />
+                        {(selectedPdf?.status === "approved" || selectedPdf?.status === "reviewed") && (
+                          <Button
+                            className="sb-buy-btn"
+                            onClick={() => {
+                              setIsOpen(false);
+                              navigate('/search?category=AC%20Products');
+                            }}
+                          >
+                            🛒 Buy Equipment
+                          </Button>
+                        )}
+                      </div>
                     )}
 
                     {isAdmin && selectedPdfFile && (

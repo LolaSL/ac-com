@@ -42,6 +42,7 @@ router.post(
             vrf,
             refrigerantLinesAuto,
             engineerNotes,
+            status,
             imageWidth,
             imageHeight,
         } = req.body;
@@ -233,7 +234,7 @@ router.post(
                 vrf: vrfData,
             },
             engineerNotes,
-            status: "reviewed",
+            status: ["pending", "reviewed", "approved", "rejected"].includes(status) ? status : "reviewed",
         });
 
         const savedAnnotation = await newEngineerAnnotation.save();
