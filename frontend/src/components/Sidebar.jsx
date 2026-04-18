@@ -89,12 +89,34 @@ const Sidebar = () => {
   // Mobile-friendly delete confirmation state (replaces window.confirm)
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false });
 
+  // Search & sort
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'name'
+
   // PDF zoom scale
   const [pdfScale, setPdfScale] = useState(1.5);
 
   // Determine user role
   const isAdmin = !!state?.adminInfo && !!state?.adminInfo.token;
   const userId = state?.userInfo?._id || state?.adminInfo?._id;
+
+  // Filter & sort helper
+  const filterAndSort = (list) => {
+    let filtered = list;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = list.filter(
+        (item) =>
+          (item.filename || '').toLowerCase().includes(q) ||
+          (item.engineerId?.name || '').toLowerCase().includes(q)
+      );
+    }
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'name') return (a.filename || '').localeCompare(b.filename || '');
+      if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+      return new Date(b.createdAt) - new Date(a.createdAt); // newest
+    });
+  };
 
   // const isUser = !!state?.userInfo && !!state?.userInfo.token;
 
@@ -871,13 +893,37 @@ const Sidebar = () => {
               {/* Content area */}
               <div className="sb-content">
 
+                {/* ── Search & Sort bar ── */}
+                {!selectedPdf && (
+                  <div className="sb-toolbar">
+                    <input
+                      type="text"
+                      className="sb-search"
+                      placeholder="Search files…"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <select
+                      className="sb-sort"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                    >
+                      <option value="newest">Newest</option>
+                      <option value="oldest">Oldest</option>
+                      <option value="name">Name</option>
+                    </select>
+                  </div>
+                )}
+
                 {/* ── LIST VIEW ── */}
                 {!selectedPdf && (
                   <>
                     {activeTab === "my-annotations" && (
                       savedPdfsLoading ? (
                         <p className="sb-empty">Loading your drawings…</p>
-                      ) : savedPdfs.length > 0 ? (
+                      ) : savedPdfs.length > 0 ? ((() => {
+                        const filtered = filterAndSort(savedPdfs);
+                        return filtered.length > 0 ? (
                         <>
                           <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'flex-end' }}>
                             <button
@@ -889,7 +935,7 @@ const Sidebar = () => {
                             </button>
                           </div>
                           <ul className="sb-list">
-                          {savedPdfs.map((pdf) => (
+                          {filtered.map((pdf) => (
                             <li key={pdf._id} className="sb-item">
                               <button
                                 className="sb-item__open"
@@ -914,7 +960,10 @@ const Sidebar = () => {
                           ))}
                           </ul>
                         </>
-                      ) : (
+                        ) : (
+                          <p className="sb-empty">No matches found.</p>
+                        );
+                      })()) : (
                         <p className="sb-empty sb-empty--danger">No saved documents yet.</p>
                       )
                     )}
@@ -922,7 +971,9 @@ const Sidebar = () => {
                     {activeTab === "engineer-reviews" && (
                       engineerAnnotationsLoading ? (
                         <p className="sb-empty">Loading engineer reviews…</p>
-                      ) : engineerAnnotations.length > 0 ? (
+                      ) : engineerAnnotations.length > 0 ? ((() => {
+                        const filtered = filterAndSort(engineerAnnotations);
+                        return filtered.length > 0 ? (
                         <>
                           <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'flex-end' }}>
                             <button
@@ -934,7 +985,7 @@ const Sidebar = () => {
                             </button>
                           </div>
                           <ul className="sb-list">
-                          {engineerAnnotations.map((annotation) => (
+                          {filtered.map((annotation) => (
                             <li key={annotation._id} className="sb-item">
                               <button
                                 className="sb-item__open"
@@ -968,7 +1019,10 @@ const Sidebar = () => {
                           ))}
                           </ul>
                         </>
-                      ) : (
+                        ) : (
+                          <p className="sb-empty">No matches found.</p>
+                        );
+                      })()) : (
                         <p className="sb-empty sb-empty--info">No engineer reviews yet.</p>
                       )
                     )}

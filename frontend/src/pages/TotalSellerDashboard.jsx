@@ -10,7 +10,8 @@ import Card from "react-bootstrap/Card";
 import Table from "react-bootstrap/Table";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
-import { FaEye, FaChartLine, FaCopy, FaCheckCircle } from "react-icons/fa";
+import Alert from "react-bootstrap/Alert";
+import { FaEye, FaChartLine, FaCopy, FaCheckCircle, FaInfoCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./TotalSellerDashboard.css";
 import "./AdminHero.css";
@@ -94,6 +95,12 @@ export default function TotalSellerDashboard() {
         <MessageBox variant="danger">{error}</MessageBox>
       ) : (
         <>
+          {/* Partnership Disclaimer */}
+          <Alert variant="info" className="d-flex align-items-center gap-2 mb-4">
+            <FaInfoCircle />
+            <span>Commission tracking is active. Payouts begin after partnership agreement.</span>
+          </Alert>
+
           {/* Summary Cards */}
           <Row className="mb-4">
             <Col md={3}>

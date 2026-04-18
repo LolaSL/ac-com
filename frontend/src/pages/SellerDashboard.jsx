@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import LoadingBox from "../components/LoadingBox";
@@ -10,7 +10,9 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import Badge from "react-bootstrap/Badge";
-import { FaCopy, FaCheckCircle } from "react-icons/fa";
+import Alert from "react-bootstrap/Alert";
+import { FaCopy, FaCheckCircle, FaInfoCircle } from "react-icons/fa";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -36,6 +38,51 @@ const reducer = (state, action) => {
       return state;
   }
 };
+
+// Click trend chart — aggregates clickLogs into weekly buckets
+function ClickTrendChart({ clickLogs }) {
+  const chartData = useMemo(() => {
+    if (!clickLogs || clickLogs.length === 0) return [];
+
+    const buckets = {};
+    clickLogs.forEach((log) => {
+      const d = new Date(log.clickedAt);
+      // Week start (Monday)
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const weekStart = new Date(d.getFullYear(), d.getMonth(), diff);
+      const key = weekStart.toISOString().slice(0, 10);
+      buckets[key] = (buckets[key] || 0) + 1;
+    });
+
+    return Object.entries(buckets)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12) // last 12 weeks
+      .map(([week, clicks]) => ({
+        week: new Date(week).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        clicks,
+      }));
+  }, [clickLogs]);
+
+  if (chartData.length === 0) return null;
+
+  return (
+    <Card className="mb-4">
+      <Card.Header><strong>Click Trend (Weekly)</strong></Card.Header>
+      <Card.Body>
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="week" tick={{ fontSize: 12 }} />
+            <YAxis allowDecimals={false} />
+            <Tooltip />
+            <Bar dataKey="clicks" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </Card.Body>
+    </Card>
+  );
+}
 
 export default function SellerDashboard() {
   const [sellerInfo, setSellerInfo] = useState(null);
@@ -202,6 +249,12 @@ export default function SellerDashboard() {
                 </Card.Footer>
               </Card>
             )}
+            {/* Partnership Disclaimer */}
+            <Alert variant="info" className="d-flex align-items-center gap-2 mb-4">
+              <FaInfoCircle />
+              <span>Commission tracking is active. Payouts begin after partnership agreement.</span>
+            </Alert>
+
             {/* Statistics Cards */}
             <Row className="mb-4">
               <Col md={3}>
@@ -261,7 +314,27 @@ export default function SellerDashboard() {
                   </Card.Body>
                 </Card>
               </Col>
+              <Col md={3}>
+                <Card className="text-center">
+                  <Card.Body>
+                    <Card.Title style={{ color: '#059669' }}>
+                      {stats.outboundClicks > 0
+                        ? ((stats.referredUsersCount / stats.outboundClicks) * 100).toFixed(1)
+                        : '0.0'}%
+                    </Card.Title>
+                    <Card.Text>Conversion Rate</Card.Text>
+                    <small className="text-muted">
+                      Clicks → Signups
+                    </small>
+                  </Card.Body>
+                </Card>
+              </Col>
             </Row>
+
+            {/* Click Trend Chart */}
+            {sellerInfo?.clickLogs?.length > 0 && (
+              <ClickTrendChart clickLogs={sellerInfo.clickLogs} />
+            )}
 
             {/* Action Buttons */}
             <Row className="mb-4">

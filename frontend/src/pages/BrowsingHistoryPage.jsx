@@ -196,11 +196,29 @@ function BrowsingHistoryPage() {
       ) : error ? (
         <Alert variant="danger">{error}</Alert>
       ) : filteredHistory.length === 0 ? (
-        <Alert variant="info">
-          {filterPriceDrops
-            ? "No price drops found in your browsing history."
-            : "Your browsing history is empty. Start exploring products!"}
-        </Alert>
+        filterPriceDrops ? (
+          <Alert variant="info">No price drops found in your browsing history.</Alert>
+        ) : (
+          <div className="text-center py-5">
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔍</div>
+            <h5 style={{ color: '#495057', fontWeight: 600 }}>Your browsing history is empty</h5>
+            <p className="text-muted mb-3">You haven't viewed any products yet.</p>
+            <Link
+              to="/search"
+              className="btn btn-primary"
+              style={{
+                background: 'linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%)',
+                border: 'none',
+                padding: '0.6rem 1.5rem',
+                borderRadius: '8px',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              Start Exploring Products
+            </Link>
+          </div>
+        )
       ) : (
         <Row className="g-3 mx-0">
           {filteredHistory.map((item) => (

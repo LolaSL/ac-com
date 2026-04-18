@@ -258,6 +258,47 @@
 .sb-empty--danger { color: #ef4444; }
 .sb-empty--info   { color: #2563a8; }
 
+/* ── Search & Sort toolbar ──────────────────────────────── */
+.sb-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.sb-search {
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.sb-search:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+.sb-search::placeholder {
+  color: #9ca3af;
+}
+
+.sb-sort {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+.sb-sort:focus {
+  border-color: #667eea;
+}
+
 /* ── PDF view bar ───────────────────────────────────────── */
 .sb-pdfbar {
   display: flex;

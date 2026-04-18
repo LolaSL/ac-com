@@ -125,25 +125,34 @@ seedRouter.get('/', async (req, res) => {
     const createdSellers = await Seller.find({});
     const createdContacts = await Contact.insertMany(data.contacts);
 
-    // Assign referrals to some users
-    if (createdUsers.length > 0 && createdSellers.length > 0) {
-      // Assign first 3 users to be referred by first seller
-      await User.findByIdAndUpdate(createdUsers[0]._id, { referredBy: createdSellers[0]._id });
-      await User.findByIdAndUpdate(createdUsers[1]._id, { referredBy: createdSellers[0]._id });
-      await User.findByIdAndUpdate(createdUsers[2]._id, { referredBy: createdSellers[0]._id });
+    // Assign referrals to specific users by email (deterministic regardless of DB order)
+    const sellerByCode = {};
+    createdSellers.forEach(s => { sellerByCode[s.referralCode] = s._id; });
 
-      // Assign next 2 users to be referred by second seller
-      if (createdSellers.length > 1) {
-        await User.findByIdAndUpdate(createdUsers[3]._id, { referredBy: createdSellers[1]._id });
-        await User.findByIdAndUpdate(createdUsers[4]._id, { referredBy: createdSellers[1]._id });
+    const referralAssignments = [
+      // Referred by LG (LGREF)
+      { email: 'user_doe@example.com', referralCode: 'LGREF' },
+      { email: 'user_jen@example.com', referralCode: 'LGREF' },
+      { email: 'user_manny@example.com', referralCode: 'LGREF' },
+      // Referred by Samsung (SAMSUNGREF)
+      { email: 'user_ban@example.com', referralCode: 'SAMSUNGREF' },
+      { email: 'user_mik@example.com', referralCode: 'SAMSUNGREF' },
+    ];
+
+    for (const { email, referralCode } of referralAssignments) {
+      const sellerId = sellerByCode[referralCode];
+      if (sellerId) {
+        await User.findOneAndUpdate({ email }, { referredBy: sellerId });
       }
     }
 
     // Refresh users data after referral assignments
     createdUsers = await User.find({});
 
-    // Update existing orders with referredBy based on user's referredBy
-    const existingOrders = await Order.find({ referredBy: { $exists: false } }).populate('user');
+    // Update existing orders missing referredBy based on user's referredBy
+    const existingOrders = await Order.find({
+      $or: [{ referredBy: { $exists: false } }, { referredBy: null }]
+    }).populate('user');
     for (const order of existingOrders) {
       if (order.user && order.user.referredBy) {
         await Order.findByIdAndUpdate(order._id, { referredBy: order.user.referredBy });

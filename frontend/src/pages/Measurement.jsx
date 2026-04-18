@@ -32,7 +32,7 @@ const GridItem = ({ children }) => (
 );
 
 const Measurement = () => {
-  const { state } = useContext(Store);
+  const { state, dispatch: ctxDispatch } = useContext(Store);
   const [savedPdfs, setSavedPdfs] = useState([]);
   const [roomData, setRoomDataState] = useState([]);
   const [acAnnotations, setAcAnnotations] = useState([]);
@@ -146,7 +146,7 @@ const Measurement = () => {
           <div className="ms-hero__icon"><FaRulerCombined /></div>
           <h1 className="ms-hero__title">Measurement Service System</h1>
           <p className="ms-hero__sub">Upload your floor plan, notate rooms and export to BTU calculator.</p>
-          {storedBtuProject && !roomData?.length && (
+          {showStoredCalculation && storedBtuProject && !roomData?.length && (
             <div style={{
               marginTop: '1rem',
               padding: '0.75rem 1rem',
@@ -204,7 +204,10 @@ const Measurement = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowStoredCalculation(false)}
+                  onClick={() => {
+                    setShowStoredCalculation(false);
+                    ctxDispatch({ type: 'BTU_CLEAR' });
+                  }}
                   className="ms-clear-calc-btn"
                   style={{
                     background: 'rgba(255,255,255,0.2)',

@@ -1,8 +1,8 @@
-import { useEffect, useState, useContext } from "react";
-import { Table, Spinner, Alert, Button } from "react-bootstrap";
+import { useEffect, useState, useContext, useMemo } from "react";
+import { Table, Spinner, Alert, Button, Form, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store.js";
-import { FaEye, FaPencilRuler } from "react-icons/fa";
+import { FaEye, FaPencilRuler, FaSearch } from "react-icons/fa";
 import "./AdminHero.css";
 
 const AdminAllAnnotationsPage = () => {
@@ -12,6 +12,36 @@ const AdminAllAnnotationsPage = () => {
   const [annotations, setAnnotations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Filter & sort state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest'); // newest | oldest | name
+  const [paidFilter, setPaidFilter] = useState('all'); // all | paid | unpaid
+
+  const filteredAnnotations = useMemo(() => {
+    let result = annotations;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (a) =>
+          (a.filename || '').toLowerCase().includes(q) ||
+          (a.userId || '').toLowerCase().includes(q)
+      );
+    }
+
+    // Paid filter
+    if (paidFilter === 'paid') result = result.filter((a) => a.isPaid);
+    if (paidFilter === 'unpaid') result = result.filter((a) => !a.isPaid);
+
+    // Sort
+    return [...result].sort((a, b) => {
+      if (sortBy === 'name') return (a.filename || '').localeCompare(b.filename || '');
+      if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+      return new Date(b.createdAt) - new Date(a.createdAt); // newest
+    });
+  }, [annotations, searchQuery, sortBy, paidFilter]);
 
   useEffect(() => {
     const fetchAllAnnotations = async () => {
@@ -69,6 +99,40 @@ const AdminAllAnnotationsPage = () => {
       {loading && <Spinner animation="border" />}
       {error && <Alert variant="danger">{error}</Alert>}
       {!loading && !error && (
+        <>
+          {/* Filter & Sort toolbar */}
+          <div className="d-flex flex-wrap gap-2 mb-3 align-items-center">
+            <InputGroup style={{ maxWidth: '300px' }}>
+              <InputGroup.Text><FaSearch /></InputGroup.Text>
+              <Form.Control
+                placeholder="Search filename or user ID…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </InputGroup>
+            <Form.Select
+              style={{ maxWidth: '150px' }}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="name">Name A-Z</option>
+            </Form.Select>
+            <Form.Select
+              style={{ maxWidth: '140px' }}
+              value={paidFilter}
+              onChange={(e) => setPaidFilter(e.target.value)}
+            >
+              <option value="all">All status</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
+            </Form.Select>
+            <small className="text-muted ms-auto">
+              {filteredAnnotations.length} of {annotations.length} drawings
+            </small>
+          </div>
+
         <Table striped bordered hover responsive>
           <thead>
             <tr>
@@ -81,7 +145,8 @@ const AdminAllAnnotationsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {annotations.map((a) => (
+            {filteredAnnotations.length > 0 ? (
+              filteredAnnotations.map((a) => (
               <tr key={a._id}>
                 <td data-label="Filename">{a.filename}</td>
                 <td data-label="User ID">{a.userId}</td>
@@ -99,9 +164,17 @@ const AdminAllAnnotationsPage = () => {
                   </Button>
                 </td>
               </tr>
-            ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="text-center text-muted py-3">
+                  No drawings match your filters.
+                </td>
+              </tr>
+            )}
           </tbody>
         </Table>
+        </>
       )}  
       </div>
     </div>

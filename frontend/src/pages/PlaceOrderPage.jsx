@@ -49,7 +49,7 @@ export default function PlaceOrderPage() {
   };
 
   cart.shippingPrice = getShippingPrice(cart.itemsPrice, cart.cartItems);
-  cart.taxPrice = round2(0.15 * cart.itemsPrice);
+  cart.taxPrice = round2(0.08 * cart.itemsPrice);
   cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
 
   const placeOrderHandler = async () => {
@@ -192,7 +192,7 @@ export default function PlaceOrderPage() {
               <span>${cart.shippingPrice.toFixed(2)}</span>
             </div>
             <div className="po-summary__row">
-              <span className="po-summary__lbl">Tax (15%)</span>
+              <span className="po-summary__lbl">Tax (8%)</span>
               <span>${cart.taxPrice.toFixed(2)}</span>
             </div>
             <div className="po-summary__total">

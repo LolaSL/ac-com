@@ -224,6 +224,7 @@ useEffect(() => {
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
   const [numPeople, setNumPeople] = useState(2);
   const [error, setError] = useState("");
+  const [isCalculating, setIsCalculating] = useState(false);
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
       Roof: false,
@@ -526,6 +527,7 @@ useEffect(() => {
 
   const handleCalculate = async () => {
     setError("");
+    setIsCalculating(true);
     const results = [];
     let totalBTU = 0;
 
@@ -1010,6 +1012,7 @@ useEffect(() => {
       payload: btuData,
     });
 
+    setIsCalculating(false);
     toast.success("BTU calculation complete! Navigating to recommendations...");
     navigate("/recommendations");
   };
@@ -1306,8 +1309,9 @@ useEffect(() => {
           variant="primary"
           onClick={handleCalculate}
           className="mt-4 me-3 mb-4"
+          disabled={isCalculating}
         >
-          Calculate BTU
+          {isCalculating ? '⏳ Calculating…' : 'Calculate BTU'}
         </Button>
 
         <Button variant="secondary" onClick={handleClear} className="mt-4 mb-4">

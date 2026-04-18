@@ -1,5 +1,6 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
+import mongoose from 'mongoose';
 import Wishlist from '../models/wishlistModel.js';
 import WishlistCollection from '../models/wishlistCollectionModel.js';
 import Product from '../models/productModel.js';
@@ -38,7 +39,7 @@ wishlistRouter.get(
 
     // count items per collection
     const counts = await Wishlist.aggregate([
-      { $match: { user: req.user._id } },
+      { $match: { user: new mongoose.Types.ObjectId(req.user._id) } },
       { $group: { _id: '$collection', count: { $sum: 1 } } },
     ]);
     const countMap = {};

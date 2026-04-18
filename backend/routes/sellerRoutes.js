@@ -234,6 +234,7 @@ sellerRouter.get('/:id/dashboard', expressAsyncHandler(async (req, res) => {
       lastClickAt: seller.clickLogs?.length > 0
         ? seller.clickLogs[seller.clickLogs.length - 1].clickedAt
         : null,
+      clickLogs: (seller.clickLogs || []).map(log => ({ clickedAt: log.clickedAt })),
     },
     stats: {
       referredUsersCount: totalReferredUsers,

@@ -474,7 +474,7 @@ export default function OrderPage() {
                   <span>Shipping</span><span>${order.shippingPrice.toFixed(2)}</span>
                 </div>
                 <div className="op-summary__row">
-                  <span>Tax</span><span>${order.taxPrice.toFixed(2)}</span>
+                  <span>Tax (8%)</span><span>${order.taxPrice.toFixed(2)}</span>
                 </div>
                 <div className="op-summary__row op-summary__row--total">
                   <span>Total</span><span>${order.totalPrice.toFixed(2)}</span>

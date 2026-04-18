@@ -102,8 +102,8 @@
   gap: 0.5rem;
   overflow-x: auto;
   overflow-y: visible;
-  padding-bottom: 3.5rem;
-  margin-bottom: -3.5rem;
+  padding-bottom: 6rem;
+  margin-bottom: -6rem;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -180,7 +180,7 @@
   border-radius: 0.75rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   z-index: 100;
-  overflow: hidden;
+  overflow: visible;
   min-width: 150px;
   animation: wlDropIn 0.15s ease;
 }

@@ -222,11 +222,14 @@
 }
 
 @media (max-width: 768px) {
+  .home-banner-page { padding-top: 0.5rem !important; }
   .home-hero__inner { padding: 2rem 1.25rem; }
   .home-hero__title { font-size: 1.4rem; }
 }
 
 @media (max-width: 480px) {
+  .home-banner-page { padding-top: 0.35rem !important; }
+  .home-hero { aspect-ratio: 16 / 9; }
   .home-hero__inner { padding: 1.5rem 1rem; }
   .home-hero__title { font-size: 1.1rem; }
   .home-hero__sub { font-size: 0.78rem; }
@@ -235,6 +238,8 @@
 }
 
 @media (max-width: 360px) {
+  .home-banner-page { padding-top: 0.25rem !important; }
+  .home-hero { aspect-ratio: 16 / 10; }
   .home-hero__title { font-size: 0.95rem; }
   .home-hero__sub { font-size: 0.72rem; }
 }
