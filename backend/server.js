@@ -33,6 +33,8 @@ import { startPaymentReminderJob } from './utils/paymentReminderJob.js';
 
 dotenv.config();
 
+let server;
+
 async function start() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
@@ -43,12 +45,19 @@ async function start() {
 
     // Start scheduled jobs
     startPaymentReminderJob();
+
+    const port = process.env.PORT || 5020;
+    server = app.listen(port, () => {
+      console.log(`Server is listening at http://localhost:${port}`);
+    });
   } catch (err) {
     console.error("MongoDB connection error:", err.message);
+    if (err.reason) {
+      console.error("MongoDB connection details:", err.reason);
+    }
+    process.exit(1);
   }
 }
-
-start();
 
 const app = express();
 
@@ -186,12 +195,13 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
 });
 
-const port = process.env.PORT || 5020;
-const server = app.listen(port, () => {
-  console.log(`Server is listening at http://localhost:${port}`);
-});
+start();
 
 process.on('SIGINT', () => {
+  if (!server) {
+    process.exit(0);
+  }
+
   server.close(() => {
     console.log('Server gracefully shut down');
     process.exit(0);
