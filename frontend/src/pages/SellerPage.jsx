@@ -17,6 +17,46 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import "./SellerPage.css";
 
+const buildTrackedCompanyUrl = (companyLink, campaignId) => {
+  try {
+    const url = new URL(companyLink);
+    url.searchParams.set("utm_source", "accommerce");
+    url.searchParams.set("utm_medium", "referral");
+    url.searchParams.set("utm_campaign", campaignId || "seller");
+    return url.toString();
+  } catch {
+    return companyLink;
+  }
+};
+
+const trackSellerClick = (sellerId, userId) => {
+  const endpoint = `/api/sellers/${sellerId}/track-click`;
+  const payload = JSON.stringify({ userId: userId || null });
+
+  if (navigator.sendBeacon) {
+    const blob = new Blob([payload], { type: "application/json" });
+    navigator.sendBeacon(endpoint, blob);
+    return;
+  }
+
+  fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {
+    // fire-and-forget
+  });
+};
+
+const shouldOpenExternalInSameTab = () => {
+  const ua = navigator.userAgent || "";
+  const iOSDevice = /iPhone|iPad|iPod/i.test(ua);
+  const iPadOSDesktopUA =
+    navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return iOSDevice || iPadOSDesktopUA;
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
@@ -64,23 +104,14 @@ export default function SellerPage() {
     fetchData();
   }, [id]);
 
-  const handleCompanyLinkClick = async (e) => {
-    e.preventDefault();
-    // Build URL with UTM params so seller's analytics shows AC Commerce as traffic source
-    const url = new URL(seller.companyLink);
-    url.searchParams.set('utm_source', 'accommerce');
-    url.searchParams.set('utm_medium', 'referral');
-    url.searchParams.set('utm_campaign', seller.referralCode || seller._id);
-    // Open immediately (synchronous) so popup blockers don't interfere
-    window.open(url.toString(), '_blank', 'noopener,noreferrer');
-    // Track in background after navigation
-    try {
-      await axios.post(`/api/sellers/${seller._id}/track-click`, {
-        userId: userInfo?._id || null,
-      });
-    } catch (_) {
-      // fire-and-forget — don't block the user if tracking fails
-    }
+  const trackedCompanyLink = seller?.companyLink
+    ? buildTrackedCompanyUrl(seller.companyLink, seller.referralCode || seller._id)
+    : "";
+  const openExternalInSameTab = shouldOpenExternalInSameTab();
+
+  const handleCompanyLinkClick = () => {
+    if (!seller?._id) return;
+    trackSellerClick(seller._id, userInfo?._id);
   };
 
   const submitHandler = async (e) => {
@@ -146,10 +177,10 @@ export default function SellerPage() {
                 <div className="sp-hero__meta">
                   {seller.companyLink ? (
                     <a
-                      href={seller.companyLink}
+                      href={trackedCompanyLink}
                       onClick={handleCompanyLinkClick}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target={openExternalInSameTab ? "_self" : "_blank"}
+                      rel={openExternalInSameTab ? undefined : "noopener noreferrer"}
                       className="sp-hero__link"
                     >
                       🌐 Visit Website

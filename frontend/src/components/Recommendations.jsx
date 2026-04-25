@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useCallback} from "react";
+import React, { useContext, useEffect, useCallback, useState } from "react";
 import { Store } from "../Store";
-import { Card, Table, Button } from "react-bootstrap";
+import { Card, Table, Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaPrint, FaShoppingCart, FaStar, FaShareAlt } from "react-icons/fa";
 import printJS from "print-js";
@@ -14,6 +14,7 @@ import { getName, getPrice } from "./shared/productHelpers";
 export default function Recommendations() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Extract BTU/ROI project data (must be before handlePrint)
   const btuProject =
@@ -437,6 +438,82 @@ export default function Recommendations() {
     });
   };
 
+  const getSharePayload = useCallback(() => {
+    const summary = perRoomResults
+      ? `AC System: ${perRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || "-"} BTU total`
+      : "AC Unit Recommendations";
+
+    return {
+      title: "AC Commerce - System Recommendations",
+      text: summary,
+      url: window.location.href,
+    };
+  }, [perRoomResults, btuProject]);
+
+  const copyToClipboard = useCallback(async (value) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+
+    const textArea = document.createElement("textarea");
+    textArea.value = value;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    textArea.setAttribute("readonly", "");
+    document.body.appendChild(textArea);
+    textArea.select();
+    const copied = document.execCommand("copy");
+    document.body.removeChild(textArea);
+    return copied;
+  }, []);
+
+  const handleShare = async () => {
+    const payload = getSharePayload();
+
+    try {
+      if (navigator.share) {
+        await navigator.share(payload);
+        return;
+      }
+    } catch {
+      // no-op, fallback modal opens below
+    }
+
+    setShowShareModal(true);
+  };
+
+  const handleShareOption = async (type) => {
+    const payload = getSharePayload();
+    const encodedUrl = encodeURIComponent(payload.url);
+    const encodedText = encodeURIComponent(`${payload.title}\n${payload.text}\n${payload.url}`);
+
+    if (type === "copy") {
+      const copied = await copyToClipboard(payload.url);
+      if (copied) {
+        toast.success("Link copied to clipboard!");
+      } else {
+        toast.error("Could not copy link.");
+      }
+      setShowShareModal(false);
+      return;
+    }
+
+    if (type === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodedText}`, "_blank", "noopener,noreferrer");
+    }
+
+    if (type === "telegram") {
+      window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(payload.text)}`, "_blank", "noopener,noreferrer");
+    }
+
+    if (type === "email") {
+      window.open(`mailto:?subject=${encodeURIComponent(payload.title)}&body=${encodedText}`, "_self");
+    }
+
+    setShowShareModal(false);
+  };
+
   return (
     <div className="recommendations-page-container">
       {/* Page Header */}
@@ -707,24 +784,7 @@ export default function Recommendations() {
               </Button>
 
               <Button
-                onClick={() => {
-                  const summary = perRoomResults
-                    ? `AC System: ${perRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || '—'} BTU total`
-                    : 'AC Unit Recommendations';
-                  if (navigator.share) {
-                    navigator.share({
-                      title: 'AC Commerce — System Recommendations',
-                      text: summary,
-                      url: window.location.href,
-                    }).catch(() => {});
-                  } else {
-                    navigator.clipboard.writeText(window.location.href).then(() => {
-                      toast.success('Link copied to clipboard!');
-                    }).catch(() => {
-                      toast.error('Could not copy link.');
-                    });
-                  }
-                }}
+                onClick={handleShare}
                 variant="outline-secondary"
                 className="w-75 w-md-auto py-2"
                 style={{
@@ -752,6 +812,20 @@ export default function Recommendations() {
         perRoomResults={perRoomResults}
         recommendedUnits={recommendedUnits}
       />
+
+      <Modal show={showShareModal} onHide={() => setShowShareModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Share Recommendations</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-grid gap-2">
+            <Button variant="success" onClick={() => handleShareOption("whatsapp")}>Share via WhatsApp</Button>
+            <Button variant="info" onClick={() => handleShareOption("telegram")}>Share via Telegram</Button>
+            <Button variant="secondary" onClick={() => handleShareOption("email")}>Share via Email</Button>
+            <Button variant="outline-primary" onClick={() => handleShareOption("copy")}>Copy Link</Button>
+          </div>
+        </Modal.Body>
+      </Modal>
 
       </div>{/* End rec-inner */}
     </div>

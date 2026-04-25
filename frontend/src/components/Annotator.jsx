@@ -825,6 +825,21 @@ const Annotator = ({
   // Default to annotation mode (true) so users can create rectangles immediately
   // Track last rectangle tap for double-tap deletion on mobile
   const lastRectTapRef = useRef({});
+
+  const idsMatch = useCallback((left, right) => {
+    if (left === undefined || left === null || right === undefined || right === null) {
+      return false;
+    }
+    return String(left) === String(right);
+  }, []);
+
+  const removeAnnotationByRectId = useCallback((rectId) => {
+    setRectangles((prevRects) => prevRects.filter((r) => !idsMatch(r.id, rectId)));
+    setComments((prevComments) =>
+      prevComments.filter((comment) => !idsMatch(comment.rectId, rectId))
+    );
+    setLines((prevLines) => prevLines.filter((line) => !idsMatch(line.rectId, rectId)));
+  }, [idsMatch]);
   
   // Track if currently dragging to prevent modal from showing
   const isDraggingRef = useRef(false);
@@ -1246,10 +1261,24 @@ const Annotator = ({
       console.log('confirmAcUnitAnnotation: no comment text, returning');
       return;
     }
+
+    const normalizedCommentText = commentText.trim().toLowerCase();
+    if (!normalizedCommentText) {
+      return;
+    }
+
+    // Only treat a label as duplicate if it belongs to a comment that is still
+    // attached to an existing rectangle. This allows recreating deleted labels.
+    const existingRectIds = new Set(rectangles.map((rect) => String(rect.id)));
     
-    const existingComment = comments.some(
-      (comment) => comment.text.toLowerCase() === commentText.toLowerCase()
-    );
+    const existingComment = comments.some((comment) => {
+      const hasActiveRect = existingRectIds.has(String(comment.rectId));
+      const sameText =
+        typeof comment.text === 'string' &&
+        comment.text.trim().toLowerCase() === normalizedCommentText;
+      return hasActiveRect && sameText;
+    });
+
     if (existingComment) {
       console.log('confirmAcUnitAnnotation: comment already exists');
       toast.error('This comment already exists.');
@@ -1257,7 +1286,7 @@ const Annotator = ({
     }
     
     const newRectId = Date.now();
-    const trimmedText = commentText.trim().toLowerCase();
+    const trimmedText = normalizedCommentText;
     const isCondenser = /^condenser/i.test(trimmedText) || trimmedText.includes('condenser');
     const rectSize = getResponsiveRectSize();
     console.log('confirmAcUnitAnnotation: creating rect at position', position, 'with size', rectSize, { trimmedText, isCondenser });
@@ -1297,7 +1326,7 @@ const Annotator = ({
       strokeWidth: 1,
     };
     setLines((prevLines) => [...prevLines, newLine]);
-  }, [comments]);
+  }, [comments, rectangles]);
 
   const handleStageClick = (event) => {
     console.log('handleStageClick fired', { isRotating, isDragging: isDraggingRef.current, eventTarget: event.target?.constructor?.name });    // Don't show modal during drag or rotation
@@ -1333,11 +1362,16 @@ const Annotator = ({
 
   const handleTouchStart = (e) => {
     // Safety check: ensure event has valid target with ID
-    if (!e || !e.target || !e.target.attrs || !e.target.attrs.id) {
+    if (!e || !e.target || !e.target.attrs) {
       return;
     }
-    
-    const clickedRectId = e.target.attrs.id;
+
+    // Touch can happen on rectangle or on linked comment elements.
+    const clickedRectId = e.target.attrs.rectId || e.target.attrs.id;
+    if (clickedRectId === undefined || clickedRectId === null) {
+      return;
+    }
+
     const now = Date.now();
     
     // Record touch start position and time for drag detection
@@ -1362,18 +1396,10 @@ const Annotator = ({
     }
     
     // Check for double-tap: if same rect was tapped within 400ms, delete it
-    if (lastRectTapRef.current.id === clickedRectId && 
-        now - lastRectTapRef.current.timestamp < 400) {
+    if (idsMatch(lastRectTapRef.current.id, clickedRectId) && 
+        now - lastRectTapRef.current.timestamp < 700) {
       // Double-tap detected - delete rectangle
-      setRectangles((prevRects) =>
-        prevRects.filter((r) => r.id !== clickedRectId)
-      );
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment.rectId !== clickedRectId)
-      );
-      setLines((prevLines) =>
-        prevLines.filter((line) => line.rectId !== clickedRectId)
-      );
+      removeAnnotationByRectId(clickedRectId);
       lastRectTapRef.current = {}; // Reset
       return;
     }
@@ -1383,18 +1409,10 @@ const Annotator = ({
     
     // Set up long-press timeout (800ms)
     longPressTimeoutRef.current = setTimeout(() => {
-      if (touchStartRef.current.rectId === clickedRectId) {
+      if (idsMatch(touchStartRef.current.rectId, clickedRectId)) {
         longPressTriggeredRef.current = true; // Mark that long-press fired
         // Long press detected - delete rectangle
-        setRectangles((prevRects) =>
-          prevRects.filter((r) => r.id !== clickedRectId)
-        );
-        setComments((prevComments) =>
-          prevComments.filter((comment) => comment.rectId !== clickedRectId)
-        );
-        setLines((prevLines) =>
-          prevLines.filter((line) => line.rectId !== clickedRectId)
-        );
+        removeAnnotationByRectId(clickedRectId);
         touchStartRef.current = { x: 0, y: 0, time: 0, rectId: null };
       }
     }, LONG_TAP_THRESHOLD);
@@ -1447,15 +1465,7 @@ const Annotator = ({
   const handleRectangleRightClick = (event) => {
     event.evt.preventDefault();
     const clickedRectId = event.target.attrs.id;
-    setRectangles((prevRects) =>
-      prevRects.filter((r) => r.id !== clickedRectId)
-    );
-    setComments((prevComments) =>
-      prevComments.filter((comment) => comment.rectId !== clickedRectId)
-    );
-    setLines((prevLines) =>
-      prevLines.filter((line) => line.rectId !== clickedRectId)
-    );
+    removeAnnotationByRectId(clickedRectId);
   };
 
   const handleCanvasEvent = (e) => {
@@ -1480,7 +1490,7 @@ const Annotator = ({
 
     setRectangles((prevRects) =>
       prevRects.map((rect) =>
-        rect.id === draggedId
+        idsMatch(rect.id, draggedId)
           ? { ...rect, x: draggedNode.x(), y: draggedNode.y() }
           : rect
       )
@@ -1488,7 +1498,7 @@ const Annotator = ({
 
     setComments((prevComments) =>
       prevComments.map((comment) => {
-        if (comment.rectId === draggedId) {
+        if (idsMatch(comment.rectId, draggedId)) {
           const rectSize = getResponsiveRectSize();
           const newCommentPos = {
             x: draggedNode.x() + rectSize.width + 2,
@@ -1502,8 +1512,8 @@ const Annotator = ({
 
     setLines((prevLines) =>
       prevLines.map((line) => {
-        const isRect = line.rectId === draggedId;
-        const isComment = line.commentId === draggedId;
+        const isRect = idsMatch(line.rectId, draggedId);
+        const isComment = idsMatch(line.commentId, draggedId);
         let rect = null;
         let comment = null;
 
@@ -1515,11 +1525,11 @@ const Annotator = ({
                 width: draggedNode.width(),
                 height: draggedNode.height(),
               }
-            : rectangles.find((r) => r.id === line.rectId);
+            : rectangles.find((r) => idsMatch(r.id, line.rectId));
 
           comment = isComment
             ? { x: draggedNode.x(), y: draggedNode.y() }
-            : comments.find((c) => c.rectId === draggedId);
+            : comments.find((c) => idsMatch(c.rectId, draggedId));
 
           if (rect && comment) {
             return {
@@ -1545,10 +1555,12 @@ const Annotator = ({
     console.trace();
     setRectangles((prevRects) =>
       prevRects.map((rect) =>
-        rect.id === rectId ? { ...rect, rotation: rect.rotation + 90 } : rect
+        idsMatch(rect.id, rectId)
+          ? { ...rect, rotation: rect.rotation + 90 }
+          : rect
       )
     );
-  }, []);
+  }, [idsMatch]);
 
   // Note: Comments are now rendered via Konva Stage text elements, not canvas
   
@@ -2892,6 +2904,7 @@ const Annotator = ({
                           fill={rect.fill}
                           stroke={rect.stroke}
                           strokeWidth={rect.stroke ? 2 : 0}
+                          hitStrokeWidth={24}
                           draggable={true}
                           rotation={rect.rotation}
                           onContextMenu={(event) => {
@@ -2902,21 +2915,7 @@ const Annotator = ({
                               "Rectangle right-clicked (removing)",
                               clickedRectId
                             );
-
-                            setRectangles((prevRects) =>
-                              prevRects.filter((r) => r.id !== clickedRectId)
-                            );
-
-                            setComments((prevComments) =>
-                              prevComments.filter(
-                                (comment) => comment.rectId !== clickedRectId
-                              )
-                            );
-                            setLines((prevLines) =>
-                              prevLines.filter(
-                                (line) => line.rectId !== clickedRectId
-                              )
-                            );
+                            removeAnnotationByRectId(clickedRectId);
                           }}
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
@@ -2970,6 +2969,7 @@ const Annotator = ({
                       <Group key={comment.id}>
                         {/* Comment background box */}
                         <Rect
+                          rectId={comment.rectId}
                           x={comment.x}
                           y={comment.y - 10}
                           width={boxWidth}
@@ -2977,11 +2977,20 @@ const Annotator = ({
                           fill="rgba(252, 252, 243, 0.3)"
                           stroke="grey"
                           strokeWidth={1}
+                          hitStrokeWidth={24}
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={() => {
+                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
+                              clearTimeout(longPressTimeoutRef.current);
+                              longPressTimeoutRef.current = null;
+                            }
+                          }}
                         />
                         {/* Comment text */}
                         <Text
                           key={comment.id}
                           id={comment.id}
+                          rectId={comment.rectId}
                           x={comment.x + 2}
                           y={comment.y - 9}
                           text={comment.text}
@@ -2991,6 +3000,13 @@ const Annotator = ({
                           fill="deeppink"
                           width={boxWidth - 4}
                           draggable={true}
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={() => {
+                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
+                              clearTimeout(longPressTimeoutRef.current);
+                              longPressTimeoutRef.current = null;
+                            }
+                          }}
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
                         />

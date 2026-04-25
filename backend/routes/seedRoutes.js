@@ -14,6 +14,7 @@ import Payment from '../models/paymentModel.js';
 import BrowsingHistory from '../models/browsingHistoryModel.js';
 import DemoRequest from '../models/demoRequestModel.js';
 import Newsletter from '../models/newsletterModel.js';
+import Wishlist from '../models/wishlistModel.js';
 import data from '../data.js';
 
 const seedRouter = express.Router();
@@ -22,6 +23,14 @@ seedRouter.get('/', async (req, res) => {
   try {
     const includeOrders = req.query.includeOrders === 'true';
     const ordersMode = req.query.ordersMode || (includeOrders ? 'append' : 'skip');
+
+    // Snapshot existing products so wishlist rows can be remapped by slug after reseed.
+    const existingProducts = await Product.find({}).select('_id slug');
+    const oldProductIdToSlug = new Map(
+      existingProducts
+        .filter((p) => p.slug)
+        .map((p) => [p._id.toString(), p.slug])
+    );
 
     await Product.deleteMany({});
     // Sellers are upserted below to preserve click tracking data
@@ -90,6 +99,57 @@ seedRouter.get('/', async (req, res) => {
         console.log(`Skipping product ${product.name}: ${error.message}`);
       }
     }
+
+    // Safeguard wishlist references after product reseed.
+    const newSlugToProductId = new Map(
+      createdProducts
+        .filter((p) => p.slug)
+        .map((p) => [p.slug, p._id.toString()])
+    );
+    const wishlistItems = await Wishlist.find({}).select('_id user product');
+
+    const wishlistUpdateOps = [];
+    const wishlistDeleteIds = [];
+    const seenUserProductPairs = new Set();
+
+    for (const item of wishlistItems) {
+      const oldProductId = item.product ? item.product.toString() : null;
+      const slug = oldProductId ? oldProductIdToSlug.get(oldProductId) : null;
+      const mappedProductId = slug ? newSlugToProductId.get(slug) : null;
+
+      if (!mappedProductId) {
+        wishlistDeleteIds.push(item._id);
+        continue;
+      }
+
+      const pairKey = `${item.user.toString()}:${mappedProductId}`;
+      if (seenUserProductPairs.has(pairKey)) {
+        wishlistDeleteIds.push(item._id);
+        continue;
+      }
+      seenUserProductPairs.add(pairKey);
+
+      if (oldProductId !== mappedProductId) {
+        wishlistUpdateOps.push({
+          updateOne: {
+            filter: { _id: item._id },
+            update: { $set: { product: mappedProductId } },
+          },
+        });
+      }
+    }
+
+    if (wishlistUpdateOps.length > 0) {
+      await Wishlist.bulkWrite(wishlistUpdateOps, { ordered: false });
+    }
+    if (wishlistDeleteIds.length > 0) {
+      await Wishlist.deleteMany({ _id: { $in: wishlistDeleteIds } });
+    }
+
+    const wishlistSafeguard = {
+      remapped: wishlistUpdateOps.length,
+      cleared: wishlistDeleteIds.length,
+    };
 
     // Preserve existing users; seed defaults only if none exist
     let createdUsers = await User.find({});
@@ -275,6 +335,7 @@ seedRouter.get('/', async (req, res) => {
       createdNotifications,
       createdOrders,
       createdNewsletters,
+      wishlistSafeguard,
       message:
         ordersMode === 'reset'
           ? 'Seeding completed (orders reset)'

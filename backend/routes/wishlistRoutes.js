@@ -25,11 +25,27 @@ async function ensureDefaultCollection(userId) {
   return col;
 }
 
+// Remove wishlist rows pointing to deleted products so counts and list views stay in sync.
+async function cleanupOrphanWishlistItems(userId) {
+  const orphanRows = await Wishlist.find({ user: userId })
+    .populate({ path: 'product', select: '_id' })
+    .select('_id product');
+
+  const orphanIds = orphanRows
+    .filter((row) => !row.product)
+    .map((row) => row._id);
+
+  if (orphanIds.length > 0) {
+    await Wishlist.deleteMany({ _id: { $in: orphanIds } });
+  }
+}
+
 // GET all collections (with item counts)
 wishlistRouter.get(
   '/collections',
   isAuth,
   expressAsyncHandler(async (req, res) => {
+    await cleanupOrphanWishlistItems(req.user._id);
     const defaultCol = await ensureDefaultCollection(req.user._id);
 
     const collections = await WishlistCollection.find({ user: req.user._id }).sort({
@@ -174,6 +190,7 @@ wishlistRouter.get(
     '/',
     isAuth,
     expressAsyncHandler(async (req, res) => {
+    await cleanupOrphanWishlistItems(req.user._id);
         const { collectionId } = req.query;
         const defaultCol = await ensureDefaultCollection(req.user._id);
 

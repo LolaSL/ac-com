@@ -11,6 +11,46 @@ import { FaPlus, FaEdit, FaTrash, FaSearch, FaStore } from "react-icons/fa";
 import "./SellersListPage.css";
 import "./AdminHero.css";
 
+const buildTrackedCompanyUrl = (companyLink, campaignId) => {
+  try {
+    const url = new URL(companyLink);
+    url.searchParams.set("utm_source", "accommerce");
+    url.searchParams.set("utm_medium", "referral");
+    url.searchParams.set("utm_campaign", campaignId || "seller");
+    return url.toString();
+  } catch {
+    return companyLink;
+  }
+};
+
+const trackSellerClick = (sellerId, userId) => {
+  const endpoint = `/api/sellers/${sellerId}/track-click`;
+  const payload = JSON.stringify({ userId: userId || null });
+
+  if (navigator.sendBeacon) {
+    const blob = new Blob([payload], { type: "application/json" });
+    navigator.sendBeacon(endpoint, blob);
+    return;
+  }
+
+  fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {
+    // fire-and-forget
+  });
+};
+
+const shouldOpenExternalInSameTab = () => {
+  const ua = navigator.userAgent || "";
+  const iOSDevice = /iPhone|iPad|iPod/i.test(ua);
+  const iPadOSDesktopUA =
+    navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return iOSDevice || iPadOSDesktopUA;
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case "FETCH_REQUEST":
@@ -63,6 +103,7 @@ const SellersListPage = () => {
   const { userInfo, adminInfo } = state;
   const token = userInfo?.token || adminInfo?.token;
   const [searchQuery, setSearchQuery] = useState("");
+  const openExternalInSameTab = shouldOpenExternalInSameTab();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,23 +153,9 @@ const SellersListPage = () => {
     }
   };
 
-  const handleVisitClick = async (e, seller) => {
-    e.preventDefault();
-    // Build URL with UTM params so seller's analytics shows AC Commerce as traffic source
-    const url = new URL(seller.companyLink);
-    url.searchParams.set('utm_source', 'accommerce');
-    url.searchParams.set('utm_medium', 'referral');
-    url.searchParams.set('utm_campaign', seller.referralCode || seller._id);
-    // Open immediately (synchronous) so popup blockers don't interfere
-    window.open(url.toString(), '_blank', 'noopener,noreferrer');
-    // Track in background after navigation
-    try {
-      await axios.post(`/api/sellers/${seller._id}/track-click`, {
-        userId: userInfo?._id || null,
-      });
-    } catch (_) {
-      // fire-and-forget
-    }
+  const handleVisitClick = (seller) => {
+    if (!seller?._id) return;
+    trackSellerClick(seller._id, userInfo?._id);
   };
 
   const deleteHandler = async (seller) => {
@@ -242,10 +269,13 @@ const SellersListPage = () => {
                     <td data-label="Brand">{seller.brand}</td>
                     <td data-label="Company Link">
                       <a
-                        href={seller.companyLink}
-                        onClick={(e) => handleVisitClick(e, seller)}
-                        target="_blank"
-                        rel="noreferrer"
+                        href={buildTrackedCompanyUrl(
+                          seller.companyLink,
+                          seller.referralCode || seller._id
+                        )}
+                        onClick={() => handleVisitClick(seller)}
+                        target={openExternalInSameTab ? "_self" : "_blank"}
+                        rel={openExternalInSameTab ? undefined : "noreferrer"}
                         className="admin-link"
                       >
                         Visit
