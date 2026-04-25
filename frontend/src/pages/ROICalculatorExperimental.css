@@ -163,6 +163,27 @@
   margin-bottom: clamp(1.5rem, 3vh, 2rem);
 }
 
+.roi-mode-switch {
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: #eef2f7;
+  border: 1px solid #dbe4ee;
+}
+
+.roi-mode-switch__btn {
+  border-radius: 999px !important;
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+}
+
+.roi-mode-hint {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #475569;
+}
+
 /* Parameters */
 .param-label {
   font-size: clamp(0.9rem, 1.8vw, 1rem);

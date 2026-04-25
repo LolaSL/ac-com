@@ -314,129 +314,129 @@ export default function Recommendations() {
   };
 
   // Handler: Calculate ROI
-  const handleCalculateROI = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  // const handleCalculateROI = (e) => {
+  //   if (e) {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //   }
 
-    if (!btuProject) {
-      toast.error("No BTU data available. Please complete a BTU calculation first.");
-      return;
-    }
+  //   if (!btuProject) {
+  //     toast.error("No BTU data available. Please complete a BTU calculation first.");
+  //     return;
+  //   }
 
-    // BTU project already contains all necessary data
-    ctxDispatch({
-      type: "BTU_SET_CURRENT_PROJECT",
-      payload: btuProject,
-    });
+  //   // BTU project already contains all necessary data
+  //   ctxDispatch({
+  //     type: "BTU_SET_CURRENT_PROJECT",
+  //     payload: btuProject,
+  //   });
 
-    toast.success("Navigating to ROI Calculator...");
-    // Pass BTU data in navigation state so ROI calculator can capture it
-    navigate("/roi-calculator", {
-      state: { btuData: btuProject, fromBTU: true }
-    });
-  };
+  //   toast.success("Navigating to ROI Calculator...");
+  //   // Pass BTU data in navigation state so ROI calculator can capture it
+  //   navigate("/roi-calculator", {
+  //     state: { btuData: btuProject, fromBTU: true }
+  //   });
+  // };
 
   // Handler: Do Both (Save to Cart + Navigate to ROI)
-  const handleDoBoth = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  // const handleDoBoth = (e) => {
+  //   if (e) {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //   }
 
-    if (!perRoomResults || perRoomResults.length === 0) {
-      toast.error("No products available. Please complete a BTU calculation first.");
-      return;
-    }
+  //   if (!perRoomResults || perRoomResults.length === 0) {
+  //     toast.error("No products available. Please complete a BTU calculation first.");
+  //     return;
+  //   }
 
-    // Check if product is a real (purchasable) product vs a placeholder
-    const isRealProduct = (product) => {
-      if (!product || !product._id) return false;
-      if (String(product._id).startsWith('placeholder-')) return false;
-      if (product.category === 'Placeholder') return false;
-      if (product.price === null || product.price === undefined || product.price <= 0) return false;
-      return true;
-    };
+  //   // Check if product is a real (purchasable) product vs a placeholder
+  //   const isRealProduct = (product) => {
+  //     if (!product || !product._id) return false;
+  //     if (String(product._id).startsWith('placeholder-')) return false;
+  //     if (product.category === 'Placeholder') return false;
+  //     if (product.price === null || product.price === undefined || product.price <= 0) return false;
+  //     return true;
+  //   };
 
-    // Normalize product to include all cart-required fields
-    const normalizeForCart = (product) => ({
-      ...product,
-      price: typeof product.price === 'number' ? product.price : 0,
-      discount: typeof product.discount === 'number' ? product.discount : 0,
-      countInStock: product.countInStock ?? 99,
-      image: product.image || '/images/p1.jpg',
-      slug: product.slug || product._id,
-    });
+  //   // Normalize product to include all cart-required fields
+  //   const normalizeForCart = (product) => ({
+  //     ...product,
+  //     price: typeof product.price === 'number' ? product.price : 0,
+  //     discount: typeof product.discount === 'number' ? product.discount : 0,
+  //     countInStock: product.countInStock ?? 99,
+  //     image: product.image || '/images/p1.jpg',
+  //     slug: product.slug || product._id,
+  //   });
 
-    const addItemToCart = (product, quantity = 1) => {
-      if (!isRealProduct(product)) return;
+  //   const addItemToCart = (product, quantity = 1) => {
+  //     if (!isRealProduct(product)) return;
 
-      const normalized = normalizeForCart(product);
-      const existItem = state.cart.cartItems.find((x) => x._id === normalized._id);
-      const newQuantity = existItem ? existItem.quantity + quantity : quantity;
+  //     const normalized = normalizeForCart(product);
+  //     const existItem = state.cart.cartItems.find((x) => x._id === normalized._id);
+  //     const newQuantity = existItem ? existItem.quantity + quantity : quantity;
 
-      ctxDispatch({
-        type: "CART_ADD_ITEM",
-        payload: { ...normalized, quantity: newQuantity },
-      });
-    };
+  //     ctxDispatch({
+  //       type: "CART_ADD_ITEM",
+  //       payload: { ...normalized, quantity: newQuantity },
+  //     });
+  //   };
 
-    // Group products by _id to avoid duplicates
-    const productCount = {};
-    perRoomResults.forEach((room) => {
-      const product = room.product;
-      if (!isRealProduct(product) || product.isCondenser) return;
+  //   // Group products by _id to avoid duplicates
+  //   const productCount = {};
+  //   perRoomResults.forEach((room) => {
+  //     const product = room.product;
+  //     if (!isRealProduct(product) || product.isCondenser) return;
 
-      const key = product._id;
-      if (!productCount[key]) {
-        productCount[key] = { product, quantity: 0 };
-      }
-      productCount[key].quantity += 1;
-    });
+  //     const key = product._id;
+  //     if (!productCount[key]) {
+  //       productCount[key] = { product, quantity: 0 };
+  //     }
+  //     productCount[key].quantity += 1;
+  //   });
 
-    // Add indoor units to cart
-    let addedCount = 0;
-    Object.values(productCount).forEach(({ product, quantity }) => {
-      addItemToCart(product, quantity);
-      addedCount++;
-    });
+  //   // Add indoor units to cart
+  //   let addedCount = 0;
+  //   Object.values(productCount).forEach(({ product, quantity }) => {
+  //     addItemToCart(product, quantity);
+  //     addedCount++;
+  //   });
 
-    // Add condensers to cart
-    const condensers = perRoomResults.filter(room => room.product?.isCondenser);
-    condensers.forEach((room) => {
-      const condenser = room.product;
-      if (condenser && condenser._id) {
-        // Make unique per flat if flatName exists
-        const uniqueCond = condenser.flatName
-          ? {
-              ...condenser,
-              _id: `${condenser._id}_${condenser.flatName.replace(/\s+/g, '_')}`,
-              name: `${condenser.flatName}: ${condenser.name}`,
-            }
-          : condenser;
-        addItemToCart(uniqueCond, 1);
-        addedCount++;
-      }
-    });
+  //   // Add condensers to cart
+  //   const condensers = perRoomResults.filter(room => room.product?.isCondenser);
+  //   condensers.forEach((room) => {
+  //     const condenser = room.product;
+  //     if (condenser && condenser._id) {
+  //       // Make unique per flat if flatName exists
+  //       const uniqueCond = condenser.flatName
+  //         ? {
+  //             ...condenser,
+  //             _id: `${condenser._id}_${condenser.flatName.replace(/\s+/g, '_')}`,
+  //             name: `${condenser.flatName}: ${condenser.name}`,
+  //           }
+  //         : condenser;
+  //       addItemToCart(uniqueCond, 1);
+  //       addedCount++;
+  //     }
+  //   });
 
-    if (addedCount > 0) {
-      toast.success(`${addedCount} product(s) added to cart! Navigating to ROI Calculator...`);
-    } else {
-      toast.info("No purchasable products to add. Navigating to ROI Calculator...");
-    }
+  //   if (addedCount > 0) {
+  //     toast.success(`${addedCount} product(s) added to cart! Navigating to ROI Calculator...`);
+  //   } else {
+  //     toast.info("No purchasable products to add. Navigating to ROI Calculator...");
+  //   }
 
-    // Save BTU data to store
-    ctxDispatch({
-      type: "BTU_SET_CURRENT_PROJECT",
-      payload: btuProject,
-    });
+  //   // Save BTU data to store
+  //   ctxDispatch({
+  //     type: "BTU_SET_CURRENT_PROJECT",
+  //     payload: btuProject,
+  //   });
 
-    // Pass BTU data in navigation state so ROI calculator can capture it
-    navigate("/roi-calculator", {
-      state: { btuData: btuProject, fromBTU: true }
-    });
-  };
+  //   // Pass BTU data in navigation state so ROI calculator can capture it
+  //   navigate("/roi-calculator", {
+  //     state: { btuData: btuProject, fromBTU: true }
+  //   });
+  // };
 
   const getSharePayload = useCallback(() => {
     const summary = perRoomResults
@@ -707,7 +707,7 @@ export default function Recommendations() {
               <Button
                 onClick={handleSaveToCart}
                 variant="info"
-                className="w-75 w-md-auto py-2"
+                className=" w-auto py-2"
                 style={{
                   fontWeight: '600',
                   padding: '0.7rem 1.5rem',
@@ -722,7 +722,7 @@ export default function Recommendations() {
                 <span>Save to Cart</span>
               </Button>
 
-              <Button
+              {/* <Button
                 onClick={handleCalculateROI}
                 variant="primary"
                 className="w-75 w-md-auto py-2"
@@ -781,12 +781,12 @@ export default function Recommendations() {
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 <span>Do Both</span>
-              </Button>
+              </Button> */}
 
               <Button
                 onClick={handleShare}
                 variant="outline-secondary"
-                className="w-75 w-md-auto py-2"
+                className=" w-auto py-2"
                 style={{
                   fontWeight: '600',
                   padding: '0.7rem 1.5rem',

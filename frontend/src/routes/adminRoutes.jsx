@@ -1,5 +1,5 @@
 import DashboardPage from "../pages/DashboardPage.jsx";
-import AdminROICalculationsPage from "../pages/AdminROICalculationsPage.jsx";
+// import AdminROICalculationsPage from "../pages/AdminROICalculationsPage.jsx";
 import ProductListPage from "../pages/ProductListPage.jsx";
 import ProductEditPage from "../pages/ProductEditPage.jsx";
 import OrderListPage from "../pages/OrderListPage.jsx";
@@ -118,14 +118,14 @@ export const adminRoutes = [
       </AdminRoute>
     ),
   },
-    {
-    path: "/admin/roi-calculations",
-    element: (
-      <AdminRoute>
-        <AdminROICalculationsPage />
-      </AdminRoute>
-    ),
-  },
+  //   {
+  //   path: "/admin/roi-calculations",
+  //   element: (
+  //     <AdminRoute>
+  //       <AdminROICalculationsPage />
+  //     </AdminRoute>
+  //   ),
+  // },
   {
     path: "/admin/payments",
     element: (

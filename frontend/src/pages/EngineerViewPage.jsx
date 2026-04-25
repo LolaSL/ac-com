@@ -2064,9 +2064,9 @@ const EngineerViewPage = () => {
                 size="sm"
                 className="w-auto"
                 onClick={handleSaveToMongoDB}
-                disabled={saveLoading}
+                disabled={saveLoading || loading || !pdfFile || !annotation}
               >
-                {saveLoading ? "Saving..." : "💾 Save Engineer Review"}
+                {saveLoading ? "Saving..." : loading ? "Loading PDF..." : "💾 Save Engineer Review"}
               </Button>
             </div>
             {saveSuccess && (

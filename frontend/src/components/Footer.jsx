@@ -65,13 +65,13 @@ const Footer = () => {
             >
               Get A Quote
             </NavLink>
-            <NavLink
+            {/* <NavLink
               className="text-white d-block"
               href="#"
               onClick={(e) => handleNavigation(e, "/roi-calculator")}
             >
               ROI Calculator
-            </NavLink>
+            </NavLink> */}
             <NavLink className="text-white d-block" href="/offers">
               Special Offers
             </NavLink>

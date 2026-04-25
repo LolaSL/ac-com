@@ -54,6 +54,13 @@ export default function ROICalculatorExperimental() {
   const [savedCalculations, setSavedCalculations] = useState([]);
   const [isLoadingSavedCalcs, setIsLoadingSavedCalcs] = useState(false);
   const [activeTab, setActiveTab] = useState("calculator");
+  const allowAdvancedMode = process.env.REACT_APP_ROI_ALLOW_ADVANCED !== "false";
+  const defaultInputMode =
+    allowAdvancedMode && process.env.REACT_APP_ROI_DEFAULT_MODE === "advanced"
+      ? "advanced"
+      : "simple";
+  const [inputMode, setInputMode] = useState(defaultInputMode);
+  const isAdvancedMode = allowAdvancedMode && inputMode === "advanced";
 
   // Calculator Parameters
   const [serviceType, setServiceType] = useState("AC Installation");
@@ -1742,6 +1749,35 @@ export default function ROICalculatorExperimental() {
                   <Col lg={6} md={12} className="mb-4">
                     <h3 className="section-title">⚙️ Input Parameters</h3>
 
+                    {allowAdvancedMode && (
+                      <div className="roi-mode-switch mb-4" role="group" aria-label="ROI input mode switch">
+                        <Button
+                          variant={isAdvancedMode ? "outline-secondary" : "primary"}
+                          size="sm"
+                          className="roi-mode-switch__btn"
+                          onClick={() => setInputMode("simple")}
+                        >
+                          Simple Mode
+                        </Button>
+                        <Button
+                          variant={isAdvancedMode ? "primary" : "outline-secondary"}
+                          size="sm"
+                          className="roi-mode-switch__btn"
+                          onClick={() => setInputMode("advanced")}
+                        >
+                          Advanced Mode
+                        </Button>
+                      </div>
+                    )}
+
+                    {!isAdvancedMode && (
+                      <Alert variant="light" className="roi-mode-hint py-2">
+                        <small>
+                          Simple mode keeps all ROI formulas intact and uses defaults for advanced controls.
+                        </small>
+                      </Alert>
+                    )}
+
                     {/* Service Type */}
                     <Form.Group className="mb-4">
                       <Form.Label className="param-label">
@@ -1774,32 +1810,34 @@ export default function ROICalculatorExperimental() {
                     </Form.Group>
 
                     {/* Equipment Age */}
-                    <Form.Group className="mb-4">
-                      <Form.Label className="param-label">
-                        <strong>Equipment Age (Optional)</strong>
-                      </Form.Label>
-                      <Form.Select
-                        value={equipmentAge}
-                        onChange={(e) => setEquipmentAge(e.target.value)}
-                      >
-                        <option value="">Select equipment age</option>
-                        <option value="Less than 1 year">
-                          Less than 1 year
-                        </option>
-                        <option value="1-2 years">1-2 years</option>
-                        <option value="3-4 years">3-4 years</option>
-                        <option value="5-6 years">5-6 years</option>
-                        <option value="More than 6 years">
-                          More than 6 years
-                        </option>
-                        <option value="New installation">
-                          New installation
-                        </option>
-                      </Form.Select>
-                      <small className="text-muted">
-                        Helps refine cost estimates
-                      </small>
-                    </Form.Group>
+                    {isAdvancedMode && (
+                      <Form.Group className="mb-4">
+                        <Form.Label className="param-label">
+                          <strong>Equipment Age (Optional)</strong>
+                        </Form.Label>
+                        <Form.Select
+                          value={equipmentAge}
+                          onChange={(e) => setEquipmentAge(e.target.value)}
+                        >
+                          <option value="">Select equipment age</option>
+                          <option value="Less than 1 year">
+                            Less than 1 year
+                          </option>
+                          <option value="1-2 years">1-2 years</option>
+                          <option value="3-4 years">3-4 years</option>
+                          <option value="5-6 years">5-6 years</option>
+                          <option value="More than 6 years">
+                            More than 6 years
+                          </option>
+                          <option value="New installation">
+                            New installation
+                          </option>
+                        </Form.Select>
+                        <small className="text-muted">
+                          Helps refine cost estimates
+                        </small>
+                      </Form.Group>
+                    )}
 
                     {/* Property Type */}
                     <Form.Group className="mb-4">
@@ -1871,23 +1909,25 @@ export default function ROICalculatorExperimental() {
                     </Form.Group>
 
                     {/* Team Size */}
-                    <Form.Group className="mb-4">
-                      <Form.Label className="param-label">
-                        Team Size: {teamSize} people
-                      </Form.Label>
-                      <Form.Range
-                        value={teamSize}
-                        onChange={(e) => setTeamSize(Number(e.target.value))}
-                        min={1}
-                        max={20}
-                        step={1}
-                        className="param-slider"
-                      />
-                      <small className="text-muted">Range: 1 - 20 people</small>
-                    </Form.Group>
+                    {isAdvancedMode && (
+                      <Form.Group className="mb-4">
+                        <Form.Label className="param-label">
+                          Team Size: {teamSize} people
+                        </Form.Label>
+                        <Form.Range
+                          value={teamSize}
+                          onChange={(e) => setTeamSize(Number(e.target.value))}
+                          min={1}
+                          max={20}
+                          step={1}
+                          className="param-slider"
+                        />
+                        <small className="text-muted">Range: 1 - 20 people</small>
+                      </Form.Group>
+                    )}
 
                     {/* Multi-Unit Selector (for residential-multi) */}
-                    {propertyType === "residential-multi" && (
+                    {isAdvancedMode && propertyType === "residential-multi" && (
                       <Form.Group className="mb-4">
                         <Form.Label className="param-label">
                           Number of Units: {numberOfUnits}
@@ -1909,7 +1949,7 @@ export default function ROICalculatorExperimental() {
                     )}
 
                     {/* Maintenance Frequency (for industrial-commercial) */}
-                    {propertyType === "industrial-commercial" && (
+                    {isAdvancedMode && propertyType === "industrial-commercial" && (
                       <Form.Group className="mb-4">
                         <Form.Label className="param-label">
                           Annual Maintenance Cycles: {maintenanceFrequency}x

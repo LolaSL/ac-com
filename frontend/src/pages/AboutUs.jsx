@@ -17,13 +17,13 @@ const AboutUs = () => {
     },
     {
       icon: "fas fa-hard-hat",
-      title: "Engineer Review",
-      text: "After making an order submission, a certified HVAC engineer opens your submitted plan, adds professional VRF refrigerant lines, and signs off with a digital signature — producing a verified 2-page review PDF. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations. Symbols of ducted HVAC elements/accessories for both ducted and ductless VRF modes-comming soon",
+      title: "AI-Engineer Review",
+      text: "After making an order submission, a certified AI-HVAC engineer opens your submitted plan, adds professional VRF refrigerant lines, and signs off with a digital signature — producing a verified 2-page review PDF. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations. Symbols of ducted HVAC elements/accessories for both ducted and ductless VRF modes-comming soon",
     },
     {
       icon: "fas fa-file-pdf",
       title: "Save & Download",
-      text: "Download your completed engineer-reviewed plan as a PDF with all ac rectangles, outdoor unit -condenser rectangle, comments, system lines, and the engineer's digital stamp baked in.",
+      text: "Download your completed AI-engineer-reviewed plan as a PDF with all ac rectangles, outdoor unit -condenser rectangle, comments, system lines, and the AI-engineer's digital stamp baked in.",
     },
     {
       icon: "fas fa-calculator",
@@ -32,8 +32,8 @@ const AboutUs = () => {
     },
     {
       icon: "fas fa-chart-line",
-      title: "Return on Investment (ROI) Calculator",
-      text: "Compare traditional HVAC purchasing costs against AC-Commerce pricing. Estimate labour savings, efficiency gains, and project payback periods across residential, commercial, and industrial property types.",
+      title: "Recommendations - HVAC System Quote",
+      text: "After completing the BTU calculation, review room-by-room HVAC recommendations with matched products, system totals, pricing, print-ready quote output, and quick add-to-cart actions.",
     },
   ];
 
@@ -50,8 +50,8 @@ const AboutUs = () => {
     },
     {
       icon: "fas fa-user-check",
-      title: "Certified Engineer Sign-off",
-      text: "Every submitted plan is reviewed by a qualified engineer who adds system-specific notes and a digital signature — giving you a document suitable for permits and contractors.",
+      title: "Certified AI-Engineer Sign-off",
+      text: "Every submitted plan is reviewed by a qualified AI-Engineer who adds system-specific notes and a digital signature — giving you a document suitable for permits and contractors.",
     },
     {
       icon: "fas fa-tools",
@@ -72,7 +72,7 @@ const AboutUs = () => {
 
   const audiences = [
     { icon: "fas fa-home", label: "Homeowners", desc: "Plan and purchase the right HVAC system for your property." },
-    { icon: "fas fa-building", label: "Commercial Buyers", desc: "Outfit offices, retail spaces, and facilities efficiently." },
+    { icon: "fas fa-building", label: "Commercial Buyers", desc: "Outfit offices, retail spaces, and facilities efficiently, whether you're a developer, project initiator, or building contractor." },
     { icon: "fas fa-wrench", label: "HVAC Contractors", desc: "Source equipment and manage project plans in one place." },
     { icon: "fas fa-compass", label: "Architects & Designers", desc: "Integrate HVAC layouts directly into architectural workflows." },
     { icon: "fas fa-shield-alt", label: "Service Providers", desc: "Offer installation, maintenance, and repair through the platform." },

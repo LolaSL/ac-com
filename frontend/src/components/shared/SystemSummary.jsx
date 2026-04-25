@@ -26,6 +26,16 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
     return sum + productPrice + condenserPrice;
   }, 0) || 0;
 
+  // const projectCost = Number(btuProject.estimatedProjectCost || 0);
+  // const multiplier = totalProductSum > 0 ? projectCost / totalProductSum : 0;
+  // const equipmentCost = Number(btuProject.equipmentCost || 0);
+  // const projectFactor =
+  //   btuProject.propertyType === 'residential-single'
+  //     ? 0.2
+  //     : btuProject.propertyType === 'residential-multi'
+  //       ? 0.25
+  //       : 0.3;
+
   return (
     <Card className="recommendations-card" style={{ backgroundColor: '#f8f9fa', marginBottom: '2rem' }}>
       <Card.Body>
@@ -77,8 +87,16 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
           </div>
         </div>
         
-        {btuProject.estimatedProjectCost && (
+        {/* {btuProject.estimatedProjectCost && (
           <div className="mt-4 pt-3 border-top">
+            <p style={{ fontSize: '0.95rem', marginBottom: '0.75rem', opacity: 0.9, lineHeight: 1.6 }}>
+              This estimated project cost is generated from the BTU project before ROI is calculated. It is a broader project estimate than the product-only total, and the ROI calculator uses this same value as the Average Project Value.
+            </p>
+            {equipmentCost > 0 && (
+              <p style={{ fontSize: '0.95rem', marginBottom: '0.75rem', opacity: 0.95, lineHeight: 1.6 }}>
+                BTU calculator formula used: equipment cost ${equipmentCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} divided by {projectFactor} = ${projectCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}. Project type: {btuProject.propertyType || 'custom'}. Compared with the visible product-only total, this estimate is about {multiplier.toFixed(2)}x higher because it represents a broader install budget, not just the listed units.
+              </p>
+            )}
             <div style={{ fontSize: '0.95rem', marginBottom: '0.5rem', fontWeight: '600' }}>
               💰 Estimated Project Cost:
             </div>
@@ -86,7 +104,7 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
               ${btuProject.estimatedProjectCost.toLocaleString()}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Energy Cost Estimator */}
         {perRoomResults && perRoomResults.length > 0 && (() => {
@@ -116,7 +134,7 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
 
           return (
             <div className="mt-4 pt-3 border-top">
-              <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '1rem' }}>
                 ⚡ Energy Cost Estimator
               </div>
               <div className="row g-2 mb-3">

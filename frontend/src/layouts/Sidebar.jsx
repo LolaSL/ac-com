@@ -37,7 +37,7 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
     { path: "/advanced-ac", label: "Advanced AC" },
     { type: "categories", label: "Categories" }, // Categories marker
     { path: "/measurement", label: "Get A Quote" },
-    { path: "/roi-calculator", label: "ROI Calculator" },
+    // { path: "/roi-calculator", label: "ROI Calculator" },
     { path: "/offers", label: "Special Offers" },
     { path: "/shipment", label: "Shipment & Delivery" },
     { path: "/returns", label: "Returns" },
