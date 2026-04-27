@@ -3,7 +3,7 @@ import NotificationPopUp from "../components/NotificationPopUp";
 import TrustSection from "../components/TrustSection";
 import ValuePropositionSection from "../components/ValuePropositionSection";
 import TestimonialsSection from "../components/TestimonialsSection";
-import ROICalculatorPreview from "../components/ROICalculatorPreview";
+// import ROICalculatorPreview from "../components/ROICalculatorPreview";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
@@ -215,7 +215,7 @@ export default function HomeBannerPage() {
         <TrustSection />
         <ValuePropositionSection />
         <TestimonialsSection />
-        <ROICalculatorPreview />
+        {/* <ROICalculatorPreview /> */}
         <NewsletterSignup />
       </div>
     </div>

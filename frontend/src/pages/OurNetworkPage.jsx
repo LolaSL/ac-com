@@ -52,7 +52,7 @@ export default function OurNetworkPage() {
       <section className="on-hero">
         <div className="on-hero__inner">
           <i className="fas fa-network-wired on-hero__icon" />
-          <h1 className="on-hero__title">Our Network</h1>
+          <h1 className="on-hero__title">Our Suppliers</h1>
           <p className="on-hero__sub">
             Trusted suppliers, service providers, and manufacturer partnerships
             powering HVAC excellence across the region.

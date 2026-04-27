@@ -7,6 +7,7 @@ import { COMMON_AC_RECOMMENDATIONS } from '../acRecommendationData.js';
 
 export default function InstallationAccessories({ perRoomResults, recommendedUnits }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Analyze calculated products to determine relevant recommendation categories
   const getRelevantCategories = () => {
@@ -80,10 +81,73 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
   };
 
   const filteredRecommendations = getFilteredRecommendations();
+  const totalRelevantCount = COMMON_AC_RECOMMENDATIONS.filter(item => relevantCategories.has(item.category)).length;
+
+  const filterButtons = (
+    <>
+      <Button
+        key="all"
+        variant="light"
+        className={`insta-filter-btn${selectedCategory === 'All' ? ' insta-filter-btn--active' : ''}`}
+        onClick={() => {
+          setSelectedCategory('All');
+          setShowMobileFilters(false);
+        }}
+      >
+        All Categories ({totalRelevantCount})
+      </Button>
+      {Array.from(relevantCategories).map((cat, idx) => {
+        const count = COMMON_AC_RECOMMENDATIONS.filter(item => item.category === cat).length;
+        const icon = getCategoryIcon(cat);
+        return (
+          <Button
+            key={idx}
+            variant="light"
+            className={`insta-filter-btn${selectedCategory === cat ? ' insta-filter-btn--active' : ''}`}
+            onClick={() => {
+              setSelectedCategory(cat);
+              setShowMobileFilters(false);
+            }}
+          >
+            <span style={{ marginRight: '0.5rem' }}>{icon}</span>
+            {cat} ({count})
+          </Button>
+        );
+      })}
+    </>
+  );
 
   if (filteredRecommendations.length === 0) return null;
 
   return (
+    <>
+      {showMobileFilters && (
+        <div
+          className="insta-mobile-overlay"
+          onClick={() => setShowMobileFilters(false)}
+        >
+          <div
+            className="insta-mobile-drawer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="insta-mobile-drawer__header">
+              <h2 className="insta-mobile-drawer__title">Filter Categories</h2>
+              <button
+                type="button"
+                className="insta-mobile-drawer__close"
+                onClick={() => setShowMobileFilters(false)}
+              >
+                Close
+              </button>
+            </div>
+            <div className="insta-mobile-drawer__body">
+              <div className="insta-mobile-button-group">
+                {filterButtons}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     <Card className="recommendations-card common-parts-section" style={{ marginTop: '2rem' }}>
       <Card.Body>
         <Card.Title className="card-title" style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem' }}>
@@ -96,28 +160,22 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
             <p className="text-muted mb-3">
               <strong>📁 Filter by category:</strong> Click on a category below to view specific recommendations.
             </p>
-            <ButtonGroup className="d-flex flex-wrap gap-2">
-              <Button
-                key="all"
-                variant={selectedCategory === 'All' ? 'primary' : 'outline-primary'}
-                onClick={() => setSelectedCategory('All')}
+            <div className="insta-mobile-toolbar">
+              <div className="insta-mobile-toolbar__summary">
+                {selectedCategory === 'All'
+                  ? `All Categories (${totalRelevantCount})`
+                  : `${selectedCategory} (${filteredRecommendations.length})`}
+              </div>
+              <button
+                type="button"
+                className="insta-mobile-filter-btn"
+                onClick={() => setShowMobileFilters(true)}
               >
-                All Categories ({COMMON_AC_RECOMMENDATIONS.filter(item => relevantCategories.has(item.category)).length})
-              </Button>
-              {Array.from(relevantCategories).map((cat, idx) => {
-                const count = COMMON_AC_RECOMMENDATIONS.filter(item => item.category === cat).length;
-                const icon = getCategoryIcon(cat);
-                return (
-                  <Button
-                    key={idx}
-                    variant={selectedCategory === cat ? 'primary' : 'outline-primary'}
-                    onClick={() => setSelectedCategory(cat)}
-                  >
-                    <span style={{ marginRight: '0.5rem' }}>{icon}</span>
-                    {cat} ({count})
-                  </Button>
-                );
-              })}
+                Filters
+              </button>
+            </div>
+            <ButtonGroup className="flex-wrap gap-2 insta-desktop-button-group">
+              {filterButtons}
             </ButtonGroup>
             {selectedCategory !== 'All' && (
               <div className="mt-3" style={{ 
@@ -176,5 +234,6 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
         </Table>
       </Card.Body>
     </Card>
+    </>
   );
 }

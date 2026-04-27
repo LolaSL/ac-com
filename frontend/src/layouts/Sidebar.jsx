@@ -33,7 +33,7 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
   const sidebarItems = [
     { path: "/", label: "Home" },
     { path: "/about-us", label: "About Us" },
-    { path: "/sellers", label: "Our Network" },
+    { path: "/sellers", label: "Our Suppliers" },
     { path: "/advanced-ac", label: "Advanced AC" },
     { type: "categories", label: "Categories" }, // Categories marker
     { path: "/measurement", label: "Get A Quote" },

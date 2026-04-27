@@ -104,7 +104,7 @@ const Footer = () => {
               About Us
             </NavLink>
             <NavLink className="text-white d-block" href="/sellers">
-              Our Network
+             Our Suppliers
             </NavLink>
             <NavLink className="text-white d-block" href="/advanced-ac">
               Advanced AC

@@ -703,7 +703,7 @@ export default function Recommendations() {
 
           {/* Action Buttons */}
           {perRoomResults && perRoomResults.length > 0 && (
-            <div className="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4">
+            <div className="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4 rec-mobile-inline-actions">
               <Button
                 onClick={handleSaveToCart}
                 variant="info"
@@ -715,7 +715,8 @@ export default function Recommendations() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  color: 'white'
                 }}
               >
                 <FaShoppingCart size={18} />

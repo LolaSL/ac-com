@@ -6,6 +6,29 @@ import { sendEmail, isAuth, isAdmin, baseUrl } from '../utils.js';
 
 const newsletterRouter = express.Router();
 
+const buildWelcomeEmailHtml = (unsubscribeUrl) => `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #0066ff;">Welcome to AC Commerce!</h2>
+        <p>Thank you for subscribing to our newsletter. You'll receive updates on:</p>
+        <ul>
+            <li>New features and platform updates</li>
+            <li>Pricing options and special offers</li>
+            <li>Industry insights and best practices</li>
+        </ul>
+        <p>You can manage your preferences or unsubscribe at any time from our website.</p>
+        <p>
+            <a href="${unsubscribeUrl}" style="display: inline-block; padding: 10px 16px; background: #0f766e; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                Unsubscribe from this newsletter
+            </a>
+        </p>
+        <p style="font-size: 12px; color: #64748b; word-break: break-all;">
+            If the button does not work, copy and paste this link into your browser:<br />
+            <a href="${unsubscribeUrl}" style="color: #0f766e;">${unsubscribeUrl}</a>
+        </p>
+        <p>Best regards,<br>The AC Commerce Team</p>
+    </div>
+`;
+
 // Subscribe to newsletter
 newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
     const { email, preferences } = req.body;
@@ -32,11 +55,26 @@ newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
                 existingSubscriber.subscriptionStatus = 'active';
                 existingSubscriber.subscriptionDate = new Date();
                 existingSubscriber.unsubscribeDate = undefined;
-                existingSubscriber.unsubscribeToken = undefined;
+                existingSubscriber.unsubscribeToken = crypto.randomBytes(32).toString('hex');
                 if (preferences) {
                     existingSubscriber.preferences = { ...existingSubscriber.preferences, ...preferences };
                 }
                 await existingSubscriber.save();
+
+                if (process.env.GMAIL_USER) {
+                    try {
+                        const unsubscribeUrl = `${baseUrl()}/api/newsletter/unsubscribe/${existingSubscriber.unsubscribeToken}`;
+                        await sendEmail({
+                            to: existingSubscriber.email,
+                            subject: 'Welcome back to AC Commerce Newsletter!',
+                            html: buildWelcomeEmailHtml(unsubscribeUrl)
+                        });
+                    } catch (emailError) {
+                        console.error('Failed to send resubscription email:', emailError);
+                    }
+                } else {
+                    console.log('Gmail not configured - skipping resubscription email');
+                }
 
                 return res.json({
                     message: 'Successfully resubscribed to newsletter!',
@@ -52,6 +90,7 @@ newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
         // Create new subscriber
         const subscriber = new Newsletter({
             email: email.toLowerCase(),
+            unsubscribeToken: crypto.randomBytes(32).toString('hex'),
             preferences: {
                 newFeatures: true,
                 pricingUpdates: true,
@@ -66,22 +105,11 @@ newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
         // Send welcome email (only if Gmail is configured)
         if (process.env.GMAIL_USER) {
             try {
+                const unsubscribeUrl = `${baseUrl()}/api/newsletter/unsubscribe/${subscriber.unsubscribeToken}`;
                 await sendEmail({
                     to: subscriber.email,
                     subject: 'Welcome to AC Commerce Newsletter!',
-                    html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #0066ff;">Welcome to AC Commerce!</h2>
-            <p>Thank you for subscribing to our newsletter. You'll receive updates on:</p>
-            <ul>
-              <li>New features and platform updates</li>
-              <li>Pricing options and special offers</li>
-              <li>Industry insights and best practices</li>
-            </ul>
-            <p>You can manage your preferences or unsubscribe at any time from our website.</p>
-            <p>Best regards,<br>The AC Commerce Team</p>
-          </div>
-        `
+                    html: buildWelcomeEmailHtml(unsubscribeUrl)
                 });
             } catch (emailError) {
                 console.error('Failed to send welcome email:', emailError);

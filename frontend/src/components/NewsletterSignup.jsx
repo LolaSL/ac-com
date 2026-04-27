@@ -5,6 +5,7 @@ export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState("subscribe");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,18 +19,23 @@ export default function NewsletterSignup() {
     }
 
     try {
-      const response = await fetch("/api/newsletter/subscribe", {
+      const endpoint = mode === "unsubscribe" ? "/api/newsletter/unsubscribe" : "/api/newsletter/subscribe";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          preferences: {
-            newFeatures: true,
-            pricingUpdates: true,
-            industryInsights: true,
-            promotions: false,
-          },
-        }),
+        body: JSON.stringify(
+          mode === "unsubscribe"
+            ? { email }
+            : {
+                email,
+                preferences: {
+                  newFeatures: true,
+                  pricingUpdates: true,
+                  industryInsights: true,
+                  promotions: false,
+                },
+              }
+        ),
       });
 
       const data = await response.json();
@@ -37,22 +43,36 @@ export default function NewsletterSignup() {
       if (response.ok) {
         setStatus({
           type: "success",
-          message: data.message || "Thanks for subscribing! Check your email for exclusive offers.",
+          message:
+            data.message ||
+            (mode === "unsubscribe"
+              ? "You have been unsubscribed from the newsletter."
+              : "Thanks for subscribing! Check your email for exclusive offers."),
         });
         setEmail("");
         setTimeout(() => setStatus(null), 5000);
       } else {
         if (response.status === 400 && data.message.includes("already subscribed")) {
           setStatus({ type: "info", message: data.message });
+        } else if (response.status === 404 || data.message?.includes("already unsubscribed")) {
+          setStatus({ type: "info", message: data.message || "This email is already unsubscribed." });
         } else {
-          throw new Error(data.message || "Failed to subscribe");
+          throw new Error(data.message || `Failed to ${mode}`);
         }
       }
     } catch (error) {
-      setStatus({ type: "error", message: "Something went wrong. Please try again." });
+      setStatus({
+        type: "error",
+        message: `Something went wrong while trying to ${mode}. Please try again.`,
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleMode = (nextMode) => {
+    setMode(nextMode);
+    setStatus(null);
   };
 
   return (
@@ -61,12 +81,32 @@ export default function NewsletterSignup() {
         <div className="nl-inner">
           <div className="nl-text">
             <span className="nl-badge">Newsletter</span>
-            <h2 className="nl-title">Stay Updated</h2>
+            <h2 className="nl-title">{mode === "unsubscribe" ? "Manage Subscription" : "Stay Updated"}</h2>
             <p className="nl-desc">
-              Get exclusive updates on new features, pricing options, and industry insights delivered to your inbox
+              {mode === "unsubscribe"
+                ? "Enter your email address to stop receiving newsletter updates from AC Commerce."
+                : "Get exclusive updates on new features, pricing options, and industry insights delivered to your inbox"}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="nl-form">
+            <div className="nl-mode-switch" role="tablist" aria-label="Newsletter action">
+              <button
+                type="button"
+                className={`nl-mode-btn ${mode === "subscribe" ? "is-active" : ""}`}
+                onClick={() => toggleMode("subscribe")}
+                disabled={loading}
+              >
+                Subscribe
+              </button>
+              <button
+                type="button"
+                className={`nl-mode-btn ${mode === "unsubscribe" ? "is-active" : ""}`}
+                onClick={() => toggleMode("unsubscribe")}
+                disabled={loading}
+              >
+                Unsubscribe
+              </button>
+            </div>
             <div className="nl-input-row">
               <input
                 type="email"
@@ -77,7 +117,7 @@ export default function NewsletterSignup() {
                 disabled={loading}
               />
               <button type="submit" className="nl-btn" disabled={loading}>
-                {loading ? "Subscribing..." : "Subscribe"}
+                {loading ? (mode === "unsubscribe" ? "Unsubscribing..." : "Subscribing...") : mode === "unsubscribe" ? "Unsubscribe" : "Subscribe"}
               </button>
             </div>
 
@@ -89,7 +129,7 @@ export default function NewsletterSignup() {
             )}
 
             <p className="nl-note">
-              We respect your privacy. Unsubscribe at any time.
+              We respect your privacy. You can subscribe or unsubscribe at any time.
             </p>
           </form>
         </div>

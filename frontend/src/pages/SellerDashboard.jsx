@@ -402,9 +402,10 @@ export default function SellerDashboard() {
                       .toFixed(2)}
                   </h5>
                   <Button
-                    variant="outline-info"
+                    variant={showFilters ? "info" : "outline-info"}
                     size="sm"
                     className="ms-2"
+                    style={showFilters ? { color: 'white' } : { color: 'black' }}
                     onClick={() => setShowFilters((prev) => !prev)}
                   >
                     {showFilters ? "Hide Filters" : "Show Filters"}
