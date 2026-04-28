@@ -592,6 +592,14 @@ const Sidebar = () => {
           overlayCtx.restore();
 
           // ========== ENGINEER REVIEW SEAL STAMP ==========
+          const stampStatus = (engineerAnnotation.status || 'reviewed').toLowerCase();
+          const stampConfig = {
+            reviewed:  { label: 'REVIEWED',  iconColor: 'rgba(20, 70, 180, 0.75)',  ringColor: 'rgba(20, 70, 180, 0.7)',  textColor: 'rgba(20, 70, 180, 0.8)' },
+            approved:  { label: 'APPROVED',  iconColor: 'rgba(20, 130, 50, 0.75)',  ringColor: 'rgba(20, 130, 50, 0.7)',  textColor: 'rgba(20, 130, 50, 0.85)' },
+            rejected:  { label: 'REJECTED',  iconColor: 'rgba(200, 30, 30, 0.75)',  ringColor: 'rgba(200, 30, 30, 0.7)',  textColor: 'rgba(200, 30, 30, 0.85)' },
+            pending:   { label: 'PENDING',   iconColor: 'rgba(180, 120, 0, 0.75)',  ringColor: 'rgba(180, 120, 0, 0.7)',  textColor: 'rgba(180, 120, 0, 0.85)' },
+          };
+          const sc = stampConfig[stampStatus] || stampConfig.reviewed;
           const cx = viewport.width - 80;
           const cy = viewport.height - 80;
           const outerR = 52;
@@ -601,14 +609,14 @@ const Sidebar = () => {
           overlayCtx.save();
 
           // Outer ring — bold border
-          overlayCtx.strokeStyle = "rgba(20, 70, 180, 0.7)";
+          overlayCtx.strokeStyle = sc.ringColor;
           overlayCtx.lineWidth = 3;
           overlayCtx.beginPath();
           overlayCtx.arc(cx, cy, outerR, 0, 2 * Math.PI);
           overlayCtx.stroke();
 
           // Inner ring — thinner
-          overlayCtx.strokeStyle = "rgba(20, 70, 180, 0.45)";
+          overlayCtx.strokeStyle = sc.ringColor.replace('0.7', '0.45');
           overlayCtx.lineWidth = 1.5;
           overlayCtx.beginPath();
           overlayCtx.arc(cx, cy, innerR, 0, 2 * Math.PI);
@@ -624,7 +632,7 @@ const Sidebar = () => {
           // Curved text — "AC-COMMERCE" along top arc
           const topText = "AC-COMMERCE";
           overlayCtx.font = "bold 8px Arial";
-          overlayCtx.fillStyle = "rgba(20, 70, 180, 0.72)";
+          overlayCtx.fillStyle = sc.ringColor;
           overlayCtx.textAlign = "center";
           overlayCtx.textBaseline = "middle";
           const topArcR = (outerR + innerR) / 2;
@@ -642,6 +650,7 @@ const Sidebar = () => {
 
           // Curved text — "ENGINEER REVIEW" along bottom arc
           const bottomText = "ENGINEER REVIEW";
+          overlayCtx.fillStyle = sc.ringColor;
           overlayCtx.font = "bold 7px Arial";
           const botArcR = (outerR + innerR) / 2;
           const botStartAngle = Math.PI / 2 + (bottomText.length * 0.08);
@@ -658,7 +667,7 @@ const Sidebar = () => {
 
           // Small stars separating top/bottom text
           overlayCtx.font = "8px Arial";
-          overlayCtx.fillStyle = "rgba(20, 70, 180, 0.6)";
+          overlayCtx.fillStyle = sc.ringColor;
           const starAngleL = -Math.PI / 2 - (topText.length * 0.09) - 0.2;
           const starAngleR = -Math.PI / 2 + (topText.length * 0.09) + 0.2;
           [starAngleL, starAngleR].forEach(a => {
@@ -671,27 +680,64 @@ const Sidebar = () => {
           overlayCtx.arc(cx, cy, coreR, 0, 2 * Math.PI);
           overlayCtx.fill();
 
-          // Center — checkmark icon (shifted up to make room for date)
-          overlayCtx.strokeStyle = "rgba(20, 130, 50, 0.75)";
+          // Center icon — varies by status
+          overlayCtx.strokeStyle = sc.iconColor;
           overlayCtx.lineWidth = 3;
           overlayCtx.lineCap = "round";
           overlayCtx.lineJoin = "round";
           overlayCtx.beginPath();
-          overlayCtx.moveTo(cx - 10, cy - 8);
-          overlayCtx.lineTo(cx - 3, cy);
-          overlayCtx.lineTo(cx + 12, cy - 14);
+          if (stampStatus === 'approved') {
+            // Checkmark
+            overlayCtx.moveTo(cx - 10, cy - 8);
+            overlayCtx.lineTo(cx - 3, cy);
+            overlayCtx.lineTo(cx + 12, cy - 14);
+          } else if (stampStatus === 'rejected') {
+            // X mark
+            overlayCtx.moveTo(cx - 9, cy - 9);
+            overlayCtx.lineTo(cx + 9, cy + 9);
+            overlayCtx.moveTo(cx + 9, cy - 9);
+            overlayCtx.lineTo(cx - 9, cy + 9);
+          } else if (stampStatus === 'pending') {
+            // Clock-like arc
+            overlayCtx.arc(cx, cy - 4, 10, -Math.PI / 2, Math.PI * 0.8);
+            overlayCtx.moveTo(cx, cy - 4);
+            overlayCtx.lineTo(cx, cy - 12);
+            overlayCtx.moveTo(cx, cy - 4);
+            overlayCtx.lineTo(cx + 6, cy - 4);
+          } else {
+            // Reviewed — clipboard tick
+            overlayCtx.moveTo(cx - 10, cy - 8);
+            overlayCtx.lineTo(cx - 3, cy);
+            overlayCtx.lineTo(cx + 12, cy - 14);
+          }
           overlayCtx.stroke();
 
-          // "APPROVED" text below checkmark
-          overlayCtx.fillStyle = "rgba(20, 70, 180, 0.8)";
+          // Status label below icon
+          overlayCtx.fillStyle = sc.textColor;
           overlayCtx.font = "bold 9px Arial";
           overlayCtx.textAlign = "center";
-          overlayCtx.fillText("APPROVED", cx, cy + 14);
+          overlayCtx.fillText(sc.label, cx, cy + 14);
 
-          // Date inside stamp, below APPROVED
+          // Date inside stamp, below status label
           overlayCtx.font = "7px Arial";
           overlayCtx.fillStyle = "rgba(60, 60, 60, 0.65)";
           overlayCtx.fillText(reviewDate, cx, cy + 24);
+
+          // Short explanation note for Rejected / Pending (rendered left of stamp)
+          if (stampStatus === 'rejected' || stampStatus === 'pending') {
+            const noteLines = stampStatus === 'rejected'
+              ? ["Revisions required.", "Contact engineer for details."]
+              : ["Awaiting engineer review.", "Check back later."];
+            const noteX = cx - outerR - 8;
+            overlayCtx.font = "bold 7.5px Arial";
+            overlayCtx.fillStyle = sc.textColor;
+            overlayCtx.textAlign = "right";
+            overlayCtx.textBaseline = "middle";
+            overlayCtx.fillText(noteLines[0], noteX, cy - 6);
+            overlayCtx.font = "7px Arial";
+            overlayCtx.fillStyle = sc.textColor.replace(/[\d.]+\)$/, '0.65)');
+            overlayCtx.fillText(noteLines[1], noteX, cy + 7);
+          }
 
           overlayCtx.restore();
         }
@@ -752,31 +798,25 @@ const Sidebar = () => {
 
     try {
       if (deleteAll) {
-        // Delete all PDFs in the current tab
+        // Delete all PDFs in the current tab — fire all requests in parallel
         const pdfList = isEngineerReview ? engineerAnnotations : savedPdfs;
-        let successCount = 0;
-        let failureCount = 0;
 
-        for (const pdf of pdfList) {
-          try {
-            const endpoint = isEngineerReview 
+        const results = await Promise.allSettled(
+          pdfList.map((pdf) => {
+            const endpoint = isEngineerReview
               ? `/api/engineer-annotations/${pdf._id}`
               : `/api/annotations/${pdf._id}`;
-            
-            const response = await fetch(endpoint, {
+            return fetch(endpoint, {
               method: "DELETE",
               headers: { Authorization: `Bearer ${token}` },
             });
-            if (!response.ok) {
-              failureCount++;
-            } else {
-              successCount++;
-            }
-          } catch (err) {
-            console.error(`Failed to delete ${pdf.filename}:`, err);
-            failureCount++;
-          }
-        }
+          })
+        );
+
+        const successCount = results.filter(
+          (r) => r.status === "fulfilled" && r.value.ok
+        ).length;
+        const failureCount = results.length - successCount;
 
         if (isEngineerReview) {
           setEngineerAnnotations([]);

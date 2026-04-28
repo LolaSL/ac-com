@@ -633,27 +633,27 @@
   }
 
   .recommendations-table {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    min-width: 600px;
   }
 
   .recommendations-table thead {
-    display: none;
+    display: table-header-group;
   }
 
   .recommendations-table tbody tr {
-    display: block;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    overflow: hidden;
+    display: table-row;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    overflow: visible;
   }
 
   .recommendations-table tbody td {
-    display: block !important;
-    padding: 0.5rem 0.75rem;
-    text-align: center;
-    border-bottom: 1px solid #f1f3f5;
-    justify-content: initial;
+    display: table-cell !important;
+    padding: 0.4rem 0.35rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
   }
 
   .recommendations-table tbody td::before {
@@ -662,12 +662,12 @@
   }
 
   .recommendations-table tbody td:last-child {
-    border-bottom: 0;
+    border-bottom: 1px solid #dee2e6;
   }
 
   .recommendations-table th,
   .recommendations-table td {
-    padding: 0.5rem 0.35rem;
+    padding: 0.4rem 0.35rem;
   }
 }
 

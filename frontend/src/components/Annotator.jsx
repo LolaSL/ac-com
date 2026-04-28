@@ -1251,7 +1251,7 @@ const Annotator = ({
     } else if (width < 768) {
       return { width: 48, height: 16 };
     }
-    return { width: 64, height: 22 };
+    return { width: 54, height: 18 };
   };
 
   const confirmAcUnitAnnotation = useCallback((commentText, position) => {
@@ -2627,7 +2627,8 @@ const Annotator = ({
                                     <div className="d-flex gap-2">
                                       <Button
                                         size="sm"
-                                        variant="info"
+                                        variant="secondary"
+                                        style={{ color: '#fff', whiteSpace: 'nowrap' }}
                                         onClick={() =>
                                           handleEditClick(
                                             room,
@@ -2641,6 +2642,7 @@ const Annotator = ({
                                       <Button
                                         size="sm"
                                         variant="danger"
+                                        style={{ whiteSpace: 'nowrap' }}
                                         onClick={() =>
                                           handleDeleteRoom(
                                             room.uniqueId,
@@ -2688,7 +2690,7 @@ const Annotator = ({
           );
         })}
       <ButtonToolbar
-        className="mb-3 mt-3 button-toolbar-annotator"
+        className="mb-3 mt-3 button-toolbar-annotator px-2"
         aria-label="PDF controls"
       >
         {file && file.type === "application/pdf" && (
@@ -2728,8 +2730,7 @@ const Annotator = ({
                 }
                 title="Export rooms to BTU Calculator"
               >
-                Export rooms to BTU Calculator (
-                {filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
+                Export to BTU ({filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
               </Button>
 
               <Button

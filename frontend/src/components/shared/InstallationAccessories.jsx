@@ -47,7 +47,6 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
 
     // Add condenser-specific categories
     if (hasCondenser) {
-      categories.add('VRF Heat Recovery');
       categories.add('Mounting');
       categories.add('Fan Motor');
       categories.add('Fans');
@@ -55,10 +54,6 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
 
     // Add indoor unit categories
     if (hasIndoorUnits) {
-      categories.add('Mini Split AC');
-      categories.add('Wall-Mounted AC');
-      categories.add('Cassette Indoor Unit');
-      categories.add('Wind-Free TM Cooling');
       categories.add('Knobs');
     }
 

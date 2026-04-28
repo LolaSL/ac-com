@@ -42,10 +42,10 @@ export default function PlaceOrderPage() {
       )
     : 0;
   const getShippingPrice = (itemsPrice, items) => {
-    if (itemsPrice > 5000) return round2(100);
-    if (itemsPrice > 2000) return round2(50);
-    if (itemsPrice > 500) return round2(25);
-    return round2(10);
+    if (itemsPrice > 5000) return round2(0);
+    if (itemsPrice > 2000) return round2(100);
+    if (itemsPrice > 500) return round2(50);
+    return round2(25);
   };
 
   cart.shippingPrice = getShippingPrice(cart.itemsPrice, cart.cartItems);

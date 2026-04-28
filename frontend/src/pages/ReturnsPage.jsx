@@ -14,7 +14,7 @@ const ReturnsPage = () => {
       </div>
       <div className="ret-inner">
         <p className="fs-5">
-          At Total Home Supply, your satisfaction is our top priority. We offer a
+          At AC-Commerce, your satisfaction is our top priority. We offer a
           flexible return policy for air conditioners, outdoor units, and
           ventilation equipment. If you are not satisfied with your purchase,
           contact us and we will guide you through our easy return process.
@@ -29,7 +29,7 @@ const ReturnsPage = () => {
           </li>
           <li className="fs-5">
             Customers are responsible for all shipping charges, both to and from
-            our warehouses. Although items are shipped using Total Home Supply's
+            our warehouses. Although items are shipped using AC-Commerce's
             “Simply Free Shipping,” actual return shipping/freight costs are the
             responsibility of the customer.
           </li>
@@ -88,7 +88,7 @@ const ReturnsPage = () => {
         <h4>Defective Items</h4>
         <p className="fs-5">
           If your item does not work upon receipt, contact the product
-          manufacturer for a service call or replacement parts. Total Home Supply
+          manufacturer for a service call or replacement parts. AC-Commerce
           cannot authorize exchanges for defective items; this must be handled by
           the manufacturer.
         </p>
@@ -113,7 +113,7 @@ const ReturnsPage = () => {
 
         <h4>Product Usage &amp; Installation</h4>
         <p className="fs-5">
-          Total Home Supply is not responsible for confirming local code
+          AC-Commerce is not responsible for confirming local code
           compliance. Customers must verify that products meet all local, state,
           and federal codes and have items installed by a qualified installer.
           Improper installation or usage is the responsibility of the customer.

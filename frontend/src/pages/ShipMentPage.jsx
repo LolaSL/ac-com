@@ -21,15 +21,15 @@ const ShipMentPage = () => {
       </p>
 
       <ul className="fs-5">
-        <li>Orders over $5,000: $100 shipping</li>
-        <li>Orders over $2,000: $50 shipping</li>
-        <li>Orders over $500: $25 shipping</li>
-        <li>Orders under $500: $10 shipping</li>
+        <li>Orders over $5,000: <strong>Free shipping</strong></li>
+        <li>Orders over $2,000: $100 shipping</li>
+        <li>Orders over $500: $50 shipping</li>
+        <li>Orders under $500: $25 shipping</li>
       </ul>
 
       <h4>Sales Tax</h4>
       <p className="fs-5">
-        All orders are subject to a flat <strong>15% sales tax</strong>, which
+        All orders are subject to a flat <strong>8% sales tax</strong>, which
         is calculated automatically at checkout based on your items subtotal.
         Tax is displayed separately and included in your final order total
         before payment is completed.

@@ -584,23 +584,18 @@ export default function Recommendations() {
 
           {/* --- Per-room results table --- */}
           {perRoomResults ? (
-            <Table
-              className="recommendations-table"
-              striped
-              bordered
-              hover
-              responsive
-            >
+            <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
               <thead>
-                <tr>
-                  <th>Room</th>
-                  <th>Room Size</th>
-                  <th>Room BTU</th>
-                  <th>Optimal Product</th>
-                  <th>Product BTU</th>
-                  <th>Product Price ($)</th>
-                  <th>Product Model</th>
-                  <th>View</th>
+                <tr style={{ borderBottom: '2px solid #dee2e6', background: 'rgba(102, 126, 234, 0.1)' }}>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Room</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Size</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Room BTU</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Optimal Product</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Product BTU</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Price ($)</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Model</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'center', color: '#1a1a2e', fontWeight: '700' }}>View</th>
                 </tr>
               </thead>
               <tbody>
@@ -622,35 +617,38 @@ export default function Recommendations() {
                     }
 
                     return (
-                      <tr key={idx}>
-                        <td>{displayName}</td>
-                      <td>{room.size}</td>
-                      <td>{room.btu}</td>
-                      <td>{getName(product)}</td>
-                      <td>{product.btu || "—"}</td>
-                      <td>{getPrice(product)}</td>
-                      <td>{product.model || product.name || "—"}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        {product.slug ? (
-                          <a
-                            href={`/product/${product.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ fontSize: '1.2rem', color: '#0d6efd' }}
-                            title="View product details"
-                          >
-                            <FaEye />
-                          </a>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  );
+                      <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '5px 8px' }}>{displayName}</td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right' }}>{room.size}</td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right' }}>{room.btu}</td>
+                        <td style={{ padding: '5px 8px' }}>
+                          <div style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={getName(product)}>{getName(product)}</div>
+                        </td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right' }}>{product.btu || "—"}</td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right', fontWeight: '600' }}>{getPrice(product)}</td>
+                        <td style={{ padding: '5px 8px' }}>{product.model || product.name || "—"}</td>
+                        <td style={{ padding: '5px 8px', textAlign: 'center' }}>
+                          {product.slug ? (
+                            <a
+                              href={`/product/${product.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ fontSize: '1.2rem', color: '#0d6efd' }}
+                              title="View product details"
+                            >
+                              <FaEye />
+                            </a>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                      </tr>
+                    );
                   });
-                })()}
+                  })()}
               </tbody>
-            </Table>
+            </table>
+            </div>
           ) : recommendedUnits.length === 0 ? (
             <div className="recommendations-empty">
               <strong>No recommendations available</strong>

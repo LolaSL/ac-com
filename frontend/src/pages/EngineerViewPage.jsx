@@ -1472,6 +1472,7 @@ const EngineerViewPage = () => {
           <>
             <Button
               className="btn btn-outline-primary me-2"
+              style={{ color: '#fff' }}
               onClick={() => setShowHVAC((prev) => !prev)}
             >
               {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
