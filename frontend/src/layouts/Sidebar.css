@@ -2,6 +2,19 @@
    Sidebar — Modern Dark Theme
    ========================================== */
 
+/* ── Get A Quote pulse badge ── */
+@keyframes quote-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+
+.quote-badge-pulse {
+  display: inline-block !important;
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+  animation: quote-pulse 1.2s ease-in-out infinite !important;
+}
+
 /* ── Overlay: only covers below the header ── */
 .sidebar-overlay {
   position: fixed;

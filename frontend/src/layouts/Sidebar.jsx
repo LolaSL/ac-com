@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import Nav from "react-bootstrap/Nav";
+import Badge from "react-bootstrap/Badge";
 import { toast } from "react-toastify";
 import { getError } from "../utils.js";
 import axios from "axios";
@@ -137,7 +138,12 @@ function Sidebar({ sidebarIsOpen, setSidebarIsOpen }) {
                     }
                   }}
                 >
-                  {item.label}
+                  <span className="d-flex align-items-center justify-content-between w-100">
+                    {item.label}
+                    {item.path === "/measurement" && (
+                      <Badge bg="danger" className="quote-badge-pulse ms-2">NEW</Badge>
+                    )}
+                  </span>
                 </Link>
               )}
             </Nav.Item>

@@ -39,7 +39,7 @@ export default function TestimonialsSection() {
     <section className="ts-section">
       <div className="ts-container">
         <div className="ts-header">
-          <span className="ts-badge">Testimonials</span>
+          <span className="ts-badge">Client Success Stories</span>
           <h2 className="ts-title">What Our Customers Say</h2>
           <p className="ts-subtitle">Real results from industry professionals</p>
         </div>

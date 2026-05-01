@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import Badge from "react-bootstrap/Badge";
 import {
   FaUser, FaEnvelope, FaPhone, FaGlobe, FaWrench,
   FaClock, FaMapMarkerAlt, FaHeadset, FaComment, FaPaperPlane,
@@ -186,8 +187,8 @@ const ContactPage = () => {
             <h3 className="ct-info-card__title">Quick Links</h3>
             <Link to="/" className="ct-quick-link">🏠 Home</Link>
             <Link to="/search" className="ct-quick-link">🛒 Products</Link>
-            <Link to="/measurement" className="ct-quick-link">💻 Get A Quote</Link>
-            <Link to="/roi-calculator" className="ct-quick-link">📊 ROI Calculator</Link>
+            <Link to="/measurement" className="ct-quick-link d-flex align-items-center justify-content-between">💻 Get A Quote <Badge bg="danger" className="quote-badge-pulse ms-2">NEW</Badge></Link>
+            {/* <Link to="/roi-calculator" className="ct-quick-link">📊 ROI Calculator</Link> */}
           </div>
         </div>
       </div>

@@ -136,8 +136,9 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/profile" className="dropdown-item ">
                     User Profile
                   </Link>
-                  <Link to="/measurement" className="dropdown-item">
-                    Get A Quote
+                  <Link to="/measurement" className="dropdown-item d-flex align-items-center justify-content-between">
+                    <span>Get A Quote</span>
+                    <Badge bg="danger" className="quote-badge-pulse ms-2">NEW</Badge>
                   </Link>
                   {/* <Link to="/roi-calculator" className="dropdown-item">
                     ROI Calculator

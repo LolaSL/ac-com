@@ -6,7 +6,7 @@ import React, {
   useRef,
   useContext,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FaRulerCombined } from "react-icons/fa";
 import { Store } from "../Store";
 import AnnotatorErrorBoundary from "../components/AnnotatorErrorBoundary.js";
@@ -33,6 +33,7 @@ const GridItem = ({ children }) => (
 
 const Measurement = () => {
   const { state, dispatch: ctxDispatch } = useContext(Store);
+  const location = useLocation();
   const [savedPdfs, setSavedPdfs] = useState([]);
   const [roomData, setRoomDataState] = useState([]);
   const [acAnnotations, setAcAnnotations] = useState([]);
@@ -55,19 +56,21 @@ const Measurement = () => {
     };
   }, []);
 
-  // Check for stored calculation on mount
+  // Check for stored calculation on mount or when returning from another page
   useEffect(() => {
     if (storedBtuProject && storedBtuProject.rooms && storedBtuProject.rooms.length > 0) {
       setShowStoredCalculation(true);
-      // Scroll to calculator after a brief delay
-      setTimeout(() => {
-        if (btuCalculatorRef.current) {
-          btuCalculatorRef.current.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
-        }
-      }, 500);
+      // Only auto-scroll when navigating directly from the BTU Calculator
+      if (location.state?.fromBtu) {
+        setTimeout(() => {
+          if (btuCalculatorRef.current) {
+            btuCalculatorRef.current.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }
+        }, 500);
+      }
     }
   }, [storedBtuProject]);
 
@@ -189,12 +192,12 @@ const Measurement = () => {
               <div style={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: '#fff',
-                padding: '1rem 1.5rem',
+                padding: '1rem 1.25rem',
                 borderRadius: '12px',
                 marginBottom: '1rem',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flexDirection: 'column',
+                gap: '0.75rem',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
               }}>
                 <div>
@@ -210,10 +213,11 @@ const Measurement = () => {
                   }}
                   className="ms-clear-calc-btn"
                   style={{
+                    alignSelf: 'flex-end',
                     background: 'rgba(255,255,255,0.2)',
                     border: '1px solid rgba(255,255,255,0.3)',
                     color: '#fff',
-                    padding: '0.5rem 1rem',
+                    padding: '0.5rem 1.25rem',
                     borderRadius: '8px',
                     cursor: 'pointer',
                     fontWeight: '600',

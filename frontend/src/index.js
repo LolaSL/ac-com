@@ -5,6 +5,7 @@ import './index.css';
 import App from './App.jsx';
 import { StoreProvider } from "./Store.js";
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import reportWebVitals from './reportWebVitals';
 import { GlobalWorkerOptions, version as pdfjsVersion } from 'pdfjs-dist';
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
@@ -12,11 +13,13 @@ GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <StoreProvider>
-      <PayPalScriptProvider deferLoading={true}>
-        <App />
-      </PayPalScriptProvider>
-    </StoreProvider>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ""}>
+      <StoreProvider>
+        <PayPalScriptProvider deferLoading={true}>
+          <App />
+        </PayPalScriptProvider>
+      </StoreProvider>
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
 

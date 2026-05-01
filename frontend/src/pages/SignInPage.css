@@ -188,7 +188,7 @@
   justify-content: center;
   padding: 3rem 4rem;
   background: #ffffff;
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 .signin-form-container {
@@ -370,6 +370,49 @@
   cursor: not-allowed;
 }
 
+/* ── Google OAuth divider & button ── */
+.signin-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0 1rem;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+.signin-divider::before,
+.signin-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+.signin-divider span {
+  padding: 0 0.75rem;
+  white-space: nowrap;
+}
+.signin-google-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.google-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  padding: 0;
+}
+
+.google-icon-btn:hover {
+  box-shadow: 0 2px 10px rgba(66, 133, 244, 0.35);
+  border-color: #4285F4;
+}
+
 .signin-form-footer {
   text-align: center;
   margin-top: 2rem;
@@ -431,11 +474,12 @@
   }
 
   .signin-left {
-    padding: 3rem 2rem;
+    display: none;
   }
 
   .signin-right {
     padding: 3rem 2rem;
+    min-height: 100vh;
   }
 }
 
@@ -494,6 +538,14 @@
 
   .signin-right {
     padding: 1.25rem 1.25rem;
+  }
+
+  .signin-divider {
+    margin: 0.85rem 0 0.75rem;
+  }
+
+  .signin-google-wrap {
+    margin-bottom: 1rem;
   }
 
   .signin-form-icon {

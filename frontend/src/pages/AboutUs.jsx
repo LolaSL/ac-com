@@ -76,7 +76,7 @@ const AboutUs = () => {
     { icon: "fas fa-wrench", label: "HVAC Contractors", desc: "Source equipment and manage project plans in one place." },
     { icon: "fas fa-compass", label: "Architects & Designers", desc: "Integrate HVAC layouts directly into architectural workflows." },
     { icon: "fas fa-shield-alt", label: "Service Providers", desc: "Offer installation, maintenance, and repair through the platform." },
-    { icon: "fas fa-tags", label: "Affiliate Sellers", desc: "Partner with AC-Commerce and grow revenue through the marketplace." },
+    { icon: "fas fa-tags", label: "Affiliate Sellers", desc: "Merger Consultants, Architectural Designers, Accessories Suppliers, and other industry professionals are partners with AC-Commerce." },
   ];
 
   return (

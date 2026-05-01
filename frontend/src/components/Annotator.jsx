@@ -412,8 +412,6 @@ const parseRoomDataFromText = (rawText, fileName) => {
     })
     .filter(Boolean);
 
-  console.log(cleanedApartmentTypes);
-
   const lines = splitMultiRoomLines(
     text.split("\n").map(cleanTextLine).filter(Boolean)
   );
@@ -427,7 +425,6 @@ const parseRoomDataFromText = (rawText, fileName) => {
   const totalSf = totalSfMatch ? totalSfMatch[1].trim() : null;
   result.totalSf = totalSf;
 
-  result.totalSf = totalSfMatch ? totalSfMatch[1].trim() : null;
   const searchWindowSize = 5;
   const extendedRoomPatterns = { ...roomPatterns };
 
@@ -779,8 +776,8 @@ const Annotator = ({
   const [file, setFile] = useState(null);
   const stageRef = useRef(null);
   const [pdfSize, setPdfSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: 0,
+    height: 0,
   });
   const [allRooms, setAllRooms] = useState([]);
   const [exportStatus, setExportStatus] = useState("idle");
@@ -825,6 +822,145 @@ const Annotator = ({
   // Default to annotation mode (true) so users can create rectangles immediately
   // Track last rectangle tap for double-tap deletion on mobile
   const lastRectTapRef = useRef({});
+
+  // ── sessionStorage persistence (fixes iOS Safari losing state on navigation) ──
+  // Primary path: store annotation _id after save, re-fetch from backend on restore (no quota issues).
+  // Fallback path: raw PDF bytes in sessionStorage for unsaved PDFs (works when PDF < ~3.5 MB).
+  const SESSION_KEY_ANN_ID   = 'annotator_annotation_id';
+  const SESSION_KEY_PDF      = 'annotator_pdf_data';
+  const SESSION_KEY_NAME     = 'annotator_pdf_name';
+  const SESSION_KEY_RECTS    = 'annotator_rectangles';
+  const SESSION_KEY_COMMENTS = 'annotator_comments';
+  const SESSION_KEY_LINES    = 'annotator_lines';
+  const SESSION_KEY_ROOMS    = 'annotator_rooms';
+  const SESSION_KEY_ROTATION = 'annotator_pdf_rotation';
+
+  // Holds percent-based annotations fetched from backend; applied after PDF renders and pdfSize is known.
+  const pendingPercentAnnotationsRef = useRef(null);
+
+  // Apply percent-based annotations to state once canvas dimensions are known (after PDF renders).
+  useEffect(() => {
+    if (!pendingPercentAnnotationsRef.current) return;
+    const ann = pendingPercentAnnotationsRef.current;
+    pendingPercentAnnotationsRef.current = null;
+    const cw = pdfSize.width;
+    const ch = pdfSize.height;
+    if (!cw || !ch) return;
+    if (ann.rectangles?.length) {
+      setRectangles(ann.rectangles.map(r => ({
+        ...r,
+        x: r.xPercent * cw,
+        y: r.yPercent * ch,
+        width: r.widthPercent * cw,
+        height: r.heightPercent * ch,
+      })));
+    }
+    if (ann.comments?.length) {
+      setComments(ann.comments.map(c => ({
+        ...c,
+        x: c.xPercent * cw,
+        y: c.yPercent * ch,
+      })));
+    }
+    if (ann.lines?.length) {
+      setLines(ann.lines.map(l => ({
+        ...l,
+        points: l.points.map((p, i) => i % 2 === 0 ? p * cw : p * ch),
+      })));
+    }
+  }, [pdfSize]);
+
+  // Restore state from sessionStorage on initial mount.
+  useEffect(() => {
+    const annotationId = sessionStorage.getItem(SESSION_KEY_ANN_ID);
+    // Read token directly from localStorage to avoid stale-closure issues.
+    const rawToken = (() => { try { return JSON.parse(localStorage.getItem('userInfo'))?.token || null; } catch { return null; } })();
+
+    const restoreFromBytes = () => {
+      const storedPdf  = sessionStorage.getItem(SESSION_KEY_PDF);
+      const storedName = sessionStorage.getItem(SESSION_KEY_NAME);
+      if (!storedPdf || !storedName) return;
+      try {
+        const binary = atob(storedPdf);
+        const bytes  = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const blob         = new Blob([bytes], { type: 'application/pdf' });
+        const restoredFile = new File([blob], storedName, { type: 'application/pdf' });
+        setFile(restoredFile);
+        setPdfInfo({ fileName: storedName });
+        setPreviewUrl(URL.createObjectURL(blob));
+        const storedRects    = sessionStorage.getItem(SESSION_KEY_RECTS);
+        const storedComments = sessionStorage.getItem(SESSION_KEY_COMMENTS);
+        const storedLines    = sessionStorage.getItem(SESSION_KEY_LINES);
+        const storedRooms    = sessionStorage.getItem(SESSION_KEY_ROOMS);
+        const storedRotation = sessionStorage.getItem(SESSION_KEY_ROTATION);
+        if (storedRects)    setRectangles(JSON.parse(storedRects));
+        if (storedComments) setComments(JSON.parse(storedComments));
+        if (storedLines)    setLines(JSON.parse(storedLines));
+        if (storedRooms)    setAllRooms(JSON.parse(storedRooms));
+        if (storedRotation) setPdfRotation(Number(storedRotation));
+      } catch (e) {
+        console.warn('Annotator: bytes restore failed', e);
+      }
+    };
+
+    if (annotationId && rawToken) {
+      // Primary path: re-fetch from backend (reliable on iOS, no quota issues).
+      (async () => {
+        try {
+          const storedName     = sessionStorage.getItem(SESSION_KEY_NAME) || 'restored.pdf';
+          const storedRotation = sessionStorage.getItem(SESSION_KEY_ROTATION);
+          const storedRooms    = sessionStorage.getItem(SESSION_KEY_ROOMS);
+          if (storedRotation) setPdfRotation(Number(storedRotation));
+          if (storedRooms)    setAllRooms(JSON.parse(storedRooms));
+
+          const [pdfRes, annRes] = await Promise.all([
+            fetch(`/api/annotated-pdf/${annotationId}`, { headers: { Authorization: `Bearer ${rawToken}` } }),
+            fetch(`/api/annotations/${annotationId}`,   { headers: { Authorization: `Bearer ${rawToken}` } }),
+          ]);
+          if (!pdfRes.ok) throw new Error(`PDF fetch ${pdfRes.status}`);
+
+          const pdfBlob      = await pdfRes.blob();
+          const restoredFile = new File([pdfBlob], storedName, { type: 'application/pdf' });
+          setFile(restoredFile);
+          setPdfInfo({ fileName: storedName });
+          setPreviewUrl(URL.createObjectURL(pdfBlob));
+
+          if (annRes.ok) {
+            const annData = await annRes.json();
+            const ann     = annData.annotations ? annData.annotations : annData;
+            // Will be converted to pixels once pdfSize is known after rendering.
+            pendingPercentAnnotationsRef.current = ann;
+          }
+        } catch (e) {
+          console.warn('Annotator: backend restore failed, trying bytes fallback', e);
+          restoreFromBytes();
+        }
+      })();
+    } else {
+      restoreFromBytes();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist light metadata to sessionStorage whenever annotations change.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        sessionStorage.setItem(SESSION_KEY_RECTS,    JSON.stringify(rectangles));
+        sessionStorage.setItem(SESSION_KEY_COMMENTS, JSON.stringify(comments));
+        sessionStorage.setItem(SESSION_KEY_LINES,    JSON.stringify(lines));
+      } catch (e) { /* quota exceeded – silent fail */ }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [rectangles, comments, lines]);
+
+  useEffect(() => {
+    try { sessionStorage.setItem(SESSION_KEY_ROOMS,    JSON.stringify(allRooms)); } catch (e) { /* silent */ }
+  }, [allRooms]);
+
+  useEffect(() => {
+    try { sessionStorage.setItem(SESSION_KEY_ROTATION, String(pdfRotation)); } catch (e) { /* silent */ }
+  }, [pdfRotation]);
 
   const idsMatch = useCallback((left, right) => {
     if (left === undefined || left === null || right === undefined || right === null) {
@@ -929,9 +1065,18 @@ const Annotator = ({
     setError(null);
     setIconPositions([]);
     setComments([]);
+    setRectangles([]);
+    setLines([]);
+    setPreviewUrl(null);
+    setFile(null);
     setPdfRotation(0); // Reset rotation when new file is uploaded
+    // Clear old session state so new file starts fresh
+    ['annotator_annotation_id', 'annotator_pdf_data', 'annotator_pdf_name',
+     'annotator_rectangles', 'annotator_comments', 'annotator_lines',
+     'annotator_rooms', 'annotator_pdf_rotation'].forEach(k => sessionStorage.removeItem(k));
 
     const output = [];
+    let previewSet = false; // Track if preview has been set for the first valid file
 
     for (const file of files) {
       if (file.type !== "application/pdf") {
@@ -958,9 +1103,10 @@ const Annotator = ({
           rooms: normalizedRooms,
         });
         console.log(text);
-        if (!previewUrl) {
+        if (!previewSet) {
           setPreviewUrl(URL.createObjectURL(file));
           setFile(file);
+          previewSet = true;
         }
       } catch (err) {
         console.error("Error processing file:", file.name, err);
@@ -1550,9 +1696,6 @@ const Annotator = ({
   };
 
   const rotateRectangle = useCallback((rectId) => {
-    console.log("rotateRectangle called for:", rectId);
-
-    console.trace();
     setRectangles((prevRects) =>
       prevRects.map((rect) =>
         idsMatch(rect.id, rectId)
@@ -1703,6 +1846,16 @@ const Annotator = ({
         const pdfData = new Uint8Array(e.target.result);
         pdfDataRef.current = pdfData; // Store for responsive re-rendering
         await renderPDFOnCanvas(pdfData);
+        // Persist PDF bytes to sessionStorage for iOS navigation recovery
+        try {
+          let binary = '';
+          const chunkSize = 8192;
+          for (let i = 0; i < pdfData.length; i += chunkSize) {
+            binary += String.fromCharCode(...pdfData.subarray(i, i + chunkSize));
+          }
+          sessionStorage.setItem('annotator_pdf_data', btoa(binary));
+          sessionStorage.setItem('annotator_pdf_name', file.name);
+        } catch (e) { /* quota exceeded – silent fail */ }
       };
       reader.readAsArrayBuffer(file);
     }
@@ -1722,9 +1875,40 @@ const Annotator = ({
     const handleWindowResize = () => {
       // Debounce resize events to avoid excessive re-renders
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
+      resizeTimeout = setTimeout(async () => {
         if (pdfDataRef.current && file?.type === "application/pdf") {
-          renderPDFOnCanvas(pdfDataRef.current);
+          // Capture canvas dimensions BEFORE re-render so we can scale annotations
+          const oldWidth  = canvasRef.current?.width  || 0;
+          const oldHeight = canvasRef.current?.height || 0;
+
+          await renderPDFOnCanvas(pdfDataRef.current);
+
+          // After render, canvas has the new dimensions (set synchronously inside renderPDFOnCanvas)
+          const newWidth  = canvasRef.current?.width  || 0;
+          const newHeight = canvasRef.current?.height || 0;
+
+          // Only rescale when dimensions actually changed (e.g. window restore/snap)
+          if (oldWidth > 0 && oldHeight > 0 && (oldWidth !== newWidth || oldHeight !== newHeight)) {
+            const scaleX = newWidth  / oldWidth;
+            const scaleY = newHeight / oldHeight;
+
+            setRectangles(prev => prev.map(r => ({
+              ...r,
+              x: r.x * scaleX,
+              y: r.y * scaleY,
+              width:  r.width  * scaleX,
+              height: r.height * scaleY,
+            })));
+            setComments(prev => prev.map(c => ({
+              ...c,
+              x: c.x * scaleX,
+              y: c.y * scaleY,
+            })));
+            setLines(prev => prev.map(l => ({
+              ...l,
+              points: l.points.map((p, i) => i % 2 === 0 ? p * scaleX : p * scaleY),
+            })));
+          }
         }
       }, 300);
     };
@@ -1846,7 +2030,8 @@ const Annotator = ({
         const data = await response.json();
         console.log("Data saved to backend:", data);
         toast.success("PDF and annotations saved successfully!", { autoClose: 3000 });
-
+        // Store annotation ID so iOS Safari can re-fetch on navigation restore.
+        try { sessionStorage.setItem('annotator_annotation_id', data.id); } catch (e) { /* silent */ }
         setIsSaved(true);
         // Keep the PDF and annotations on canvas after saving
         // User can manually clear using "Clear Canvas" button if needed
@@ -2020,15 +2205,6 @@ const Annotator = ({
     // passes a non-memoized function. We still call it conditionally inside.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allRooms]);
-
-  useEffect(() => {
-    if (isSaved) {
-      toast.success("Saved successfully!", {
-        duration: 3000,
-        position: "bottom-center",
-      });
-    }
-  }, [isSaved]);
 
   const handleExportToBtuCalculator = (roomsToExport) => {
     const refRooms = filteredRoomsRef.current.flat().filter(Boolean);
@@ -2238,14 +2414,6 @@ const Annotator = ({
     };
   }, [downloadedFiles]);
 
-  React.useEffect(() => {
-    return () => {
-      downloadedFiles.forEach((file) => {
-        URL.revokeObjectURL(file.url);
-      });
-    };
-  }, [downloadedFiles]);
-
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -2258,9 +2426,18 @@ const Annotator = ({
     setIsSaved(false);
     setRectangles([]);
     setComments([]);
+    setLines([]);
     setFile(null);
     setResults([]);
+    setImages([]);
+    setPdfInfo(null);
+    setPdfZoom(1);
+    pdfDataRef.current = null;
     setError(null);
+    // Clear persisted session state so restored data doesn't reappear
+    ['annotator_annotation_id', 'annotator_pdf_data', 'annotator_pdf_name',
+     'annotator_rectangles', 'annotator_comments', 'annotator_lines',
+     'annotator_rooms', 'annotator_pdf_rotation'].forEach(k => sessionStorage.removeItem(k));
     console.log("Canvas and table data cleared.");
   };
 

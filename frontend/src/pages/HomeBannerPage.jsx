@@ -20,31 +20,7 @@ export default function HomeBannerPage() {
   const navigate = useNavigate();
 
   const banners = [
-    {
-      title: "AC-Commerce Marketplace Technology",
-      description:
-        "Revolutionizing HVAC procurement with comprehensive marketplace solutions.",
-      imageSrc: "/images/hero.jpg",
-      linkText: "Explore Our Technology",
-      linkTo: "/products",
-    },
-  {
-      title: "Industry-Leading Partnerships",
-      description:
-        "Trusted by leading HVAC manufacturers including Daikin, LG, Samsung, and Mitsubishi for comprehensive equipment solutions.",
-      imageSrc: "/images/hvac-business-partnership.jpg",
-      linkText: "View Our Network",
-      linkTo: "/sellers",
-    },
-    {
-      title: "Advanced Design Technology",
-      description:
-        "Upload floor plans and receive professional AC unit annotations, BTU calculations, and installation specifications instantly.",
-      imageSrc: "/images/floor-plan.jpg",
-      linkText: "Try Design Tools",
-      linkTo: "/measurement",
-    },
-    {
+      {
       title: "About Us - AC-Commerce",
       description:
         "Learn more about AC-Commerce, our mission, values, and the team driving innovation in the HVAC industry.",
@@ -52,6 +28,31 @@ export default function HomeBannerPage() {
       linkText: "Learn More",
       linkTo: "/about-us",
     },
+    {
+      title: "AC-Commerce Marketplace Technology",
+      description:
+        "Revolutionizing HVAC procurement with comprehensive marketplace solutions.",
+      imageSrc: "/images/hero.jpg",
+      linkText: "Explore Our Products",
+      linkTo: "/products",
+    },
+  {
+      title: "Industry-Leading Partnerships",
+      description:
+        "Trusted by leading HVAC manufacturers including Daikin, LG, Samsung, and Mitsubishi for comprehensive equipment solutions.",
+      imageSrc: "/images/hvac-business-partnership.jpg",
+      linkText: "View Our Suppliers",
+      linkTo: "/sellers",
+    },
+    {
+      title: "Advanced Design Technology",
+      description:
+        "Upload floor plans and receive professional AC unit notations, BTU calculations, and installation specifications instantly.",
+      imageSrc: "/images/floor-plan.jpg",
+      linkText: "Try Design Tools",
+      linkTo: "/measurement",
+    }
+
   ];
 
   useEffect(() => {

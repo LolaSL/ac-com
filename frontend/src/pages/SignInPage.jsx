@@ -5,6 +5,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 import { useContext, useEffect, useState } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { getError } from "../utils.js";
@@ -24,6 +25,23 @@ export default function SignInPage() {
 
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { userInfo } = state;
+
+  const googleSignIn = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const { data } = await Axios.post("/api/users/google-auth", {
+          access_token: tokenResponse.access_token,
+        });
+        ctxDispatch({ type: "USER_SIGNIN", payload: data });
+        localStorage.setItem("userInfo", JSON.stringify(data));
+        navigate(redirect || "/");
+        toast.success("Signed in with Google");
+      } catch (err) {
+        toast.error(getError(err));
+      }
+    },
+    onError: () => toast.error("Google sign-in failed"),
+  });
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -210,6 +228,20 @@ export default function SignInPage() {
                 </div>
               </Form>
 
+              <div className="signin-divider">
+                <span>or continue with</span>
+              </div>
+              <div className="signin-google-wrap">
+                <button className="google-icon-btn" onClick={() => googleSignIn()} title="Sign in with Google">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22">
+                    <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.09-6.09C34.46 3.1 29.5 1 24 1 14.82 1 7.07 6.48 3.64 14.18l7.08 5.5C12.4 13.62 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.5 24.5c0-1.64-.15-3.22-.42-4.75H24v9h12.67c-.55 2.97-2.2 5.48-4.67 7.17l7.19 5.59C43.17 37.28 46.5 31.36 46.5 24.5z"/>
+                    <path fill="#FBBC05" d="M10.72 28.32A14.6 14.6 0 0 1 9.5 24c0-1.5.26-2.95.72-4.32l-7.08-5.5A23.93 23.93 0 0 0 0 24c0 3.87.92 7.53 2.54 10.77l8.18-6.45z"/>
+                    <path fill="#34A853" d="M24 47c5.5 0 10.12-1.82 13.5-4.94l-7.19-5.59c-1.89 1.27-4.31 2.03-6.31 2.03-6.26 0-11.6-4.12-13.28-9.68l-8.18 6.45C7.07 41.52 14.82 47 24 47z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                  </svg>
+                </button>
+              </div>
 
             </div>
           </div>

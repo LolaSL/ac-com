@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import expressAsyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/userModel.js';
 import Seller from '../models/sellerModel.js';
 import ServiceProvider from '../models/serviceProviderModel.js';
@@ -248,6 +249,59 @@ userRouter.post(
       return;
     }
     res.status(401).send({ message: 'Invalid email or password' });
+  })
+);
+
+userRouter.post(
+  '/google-auth',
+  expressAsyncHandler(async (req, res) => {
+    const { access_token } = req.body;
+    if (!access_token) {
+      return res.status(400).send({ message: 'Google access token is required' });
+    }
+
+    // Fetch user info from Google using the access token
+    const googleRes = await fetch(
+      `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
+    );
+    if (!googleRes.ok) {
+      return res.status(401).send({ message: 'Invalid Google token' });
+    }
+    const { sub: googleId, email, name, picture } = await googleRes.json();
+
+    // Find by googleId first, then fall back to email
+    let user = await User.findOne({ googleId });
+    if (!user) {
+      user = await User.findOne({ email });
+    }
+
+    if (user) {
+      // Link googleId if signing in via Google for the first time on existing account
+      if (!user.googleId) {
+        user.googleId = googleId;
+        if (!user.avatar && picture) user.avatar = picture;
+        await user.save();
+      }
+    } else {
+      // New user — create account
+      user = await new User({
+        name,
+        email,
+        googleId,
+        avatar: picture,
+        isAdmin: false,
+      }).save();
+    }
+
+    res.send({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      avatar: user.avatar,
+      isAdmin: user.isAdmin,
+      token: generateToken(user),
+    });
   })
 );
 
