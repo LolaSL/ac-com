@@ -57,6 +57,7 @@ const BlogEditPage = () => {
   const [content, setContent] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [image, setImage] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,6 +69,7 @@ const BlogEditPage = () => {
         setContent(data.content);
         setImage(data.image);
         setShortDescription(data.shortDescription);
+        setTagsInput((data.tags || []).join(", "));
         dispatch({ type: "FETCH_SUCCESS" });
       } catch (err) {
         dispatch({ type: "FETCH_FAIL", payload: getError(err) });
@@ -88,6 +90,7 @@ const BlogEditPage = () => {
           content,
           shortDescription,
           image,
+          tags: tagsInput.split(",").map((t) => t.trim()).filter(Boolean),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -186,6 +189,17 @@ const BlogEditPage = () => {
                     required
                     placeholder="Enter a brief description for preview cards"
                   />
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="tags">
+                  <Form.Label>Tags</Form.Label>
+                  <Form.Control
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    placeholder="e.g. Maintenance, Energy Saving, BTU"
+                  />
+                  <Form.Text className="text-muted">
+                    Separate tags with commas.
+                  </Form.Text>
                 </Form.Group>
               </div>
 

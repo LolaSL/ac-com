@@ -7,11 +7,10 @@ import ShippingAddressPage from "../pages/ShippingAddressPage.jsx";
 import PaymentMethodPage from "../pages/PaymentMethodPage.jsx";
 import PlaceOrderPage from "../pages/PlaceOrderPage.jsx";
 import NotFoundPage from "../pages/NotFoundPage.jsx";
-import Container from "react-bootstrap/Container";
 
 function AppRoutes() {
   return (
-    <Container fluid className="no-padding">
+    <div style={{ width: '100%', padding: 0, margin: 0 }}>
       <Routes>
         {/* Public Routes */}
         {publicRoutes.map((route) => (
@@ -36,7 +35,7 @@ function AppRoutes() {
         {/* 404 Catch-all */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </Container>
+    </div>
   );
 }
 

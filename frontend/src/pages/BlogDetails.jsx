@@ -78,6 +78,15 @@ function BlogDetails() {
           )}
         </div>
 
+        {/* Tags */}
+        {blog.tags && blog.tags.length > 0 && (
+          <div className="bd-tags">
+            {blog.tags.map((tag) => (
+              <span key={tag} className="bd-tag">{tag}</span>
+            ))}
+          </div>
+        )}
+
         {/* Title when no hero image */}
         {!blog.image && (
           <h1 className="bd-title">{blog.title}</h1>

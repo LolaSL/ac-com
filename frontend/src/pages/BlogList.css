@@ -178,9 +178,10 @@
 
 .blog-content {
   width: 100%;
-  padding: 16px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  padding: 28px 20px 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.28) 70%, transparent 100%);
   color: white;
+  margin-top: auto;
 }
 
 .blog-title {
@@ -191,7 +192,28 @@
 
 .blog-description {
   font-size: 1em;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  max-width: 92%;
+  line-height: 1.5;
+}
+
+/* Tags on cards */
+.blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 12px;
+}
+
+.blog-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.1);
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  padding: 2px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
 }
 
 .blog-link {

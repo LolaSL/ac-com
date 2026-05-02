@@ -205,9 +205,27 @@
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+.home-hero__corner-tag {
+  position: absolute;
+  top: -0.2rem;
+  right: 0.4rem;
+  z-index: 3;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
 @media (min-width: 992px) {
   .home-hero__title { font-size: 3rem; }
   .home-hero__sub { font-size: 1.3rem; }
+  .home-hero__corner-tag { right: 2.5rem; }
 }
 
 .home-hero__sub {

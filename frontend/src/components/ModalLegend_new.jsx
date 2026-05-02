@@ -34,37 +34,47 @@ const ModalLegend = () => {
             {/* BUTTON LEGEND TAB */}
             <Tab eventKey="buttons" title="🔘 Button Legend">
               <div className="mt-3">
-                <h6 className="mb-2 text-primary">🖼️ PDF Mark Buttons</h6>
+                <h6 className="mb-2 text-primary">🖼️ PDF Designer Buttons</h6>
                 <ul className="list-unstyled fs-6">
-                  <li><strong>📤 Upload PDF:</strong> Select and upload floor plan PDF</li>
-                  <li><strong>✏️ Mark ON / 🖐️ Scroll:</strong> Toggle between notation mode and scroll mode. <em>Mark ON</em> — tap/click on the canvas to place AC unit rectangles. <em>Scroll</em> — freely pan and scroll the drawing without placing notations.</li>
-                  <li><strong>🔄 Rotate 0°/90°/180°/270°:</strong> Rotate PDF if uploaded incorrectly</li>
-                  <li><strong>➕ Add Rectangle:</strong> Place AC unit locations on drawing</li>
-                  <li><strong>💬 Add Comment:</strong> Label AC units (e.g., "ac-1", "ac-2")</li>
-                  <li><strong>🔄 Rotate Shape:</strong> Rotate selected rectangle</li>
-                  <li><strong>📌 Drag Shape:</strong> Move rectangle position</li>
-                  <li><strong>🗑️ Delete Shape:</strong> Right-click or tap & hold to remove</li>
-                  <li><strong>📊 Extract Rooms:</strong> Process drawing to identify rooms</li>
-                  <li><strong>🚀 Export (n):</strong> Send rooms to BTU Calculator</li>
-                  <li><strong>💾 Save PDF File:</strong> Download notated PDF</li>
-                  <li><strong>🧹 Clear:</strong> Remove all notations</li>
+                  <li><strong>📤 Upload PDF:</strong> Select and upload a floor plan PDF file (accepts .pdf only)</li>
+                  <li><strong>↶ Left / ↷ Right:</strong> Rotate the PDF drawing counter-clockwise or clockwise by 90° steps</li>
+                  <li><strong>Reset (°):</strong> Appears only when PDF is rotated — resets back to original 0° orientation</li>
+                  <li><strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF canvas (range: 100%–400%)</li>
+                  <li><strong>100% (zoom%):</strong> Shows current zoom level; click to reset zoom back to 100%</li>
+                  <li><strong>Click on canvas:</strong> Opens a modal to enter an AC unit label and places a rectangle annotation at that position</li>
+                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF is loaded. Tap to toggle — when active it turns blue and shows <em>"✅ Tap to place"</em>; only while active can you tap the canvas to place annotations. This prevents accidental placements while scrolling on touch screens.</li>
+                  <li><strong>Drag rectangle:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an annotation</li>
+                  <li><strong>Click rectangle (desktop):</strong> Rotates the rectangle 90° in place</li>
+                  <li><strong>🗑️ Delete rectangle:</strong> <em>Desktop:</em> right-click the rectangle. <em>Mobile:</em> double-tap the rectangle (two taps within ~700 ms) or press and hold for ~800 ms</li>
+                  <li><strong>Export to BTU (n rooms):</strong> Sends all extracted rooms to the BTU Calculator; disabled when no rooms are available</li>
+                  <li><strong>Save:</strong> Saves the PDF with annotations to the backend (shows "Saving..." while in progress)</li>
+                  <li><strong>Clear:</strong> Removes all annotations, resets the canvas, and clears all session data</li>
+                </ul>
+
+                <h6 className="mb-2 mt-3 text-primary">📋 Room Table Controls</h6>
+                <ul className="list-unstyled fs-6">
+                  <li><strong>Filter by room type:</strong> Text input to filter the room table by room name</li>
+                  <li><strong>Sort dropdown:</strong> Sort table by Room Type, Width, Height, Area (sqft), or Area (sqm)</li>
+                  <li><strong>Sort ASC/DESC:</strong> Toggle sort direction for the selected column</li>
+                  <li><strong>Excel icon:</strong> Export the current filtered room table as a styled .xlsx file</li>
+                  <li><strong>+ Add Room:</strong> Manually add a new room row to the table for a given file</li>
+                  <li><strong>✏️ Edit / ✔ Save / ✖ Cancel:</strong> Inline edit controls for each room row</li>
+                  <li><strong>↑ Move Up / ↓ Move Down:</strong> Reorder room rows within the table</li>
+                  <li><strong>🗑️ Delete row:</strong> Remove a room entry from the table</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">📐 BTU Calculator Buttons</h6>
                 <ul className="list-unstyled fs-6">
-                  <li><strong>⚙️ Settings:</strong> Adjust calculation parameters</li>
-                  <li><strong>🧮 Calculate BTU:</strong> Run BTU calculations</li>
-                  <li><strong>➕ Add to Cart:</strong> Save equipment to shopping cart</li>
-                  <li><strong>📈 Calculate ROI:</strong> Analyze cost savings</li>
-                  <li><strong>🖨️ Print/Export:</strong> Generate reports</li>
-                  <li><strong>🔄 Reset:</strong> Clear all inputs</li>
+                  <li><strong>Calculate BTU:</strong> Runs the VRF BTU calculation for all rooms, saves results to the store, and navigates to the Recommendations page</li>
+                  <li><strong>Clear:</strong> Resets all rooms, parameters, and environmental options back to defaults</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">🎯 Interaction Notes</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li><strong>Single Flat:</strong> Standard workflow - notate one flat, calculate BTU</li>
-                  <li><strong>Multi-Flat:</strong> Label AC units with numbers (ac-1, ac-2), rename rooms with flat numbers, system auto-detects separate units</li>
+                  <li><strong>Single Flat:</strong> Standard workflow — upload PDF, annotate AC locations, export rooms, calculate BTU</li>
+                  <li><strong>Multi-Flat:</strong> Label AC units with flat-specific numbers (ac-1.1, ac-2.1), rename rooms with flat numbers, system auto-detects separate units</li>
                   <li><strong>VRF System:</strong> All calculations use VRF technology with chain topology refrigerant connections</li>
+                  <li><strong>Mobile:</strong> Pinch two fingers on the canvas to zoom in/out on small screens</li>
                 </ul>
               </div>
             </Tab>
@@ -74,33 +84,44 @@ const ModalLegend = () => {
               <div className="mt-3">
                 <h6 className="mb-2 text-primary">📌 Step 1: Upload PDF</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Supported: High-resolution PDF files (.pdf)</li>
+                  <li>Supported: PDF files only (.pdf)</li>
                   <li>
-                    PDFs should be flat/apartment drawings without modifications
+                    PDFs should be floor plan drawings of flats or apartments
                   </li>
-                  <li>Works best with floor plans showing room layouts</li>
+                  <li>Works best with clear floor plans showing room labels and dimensions</li>
+                  <li>On upload the system automatically extracts and classifies rooms via OCR</li>
                 </ul>
-<h6 className="mb-2 mt-3 text-primary">
-                  ✅ Step 2: Extract Room Data
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    Review the classified room data table below the canvas
-                  </li>
-                  <li>Edit room names, sizes if needed</li>
-                  <li>
-                    For multi-flat: name room (e.g., "Kitchen ", "LivingRoom "  and etc.)
-                  </li>
-                  <li>Delete duplicate or unwanted room entries</li>
-                </ul>
+
                 <h6 className="mb-2 mt-3 text-primary">
-                  🔄 Step 3: Rotate PDF Drawing (if needed)
+                  🔄 Step 2: Rotate PDF Drawing (if needed)
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>Rotation Buttons:</strong> Dedicated to rotate the
-                    uploaded PDF drawing (0°, 90°, 180°, 270°) before
-                    notations if PDF was uploaded with incorrect position
+                    <strong>↶ Left:</strong> Rotate PDF counter-clockwise by 90°
+                  </li>
+                  <li>
+                    <strong>↷ Right:</strong> Rotate PDF clockwise by 90°
+                  </li>
+                  <li>
+                    <strong>Reset (°):</strong> Appears when PDF is not at 0° — click to restore original orientation
+                  </li>
+                </ul>
+
+                <h6 className="mb-2 mt-3 text-primary">
+                  🔍 Step 3: Zoom the Canvas (if needed)
+                </h6>
+                <ul className="list-disc ml-4 space-y-1 fs-6">
+                  <li>
+                    <strong>🔍 +:</strong> Zoom in up to 400%
+                  </li>
+                  <li>
+                    <strong>🔍 −:</strong> Zoom out (minimum 100%)
+                  </li>
+                  <li>
+                    <strong>Zoom %:</strong> Shows current zoom; click to reset to 100%
+                  </li>
+                  <li>
+                    <strong>Mobile pinch:</strong> Pinch two fingers on the canvas to zoom on small screens
                   </li>
                 </ul>
 
@@ -109,61 +130,64 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>➕ Add Rectangle:</strong> Click on empty area where
-                    AC unit should go
-                  </li>
-                    <li>
-                    <strong>💬 Add Comment for single Flat:</strong> Enter AC label (e.g.,
-                    "ac-1", "ac-2" for single flat VRF systems)
+                    <strong>Click on the canvas</strong> at the position where an AC unit or condenser should go — a modal will appear to enter the label
                   </li>
                   <li>
-                    <strong>💬 Add Comment for multi-Flat:</strong> Enter AC label (e.g.,
-                    "ac-1.1", "ac-1.2" for flat 1, "ac-2.1", "ac-2.2" for flat 2 and etc. in multi-flat VRF systems)
-                  </li>
-                     <li>
-                    <strong>💬 Add Comment for single Flat:</strong> Enter Condenser label (e.g.,
-                    "condenser-1" for single flat VRF systems)
-                  </li>
-                     <li>
-                    <strong>💬 Add Comment for multi-Flat:</strong> Enter Condenser label (e.g.,
-                    "condenser-1" for flat 1, "condenser-2" for flat 2 and etc. in multi-flat VRF systems)
+                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF is loaded. Tap it to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas to place annotations. Tap the button again to deactivate and return to scroll-only mode.
                   </li>
                   <li>
-                    Recommended: Place AC rectangle above the door in the
-                    drawing
+                    <strong>Single Flat AC label:</strong> Enter e.g. "ac-1", "ac-2"
                   </li>
-                    <li>
-                    Recommended: Place Condenser rectangle near flat/apartment in the
-                    drawing
+                  <li>
+                    <strong>Multi-Flat AC label:</strong> Enter e.g. "ac-1.1", "ac-1.2" for flat 1; "ac-2.1", "ac-2.2" for flat 2
+                  </li>
+                  <li>
+                    <strong>Single Flat Condenser label:</strong> Enter e.g. "condenser-1"
+                  </li>
+                  <li>
+                    <strong>Multi-Flat Condenser label:</strong> Enter e.g. "condenser-1" for flat 1, "condenser-2" for flat 2
+                  </li>
+                  <li>
+                    Recommended: Place AC rectangle above the room door; place Condenser rectangle near the flat entrance
                   </li>
                 </ul>
+
                 <h6 className="mb-2 mt-3 text-primary">
                   🔧 Step 5: Edit Shapes
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>🔄 Rotate Rectangle:</strong> Click on the rectangle
+                    <strong>🔄 Rotate Rectangle:</strong> Click on an existing rectangle to rotate it 90°
                   </li>
                   <li>
-                    <strong>📌 Drag Rectangle:</strong> Click and drag (mouse)
-                    or touch and drag (mobile)
+                    <strong>📌 Drag Rectangle:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition
                   </li>
                   <li>
-                    <strong>🗑️ Delete Rectangle:</strong> Right-click (desktop)
-                    or tap & hold (mobile)
-                  </li>
-                  <li>
-                    <strong>🖱️ Pan Drawing:</strong> Arrow keys (← → ↑ ↓) to
-                    move view
+                    <strong>🗑️ Delete Rectangle:</strong> <em>Desktop:</em> right-click the rectangle. <em>Mobile:</em> double-tap (two quick taps on the same rectangle within ~700 ms) or press and hold for ~800 ms
                   </li>
                 </ul>
+
                 <h6 className="mb-2 mt-3 text-primary">
-                  🚀 Step 6: Export to BTU Calculator
+                  ✅ Step 6: Review & Edit Room Data
+                </h6>
+                <ul className="list-disc ml-4 space-y-1 fs-6">
+                  <li>The room data table below the canvas is auto-filled by OCR on upload</li>
+                  <li>Use the <strong>Filter</strong> input to find rooms by type</li>
+                  <li>Use the <strong>Sort</strong> dropdown and ASC/DESC button to reorder the table</li>
+                  <li>Click <strong>✏️ Edit</strong> on any row to rename a room or change its area; click ✔ to save or ✖ to cancel</li>
+                  <li>Use <strong>↑ / ↓</strong> to reorder rows</li>
+                  <li>Use <strong>🗑️</strong> to delete unwanted or duplicate rooms</li>
+                  <li>Click <strong>+ Add Room</strong> to manually insert a new room entry</li>
+                  <li>Click the <strong>Excel icon</strong> to download the room table as an .xlsx file</li>
+                  <li>For multi-flat: rename rooms to distinguish flats (e.g., "Kitchen 1", "Kitchen 2")</li>
+                </ul>
+
+                <h6 className="mb-2 mt-3 text-primary">
+                  🚀 Step 7: Export to BTU Calculator
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Click <strong>"Export rooms to BTU Calculator(n)"</strong> button to send rooms to
-                    VRF BTU Calculator
+                    Click <strong>"Export to BTU (n rooms)"</strong> to send all filtered rooms to the BTU Calculator; the button is disabled when no valid rooms exist
                   </li>
                   <li>
                     Multi-flat properties are automatically detected and
@@ -173,16 +197,14 @@ const ModalLegend = () => {
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
-                  💾 Optional: Save PDF
+                  💾 Optional: Save & Clear
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Click <strong>"Save PDF File"</strong> to store notated
-                    drawing
+                    Click <strong>"Save"</strong> to save the annotated PDF and room data to the backend (button shows "Saving..." during operation)
                   </li>
                   <li>
-                    Click <strong>"Clear"</strong> to remove all notations and
-                    start over
+                    Click <strong>"Clear"</strong> to remove all annotations, reset the canvas, and clear all saved session data
                   </li>
                 </ul>
               </div>
@@ -193,11 +215,10 @@ const ModalLegend = () => {
               <div className="mt-3">
                 <h6 className="mb-2 text-primary">📊 Step 1: Review Rooms</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>View rooms imported from <strong>PDF Mark</strong></li>
-                  <li>Each room shows area in m²</li>
-                  <li>
-                    Multi-flat properties show rooms prefixed with flat number
-                  </li>
+                  <li>Rooms are auto-populated when you export from <strong>PDF Designer</strong></li>
+                  <li>Each room shows its name and area (m² or ft²)</li>
+                  <li>Multi-flat rooms arrive with a <em>"Flat N: "</em> prefix (e.g. "Flat 1: Kitchen")</li>
+                  <li>Condenser labels from the PDF Designer are filtered out automatically — only habitable rooms are kept</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
@@ -205,18 +226,16 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>Measurement System:</strong> Choose meters or feet
+                    <strong>Measurement System:</strong> Meters (m²) or Feet (ft²)
                   </li>
                   <li>
-                    <strong>Ceiling Height:</strong> Enter height in meters
-                    (default: 2.5m)
+                    <strong>Ceiling Height (m):</strong> Default 2.5 m
                   </li>
                   <li>
-                    <strong>Number of People:</strong> Set occupancy level
+                    <strong>Number of People:</strong> Occupancy level (each person adds ~600 BTU)
                   </li>
                   <li>
-                    <strong>Multi-flat Property:</strong> Enable if you have
-                    multiple separate units
+                    <strong>Multi-flat/Multi-unit property:</strong> Check this box to give each flat its own separate condenser. Auto-checked when multi-flat is detected from room-name prefixes or annotation labels
                   </li>
                 </ul>
 
@@ -225,95 +244,65 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>Outdoor Unit Location:</strong> Pitched roof, wall
-                    brackets, hard ground
+                    <strong>Outdoor Unit Location:</strong> Roof, Wall Brackets, or Hard Ground
                   </li>
                   <li>
-                    <strong>Insulation:</strong> Poor, average, or good
+                    <strong>Wall Type:</strong> Brick Veneer, Double Brick, or Foam Cladding
                   </li>
                   <li>
-                    <strong>Climate:</strong> Hot, average, or cold
+                    <strong>Insulation:</strong> Poor, Average, or Good
                   </li>
                   <li>
-                    <strong>Sun Exposure:</strong> Full sun, average, or shaded
+                    <strong>Sun Exposure:</strong> Full Sunlight, Average, or Heavily Shaded
                   </li>
                   <li>
-                    <strong>Window Type:</strong> Single, double, triple glazed
+                    <strong>Climate:</strong> Average Europe, Hot Middle East, or Cold Alaska
                   </li>
                   <li>
-                    <strong>Wall Type, Roof, Floor:</strong> Various options
-                    available
+                    <strong>Appliances:</strong> Oven, Television, Computer (adds heat load)
+                  </li>
+                  <li>
+                    <strong>Window Type:</strong> Single Glazed, Double Glazed, Triple Glazed, or Louvered
+                  </li>
+                  <li>
+                    <strong>Roof Type:</strong> Flat, Pitched, or Gable
+                  </li>
+                  <li>
+                    <strong>Floor:</strong> Marble, Timber, Concrete, or Carpeted
+                  </li>
+                  <li>
+                    <strong>Apartment Orientation:</strong> North, East, South, or West
+                  </li>
+                  <li>
+                    <strong>Output Unit:</strong> BTU, Watt, or kW
                   </li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
-                  🧮 Step 4: Calculate BTU
+                  🧮 Step 4: Calculate &amp; Navigate
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Click <strong>"Calculate BTU"</strong> button
+                    Click <strong>"Calculate BTU"</strong> — calculates BTU for each room, matches VRF products, saves results to the store, and navigates to the <strong>Recommendations</strong> page
                   </li>
-                  <li>System calculates required BTU for each room using VRF technology</li>
-                  <li>Matches optimal VRF AC units from product database</li>
-                  <li>For multi-flat: Sizes separate VRF condensers per flat</li>
-                </ul>
-
-                <h6 className="mb-2 mt-3 text-primary">
-                  📈 Step 5: Review Results
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
+                  <li>For multi-flat: sizes a separate VRF condenser for each flat</li>
                   <li>
-                    <strong>BTU Results Table:</strong> Shows each room with
-                    required BTU and matched product
-                  </li>
-                  <li>
-                    <strong>Condenser Sizing:</strong> Displays outdoor
-                    condenser(s) for your system
-                  </li>
-                  <li>
-                    <strong>Per-Flat Cooling Load:</strong> For multi-flat,
-                    shows separate totals per flat
-                  </li>
-                  <li>
-                    <strong>System Type:</strong> VRF (Variable Refrigerant Flow) - advanced technology for efficient cooling
+                    Click <strong>"Clear"</strong> to reset all rooms, parameters, and environmental options back to defaults
                   </li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
-                  💼 Step 6: Next Actions
+                  ⚡ Multi-Flat Auto-Detection
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>Add to Cart:</strong> Save equipment selections to
-                    shopping cart
+                    Multi-flat is detected automatically from <em>room-name prefixes</em> ("Flat 1: Kitchen", "Flat 2: Kitchen") or from <em>annotation labels</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)
                   </li>
-                      <li>
-                    <strong>View Recommendations:</strong> Recommend additional products like smart thermostats, air purifiers, etc.
-                  </li>
-                  <li>
-                    <strong>Calculate ROI:</strong> Analyze cost savings vs
-                    traditional HVAC
-                  </li>
-                  <li>
-                    <strong>Print/Export:</strong> Generate reports for
-                    reference
-                  </li>
-                </ul>
-
-                <h6 className="mb-2 mt-3 text-primary">
-                  ⚡ Multi-Flat Properties (VRF Systems)
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    System auto-detects 2+ flats from room duplicates or AC
-                   notations (ac-1, ac-2, etc.)
-                  </li>
+                  <li>Duplicate room names alone do <strong>not</strong> indicate multi-flat — use the explicit labels above</li>
                   <li>
                     Each flat gets <strong>separate VRF condenser sizing</strong> with chain topology
                   </li>
                   <li>Refrigerant lines connect in chain: Condenser → AC1 → AC2 → ... per flat</li>
-                  <li>Total cost includes all VRF equipment for all flats</li>
-                  <li>Per-flat cooling load shows individual VRF requirements</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">

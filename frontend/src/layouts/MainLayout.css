@@ -4,7 +4,7 @@
   flex: 1;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   padding: 0;
   margin: 0;
 }
@@ -27,7 +27,7 @@
   flex-grow: 1;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   padding: 0 !important;
   margin: 0 !important;
 }

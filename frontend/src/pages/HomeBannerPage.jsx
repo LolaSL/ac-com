@@ -8,7 +8,6 @@ import NewsletterSignup from "../components/NewsletterSignup";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import bannerVideo from "../assets/videos/banner-video.mp4";
 import "./HomeBannerPage.css";
 
 export default function HomeBannerPage() {
@@ -180,13 +179,14 @@ export default function HomeBannerPage() {
           playsInline
           poster="/images/hero.jpg"
         >
-          <source src={bannerVideo} type="video/mp4" />
+          <source src="/videos/banner1-video.mp4" type="video/mp4" />
         </video>
         <div className="home-hero__overlay" />
         <div className="home-hero__inner">
           <h1 className="home-hero__title">Welcome to AC-Commerce</h1>
           <p className="home-hero__sub">Smarter HVAC designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
+        <p className="home-hero__corner-tag">Cooling Solutions For Every Space</p>
       </div>
 
       {/* Content wrapper */}

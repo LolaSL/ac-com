@@ -13,15 +13,21 @@ userReviewsRouter.get(
     expressAsyncHandler(async (req, res) => {
         const userId = req.user._id;
 
-        // Seller reviews reference user by ObjectId
-        const sellers = await Seller.find({ 'reviews.user': userId })
+        // Seller reviews reference user by ObjectId; fall back to name for legacy/seeded reviews
+        const userName = req.user.name;
+        const sellers = await Seller.find({
+            $or: [
+                { 'reviews.user': userId },
+                { 'reviews.name': userName },
+            ],
+        })
             .select('name brand reviews')
             .lean();
 
         const sellerReviews = [];
         sellers.forEach((s) => {
             s.reviews
-                .filter((r) => r.user?.toString() === userId.toString() && !r.deleted)
+                .filter((r) => ((r.user?.toString() === userId.toString()) || r.name === userName) && !r.deleted)
                 .forEach((r) => {
                     sellerReviews.push({
                         sellerId: s._id,
@@ -36,7 +42,6 @@ userReviewsRouter.get(
         });
 
         // Product reviews: prefer matching by user ObjectId; fallback to name for legacy reviews
-        const userName = req.user.name;
         const products = await Product.find({
             $or: [
                 { 'reviews.user': userId },

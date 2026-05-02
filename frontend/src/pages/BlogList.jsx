@@ -108,6 +108,13 @@ function BlogList() {
                 <div className="blog-content">
                   <h2 className="blog-title">{blog.title}</h2>
                   <p className="blog-description">{blog.shortDescription}</p>
+                  {blog.tags && blog.tags.length > 0 && (
+                    <div className="blog-tags">
+                      {blog.tags.map((tag) => (
+                        <span key={tag} className="blog-tag">{tag}</span>
+                      ))}
+                    </div>
+                  )}
                   <Link to={`/blogs/${blog._id}`} className="blog-link">
                     Read More
                   </Link>

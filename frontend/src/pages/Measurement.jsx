@@ -37,6 +37,7 @@ const Measurement = () => {
   const [savedPdfs, setSavedPdfs] = useState([]);
   const [roomData, setRoomDataState] = useState([]);
   const [acAnnotations, setAcAnnotations] = useState([]);
+  const [annotatorActive, setAnnotatorActive] = useState(false);
   const [error, setError] = useState(null);
   const [showStoredCalculation, setShowStoredCalculation] = useState(false);
   const btuCalculatorRef = useRef(null);
@@ -72,11 +73,12 @@ const Measurement = () => {
         }, 500);
       }
     }
-  }, [storedBtuProject]);
+  }, [location.state?.fromBtu, storedBtuProject]);
 
   // Wrapper for setRoomData that also accepts annotations
   const setRoomData = (rooms, annotations = []) => {
     setRoomDataState(rooms);
+    setAnnotatorActive(true); // File has been loaded — keep BTU Calculator visible
     if (annotations && annotations.length > 0) {
       setAcAnnotations(annotations);
     }
@@ -186,7 +188,7 @@ const Measurement = () => {
         </AnnotatorErrorBoundary>
 
         {/* Show BTU Calculator if either fresh annotation data OR stored calculation exists */}
-        {((roomData && roomData.length > 0) || (showStoredCalculation && storedBtuProject)) && (
+        {(annotatorActive || (roomData && roomData.length > 0) || (showStoredCalculation && storedBtuProject)) && (
           <div ref={btuCalculatorRef}>
             {showStoredCalculation && storedBtuProject && !(roomData && roomData.length > 0) && (
               <div style={{

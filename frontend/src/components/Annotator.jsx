@@ -403,14 +403,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
 
   const apartmentTypes = getApartmentTypes(text);
   const apartmentType = apartmentTypes[0] || null;
-  const cleanedApartmentTypes = apartmentTypes
-    .map((type) => {
-      const match = type.match(
-        /\b(\d+\s+Bedroom\s+Apartment\s*-\s*Model\s*[A-Z\d]+|Studio\s+Apartment|Loft\s+Apartment)\b/i
-      );
-      return match ? match[1].trim() : null;
-    })
-    .filter(Boolean);
+
 
   const lines = splitMultiRoomLines(
     text.split("\n").map(cleanTextLine).filter(Boolean)
@@ -770,7 +763,7 @@ const Annotator = ({
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
-  const [isSaved, setIsSaved] = useState(false);
+  const [, setIsSaved] = useState(false);
   const canvasRef = useRef(null);
   const pdfDataRef = useRef(null); // Store PDF data for responsive re-rendering
   const [file, setFile] = useState(null);
@@ -822,6 +815,10 @@ const Annotator = ({
   // Default to annotation mode (true) so users can create rectangles immediately
   // Track last rectangle tap for double-tap deletion on mobile
   const lastRectTapRef = useRef({});
+
+  // Mobile stable annotation bar (small screens only — replaces popup modal for touch)
+  const [, setMobileAnnotationLabel] = useState('');
+  const [mobileAnnotationActive, setMobileAnnotationActive] = useState(false);
 
   // ── sessionStorage persistence (fixes iOS Safari losing state on navigation) ──
   // Primary path: store annotation _id after save, re-fetch from backend on restore (no quota issues).
@@ -990,6 +987,8 @@ const Annotator = ({
   // Track pinch zoom on small screens
   const pinchStartDistanceRef = useRef(0);
   const pinchStartZoomRef = useRef(1);
+  // Track in-flight PDF.js render task so we can cancel before starting a new one
+  const renderTaskRef = useRef(null);
 
   // Cleanup long-press timeout on unmount
   useEffect(() => {
@@ -1107,6 +1106,9 @@ const Annotator = ({
           setPreviewUrl(URL.createObjectURL(file));
           setFile(file);
           previewSet = true;
+          // Signal parent that a file is loaded so BTU Calculator becomes visible
+          // even before OCR finishes (or if OCR finds no rooms)
+          if (setRoomData) setRoomData([], []);
         }
       } catch (err) {
         console.error("Error processing file:", file.name, err);
@@ -1388,6 +1390,19 @@ const Annotator = ({
     setFilteredRoomsTrigger((prev) => prev + 1);
   };
 
+  // Returns [x1,y1, x2,y2] connecting the nearest edges of the rect and comment box.
+  // This keeps the line short instead of crossing through both shapes.
+  const getLinePoints = (rectX, rectY, rectW, rectH, commentX, commentY) => {
+    const charWidth = 6;
+    const textPadding = 6;
+    // comment box height is 16, estimated from rendering
+    const startX = commentX > rectX ? rectX + rectW : rectX;
+    const startY = rectY + rectH / 2;
+    const endX   = commentX > rectX ? commentX : commentX + Math.max(48, charWidth + textPadding);
+    const endY   = commentY + 8; // mid-height of comment box (16/2)
+    return [startX, startY, endX, endY];
+  };
+
   // Confirm the AC unit annotation after modal input
   // Get responsive rectangle dimensions based on screen width
   const getResponsiveRectSize = () => {
@@ -1400,8 +1415,27 @@ const Annotator = ({
     return { width: 54, height: 18 };
   };
 
+  // Returns {x, y} for the comment box next to a rect, clamped to canvas bounds.
+  const computeCommentPos = useCallback((rectX, rectY, rectW, rectH, commentText) => {
+    const canvasWidth = pdfSize.width;
+    const canvasHeight = pdfSize.height;
+    const charWidth = 6;
+    const textPadding = 6;
+    const boxWidth = Math.max(48, commentText.length * charWidth + textPadding);
+    const boxHeight = 16;
+    // +2 so comment box centre aligns with rect centre (box renders at y-10, h=16, centre=y-2)
+    let cx = rectX + rectW + 2;
+    let cy = rectY + rectH / 2 + 2;
+    if (canvasWidth > 0 && cx + boxWidth > canvasWidth) cx = rectX - boxWidth - 2;
+    if (cx < 0) cx = 2;
+    if (canvasHeight > 0) {
+      if (cy + boxHeight > canvasHeight) cy = canvasHeight - boxHeight - 2;
+      if (cy < 0) cy = 2;
+    }
+    return { x: cx, y: cy };
+  }, [pdfSize]);
+
   const confirmAcUnitAnnotation = useCallback((commentText, position) => {
-    console.log('confirmAcUnitAnnotation called', { commentText, position });
     
     if (!commentText) {
       console.log('confirmAcUnitAnnotation: no comment text, returning');
@@ -1449,12 +1483,17 @@ const Annotator = ({
     };
     setRectangles((prevRects) => [...prevRects, newRect]);
     const newCommentId = `comment-${Date.now()}`;
+
+    const commentPos = computeCommentPos(
+      newRect.x, newRect.y, newRect.width, newRect.height, commentText
+    );
+
     const newComment = {
       id: newCommentId,
       rectId: newRectId,
       text: commentText,
-      x: position.x + rectSize.width + 2,
-      y: position.y + rectSize.height / 2 - 6,
+      x: commentPos.x,
+      y: commentPos.y,
       fill: 'rgba(226, 218, 228, 0.3)',
     };
     setComments((prevComments) => [...prevComments, newComment]);
@@ -1462,47 +1501,29 @@ const Annotator = ({
       id: `line-${Date.now()}`,
       rectId: newRectId,
       commentId: newCommentId,
-      points: [
-        newRect.x + newRect.width / 2,
-        newRect.y + newRect.height / 2,
-        newComment.x + 3,
-        newComment.y + 6,
-      ],
+      points: getLinePoints(
+        newRect.x, newRect.y, newRect.width, newRect.height,
+        newComment.x, newComment.y
+      ),
       stroke: 'black',
       strokeWidth: 1,
     };
     setLines((prevLines) => [...prevLines, newLine]);
-  }, [comments, rectangles]);
+  }, [comments, rectangles, computeCommentPos]);
 
   const handleStageClick = (event) => {
-    console.log('handleStageClick fired', { isRotating, isDragging: isDraggingRef.current, eventTarget: event.target?.constructor?.name });    // Don't show modal during drag or rotation
-    if (isDraggingRef.current || isRotating) {
-      console.log('handleStageClick: currently dragging or rotating, returning');
-      return;
-    }
+    // Small screens use handleStageTouchEnd (onTap) exclusively — skip here
+    if (window.innerWidth < 768) return;
+    // Don't show modal during drag or rotation
+    if (isDraggingRef.current || isRotating) return;
     if (event.target === event.target.getStage()) {
-      console.log('handleStageClick: Getting pointer position...');
       let pointerPosition = stageRef.current.getPointerPosition();
-      console.log('Pointer position:', pointerPosition);
       if (!pointerPosition) return;
 
-      // On small screens with horizontal scrolling, adjust for scroll offset
-      const containerMain = document.querySelector('.container-main');
-      if (containerMain && window.innerWidth < 768) {
-        pointerPosition = {
-          x: pointerPosition.x + containerMain.scrollLeft,
-          y: pointerPosition.y + containerMain.scrollTop,
-        };
-        console.log('Adjusted pointer position (with scroll):', pointerPosition);
-      }
-
       // Use mobile-friendly modal instead of prompt()
-      console.log('handleStageClick: Opening modal at position:', pointerPosition);
       setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
       setAcUnitInput('');
       setShowAcUnitModal(true);
-    } else {
-      console.log('handleStageClick: Condition not met', { isStageClick: event.target === event.target.getStage() });
     }
   };
 
@@ -1566,43 +1587,27 @@ const Annotator = ({
 
   // Handle touch tap on stage for placing annotations (mobile equivalent of click)
   const handleStageTouchEnd = (event) => {
-    console.log('handleStageTouchEnd fired', { isDragging: isDraggingRef.current, 
-      isRotating,
-      targetName: event.target?.name(),
-      targetIsStage: event.target === event.target.getStage()
-    });    
-    // Don't show modal during drag or rotation
-    if (isDraggingRef.current || isRotating) {
-      console.log('handleStageTouchEnd: currently dragging or rotating, returning');
-      return;
+    // Don't place during drag or rotation
+    if (isDraggingRef.current || isRotating) return;
+
+    // Only act on blank stage area (not on existing shapes)
+    if (event.target.name && event.target.name() === 'rect') return;
+
+    // ── Small screens: gate behind Place mode toggle to prevent accidental triggers ──
+    if (window.innerWidth < 768) {
+      if (!mobileAnnotationActive) return; // mode is off — ignore accidental taps
     }
-    
-    // Only act on taps on blank stage area (not on shapes/rects)
-    // Check if tap was on stage or on a rect
-    if (event.target.name && event.target.name() === 'rect') {
-      console.log('handleStageTouchEnd: tap was on a rect, not blank stage');
-      return;
-    }
-    
+
+    // Show the label-entry modal (same flow as desktop click)
     let pointerPosition = stageRef.current.getPointerPosition();
-    console.log('handleStageTouchEnd: pointer position:', pointerPosition);
-    
-    if (!pointerPosition) {
-      console.log('handleStageTouchEnd: no pointer position, returning');
-      return;
-    }
-    
-    // On small screens with horizontal scrolling, adjust for scroll offset
+    if (!pointerPosition) return;
     const containerMain = document.querySelector('.container-main');
     if (containerMain && window.innerWidth < 768) {
       pointerPosition = {
         x: pointerPosition.x + containerMain.scrollLeft,
         y: pointerPosition.y + containerMain.scrollTop,
       };
-      console.log('handleStageTouchEnd: adjusted position (with scroll):', pointerPosition);
     }
-
-    console.log('handleStageTouchEnd: opening modal at position:', pointerPosition);
     setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
     setAcUnitInput('');
     setShowAcUnitModal(true);
@@ -1615,18 +1620,37 @@ const Annotator = ({
   };
 
   const handleCanvasEvent = (e) => {
-    if (window.innerWidth > 268) {
-      handleStageClick(e);
-    }
+    if (window.innerWidth < 768) return; // small screens handled by handleStageTouchEnd
+    handleStageClick(e);
   };
 
   const handleDragMove = (e) => {
     isDraggingRef.current = true;
     const draggedNode = e.target;
-    const layer = draggedNode.getLayer();
-    if (layer) {
-      layer.batchDraw();
+    const draggedId = draggedNode.id();
+
+    // Keep comment tracking the rect in real time (prevents visual lag)
+    const isRectDrag = rectangles.some((r) => idsMatch(r.id, draggedId));
+    if (isRectDrag) {
+      const linkedComment = comments.find((c) => idsMatch(c.rectId, draggedId));
+      if (linkedComment) {
+        const rw = draggedNode.width();
+        const rh = draggedNode.height();
+        const pos = computeCommentPos(draggedNode.x(), draggedNode.y(), rw, rh, linkedComment.text);
+        setComments((prev) =>
+          prev.map((c) => idsMatch(c.rectId, draggedId) ? { ...c, x: pos.x, y: pos.y } : c)
+        );
+        setLines((prev) =>
+          prev.map((l) => {
+            if (!idsMatch(l.rectId, draggedId)) return l;
+            return { ...l, points: getLinePoints(draggedNode.x(), draggedNode.y(), rw, rh, pos.x, pos.y) };
+          })
+        );
+      }
     }
+
+    const layer = draggedNode.getLayer();
+    if (layer) layer.batchDraw();
   };
 
   const handleDragEnd = (e) => {
@@ -1634,65 +1658,78 @@ const Annotator = ({
     const draggedNode = e.target;
     const draggedId = draggedNode.id();
 
-    setRectangles((prevRects) =>
-      prevRects.map((rect) =>
-        idsMatch(rect.id, draggedId)
-          ? { ...rect, x: draggedNode.x(), y: draggedNode.y() }
-          : rect
-      )
-    );
+    // Check if it's a rect being dragged (has a matching rectangle) or a comment text
+    const isRectDrag = rectangles.some((r) => idsMatch(r.id, draggedId));
 
-    setComments((prevComments) =>
-      prevComments.map((comment) => {
-        if (idsMatch(comment.rectId, draggedId)) {
-          const rectSize = getResponsiveRectSize();
-          const newCommentPos = {
-            x: draggedNode.x() + rectSize.width + 2,
-            y: draggedNode.y() + rectSize.height / 2 - 6,
+    if (isRectDrag) {
+      const rw = draggedNode.width();
+      const rh = draggedNode.height();
+      const newRectX = draggedNode.x();
+      const newRectY = draggedNode.y();
+
+      const linkedComment = comments.find((c) => idsMatch(c.rectId, draggedId));
+      let newCommentX = newRectX;
+      let newCommentY = newRectY;
+
+      if (linkedComment) {
+        const pos = computeCommentPos(newRectX, newRectY, rw, rh, linkedComment.text);
+        newCommentX = pos.x;
+        newCommentY = pos.y;
+      }
+
+      setRectangles((prevRects) =>
+        prevRects.map((rect) =>
+          idsMatch(rect.id, draggedId)
+            ? { ...rect, x: newRectX, y: newRectY }
+            : rect
+        )
+      );
+
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          idsMatch(comment.rectId, draggedId)
+            ? { ...comment, x: newCommentX, y: newCommentY }
+            : comment
+        )
+      );
+
+      setLines((prevLines) =>
+        prevLines.map((line) => {
+          if (!idsMatch(line.rectId, draggedId)) return line;
+          return {
+            ...line,
+            points: getLinePoints(newRectX, newRectY, rw, rh, newCommentX, newCommentY),
           };
-          return { ...comment, ...newCommentPos };
-        }
-        return comment;
-      })
-    );
+        })
+      );
+    } else {
+      // Comment text box was dragged — update only the line endpoint
+      const newCommentX = draggedNode.x();
+      const newCommentY = draggedNode.y();
 
-    setLines((prevLines) =>
-      prevLines.map((line) => {
-        const isRect = idsMatch(line.rectId, draggedId);
-        const isComment = idsMatch(line.commentId, draggedId);
-        let rect = null;
-        let comment = null;
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          idsMatch(comment.id, draggedId)
+            ? { ...comment, x: newCommentX, y: newCommentY }
+            : comment
+        )
+      );
 
-        if (isRect || isComment) {
-          rect = isRect
-            ? {
-                x: draggedNode.x(),
-                y: draggedNode.y(),
-                width: draggedNode.width(),
-                height: draggedNode.height(),
-              }
-            : rectangles.find((r) => idsMatch(r.id, line.rectId));
-
-          comment = isComment
-            ? { x: draggedNode.x(), y: draggedNode.y() }
-            : comments.find((c) => idsMatch(c.rectId, draggedId));
-
-          if (rect && comment) {
-            return {
-              ...line,
-              points: [
-                rect.x + rect.width / 2,
-                rect.y + rect.height / 2,
-                comment.x + 3,
-                comment.y + 6,
-              ],
-            };
-          }
-        }
-
-        return line;
-      })
-    );
+      setLines((prevLines) =>
+        prevLines.map((line) => {
+          if (!idsMatch(line.commentId, draggedId)) return line;
+          const rect = rectangles.find((r) => idsMatch(r.id, line.rectId));
+          if (!rect) return line;
+          return {
+            ...line,
+            points: getLinePoints(
+              rect.x, rect.y, rect.width, rect.height,
+              newCommentX, newCommentY
+            ),
+          };
+        })
+      );
+    }
   };
 
   const rotateRectangle = useCallback((rectId) => {
@@ -1781,7 +1818,22 @@ const Annotator = ({
         viewport: renderViewport,
       };
 
-      await page.render(renderContext).promise;
+      // Cancel any previous render task before starting a new one
+      if (renderTaskRef.current) {
+        renderTaskRef.current.cancel();
+        renderTaskRef.current = null;
+      }
+      const task = page.render(renderContext);
+      renderTaskRef.current = task;
+      try {
+        await task.promise;
+      } catch (err) {
+        // RenderingCancelledException is expected when we cancel — ignore it
+        if (err?.name !== 'RenderingCancelledException') throw err;
+        return;
+      } finally {
+        if (renderTaskRef.current === task) renderTaskRef.current = null;
+      }
 
       // Scale for drawing on canvas (without zoom - zoom applied visually)
       const scaleX = scale;
@@ -1865,7 +1917,9 @@ const Annotator = ({
     iconPositions,
     previewUrl,
     renderPDFOnCanvas,
-    pdfZoom,
+    // pdfZoom intentionally omitted: zoom is applied via CSS transform only,
+    // re-rendering the PDF on every pinch event causes the
+    // "multiple render() operations" canvas error.
   ]);
 
   // Handle responsive PDF resizing when window is resized
@@ -2434,6 +2488,8 @@ const Annotator = ({
     setPdfZoom(1);
     pdfDataRef.current = null;
     setError(null);
+    setMobileAnnotationLabel('');
+    setMobileAnnotationActive(false);
     // Clear persisted session state so restored data doesn't reappear
     ['annotator_annotation_id', 'annotator_pdf_data', 'annotator_pdf_name',
      'annotator_rectangles', 'annotator_comments', 'annotator_lines',
@@ -2991,6 +3047,24 @@ const Annotator = ({
         )}
       </ButtonToolbar>
       {error && <p className="error-message mt-4">{error}</p>}
+
+      {/* ── Mobile placement toggle (small screens only) ── */}
+      {file && file.type === 'application/pdf' && (
+        <div className="mobile-annotation-bar d-flex d-md-none flex-column align-items-center gap-1 mb-2 px-1 text-center">
+          <span className="text-muted small">
+            {mobileAnnotationActive
+              ? 'Tap canvas to place an AC unit or condenser'
+              : 'Enable place mode, then tap canvas to make notations'}
+          </span>
+          <button
+            className={`btn btn-sm ${mobileAnnotationActive ? 'btn-primary' : 'btn-outline-secondary'}`}
+            onClick={() => setMobileAnnotationActive(prev => !prev)}
+          >
+            {mobileAnnotationActive ? '✅ Tap to place' : '📌 Place mode'}
+          </button>
+        </div>
+      )}
+
       {previewUrl && (
         <div>
           {previewUrl && (
@@ -3149,7 +3223,7 @@ const Annotator = ({
                         <Rect
                           rectId={comment.rectId}
                           x={comment.x}
-                          y={comment.y - 10}
+                          y={comment.y - 14}
                           width={boxWidth}
                           height={16}
                           fill="rgba(252, 252, 243, 0.3)"
@@ -3170,7 +3244,7 @@ const Annotator = ({
                           id={comment.id}
                           rectId={comment.rectId}
                           x={comment.x + 2}
-                          y={comment.y - 9}
+                          y={comment.y - 13}
                           text={comment.text}
                           fontSize={10}
                           fontFamily="Arial"

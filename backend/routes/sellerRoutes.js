@@ -288,7 +288,7 @@ sellerRouter.get('/:id', expressAsyncHandler(async (req, res) => {
     companyLink: seller.companyLink,
     rating: actualRating,
     numReviews: actualNumReviews,
-    reviews: seller.reviews,
+    reviews: seller.reviews.filter((r) => !r.deleted),
     referralCode: seller.referralCode,
     outboundClicks: seller.outboundClicks || 0,
     stats: {

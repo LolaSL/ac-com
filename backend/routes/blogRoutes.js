@@ -49,19 +49,44 @@ blogRouter.get(
 );
 
 
+blogRouter.get('/admin/blogs-list', async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    try {
+        const totalBlogs = await Blog.countDocuments();
+        const blogs = await Blog.find().skip(skip).limit(limit);
+
+        res.json({
+            totalBlogs,
+            blogs,
+            currentPage: page,
+            totalPages: Math.ceil(totalBlogs / limit),
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+});
+
+
 blogRouter.get(
     '/:id',
-    validateObjectId,
     expressAsyncHandler(async (req, res) => {
-        try {
-            const blog = await Blog.findById(req.params.id);
-            if (!blog) {
-                return res.status(404).json({ message: 'Blog not found' });
-            }
-            res.json(blog);
-        } catch (err) {
-            res.status(500).json({ message: err.message });
+        const { id } = req.params;
+        let blog = null;
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            blog = await Blog.findById(id);
         }
+        // Fallback: look up by slug
+        if (!blog) {
+            blog = await Blog.findOne({ slug: id });
+        }
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog not found' });
+        }
+        res.json(blog);
     })
 );
 
@@ -77,6 +102,7 @@ blogRouter.post(
             content: 'sample content',
             shortDescription: 'sample description',
             image: '/images/p1.jpg',
+            tags: [],
         });
         const blog = await newBlog.save();
         res.send({ message: 'Blog Created', blog });
@@ -97,6 +123,7 @@ blogRouter.put(
             blog.content = req.body.content;
             blog.shortDescription = req.body.shortDescription;
             blog.image = req.body.image;
+            blog.tags = req.body.tags || [];
             await blog.save();
             res.send({ message: 'Blog Updated' });
         } else {
@@ -122,26 +149,5 @@ blogRouter.delete(
     })
 );
 
-
-blogRouter.get('/admin/blogs-list', async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const skip = (page - 1) * limit;
-
-    try {
-        const totalBlogs = await Blog.countDocuments();
-        const blogs = await Blog.find().skip(skip).limit(limit);
-
-        res.json({
-            totalBlogs,
-            blogs,
-            currentPage: page,
-            totalPages: Math.ceil(totalBlogs / limit),
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server Error');
-    }
-});
 
 export default blogRouter;
