@@ -3,7 +3,7 @@ import multer from "multer";
 import EngineerAnnotationModel from "../models/engineerAnnotationModel.js";
 import AnnotationModel from "../models/annotationModel.js";
 import { isAuth } from "../utils.js";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
 import expressAsyncHandler from "express-async-handler";
 
 const router = express.Router();
@@ -415,9 +415,11 @@ router.get(
         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-        // Draw annotations on PDF
+        // All annotation content (rectangles, HVAC, zones, lines, comments) is already
+        // baked into the 2-page PDF as canvas PNG images by the engineer save process.
+        // No re-drawing needed here — only the watermark and stamp are added below.
         const ann = annotation.annotations;
-        if (ann) {
+        if (false) { // eslint-disable-line no-constant-condition
             const { width, height } = firstPage.getSize();
 
             // Rectangles are already baked into the PDF canvas image (with correct rotation).
@@ -754,6 +756,9 @@ router.get(
             }
         }
 
+        // Second page (ductless) already exists in the stored 2-page PDF
+        const secondPage = pdfDoc.getPages()[1] || null;
+
         // Add watermark with engineer info
         const formattedDate = annotation.createdAt
             ? new Date(annotation.createdAt).toLocaleString()
@@ -764,12 +769,15 @@ router.get(
         const userEmail = annotation.userId?.email || "No User Email";
         const watermarkText = `AC-Commerce | User: ${userName} (${userEmail}) | Engineer: ${engineerName} (${engineerEmail}) | Reviewed: ${formattedDate}`;
 
-        pages.forEach((page) => {
+        pdfDoc.getPages().forEach((page) => {
             const fontSize = 9;
             const { width, height } = page.getSize();
             const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
-            const xPos = (width - textWidth) / 2;
-            const yPos = height / 2 - fontSize / 2;
+            // Diagonal watermark ~30° — matches the canvas rotate(-Math.PI/6) in the preview
+            const angle = 30;
+            const rad = angle * Math.PI / 180;
+            const xPos = width / 2 - (textWidth / 2) * Math.cos(rad);
+            const yPos = height / 2 - (textWidth / 2) * Math.sin(rad);
             page.drawText(watermarkText, {
                 x: xPos,
                 y: yPos,
@@ -777,21 +785,59 @@ router.get(
                 font: helveticaFont,
                 opacity: 0.28,
                 color: rgb(0.4, 0.4, 0.4),
+                rotate: degrees(angle),
             });
         });
 
-        // Add circular seal-style stamp (clean/minimal)
+        // Add circular seal-style stamp (clean/minimal) — color driven by annotation status
         const { width, height } = firstPage.getSize();
         const sealRadius = 58;
         const sealX = Math.max(sealRadius + 16, width - sealRadius - 26);
         const sealY = Math.max(sealRadius + 16, height - sealRadius - 30);
+
+        const stampStatus = (annotation.status || 'reviewed').toLowerCase();
+        const stampStyles = {
+            approved: {
+                label:       'APPROVED',
+                ringColor:   rgb(0.08, 0.51, 0.20),   // green
+                fillColor:   rgb(0.90, 0.98, 0.92),   // light green tint
+                labelColor:  rgb(0.06, 0.40, 0.16),
+                subColor:    rgb(0.08, 0.45, 0.18),
+                dateColor:   rgb(0.10, 0.40, 0.18),
+            },
+            reviewed: {
+                label:       'REVIEWED',
+                ringColor:   rgb(0.12, 0.35, 0.78),   // blue
+                fillColor:   rgb(0.90, 0.95, 1.00),
+                labelColor:  rgb(0.10, 0.30, 0.75),
+                subColor:    rgb(0.16, 0.34, 0.68),
+                dateColor:   rgb(0.18, 0.33, 0.62),
+            },
+            rejected: {
+                label:       'REJECTED',
+                ringColor:   rgb(0.78, 0.12, 0.12),   // red
+                fillColor:   rgb(1.00, 0.92, 0.92),
+                labelColor:  rgb(0.70, 0.08, 0.08),
+                subColor:    rgb(0.72, 0.12, 0.12),
+                dateColor:   rgb(0.68, 0.14, 0.14),
+            },
+            pending: {
+                label:       'PENDING',
+                ringColor:   rgb(0.80, 0.45, 0.00),   // orange
+                fillColor:   rgb(1.00, 0.96, 0.88),
+                labelColor:  rgb(0.70, 0.38, 0.00),
+                subColor:    rgb(0.72, 0.40, 0.00),
+                dateColor:   rgb(0.68, 0.38, 0.00),
+            },
+        };
+        const sc = stampStyles[stampStatus] || stampStyles.reviewed;
 
         // Outer ring
         firstPage.drawCircle({
             x: sealX,
             y: sealY,
             size: sealRadius,
-            borderColor: rgb(0.12, 0.35, 0.78),
+            borderColor: sc.ringColor,
             borderWidth: 3,
             opacity: 0.5,
         });
@@ -801,14 +847,14 @@ router.get(
             x: sealX,
             y: sealY,
             size: sealRadius - 8,
-            color: rgb(0.9, 0.95, 1),
+            color: sc.fillColor,
             opacity: 0.28,
-            borderColor: rgb(0.12, 0.35, 0.78),
+            borderColor: sc.ringColor,
             borderWidth: 1,
             borderOpacity: 0.35,
         });
 
-        const approvedText = "APPROVED";
+        const approvedText = sc.label;
         const approvedSize = 14;
         const approvedWidth = helveticaBoldFont.widthOfTextAtSize(approvedText, approvedSize);
 
@@ -817,7 +863,7 @@ router.get(
             y: sealY + 14,
             size: approvedSize,
             font: helveticaBoldFont,
-            color: rgb(0.1, 0.3, 0.75),
+            color: sc.labelColor,
             opacity: 0.66,
         });
 
@@ -830,7 +876,7 @@ router.get(
             y: sealY + 1,
             size: reviewSize,
             font: helveticaBoldFont,
-            color: rgb(0.16, 0.34, 0.68),
+            color: sc.subColor,
             opacity: 0.62,
         });
 
@@ -843,9 +889,55 @@ router.get(
             y: sealY - 12,
             size: dateSize,
             font: helveticaFont,
-            color: rgb(0.18, 0.33, 0.62),
+            color: sc.dateColor,
             opacity: 0.56,
         });
+
+        // Draw identical seal stamp on second page (ductless) if it exists
+        if (secondPage) {
+            secondPage.drawCircle({
+                x: sealX,
+                y: sealY,
+                size: sealRadius,
+                borderColor: sc.ringColor,
+                borderWidth: 3,
+                opacity: 0.5,
+            });
+            secondPage.drawCircle({
+                x: sealX,
+                y: sealY,
+                size: sealRadius - 8,
+                color: sc.fillColor,
+                opacity: 0.28,
+                borderColor: sc.ringColor,
+                borderWidth: 1,
+                borderOpacity: 0.35,
+            });
+            secondPage.drawText(approvedText, {
+                x: sealX - approvedWidth / 2,
+                y: sealY + 14,
+                size: approvedSize,
+                font: helveticaBoldFont,
+                color: sc.labelColor,
+                opacity: 0.66,
+            });
+            secondPage.drawText(reviewText, {
+                x: sealX - reviewWidth / 2,
+                y: sealY + 1,
+                size: reviewSize,
+                font: helveticaBoldFont,
+                color: sc.subColor,
+                opacity: 0.62,
+            });
+            secondPage.drawText(dateText, {
+                x: sealX - dateWidth / 2,
+                y: sealY - 12,
+                size: dateSize,
+                font: helveticaFont,
+                color: sc.dateColor,
+                opacity: 0.56,
+            });
+        }
 
         // Save and send PDF
         const pdfBytes = await pdfDoc.save();

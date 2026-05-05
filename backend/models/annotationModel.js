@@ -56,6 +56,7 @@ const annotationSchema = new Schema(
             yPercent: { type: Number, required: true },
             width: { type: Number, required: true },
             height: { type: Number },
+            ductType: { type: String }, // "supply", "return", "flex", "exhaust", "insulated"
             fill: { type: String },
             stroke: { type: String },
           },
@@ -63,10 +64,11 @@ const annotationSchema = new Schema(
         diffusers: [
           {
             id: { type: String, required: true },
-            shape: { type: String, required: true }, // "circle", "square"
+            shape: { type: String, required: true }, // "circle", "square", "linear", etc.
             xPercent: { type: Number, required: true },
             yPercent: { type: Number, required: true },
             sizePercent: { type: Number, required: true },
+            diffuserType: { type: String }, // "round", "supply-4way", "return-grille", "linear-slot", etc.
             airflow: { type: Number }, // optional CFM
           },
         ],
@@ -77,6 +79,36 @@ const annotationSchema = new Schema(
             stroke: { type: String },
             strokeWidth: { type: Number },
             lineType: { type: String }, // "liquid", "vapor", "suction"
+          },
+        ],
+        dampers: [
+          {
+            id: { type: String, required: true },
+            xPercent: { type: Number, required: true },
+            yPercent: { type: Number, required: true },
+            sizePercent: { type: Number },
+            damperType: { type: String }, // "fire", "volume"
+          },
+        ],
+        thermostats: [
+          {
+            id: { type: String, required: true },
+            xPercent: { type: Number, required: true },
+            yPercent: { type: Number, required: true },
+            sizePercent: { type: Number },
+            label: { type: String },
+          },
+        ],
+        zones: [
+          {
+            id: { type: String, required: true },
+            xPercent: { type: Number, required: true },
+            yPercent: { type: Number, required: true },
+            widthPercent: { type: Number, required: true },
+            heightPercent: { type: Number, required: true },
+            fill: { type: String },  // zone background color (e.g. "rgba(0,150,255,0.12)")
+            stroke: { type: String }, // zone border color
+            zoneNumber: { type: Number },
           },
         ],
       },
@@ -112,7 +144,7 @@ const annotationSchema = new Schema(
         unit: { type: String, default: 'meters' }, // Unit of measurement
         roomType: { type: String }, // Original room type for backward compatibility
         width: { type: String },
-        height: { type: String },
+        length: { type: String },
         areaSqFt: { type: String },
         areaSqM: { type: String },
         uniqueId: { type: String },

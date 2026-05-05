@@ -97,6 +97,17 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
         flatKeywords.add(parseInt(flatNumber));
       }
 
+      // Also match plain "condenser" with no number (single-flat / whole-building unit)
+      const plainCondenserMatch = !condenserMatch && !simpleCondenserMatch && /\bcondenser\b/.test(label);
+      if (plainCondenserMatch && !condensers['1']) {
+        condensers['1'] = {
+          label: annotation.label,
+          flatNumber: 1,
+          coordinates: annotation.coordinates,
+        };
+        flatKeywords.add(1);
+      }
+
       // Match keywords: "Flat 1", "Flat 2", "Unit 1", "Unit 2"
       const flatKeywordMatch = label.match(/(?:flat|unit)\s+(\d+)/);
       if (flatKeywordMatch) {
@@ -531,6 +542,13 @@ useEffect(() => {
     const results = [];
     let totalBTU = 0;
 
+    // Determine if user explicitly placed a condenser rectangle in the Annotator
+    const hasAnnotatedCondenser = (() => {
+      if (!acAnnotations?.length) return false;
+      const { condensers: annotatedCond } = parseAcAnnotations(acAnnotations);
+      return Object.keys(annotatedCond).length > 0;
+    })();
+
     // Filter out condenser entries before processing
     const actualRooms = rooms.filter(room => 
       !room.name?.toLowerCase().includes('condenser') && 
@@ -915,6 +933,7 @@ useEffect(() => {
       equipmentCost: totalEquipmentCost,
       estimatedProjectCost: estimatedProjectSize,
       estimatedInstallationDays: estimatedDays,
+      hasAnnotatedCondenser,
       rooms: productResults
         .filter(({ product }) => product && !product.isCondenser)
         .map(({ room, product, btu }, index) => ({

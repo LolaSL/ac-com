@@ -173,6 +173,29 @@
   margin-top: 10px;
 }
 
+@media (max-width: 767px) {
+  .ac-unit-modal-content {
+    padding: 14px !important;
+    min-width: 220px !important;
+    border-radius: 8px !important;
+  }
+
+  .ac-unit-modal-content h5 {
+    font-size: 0.95rem;
+    margin-bottom: 8px !important;
+  }
+
+  .ac-unit-modal-content .form-control {
+    font-size: 14px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .ac-unit-modal-content .btn {
+    font-size: 13px;
+    padding: 4px 10px;
+  }
+}
+
 /* ========== Mobile Responsive ========== */
 @media (max-width: 767px) {
   .container-main {

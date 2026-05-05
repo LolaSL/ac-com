@@ -196,7 +196,7 @@ const normalizeRoomType = (raw) =>
 
 const normalizeRoomData = (room) => {
   const widthFt = parseToFeet(room.width);
-  const heightFt = parseToFeet(room.height);
+  const heightFt = parseToFeet(room.length);
 
   const areaSqFt = widthFt * heightFt;
   const areaSqM = areaSqFt * 0.092903;
@@ -204,7 +204,7 @@ const normalizeRoomData = (room) => {
   return {
     ...room,
     width: widthFt ? widthFt.toFixed(2) : "",
-    height: heightFt ? heightFt.toFixed(2) : "",
+    length: heightFt ? heightFt.toFixed(2) : "",
     areaSqFt: areaSqFt ? areaSqFt.toFixed(2) : "",
     areaSqM: areaSqM ? areaSqM.toFixed(2) : "",
   };
@@ -495,7 +495,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
           table.push({
             roomType: normalizedType,
             width: "N/A",
-            height: "N/A",
+            length: "N/A",
             areaSqFt: `${areaSqFt.toFixed(2)} sqft`,
             areaSqM: `${areaSqM.toFixed(2)} sqm`,
           });
@@ -730,7 +730,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
         table.push({
           roomType: normalizedRoomType,
           width: `${width.toFixed(2)} ft`,
-          height: `${height.toFixed(2)} ft`,
+          length: `${height.toFixed(2)} ft`,
           areaSqFt: `${sqft.toFixed(2)} sqft`,
           areaSqM: `${sqm.toFixed(2)} sqm`,
         });
@@ -746,7 +746,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
     table.push({
       roomType: "Unlabeled Room",
       width: "N/A",
-      height: "N/A",
+      length: "N/A",
       areaSqFt: "N/A",
       areaSqM: "N/A",
     });
@@ -799,7 +799,7 @@ const Annotator = ({
   const [newRoom, setNewRoom] = useState({
     roomType: "",
     width: "",
-    height: "",
+    length: "",
     areaSqFt: "",
     areaSqM: "",
   });
@@ -1275,7 +1275,7 @@ const Annotator = ({
       const updated = [...prev];
 
       const widthFt = parseToFeet(newRoom.width);
-      const heightFt = parseToFeet(newRoom.height);
+      const heightFt = parseToFeet(newRoom.length);
 
       const areaSqFt = widthFt * heightFt;
       const areaSqM = areaSqFt * 0.092903;
@@ -1283,7 +1283,7 @@ const Annotator = ({
       const roomWithAreas = {
         ...newRoom,
         width: widthFt.toFixed(2),
-        height: heightFt.toFixed(2),
+        length: heightFt.toFixed(2),
         areaSqFt: areaSqFt.toFixed(2),
         areaSqM: areaSqM.toFixed(2),
         uniqueId: Date.now() + Math.random(),
@@ -1296,7 +1296,7 @@ const Annotator = ({
     setNewRoom({
       roomType: "",
       width: "",
-      height: "",
+      length: "",
       areaSqFt: "",
       areaSqM: "",
     });
@@ -1331,9 +1331,9 @@ const Annotator = ({
       }
     };
 
-    if (field === "width" || field === "height") {
+    if (field === "width" || field === "length") {
       const newWidth = parseFeetAndInches(newEditingRoomData.width);
-      const newHeight = parseFeetAndInches(newEditingRoomData.height);
+      const newHeight = parseFeetAndInches(newEditingRoomData.length);
 
       if (!isNaN(newWidth) && !isNaN(newHeight)) {
         const areaSqFt = (newWidth * newHeight).toFixed(2);
@@ -2271,13 +2271,13 @@ const Annotator = ({
 
     console.log("Exporting filtered rooms to BTU Calculator:", flatRooms);
 
-    // Extract AC annotations (ac-1.1, condenser-1, etc.)
+    // Extract AC annotations (ac-1.1, condenser-1, condenser, etc.)
     const acAnnotations = comments
       .filter(
         (comment) =>
           comment.text &&
           (comment.text.toLowerCase().match(/ac-\d+/) ||
-            comment.text.toLowerCase().match(/condenser-\d+/) ||
+            /condenser/i.test(comment.text) ||
             comment.text.toLowerCase().match(/flat\s+\d+/i) ||
             comment.text.toLowerCase().match(/unit\s+\d+/i))
       )
@@ -2384,7 +2384,7 @@ const Annotator = ({
       worksheet.columns = [
         { header: "Room Type", key: "roomType", width: 20 },
         { header: "Width", key: "width", width: 15 },
-        { header: "Height", key: "height", width: 15 },
+        { header: "Length", key: "length", width: 15 },
         { header: "Area (sqft)", key: "areaSqFt", width: 15 },
         { header: "Area (sqm)", key: "areaSqM", width: 15 },
       ];
@@ -2393,7 +2393,7 @@ const Annotator = ({
         worksheet.addRow({
           roomType: room.roomType,
           width: room.width,
-          height: room.height,
+          length: room.length,
           areaSqFt: room.areaSqFt,
           areaSqM: room.areaSqM,
         });
@@ -2553,9 +2553,9 @@ const Annotator = ({
                   aVal = parseFloat((a.width || "").replace(/[^\d.]/g, ""));
                   bVal = parseFloat((b.width || "").replace(/[^\d.]/g, ""));
                   break;
-                case "height":
-                  aVal = parseFloat((a.height || "").replace(/[^\d.]/g, ""));
-                  bVal = parseFloat((b.height || "").replace(/[^\d.]/g, ""));
+                case "length":
+                  aVal = parseFloat((a.length || "").replace(/[^\d.]/g, ""));
+                  bVal = parseFloat((b.length || "").replace(/[^\d.]/g, ""));
                   break;
                 case "areaSqft":
                   aVal = parseFloat((a.areaSqFt || "").replace(/[^\d.]/g, ""));
@@ -2620,7 +2620,7 @@ const Annotator = ({
                       >
                         <option value="roomType">Room Type</option>
                         <option value="width">Width</option>
-                        <option value="height">Height</option>
+                        <option value="length">Length</option>
                         <option value="areaSqft">Area (sqft)</option>
                         <option value="areaSqm">Area (sqm)</option>
                       </select>
@@ -2721,10 +2721,10 @@ const Annotator = ({
                     />
                     <input
                       type="text"
-                      placeholder="Enter height in decimal ft e.g., 10.5 for 10'6"
-                      value={newRoom.height}
+                      placeholder="Enter length in decimal ft e.g., 10.5 for 10'6"
+                      value={newRoom.length}
                       onChange={(e) =>
-                        setNewRoom({ ...newRoom, height: e.target.value })
+                        setNewRoom({ ...newRoom, length: e.target.value })
                       }
                       className="form-control"
                     />
@@ -2744,7 +2744,7 @@ const Annotator = ({
                           <tr>
                             <th>Room Type</th>
                             <th>Width (ft)</th>
-                            <th>Height (ft)</th>
+                            <th>Length (ft)</th>
                             <th>Area (sqft)</th>
                             <th>Area (sqm)</th>
                             <th>Actions</th>
@@ -2794,16 +2794,16 @@ const Annotator = ({
                                   {isEditing ? (
                                     <input
                                       type="text"
-                                      value={editingRoomData.height}
+                                      value={editingRoomData.length}
                                       onChange={(e) =>
                                         handleEditingChange(
-                                          "height",
+                                          "length",
                                           e.target.value
                                         )
                                       }
                                     />
                                   ) : (
-                                    `${room.height} ft`
+                                    `${room.length} ft`
                                   )}
                                 </td>
                                 <td>

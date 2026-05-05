@@ -32,10 +32,18 @@ export default function Recommendations() {
       ? btuProject.rooms
       : null;
 
+  // Only show condenser rows when the user explicitly placed one in the Annotator
+  const hasAnnotatedCondenser = btuProject?.hasAnnotatedCondenser === true;
+  const visibleRoomResults = perRoomResults
+    ? perRoomResults.filter(room =>
+        hasAnnotatedCondenser || !room.product?.isCondenser
+      )
+    : null;
+
   console.log('Recommendations - perRoomResults:', perRoomResults);
 
   const handlePrint = useCallback(() => {
-    if (!perRoomResults || perRoomResults.length === 0) {
+    if (!visibleRoomResults || visibleRoomResults.length === 0) {
       alert("No recommendation data available to print. Please complete a BTU calculation first.");
       return;
     }
@@ -49,7 +57,7 @@ export default function Recommendations() {
     });
 
     // Build room rows
-    const roomRowsHtml = perRoomResults.map((room, i) => {
+    const roomRowsHtml = visibleRoomResults.map((room, i) => {
       const product = room.product || {};
       const productPrice = product.price
         ? product.discount
@@ -70,9 +78,9 @@ export default function Recommendations() {
     }).join('');
 
     // Calculate totals
-    const totalBTU = perRoomResults.reduce((sum, room) => sum + (room.btu || 0), 0);
-    const totalProductBTU = perRoomResults.reduce((sum, room) => sum + (room.product?.btu || 0), 0);
-    const totalPrice = perRoomResults.reduce((sum, room) => {
+    const totalBTU = visibleRoomResults.reduce((sum, room) => sum + (room.btu || 0), 0);
+    const totalProductBTU = visibleRoomResults.reduce((sum, room) => sum + (room.product?.btu || 0), 0);
+    const totalPrice = visibleRoomResults.reduce((sum, room) => {
       const product = room.product || {};
       if (product.price) {
         const price = product.discount
@@ -88,7 +96,7 @@ export default function Recommendations() {
         <h1>HVAC System Quote</h1>
         <div class="print-meta">
           <p><strong>Generated:</strong> ${printDate}</p>
-          <p><strong>Total Rooms:</strong> ${perRoomResults.length} | <strong>Total BTU:</strong> ${totalBTU.toLocaleString()} | <strong>Total Area:</strong> ${btuProject?.totalSquareFootage || 'N/A'} m²</p>
+          <p><strong>Total Rooms:</strong> ${visibleRoomResults.length} | <strong>Total BTU:</strong> ${totalBTU.toLocaleString()} | <strong>Total Area:</strong> ${btuProject?.totalSquareFootage || 'N/A'} m²</p>
         </div>
         <table class="quote-table">
           <thead>
@@ -106,7 +114,7 @@ export default function Recommendations() {
             <tr class="total-row">
               <td><strong>Total</strong></td>
               <td><strong>${totalBTU.toLocaleString()}</strong></td>
-              <td><strong>${perRoomResults.length}</strong></td>
+              <td><strong>${visibleRoomResults.length}</strong></td>
               <td><strong>—</strong></td>
               <td><strong>${totalProductBTU.toLocaleString()}</strong></td>
               <td><strong>$${totalPrice.toFixed(2)}</strong></td>
@@ -203,7 +211,7 @@ export default function Recommendations() {
         }
       `,
     });
-  }, [perRoomResults, btuProject]);
+  }, [visibleRoomResults, btuProject]);
 
   // Add keyboard shortcut support (Ctrl+P)
   useEffect(() => {
@@ -229,7 +237,7 @@ export default function Recommendations() {
       e.stopPropagation();
     }
 
-    if (!perRoomResults || perRoomResults.length === 0) {
+    if (!visibleRoomResults || visibleRoomResults.length === 0) {
       toast.error("No products available to add to cart. Please complete a BTU calculation first.");
       return;
     }
@@ -268,7 +276,7 @@ export default function Recommendations() {
 
     // Group products by _id to avoid duplicates
     const productCount = {};
-    perRoomResults.forEach((room) => {
+    visibleRoomResults.forEach((room) => {
       const product = room.product;
       if (!isRealProduct(product) || product.isCondenser) return;
 
@@ -286,8 +294,8 @@ export default function Recommendations() {
       addedCount++;
     });
 
-    // Add condensers to cart
-    const condensers = perRoomResults.filter(room => room.product?.isCondenser);
+    // Add condensers to cart (only if user annotated one)
+    const condensers = visibleRoomResults.filter(room => room.product?.isCondenser);
     condensers.forEach((room) => {
       const condenser = room.product;
       if (condenser && condenser._id) {
@@ -439,8 +447,8 @@ export default function Recommendations() {
   // };
 
   const getSharePayload = useCallback(() => {
-    const summary = perRoomResults
-      ? `AC System: ${perRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || "-"} BTU total`
+    const summary = visibleRoomResults
+      ? `AC System: ${visibleRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || "-"} BTU total`
       : "AC Unit Recommendations";
 
     return {
@@ -448,7 +456,7 @@ export default function Recommendations() {
       text: summary,
       url: window.location.href,
     };
-  }, [perRoomResults, btuProject]);
+  }, [visibleRoomResults, btuProject]);
 
   const copyToClipboard = useCallback(async (value) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -569,7 +577,7 @@ export default function Recommendations() {
       ============================= */}
       <DetectedSystems 
         btuProject={btuProject}
-        perRoomResults={perRoomResults}
+        perRoomResults={visibleRoomResults}
         recommendedUnits={recommendedUnits}
       />
 
@@ -583,7 +591,7 @@ export default function Recommendations() {
           </Card.Title>
 
           {/* --- Per-room results table --- */}
-          {perRoomResults ? (
+          {visibleRoomResults ? (
             <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
               <thead>
@@ -602,12 +610,12 @@ export default function Recommendations() {
                 {(() => {
                   // Number duplicate room names (e.g., Bedroom → Bedroom 1, Bedroom 2)
                   const nameCounts = {};
-                  perRoomResults.forEach(r => {
+                  visibleRoomResults.forEach(r => {
                     const n = r.name || 'Room';
                     nameCounts[n] = (nameCounts[n] || 0) + 1;
                   });
                   const nameIndex = {};
-                  return perRoomResults.map((room, idx) => {
+                  return visibleRoomResults.map((room, idx) => {
                     const product = room.product || room;
                     const baseName = room.name || `Room ${idx + 1}`;
                     let displayName = baseName;
@@ -689,18 +697,18 @@ export default function Recommendations() {
           {/* ============================
               SYSTEM SUMMARY
           ============================= */}
-          {perRoomResults && perRoomResults.length > 0 && (
+          {visibleRoomResults && visibleRoomResults.length > 0 && (
             <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
               <SystemSummary 
                 btuProject={btuProject} 
-                perRoomResults={perRoomResults} 
+                perRoomResults={visibleRoomResults} 
                 recommendedUnits={recommendedUnits} 
               />
             </div>
           )}
 
           {/* Action Buttons */}
-          {perRoomResults && perRoomResults.length > 0 && (
+          {visibleRoomResults && visibleRoomResults.length > 0 && (
             <div className="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4 rec-mobile-inline-actions">
               <Button
                 onClick={handleSaveToCart}
@@ -808,7 +816,7 @@ export default function Recommendations() {
           COMMON AC PARTS
       ============================= */}
       <InstallationAccessories 
-        perRoomResults={perRoomResults}
+        perRoomResults={visibleRoomResults}
         recommendedUnits={recommendedUnits}
       />
 

@@ -8,6 +8,8 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
   // Get detected system types for display
   const getDetectedSystems = () => {
     const systems = [];
+    // Only show condensers if the user explicitly placed a condenser in the Annotator
+    const showCondensers = btuProject?.hasAnnotatedCondenser === true;
     
     // Check perRoomResults (includes condensers) if available
     if (perRoomResults && perRoomResults.length > 0) {
@@ -27,7 +29,7 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
         systems.push({ name: 'Indoor Units', icon: '❄️', count: indoorRooms.length });
       }
       
-      if (condenserRooms.length > 0) {
+      if (showCondensers && condenserRooms.length > 0) {
         systems.push({ name: 'Outdoor Condensers', icon: '🔧', count: condenserRooms.length });
       }
     } else if (recommendedUnits) {
@@ -46,7 +48,7 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
         systems.push({ name: 'Indoor Units', icon: '❄️', count: indoorUnits.length });
       }
       
-      if (outdoorUnits.length > 0) {
+      if (showCondensers && outdoorUnits.length > 0) {
         systems.push({ name: 'Outdoor Condensers', icon: '🔧', count: outdoorUnits.length });
       }
     }

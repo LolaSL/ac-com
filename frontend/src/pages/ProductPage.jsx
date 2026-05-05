@@ -526,13 +526,19 @@ function ProductPage() {
                 CONDENSER_REGEX.test(category);
 
               if (isCondenser) {
-                // For Condenser/VRF products: show Max Indoor Units
+                // For Condenser/VRF products: show Max Indoor Units + Energy Efficiency
                 return (
                   <>
                     {hasMaxIndoor && (
                       <ListGroup.Item>
                         <strong>Max Indoor Units:</strong>{" "}
                         {product.numberOfMaximumIndoorUnits}
+                      </ListGroup.Item>
+                    )}
+                    {product.energyEfficiency > 0 && (
+                      <ListGroup.Item>
+                        <strong>Energy Efficiency (SEER):</strong>{" "}
+                        {product.energyEfficiency}
                       </ListGroup.Item>
                     )}
                   </>
