@@ -763,11 +763,8 @@ router.get(
         const formattedDate = annotation.createdAt
             ? new Date(annotation.createdAt).toLocaleString()
             : "Unknown Date";
-        const engineerName = annotation.engineerId?.name || "Engineer";
-        const engineerEmail = annotation.engineerId?.email || "No Engineer Email";
-        const userName = annotation.userId?.name || "User";
         const userEmail = annotation.userId?.email || "No User Email";
-        const watermarkText = `AC-Commerce | User: ${userName} (${userEmail}) | Engineer: ${engineerName} (${engineerEmail}) | Reviewed: ${formattedDate}`;
+        const watermarkText = `AC-Commerce | ${userEmail} | Reviewed: ${formattedDate}`;
 
         pdfDoc.getPages().forEach((page) => {
             const fontSize = 9;

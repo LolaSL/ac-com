@@ -179,7 +179,7 @@ export default function HomeBannerPage() {
           playsInline
           poster="/images/hero.jpg"
         >
-          <source src="/videos/banner1-video.mp4" type="video/mp4" />
+          <source src="/videos/banner2-video.mp4" type="video/mp4" />
         </video>
         <div className="home-hero__overlay" />
         <div className="home-hero__inner">

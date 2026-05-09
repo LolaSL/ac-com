@@ -41,11 +41,11 @@ const ModalLegend = () => {
                   <li><strong>Reset (°):</strong> Appears only when PDF is rotated — resets back to original 0° orientation</li>
                   <li><strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF canvas (range: 100%–400%)</li>
                   <li><strong>100% (zoom%):</strong> Shows current zoom level; click to reset zoom back to 100%</li>
-                  <li><strong>Click on canvas:</strong> Opens a modal to enter an AC unit label and places a rectangle annotation at that position</li>
+                  <li><strong>Click on canvas:</strong> Opens a modal to enter an AC unit label and places an air conditioner symbol annotation at that position</li>
                   <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF is loaded. Tap to toggle — when active it turns blue and shows <em>"✅ Tap to place"</em>; only while active can you tap the canvas to place annotations. This prevents accidental placements while scrolling on touch screens.</li>
-                  <li><strong>Drag rectangle:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an annotation</li>
-                  <li><strong>Click rectangle (desktop):</strong> Rotates the rectangle 90° in place</li>
-                  <li><strong>🗑️ Delete rectangle:</strong> <em>Desktop:</em> right-click the rectangle. <em>Mobile:</em> double-tap the rectangle (two taps within ~700 ms) or press and hold for ~800 ms</li>
+                  <li><strong>Drag air conditioner symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an annotation</li>
+                  <li><strong>Click air conditioner symbol (desktop):</strong> Rotates the air conditioner symbol 90° in place</li>
+                  <li><strong>🗑️ Delete air conditioner symbol:</strong> <em>Desktop:</em> right-click the air conditioner symbol. <em>Mobile:</em> double-tap the air conditioner symbol (two taps within ~700 ms) or press and hold for ~800 ms</li>
                   <li><strong>Export to BTU (n rooms):</strong> Sends all extracted rooms to the BTU Calculator; disabled when no rooms are available</li>
                   <li><strong>Save:</strong> Saves the PDF with annotations to the backend (shows "Saving..." while in progress)</li>
                   <li><strong>Clear:</strong> Removes all annotations, resets the canvas, and clears all session data</li>
@@ -148,7 +148,7 @@ const ModalLegend = () => {
                     <strong>Multi-Flat Condenser label:</strong> Enter e.g. "condenser-1" for flat 1, "condenser-2" for flat 2
                   </li>
                   <li>
-                    Recommended: Place AC rectangle above the room door; place Condenser rectangle near the flat entrance
+                    Recommended: Place AC air conditioner symbol above the room door; place Condenser air conditioner symbol near the flat entrance
                   </li>
                 </ul>
 
@@ -157,13 +157,13 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>🔄 Rotate Rectangle:</strong> Click on an existing rectangle to rotate it 90°
+                    <strong>🔄 Rotate Air Conditioner Symbol:</strong> Click on an existing air conditioner symbol to rotate it 90°
                   </li>
                   <li>
-                    <strong>📌 Drag Rectangle:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition
+                    <strong>📌 Drag Air Conditioner Symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition
                   </li>
                   <li>
-                    <strong>🗑️ Delete Rectangle:</strong> <em>Desktop:</em> right-click the rectangle. <em>Mobile:</em> double-tap (two quick taps on the same rectangle within ~700 ms) or press and hold for ~800 ms
+                    <strong>🗑️ Delete Air Conditioner Symbol:</strong> <em>Desktop:</em> right-click the air conditioner symbol. <em>Mobile:</em> double-tap (two quick taps on the same air conditioner symbol within ~700 ms) or press and hold for ~800 ms
                   </li>
                 </ul>
 

@@ -816,6 +816,12 @@ const Annotator = ({
   // Track last rectangle tap for double-tap deletion on mobile
   const lastRectTapRef = useRef({});
 
+  // Ref mirrors for rectangles and comments — always up-to-date regardless of closure age.
+  // Fixes a Safari stale-closure bug in confirmAcUnitAnnotation where deleting then
+  // immediately re-creating the same label would incorrectly trigger "already exists".
+  const rectanglesRef = useRef(rectangles);
+  const commentsRef   = useRef(comments);
+
   // Mobile stable annotation bar (small screens only — replaces popup modal for touch)
   const [, setMobileAnnotationLabel] = useState('');
   const [mobileAnnotationActive, setMobileAnnotationActive] = useState(false);
@@ -938,6 +944,10 @@ const Annotator = ({
       restoreFromBytes();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep ref mirrors in sync with state.
+  useEffect(() => { rectanglesRef.current = rectangles; }, [rectangles]);
+  useEffect(() => { commentsRef.current   = comments;   }, [comments]);
 
   // Persist light metadata to sessionStorage whenever annotations change.
   useEffect(() => {
@@ -1449,9 +1459,10 @@ const Annotator = ({
 
     // Only treat a label as duplicate if it belongs to a comment that is still
     // attached to an existing rectangle. This allows recreating deleted labels.
-    const existingRectIds = new Set(rectangles.map((rect) => String(rect.id)));
+    // Use ref mirrors instead of closure values to avoid stale-closure false positives in Safari.
+    const existingRectIds = new Set(rectanglesRef.current.map((rect) => String(rect.id)));
     
-    const existingComment = comments.some((comment) => {
+    const existingComment = commentsRef.current.some((comment) => {
       const hasActiveRect = existingRectIds.has(String(comment.rectId));
       const sameText =
         typeof comment.text === 'string' &&
@@ -1509,7 +1520,7 @@ const Annotator = ({
       strokeWidth: 1,
     };
     setLines((prevLines) => [...prevLines, newLine]);
-  }, [comments, rectangles, computeCommentPos]);
+  }, [computeCommentPos]);
 
   const handleStageClick = (event) => {
     // Small screens use handleStageTouchEnd (onTap) exclusively — skip here
@@ -3304,7 +3315,7 @@ const Annotator = ({
             <h5 style={{ marginBottom: '12px' }}>Enter AC unit number</h5>
             <Form.Control
               type="text"
-              placeholder="ac-1, ac-2, condenser, condenser-1, etc."
+              placeholder="ac-1, ac-2, condenser, etc."
               value={acUnitInput}
               onChange={(e) => setAcUnitInput(e.target.value)}
               onKeyDown={(e) => {

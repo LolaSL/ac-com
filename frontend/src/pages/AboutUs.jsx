@@ -13,7 +13,7 @@ const AboutUs = () => {
     {
       icon: "fas fa-drafting-compass",
       title: "Mark AC Placements",
-      text: "Place labelled AC unit rectangles on the plan - add comments (ac-1, ac-2...etc) and condenser (outdoor unit rectangle) placement. Save your work on the cloud.",
+      text: "Place labelled AC unit air conditioner symbols on the plan - add comments (ac-1, ac-2...etc) and condenser (outdoor unit air conditioner symbol) placement. Save your work on the cloud.",
     },
     {
       icon: "fas fa-hard-hat",
@@ -23,7 +23,7 @@ const AboutUs = () => {
     {
       icon: "fas fa-file-pdf",
       title: "Save & Download",
-      text: "Download your completed AI-engineer-reviewed plan as a PDF with all ac rectangles, outdoor unit -condenser rectangle, comments, system lines, and the AI-engineer's digital stamp baked in.",
+      text: "Download your completed AI-engineer-reviewed plan as a PDF with all ac air conditioner symbols, outdoor unit -condenser air conditioner symbol, comments, system lines, and the AI-engineer's digital stamp baked in.",
     },
     {
       icon: "fas fa-calculator",
@@ -46,7 +46,7 @@ const AboutUs = () => {
     {
       icon: "fas fa-pencil-ruler",
       title: "Professional Notation Tools",
-      text: "Browser-based PDF notifications with coloured rectangles, text comments, VRF refrigerant lines, (ducted air diffusers -comming soon).",
+      text: "Browser-based PDF notifications with coloured air conditioner symbols, text comments, VRF refrigerant lines, (ducted air diffusers -comming soon).",
     },
     {
       icon: "fas fa-user-check",
@@ -56,18 +56,19 @@ const AboutUs = () => {
     {
       icon: "fas fa-tools",
       title: "Trusted Service Network",
-      text: "Connect directly with verified HVAC service providers for installation, maintenance, and  repairs through our integrated messaging and booking system.",
+      text: "Connect directly with verified HVAC  service providers for consultants, installation, maintenance, and  repairs through our integrated messaging and booking system.",
     },
-    {
-      icon: "fas fa-hand-holding-usd",
-      title: "Affiliate Seller Programme",
-      text: "Industry professionals and businesses can list products on the marketplace, earn commission through referrals, (access a dedicated seller dashboard and track their earnings in real time - comming soon).",
-    },
+
     {
       icon: "fas fa-bell",
       title: "Orders, Notifications & Support",
       text: "Track orders end-to-end, receive payment and delivery reminders, communicate with sellers via built-in messaging, and access dedicated customer support at every stage.",
     },
+        {
+      icon: "fas fa-hand-holding-usd",
+      title: "Friend Bring Friend Commission Program",
+      text: "Industry professionals and businesses can list products on the marketplace, earn commission through \"friend bring friend\"",
+    }
   ];
 
   const audiences = [

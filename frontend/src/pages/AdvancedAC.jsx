@@ -41,16 +41,6 @@ const AdvancedAC = () => {
           operate in extreme temperatures, making them a versatile choice for
           any region.
           </p>
-        <p className="mb-3 p-3 ac-conditioning fs-4">
-        <strong>LG’s </strong>advanced components bring energy-efficient warmth to everyday living designed for comfort and made for reliability.
-        </p>
-        <div className="mb-4 text-center pb-4">
-          <Image
-            src="/images/ac2.jpg"
-            alt="Air Conditioning"
-            className="responsive-image-advanced rounded"
-          />
-        </div>
       </article>
       <article>
         <h3 className="mb-2 p-4 fs-3 text-bold">

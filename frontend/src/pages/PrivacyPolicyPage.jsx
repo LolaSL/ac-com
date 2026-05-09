@@ -16,7 +16,7 @@ const PrivacyPolicyPage = () => {
 
       <h4>Information We Collect</h4>
       <p className="fs-5">
-        We collect information when you register on our website, place an order, enter a contest or sweepstakes, respond to a survey, or communicate with us via email or phone. This may include your name, email address, mailing address, phone number, credit card information, or other details. You may also visit our site anonymously.
+        We collect information when you register on our website, place an order, respond to a survey, or communicate with us via email or phone. This may include your name, email address, mailing address, phone number, and other details. You may also visit our site anonymously.
       </p>
       <p className="fs-5">
         We also collect information about gift recipients or other shipment recipients to fulfill orders. This information is not used for marketing purposes.
@@ -29,14 +29,14 @@ const PrivacyPolicyPage = () => {
       <ul className="fs-5">
         <li>Personalize your site experience and recommend relevant products.</li>
         <li>Respond effectively to customer service requests.</li>
-        <li>Process transactions quickly and securely.</li>
-        <li>Administer contests, promotions, or surveys.</li>
+        <li>Process transactions quickly and securely via PayPal.</li>
+        <li>Administer surveys or promotions.</li>
         <li>Send periodic emails if you have opted in to receive newsletters. You can opt-out at any time.</li>
       </ul>
 
       <h4>Protection of Your Information</h4>
       <p className="fs-5">
-        We implement a variety of security measures to safeguard your personal information. Sensitive data, including credit card information, is transmitted via Secure Socket Layer (SSL) and encrypted in our databases. Access is limited to authorized personnel only.
+        We implement a variety of security measures to safeguard your personal information. Payment transactions are processed securely through PayPal — AC-Commerce does not collect, store, or have access to your credit card or banking details. Access to your personal data is limited to authorized personnel only.
       </p>
 
       <h4>Cookies &amp; Local Storage</h4>
@@ -92,7 +92,7 @@ const PrivacyPolicyPage = () => {
 
       <h4>Changes to Our Policy</h4>
       <p className="fs-5">
-        Any changes will be posted on this page. Changes apply only to information collected after the modification date. Last modified: March 2, 2026.
+        Any changes will be posted on this page. Changes apply only to information collected after the modification date. Last modified: May 9, 2026.
       </p>
       </div>
     </div>

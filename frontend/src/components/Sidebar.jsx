@@ -575,12 +575,9 @@ const Sidebar = () => {
           overlayCtx.restore();
 
           // ========== USER CREDENTIALS WATERMARK (diagonal) ==========
-          const engineerName = annotationsData.engineerId?.name || engineerAnnotation.engineerId?.name || "Engineer";
-          const engineerEmail = annotationsData.engineerId?.email || "";
-          const userName = annotationsData.userId?.name || "User";
-          const userEmail = annotationsData.userId?.email || "";
+          const userEmail = annotationsData.userId?.email || engineerAnnotation.userId?.email || "";
           const reviewDate = new Date(engineerAnnotation.createdAt).toLocaleDateString();
-          const watermarkText = `AC-Commerce | User: ${userName} (${userEmail}) | Engineer: ${engineerName} (${engineerEmail}) | Reviewed: ${reviewDate}`;
+          const watermarkText = `AC-Commerce | ${userEmail} | Reviewed: ${reviewDate}`;
 
           overlayCtx.save();
           overlayCtx.translate(viewport.width / 2, viewport.height / 2);
