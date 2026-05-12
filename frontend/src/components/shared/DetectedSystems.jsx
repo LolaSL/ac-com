@@ -8,8 +8,8 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
   // Get detected system types for display
   const getDetectedSystems = () => {
     const systems = [];
-    // Only show condensers if the user explicitly placed a condenser in the Annotator
-    const showCondensers = btuProject?.hasAnnotatedCondenser === true;
+    // Show condensers whenever they are present in the data
+    const showCondensers = true;
     
     // Check perRoomResults (includes condensers) if available
     if (perRoomResults && perRoomResults.length > 0) {

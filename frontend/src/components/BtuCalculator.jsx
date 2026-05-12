@@ -236,6 +236,7 @@ useEffect(() => {
   const [numPeople, setNumPeople] = useState(2);
   const [error, setError] = useState("");
   const [isCalculating, setIsCalculating] = useState(false);
+
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
       Roof: false,
@@ -261,6 +262,10 @@ useEffect(() => {
       AverageEurope: false,
       HotMiddleEast: false,
       ColdAlaska: false,
+      TropicalSEAsia: false,
+      Continental: false,
+      Subtropical: false,
+      SubArctic: false,
     },
     appliances: {
       Oven: false,
@@ -302,6 +307,14 @@ useEffect(() => {
   const isVRFSystem = true;
   const [isMultiFlatProperty, setIsMultiFlatProperty] = useState(false);
   const [detectedFlats, setDetectedFlats] = useState([]);
+
+  // ── Humidity & ventilation inputs ──────────────────────────────────────────
+  const [humidity, setHumidity]       = useState('average');   // 'low' | 'average' | 'high'
+  const [airChanges, setAirChanges]   = useState('1.0');        // ACH value
+
+
+
+
 
   // hvacSystemType was removed to avoid unused variable; use `isVRFSystem` directly
 
@@ -422,6 +435,10 @@ useEffect(() => {
       AverageEurope: 1000,
       HotMiddleEast: 1500,
       ColdAlaska: 700,
+      TropicalSEAsia: 1400,
+      Continental: 900,
+      Subtropical: 1200,
+      SubArctic: 600,
     };
 
     if (room.name === "Dining Room") {
@@ -482,9 +499,13 @@ useEffect(() => {
     });
 
     applyMultiplier("climate", {
-      HotMiddleEast: 1.5,    // Increased from 1.25 to properly reflect hot climate needs
-      AverageEurope: 1.0,
-      ColdAlaska: 0.85,
+      HotMiddleEast: 1.50,   // Very hot, dry
+      TropicalSEAsia: 1.45, // Hot + humid
+      Subtropical: 1.30,    // Warm + humid (Australia, S. Africa)
+      AverageEurope: 1.00,  // Temperate baseline
+      Continental: 0.95,    // Cold winters, warm summers
+      SubArctic: 0.80,      // Cold (Scandinavia, Canada)
+      ColdAlaska: 0.75,     // Very cold
     });
 
     applyMultiplier("typeOfWall", {
@@ -501,6 +522,14 @@ useEffect(() => {
       "apartmentOrientation",
       CONSTANTS.apartmentOrientationMultipliers
     );
+
+    // Humidity adjustment
+    const humidityMultipliers = { low: 0.95, average: 1.0, high: 1.12 };
+    btu *= humidityMultipliers[humidity] ?? 1.0;
+
+    // Air changes (ACH) adjustment — baseline 1.0 ACH
+    const ach = parseFloat(airChanges) || 1.0;
+    btu *= 1 + (ach - 1.0) * 0.05;
 
     return { btu: Math.round(btu), error: null };
   };
@@ -1021,18 +1050,13 @@ useEffect(() => {
     };
 
     // Save BTU data to Store and navigate to recommendations
-    console.log('BTU Data being saved to Store:', btuData);
-    console.log('Total BTU:', totalBTU);
-    console.log('Number of rooms:', actualRooms.length);
-    console.log('Rooms with products:', btuData.rooms);
-    
     ctxDispatch({
       type: "BTU_SET_CURRENT_PROJECT",
       payload: btuData,
     });
 
     setIsCalculating(false);
-    toast.success("BTU calculation complete! Navigating to recommendations...");
+    toast.success(`✅ Calculation complete — ${actualRooms.length} room${actualRooms.length !== 1 ? 's' : ''}, ${totalBTU.toLocaleString()} BTU total`);
     navigate("/recommendations");
   };
 
@@ -1066,6 +1090,10 @@ useEffect(() => {
         AverageEurope: false,
         HotMiddleEast: false,
         ColdAlaska: false,
+        TropicalSEAsia: false,
+        Continental: false,
+        Subtropical: false,
+        SubArctic: false,
       },
       appliances: {
         Oven: false,
@@ -1189,6 +1217,35 @@ useEffect(() => {
               />
             </Form.Group>
           </Col>
+
+          {/* Humidity selector */}
+          <Col xs={12} md={6} lg={4} className="my-4">
+            <Form.Group controlId="humidity">
+              <Form.Label>Humidity Level:</Form.Label>
+              <Form.Select value={humidity} onChange={(e) => setHumidity(e.target.value)}>
+                <option value="low">Low (dry climate)</option>
+                <option value="average">Average</option>
+                <option value="high">High (humid / coastal)</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+
+          {/* Air changes per hour */}
+          <Col xs={12} md={6} lg={4} className="my-4">
+            <Form.Group controlId="airChanges">
+              <Form.Label>Air Changes per Hour (ACH):</Form.Label>
+              <Form.Control
+                type="number"
+                step="0.1"
+                min="0.3"
+                max="3.0"
+                placeholder="e.g. 1.0"
+                value={airChanges}
+                onChange={(e) => setAirChanges(e.target.value)}
+              />
+              <Form.Text className="text-muted">Typical residential: 0.5–1.5 ACH</Form.Text>
+            </Form.Group>
+          </Col>
         </Row>
 {rooms.length > 0 && (
   <div className="mb-4">
@@ -1271,6 +1328,15 @@ useEffect(() => {
               name="climate"
               options={options.climate}
               onChange={handleClimateChange}
+              labels={{
+                HotMiddleEast: 'Hot Middle East',
+                TropicalSEAsia: 'Tropical (SE Asia)',
+                Subtropical: 'Subtropical (Australia/S. Africa)',
+                AverageEurope: 'Average Europe',
+                Continental: 'Continental (E. Europe)',
+                SubArctic: 'Sub-Arctic (Scandinavia/Canada)',
+                ColdAlaska: 'Cold Alaska',
+              }}
             />
 
             <CheckboxGroup
@@ -1337,6 +1403,8 @@ useEffect(() => {
           Clear
         </Button>
 
+
+
         {error && (
           <div
             className={`btu-error ${
@@ -1346,6 +1414,8 @@ useEffect(() => {
             {getError({ response: { data: { message: error } } })}
           </div>
         )}
+
+
       </Form>
     </Container>
   );

@@ -25,8 +25,31 @@
 }
 
 .modal-legend .modal-body {
-  max-height: 70vh;
+  max-height: 65vh;
   overflow-y: auto;
+  padding-top: 0.5rem;
+}
+
+.legend-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 1rem;
+  border-bottom: 1px solid #dee2e6;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.legend-search-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.legend-print-btn,
+.legend-search-clear {
+  flex-shrink: 0;
+  white-space: nowrap;
+  width: auto !important;
 }
 
 .modal-legend .modal-title {
@@ -81,7 +104,13 @@
 
 @media (max-width: 768px) {
   .modal-legend .modal-body {
-    max-height: 60vh;
+    max-height: none;
+    flex: 1;
+    padding-top: 0.5rem;
+  }
+
+  .legend-search-bar {
+    flex-wrap: nowrap;
   }
 
   .modal-legend h6 {

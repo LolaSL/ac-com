@@ -359,6 +359,27 @@ const EngineerViewPage = () => {
     const colorIndex = (zoneNumber - 1) % zoneColorPalette.length;
     const colors = zoneColorPalette[colorIndex];
 
+    // Derive zone label from the nearest AC comment whose rect center falls inside (or near) the drawn zone
+    const zoneCenterX = zoneData.x + zoneData.width / 2;
+    const zoneCenterY = zoneData.y + zoneData.height / 2;
+    const rects = annotation?.annotations?.rectangles || [];
+    const comments = annotation?.annotations?.comments || [];
+    let bestLabel = null;
+    let bestDist = Infinity;
+    rects.forEach((r) => {
+      const comment = comments.find((c) => String(c.rectId) === String(r.id));
+      if (!comment) return;
+      const acMatch = comment.text.match(/^ac-(\d+(?:\.\d+)?)/i);
+      if (!acMatch) return;
+      const rx = (r.xPercent || 0) + (r.widthPercent || 0) / 2;
+      const ry = (r.yPercent || 0) + (r.heightPercent || 0) / 2;
+      const dist = Math.hypot(rx - zoneCenterX, ry - zoneCenterY);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestLabel = acMatch[1]; // e.g. '1.1' or '1'
+      }
+    });
+
     const newZone = {
       id: `zone-manual-${Date.now()}`,
       xPercent: zoneData.x,
@@ -368,6 +389,7 @@ const EngineerViewPage = () => {
       fill: colors.fill,
       stroke: colors.stroke,
       zoneNumber: zoneNumber,
+      zoneLabel: bestLabel || String(zoneNumber),
     };
 
     setAnnotation((prev) => ({
@@ -387,7 +409,7 @@ const EngineerViewPage = () => {
     // Auto-select the newly created zone to show color palette
     setSelectedZoneIndex((annotation?.annotations?.hvac?.zones?.length || 0));
     
-    toast.success(`Zone ${newZone.zoneNumber} created`);
+    toast.success(`Zone ${newZone.zoneLabel} created`);
   };
 
   // Redraw overlays whenever annotation, showHVAC, or addMode changes

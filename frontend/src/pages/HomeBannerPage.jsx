@@ -50,7 +50,15 @@ export default function HomeBannerPage() {
       imageSrc: "/images/floor-plan.jpg",
       linkText: "Try Design Tools",
       linkTo: "/measurement",
-    }
+    },
+    {
+      title: "✅ View Results on Recommendations Page",
+      description:
+        "See your BTU calculations, matched AC products, system summaries, and installation accessories — all tailored to your floor plan.",
+      imageSrc: "/images/hero.jpg",
+      linkText: "View Recommendations",
+      linkTo: "/recommendations",
+    },
 
   ];
 
@@ -186,7 +194,7 @@ export default function HomeBannerPage() {
           <h1 className="home-hero__title">Welcome to AC-Commerce</h1>
           <p className="home-hero__sub">Smarter HVAC designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
-        <p className="home-hero__corner-tag">Cooling Solutions For Every Space</p>
+        <p className="home-hero__corner-tag">Any space. Any size. Always cool.</p>
       </div>
 
       {/* Content wrapper */}

@@ -32,13 +32,8 @@ export default function Recommendations() {
       ? btuProject.rooms
       : null;
 
-  // Only show condenser rows when the user explicitly placed one in the Annotator
-  const hasAnnotatedCondenser = btuProject?.hasAnnotatedCondenser === true;
-  const visibleRoomResults = perRoomResults
-    ? perRoomResults.filter(room =>
-        hasAnnotatedCondenser || !room.product?.isCondenser
-      )
-    : null;
+  // Show all rows including condensers — they are only added to btuData.rooms when warranted
+  const visibleRoomResults = perRoomResults ?? null;
 
   console.log('Recommendations - perRoomResults:', perRoomResults);
 
@@ -534,7 +529,26 @@ export default function Recommendations() {
       </div>
 
       <div className="rec-inner">
+
+        {/* No data — guide user to run a calculation first */}
+        {!btuProject && (
+          <div style={{
+            textAlign: 'center', padding: '3rem 1rem', background: '#f8f9fa',
+            borderRadius: '12px', border: '1px solid #dee2e6', margin: '2rem 0',
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🧮</div>
+            <h4 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>No calculation results yet</h4>
+            <p style={{ color: '#6c757d', maxWidth: '420px', margin: '0 auto 1.5rem' }}>
+              Upload a floor plan, annotate your rooms, and run a BTU calculation to see your personalised AC system recommendations here.
+            </p>
+            <Button variant="primary" onClick={() => navigate('/measurement')}>
+              ← Go to Measurement Tool
+            </Button>
+          </div>
+        )}
         {/* Print-only metadata */}
+        {btuProject && (
+        <>
         <div className="print-only-info" style={{ display: 'none' }}>
           <p style={{ marginTop: '0.75rem', fontSize: '0.9rem', opacity: 0.9 }}>
             <strong>Generated:</strong> {new Date().toLocaleString('en-US', { 
@@ -833,6 +847,8 @@ export default function Recommendations() {
           </div>
         </Modal.Body>
       </Modal>
+
+        </>) } {/* End btuProject && */}
 
       </div>{/* End rec-inner */}
     </div>

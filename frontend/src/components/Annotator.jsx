@@ -826,6 +826,59 @@ const Annotator = ({
   const [, setMobileAnnotationLabel] = useState('');
   const [mobileAnnotationActive, setMobileAnnotationActive] = useState(false);
 
+  // ── Undo / Redo history ──────────────────────────────────────────────────────────
+  const historyStack = useRef([]);       // array of { rectangles, comments, lines } snapshots
+  const historyPointer = useRef(-1);     // points at current snapshot
+  const isRestoringHistory = useRef(false); // prevents pushHistory during undo/redo
+
+  const pushHistory = useCallback((rects, cmts, lns) => {
+    if (isRestoringHistory.current) return;
+    // Discard any future snapshots when a new action is recorded
+    historyStack.current = historyStack.current.slice(0, historyPointer.current + 1);
+    historyStack.current.push({
+      rectangles: JSON.parse(JSON.stringify(rects)),
+      comments:   JSON.parse(JSON.stringify(cmts)),
+      lines:      JSON.parse(JSON.stringify(lns)),
+    });
+    if (historyStack.current.length > 50) historyStack.current.shift(); // cap at 50
+    historyPointer.current = historyStack.current.length - 1;
+  }, []);
+
+  const undo = useCallback(() => {
+    if (historyPointer.current <= 0) return;
+    historyPointer.current -= 1;
+    const snap = historyStack.current[historyPointer.current];
+    isRestoringHistory.current = true;
+    setRectangles(snap.rectangles);
+    setComments(snap.comments);
+    setLines(snap.lines);
+    isRestoringHistory.current = false;
+  }, []);
+
+  const redo = useCallback(() => {
+    if (historyPointer.current >= historyStack.current.length - 1) return;
+    historyPointer.current += 1;
+    const snap = historyStack.current[historyPointer.current];
+    isRestoringHistory.current = true;
+    setRectangles(snap.rectangles);
+    setComments(snap.comments);
+    setLines(snap.lines);
+    isRestoringHistory.current = false;
+  }, []);
+
+  // ── Annotation label editing ─────────────────────────────────────────────────────
+  const [editingLabelRectId, setEditingLabelRectId] = useState(null);
+  const [editingLabelValue, setEditingLabelValue]   = useState('');
+  const [showEditLabelModal, setShowEditLabelModal] = useState(false);
+
+  // ── acType selector for save ─────────────────────────────────────────────────────
+  const [selectedAcTypeForSave, setSelectedAcTypeForSave] = useState('ductless');
+
+  // ── Multi-page PDF navigation ────────────────────────────────────────────────────
+  const [currentPage, setCurrentPage]   = useState(1);
+  const [totalPages, setTotalPages]     = useState(1);
+  const pdfDocRef = useRef(null); // caches the loaded PDF document
+
   // ── sessionStorage persistence (fixes iOS Safari losing state on navigation) ──
   // Primary path: store annotation _id after save, re-fetch from backend on restore (no quota issues).
   // Fallback path: raw PDF bytes in sessionStorage for unsaved PDFs (works when PDF < ~3.5 MB).
@@ -977,12 +1030,14 @@ const Annotator = ({
   }, []);
 
   const removeAnnotationByRectId = useCallback((rectId) => {
+    // snapshot BEFORE deletion so it can be undone
+    pushHistory(rectanglesRef.current, commentsRef.current, lines);
     setRectangles((prevRects) => prevRects.filter((r) => !idsMatch(r.id, rectId)));
     setComments((prevComments) =>
       prevComments.filter((comment) => !idsMatch(comment.rectId, rectId))
     );
     setLines((prevLines) => prevLines.filter((line) => !idsMatch(line.rectId, rectId)));
-  }, [idsMatch]);
+  }, [idsMatch, pushHistory, lines]);
   
   // Track if currently dragging to prevent modal from showing
   const isDraggingRef = useRef(false);
@@ -1079,6 +1134,9 @@ const Annotator = ({
     setPreviewUrl(null);
     setFile(null);
     setPdfRotation(0); // Reset rotation when new file is uploaded
+    setCurrentPage(1);
+    setTotalPages(1);
+    pdfDocRef.current = null; // Invalidate cached PDF doc
     // Clear old session state so new file starts fresh
     ['annotator_annotation_id', 'annotator_pdf_data', 'annotator_pdf_name',
      'annotator_rectangles', 'annotator_comments', 'annotator_lines',
@@ -1445,6 +1503,21 @@ const Annotator = ({
     return { x: cx, y: cy };
   }, [pdfSize]);
 
+  // Keyboard shortcut Ctrl+Z / Ctrl+Y for undo/redo
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [undo, redo]);
+
   const confirmAcUnitAnnotation = useCallback((commentText, position) => {
     
     if (!commentText) {
@@ -1492,6 +1565,8 @@ const Annotator = ({
       stroke: isCondenser ? '#cc5500' : undefined,
       rotation: 0,
     };
+    // snapshot BEFORE placing so it can be undone
+    pushHistory(rectanglesRef.current, commentsRef.current, lines);
     setRectangles((prevRects) => [...prevRects, newRect]);
     const newCommentId = `comment-${Date.now()}`;
 
@@ -1520,7 +1595,7 @@ const Annotator = ({
       strokeWidth: 1,
     };
     setLines((prevLines) => [...prevLines, newLine]);
-  }, [computeCommentPos]);
+  }, [computeCommentPos, pushHistory, lines]);
 
   const handleStageClick = (event) => {
     // Small screens use handleStageTouchEnd (onTap) exclusively — skip here
@@ -1778,14 +1853,21 @@ const Annotator = ({
   );
 
   const renderPDFOnCanvas = useCallback(
-    async (pdfData) => {
+    async (pdfData, pageNum) => {
       const canvas = canvasRef.current;
       if (!canvas || !file) return;
       const context = canvas.getContext("2d");
 
-      const loadingTask = pdfjsLib.getDocument({ data: pdfData });
-      const pdf = await loadingTask.promise;
-      const page = await pdf.getPage(1);
+      // Re-use cached PDF document when possible
+      let pdf = pdfDocRef.current;
+      if (!pdf) {
+        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+        pdf = await loadingTask.promise;
+        pdfDocRef.current = pdf;
+        setTotalPages(pdf.numPages);
+      }
+      const requestedPage = Math.max(1, Math.min(pageNum || currentPage, pdf.numPages));
+      const page = await pdf.getPage(requestedPage);
 
       // On small screens, keep PDF at native size for horizontal scrolling
       // On larger screens, scale to fit the viewport
@@ -1874,8 +1956,17 @@ const Annotator = ({
       memoizedCallback,
       setPdfSize,
       pdfRotation,
+      currentPage,
     ]
   );
+
+  // Re-render when page changes
+  useEffect(() => {
+    if (pdfDataRef.current && file?.type === 'application/pdf') {
+      renderPDFOnCanvas(pdfDataRef.current, currentPage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -2066,7 +2157,7 @@ const Annotator = ({
     formData.append("comments", JSON.stringify(commentsWithPercent));
     formData.append("lines", JSON.stringify(linesWithPercent));
     formData.append("pdfId", pdfId);
-    formData.append("acType", "ductless");
+    formData.append("acType", selectedAcTypeForSave);
     formData.append("roomData", JSON.stringify(roomsToSave)); // Save room data with flat prefixes
 
     const imageWidth = canvas?.width;
@@ -2463,6 +2554,60 @@ const Annotator = ({
     }
   };
 
+  const handleExportJSON = (data, info) => {
+    try {
+      const baseName = info?.fileName
+        ? info.fileName.replace(/\.[^.]+$/, '')
+        : file?.name?.replace(/\.[^.]+$/, '') || 'annotation';
+
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        fileName: baseName,
+        rooms: data.map((room) => ({
+          roomType: room.roomType,
+          width:    room.width,
+          length:   room.length,
+          areaSqFt: room.areaSqFt,
+          areaSqM:  room.areaSqM,
+        })),
+        annotations: {
+          rectangles: rectangles.map((r) => ({
+            id:           r.id,
+            x:            r.x,
+            y:            r.y,
+            width:        r.width,
+            height:       r.height,
+            rotation:     r.rotation,
+            fill:         r.fill,
+          })),
+          comments: comments.map((c) => ({
+            id:     c.id,
+            rectId: c.rectId,
+            text:   c.text,
+            x:      c.x,
+            y:      c.y,
+          })),
+        },
+        canvasSize: { width: pdfSize.width, height: pdfSize.height },
+      };
+
+      const json     = JSON.stringify(payload, null, 2);
+      const blob     = new Blob([json], { type: 'application/json' });
+      const url      = URL.createObjectURL(blob);
+      const fileName = `${baseName}-annotations-${Date.now()}.json`;
+
+      setDownloadedFiles((prev) => [...prev, { id: Date.now(), name: fileName, url }]);
+
+      const a = document.createElement('a');
+      a.href     = url;
+      a.download = fileName;
+      a.click();
+    } catch (err) {
+      console.error('JSON export failed:', err);
+      alert('Failed to export JSON file.');
+    }
+  };
+
   const handleRemoveFile = (fileToRemove) => {
     URL.revokeObjectURL(fileToRemove.url);
 
@@ -2671,6 +2816,19 @@ const Annotator = ({
                         ) : (
                           <FaFileExcel size={32} color="#217346" />
                         )}
+                      </Button>
+
+                      <Button
+                        variant="link"
+                        title="Export raw JSON (rooms + annotations)"
+                        onClick={() => handleExportJSON(filteredRoomsForTable, pdfInfo)}
+                        style={{ padding: 0, marginLeft: '4px' }}
+                      >
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          width: 32, height: 32, background: '#f59e0b', borderRadius: '6px',
+                          color: '#fff', fontWeight: 700, fontSize: '11px', letterSpacing: '-0.5px',
+                        }}>JSON</span>
                       </Button>
                       {exportStatus === "success" && (
                         <span className="export-success">
@@ -2995,6 +3153,42 @@ const Annotator = ({
               </Button>
             </ButtonGroup>
 
+            {/* Undo / Redo */}
+            <ButtonGroup size="sm" className="me-2">
+              <Button
+                variant="outline-dark"
+                onClick={undo}
+                title="Undo last annotation action (Ctrl+Z)"
+              >↩ Undo</Button>
+              <Button
+                variant="outline-dark"
+                onClick={redo}
+                title="Redo (Ctrl+Y)"
+              >↪ Redo</Button>
+            </ButtonGroup>
+
+            {file && file.type === "application/pdf" && totalPages > 1 && (
+              <ButtonGroup size="sm" className="me-2">
+                <Button
+                  variant="outline-success"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  title="Previous page"
+                >◀ Prev</Button>
+                <Button
+                  variant="outline-success"
+                  disabled
+                  style={{ minWidth: '70px' }}
+                >Page {currentPage}/{totalPages}</Button>
+                <Button
+                  variant="outline-success"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  title="Next page"
+                >Next ▶</Button>
+              </ButtonGroup>
+            )}
+
             {file && file.type === "application/pdf" && (
               <ButtonGroup size="sm">
                 <Button
@@ -3120,7 +3314,7 @@ const Annotator = ({
             >
               <div 
                 className="canvas-wrapper"
-                style={window.innerWidth < 768 && pdfZoom > 1 ? {
+                style={pdfZoom !== 1 ? {
                   transform: `scale(${pdfZoom})`,
                   transformOrigin: '0 0',
                   display: 'inline-block',
@@ -3272,6 +3466,18 @@ const Annotator = ({
                           }}
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
+                          onDblClick={(event) => {
+                            event.cancelBubble = true;
+                            setEditingLabelRectId(comment.rectId);
+                            setEditingLabelValue(comment.text);
+                            setShowEditLabelModal(true);
+                          }}
+                          onDblTap={(event) => {
+                            event.cancelBubble = true;
+                            setEditingLabelRectId(comment.rectId);
+                            setEditingLabelValue(comment.text);
+                            setShowEditLabelModal(true);
+                          }}
                         />
                       </Group>
                       );
@@ -3281,6 +3487,111 @@ const Annotator = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Placed annotations list — edit or delete without hunting on canvas */}
+      {comments.length > 0 && (
+        <div style={{ margin: '12px 0 4px', padding: '10px 14px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
+          <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '8px', color: '#495057' }}>
+            📌 Placed annotations ({comments.length})
+            <span style={{ fontWeight: 400, color: '#6c757d', marginLeft: '8px', fontSize: '12px' }}>
+              — or double-click a label on the canvas to edit
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {comments.map((comment) => (
+              <div
+                key={comment.id}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  background: '#fff', border: '1px solid #ced4da', borderRadius: '20px',
+                  padding: '2px 8px 2px 10px', fontSize: '12px', color: '#212529',
+                }}
+              >
+                <span style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {comment.text}
+                </span>
+                <button
+                  title="Edit annotation label"
+                  onClick={() => {
+                    setEditingLabelRectId(comment.rectId);
+                    setEditingLabelValue(comment.text);
+                    setShowEditLabelModal(true);
+                  }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '0 2px', color: '#0d6efd', fontSize: '13px', lineHeight: 1,
+                  }}
+                >✏️</button>
+                <button
+                  title="Delete annotation"
+                  onClick={() => removeAnnotationByRectId(comment.rectId)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '0 2px', color: '#dc3545', fontSize: '13px', lineHeight: 1,
+                  }}
+                >🗑️</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Label modal (double-click on annotation label) */}
+      {showEditLabelModal && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.5)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+          }}
+          onClick={() => setShowEditLabelModal(false)}
+        >
+          <div
+            style={{
+              background: '#fff', borderRadius: '12px', padding: '24px',
+              minWidth: '280px', maxWidth: '90vw', boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h5 style={{ marginBottom: '12px' }}>✏️ Edit annotation label</h5>
+            <Form.Control
+              type="text"
+              value={editingLabelValue}
+              onChange={(e) => setEditingLabelValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && editingLabelValue.trim()) {
+                  pushHistory(rectangles, comments, lines);
+                  setComments((prev) =>
+                    prev.map((c) =>
+                      idsMatch(c.rectId, editingLabelRectId) ? { ...c, text: editingLabelValue.trim() } : c
+                    )
+                  );
+                  setShowEditLabelModal(false);
+                }
+              }}
+              autoFocus
+              style={{ marginBottom: '16px', fontSize: '16px' }}
+            />
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <Button
+                variant="primary" size="sm"
+                onClick={() => {
+                  if (!editingLabelValue.trim()) return;
+                  pushHistory(rectangles, comments, lines);
+                  setComments((prev) =>
+                    prev.map((c) =>
+                      idsMatch(c.rectId, editingLabelRectId) ? { ...c, text: editingLabelValue.trim() } : c
+                    )
+                  );
+                  setShowEditLabelModal(false);
+                }}
+                disabled={!editingLabelValue.trim()}
+              >Save</Button>
+              <Button variant="secondary" size="sm" onClick={() => setShowEditLabelModal(false)}>Cancel</Button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -330,14 +330,15 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.strokeStyle = zone.stroke || 'rgba(0,100,200,0.3)';
     context.stroke();
 
-    // Draw zone number in top-left corner
+    // Draw zone label in top-left corner
     if (zone.zoneNumber) {
+      const label = zone.zoneLabel || String(zone.zoneNumber);
       const fontSize = Math.max(12, 16 * scaleFactor);
       context.font = `bold ${fontSize}px Arial`;
       context.fillStyle = 'rgba(0,80,160,0.9)';
       context.textAlign = 'left';
       context.textBaseline = 'top';
-      context.fillText(`Zone ${zone.zoneNumber}`, x + 6 * scaleFactor, y + 6 * scaleFactor);
+      context.fillText(`Zone ${label}`, x + 6 * scaleFactor, y + 6 * scaleFactor);
     }
     context.restore();
   });

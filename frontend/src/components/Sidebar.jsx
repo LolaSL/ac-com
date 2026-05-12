@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useEffect, useContext, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
@@ -66,7 +66,7 @@ const statusConfig = {
   rejected: { label: 'Rejected', color: '#dc2626', bg: '#fee2e2' },
 };
 
-const Sidebar = () => {
+const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
   const navigate = useNavigate();
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
@@ -89,9 +89,18 @@ const Sidebar = () => {
   // Mobile-friendly delete confirmation state (replaces window.confirm)
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false });
 
+  // Pagination state
+  const ITEMS_PER_PAGE = 10;
+  const [myDrawingsPage, setMyDrawingsPage]         = useState(1);
+  const [engineerReviewsPage, setEngineerReviewsPage] = useState(1);
+
   // Search & sort
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'name'
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'approved' | 'reviewed' | 'rejected'
+
+  // Track whether the deep-link has already been handled (avoid repeated triggers)
+  const deepLinkHandled = useRef(false);
 
   // PDF zoom scale
   const [pdfScale, setPdfScale] = useState(1.5);
@@ -111,12 +120,43 @@ const Sidebar = () => {
           (item.engineerId?.name || '').toLowerCase().includes(q)
       );
     }
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(
+        (item) => (item.status || 'pending').toLowerCase() === statusFilter
+      );
+    }
     return [...filtered].sort((a, b) => {
       if (sortBy === 'name') return (a.filename || '').localeCompare(b.filename || '');
       if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
       return new Date(b.createdAt) - new Date(a.createdAt); // newest
     });
   };
+
+  const handleShareLink = (id, isEngineer = false) => {
+    const base = window.location.origin;
+    const url = isEngineer
+      ? `${base}/measurement?engineerReview=${id}`
+      : `${base}/measurement?annotation=${id}`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast.success('Link copied to clipboard!'));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast.success('Link copied to clipboard!');
+    }
+  };
+
+  // Reset pagination when search/sort/filter changes
+  useEffect(() => {
+    setMyDrawingsPage(1);
+    setEngineerReviewsPage(1);
+  }, [searchQuery, sortBy, statusFilter]);
 
   // const isUser = !!state?.userInfo && !!state?.userInfo.token;
 
@@ -216,6 +256,38 @@ const Sidebar = () => {
       setError(null);
     }
   }, [isOpen, fetchSavedPdfs, fetchEngineerAnnotations]);
+
+  // Auto-open sidebar and switch to the correct tab when a deep-link param is present
+  useEffect(() => {
+    if ((deepLinkAnnotationId || deepLinkEngineerReviewId) && !deepLinkHandled.current) {
+      setIsOpen(true);
+      if (deepLinkEngineerReviewId) setActiveTab('engineer-reviews');
+      else setActiveTab('my-annotations');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Once my-annotations data loads, auto-select the linked item
+  useEffect(() => {
+    if (deepLinkHandled.current || !deepLinkAnnotationId || savedPdfs.length === 0) return;
+    const item = savedPdfs.find((p) => p._id === deepLinkAnnotationId);
+    if (item) {
+      deepLinkHandled.current = true;
+      viewPdfWithAnnotations(item);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedPdfs, deepLinkAnnotationId]);
+
+  // Once engineer-reviews data loads, auto-select the linked item
+  useEffect(() => {
+    if (deepLinkHandled.current || !deepLinkEngineerReviewId || engineerAnnotations.length === 0) return;
+    const item = engineerAnnotations.find((a) => a._id === deepLinkEngineerReviewId);
+    if (item) {
+      deepLinkHandled.current = true;
+      viewEngineerAnnotationPdf(item);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [engineerAnnotations, deepLinkEngineerReviewId]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -949,6 +1021,20 @@ const Sidebar = () => {
                       <option value="oldest">Oldest</option>
                       <option value="name">Name</option>
                     </select>
+                    {activeTab === 'engineer-reviews' && (
+                      <select
+                        className="sb-sort"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        title="Filter by status"
+                      >
+                        <option value="all">All statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="reviewed">Reviewed</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    )}
                   </div>
                 )}
 
@@ -960,6 +1046,9 @@ const Sidebar = () => {
                         <p className="sb-empty">Loading your drawings…</p>
                       ) : savedPdfs.length > 0 ? ((() => {
                         const filtered = filterAndSort(savedPdfs);
+                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+                        const page = Math.min(myDrawingsPage, totalPages || 1);
+                        const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
                         return filtered.length > 0 ? (
                         <>
                           <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'flex-end' }}>
@@ -972,7 +1061,7 @@ const Sidebar = () => {
                             </button>
                           </div>
                           <ul className="sb-list">
-                          {filtered.map((pdf) => (
+                          {paged.map((pdf) => (
                             <li key={pdf._id} className="sb-item">
                               <button
                                 className="sb-item__open"
@@ -993,9 +1082,24 @@ const Sidebar = () => {
                               >
                                 <FaTrash />
                               </button>
+                              <button
+                                className="sb-item__share"
+                                onClick={() => handleShareLink(pdf._id, false)}
+                                title="Copy shareable link"
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#6c757d' }}
+                              >
+                                🔗
+                              </button>
                             </li>
                           ))}
                           </ul>
+                          {totalPages > 1 && (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '8px' }}>
+                              <button className="btn btn-outline-secondary btn-sm" disabled={page <= 1} onClick={() => setMyDrawingsPage(p => Math.max(1, p - 1))}>◀</button>
+                              <span style={{ fontSize: '0.8rem' }}>Page {page} of {totalPages}</span>
+                              <button className="btn btn-outline-secondary btn-sm" disabled={page >= totalPages} onClick={() => setMyDrawingsPage(p => Math.min(totalPages, p + 1))}>▶</button>
+                            </div>
+                          )}
                         </>
                         ) : (
                           <p className="sb-empty">No matches found.</p>
@@ -1010,6 +1114,9 @@ const Sidebar = () => {
                         <p className="sb-empty">Loading engineer reviews…</p>
                       ) : engineerAnnotations.length > 0 ? ((() => {
                         const filtered = filterAndSort(engineerAnnotations);
+                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+                        const page = Math.min(engineerReviewsPage, totalPages || 1);
+                        const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
                         return filtered.length > 0 ? (
                         <>
                           <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'flex-end' }}>
@@ -1022,7 +1129,7 @@ const Sidebar = () => {
                             </button>
                           </div>
                           <ul className="sb-list">
-                          {filtered.map((annotation) => (
+                          {paged.map((annotation) => (
                             <li key={annotation._id} className="sb-item">
                               <button
                                 className="sb-item__open"
@@ -1052,9 +1159,24 @@ const Sidebar = () => {
                               >
                                 <FaTrash />
                               </button>
+                              <button
+                                className="sb-item__share"
+                                onClick={() => handleShareLink(annotation._id, true)}
+                                title="Copy shareable link"
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#6c757d' }}
+                              >
+                                🔗
+                              </button>
                             </li>
                           ))}
                           </ul>
+                          {totalPages > 1 && (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '8px' }}>
+                              <button className="btn btn-outline-secondary btn-sm" disabled={page <= 1} onClick={() => setEngineerReviewsPage(p => Math.max(1, p - 1))}>◀</button>
+                              <span style={{ fontSize: '0.8rem' }}>Page {page} of {totalPages}</span>
+                              <button className="btn btn-outline-secondary btn-sm" disabled={page >= totalPages} onClick={() => setEngineerReviewsPage(p => Math.min(totalPages, p + 1))}>▶</button>
+                            </div>
+                          )}
                         </>
                         ) : (
                           <p className="sb-empty">No matches found.</p>
@@ -1096,6 +1218,13 @@ const Sidebar = () => {
                           <FaTrash />
                         </button>
                       )}
+                      {activeTab === "my-annotations" && currentPdfType === "user" && (
+                        <button
+                          onClick={() => handleShareLink(selectedPdf._id, false)}
+                          title="Copy shareable link"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', color: '#6c757d', fontSize: '1.1rem' }}
+                        >🔗</button>
+                      )}
                       {activeTab === "engineer-reviews" && currentPdfType === "engineer" && (
                         <button
                           className="sb-item__delete sb-pdfbar__delete"
@@ -1104,6 +1233,13 @@ const Sidebar = () => {
                         >
                           <FaTrash />
                         </button>
+                      )}
+                      {activeTab === "engineer-reviews" && currentPdfType === "engineer" && (
+                        <button
+                          onClick={() => handleShareLink(selectedPdf._id, true)}
+                          title="Copy shareable link"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', color: '#6c757d', fontSize: '1.1rem' }}
+                        >🔗</button>
                       )}
                     </div>
 

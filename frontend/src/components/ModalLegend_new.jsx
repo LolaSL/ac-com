@@ -1,15 +1,107 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Modal, Button, Tabs, Tab } from "react-bootstrap";
 import "./ModalLegend_new.css";
 
-const ModalLegend = () => {
+import "./ModalLegend_new.css";const ModalLegend = () => {
   const [show, setShow] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const printRef = useRef(null);
+
   const handleShow = () => {
     setShow(true);
-    setTimeout(() => {
-      setShow(false);
-    }, 60000);
+    setTimeout(() => setShow(false), 60000);
   };
+
+  const handlePrint = useCallback(() => {
+    const content = printRef.current;
+    if (!content) return;
+    const win = window.open('', '_blank', 'width=900,height=700');
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>AC-Commerce: Measurement System Instructions</title>
+          <style>
+            body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a1a; padding: 24px; }
+            h5 { color: #0d6efd; margin-top: 18px; margin-bottom: 6px; }
+            h6 { color: #0d6efd; margin-top: 14px; margin-bottom: 4px; font-size: 13px; }
+            ul { margin: 0 0 8px 18px; padding: 0; }
+            li { margin-bottom: 4px; line-height: 1.5; }
+            strong { color: #111; }
+            .section { border-top: 1px solid #dee2e6; margin-top: 20px; padding-top: 12px; }
+            .footer { margin-top: 24px; font-size: 11px; color: #6c757d; border-top: 1px solid #dee2e6; padding-top: 8px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <h3 style="color:#dc3545">📋 AC-Commerce: Measurement System Instructions</h3>
+          <p style="color:#6c757d;font-size:12px">Generated: ${new Date().toLocaleString()}</p>
+          ${content.innerHTML}
+          <div class="footer">AC-Commerce &mdash; Professional HVAC Solutions &mdash; www.accommerce.com</div>
+        </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 400);
+  }, []);
+
+  // DOM-based search: runs after every render, filters <li> items and highlights matches
+  useEffect(() => {
+    const container = printRef.current;
+    if (!container) return;
+    const q = searchQuery.trim().toLowerCase();
+
+    // Restore all items first
+    container.querySelectorAll('li').forEach((li) => {
+      li.style.display = '';
+      if (li.dataset.originalHtml !== undefined) {
+        li.innerHTML = li.dataset.originalHtml;
+        delete li.dataset.originalHtml;
+      }
+    });
+
+    if (!q) {
+      // Show all section headers and paragraphs too
+      container.querySelectorAll('h6, p').forEach((el) => (el.style.display = ''));
+      return;
+    }
+
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+
+    container.querySelectorAll('li').forEach((li) => {
+      const text = li.textContent.toLowerCase();
+      if (!text.includes(q)) {
+        li.style.display = 'none';
+      } else {
+        // Highlight match inside the li
+        if (li.dataset.originalHtml === undefined) {
+          li.dataset.originalHtml = li.innerHTML;
+        }
+        li.innerHTML = li.dataset.originalHtml.replace(
+          regex,
+          '<mark style="background:#fef08a;padding:0">$1</mark>'
+        );
+      }
+    });
+
+    // Hide section headings whose entire list has no visible items
+    container.querySelectorAll('h6').forEach((h6) => {
+      let next = h6.nextElementSibling;
+      let hasVisible = false;
+      while (next && next.tagName !== 'H6') {
+        if (next.tagName === 'UL') {
+          const anyVisible = Array.from(next.querySelectorAll('li')).some(
+            (li) => li.style.display !== 'none'
+          );
+          if (anyVisible) hasVisible = true;
+        }
+        next = next.nextElementSibling;
+      }
+      h6.style.display = hasVisible ? '' : 'none';
+    });
+  }, [searchQuery]);
 
   return (
     <>
@@ -29,7 +121,33 @@ const ModalLegend = () => {
             📋 Measurement System: How to Use
           </Modal.Title>
         </Modal.Header>
+
+        {/* Search + Print bar — outside Modal.Body so sticky works reliably */}
+        <div className="legend-search-bar">
+          <input
+            type="text"
+            className="form-control form-control-sm legend-search-input"
+            placeholder="🔍 Search instructions…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              className="btn btn-outline-secondary btn-sm legend-search-clear"
+              onClick={() => setSearchQuery('')}
+              title="Clear search"
+            >✕</button>
+          )}
+          <button
+            className="btn btn-outline-primary btn-sm legend-print-btn"
+            onClick={handlePrint}
+            title="Print / Download instructions as reference"
+          >🖨️ Print</button>
+        </div>
+
         <Modal.Body>
+          {/* Printable content ref */}
+          <div ref={printRef}>
           <Tabs defaultActiveKey="annotator" id="legend-tabs" className="mb-3">
             {/* BUTTON LEGEND TAB */}
             <Tab eventKey="buttons" title="🔘 Button Legend">
@@ -41,14 +159,14 @@ const ModalLegend = () => {
                   <li><strong>Reset (°):</strong> Appears only when PDF is rotated — resets back to original 0° orientation</li>
                   <li><strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF canvas (range: 100%–400%)</li>
                   <li><strong>100% (zoom%):</strong> Shows current zoom level; click to reset zoom back to 100%</li>
-                  <li><strong>Click on canvas:</strong> Opens a modal to enter an AC unit label and places an air conditioner symbol annotation at that position</li>
-                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF is loaded. Tap to toggle — when active it turns blue and shows <em>"✅ Tap to place"</em>; only while active can you tap the canvas to place annotations. This prevents accidental placements while scrolling on touch screens.</li>
-                  <li><strong>Drag air conditioner symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an annotation</li>
+                  <li><strong>Click on canvas:</strong> Opens a modal to enter an AC unit label and places an AC symbol at that position</li>
+                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF is loaded. Tap to toggle — when active it turns blue and shows <em>"✅ Tap to place"</em>; only while active can you tap the canvas to place AC symbols. This prevents accidental placements while scrolling on touch screens.</li>
+                  <li><strong>Drag air conditioner symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an AC symbol</li>
                   <li><strong>Click air conditioner symbol (desktop):</strong> Rotates the air conditioner symbol 90° in place</li>
                   <li><strong>🗑️ Delete air conditioner symbol:</strong> <em>Desktop:</em> right-click the air conditioner symbol. <em>Mobile:</em> double-tap the air conditioner symbol (two taps within ~700 ms) or press and hold for ~800 ms</li>
                   <li><strong>Export to BTU (n rooms):</strong> Sends all extracted rooms to the BTU Calculator; disabled when no rooms are available</li>
-                  <li><strong>Save:</strong> Saves the PDF with annotations to the backend (shows "Saving..." while in progress)</li>
-                  <li><strong>Clear:</strong> Removes all annotations, resets the canvas, and clears all session data</li>
+                  <li><strong>Save:</strong> Saves the PDF with all AC symbols to the backend (shows "Saving..." while in progress)</li>
+                  <li><strong>Clear:</strong> Removes all AC symbols, resets the canvas, and clears all session data</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">📋 Room Table Controls</h6>
@@ -71,7 +189,7 @@ const ModalLegend = () => {
 
                 <h6 className="mb-2 mt-3 text-primary">🎯 Interaction Notes</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li><strong>Single Flat:</strong> Standard workflow — upload PDF, annotate AC locations, export rooms, calculate BTU</li>
+                  <li><strong>Single Flat:</strong> Standard workflow — upload PDF, notate AC locations, export rooms, calculate BTU</li>
                   <li><strong>Multi-Flat:</strong> Label AC units with flat-specific numbers (ac-1.1, ac-2.1), rename rooms with flat numbers, system auto-detects separate units</li>
                   <li><strong>VRF System:</strong> All calculations use VRF technology with chain topology refrigerant connections</li>
                   <li><strong>Mobile:</strong> Pinch two fingers on the canvas to zoom in/out on small screens</li>
@@ -133,7 +251,7 @@ const ModalLegend = () => {
                     <strong>Click on the canvas</strong> at the position where an AC unit or condenser should go — a modal will appear to enter the label
                   </li>
                   <li>
-                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF is loaded. Tap it to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas to place annotations. Tap the button again to deactivate and return to scroll-only mode.
+                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF is loaded. Tap it to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas to place AC symbols. Tap the button again to deactivate and return to scroll-only mode.
                   </li>
                   <li>
                     <strong>Single Flat AC label:</strong> Enter e.g. "ac-1", "ac-2"
@@ -201,10 +319,10 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Click <strong>"Save"</strong> to save the annotated PDF and room data to the backend (button shows "Saving..." during operation)
+                    Click <strong>"Save"</strong> to save the notated PDF and room data to the backend (button shows "Saving..." during operation)
                   </li>
                   <li>
-                    Click <strong>"Clear"</strong> to remove all annotations, reset the canvas, and clear all saved session data
+                    Click <strong>"Clear"</strong> to remove all AC symbols, reset the canvas, and clear all saved session data
                   </li>
                 </ul>
               </div>
@@ -235,7 +353,7 @@ const ModalLegend = () => {
                     <strong>Number of People:</strong> Occupancy level (each person adds ~600 BTU)
                   </li>
                   <li>
-                    <strong>Multi-flat/Multi-unit property:</strong> Check this box to give each flat its own separate condenser. Auto-checked when multi-flat is detected from room-name prefixes or annotation labels
+                    <strong>Multi-flat/Multi-unit property:</strong> Check this box to give each flat its own separate condenser. Auto-checked when multi-flat is detected from room-name prefixes or AC symbol labels
                   </li>
                 </ul>
 
@@ -296,7 +414,7 @@ const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Multi-flat is detected automatically from <em>room-name prefixes</em> ("Flat 1: Kitchen", "Flat 2: Kitchen") or from <em>annotation labels</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)
+                    Multi-flat is detected automatically from <em>room-name prefixes</em> ("Flat 1: Kitchen", "Flat 2: Kitchen") or from <em>AC symbol labels</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)
                   </li>
                   <li>Duplicate room names alone do <strong>not</strong> indicate multi-flat — use the explicit labels above</li>
                   <li>
@@ -428,8 +546,16 @@ const ModalLegend = () => {
               </div>
             </Tab>
           </Tabs>
+          </div>{/* end printRef */}
         </Modal.Body>
         <Modal.Footer>
+          <Button
+            className="btn btn-outline-primary btn-sm"
+            onClick={handlePrint}
+            title="Print / Download instructions"
+          >
+            🖨️ Print / Save
+          </Button>
           <Button
             className="go-to-btn btn-text w-auto"
             variant="btn-outline"

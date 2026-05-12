@@ -2,7 +2,7 @@ import React from "react";
 import { Form } from "react-bootstrap";
 import "./CheckboxGroup.css";
 
-const CheckboxGroup = ({ title, name, options, onChange }) => {
+const CheckboxGroup = ({ title, name, options, onChange, labels }) => {
   const safeOptions = options || {};
 
   return (
@@ -12,7 +12,7 @@ const CheckboxGroup = ({ title, name, options, onChange }) => {
         <Form.Check
           key={key}
           type="checkbox"
-          label={key.replace(/([A-Z])/g, " $1").trim()}
+          label={labels?.[key] ?? key.replace(/([A-Z])/g, " $1").trim()}
           name={key}
           checked={safeOptions[key] || false}
           onChange={onChange}
