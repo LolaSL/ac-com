@@ -176,3 +176,32 @@
     padding: 0 0.5rem;
   }
 }
+
+/* ── Wizard single-line on small screens ───────────────── */
+@media (max-width: 575px) {
+  .ms-wizard {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .ms-wizard__step {
+    min-width: 44px !important;
+    gap: 3px !important;
+  }
+
+  .ms-wizard__step > div:first-child {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .ms-wizard__step > span {
+    font-size: 0.55rem !important;
+  }
+
+  .ms-wizard__connector {
+    width: 12px !important;
+    flex-shrink: 0;
+  }
+}

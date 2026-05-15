@@ -20,7 +20,7 @@ import ExcelJS from "exceljs";
 import "./Annotator.css";
 
 import * as pdfjsLib from "pdfjs-dist";
-import { FaFileExcel, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
+import { FaFileExcel, FaFileCode, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
 let Tesseract;
@@ -813,9 +813,6 @@ const Annotator = ({
   const [acUnitInput, setAcUnitInput] = useState('');
   const [pendingAnnotationPos, setPendingAnnotationPos] = useState(null);
   // Default to annotation mode (true) so users can create rectangles immediately
-  // Track last rectangle tap for double-tap deletion on mobile
-  const lastRectTapRef = useRef({});
-
   // Ref mirrors for rectangles and comments — always up-to-date regardless of closure age.
   // Fixes a Safari stale-closure bug in confirmAcUnitAnnotation where deleting then
   // immediately re-creating the same label would incorrectly trigger "already exists".
@@ -872,6 +869,7 @@ const Annotator = ({
   const [showEditLabelModal, setShowEditLabelModal] = useState(false);
 
   // ── acType selector for save ─────────────────────────────────────────────────────
+  // eslint-disable-next-line no-unused-vars
   const [selectedAcTypeForSave, setSelectedAcTypeForSave] = useState('ductless');
 
   // ── Multi-page PDF navigation ────────────────────────────────────────────────────
@@ -1042,27 +1040,63 @@ const Annotator = ({
   // Track if currently dragging to prevent modal from showing
   const isDraggingRef = useRef(false);
   
-  // Track touch movement to distinguish between tap and drag
-  const touchStartRef = useRef({ x: 0, y: 0, time: 0, rectId: null });
-  const LONG_TAP_THRESHOLD = 800; // milliseconds - hold time for long press delete
-  const longPressTimeoutRef = useRef(null);
-  const longPressTriggeredRef = useRef(false); // Track if long-press actually fired
   const isSavingRef = useRef(false); // Synchronous flag to prevent duplicate saves
   
   // Track pinch zoom on small screens
   const pinchStartDistanceRef = useRef(0);
   const pinchStartZoomRef = useRef(1);
+  const containerMainRef = useRef(null); // ref for non-passive touch listeners
+  const pdfZoomRef = useRef(1);          // mirrors pdfZoom state for use inside event listeners
   // Track in-flight PDF.js render task so we can cancel before starting a new one
   const renderTaskRef = useRef(null);
 
-  // Cleanup long-press timeout on unmount
+  // Keep pdfZoomRef in sync with state
+  useEffect(() => { pdfZoomRef.current = pdfZoom; }, [pdfZoom]);
+
+  // Attach non-passive touchmove on container-main so e.preventDefault() actually works.
+  // React attaches passive listeners by default which silently ignores preventDefault,
+  // causing the browser to scroll AND zoom simultaneously (the "diagonal" effect).
+  // NOTE: depends on previewUrl so it re-runs after the PDF loads (container-main
+  //       only renders when previewUrl is set, so containerMainRef is null at mount).
   useEffect(() => {
-    return () => {
-      if (longPressTimeoutRef.current) {
-        clearTimeout(longPressTimeoutRef.current);
+    const el = containerMainRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e) => {
+      if (e.touches.length === 2 && window.innerWidth < 768) {
+        // Prevent browser committing to a pan/zoom gesture so our JS handler takes over
+        e.preventDefault();
+        const t1 = e.touches[0], t2 = e.touches[1];
+        pinchStartDistanceRef.current = Math.hypot(
+          t2.clientX - t1.clientX, t2.clientY - t1.clientY
+        );
+        pinchStartZoomRef.current = pdfZoomRef.current;
       }
     };
-  }, []);
+
+    const onTouchMove = (e) => {
+      if (e.touches.length === 2 && window.innerWidth < 768 && pinchStartDistanceRef.current > 0) {
+        e.preventDefault(); // works because listener is non-passive
+        const t1 = e.touches[0], t2 = e.touches[1];
+        const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const newZoom = Math.max(1, Math.min(4, pinchStartZoomRef.current * (dist / pinchStartDistanceRef.current)));
+        setPdfZoom(newZoom);
+      }
+    };
+
+    const onTouchEnd = () => { pinchStartDistanceRef.current = 0; };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: false }); // non-passive to allow preventDefault on 2-finger
+    el.addEventListener('touchmove',  onTouchMove,  { passive: false }); // non-passive!
+    el.addEventListener('touchend',   onTouchEnd,   { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove',  onTouchMove);
+      el.removeEventListener('touchend',   onTouchEnd);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewUrl]);
 
   // const clearResults = () => {
   //   setResults([]);
@@ -1476,9 +1510,9 @@ const Annotator = ({
   const getResponsiveRectSize = () => {
     const width = window.innerWidth;
     if (width < 480) {
-      return { width: 36, height: 14 };
+      return { width: 24, height: 9 };
     } else if (width < 768) {
-      return { width: 48, height: 16 };
+      return { width: 32, height: 11 };
     }
     return { width: 54, height: 18 };
   };
@@ -1487,10 +1521,12 @@ const Annotator = ({
   const computeCommentPos = useCallback((rectX, rectY, rectW, rectH, commentText) => {
     const canvasWidth = pdfSize.width;
     const canvasHeight = pdfSize.height;
-    const charWidth = 6;
-    const textPadding = 6;
-    const boxWidth = Math.max(48, commentText.length * charWidth + textPadding);
-    const boxHeight = 16;
+    const _w = window.innerWidth;
+    const charWidth   = _w < 480 ? 4 : _w < 768 ? 5 : 6;
+    const textPadding = _w < 480 ? 3 : _w < 768 ? 4 : 6;
+    const minBoxWidth = _w < 480 ? 24 : _w < 768 ? 28 : 48;
+    const boxWidth = Math.max(minBoxWidth, commentText.length * charWidth + textPadding);
+    const boxHeight = _w < 480 ? 10 : _w < 768 ? 12 : 16;
     // +2 so comment box centre aligns with rect centre (box renders at y-10, h=16, centre=y-2)
     let cx = rectX + rectW + 2;
     let cy = rectY + rectH / 2 + 2;
@@ -1611,64 +1647,6 @@ const Annotator = ({
       setAcUnitInput('');
       setShowAcUnitModal(true);
     }
-  };
-
-  const handleTouchStart = (e) => {
-    // Safety check: ensure event has valid target with ID
-    if (!e || !e.target || !e.target.attrs) {
-      return;
-    }
-
-    // Touch can happen on rectangle or on linked comment elements.
-    const clickedRectId = e.target.attrs.rectId || e.target.attrs.id;
-    if (clickedRectId === undefined || clickedRectId === null) {
-      return;
-    }
-
-    const now = Date.now();
-    
-    // Record touch start position and time for drag detection
-    // Handle both native touch events and Konva touch events
-    let touchX = 0, touchY = 0;
-    if (e.evt && e.evt.touches && e.evt.touches.length > 0) {
-      // Native touch event
-      touchX = e.evt.touches[0].clientX;
-      touchY = e.evt.touches[0].clientY;
-    } else if (e.pointers && e.pointers.length > 0) {
-      // Konva pointer event
-      touchX = e.pointers[0].clientX || 0;
-      touchY = e.pointers[0].clientY || 0;
-    }
-    
-    touchStartRef.current = { x: touchX, y: touchY, time: now, rectId: clickedRectId };
-    longPressTriggeredRef.current = false; // Reset flag
-    
-    // Clear any existing long-press timeout
-    if (longPressTimeoutRef.current) {
-      clearTimeout(longPressTimeoutRef.current);
-    }
-    
-    // Check for double-tap: if same rect was tapped within 400ms, delete it
-    if (idsMatch(lastRectTapRef.current.id, clickedRectId) && 
-        now - lastRectTapRef.current.timestamp < 700) {
-      // Double-tap detected - delete rectangle
-      removeAnnotationByRectId(clickedRectId);
-      lastRectTapRef.current = {}; // Reset
-      return;
-    }
-    
-    // Record this tap
-    lastRectTapRef.current = { id: clickedRectId, timestamp: now };
-    
-    // Set up long-press timeout (800ms)
-    longPressTimeoutRef.current = setTimeout(() => {
-      if (idsMatch(touchStartRef.current.rectId, clickedRectId)) {
-        longPressTriggeredRef.current = true; // Mark that long-press fired
-        // Long press detected - delete rectangle
-        removeAnnotationByRectId(clickedRectId);
-        touchStartRef.current = { x: 0, y: 0, time: 0, rectId: null };
-      }
-    }, LONG_TAP_THRESHOLD);
   };
 
   // Handle touch tap on stage for placing annotations (mobile equivalent of click)
@@ -2203,7 +2181,7 @@ const Annotator = ({
       isSavingRef.current = false;
       setIsSaving(false);
     }
-  }, [file, formatRoomsWithFlatPrefixes, pdfRotation, rectangles, comments, lines, pdfId, token]);
+  }, [file, formatRoomsWithFlatPrefixes, pdfRotation, rectangles, comments, lines, pdfId, selectedAcTypeForSave, token]);
 
   useEffect(() => {
     if (!results.length || !images.length) return;
@@ -2532,17 +2510,40 @@ const Annotator = ({
 
       const finalFileName = `${baseName}-data-${Date.now()}.xlsx`;
 
-      const url = URL.createObjectURL(blob);
-
-      setDownloadedFiles((prev) => [
-        ...prev,
-        { id: Date.now(), name: finalFileName, url: url },
-      ]);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = finalFileName;
-      a.click();
+      // On mobile, use Web Share API to avoid Chrome's "can't download securely" warning
+      // (async breaks the user-gesture chain required for trusted blob downloads)
+      const shareFile = new File([blob], finalFileName, {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+        try {
+          await navigator.share({ files: [shareFile], title: finalFileName });
+        } catch (shareErr) {
+          // User cancelled share or share failed — fall through to blob download
+          if (shareErr.name !== 'AbortError') {
+            const url = URL.createObjectURL(blob);
+            setDownloadedFiles((prev) => [
+              ...prev,
+              { id: Date.now(), name: finalFileName, url, fileType: 'excel' },
+            ]);
+            const a = document.createElement("a");
+            a.href = url; a.download = finalFileName; a.style.display = 'none';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
+          }
+        }
+      } else {
+        // Desktop or unsupported — standard blob download
+        const url = URL.createObjectURL(blob);
+        setDownloadedFiles((prev) => [
+          ...prev,
+          { id: Date.now(), name: finalFileName, url, fileType: 'excel' },
+        ]);
+        const a = document.createElement("a");
+        a.href = url; a.download = finalFileName; a.style.display = 'none';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      }
 
       setExportStatus("success");
       setTimeout(() => setExportStatus("idle"), 5000);
@@ -2596,12 +2597,16 @@ const Annotator = ({
       const url      = URL.createObjectURL(blob);
       const fileName = `${baseName}-annotations-${Date.now()}.json`;
 
-      setDownloadedFiles((prev) => [...prev, { id: Date.now(), name: fileName, url }]);
+      setDownloadedFiles((prev) => [...prev, { id: Date.now(), name: fileName, url, fileType: 'json' }]);
 
       const a = document.createElement('a');
       a.href     = url;
       a.download = fileName;
+      a.style.display = 'none';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
     } catch (err) {
       console.error('JSON export failed:', err);
       alert('Failed to export JSON file.');
@@ -2781,7 +2786,7 @@ const Annotator = ({
                         <option value="areaSqm">Area (sqm)</option>
                       </select>
                     </div>
-                    <div className="d-flex flex-column flex-sm-row gap-2">
+                    <div className="d-flex flex-column flex-sm-row gap-2 sort-export-btns">
                       <Button
                         variant="light"
                         size="sm"
@@ -2849,11 +2854,19 @@ const Annotator = ({
                                 download={file.name}
                                 title={`Click to download and open: ${file.name}`}
                               >
-                                <FaFileExcel
-                                  className="excel-icon-button excel-icon"
-                                  size={20}
-                                  color="#217346"
-                                />
+                                {file.fileType === 'json' ? (
+                                  <FaFileCode
+                                    className="excel-icon-button excel-icon"
+                                    size={20}
+                                    color="#f59e0b"
+                                  />
+                                ) : (
+                                  <FaFileExcel
+                                    className="excel-icon-button excel-icon"
+                                    size={20}
+                                    color="#217346"
+                                  />
+                                )}
                                 <span>{file.name}</span>
                               </a>
                               <button
@@ -3275,49 +3288,23 @@ const Annotator = ({
           {previewUrl && (
             <div 
               className="container-main"
-              onTouchStart={(e) => {
-                // Support pinch zoom on small screens
-                if (e.touches.length === 2 && window.innerWidth < 768) {
-                  const touch1 = e.touches[0];
-                  const touch2 = e.touches[1];
-                  const distance = Math.hypot(
-                    touch2.clientX - touch1.clientX,
-                    touch2.clientY - touch1.clientY
-                  );
-                  pinchStartDistanceRef.current = distance;
-                  pinchStartZoomRef.current = pdfZoom;
-                }
-              }}
-              onTouchMove={(e) => {
-                // Handle pinch zoom
-                if (e.touches.length === 2 && window.innerWidth < 768 && pinchStartDistanceRef.current > 0) {
-                  const touch1 = e.touches[0];
-                  const touch2 = e.touches[1];
-                  const distance = Math.hypot(
-                    touch2.clientX - touch1.clientX,
-                    touch2.clientY - touch1.clientY
-                  );
-                  
-                  const ratio = distance / pinchStartDistanceRef.current;
-                  let newZoom = pinchStartZoomRef.current * ratio;
-                  
-                  // Constrain zoom between 1x and 4x
-                  newZoom = Math.max(1, Math.min(4, newZoom));
-                  
-                  setPdfZoom(newZoom);
-                  e.preventDefault();
-                }
-              }}
-              onTouchEnd={() => {
-                pinchStartDistanceRef.current = 0;
-              }}
+              ref={containerMainRef}
             >
+              {/* Size-holder: expands to actual zoomed pixel size so scroll area is correct */}
+              <div style={pdfZoom !== 1 ? {
+                position: 'relative',
+                width: pdfSize.width * pdfZoom,
+                height: pdfSize.height * pdfZoom,
+                flexShrink: 0,
+              } : { position: 'relative' }}>
               <div 
                 className="canvas-wrapper"
                 style={pdfZoom !== 1 ? {
                   transform: `scale(${pdfZoom})`,
                   transformOrigin: '0 0',
-                  display: 'inline-block',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
                 } : {}}
               >
                 <canvas
@@ -3377,11 +3364,6 @@ const Annotator = ({
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
                           onClick={(event) => {
-                            // Don't rotate if a long-press is pending or just fired
-                            if (longPressTriggeredRef.current || longPressTimeoutRef.current) {
-                              longPressTriggeredRef.current = false; // Reset for next touch
-                              return;
-                            }
                             event.cancelBubble = true;
                             const clickedRectId = event.target.attrs.id;
                             setIsRotating(true);
@@ -3389,59 +3371,36 @@ const Annotator = ({
                             setTimeout(() => setIsRotating(false), 100);
                           }}
                           onTap={(event) => {
-                            // Don't rotate if a long-press is pending or just fired
-                            if (longPressTriggeredRef.current || longPressTimeoutRef.current) {
-                              longPressTriggeredRef.current = false; // Reset for next touch
-                              return;
-                            }
                             event.cancelBubble = true;
                             const clickedRectId = event.target.attrs.id;
                             setIsRotating(true);
                             rotateRectangle(clickedRectId);
                             setTimeout(() => setIsRotating(false), 100);
                           }}
-                          onTouchStart={handleTouchStart}
-                          onTouchEnd={() => {
-                            // Only cancel long-press if it hasn't fired yet
-                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
-                              clearTimeout(longPressTimeoutRef.current);
-                              longPressTimeoutRef.current = null;
-                            }
-                          }}
-                          onDragStart={() => {
-                            // Cancel long-press when dragging starts (but not if it already fired)
-                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
-                              clearTimeout(longPressTimeoutRef.current);
-                              longPressTimeoutRef.current = null;
-                            }
-                          }}
                         />
                       </React.Fragment>
                     ))}
                     {comments.map((comment) => {
-                      const charWidth = 6; // approximate width per character at fontSize 10
-                      const textPadding = 6;
-                      const boxWidth = Math.max(48, comment.text.length * charWidth + textPadding);
+                      const _w = window.innerWidth;
+                      const charWidth   = _w < 480 ? 4 : _w < 768 ? 5 : 6;
+                      const textPadding = _w < 480 ? 3 : _w < 768 ? 4 : 6;
+                      const minBoxWidth = _w < 480 ? 24 : _w < 768 ? 28 : 48;
+                      const boxHeight   = _w < 480 ? 10 : _w < 768 ? 12 : 16;
+                      const fontSize    = _w < 480 ? 7 : _w < 768 ? 8 : 10;
+                      const boxWidth = Math.max(minBoxWidth, comment.text.length * charWidth + textPadding);
                       return (
                       <Group key={comment.id}>
                         {/* Comment background box */}
                         <Rect
                           rectId={comment.rectId}
                           x={comment.x}
-                          y={comment.y - 14}
+                          y={comment.y - (boxHeight - 2)}
                           width={boxWidth}
-                          height={16}
+                          height={boxHeight}
                           fill="rgba(252, 252, 243, 0.3)"
                           stroke="grey"
                           strokeWidth={1}
                           hitStrokeWidth={24}
-                          onTouchStart={handleTouchStart}
-                          onTouchEnd={() => {
-                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
-                              clearTimeout(longPressTimeoutRef.current);
-                              longPressTimeoutRef.current = null;
-                            }
-                          }}
                         />
                         {/* Comment text */}
                         <Text
@@ -3449,21 +3408,14 @@ const Annotator = ({
                           id={comment.id}
                           rectId={comment.rectId}
                           x={comment.x + 2}
-                          y={comment.y - 13}
+                          y={comment.y - (boxHeight - 3)}
                           text={comment.text}
-                          fontSize={10}
+                          fontSize={fontSize}
                           fontFamily="Arial"
                           fontStyle="bold"
                           fill="deeppink"
                           width={boxWidth - 4}
                           draggable={true}
-                          onTouchStart={handleTouchStart}
-                          onTouchEnd={() => {
-                            if (longPressTimeoutRef.current && !longPressTriggeredRef.current) {
-                              clearTimeout(longPressTimeoutRef.current);
-                              longPressTimeoutRef.current = null;
-                            }
-                          }}
                           onDragMove={handleDragMove}
                           onDragEnd={handleDragEnd}
                           onDblClick={(event) => {
@@ -3484,6 +3436,7 @@ const Annotator = ({
                     })}
                   </Layer>
                 </Stage>
+              </div>
               </div>
             </div>
           )}

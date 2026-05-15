@@ -177,7 +177,7 @@ const Measurement = () => {
           {/* Step-by-step progress wizard */}
           <div className="ms-wizard" style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 0, marginTop: '1.5rem', flexWrap: 'wrap', rowGap: '0.5rem',
+            gap: 0, marginTop: '1.5rem',
           }}>
             {WIZARD_STEPS.map((step, idx) => {
               const stepNum = idx + 1;
@@ -188,6 +188,7 @@ const Measurement = () => {
               return (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center' }}>
                   <div
+                    className="ms-wizard__step"
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
                       gap: '4px', minWidth: '64px', cursor: clickable ? 'pointer' : 'default' }}
                     onClick={clickable ? () => navigate('/recommendations') : undefined}
@@ -210,7 +211,7 @@ const Measurement = () => {
                     }}>{step.label}</span>
                   </div>
                   {idx < WIZARD_STEPS.length - 1 && (
-                    <div style={{
+                    <div className="ms-wizard__connector" style={{
                       width: '28px', height: '2px', marginBottom: '18px',
                       background: isDone ? '#10b981' : 'rgba(255,255,255,0.2)',
                       transition: 'background 0.3s',

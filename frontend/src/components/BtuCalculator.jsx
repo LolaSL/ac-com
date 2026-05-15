@@ -233,7 +233,7 @@ useEffect(() => {
   const [measurementSystem, setMeasurementSystem] = useState("meters");
   const [rooms, setRooms] = useState([{ name: "Bedroom 1", size: "", btu: 0 }]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
-  const [numPeople, setNumPeople] = useState(2);
+  const [numPeople, setNumPeople] = useState(0);
   const [error, setError] = useState("");
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -307,6 +307,8 @@ useEffect(() => {
   const isVRFSystem = true;
   const [isMultiFlatProperty, setIsMultiFlatProperty] = useState(false);
   const [detectedFlats, setDetectedFlats] = useState([]);
+  // Per-flat people count (only used when isMultiFlatProperty && detectedFlats.length > 1)
+  const [flatPeopleCount, setFlatPeopleCount] = useState({});
 
   // ── Humidity & ventilation inputs ──────────────────────────────────────────
   const [humidity, setHumidity]       = useState('average');   // 'low' | 'average' | 'high'
@@ -412,11 +414,14 @@ useEffect(() => {
   useEffect(() => {
     setError("");
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, ceilingHeight, numPeople, measurementSystem, rooms]);
+  }, [options, ceilingHeight, numPeople, flatPeopleCount, measurementSystem, rooms]);
 
-  const calculateBTUForRoom = (room) => {
+  const calculateBTUForRoom = (room, peopleOverride) => {
     let area = convertArea(parseFloat(room.size));
     let height = parseFloat(ceilingHeight);
+    const effectivePeople = peopleOverride !== undefined
+      ? Math.max(0, parseInt(peopleOverride, 10) || 0)
+      : Math.max(0, parseInt(numPeople, 10) || 0);
 
     if (isNaN(area) || isNaN(height)) {
       return { btu: null, error: "Enter valid room size & ceiling height." };
@@ -427,7 +432,7 @@ useEffect(() => {
     // Adds HEIGHT_BTU_FACTOR_PER_METER × (extra metres) × current base BTU.
     if (height > 2.5)
       btu += btu * CONSTANTS.HEIGHT_BTU_FACTOR_PER_METER * (height - 2.5);
-    btu += CONSTANTS.BTU_PER_ADDITIONAL_PERSON * Math.max(0, numPeople - 1);
+    btu += CONSTANTS.BTU_PER_ADDITIONAL_PERSON * Math.max(0, effectivePeople - 1);
     if (room.name === "Kitchen") btu += CONSTANTS.KITCHEN_BTU_ADDITION;
 
     // Dining room climate bonuses (moderate values)
@@ -586,7 +591,18 @@ useEffect(() => {
     );
 
     const productRequests = actualRooms.map(async (room) => {
-      const { btu, error } = calculateBTUForRoom(room);
+      // Resolve per-flat people count for multi-flat properties
+      let peopleOverride;
+      if (isMultiFlatProperty && detectedFlats.length > 1) {
+        const flatMatch = room.name.match(/^(Flat\s*\d+|Unit\s*[A-Z0-9]+|Apt\s*\d+)[\s:]/i);
+        const flatKey = flatMatch
+          ? flatMatch[1].replace(/^(\w)(.*)/, (_, a, b) => a.toUpperCase() + b.toLowerCase())
+          : null;
+        peopleOverride = flatKey !== null && flatPeopleCount[flatKey] !== undefined
+          ? flatPeopleCount[flatKey]
+          : 0;
+      }
+      const { btu, error } = calculateBTUForRoom(room, peopleOverride);
       if (error) {
         setError(error);
         return { room, product: null, btu };
@@ -1063,7 +1079,8 @@ useEffect(() => {
   const handleClear = () => {
     setRooms([{ name: "Bedroom 1", size: "", btu: 0, unit: "meters" }]);
     setCeilingHeight("2.5");
-    setNumPeople(2);
+    setNumPeople(0);
+    setFlatPeopleCount({});
     setMeasurementSystem("meters");
     setOptions({
       OutdoorUnitLocation: {
@@ -1183,11 +1200,15 @@ useEffect(() => {
   {acAnnotations?.length > 0 && (
     <small className="text-success d-block mt-2">
       ✓ AC notifications found: {acAnnotations.length} label(s) detected
-      <br />
-      <em>
-        Flats auto-detected from condenser labels (e.g., condenser-1,
-        condenser-2)
-      </em>
+      {detectedFlats.length > 1 && (
+        <>
+          <br />
+          <em>
+            Flats auto-detected from condenser labels (e.g., condenser-1,
+            condenser-2)
+          </em>
+        </>
+      )}
     </small>
   )}
 </Form.Group>
@@ -1208,13 +1229,39 @@ useEffect(() => {
           </Col>
           <Col xs={12} md={6} lg={4} className="my-4">
             <Form.Group controlId="numberOfPeople">
-              <Form.Label>Number of People:</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Enter number of people"
-                value={numPeople}
-                onChange={(e) => setNumPeople(e.target.value)}
-              />
+              {isMultiFlatProperty && detectedFlats.length > 1 ? (
+                <>
+                  <Form.Label>Number of People (per flat):</Form.Label>
+                  {detectedFlats.map((flatName) => (
+                    <div key={flatName} className="d-flex align-items-center gap-2 mb-1">
+                      <span style={{ minWidth: 60, fontSize: '0.9rem' }}>{flatName}:</span>
+                      <Form.Control
+                        type="number"
+                        size="sm"
+                        min={0}
+                        placeholder="0"
+                        value={flatPeopleCount[flatName] ?? ''}
+                        onChange={(e) => setFlatPeopleCount(prev => ({
+                          ...prev,
+                          [flatName]: e.target.value === '' ? undefined : e.target.value,
+                        }))}
+                        style={{ maxWidth: 80 }}
+                      />
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <Form.Label>Number of People:</Form.Label>
+                  <Form.Control
+                    type="number"
+                    min={0}
+                    placeholder="Enter number of people"
+                    value={numPeople}
+                    onChange={(e) => setNumPeople(e.target.value)}
+                  />
+                </>
+              )}
             </Form.Group>
           </Col>
 

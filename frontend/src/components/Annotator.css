@@ -7,6 +7,18 @@
   flex-wrap: wrap;
 }
 
+@media (max-width: 575.98px) {
+  .sort-export-btns {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .sort-export-btns .btn {
+    width: auto !important;
+    margin-bottom: 0;
+  }
+}
+
 .annotate-toggle-mobile {
   display: none;
 }
@@ -199,6 +211,7 @@
 /* ========== Mobile Responsive ========== */
 @media (max-width: 767px) {
   .container-main {
+    display: block;
     max-height: 65vh;
     margin: 0 !important;
     padding: 0 !important;
@@ -260,6 +273,7 @@
 
 @media (max-width: 480px) {
   .container-main {
+    display: block;
     max-height: 55vh;
     margin: 0 !important;
     padding: 0 !important;

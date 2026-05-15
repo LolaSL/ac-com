@@ -69,11 +69,10 @@ const EngineerViewPage = () => {
   
   // Ref to store overlay canvas for handlers
   const overlayCanvasRef = useRef(null);
-
-  // Debug: Log when selectedZoneIndex changes
-  useEffect(() => {
-    console.log('🎯 selectedZoneIndex changed to:', selectedZoneIndex);
-  }, [selectedZoneIndex]);
+  // Mirror selectedZoneIndex in a ref so renderOverlays reads the latest value
+  // without needing it in the dependency array (avoids full canvas rebuild on every zone click)
+  const selectedZoneIndexRef = useRef(null);
+  useEffect(() => { selectedZoneIndexRef.current = selectedZoneIndex; }, [selectedZoneIndex]);
 
   // Fetch and render PDF + annotations
   // Fetch annotation and PDF only once (on mount or id/token change)
@@ -248,11 +247,8 @@ const EngineerViewPage = () => {
 
   const handleCanvasTouchMove = (e) => {
     if (!zoneStartPointRef.current || !overlayCanvasRef.current || !isDrawingZone) return;
-    
-    // Only prevent default when in drawing mode to allow scrolling otherwise
-    if (isDrawingZone) {
-      e.preventDefault();
-    }
+    // isDrawingZone is guaranteed true here by the guard above
+    e.preventDefault();
     
     if (e.touches.length === 1) {
       const touch = e.touches[0];
@@ -306,51 +302,29 @@ const EngineerViewPage = () => {
     setIsDrawingZone(false);
   };
 
+  // Helper: find the topmost zone whose bounds contain the given normalised coords (0-1)
+  const findZoneAtCoords = (coords, zones) => {
+    for (let i = zones.length - 1; i >= 0; i--) {
+      const z = zones[i];
+      if (
+        coords.x >= z.xPercent &&
+        coords.x <= z.xPercent + z.widthPercent &&
+        coords.y >= z.yPercent &&
+        coords.y <= z.yPercent + z.heightPercent
+      ) return i;
+    }
+    return -1;
+  };
+
   // Handle zone click for selection (like HvacZoneDesignerPage)
   const handleZoneClickInternal = (e) => {
-    console.log('🖱️ handleZoneClickInternal called. isDrawingZone:', isDrawingZone, 'addMode:', addMode);
-    if (isDrawingZone || addMode) {
-      console.log('Exiting - drawing mode or addMode active');
-      return;
-    }
-    
+    if (isDrawingZone || addMode) return;
     const canvas = overlayCanvasRef.current;
-    if (!canvas) {
-      console.log('No canvas ref!');
-      return;
-    }
-    
+    if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const coords = screenToCanvasPercent(e.clientX, e.clientY, rect, canvas);
-    console.log('Click coords:', coords);
-    
     const zones = annotation?.annotations?.hvac?.zones || [];
-    let clickedIndex = -1;
-    
-    for (let i = zones.length - 1; i >= 0; i--) {
-      const zone = zones[i];
-      console.log(`Checking zone ${i}:`, {
-        zoneX: zone.xPercent,
-        zoneY: zone.yPercent,
-        zoneWidth: zone.widthPercent,
-        zoneHeight: zone.heightPercent,
-        clickX: coords.x,
-        clickY: coords.y
-      });
-      if (
-        coords.x >= zone.xPercent &&
-        coords.x <= zone.xPercent + zone.widthPercent &&
-        coords.y >= zone.yPercent &&
-        coords.y <= zone.yPercent + zone.heightPercent
-      ) {
-        clickedIndex = i;
-        console.log('✅ Zone hit! Index:', i);
-        break;
-      }
-    }
-    
-    console.log('Final clicked index:', clickedIndex, 'Total zones:', zones.length);
-    setSelectedZoneIndex(clickedIndex);
+    setSelectedZoneIndex(findZoneAtCoords(coords, zones));
   };
 
   // Save manually drawn zone (simplified, like HvacZoneDesignerPage saveZone)
@@ -419,6 +393,7 @@ const EngineerViewPage = () => {
       const pdfUrl = window.URL.createObjectURL(pdfFile);
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
       const pdfDoc = await loadingTask.promise;
+      URL.revokeObjectURL(pdfUrl); // Revoke immediately — pdf.js has loaded the document
       const page = await pdfDoc.getPage(1);
       const scale = pdfScale;
       const viewport = page.getViewport({ scale });
@@ -497,33 +472,6 @@ const EngineerViewPage = () => {
         const x = (clientX - rect.left) / overlayCanvas.width;
         const y = (clientY - rect.top) / overlayCanvas.height;
 
-        if (addMode === "duct") {
-          const newDuct = {
-            id: `duct-${Date.now()}`,
-            xPercent: x,
-            yPercent: y,
-            width: 0.08,
-            height: 0.025,
-            ductType: "supply",
-            fill: "rgba(0,85,204,0.15)",
-            stroke: "#0055CC",
-          };
-
-          setAnnotation((prev) => ({
-            ...prev,
-            annotations: {
-              ...(prev.annotations || {}),
-              hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
-                ducts: [...(prev.annotations?.hvac?.ducts || []), newDuct],
-                diffusers: prev.annotations?.hvac?.diffusers || [],
-                dampers: prev.annotations?.hvac?.dampers || [],
-                thermostats: prev.annotations?.hvac?.thermostats || [],
-              },
-            },
-          }));
-        }
-
         if (addMode === "supply-duct" || addMode === "return-duct" || addMode === "flex-duct" || addMode === "exhaust-duct" || addMode === "insulated-duct") {
           const ductTypeMap = {
             "supply-duct":    { ductType: "supply",    fill: "rgba(0,85,204,0.15)",   stroke: "#0055CC" },
@@ -552,35 +500,6 @@ const EngineerViewPage = () => {
                 ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
                 ducts: [...(prev.annotations?.hvac?.ducts || []), newDuct],
                 diffusers: prev.annotations?.hvac?.diffusers || [],
-                dampers: prev.annotations?.hvac?.dampers || [],
-                thermostats: prev.annotations?.hvac?.thermostats || [],
-              },
-            },
-          }));
-        }
-
-        if (addMode === "diffuser") {
-          const newDiffuser = {
-            id: `diffuser-${Date.now()}`,
-            xPercent: x,
-            yPercent: y,
-            sizePercent: 0.04,
-            shape: "circle",
-            diffuserType: "round",
-            airflow: 250,
-          };
-
-          setAnnotation((prev) => ({
-            ...prev,
-            annotations: {
-              ...(prev.annotations || {}),
-              hvac: {
-                ...(prev.annotations?.hvac || { ducts: [], diffusers: [], dampers: [], thermostats: [] }),
-                ducts: prev.annotations?.hvac?.ducts || [],
-                diffusers: [
-                  ...(prev.annotations?.hvac?.diffusers || []),
-                  newDiffuser,
-                ],
                 dampers: prev.annotations?.hvac?.dampers || [],
                 thermostats: prev.annotations?.hvac?.thermostats || [],
               },
@@ -661,49 +580,6 @@ const EngineerViewPage = () => {
           return; // Don't reset addMode yet — modal handles it
         }
 
-        if (addMode === "markCondenser") {
-          // Find nearest rectangle and toggle its isCondenser flag
-          if (!annotation?.annotations?.rectangles) {
-            setAddMode(null);
-            return;
-          }
-
-          let nearest = null;
-          let minDist = Infinity;
-          annotation.annotations.rectangles.forEach((r) => {
-            const rx = r.xPercent;
-            const ry = r.yPercent;
-            const dx = x - rx;
-            const dy = y - ry;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < minDist) {
-              minDist = dist;
-              nearest = r;
-            }
-          });
-
-          // threshold (in normalized coords) to avoid accidental picks
-          if (nearest && minDist < 0.08) {
-            setAnnotation((prev) => {
-              if (!prev?.annotations?.rectangles) return prev;
-              const rects = prev.annotations.rectangles.map((r) =>
-                r.id === nearest.id ? { ...r, isCondenser: !r.isCondenser } : r
-              );
-              return {
-                ...prev,
-                annotations: {
-                  ...(prev.annotations || {}),
-                  rectangles: rects,
-                },
-              };
-            });
-          } else {
-            toast.warn(
-              "No rectangle near click — try clicking closer to a rectangle."
-            );
-          }
-        }
-
         setAddMode(null);
       };
 
@@ -742,48 +618,84 @@ const EngineerViewPage = () => {
             const touch = e.changedTouches[0];
             const rect = e.currentTarget.getBoundingClientRect();
             const coords = screenToCanvasPercent(touch.clientX, touch.clientY, rect, overlayCanvasRef.current);
-            
             const zones = annotation?.annotations?.hvac?.zones || [];
-            let clickedIndex = -1;
-            
-            for (let i = zones.length - 1; i >= 0; i--) {
-              const zone = zones[i];
-              if (
-                coords.x >= zone.xPercent &&
-                coords.x <= zone.xPercent + zone.widthPercent &&
-                coords.y >= zone.yPercent &&
-                coords.y <= zone.yPercent + zone.heightPercent
-              ) {
-                clickedIndex = i;
-                break;
-              }
-            }
-            
-            setSelectedZoneIndex(clickedIndex);
+            setSelectedZoneIndex(findZoneAtCoords(coords, zones));
           }
         };
       }
 
-      // Highlight selected zone
-      if (selectedZoneIndex !== null && selectedZoneIndex !== -1) {
+      // Highlight selected zone on a dedicated canvas layer (so zone selection doesn't
+      // trigger a full canvas rebuild — handled by the lightweight effect below)
+      const currentSelIdx = selectedZoneIndexRef.current;
+      if (currentSelIdx !== null && currentSelIdx !== -1) {
         const zones = annotation?.annotations?.hvac?.zones || [];
-        const selectedZone = zones[selectedZoneIndex];
+        const selectedZone = zones[currentSelIdx];
         if (selectedZone) {
-          const x = selectedZone.xPercent * overlayCanvas.width;
-          const y = selectedZone.yPercent * overlayCanvas.height;
-          const w = selectedZone.widthPercent * overlayCanvas.width;
-          const h = selectedZone.heightPercent * overlayCanvas.height;
-          
-          overlayContext.strokeStyle = '#FF6B00';
-          overlayContext.lineWidth = 3;
-          overlayContext.strokeRect(x, y, w, h);
+          const hlCanvas = document.createElement('canvas');
+          hlCanvas.className = 'zone-highlight-canvas';
+          hlCanvas.style.position = 'absolute';
+          hlCanvas.style.top = '0';
+          hlCanvas.style.left = '0';
+          hlCanvas.style.pointerEvents = 'none';
+          hlCanvas.style.zIndex = '998';
+          hlCanvas.width = overlayCanvas.width;
+          hlCanvas.height = overlayCanvas.height;
+          container.appendChild(hlCanvas);
+          const hlCtx = hlCanvas.getContext('2d');
+          hlCtx.strokeStyle = '#FF6B00';
+          hlCtx.lineWidth = 3;
+          hlCtx.strokeRect(
+            selectedZone.xPercent * hlCanvas.width,
+            selectedZone.yPercent * hlCanvas.height,
+            selectedZone.widthPercent * hlCanvas.width,
+            selectedZone.heightPercent * hlCanvas.height
+          );
         }
       }
     }; // Close renderOverlays function
     
     renderOverlays();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfFile, annotation, showHVAC, addMode, acType, pdfScale, isDrawingZone, selectedZoneIndex]);
+  }, [pdfFile, annotation, showHVAC, addMode, acType, pdfScale, isDrawingZone]);
+
+  // Lightweight effect: update zone selection highlight without a full canvas rebuild.
+  // Runs only when selectedZoneIndex or annotation changes.
+  useEffect(() => {
+    const container = pdfContainerRef.current;
+    if (!container) return;
+    // Remove existing highlight canvas (will recreate below if needed)
+    const existing = container.querySelector('.zone-highlight-canvas');
+    if (existing) existing.remove();
+    if (selectedZoneIndex === null || selectedZoneIndex === -1) return;
+    const canvas = overlayCanvasRef.current;
+    if (!canvas) return;
+    const zones = annotation?.annotations?.hvac?.zones || [];
+    const zone = zones[selectedZoneIndex];
+    if (!zone) return;
+    const hlCanvas = document.createElement('canvas');
+    hlCanvas.className = 'zone-highlight-canvas';
+    hlCanvas.style.position = 'absolute';
+    hlCanvas.style.top = '0';
+    hlCanvas.style.left = '0';
+    hlCanvas.style.pointerEvents = 'none';
+    hlCanvas.style.zIndex = '998';
+    hlCanvas.width = canvas.width;
+    hlCanvas.height = canvas.height;
+    container.appendChild(hlCanvas);
+    const hlCtx = hlCanvas.getContext('2d');
+    hlCtx.strokeStyle = '#FF6B00';
+    hlCtx.lineWidth = 3;
+    hlCtx.strokeRect(
+      zone.xPercent * hlCanvas.width,
+      zone.yPercent * hlCanvas.height,
+      zone.widthPercent * hlCanvas.width,
+      zone.heightPercent * hlCanvas.height
+    );
+    return () => {
+      const hl = container.querySelector('.zone-highlight-canvas');
+      if (hl) hl.remove();
+    };
+  }, [selectedZoneIndex, annotation]);
 
   // Separate effect for zone preview on dedicated canvas layer (prevents canvas shake)
   useEffect(() => {
@@ -847,15 +759,24 @@ const EngineerViewPage = () => {
   // Save handler (save full annotation, not just hvac)
   const handleSave = async () => {
     if (!annotation) return;
-    await fetch(`/api/annotations/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ ...annotation, acType }),
-    });
-    toast.success("Annotation (including HVAC) saved!");
+    try {
+      const res = await fetch(`/api/annotations/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ...annotation, acType }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        toast.error(errData.message || "Failed to save HVAC items.");
+        return;
+      }
+      toast.success("Annotation (including HVAC) saved!");
+    } catch (err) {
+      toast.error(err.message || "Failed to save. Please try again.");
+    }
   };
 
   // Confirm comment from modal (replaces prompt() callback)
@@ -900,20 +821,58 @@ const EngineerViewPage = () => {
 
   // Delete a specific zone by index
   const handleDeleteZone = (zoneIndex) => {
-    if (!window.confirm('Delete this zone?')) return;
-    
-    setAnnotation((prev) => ({
-      ...prev,
-      annotations: {
-        ...(prev.annotations || {}),
-        hvac: {
-          ...(prev.annotations?.hvac || {}),
-          zones: (prev.annotations?.hvac?.zones || []).filter((_, i) => i !== zoneIndex)
-        }
-      }
-    }));
-    setSelectedZoneIndex(null);
-    toast.success('Zone deleted');
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p style={{ margin: '0 0 8px' }}>Delete this zone?</p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-danger btn-sm" onClick={() => {
+              setAnnotation((prev) => ({
+                ...prev,
+                annotations: {
+                  ...(prev.annotations || {}),
+                  hvac: {
+                    ...(prev.annotations?.hvac || {}),
+                    zones: (prev.annotations?.hvac?.zones || []).filter((_, i) => i !== zoneIndex)
+                  }
+                }
+              }));
+              setSelectedZoneIndex(null);
+              toast.success('Zone deleted');
+              closeToast();
+            }}>Delete</button>
+            <button className="btn btn-secondary btn-sm" onClick={closeToast}>Cancel</button>
+          </div>
+        </div>
+      ),
+      { autoClose: false, closeButton: false }
+    );
+  };
+
+  // Delete all zones (non-blocking toast confirmation)
+  const handleDeleteAllZones = () => {
+    const zoneCount = (annotation?.annotations?.hvac?.zones || []).length;
+    if (zoneCount === 0) { toast.info('No zones to delete'); return; }
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p style={{ margin: '0 0 8px' }}>Delete all {zoneCount} zones?</p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-danger btn-sm" onClick={() => {
+              setAnnotation((prev) => ({
+                ...prev,
+                annotations: { ...(prev.annotations || {}), hvac: { ...(prev.annotations?.hvac || {}), zones: [] } }
+              }));
+              setSelectedZoneIndex(null);
+              toast.success('All zones deleted');
+              closeToast();
+            }}>Delete All</button>
+            <button className="btn btn-secondary btn-sm" onClick={closeToast}>Cancel</button>
+          </div>
+        </div>
+      ),
+      { autoClose: false, closeButton: false }
+    );
   };
 
   // Change color of a specific zone
@@ -946,6 +905,12 @@ const EngineerViewPage = () => {
   const handleAutoPlaceDucts = () => {
     const ann = annotation?.annotations;
     if (!ann) return;
+
+    // Ductless mode: no ducts/diffusers/dampers — only indoor/outdoor units are drawn
+    if (acType === 'vrf-ductless') {
+      toast.info('Ductless mode: HVAC items are drawn as indoor/outdoor units on the canvas. No duct layout is generated.');
+      return;
+    }
 
     // Build a set of rectangle IDs that are condensers.
     // isCondenser is NOT persisted to MongoDB, so we reconstruct it from:
@@ -1004,21 +969,48 @@ const EngineerViewPage = () => {
       ungroupedRects.push(rect);
     });
 
-    // Helper to compute avgX for a group of rectangles
+    // Compute visual centre and visual bounding dimensions for a rectangle
+    // (Konva rotates around the stored top-left corner, so the centre shifts)
+    const getVisuals = (r) => {
+      const px = r.xPercent;
+      const py = r.yPercent;
+      const sw = r.widthPercent  || 0.06; // stored width
+      const sh = r.heightPercent || 0.04; // stored height
+      const angle = (r.rotation || 0) * (Math.PI / 180);
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      // Visual centre = top-left + rotate(half-size vector)
+      const vcx = px + (sw / 2) * cos - (sh / 2) * sin;
+      const vcy = py + (sw / 2) * sin + (sh / 2) * cos;
+      // For 90°/270° the stored w and h swap visually
+      const rot90 = r.rotation === 90 || r.rotation === 270 || r.rotation === -90;
+      const vw = rot90 ? sh : sw;
+      const vh = rot90 ? sw : sh;
+      return { vcx, vcy, vw, vh };
+    };
+
+    // Helper to compute avgX of visual centres for a group
     const computeAvgX = (rectGroup) => {
       if (rectGroup.length === 0) return 0.5;
-      return rectGroup.reduce((s, r) => s + r.xPercent, 0) / rectGroup.length;
+      return rectGroup.reduce((s, r) => s + getVisuals(r).vcx, 0) / rectGroup.length;
+    };
+
+    // Helper to compute avgY of visual centres for a group
+    const computeAvgY = (rectGroup) => {
+      if (rectGroup.length === 0) return 0.5;
+      return rectGroup.reduce((s, r) => s + getVisuals(r).vcy, 0) / rectGroup.length;
     };
 
     // Process each flat group separately (each flat has its own center)
-    const processRectGroup = (rectGroup, groupAvgX) => {
+    const processRectGroup = (rectGroup, groupAvgX, groupAvgY) => {
       // Duct sizing constants (normalised 0-1)
-      const DUCT_LEN   = 0.08;
-      const DUCT_H     = 0.02;
+      const baseLen = rectGroup.length > 2 ? 0.055 : 0.08; // shorter ducts for dense groups
+      const DUCT_LEN   = baseLen;
+      const DUCT_H     = rectGroup.length > 2 ? 0.016 : 0.02;
       const GAP        = 0.005;
-      const FLEX_LEN   = 0.025;  // short flex connector
+      const FLEX_LEN   = rectGroup.length > 2 ? 0.018 : 0.025;
       const FLEX_H     = 0.015;
-      const DIFF_SIZE  = 0.03;
+      const DIFF_SIZE  = rectGroup.length > 2 ? 0.025 : 0.03;
       const DAMP_SIZE  = 0.018;
       const THERM_SIZE = 0.02;
 
@@ -1026,17 +1018,24 @@ const EngineerViewPage = () => {
       const WET_ROOM_RE = /\b(bath|wc|toilet|shower|laundry|kitchen|kitc?hen|ktcn|restroom|powder)\b/i;
 
       rectGroup.forEach((rect, i) => {
-        const cx = rect.xPercent;
-        const cy = rect.yPercent;
-        const rw = rect.widthPercent || 0.06;
-        const rh = rect.heightPercent || 0.04;
+        // Use the visual centre and visual dimensions (accounts for Konva rotation)
+        const { vcx: cx, vcy: cy, vw: rw, vh: rh } = getVisuals(rect);
+        // Portrait-oriented unit: use vertical HVAC layout
+        const isVertical = rh > rw;
 
+        if (!isVertical) {
         // Pick horizontal direction: extend ducts toward the centre of THIS flat's layout
         const toRight = cx <= groupAvgX;
 
         // --- Supply duct: offset from unit in chosen direction ---
+        // Place supply above or below depending on which side has more space
+        const hSpaceAbove = (cy - rh / 2) - 0.03;
+        const hSpaceBelow = 0.97 - (cy + rh / 2);
+        const supplyAbove = hSpaceAbove >= hSpaceBelow;
         const sDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
-        const sDuctY = cy - DUCT_H - 0.008;
+        const sDuctY = supplyAbove
+          ? cy - rh / 2 - GAP - DUCT_H
+          : cy + rh / 2 + GAP;
         newDucts.push({
           id: `duct-auto-s-${ts}-${rect.id}`,
           xPercent: Math.max(0.01, Math.min(0.89, sDuctX)),
@@ -1048,9 +1047,11 @@ const EngineerViewPage = () => {
           stroke: '#0055CC',
         });
 
-        // --- Return duct: same direction, stacked below the unit ---
+        // --- Return duct: same direction, stacked on the same side as supply when near a wall ---
         const rDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
-        const rDuctY = cy + 0.008;
+        const rDuctY = supplyAbove
+          ? cy + rh / 2 + GAP                      // traditional: supply above, return below
+          : cy - rh / 2;                            // near top wall: return aligned with top edge of unit
         newDucts.push({
           id: `duct-auto-r-${ts}-${rect.id}`,
           xPercent: Math.max(0.01, Math.min(0.89, rDuctX)),
@@ -1120,7 +1121,7 @@ const EngineerViewPage = () => {
         newDampers.push({
           id: `damper-auto-vd-${ts}-${rect.id}`,
           xPercent: vdX,
-          yPercent: sDuctY - 0.012,
+          yPercent: sDuctY + DUCT_H / 2,
           sizePercent: DAMP_SIZE,
           damperType: 'volume',
         });
@@ -1171,9 +1172,9 @@ const EngineerViewPage = () => {
           airflow: 0,
         });
 
-        // --- JET Diffuser: high-velocity nozzle for long throws (placed diagonally from unit) ---
+        // --- JET Diffuser ---
         const jetX = toRight ? cx + rw + GAP * 8 : cx - rw - GAP * 8;
-        const jetY = cy - rh / 2 - GAP * 4;
+        const jetY = supplyAbove ? cy - rh / 2 - GAP * 4 : cy + rh / 2 + GAP * 4;
         newDiffusers.push({
           id: `diffuser-auto-jet-${ts}-${rect.id}`,
           xPercent: Math.max(0.02, Math.min(0.98, jetX)),
@@ -1184,9 +1185,9 @@ const EngineerViewPage = () => {
           airflow: 500,
         });
 
-        // --- Wall Diffuser: side-wall mounted supply (placed on opposite side from ducts) ---
+        // --- Wall Diffuser: side-wall mounted supply ---
         const wallDiffX = toRight ? cx - rw / 2 - GAP * 6 : cx + rw / 2 + GAP * 6;
-        const wallDiffY = cy - rh / 2;
+        const wallDiffY = supplyAbove ? cy - rh / 2 : cy + rh / 2;
         newDiffusers.push({
           id: `diffuser-auto-wall-${ts}-${rect.id}`,
           xPercent: Math.max(0.02, Math.min(0.98, wallDiffX)),
@@ -1197,11 +1198,13 @@ const EngineerViewPage = () => {
           airflow: 300,
         });
 
-        // --- Insulated Duct: main trunk duct running vertically from unit ---
-        const insDuctWidth = DUCT_LEN * 0.5;  // Smaller insulated duct
+        // --- Insulated Duct: trunk duct on the supply side ---
+        const insDuctWidth = DUCT_LEN * 0.5;
         const insDuctHeight = DUCT_H * 0.6;
         const insDuctX = cx - insDuctWidth / 2;
-        const insDuctY = cy - rh / 2 - GAP - DUCT_H * 1.5;
+        const insDuctY = supplyAbove
+          ? cy - rh / 2 - GAP - DUCT_H * 1.5
+          : cy + rh / 2 + GAP + DUCT_H * 1.0;
         newDucts.push({
           id: `duct-auto-ins-${ts}-${rect.id}`,
           xPercent: Math.max(0.01, Math.min(0.89, insDuctX)),
@@ -1214,11 +1217,9 @@ const EngineerViewPage = () => {
         });
 
         // --- Exhaust grille: if nearest comment suggests a wet room ---
-        const nearestComment = comments.reduce((best, c) => {
-          const dist = Math.sqrt((c.xPercent - cx) ** 2 + (c.yPercent - cy) ** 2);
-          return dist < (best.dist || Infinity) ? { ...c, dist } : best;
-        }, {});
-        if (nearestComment.text && WET_ROOM_RE.test(nearestComment.text)) {
+        // Use the comment linked to THIS rectangle (by rectId), not the spatially nearest one
+        const linkedComment = comments.find((c) => String(c.rectId) === String(rect.id));
+        if (linkedComment && WET_ROOM_RE.test(linkedComment.text)) {
           // --- Exhaust Duct: connects to exhaust grille in wet rooms ---
           const exhDuctX = toRight ? cx - rw / 2 - GAP - DUCT_LEN : cx + rw / 2 + GAP;
           const exhDuctY = cy + rh / 2 + GAP;
@@ -1255,20 +1256,262 @@ const EngineerViewPage = () => {
             diffuserType: 'transfer-grille',
             airflow: 150,
           });
-        }
+        } // end wet-room exhaust (horizontal)
+        } // end !isVertical
+
+        else { // isVertical: portrait unit — ducts and HVAC items run vertically
+          // Units in the lower half of the canvas extend downward (into the room space);
+          // units in the upper half extend upward — avoids pushing into already-occupied areas.
+          const spaceDown = 0.97 - (cy + rh / 2);
+          const spaceUp   = (cy - rh / 2) - 0.03;
+          const toDown = cy >= 0.5 ? spaceDown >= spaceUp * 0.4 : spaceDown >= spaceUp;
+
+          // Shorter duct/flex for vertical to keep chain compact
+          const vDUCT_LEN = DUCT_LEN * 0.75;
+          const vFLEX_LEN = FLEX_LEN * 0.75;
+
+          // Prefer the horizontal side with more space for secondary items
+          const spaceRight = 1 - (cx + rw / 2);
+          const spaceLeft  = cx - rw / 2;
+          const openSide = spaceLeft >= spaceRight ? -1 : 1; // -1=left, +1=right
+
+          // Shift the whole vertical chain left so items clear the right wall
+          const vShiftX = -0.03;
+
+          // Supply duct: vertical, narrow, centered on unit
+          const sDuctWv = DUCT_H;
+          const sDuctHv = vDUCT_LEN;
+          const sDuctXv = cx + vShiftX - sDuctWv / 2;
+          const sDuctYv = toDown ? cy + rh / 2 + GAP : cy - rh / 2 - GAP - sDuctHv;
+          newDucts.push({
+            id: `duct-auto-s-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.92, sDuctXv)),
+            yPercent: Math.max(0.02, Math.min(0.93, sDuctYv)),
+            width: sDuctWv,
+            height: sDuctHv,
+            ductType: 'supply',
+            fill: 'rgba(0,120,255,0.45)',
+            stroke: '#0055CC',
+          });
+
+          // Return duct: vertical, offset to the right of supply
+          const rDuctWv = DUCT_H;
+          const rDuctHv = vDUCT_LEN;
+          const rDuctXv = sDuctXv + sDuctWv + GAP;
+          const rDuctYv = sDuctYv;
+          newDucts.push({
+            id: `duct-auto-r-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.92, rDuctXv)),
+            yPercent: Math.max(0.02, Math.min(0.93, rDuctYv)),
+            width: rDuctWv,
+            height: rDuctHv,
+            ductType: 'return',
+            fill: 'rgba(255,120,50,0.40)',
+            stroke: '#CC4400',
+          });
+
+          // Flex supply: continues vertically beyond supply duct
+          const sFlexWv = FLEX_H;
+          const sFlexHv = vFLEX_LEN;
+          const sFlexXv = sDuctXv + (sDuctWv - sFlexWv) / 2;
+          const sFlexYv = toDown ? sDuctYv + sDuctHv + GAP : sDuctYv - GAP - sFlexHv;
+          newDucts.push({
+            id: `duct-auto-sf-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.93, sFlexXv)),
+            yPercent: Math.max(0.02, Math.min(0.95, sFlexYv)),
+            width: sFlexWv,
+            height: sFlexHv,
+            ductType: 'flex',
+            fill: 'rgba(150,150,150,0.35)',
+            stroke: '#888',
+          });
+
+          // Flex return: alongside supply flex
+          const rFlexWv = FLEX_H;
+          const rFlexHv = vFLEX_LEN;
+          const rFlexXv = rDuctXv + (rDuctWv - rFlexWv) / 2;
+          const rFlexYv = sFlexYv;
+          newDucts.push({
+            id: `duct-auto-rf-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.93, rFlexXv)),
+            yPercent: Math.max(0.02, Math.min(0.95, rFlexYv)),
+            width: rFlexWv,
+            height: rFlexHv,
+            ductType: 'flex',
+            fill: 'rgba(150,150,150,0.35)',
+            stroke: '#888',
+          });
+
+          // Supply diffuser (4-way): at far end of supply flex
+          const sdYv = toDown
+            ? sFlexYv + sFlexHv + GAP + DIFF_SIZE / 2
+            : sFlexYv - GAP - DIFF_SIZE / 2;
+          newDiffusers.push({
+            id: `diffuser-auto-sd-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.98, cx + vShiftX)),
+            yPercent: Math.max(0.02, Math.min(0.98, sdYv)),
+            sizePercent: DIFF_SIZE,
+            shape: 'square',
+            diffuserType: 'supply-4way',
+            airflow: 400,
+          });
+
+          // Return grille: at far end of return flex
+          newDiffusers.push({
+            id: `diffuser-auto-rg-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.98, rDuctXv + rDuctWv / 2)),
+            yPercent: Math.max(0.02, Math.min(0.98, sdYv)),
+            sizePercent: DIFF_SIZE,
+            shape: 'square',
+            diffuserType: 'return-grille',
+            airflow: 350,
+          });
+
+          // Volume damper: on supply duct midway
+          newDampers.push({
+            id: `damper-auto-vd-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.96, cx + vShiftX)),
+            yPercent: toDown ? sDuctYv + sDuctHv * 0.4 : sDuctYv + sDuctHv * 0.6,
+            sizePercent: DAMP_SIZE,
+            damperType: 'volume',
+          });
+
+          // Fire damper: at duct origin closest to unit
+          newDampers.push({
+            id: `damper-auto-fd-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.96, cx + vShiftX)),
+            yPercent: toDown ? sDuctYv + 0.002 : sDuctYv + sDuctHv - 0.002,
+            sizePercent: DAMP_SIZE,
+            damperType: 'fire',
+          });
+
+          // Thermostat: place on the open side (reuses openSide computed above)
+          const thermXv = openSide === 1
+            ? (cx + vShiftX) + rw / 2 + GAP + THERM_SIZE
+            : (cx + vShiftX) - rw / 2 - GAP - THERM_SIZE;
+          const rectCommentV = comments.find((c) => String(c.rectId) === String(rect.id));
+          let thermLabelV = 'T';
+          if (rectCommentV) {
+            const acMatchV = rectCommentV.text.match(/ac-(\d+(?:\.\d+)?)/i);
+            if (acMatchV) thermLabelV = `T${acMatchV[1]}`;
+          }
+          newThermostats.push({
+            id: `thermo-auto-${ts}-${rect.id}`,
+            xPercent: Math.max(0.04, Math.min(0.94, thermXv)),
+            yPercent: cy,
+            sizePercent: THERM_SIZE,
+            label: thermLabelV,
+          });
+
+          // Drain: on the open horizontal side of the unit
+          newDiffusers.push({
+            id: `diffuser-auto-drain-${ts}-${rect.id}`,
+            xPercent: Math.max(0.03, Math.min(0.95, (cx + vShiftX) + openSide * (rw / 2 + GAP * 3))),
+            yPercent: Math.max(0.03, Math.min(0.95, cy)),
+            sizePercent: DIFF_SIZE * 0.7,
+            shape: 'drain',
+            diffuserType: 'drain-point',
+            airflow: 0,
+          });
+
+          // Jet diffuser: along the duct axis beyond the diffuser, not sideways
+          const jetY = toDown
+            ? sdYv + DIFF_SIZE + GAP * 3
+            : sdYv - DIFF_SIZE - GAP * 3;
+          newDiffusers.push({
+            id: `diffuser-auto-jet-${ts}-${rect.id}`,
+            xPercent: Math.max(0.03, Math.min(0.95, cx + vShiftX)),
+            yPercent: Math.max(0.03, Math.min(0.95, jetY)),
+            sizePercent: DIFF_SIZE * 0.85,
+            shape: 'jet',
+            diffuserType: 'jet',
+            airflow: 500,
+          });
+
+          // Wall diffuser: on the open horizontal side
+          newDiffusers.push({
+            id: `diffuser-auto-wall-${ts}-${rect.id}`,
+            xPercent: Math.max(0.03, Math.min(0.95, (cx + vShiftX) + openSide * (rw / 2 + GAP * 5))),
+            yPercent: Math.max(0.03, Math.min(0.95, cy + (toDown ? rh / 4 : -rh / 4))),
+            sizePercent: DIFF_SIZE * 0.9,
+            shape: 'wall',
+            diffuserType: 'wall-diffuser',
+            airflow: 300,
+          });
+
+          // Insulated duct: vertical stub — placed on whichever side has more canvas space
+          const insDuctWv = DUCT_H * 0.6;
+          const insDuctHv = DUCT_LEN * 0.5;
+          const insSpaceLeft  = (cx + vShiftX) - rw / 2;
+          const insSpaceRight = 1 - ((cx + vShiftX) + rw / 2);
+          const insOnRight = insSpaceRight > insSpaceLeft;
+          const insDuctXv = insOnRight
+            ? (cx + vShiftX) + rw / 2 + GAP
+            : (cx + vShiftX) - rw / 2 - GAP - insDuctWv;
+          newDucts.push({
+            id: `duct-auto-ins-${ts}-${rect.id}`,
+            xPercent: Math.max(0.02, Math.min(0.92, insDuctXv)),
+            yPercent: Math.max(0.02, Math.min(0.92, cy - insDuctHv / 2)),
+            width: insDuctWv,
+            height: insDuctHv,
+            ductType: 'insulated',
+            fill: 'rgba(255,180,50,0.45)',
+            stroke: '#CC9900',
+          });
+
+          // Exhaust grille: if linked comment suggests a wet room
+          const linkedCommentV = comments.find((c) => String(c.rectId) === String(rect.id));
+          if (linkedCommentV && WET_ROOM_RE.test(linkedCommentV.text)) {
+            const exhDuctX2 = cx - rw / 2 - GAP - DUCT_LEN * 0.7;
+            const exhDuctY2 = toDown ? cy + rh / 2 + GAP : cy - rh / 2 - GAP - DUCT_H;
+            newDucts.push({
+              id: `duct-auto-exh-${ts}-${rect.id}`,
+              xPercent: Math.max(0.01, Math.min(0.89, exhDuctX2)),
+              yPercent: Math.max(0.01, Math.min(0.95, exhDuctY2)),
+              width: DUCT_LEN * 0.7,
+              height: DUCT_H,
+              ductType: 'exhaust',
+              fill: 'rgba(34,180,34,0.40)',
+              stroke: '#228B22',
+            });
+            const exhY2 = toDown
+              ? exhDuctY2 + DUCT_H + GAP + DIFF_SIZE
+              : exhDuctY2 - GAP - DIFF_SIZE;
+            newDiffusers.push({
+              id: `diffuser-auto-exh-${ts}-${rect.id}`,
+              xPercent: Math.max(0.02, Math.min(0.98, exhDuctX2 + DUCT_LEN * 0.35)),
+              yPercent: Math.max(0.02, Math.min(0.98, exhY2)),
+              sizePercent: DIFF_SIZE,
+              shape: 'square',
+              diffuserType: 'exhaust',
+              airflow: 200,
+            });
+            newDiffusers.push({
+              id: `diffuser-auto-tg-${ts}-${rect.id}`,
+              xPercent: Math.max(0.02, Math.min(0.98, cx - rw / 2 - GAP * 3)),
+              yPercent: cy,
+              sizePercent: DIFF_SIZE * 0.9,
+              shape: 'square',
+              diffuserType: 'transfer-grille',
+              airflow: 150,
+            });
+          }
+        } // end isVertical
       });
     };
 
     // Process grouped flats (each flat has its own center)
     flatGroups.forEach((rectGroup, flatNum) => {
       const groupAvgX = computeAvgX(rectGroup);
-      processRectGroup(rectGroup, groupAvgX);
+      const groupAvgY = computeAvgY(rectGroup);
+      processRectGroup(rectGroup, groupAvgX, groupAvgY);
     });
 
     // Process ungrouped rectangles (fallback: use their own center)
     if (ungroupedRects.length > 0) {
       const ungroupedAvgX = computeAvgX(ungroupedRects);
-      processRectGroup(ungroupedRects, ungroupedAvgX);
+      const ungroupedAvgY = computeAvgY(ungroupedRects);
+      processRectGroup(ungroupedRects, ungroupedAvgX, ungroupedAvgY);
     }
 
     // Preserve manually-drawn zones (keep those with 'zone-manual-' prefix)
@@ -1799,27 +2042,7 @@ const EngineerViewPage = () => {
                     {isDrawingZone ? '🔲 Stop Drawing' : '🖊 Draw Zone'}
                   </Dropdown.Item>
                   <Dropdown.Divider />
-                  <Dropdown.Item onClick={() => {
-                    const zoneCount = (annotation?.annotations?.hvac?.zones || []).length;
-                    if (zoneCount === 0) {
-                      toast.info('No zones to delete');
-                      return;
-                    }
-                    if (window.confirm(`Delete all ${zoneCount} zones?`)) {
-                      setAnnotation((prev) => ({
-                        ...prev,
-                        annotations: {
-                          ...(prev.annotations || {}),
-                          hvac: {
-                            ...(prev.annotations?.hvac || {}),
-                            zones: []
-                          }
-                        }
-                      }));
-                      setSelectedZoneIndex(null);
-                      toast.success('All zones deleted');
-                    }
-                  }} className="text-danger">
+                  <Dropdown.Item onClick={() => {handleDeleteAllZones();}} className="text-danger">
                     🗑 Delete All Zones ({(annotation?.annotations?.hvac?.zones || []).length})
                   </Dropdown.Item>
                   {selectedZoneIndex !== null && selectedZoneIndex !== -1 && (
@@ -1859,35 +2082,13 @@ const EngineerViewPage = () => {
                 <Button
                   size="sm"
                   variant="outline-danger"
-                  onClick={() => {
-                    const zoneCount = (annotation?.annotations?.hvac?.zones || []).length;
-                    if (zoneCount === 0) {
-                      toast.info('No zones to delete');
-                      return;
-                    }
-                    if (window.confirm(`Delete all ${zoneCount} zones?`)) {
-                      setAnnotation((prev) => ({
-                        ...prev,
-                        annotations: {
-                          ...(prev.annotations || {}),
-                          hvac: {
-                            ...(prev.annotations?.hvac || {}),
-                            zones: []
-                          }
-                        }
-                      }));
-                      setSelectedZoneIndex(null);
-                      toast.success('All zones deleted');
-                    }
-                  }}
+                  onClick={handleDeleteAllZones}
                   title="Delete all manually drawn zones"
                 >
                   🗑 Delete All Zones ({(annotation?.annotations?.hvac?.zones || []).length})
                 </Button>
-                {console.log('Rendering toolbar. selectedZoneIndex:', selectedZoneIndex, 'Type:', typeof selectedZoneIndex)}
                 {selectedZoneIndex !== null && selectedZoneIndex !== -1 && (
                   <>
-                    {console.log('✅ Showing color picker for zone:', selectedZoneIndex)}
                     <Dropdown>
                       <Dropdown.Toggle size="sm" variant="outline-info" title="Change zone color">
                         🎨 Zone #{selectedZoneIndex + 1} Color
@@ -1928,17 +2129,12 @@ const EngineerViewPage = () => {
           {isMobile ? (
             <Dropdown>
               <Dropdown.Toggle size="sm" variant="outline-warning" className="ev-dropdown-toggle">
-                {addMode === 'comment' ? 'Comment' : addMode === 'markCondenser' ? 'Condenser' : 'Add'}
+                {addMode === 'comment' ? 'Comment' : 'Add'}
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 <Dropdown.Item active={addMode === "comment"} onClick={() => setAddMode(addMode === "comment" ? null : "comment")}>
                   Add Comment
                 </Dropdown.Item>
-                {acType === "vrf-ductless" && (
-                  <Dropdown.Item onClick={() => setAddMode("markCondenser")}>
-                    Mark Condenser
-                  </Dropdown.Item>
-                )}
               </Dropdown.Menu>
             </Dropdown>
           ) : (
@@ -1950,15 +2146,6 @@ const EngineerViewPage = () => {
               >
                 Add Comment
               </Button>
-              {acType === "vrf-ductless" && (
-                <Button
-                  size="sm"
-                  variant="outline-secondary"
-                  onClick={() => setAddMode("markCondenser")}
-                >
-                  Mark Condenser
-                </Button>
-              )}
             </div>
           )}
         </div>
