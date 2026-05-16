@@ -507,7 +507,15 @@ function ProductPage() {
               </Row>
             </ListGroup.Item>
             <ListGroup.Item>
-              <strong>BTU:</strong> {product.btu}BTU
+              <strong>BTU:</strong> {product.coolingBtu || product.btu}BTU
+              {product.heatingBtu ? (
+                <>
+                  {' '}
+                  <span className="text-muted">
+                    (Heat: {product.heatingBtu.toLocaleString()} BTU)
+                  </span>
+                </>
+              ) : null}
             </ListGroup.Item>
 
             {/* Conditional rendering based on product type */}

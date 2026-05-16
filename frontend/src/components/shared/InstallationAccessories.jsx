@@ -78,39 +78,38 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
   const filteredRecommendations = getFilteredRecommendations();
   const totalRelevantCount = COMMON_AC_RECOMMENDATIONS.filter(item => relevantCategories.has(item.category)).length;
 
-  const filterButtons = (
-    <>
+  const allCategoriesButton = (
+    <Button
+      key="all"
+      variant="light"
+      className={`insta-filter-btn${selectedCategory === 'All' ? ' insta-filter-btn--active' : ''}`}
+      onClick={() => {
+        setSelectedCategory('All');
+        setShowMobileFilters(false);
+      }}
+    >
+      All Categories ({totalRelevantCount})
+    </Button>
+  );
+
+  const categoryButtons = Array.from(relevantCategories).map((cat, idx) => {
+    const count = COMMON_AC_RECOMMENDATIONS.filter(item => item.category === cat).length;
+    const icon = getCategoryIcon(cat);
+    return (
       <Button
-        key="all"
+        key={idx}
         variant="light"
-        className={`insta-filter-btn${selectedCategory === 'All' ? ' insta-filter-btn--active' : ''}`}
+        className={`insta-filter-btn${selectedCategory === cat ? ' insta-filter-btn--active' : ''}`}
         onClick={() => {
-          setSelectedCategory('All');
+          setSelectedCategory(cat);
           setShowMobileFilters(false);
         }}
       >
-        All Categories ({totalRelevantCount})
+        <span style={{ marginRight: '0.5rem' }}>{icon}</span>
+        {cat} ({count})
       </Button>
-      {Array.from(relevantCategories).map((cat, idx) => {
-        const count = COMMON_AC_RECOMMENDATIONS.filter(item => item.category === cat).length;
-        const icon = getCategoryIcon(cat);
-        return (
-          <Button
-            key={idx}
-            variant="light"
-            className={`insta-filter-btn${selectedCategory === cat ? ' insta-filter-btn--active' : ''}`}
-            onClick={() => {
-              setSelectedCategory(cat);
-              setShowMobileFilters(false);
-            }}
-          >
-            <span style={{ marginRight: '0.5rem' }}>{icon}</span>
-            {cat} ({count})
-          </Button>
-        );
-      })}
-    </>
-  );
+    );
+  });
 
   if (filteredRecommendations.length === 0) return null;
 
@@ -137,7 +136,8 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
             </div>
             <div className="insta-mobile-drawer__body">
               <div className="insta-mobile-button-group">
-                {filterButtons}
+                {allCategoriesButton}
+                {categoryButtons}
               </div>
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
               </button>
             </div>
             <ButtonGroup className="flex-wrap gap-2 insta-desktop-button-group">
-              {filterButtons}
+              {allCategoriesButton}
             </ButtonGroup>
             {selectedCategory !== 'All' && (
               <div className="mt-3" style={{ 
@@ -188,13 +188,14 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
           </div>
         )}
 
-        <Table
-          className="recommendations-table"
-          striped
-          bordered
-          hover
-          responsive
-        >
+        {selectedCategory !== 'All' && (
+          <Table
+            className="recommendations-table"
+            striped
+            bordered
+            hover
+            responsive
+          >
           <thead>
             <tr>
               <th>Category</th>
@@ -227,6 +228,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
             ))}
           </tbody>
         </Table>
+        )}
       </Card.Body>
     </Card>
     </>

@@ -310,9 +310,19 @@ useEffect(() => {
   // Per-flat people count (only used when isMultiFlatProperty && detectedFlats.length > 1)
   const [flatPeopleCount, setFlatPeopleCount] = useState({});
 
-  // ── Humidity & ventilation inputs ──────────────────────────────────────────
+  // ── Humidity input ────────────────────────────────────────────────────────
   const [humidity, setHumidity]       = useState('average');   // 'low' | 'average' | 'high'
-  const [airChanges, setAirChanges]   = useState('1.0');        // ACH value
+
+  // ── Infiltration (envelope air-leakage) ──────────────────────────────────
+  // Tight  = new/sealed build (~3 ACH50)
+  // Average = typical existing dwelling (~7 ACH50)
+  // Leaky  = older drafty stock (~12+ ACH50)
+  const [infiltration, setInfiltration] = useState('average'); // 'tight' | 'average' | 'leaky'
+
+  // ── System mode (cooling / heating / both) ───────────────────────────────
+  // Drives which capacity field (coolingBtu / heatingBtu) the backend matches.
+  // 'both' lets the backend size on max(coolingBtu, heatingBtu) for heat pumps.
+  const [systemMode, setSystemMode] = useState('cooling'); // 'cooling' | 'heating' | 'both'
 
 
 
@@ -416,7 +426,7 @@ useEffect(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, ceilingHeight, numPeople, flatPeopleCount, measurementSystem, rooms]);
 
-  const calculateBTUForRoom = (room, peopleOverride) => {
+  const calculateBTUForRoom = (room, peopleOverride, mode = 'cooling') => {
     let area = convertArea(parseFloat(room.size));
     let height = parseFloat(ceilingHeight);
     const effectivePeople = peopleOverride !== undefined
@@ -427,15 +437,28 @@ useEffect(() => {
       return { btu: null, error: "Enter valid room size & ceiling height." };
     }
 
+    const isHeating = mode === 'heating';
+
     let btu = area * CONSTANTS.BASE_BTU_PER_SQ_METER;
     // Height adjustment: proportional to room volume increase above 2.5 m baseline.
     // Adds HEIGHT_BTU_FACTOR_PER_METER × (extra metres) × current base BTU.
     if (height > 2.5)
       btu += btu * CONSTANTS.HEIGHT_BTU_FACTOR_PER_METER * (height - 2.5);
-    btu += CONSTANTS.BTU_PER_ADDITIONAL_PERSON * Math.max(0, effectivePeople - 1);
-    if (room.name === "Kitchen") btu += CONSTANTS.KITCHEN_BTU_ADDITION;
 
-    // Dining room climate bonuses (moderate values)
+    // Occupants: in cooling they add sensible load; in heating they slightly
+    // offset it (internal gains). Use a smaller offset for heating.
+    if (isHeating) {
+      btu -= 250 * Math.max(0, effectivePeople - 1);
+    } else {
+      btu += CONSTANTS.BTU_PER_ADDITIONAL_PERSON * Math.max(0, effectivePeople - 1);
+    }
+
+    // Kitchen addition: cooking adds heat (raises cooling load, lowers heating load).
+    if (room.name === "Kitchen") {
+      btu += isHeating ? -300 : CONSTANTS.KITCHEN_BTU_ADDITION;
+    }
+
+    // Dining room climate bonuses apply only to cooling (cooking + occupancy heat).
     const diningRoomBtuByClimate = {
       AverageEurope: 1000,
       HotMiddleEast: 1500,
@@ -446,7 +469,7 @@ useEffect(() => {
       SubArctic: 600,
     };
 
-    if (room.name === "Dining Room") {
+    if (!isHeating && room.name === "Dining Room") {
       const selectedClimate = Object.keys(options.climate || {}).find(
         (k) => options.climate[k]
       );
@@ -467,57 +490,52 @@ useEffect(() => {
         }
       });
     };
-    // Reduced multipliers to avoid excessive compounding
-    applyMultiplier("insulation", {
-      Poor: 1.18,      // Increased from 1.15 (poor insulation has significant impact in hot climate)
-      Average: 1,
-      Good: 0.85,
-    });
-    applyMultiplier("floorType", {
-      Marble: 1.0,
-      Timber: 1.03,
-      Concrete: 1.0,
-      Carpeted: 0.97,
-    });
-    applyMultiplier("windowType", {
-      SingleGlazed: 1.12,    // Increased from 1.10 (windows critical in hot climate)
-      DoubleGlazed: 1.0,
-      TripleGlazed: 0.90,
-      Louvered: 1.14,        // Increased from 1.12
-    });
-    applyMultiplier("roofType", {
-      Flat: 1.05,      // was 1.1
-      Pitched: 1.0,
-      Gable: 1.0,
-      Roof: 1.0,
-    });
-    applyMultiplier("appliances", {
-      Oven: 1.08,      // was 1.1
-      Television: 1.02,
-      Computer: 1.03,
-    });
+    // Reduced multipliers to avoid excessive compounding.
+    // Heating tables flip sign on most envelope/sun/climate factors: poor
+    // envelopes lose more heat, sun helps in winter, cold climates dominate.
+    applyMultiplier("insulation", isHeating
+      ? { Poor: 1.30, Average: 1, Good: 0.75 }
+      : { Poor: 1.18, Average: 1, Good: 0.85 });
+    applyMultiplier("floorType", isHeating
+      ? { Marble: 1.05, Timber: 0.98, Concrete: 1.03, Carpeted: 0.94 }
+      : { Marble: 1.0, Timber: 1.03, Concrete: 1.0, Carpeted: 0.97 });
+    applyMultiplier("windowType", isHeating
+      ? { SingleGlazed: 1.25, DoubleGlazed: 1.0, TripleGlazed: 0.78, Louvered: 1.30 }
+      : { SingleGlazed: 1.12, DoubleGlazed: 1.0, TripleGlazed: 0.90, Louvered: 1.14 });
+    applyMultiplier("roofType", isHeating
+      ? { Flat: 1.10, Pitched: 1.0, Gable: 1.0, Roof: 1.0 }
+      : { Flat: 1.05, Pitched: 1.0, Gable: 1.0, Roof: 1.0 });
+    applyMultiplier("appliances", isHeating
+      ? { Oven: 0.95, Television: 0.99, Computer: 0.98 } // internal gains offset heat
+      : { Oven: 1.08, Television: 1.02, Computer: 1.03 });
 
-    applyMultiplier("sunExposure", {
-      FullSunlight: 1.18,    // Increased from 1.15 (critical factor in hot climate)
-      Average: 1,
-      HeavilyShaded: 0.85,
-    });
+    applyMultiplier("sunExposure", isHeating
+      ? { FullSunlight: 0.90, Average: 1, HeavilyShaded: 1.08 } // passive solar helps in winter
+      : { FullSunlight: 1.18, Average: 1, HeavilyShaded: 0.85 });
 
-    applyMultiplier("climate", {
-      HotMiddleEast: 1.50,   // Very hot, dry
-      TropicalSEAsia: 1.45, // Hot + humid
-      Subtropical: 1.30,    // Warm + humid (Australia, S. Africa)
-      AverageEurope: 1.00,  // Temperate baseline
-      Continental: 0.95,    // Cold winters, warm summers
-      SubArctic: 0.80,      // Cold (Scandinavia, Canada)
-      ColdAlaska: 0.75,     // Very cold
-    });
+    applyMultiplier("climate", isHeating
+      ? {
+          HotMiddleEast: 0.45,   // Hot days, but cold desert nights
+          TropicalSEAsia: 0.20,  // Minimal heating need
+          Subtropical: 0.55,
+          AverageEurope: 1.00,
+          Continental: 1.30,     // Cold winters dominate
+          SubArctic: 1.65,
+          ColdAlaska: 1.85,
+        }
+      : {
+          HotMiddleEast: 1.50,
+          TropicalSEAsia: 1.45,
+          Subtropical: 1.30,
+          AverageEurope: 1.00,
+          Continental: 0.95,
+          SubArctic: 0.80,
+          ColdAlaska: 0.75,
+        });
 
-    applyMultiplier("typeOfWall", {
-      BrickVeneer: 1.08,
-      DoubleBrick: 0.92,
-      FoamCladding: 0.85,
-    });
+    applyMultiplier("typeOfWall", isHeating
+      ? { BrickVeneer: 1.10, DoubleBrick: 0.90, FoamCladding: 0.75 }
+      : { BrickVeneer: 1.08, DoubleBrick: 0.92, FoamCladding: 0.85 });
 
     applyMultiplier(
       "OutdoorUnitLocation",
@@ -525,18 +543,48 @@ useEffect(() => {
     );
     applyMultiplier(
       "apartmentOrientation",
-      CONSTANTS.apartmentOrientationMultipliers
+      isHeating
+        ? { North: 1.10, East: 0.98, South: 0.92, West: 0.98 } // S-facing wins in winter (N. hemisphere)
+        : CONSTANTS.apartmentOrientationMultipliers
     );
 
-    // Humidity adjustment
-    const humidityMultipliers = { low: 0.95, average: 1.0, high: 1.12 };
+    // Humidity: matters for cooling latent load; negligible direct impact on heating.
+    const humidityMultipliers = isHeating
+      ? { low: 1.0, average: 1.0, high: 1.0 }
+      : { low: 0.95, average: 1.0, high: 1.12 };
     btu *= humidityMultipliers[humidity] ?? 1.0;
 
-    // Air changes (ACH) adjustment — baseline 1.0 ACH
-    const ach = parseFloat(airChanges) || 1.0;
-    btu *= 1 + (ach - 1.0) * 0.05;
+    // Infiltration: air leakage hits heating loads harder than cooling.
+    const infiltrationMultipliers = isHeating
+      ? { tight: 0.88, average: 1.0, leaky: 1.22 }
+      : { tight: 0.92, average: 1.0, leaky: 1.10 };
+    btu *= infiltrationMultipliers[infiltration] ?? 1.0;
 
-    return { btu: Math.round(btu), error: null };
+    return { btu: Math.max(0, Math.round(btu)), error: null };
+  };
+
+  // Per-room load wrapper. For systemMode='both', sizes on max(cool, heat)
+  // and also returns the split so downstream views can show both numbers.
+  const calculateRoomLoad = (room, peopleOverride, currentMode) => {
+    if (currentMode === 'both') {
+      const cool = calculateBTUForRoom(room, peopleOverride, 'cooling');
+      if (cool.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: cool.error };
+      const heat = calculateBTUForRoom(room, peopleOverride, 'heating');
+      if (heat.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: heat.error };
+      return {
+        btu: Math.max(cool.btu || 0, heat.btu || 0),
+        coolBtu: cool.btu,
+        heatBtu: heat.btu,
+        error: null,
+      };
+    }
+    const r = calculateBTUForRoom(room, peopleOverride, currentMode);
+    return {
+      btu: r.btu,
+      coolBtu: currentMode === 'cooling' ? r.btu : null,
+      heatBtu: currentMode === 'heating' ? r.btu : null,
+      error: r.error,
+    };
   };
 
   // Detect and group rooms by flat
@@ -602,10 +650,10 @@ useEffect(() => {
           ? flatPeopleCount[flatKey]
           : 0;
       }
-      const { btu, error } = calculateBTUForRoom(room, peopleOverride);
+      const { btu, coolBtu, heatBtu, error } = calculateRoomLoad(room, peopleOverride, systemMode);
       if (error) {
         setError(error);
-        return { room, product: null, btu };
+        return { room, product: null, btu, coolBtu, heatBtu };
       }
 
       results.push(btu);
@@ -613,12 +661,17 @@ useEffect(() => {
 
       try {
         const { data } = await axios.get(`/api/products/btu/${btu}`, {
-          params: Object.fromEntries(
-            Object.entries(options).map(([category, values]) => [
-              category,
-              Object.keys(values).filter((key) => values[key]),
-            ])
-          ),
+          params: {
+            // System mode: cooling | heating | both. Backend uses this to
+            // pick between coolingBtu and heatingBtu when filtering candidates.
+            mode: systemMode,
+            ...Object.fromEntries(
+              Object.entries(options).map(([category, values]) => [
+                category,
+                Object.keys(values).filter((key) => values[key]),
+              ])
+            ),
+          },
         });
 
         const product =
@@ -637,7 +690,7 @@ useEffect(() => {
                 description: `Product not available for ${room.name}`,
               };
 
-        return { room, product, btu };
+        return { room, product, btu, coolBtu, heatBtu };
       } catch (err) {
         console.error(`Product not found for room ${room.name}:`, err);
         return {
@@ -655,6 +708,8 @@ useEffect(() => {
             description: `Product not available for ${room.name}`,
           },
           btu,
+          coolBtu,
+          heatBtu,
         };
       }
     });
@@ -717,11 +772,20 @@ useEffect(() => {
           }
         }
 
-        // Filter condensers for VRF systems
-        availableCondensers = availableCondensers.filter(cond =>
-          /vrf/i.test(cond.name) ||
-          /vrf/i.test(cond.category || '')
-        );
+        // Outdoor unit selection: small loads (< 30k BTU) prefer single/multi-zone
+        // heat-pump outdoors over VRF (which starts at 40k and would be 2x+ oversized).
+        // Larger loads stay on the VRF ladder.
+        const SMALL_LOAD_THRESHOLD = 30000;
+        const isSmallLoad = requiredBTU < SMALL_LOAD_THRESHOLD;
+        availableCondensers = availableCondensers.filter(cond => {
+          const isVRF = /vrf/i.test(cond.name) || /vrf/i.test(cond.category || '');
+          const isNonVrfOutdoor =
+            /outdoor condenser/i.test(cond.category || '') ||
+            /single-zone|multi-zone/i.test(cond.name);
+          return isSmallLoad
+            ? (isVRF || isNonVrfOutdoor)   // small loads: VRF + non-VRF outdoor heat-pumps
+            : isVRF;                       // large loads: VRF only (original behaviour)
+        });
 
         availableCondensers.sort((a, b) => a.btu - b.btu);
 
@@ -951,6 +1015,9 @@ useEffect(() => {
       .map((p) => ({
         type: p.model || "Split System",
         btu: p.btu || 0,
+        coolingBtu: p.coolingBtu,
+        heatingBtu: p.heatingBtu,
+        productType: p.productType,
         estimatedCost: p.price || 0,
       }));
 
@@ -959,6 +1026,9 @@ useEffect(() => {
         condensersForDisplay.map((c) => ({
           type: c.model || c.name || "Condenser",
           btu: c.btu || 0,
+          coolingBtu: c.coolingBtu,
+          heatingBtu: c.heatingBtu,
+          productType: c.productType,
           estimatedCost: c.price || 0,
           flatName: c.flatName || undefined,
         }))
@@ -967,6 +1037,13 @@ useEffect(() => {
 
     const btuData = {
       totalBTU,
+      systemMode,
+      totalCoolingBTU: productResults
+        .filter(({ product }) => product && !product.isCondenser)
+        .reduce((s, r) => s + (r.coolBtu || 0), 0),
+      totalHeatingBTU: productResults
+        .filter(({ product }) => product && !product.isCondenser)
+        .reduce((s, r) => s + (r.heatBtu || 0), 0),
       totalSquareFootage: actualRooms.reduce(
         (sum, room) => sum + (parseFloat(room.size) || 0),
         0
@@ -981,10 +1058,12 @@ useEffect(() => {
       hasAnnotatedCondenser,
       rooms: productResults
         .filter(({ product }) => product && !product.isCondenser)
-        .map(({ room, product, btu }, index) => ({
+        .map(({ room, product, btu, coolBtu, heatBtu }, index) => ({
           name: room.name,
           size: room.size,
           btu: btu,
+          coolBtu: coolBtu ?? null,
+          heatBtu: heatBtu ?? null,
           product: {
             ...product,
             name: product.name || "No product available",
@@ -1033,6 +1112,14 @@ useEffect(() => {
                     name: cond.name || cond.model,
                     model: cond.model,
                     btu: cond.btu,
+                    coolingBtu: cond.coolingBtu,
+                    heatingBtu: cond.heatingBtu,
+                    category: cond.category,
+                    productType: cond.productType || 'outdoor',
+                    numberOfMaximumIndoorUnits: cond.numberOfMaximumIndoorUnits,
+                    areaCoverage: cond.areaCoverage,
+                    energyEfficiency: cond.energyEfficiency,
+                    countInStock: cond.countInStock,
                     price: cond.price,
                     discount: cond.discount || 0,
                     slug: cond.slug,
@@ -1277,22 +1364,36 @@ useEffect(() => {
             </Form.Group>
           </Col>
 
-          {/* Air changes per hour */}
+          {/* Infiltration (envelope air-leakage) selector */}
           <Col xs={12} md={6} lg={4} className="my-4">
-            <Form.Group controlId="airChanges">
-              <Form.Label>Air Changes per Hour (ACH):</Form.Label>
-              <Form.Control
-                type="number"
-                step="0.1"
-                min="0.3"
-                max="3.0"
-                placeholder="e.g. 1.0"
-                value={airChanges}
-                onChange={(e) => setAirChanges(e.target.value)}
-              />
-              <Form.Text className="text-muted">Typical residential: 0.5–1.5 ACH</Form.Text>
+            <Form.Group controlId="infiltration">
+              <Form.Label>Building Air-Tightness:</Form.Label>
+              <Form.Select
+                value={infiltration}
+                onChange={(e) => setInfiltration(e.target.value)}
+              >
+                <option value="tight">Tight (new / sealed build)</option>
+                <option value="average">Average (typical dwelling)</option>
+                <option value="leaky">Leaky (older / drafty)</option>
+              </Form.Select>
             </Form.Group>
           </Col>
+
+          {/* System mode selector – drives heating vs cooling sizing */}
+          <Col xs={12} md={6} lg={4} className="my-4">
+            <Form.Group controlId="systemMode">
+              <Form.Label>System Mode:</Form.Label>
+              <Form.Select
+                value={systemMode}
+                onChange={(e) => setSystemMode(e.target.value)}
+              >
+                <option value="cooling">Cooling only</option>
+                <option value="heating">Heating only (heat pump)</option>
+                <option value="both">Cooling + Heating (heat pump)</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+
         </Row>
 {rooms.length > 0 && (
   <div className="mb-4">

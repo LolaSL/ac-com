@@ -40,6 +40,12 @@ const productSchema = new mongoose.Schema(
     features: [{ type: String }],
     mode: [{ type: String }],
     btu: { type: Number, required: true },
+    coolingBtu: { type: Number },
+    heatingBtu: { type: Number },
+    productType: {
+      type: String,
+      enum: ['indoor', 'outdoor', 'accessory'],
+    },
     areaCoverage: { type: Number },
     energyEfficiency: { type: Number },
     numberOfMaximumIndoorUnits:{ type: Number },

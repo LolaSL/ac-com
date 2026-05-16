@@ -120,7 +120,15 @@ const ModalWindow = ({ show, onHide, products, addToCart, recommendedBTU }) => {
 
             {/* BTU and Sizing Info */}
             <p className="mb-2">
-              <strong>Capacity:</strong> {product.btu} BTU
+              <strong>Capacity:</strong> {(product.coolingBtu || product.btu).toLocaleString()} BTU
+              {product.heatingBtu ? (
+                <>
+                  {' '}
+                  <span className="text-muted">
+                    (Heat: {product.heatingBtu.toLocaleString()} BTU)
+                  </span>
+                </>
+              ) : null}
               {recommendedBTU && (
                 <>
                   <br />

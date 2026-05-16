@@ -237,7 +237,75 @@ export default function CartPage() {
   }, 0);
   const originalTotal = cartItems.reduce((a, c) => a + c.quantity * (typeof c.price === 'number' ? c.price : 0), 0);
   const totalSavings  = originalTotal - subtotal;
+  // ── Tier A: extra hero-bar metrics ──────────────────────────
+  // Classify each item as indoor / outdoor / accessory. Prefer productType
+  // (added in the heat-pump migration); fall back to multiple heuristics for
+  // products that haven't been re-seeded yet.
+  const classifyItem = (item) => {
+    if (item.productType) return item.productType;
+    const cat  = (item.category || '').toLowerCase();
+    const name = (item.name || '').toLowerCase();
+    // Strong signal: only outdoor/condensing units carry this field.
+    if (typeof item.numberOfMaximumIndoorUnits === 'number' && item.numberOfMaximumIndoorUnits > 0) {
+      return 'outdoor';
+    }
+    if (
+      cat.includes('condenser') ||
+      cat.includes('outdoor') ||
+      cat.includes('vrf heat recovery') ||
+      cat.includes('heat recovery') ||
+      cat.includes('mrv-s outdoor') ||
+      name.includes('outdoor unit') ||
+      name.includes('condenser') ||
+      name.includes('condensing unit')
+    ) return 'outdoor';
+    if (
+      cat.includes('wall-mounted') ||
+      cat.includes('mini split') ||
+      cat.includes('wind-free') ||
+      cat.includes('cassette') ||
+      cat.includes('indoor') ||
+      name.includes('indoor unit')
+    ) return 'indoor';
+    return 'accessory';
+  };
 
+  let indoorCount = 0;
+  let outdoorCount = 0;
+  let totalHeatingBTU = 0;
+  let totalCoverage = 0;
+  let weightedEfficiency = 0;
+  let efficiencyBTU = 0;
+  cartItems.forEach((item) => {
+    const qty  = item.quantity || 0;
+    const type = classifyItem(item);
+    if (type === 'indoor')  indoorCount  += qty;
+    if (type === 'outdoor') outdoorCount += qty;
+    if (typeof item.heatingBtu  === 'number') totalHeatingBTU += qty * item.heatingBtu;
+    if (typeof item.areaCoverage === 'number') totalCoverage  += qty * item.areaCoverage;
+    // BTU-weighted average efficiency (so a 60k unit dominates over a 9k one)
+    const eff = typeof item.energyEfficiency === 'number' ? item.energyEfficiency : null;
+    const btu = typeof item.coolingBtu === 'number'
+      ? item.coolingBtu
+      : (typeof item.btu === 'number' ? item.btu : 0);
+    if (eff && btu) {
+      weightedEfficiency += eff * btu * qty;
+      efficiencyBTU     += btu * qty;
+    }
+  });
+  const avgEfficiency = efficiencyBTU > 0 ? weightedEfficiency / efficiencyBTU : null;
+  // Rough annual-savings estimate vs a SEER-13 baseline unit.
+  // Assumes ~1000 cooling-hours/year and US-avg residential electricity $0.13/kWh.
+  // (Marketing estimate, not an engineering figure.)
+  const COOLING_HOURS_PER_YEAR = 1000;
+  const ELECTRICITY_PRICE = 0.13;
+  const BASELINE_SEER = 13;
+  const annualSavings = (avgEfficiency && avgEfficiency > BASELINE_SEER && totalBTU > 0)
+    ? ((totalBTU / BASELINE_SEER) - (totalBTU / avgEfficiency))
+        * COOLING_HOURS_PER_YEAR
+        / 1000               // Wh → kWh
+        * ELECTRICITY_PRICE
+    : 0;
   // ── condenser banner config ──────────────────────────────────
   const recBanner = (() => {
     if (!showAlert) return null;
@@ -263,7 +331,23 @@ export default function CartPage() {
         <h1 className="cp-hero__title">🛒 Shopping Cart</h1>
         <div className="cp-hero__meta">
           <span className="cp-badge cp-badge--white">{itemCount} {itemCount === 1 ? "item" : "items"}</span>
-          {totalBTU > 0 && <span className="cp-badge cp-badge--white">❄️ {totalBTU.toLocaleString()} BTU total</span>}
+          {(indoorCount > 0 || outdoorCount > 0) && (
+            <span className="cp-badge cp-badge--white">
+              🏠 {indoorCount} indoor · {outdoorCount} outdoor
+            </span>
+          )}
+          {totalBTU > 0 && <span className="cp-badge cp-badge--white">❄️ {totalBTU.toLocaleString()} BTU AC capacity</span>}
+          {totalHeatingBTU > 0 && (
+            <span className="cp-badge cp-badge--white">🔥 {totalHeatingBTU.toLocaleString()} BTU heat capacity</span>
+          )}
+          {totalCoverage > 0 && (
+            <span className="cp-badge cp-badge--white">📐 Rated for ~{Math.round(totalCoverage)} m²</span>
+          )}
+          {annualSavings > 1 && (
+            <span className="cp-badge cp-badge--white" title={`Estimated vs SEER ${BASELINE_SEER} baseline`}>
+              🌱 ~${Math.round(annualSavings)}/yr energy savings
+            </span>
+          )}
           {totalSavings > 0.01 && <span className="cp-badge cp-badge--white">💰 Saving ${totalSavings.toFixed(2)}</span>}
         </div>
       </div>
@@ -330,7 +414,12 @@ export default function CartPage() {
                     <div className="cp-item__info">
                       <Link to={`/product/${item.slug}`} className="cp-item__name">{item.name}</Link>
                       {item.category && <p className="cp-item__category">{item.category}</p>}
-                      {item.btu && <span className="cp-item__btu">{item.btu.toLocaleString()} BTU</span>}
+                      {(item.coolingBtu || item.btu) ? (
+                        <span className="cp-item__btu">
+                          {(item.coolingBtu || item.btu).toLocaleString()} BTU
+                          {item.heatingBtu ? ` · Heat: ${item.heatingBtu.toLocaleString()}` : ''}
+                        </span>
+                      ) : null}
                     </div>
 
                     <div className="cp-qty">

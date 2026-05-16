@@ -239,12 +239,12 @@
 
 @media (max-width: 768px) {
   .blog-item {
-    min-height: 180px;
-    aspect-ratio: 2 / 1;
+    min-height: 240px;
+    aspect-ratio: auto;
   }
 
   .blog-content {
-    padding: 10px 12px;
+    padding: 12px 14px 16px;
   }
 
   .blog-title {
@@ -260,11 +260,15 @@
     display: none;
   }
 
+  .blog-link {
+    margin-top: 4px;
+  }
+
 }
 
 @media (max-width: 480px) {
   .blog-content {
-    padding: 8px 10px;
+    padding: 10px 12px 14px;
   }
 
   .blog-title {

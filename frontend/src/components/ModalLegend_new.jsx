@@ -159,11 +159,14 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                   <li><strong>Reset (°):</strong> Appears only when PDF is rotated — resets back to original 0° orientation</li>
                   <li><strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF canvas (range: 100%–400%)</li>
                   <li><strong>100% (zoom%):</strong> Shows current zoom level; click to reset zoom back to 100%</li>
-                  <li><strong>Click on canvas:</strong> Opens a modal to enter an AC unit label and places an AC symbol at that position</li>
-                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF is loaded. Tap to toggle — when active it turns blue and shows <em>"✅ Tap to place"</em>; only while active can you tap the canvas to place AC symbols. This prevents accidental placements while scrolling on touch screens.</li>
+                  <li><strong>Annotation label input:</strong> Text field above the canvas where you type the symbol label (e.g. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>) <strong>before</strong> clicking the canvas. The label is reused for each subsequent click — update it any time to change what the next placement will be called.</li>
+                  <li><strong>Click on canvas:</strong> Places an AC / condenser symbol at that position using the current text in the <em>Annotation label</em> input. If the input is empty nothing is placed.</li>
+                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF is loaded. Type the label in the mobile input, then tap <em>📌 Place mode</em> to activate (turns blue and shows <em>"✅ Tap to place"</em>); only while active can you tap the canvas to place symbols. This prevents accidental placements while scrolling on touch screens.</li>
                   <li><strong>Drag air conditioner symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an AC symbol</li>
                   <li><strong>Click air conditioner symbol (desktop):</strong> Rotates the air conditioner symbol 90° in place</li>
-                  <li><strong>🗑️ Delete air conditioner symbol:</strong> <em>Desktop:</em> right-click the air conditioner symbol. <em>Mobile:</em> double-tap the air conditioner symbol (two taps within ~700 ms) or press and hold for ~800 ms</li>
+                  <li><strong>� Placed annotations panel:</strong> A list of every placed label appears below the canvas as pill-shaped chips (e.g. <em>ac-1 ✏️ 🗑️</em>). The header shows the total count — <em>"📌 Placed annotations (n)"</em>. Use the chip buttons to edit or delete any annotation without hunting for it on the canvas.</li>
+                  <li><strong>✏️ Edit label:</strong> Click the pencil icon on the annotation chip (works on desktop and mobile) <em>or</em> double-click the label directly on the canvas — a modal opens to rename it.</li>
+                  <li><strong>🗑️ Delete air conditioner symbol:</strong> Click the trash icon on the annotation chip in the <em>Placed annotations</em> panel (works on desktop and mobile). On desktop you can also right-click the air conditioner symbol on the canvas.</li>
                   <li><strong>Export to BTU (n rooms):</strong> Sends all extracted rooms to the BTU Calculator; disabled when no rooms are available</li>
                   <li><strong>Save:</strong> Saves the PDF with all AC symbols to the backend (shows "Saving..." while in progress)</li>
                   <li><strong>Clear:</strong> Removes all AC symbols, resets the canvas, and clears all session data</li>
@@ -244,29 +247,35 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
-                  🎯 Step 4: Mark AC Unit Locations
+                  🎯 Step 4: Mark AC Unit & Condenser Locations
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>Click on the canvas</strong> at the position where an AC unit or condenser should go — a modal will appear to enter the label
+                    <strong>Type the label first</strong> in the <em>Annotation label</em> input above the canvas (desktop) or in the mobile annotation bar below the toolbar (mobile). The input replaces the old pop-up prompt — no modal will appear when you click.
                   </li>
                   <li>
-                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF is loaded. Tap it to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas to place AC symbols. Tap the button again to deactivate and return to scroll-only mode.
+                    <strong>Then click on the canvas</strong> at the position where the AC unit or condenser should go. A symbol is placed immediately using the current label. The label stays in the input so you can keep clicking to place more of the same kind — just change the text whenever you need a new label.
                   </li>
                   <li>
-                    <strong>Single Flat AC label:</strong> Enter e.g. "ac-1", "ac-2"
+                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF is loaded. Type the label, tap the button to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas. Tap the button again to deactivate and return to scroll-only mode.
                   </li>
                   <li>
-                    <strong>Multi-Flat AC label:</strong> Enter e.g. "ac-1.1", "ac-1.2" for flat 1; "ac-2.1", "ac-2.2" for flat 2
+                    <strong>Single Flat AC label:</strong> Type e.g. <em>ac-1</em>, <em>ac-2</em>
                   </li>
                   <li>
-                    <strong>Single Flat Condenser label:</strong> Enter e.g. "condenser-1"
+                    <strong>Multi-Flat AC label:</strong> Type e.g. <em>ac-1.1</em>, <em>ac-1.2</em> for flat 1; <em>ac-2.1</em>, <em>ac-2.2</em> for flat 2
                   </li>
                   <li>
-                    <strong>Multi-Flat Condenser label:</strong> Enter e.g. "condenser-1" for flat 1, "condenser-2" for flat 2
+                    <strong>Single Flat Condenser label:</strong> Type e.g. <em>condenser</em> or <em>condenser-1</em>
                   </li>
                   <li>
-                    Recommended: Place AC air conditioner symbol above the room door; place Condenser air conditioner symbol near the flat entrance
+                    <strong>Multi-Flat Condenser label:</strong> Type <em>condenser-1</em> for flat 1, <em>condenser-2</em> for flat 2, etc.
+                  </li>
+                  <li>
+                    Recommended: Place AC symbols above each room door; place the Condenser symbol near the flat entrance or on the balcony/roof location.
+                  </li>
+                  <li>
+                    Tip: To switch from placing AC units to placing a condenser, just clear the input and type <em>condenser</em> — the next canvas click will create the condenser symbol.
                   </li>
                 </ul>
 
@@ -281,7 +290,13 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                     <strong>📌 Drag Air Conditioner Symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition
                   </li>
                   <li>
-                    <strong>🗑️ Delete Air Conditioner Symbol:</strong> <em>Desktop:</em> right-click the air conditioner symbol. <em>Mobile:</em> double-tap (two quick taps on the same air conditioner symbol within ~700 ms) or press and hold for ~800 ms
+                    <strong>� Placed annotations panel:</strong> Below the canvas you'll see a chip list <em>"📌 Placed annotations (n)"</em> containing every label you've placed (e.g. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Each chip has a ✏️ edit button and a 🗑️ delete button — this is the recommended way to manage annotations, especially on mobile.
+                  </li>
+                  <li>
+                    <strong>✏️ Edit Annotation Label:</strong> Click the pencil icon on a chip in the panel, or double-click the label directly on the canvas. A modal opens where you can rename the annotation.
+                  </li>
+                  <li>
+                    <strong>🗑️ Delete Annotation:</strong> Click the trash icon on the chip in the <em>Placed annotations</em> panel. On desktop you can also right-click the air conditioner symbol on the canvas as a shortcut.
                   </li>
                 </ul>
 

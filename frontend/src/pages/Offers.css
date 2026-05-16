@@ -186,13 +186,17 @@
 
 /* ── Card CTA button ────────────────────────────────────── */
 .of-card__btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: inline-block;
   padding: 0.55rem 1.2rem;
+  background-color: #1a1a2e;
   background-image: linear-gradient(
     120deg,
     #1a1a2e 0%,
     #16213e 35%,
-    rgba(103, 232, 249, 0.45) 50%,
+    rgba(103, 232, 249, 0.55) 50%,
     #16213e 65%,
     #1a1a2e 100%
   );
@@ -207,6 +211,28 @@
   align-self: flex-start;
   animation: btnShimmer 2.4s ease-in-out infinite;
   transition: color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  will-change: background-position;
+}
+
+/* Bright sweeping highlight — visible at any card width */
+.of-card__btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(207, 250, 254, 0.95) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: screen;
+  animation: btnSweep 2.8s ease-in-out infinite;
 }
 
 @keyframes btnShimmer {
@@ -215,12 +241,30 @@
   100% { background-position: 100% 0; }
 }
 
+@keyframes btnSweep {
+  0%   { left: -75%; }
+  60%  { left: 125%; }
+  100% { left: 125%; }
+}
+
 .of-card__btn:hover {
   background: linear-gradient(135deg, #67e8f9 0%, #22d3ee 100%);
   color: #fff;
   border-color: #67e8f9;
   box-shadow: 0 4px 14px rgba(103, 232, 249, 0.35);
   transform: translateY(-1px);
+}
+
+.of-card__btn:hover::before {
+  animation-play-state: paused;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .of-card__btn,
+  .of-card__btn::before {
+    animation: none;
+  }
 }
 
 /* ── Fade-in animation ──────────────────────────────────── */

@@ -570,6 +570,16 @@ productRouter.get('/condensers/:btu', async (req, res) => {
 
 productRouter.get('/btu/:btu', async (req, res) => {
   const targetBTU = parseInt(req.params.btu, 10);
+  // Mode:
+  //   'heating' -> filter by heatingBtu (excludes cooling-only SKUs)
+  //   'both'    -> require both coolingBtu >= target AND heatingBtu >= target
+  //                (heat pumps that meet both loads simultaneously)
+  //   default   -> 'cooling': filter by coolingBtu, fall back to legacy `btu`
+  const rawMode = (req.query.mode || 'cooling').toLowerCase();
+  const mode =
+    rawMode === 'heating' ? 'heating' :
+    rawMode === 'both'    ? 'both'    :
+    'cooling';
 
   if (isNaN(targetBTU)) {
     return res.status(400).send({ message: 'Invalid BTU value provided.' });
@@ -580,49 +590,94 @@ productRouter.get('/btu/:btu', async (req, res) => {
     const INDOOR_AC_CATEGORIES = [
       "Wall-Mounted AC",
       "Mini Split AC",
+      "Wind-Free TM Cooling",
+      "Cassette Indoor Unit",
       "Indoor Unit",
       "Split System Indoor",
       // Add any other categories that are NOT condensers here!
     ];
 
-    const query = {
-      btu: { $gte: targetBTU },
+    // Capacity filter is mode-aware.
+    // - heating: require heatingBtu >= target (excludes cooling-only SKUs).
+    // - both:    require BOTH coolingBtu >= target AND heatingBtu >= target.
+    // - cooling: prefer coolingBtu; fall back to the legacy `btu` field for SKUs not yet backfilled.
+    const capacityFilter =
+      mode === 'heating'
+        ? { heatingBtu: { $gte: targetBTU } }
+        : mode === 'both'
+        ? {
+            coolingBtu: { $gte: targetBTU },
+            heatingBtu: { $gte: targetBTU },
+          }
+        : {
+            $or: [
+              { coolingBtu: { $gte: targetBTU } },
+              { coolingBtu: { $exists: false }, btu: { $gte: targetBTU } },
+            ],
+          };
 
+    const stockFilter = {
+      $and: [
+        { $or: [{ count: { $exists: false } }, { count: { $gt: 0 } }] },
+        { $or: [{ quantity: { $exists: false } }, { quantity: { $gt: 0 } }] },
+      ],
+    };
+
+    const query = {
+      ...capacityFilter,
       // 🛑 CRITICAL FIX: Explicitly include only INDOOR AC units.
       // This is safer than excluding condensers, which fail due to naming variations.
       category: { $in: INDOOR_AC_CATEGORIES },
-
-      // Robust Stock Condition (Only includes products with count/quantity > 0 OR if the field is missing/undefined)
-      $and: [
-        { $or: [{ count: { $exists: false } }, { count: { $gt: 0 } }] },
-        { $or: [{ quantity: { $exists: false } }, { quantity: { $gt: 0 } }] }
-      ]
+      ...stockFilter,
     };
 
+    // Mode-aware sort key: pick the smallest unit that still meets the target in the requested mode.
+    // For 'both', sort by coolingBtu (then heatingBtu) since the AND filter guarantees both are >= target.
+    const sortKey =
+      mode === 'heating' ? { heatingBtu: 1 } :
+      mode === 'both'    ? { coolingBtu: 1, heatingBtu: 1 } :
+      { coolingBtu: 1, btu: 1 };
+
     // Use find() to get ALL potential candidates and sort them by BTU.
-    const candidates = await Product.find(query)
-      .sort({ btu: 1 }); // Finds the smallest suitable product first
+    const candidates = await Product.find(query).sort(sortKey);
 
     if (candidates.length === 0) {
-      // Fallback: no product with btu >= target, find the highest-BTU indoor AC available
-      console.log('⚠️ No product with BTU >=', targetBTU, '— falling back to highest available');
-      const fallback = await Product.findOne({
+      // Fallback: no product meeting target, find the highest-capacity indoor AC available in the requested mode.
+      console.log(`⚠️ No product with ${mode} BTU >=`, targetBTU, '— falling back to highest available');
+
+      const fallbackQuery = {
         category: { $in: INDOOR_AC_CATEGORIES },
-        $and: [
-          { $or: [{ count: { $exists: false } }, { count: { $gt: 0 } }] },
-          { $or: [{ quantity: { $exists: false } }, { quantity: { $gt: 0 } }] }
-        ],
+        ...stockFilter,
         price: { $gt: 0 },
-      }).sort({ btu: -1 });
+      };
+      // In heating mode, only consider products that have a heatingBtu (i.e., heat-pump-capable).
+      if (mode === 'heating') {
+        fallbackQuery.heatingBtu = { $exists: true, $gt: 0 };
+      }
+      // In 'both' mode, require heat-pump-capable SKUs with both capacities populated.
+      if (mode === 'both') {
+        fallbackQuery.heatingBtu = { $exists: true, $gt: 0 };
+        fallbackQuery.coolingBtu = { $exists: true, $gt: 0 };
+      }
+
+      const fallbackSort =
+        mode === 'heating' ? { heatingBtu: -1 } :
+        mode === 'both'    ? { coolingBtu: -1, heatingBtu: -1 } :
+        { coolingBtu: -1, btu: -1 };
+      const fallback = await Product.findOne(fallbackQuery).sort(fallbackSort);
 
       if (fallback) {
         const fname = fallback.displayName || fallback.name || `Product ID: ${fallback._id}`;
-        console.log('✅ FALLBACK PRODUCT (highest BTU indoor AC):', fname, fallback.btu);
+        const cap =
+          mode === 'heating' ? fallback.heatingBtu :
+          mode === 'both'    ? `cool ${fallback.coolingBtu} / heat ${fallback.heatingBtu}` :
+          (fallback.coolingBtu || fallback.btu);
+        console.log(`✅ FALLBACK PRODUCT (highest ${mode} BTU indoor AC):`, fname, cap);
         return res.json(fallback);
       }
 
-      console.log('❌ PRODUCT NOT FOUND for BTU:', targetBTU);
-      return res.status(404).send({ message: 'No suitable product found with available stock.' });
+      console.log('❌ PRODUCT NOT FOUND for BTU:', targetBTU, 'mode:', mode);
+      return res.status(404).send({ message: `No suitable ${mode}-capable product found with available stock.` });
     }
 
     // Final Filter: Pick the first valid product (must have price/name)
@@ -633,7 +688,11 @@ productRouter.get('/btu/:btu', async (req, res) => {
 
     if (validProduct) {
       const productName = validProduct.displayName || validProduct.name || `Product ID: ${validProduct._id}`;
-      console.log('✅ FOUND PRODUCT (Indoor AC):', productName, validProduct.btu);
+      const cap =
+        mode === 'heating' ? validProduct.heatingBtu :
+        mode === 'both'    ? `cool ${validProduct.coolingBtu} / heat ${validProduct.heatingBtu}` :
+        (validProduct.coolingBtu || validProduct.btu);
+      console.log(`✅ FOUND PRODUCT (Indoor AC, ${mode}):`, productName, cap);
 
       // Return clean JSON to the client
       return res.json(validProduct);

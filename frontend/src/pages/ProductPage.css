@@ -1,9 +1,9 @@
 /* ProductPage Styles */
 
-/* Override any parent container padding */
-.product-page-container,
-.product-page-container * .container,
-.product-page-container * .container-fluid {
+/* Reset only NESTED bootstrap containers so they don't double-pad
+   inside the page shell. The shell itself keeps its own padding/margins. */
+.product-page-container .container,
+.product-page-container .container-fluid {
   padding-left: 0 !important;
   padding-right: 0 !important;
   margin-left: 0 !important;
@@ -12,12 +12,10 @@
 
 /* ── Page shell ─────────────────────────────────── */
 .product-page-container {
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 3rem);
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
-  left: 0;
-  right: 0;
 }
 
 .product-page-container .product-title {

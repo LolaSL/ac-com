@@ -50,16 +50,49 @@ function BlogDetails() {
       {/* Reading progress bar */}
       <div className="bd-progress" style={{ width: `${progress}%` }} />
 
-      {/* Hero */}
-      {blog.image && (
-        <div className="bd-hero">
-          <img src={blog.image} alt={blog.title} className="bd-hero__img" />
-          <div className="bd-hero__overlay" />
-          <div className="bd-hero__text">
-            <h1 className="bd-hero__title">{blog.title}</h1>
-          </div>
+      {/* Hero — gradient frame always renders. When the post has an image, it
+          sits inside the gradient frame; otherwise the gradient backdrop fills
+          the hero with the title + meta on top. */}
+      <div
+        className={`bd-hero ${blog.image ? "bd-hero--with-image" : "bd-hero--fallback"} bd-hero--cat-${(blog.category || "default")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")}`}
+      >
+        <div className="bd-hero__shapes" aria-hidden="true">
+          <span className="bd-hero__shape bd-hero__shape--a" />
+          <span className="bd-hero__shape bd-hero__shape--b" />
+          <span className="bd-hero__shape bd-hero__shape--c" />
         </div>
-      )}
+
+        {blog.image ? (
+          <>
+            <img src={blog.image} alt={blog.title} className="bd-hero__img" />
+            <div className="bd-hero__overlay" />
+            <div className="bd-hero__text">
+              {blog.category && (
+                <span className="bd-hero__eyebrow">{blog.category}</span>
+              )}
+              <h1 className="bd-hero__title">{blog.title}</h1>
+            </div>
+          </>
+        ) : (
+          <div className="bd-hero__text bd-hero__text--center">
+            {blog.category && (
+              <span className="bd-hero__eyebrow">{blog.category}</span>
+            )}
+            <h1 className="bd-hero__title">{blog.title}</h1>
+            <div className="bd-hero__meta">
+              {blog.author && <span>✍️ {blog.author}</span>}
+              {(blog.updatedAt || blog.createdAt) && (
+                <span>
+                  📅 {new Date(blog.updatedAt || blog.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                </span>
+              )}
+              <span>⏱️ {readingTime} min read</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="bd-container">
         {/* Meta row */}
@@ -87,10 +120,7 @@ function BlogDetails() {
           </div>
         )}
 
-        {/* Title when no hero image */}
-        {!blog.image && (
-          <h1 className="bd-title">{blog.title}</h1>
-        )}
+        {/* Title fallback is rendered inside the gradient hero above when no image. */}
 
         {/* Content */}
         <article

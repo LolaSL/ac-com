@@ -52,6 +52,13 @@ export default function Recommendations() {
     });
 
     // Build room rows
+    const isBoth = btuProject?.systemMode === 'both';
+    const isHeatingOnly = btuProject?.systemMode === 'heating';
+    const roomBtuLabel = isBoth
+      ? 'Room Load (Cool / Heat BTU)'
+      : isHeatingOnly
+      ? 'Room Heating BTU'
+      : 'Room BTU';
     const roomRowsHtml = visibleRoomResults.map((room, i) => {
       const product = room.product || {};
       const productPrice = product.price
@@ -59,14 +66,17 @@ export default function Recommendations() {
           ? (product.price - (product.price * product.discount) / 100).toFixed(2)
           : product.price.toFixed(2)
         : '—';
-      
+      const roomBtuCell = isBoth && (room.coolBtu != null || room.heatBtu != null)
+        ? `${(room.coolBtu || 0).toLocaleString()} / ${(room.heatBtu || 0).toLocaleString()}`
+        : (room.btu?.toLocaleString() || '—');
+
       return `
         <tr>
           <td>${room.name || `Room ${i + 1}`}</td>
-          <td>${room.btu?.toLocaleString() || '—'}</td>
+          <td>${roomBtuCell}</td>
           <td>${product.name || product.model || '—'}</td>
           <td>${product.model || 'N/A'}</td>
-          <td>${product.btu?.toLocaleString() || '—'}</td>
+          <td>${(product.coolingBtu || product.btu)?.toLocaleString() || '—'}${product.heatingBtu ? ` (Heat: ${product.heatingBtu.toLocaleString()})` : ''}</td>
           <td>$${productPrice}</td>
         </tr>
       `;
@@ -91,13 +101,29 @@ export default function Recommendations() {
         <h1>HVAC System Quote</h1>
         <div class="print-meta">
           <p><strong>Generated:</strong> ${printDate}</p>
-          <p><strong>Total Rooms:</strong> ${visibleRoomResults.length} | <strong>Total BTU:</strong> ${totalBTU.toLocaleString()} | <strong>Total Area:</strong> ${btuProject?.totalSquareFootage || 'N/A'} m²</p>
+          <p>
+            <strong>System Mode:</strong> ${
+              btuProject?.systemMode
+                ? btuProject.systemMode.charAt(0).toUpperCase() + btuProject.systemMode.slice(1)
+                : 'Cooling'
+            } |
+            <strong>Total Rooms:</strong> ${visibleRoomResults.length} |
+            <strong>Total BTU:</strong> ${totalBTU.toLocaleString()} |
+            <strong>Total Area:</strong> ${btuProject?.totalSquareFootage || 'N/A'} m²
+          </p>
+          ${
+            isBoth
+              ? `<p><strong>Cooling Load:</strong> ${(btuProject?.totalCoolingBTU || 0).toLocaleString()} BTU |
+                    <strong>Heating Load:</strong> ${(btuProject?.totalHeatingBTU || 0).toLocaleString()} BTU
+                    <span style="color:#666; font-size:0.85em"> (system sized on the larger of the two per room)</span></p>`
+              : ''
+          }
         </div>
         <table class="quote-table">
           <thead>
             <tr>
               <th>Room</th>
-              <th>Room BTU</th>
+              <th>${roomBtuLabel}</th>
               <th>Optimal Product</th>
               <th>Model</th>
               <th>Product BTU</th>
@@ -442,8 +468,12 @@ export default function Recommendations() {
   // };
 
   const getSharePayload = useCallback(() => {
+    const modeLabel =
+      btuProject?.systemMode === 'heating' ? 'Heating' :
+      btuProject?.systemMode === 'both'    ? 'Heating + Cooling' :
+      'Cooling';
     const summary = visibleRoomResults
-      ? `AC System: ${visibleRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || "-"} BTU total`
+      ? `${modeLabel} system: ${visibleRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || "-"} BTU total`
       : "AC Unit Recommendations";
 
     return {
@@ -601,8 +631,51 @@ export default function Recommendations() {
       <Card className="recommendations-card">
         <Card.Body>
           <Card.Title className="card-title">
-            ❄️ AC Unit Recommendations (Calculated)
+            {btuProject?.systemMode === 'heating'
+              ? '🔥 Heat-Pump Recommendations (Calculated)'
+              : btuProject?.systemMode === 'both'
+              ? '❄️🔥 Heat-Pump Recommendations (Cooling + Heating)'
+              : '❄️ AC Unit Recommendations (Calculated)'}
           </Card.Title>
+
+          {/* System-mode summary banner */}
+          {btuProject?.systemMode && (
+            <div
+              style={{
+                background: btuProject.systemMode === 'heating'
+                  ? 'rgba(192, 57, 43, 0.08)'
+                  : btuProject.systemMode === 'both'
+                  ? 'rgba(102, 126, 234, 0.08)'
+                  : 'rgba(52, 152, 219, 0.08)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                borderRadius: '6px',
+                padding: '8px 12px',
+                marginBottom: '10px',
+                fontSize: '0.85rem',
+                color: '#1a1a2e',
+              }}
+            >
+              <strong>System Mode:</strong>{' '}
+              {btuProject.systemMode === 'heating'
+                ? 'Heating only (heat pump)'
+                : btuProject.systemMode === 'both'
+                ? 'Cooling + Heating (heat pump)'
+                : 'Cooling only'}
+              {btuProject.systemMode === 'both' && (
+                <>
+                  {' · '}<strong>Cool load:</strong>{' '}
+                  {(btuProject.totalCoolingBTU || 0).toLocaleString()} BTU
+                  {' · '}<strong>Heat load:</strong>{' '}
+                  <span style={{ color: '#c0392b' }}>
+                    {(btuProject.totalHeatingBTU || 0).toLocaleString()} BTU
+                  </span>
+                  {' '}<span style={{ color: '#666' }}>
+                    (each room sized on the larger of the two)
+                  </span>
+                </>
+              )}
+            </div>
+          )}
 
           {/* --- Per-room results table --- */}
           {visibleRoomResults ? (
@@ -612,7 +685,13 @@ export default function Recommendations() {
                 <tr style={{ borderBottom: '2px solid #dee2e6', background: 'rgba(102, 126, 234, 0.1)' }}>
                   <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Room</th>
                   <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Size</th>
-                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Room BTU</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>
+                    {btuProject?.systemMode === 'both'
+                      ? 'Room Load (Cool / Heat BTU)'
+                      : btuProject?.systemMode === 'heating'
+                      ? 'Room Heating BTU'
+                      : 'Room BTU'}
+                  </th>
                   <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Optimal Product</th>
                   <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Product BTU</th>
                   <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Price ($)</th>
@@ -642,11 +721,30 @@ export default function Recommendations() {
                       <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
                         <td style={{ padding: '5px 8px' }}>{displayName}</td>
                         <td style={{ padding: '5px 8px', textAlign: 'right' }}>{room.size}</td>
-                        <td style={{ padding: '5px 8px', textAlign: 'right' }}>{room.btu}</td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right' }}>
+                          {btuProject?.systemMode === 'both' && (room.coolBtu != null || room.heatBtu != null) ? (
+                            <>
+                              {(room.coolBtu || 0).toLocaleString()}
+                              {' / '}
+                              <span style={{ color: '#c0392b' }}>
+                                {(room.heatBtu || 0).toLocaleString()}
+                              </span>
+                            </>
+                          ) : (
+                            room.btu?.toLocaleString?.() ?? room.btu
+                          )}
+                        </td>
                         <td style={{ padding: '5px 8px' }}>
                           <div style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={getName(product)}>{getName(product)}</div>
                         </td>
-                        <td style={{ padding: '5px 8px', textAlign: 'right' }}>{product.btu || "—"}</td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right' }}>
+                          {(product.coolingBtu || product.btu) || "—"}
+                          {product.heatingBtu ? (
+                            <div style={{ fontSize: '0.75em', color: '#888' }}>
+                              Heat: {product.heatingBtu.toLocaleString()}
+                            </div>
+                          ) : null}
+                        </td>
                         <td
                           style={{
                             padding: '5px 8px',
