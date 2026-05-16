@@ -333,3 +333,32 @@
     background: rgba(0, 0, 0, 0.6);
   }
 }
+
+/* ==========================================================================
+   iOS Safari (iPhone) pinch-zoom + pan fix.
+   By default react-konva sets `touch-action: none` on the Stage's inner
+   `.konvajs-content` div and canvas. That blocks the browser from panning
+   the scroll container (.container-main) with a single finger once the user
+   has zoomed the PDF in. Override it on small screens so single-finger drag
+   scrolls the container, while two-finger pinch is still captured by the
+   custom pinch-zoom handler (which calls preventDefault only for 2 touches).
+   ========================================================================== */
+@media (max-width: 767.98px) {
+  .container-main {
+    /* Allow native pinch-zoom as a fallback in addition to JS pinch handler,
+       and allow panning in both axes so the zoomed PDF can be moved. */
+    touch-action: pan-x pan-y pinch-zoom !important;
+  }
+
+  .container-main .konvajs-content,
+  .container-main .konvajs-content canvas,
+  .container-main .konva-stage,
+  .container-main .konva-stage canvas {
+    touch-action: pan-x pan-y pinch-zoom !important;
+  }
+
+  .container-main .canvas-wrapper,
+  .container-main .canvas-wrapper canvas {
+    touch-action: pan-x pan-y pinch-zoom !important;
+  }
+}

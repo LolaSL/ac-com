@@ -73,14 +73,17 @@
 
 .premium-card-image {
   width: 100%;
+  aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
 }
 
 .premium-card-img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+  object-fit: cover;
+  object-position: center;
   border-radius: 16px 16px 0 0;
 }
 

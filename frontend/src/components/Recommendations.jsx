@@ -647,7 +647,26 @@ export default function Recommendations() {
                           <div style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={getName(product)}>{getName(product)}</div>
                         </td>
                         <td style={{ padding: '5px 8px', textAlign: 'right' }}>{product.btu || "—"}</td>
-                        <td style={{ padding: '5px 8px', textAlign: 'right', fontWeight: '600' }}>{getPrice(product)}</td>
+                        <td
+                          style={{
+                            padding: '5px 8px',
+                            textAlign: 'right',
+                            fontWeight: '600',
+                            whiteSpace: 'nowrap',
+                            color: '#1a1a2e',
+                            // Prevent iOS Safari from auto-linking $/numeric content
+                            // and re-styling it (invisible/colored link).
+                            WebkitTextFillColor: '#1a1a2e',
+                          }}
+                          // Belt-and-suspenders: opt out of Apple's data detectors
+                          // for this cell specifically.
+                          // eslint-disable-next-line react/no-unknown-property
+                          x-apple-data-detectors="false"
+                        >
+                          <span style={{ color: '#1a1a2e', WebkitTextFillColor: '#1a1a2e' }}>
+                            {getPrice(product)}
+                          </span>
+                        </td>
                         <td style={{ padding: '5px 8px' }}>{product.model || product.name || "—"}</td>
                         <td style={{ padding: '5px 8px', textAlign: 'center' }}>
                           {product.slug ? (
@@ -700,7 +719,15 @@ export default function Recommendations() {
                   <tr key={idx}>
                     <td>{getName(unit)}</td>
                     <td>{unit.btu || "—"}</td>
-                    <td>{getPrice(unit)}</td>
+                    <td
+                      style={{ whiteSpace: 'nowrap', color: '#1a1a2e', WebkitTextFillColor: '#1a1a2e' }}
+                      // eslint-disable-next-line react/no-unknown-property
+                      x-apple-data-detectors="false"
+                    >
+                      <span style={{ color: '#1a1a2e', WebkitTextFillColor: '#1a1a2e' }}>
+                        {getPrice(unit)}
+                      </span>
+                    </td>
                     <td>{unit.quantity || 1}</td>
                   </tr>
                 ))}

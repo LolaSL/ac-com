@@ -21,7 +21,10 @@ import "./Annotator.css";
 
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaFileCode, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
+// Always use a worker URL that matches the actually-loaded pdfjs API version,
+// otherwise the worker throws: 'The API version "X" does not match the Worker version "Y"'.
+const PDFJS_VERSION = pdfjsLib.version || "2.10.377";
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
 
 let Tesseract;
 
@@ -298,7 +301,15 @@ const runOcrOnImages = async (images, setRoomData) => {
   for (const image of images) {
     const {
       data: { text, words },
-    } = await Tesseract.recognize(image, "eng");
+    } = await Tesseract.recognize(image, "eng", {
+      // Pin paths explicitly: Tesseract.js otherwise tries to auto-derive a worker
+      // URL (e.g. unpkg.com/tesseract.js@vX.Y.Z/...) which has historically been
+      // broken on unpkg for some versions. Pinning avoids the
+      // "Failed to execute 'importScripts' on 'WorkerGlobalScope'" error.
+      workerPath: "https://unpkg.com/tesseract.js@5.0.4/dist/worker.min.js",
+      corePath: "https://unpkg.com/tesseract.js-core@5.0.0",
+      langPath: "https://tessdata.projectnaptha.com/4.0.0",
+    });
 
     const parsedData = parseRoomDataFromText(text);
 
@@ -809,9 +820,7 @@ const Annotator = ({
   const [pdfZoom, setPdfZoom] = useState(1); // Store pinch zoom level for small screens
 
   // Mobile-friendly prompt modal state (replaces window.prompt)
-  const [showAcUnitModal, setShowAcUnitModal] = useState(false);
   const [acUnitInput, setAcUnitInput] = useState('');
-  const [pendingAnnotationPos, setPendingAnnotationPos] = useState(null);
   // Default to annotation mode (true) so users can create rectangles immediately
   // Ref mirrors for rectangles and comments — always up-to-date regardless of closure age.
   // Fixes a Safari stale-closure bug in confirmAcUnitAnnotation where deleting then
@@ -1124,15 +1133,16 @@ const Annotator = ({
         Tesseract = window.Tesseract;
         pdfjsLib = window.pdfjsLib || window.pdfjs;
         if (pdfjsLib?.GlobalWorkerOptions) {
+          const ver = pdfjsLib.version || "2.10.377";
           pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js";
+            `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${ver}/pdf.worker.min.js`;
         }
         setScriptsLoaded(true);
       }
     };
 
     loadScript(
-      "https://unpkg.com/tesseract.js@2.1.0/dist/tesseract.min.js",
+      "https://unpkg.com/tesseract.js@5.0.4/dist/tesseract.min.js",
       "tesseract-script",
       () => {
         tesseractLoaded = true;
@@ -1642,10 +1652,9 @@ const Annotator = ({
       let pointerPosition = stageRef.current.getPointerPosition();
       if (!pointerPosition) return;
 
-      // Use mobile-friendly modal instead of prompt()
-      setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
-      setAcUnitInput('');
-      setShowAcUnitModal(true);
+      // Use pre-typed label from stable input — skip if empty
+      if (!acUnitInput.trim()) return;
+      confirmAcUnitAnnotation(acUnitInput.trim(), { x: pointerPosition.x, y: pointerPosition.y });
     }
   };
 
@@ -1662,7 +1671,7 @@ const Annotator = ({
       if (!mobileAnnotationActive) return; // mode is off — ignore accidental taps
     }
 
-    // Show the label-entry modal (same flow as desktop click)
+    // Use pre-typed label from stable input — skip if empty
     let pointerPosition = stageRef.current.getPointerPosition();
     if (!pointerPosition) return;
     const containerMain = document.querySelector('.container-main');
@@ -1672,9 +1681,8 @@ const Annotator = ({
         y: pointerPosition.y + containerMain.scrollTop,
       };
     }
-    setPendingAnnotationPos({ x: pointerPosition.x, y: pointerPosition.y });
-    setAcUnitInput('');
-    setShowAcUnitModal(true);
+    if (!acUnitInput.trim()) return;
+    confirmAcUnitAnnotation(acUnitInput.trim(), { x: pointerPosition.x, y: pointerPosition.y });
   };
 
   const handleRectangleRightClick = (event) => {
@@ -3266,20 +3274,46 @@ const Annotator = ({
       </ButtonToolbar>
       {error && <p className="error-message mt-4">{error}</p>}
 
-      {/* ── Mobile placement toggle (small screens only) ── */}
+      {/* ── Desktop annotation label input (≥768px only) ── */}
+      {file && file.type === 'application/pdf' && (
+        <div className="d-none d-md-flex align-items-center gap-2 mb-2 px-2">
+          <span className="text-muted small" style={{ whiteSpace: 'nowrap' }}>Annotation label:</span>
+          <input
+            type="text"
+            className="form-control form-control-sm"
+            style={{ maxWidth: '200px' }}
+            placeholder="ac-1, ac-2, condenser…"
+            value={acUnitInput}
+            onChange={(e) => setAcUnitInput(e.target.value)}
+          />
+          <span className="text-muted small">{acUnitInput.trim() ? 'Click canvas to place' : 'Type label, then click canvas'}</span>
+        </div>
+      )}
+
+      {/* ── Mobile annotation label input + place mode toggle (<768px only) ── */}
       {file && file.type === 'application/pdf' && (
         <div className="mobile-annotation-bar d-flex d-md-none flex-column align-items-center gap-1 mb-2 px-1 text-center">
           <span className="text-muted small">
-            {mobileAnnotationActive
-              ? 'Tap canvas to place an AC unit or condenser'
-              : 'Enable place mode, then tap canvas to make notations'}
+            {acUnitInput.trim()
+              ? mobileAnnotationActive ? 'Tap canvas to place annotation' : 'Enable place mode, then tap canvas'
+              : 'Type a label below, then tap the canvas to place'}
           </span>
-          <button
-            className={`btn btn-sm ${mobileAnnotationActive ? 'btn-primary' : 'btn-outline-secondary'}`}
-            onClick={() => setMobileAnnotationActive(prev => !prev)}
-          >
-            {mobileAnnotationActive ? '✅ Tap to place' : '📌 Place mode'}
-          </button>
+          <div className="d-flex align-items-center gap-2">
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              style={{ maxWidth: '180px' }}
+              placeholder="ac-1, ac-2, condenser…"
+              value={acUnitInput}
+              onChange={(e) => setAcUnitInput(e.target.value)}
+            />
+            <button
+              className={`btn btn-sm ${mobileAnnotationActive ? 'btn-primary' : 'btn-outline-secondary'}`}
+              onClick={() => setMobileAnnotationActive(prev => !prev)}
+            >
+              {mobileAnnotationActive ? '✅ Tap to place' : '📌 Place mode'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -3543,75 +3577,6 @@ const Annotator = ({
                 disabled={!editingLabelValue.trim()}
               >Save</Button>
               <Button variant="secondary" size="sm" onClick={() => setShowEditLabelModal(false)}>Cancel</Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile-friendly AC Unit annotation modal (replaces window.prompt) */}
-      {showAcUnitModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-          }}
-          onClick={() => setShowAcUnitModal(false)}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: '12px',
-              padding: '24px',
-              minWidth: '280px',
-              maxWidth: '90vw',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h5 style={{ marginBottom: '12px' }}>Enter AC unit number</h5>
-            <Form.Control
-              type="text"
-              placeholder="ac-1, ac-2, condenser, etc."
-              value={acUnitInput}
-              onChange={(e) => setAcUnitInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  console.log('Modal Enter key pressed, pendingAnnotationPos:', pendingAnnotationPos);
-                  confirmAcUnitAnnotation(acUnitInput.trim(), pendingAnnotationPos);
-                  setShowAcUnitModal(false);
-                }
-              }}
-              autoFocus
-              style={{ marginBottom: '16px', fontSize: '16px' }}
-            />  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => {
-                  console.log('Modal Add button clicked, pendingAnnotationPos:', pendingAnnotationPos);
-                  confirmAcUnitAnnotation(acUnitInput.trim(), pendingAnnotationPos);
-                  setShowAcUnitModal(false);
-                }}
-                disabled={!acUnitInput.trim()}
-              >
-                Add
-              </Button>
-          <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowAcUnitModal(false)}
-              >
-                Cancel
-              </Button>
-          
             </div>
           </div>
         </div>

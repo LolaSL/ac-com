@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from 'react-bootstrap';
 
 // Default: ~8 hours/day cooling, average US electricity rate
-const DEFAULT_HOURS_PER_DAY = 8;
-const DEFAULT_RATE_PER_KWH = 0.12;
-const DEFAULT_SEER = 14; // Fallback if product has no energyEfficiency
+// const DEFAULT_HOURS_PER_DAY = 8;
+// const DEFAULT_RATE_PER_KWH = 0.12;
+// const DEFAULT_SEER = 14; // Fallback if product has no energyEfficiency
 
-function calcMonthlyCost(btu, seer, hoursPerDay, ratePerKwh) {
-  // Power in kW = BTU/h ÷ (SEER × 1000)
-  // SEER = BTU/h per Watt, so Watts = BTU / SEER, kW = BTU / (SEER * 1000)
-  const kw = btu / (seer * 1000);
-  return kw * hoursPerDay * 30 * ratePerKwh;
-}
+// function calcMonthlyCost(btu, seer, hoursPerDay, ratePerKwh) {
+//   // Power in kW = BTU/h ÷ (SEER × 1000)
+//   // SEER = BTU/h per Watt, so Watts = BTU / SEER, kW = BTU / (SEER * 1000)
+//   const kw = btu / (seer * 1000);
+//   return kw * hoursPerDay * 30 * ratePerKwh;
+// }
 
 export default function SystemSummary({ btuProject, perRoomResults, recommendedUnits }) {
-  const [electricityRate, setElectricityRate] = useState(DEFAULT_RATE_PER_KWH);
-  const [hoursPerDay, setHoursPerDay] = useState(DEFAULT_HOURS_PER_DAY);
+  // const [electricityRate, setElectricityRate] = useState(DEFAULT_RATE_PER_KWH);
+  // const [hoursPerDay, setHoursPerDay] = useState(DEFAULT_HOURS_PER_DAY);
 
   if (!btuProject) return null;
 
@@ -107,7 +107,7 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
         )} */}
 
         {/* Energy Cost Estimator */}
-        {perRoomResults && perRoomResults.length > 0 && (() => {
+        {/* {perRoomResults && perRoomResults.length > 0 && (() => {
           const roomCosts = perRoomResults
             .filter(r => r.btu && !r.isCondenser && r.product && !r.product.isCondenser)
             .map(r => {
@@ -217,7 +217,7 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
               </div>
             </div>
           );
-        })()}
+        })()} */}
       </Card.Body>
     </Card>
   );

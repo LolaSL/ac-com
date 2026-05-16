@@ -6,6 +6,14 @@
   <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="AC-Commerce — HVAC Marketplace & Measurement Services" />
+  <!--
+    Disable iOS Safari auto data detectors. Without this, Safari on iPhone
+    silently wraps strings like "$1,234" or long digit runs in invisible <a>
+    tags (telephone/date detectors), making prices appear blank on mobile
+    while every other browser renders them fine.
+  -->
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+  <meta name="x-apple-disable-message-reformatting" />
   <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
