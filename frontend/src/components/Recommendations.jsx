@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useCallback, useState } from "react";
 import { Store } from "../Store";
 import { Card, Table, Button, Modal } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FaEye, FaPrint, FaShoppingCart, FaStar, FaShareAlt } from "react-icons/fa";
 import printJS from "print-js";
 import { toast } from "react-toastify";
@@ -35,6 +35,9 @@ export default function Recommendations() {
   // Show all rows including condensers — they are only added to btuData.rooms when warranted
   const visibleRoomResults = perRoomResults ?? null;
 
+  // Component-level mode flags (used in both JSX and the print callback)
+  const isBoth = btuProject?.systemMode === 'heatpump' || btuProject?.systemMode === 'recovery';
+
   console.log('Recommendations - perRoomResults:', perRoomResults);
 
   const handlePrint = useCallback(() => {
@@ -52,12 +55,9 @@ export default function Recommendations() {
     });
 
     // Build room rows
-    const isBoth = btuProject?.systemMode === 'both';
-    const isHeatingOnly = btuProject?.systemMode === 'heating';
+    const isHeatingOnly = false; // removed — no standalone heating mode
     const roomBtuLabel = isBoth
       ? 'Room Load (Cool / Heat BTU)'
-      : isHeatingOnly
-      ? 'Room Heating BTU'
       : 'Room BTU';
     const roomRowsHtml = visibleRoomResults.map((room, i) => {
       const product = room.product || {};
@@ -76,7 +76,7 @@ export default function Recommendations() {
           <td>${roomBtuCell}</td>
           <td>${product.name || product.model || '—'}</td>
           <td>${product.model || 'N/A'}</td>
-          <td>${(product.coolingBtu || product.btu)?.toLocaleString() || '—'}${product.heatingBtu ? ` (Heat: ${product.heatingBtu.toLocaleString()})` : ''}</td>
+          <td>${(product.coolingBtu || product.btu)?.toLocaleString() || '—'}${product.heatingBtu && isBoth ? ` (Heat: ${product.heatingBtu.toLocaleString()})` : ''}</td>
           <td>$${productPrice}</td>
         </tr>
       `;
@@ -103,8 +103,10 @@ export default function Recommendations() {
           <p><strong>Generated:</strong> ${printDate}</p>
           <p>
             <strong>System Mode:</strong> ${
-              btuProject?.systemMode
-                ? btuProject.systemMode.charAt(0).toUpperCase() + btuProject.systemMode.slice(1)
+              btuProject?.systemMode === 'recovery'
+                ? 'Cooling & Heat Recovery'
+                : btuProject?.systemMode === 'heatpump'
+                ? 'Cooling or Heating (heat pump)'
                 : 'Cooling'
             } |
             <strong>Total Rooms:</strong> ${visibleRoomResults.length} |
@@ -469,8 +471,8 @@ export default function Recommendations() {
 
   const getSharePayload = useCallback(() => {
     const modeLabel =
-      btuProject?.systemMode === 'heating' ? 'Heating' :
-      btuProject?.systemMode === 'both'    ? 'Heating + Cooling' :
+      btuProject?.systemMode === 'recovery' ? 'Cooling & Heat Recovery' :
+      btuProject?.systemMode === 'heatpump' ? 'Cooling or Heating (heat pump)' :
       'Cooling';
     const summary = visibleRoomResults
       ? `${modeLabel} system: ${visibleRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || "-"} BTU total`
@@ -631,20 +633,16 @@ export default function Recommendations() {
       <Card className="recommendations-card">
         <Card.Body>
           <Card.Title className="card-title">
-            {btuProject?.systemMode === 'heating'
-              ? '🔥 Heat-Pump Recommendations (Calculated)'
-              : btuProject?.systemMode === 'both'
-              ? '❄️🔥 Heat-Pump Recommendations (Cooling + Heating)'
-              : '❄️ AC Unit Recommendations (Calculated)'}
+            {btuProject?.systemMode === 'recovery'
+              ? '❄️🔥 Heat-Recovery System Recommendations (Cooling & Heat Recovery)'
+              : '❄️🔥 Heat-Pump Recommendations (Cooling or Heating)'}
           </Card.Title>
 
           {/* System-mode summary banner */}
           {btuProject?.systemMode && (
             <div
               style={{
-                background: btuProject.systemMode === 'heating'
-                  ? 'rgba(192, 57, 43, 0.08)'
-                  : btuProject.systemMode === 'both'
+                background: btuProject.systemMode === 'recovery'
                   ? 'rgba(102, 126, 234, 0.08)'
                   : 'rgba(52, 152, 219, 0.08)',
                 border: '1px solid rgba(0,0,0,0.06)',
@@ -656,12 +654,10 @@ export default function Recommendations() {
               }}
             >
               <strong>System Mode:</strong>{' '}
-              {btuProject.systemMode === 'heating'
-                ? 'Heating only (heat pump)'
-                : btuProject.systemMode === 'both'
-                ? 'Cooling + Heating (heat pump)'
-                : 'Cooling only'}
-              {btuProject.systemMode === 'both' && (
+              {btuProject.systemMode === 'recovery'
+                ? 'Cooling & Heat Recovery'
+                : 'Cooling or Heating (heat pump)'}
+              {isBoth && (
                 <>
                   {' · '}<strong>Cool load:</strong>{' '}
                   {(btuProject.totalCoolingBTU || 0).toLocaleString()} BTU
@@ -686,11 +682,7 @@ export default function Recommendations() {
                   <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Room</th>
                   <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Size</th>
                   <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>
-                    {btuProject?.systemMode === 'both'
-                      ? 'Room Load (Cool / Heat BTU)'
-                      : btuProject?.systemMode === 'heating'
-                      ? 'Room Heating BTU'
-                      : 'Room BTU'}
+                    {isBoth ? 'Room Load (Cool / Heat BTU)' : 'Room BTU'}
                   </th>
                   <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Optimal Product</th>
                   <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Product BTU</th>
@@ -722,7 +714,7 @@ export default function Recommendations() {
                         <td style={{ padding: '5px 8px' }}>{displayName}</td>
                         <td style={{ padding: '5px 8px', textAlign: 'right' }}>{room.size}</td>
                         <td style={{ padding: '5px 8px', textAlign: 'right' }}>
-                          {btuProject?.systemMode === 'both' && (room.coolBtu != null || room.heatBtu != null) ? (
+                          {isBoth && (room.coolBtu != null || room.heatBtu != null) ? (
                             <>
                               {(room.coolBtu || 0).toLocaleString()}
                               {' / '}
@@ -739,7 +731,7 @@ export default function Recommendations() {
                         </td>
                         <td style={{ padding: '5px 8px', textAlign: 'right' }}>
                           {(product.coolingBtu || product.btu) || "—"}
-                          {product.heatingBtu ? (
+                          {product.heatingBtu && isBoth ? (
                             <div style={{ fontSize: '0.75em', color: '#888' }}>
                               Heat: {product.heatingBtu.toLocaleString()}
                             </div>
@@ -768,15 +760,13 @@ export default function Recommendations() {
                         <td style={{ padding: '5px 8px' }}>{product.model || product.name || "—"}</td>
                         <td style={{ padding: '5px 8px', textAlign: 'center' }}>
                           {product.slug ? (
-                            <a
-                              href={`/product/${product.slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <Link
+                              to={`/product/${product.slug}`}
                               style={{ fontSize: '1.2rem', color: '#0d6efd' }}
                               title="View product details"
                             >
                               <FaEye />
-                            </a>
+                            </Link>
                           ) : (
                             "—"
                           )}

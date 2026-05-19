@@ -822,11 +822,14 @@ const Annotator = ({
   // Mobile-friendly prompt modal state (replaces window.prompt)
   const [acUnitInput, setAcUnitInput] = useState('');
   // Default to annotation mode (true) so users can create rectangles immediately
-  // Ref mirrors for rectangles and comments — always up-to-date regardless of closure age.
+  // Ref mirrors for rectangles, comments, and lines — always up-to-date regardless of closure age.
   // Fixes a Safari stale-closure bug in confirmAcUnitAnnotation where deleting then
   // immediately re-creating the same label would incorrectly trigger "already exists".
+  // linesRef is also used by the pagehide flush so deleted annotations don't reappear on
+  // iOS Safari back-navigation when the 500 ms debounce hasn't fired yet.
   const rectanglesRef = useRef(rectangles);
   const commentsRef   = useRef(comments);
+  const linesRef      = useRef(lines);
 
   // Mobile stable annotation bar (small screens only — replaces popup modal for touch)
   const [, setMobileAnnotationLabel] = useState('');
@@ -1008,6 +1011,7 @@ const Annotator = ({
   // Keep ref mirrors in sync with state.
   useEffect(() => { rectanglesRef.current = rectangles; }, [rectangles]);
   useEffect(() => { commentsRef.current   = comments;   }, [comments]);
+  useEffect(() => { linesRef.current      = lines;      }, [lines]);
 
   // Persist light metadata to sessionStorage whenever annotations change.
   useEffect(() => {
@@ -1020,6 +1024,22 @@ const Annotator = ({
     }, 500);
     return () => clearTimeout(timer);
   }, [rectangles, comments, lines]);
+
+  // Flush annotation state to sessionStorage immediately when iOS Safari navigates away.
+  // Without this, the 500 ms debounce above may not have fired, so a deletion done just
+  // before navigating would NOT be persisted — the deleted annotation then reappears on
+  // back-navigation ("ghost annotation" echo bug on Safari iOS).
+  useEffect(() => {
+    const flushOnHide = () => {
+      try {
+        sessionStorage.setItem(SESSION_KEY_RECTS,    JSON.stringify(rectanglesRef.current));
+        sessionStorage.setItem(SESSION_KEY_COMMENTS, JSON.stringify(commentsRef.current));
+        sessionStorage.setItem(SESSION_KEY_LINES,    JSON.stringify(linesRef.current));
+      } catch (e) { /* quota exceeded */ }
+    };
+    window.addEventListener('pagehide', flushOnHide);
+    return () => window.removeEventListener('pagehide', flushOnHide);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     try { sessionStorage.setItem(SESSION_KEY_ROOMS,    JSON.stringify(allRooms)); } catch (e) { /* silent */ }
@@ -1039,10 +1059,18 @@ const Annotator = ({
   const removeAnnotationByRectId = useCallback((rectId) => {
     // snapshot BEFORE deletion so it can be undone
     pushHistory(rectanglesRef.current, commentsRef.current, lines);
-    setRectangles((prevRects) => prevRects.filter((r) => !idsMatch(r.id, rectId)));
-    setComments((prevComments) =>
-      prevComments.filter((comment) => !idsMatch(comment.rectId, rectId))
-    );
+
+    const filteredRects    = rectanglesRef.current.filter((r) => !idsMatch(r.id, rectId));
+    const filteredComments = commentsRef.current.filter((c) => !idsMatch(c.rectId, rectId));
+
+    // Synchronously update ref mirrors so the duplicate-check in confirmAcUnitAnnotation
+    // sees the deletion immediately. On Safari iOS the next tap can fire before the
+    // useEffect that mirrors state→ref has a chance to run (useEffect runs after paint).
+    rectanglesRef.current = filteredRects;
+    commentsRef.current   = filteredComments;
+
+    setRectangles(filteredRects);
+    setComments(filteredComments);
     setLines((prevLines) => prevLines.filter((line) => !idsMatch(line.rectId, rectId)));
   }, [idsMatch, pushHistory, lines]);
   
@@ -1056,6 +1084,7 @@ const Annotator = ({
   const pinchStartZoomRef = useRef(1);
   const containerMainRef = useRef(null); // ref for non-passive touch listeners
   const pdfZoomRef = useRef(1);          // mirrors pdfZoom state for use inside event listeners
+  const isPinchingRef = useRef(false);   // true while a 2-finger pinch is active — guards resize handler
   // Track in-flight PDF.js render task so we can cancel before starting a new one
   const renderTaskRef = useRef(null);
 
@@ -1075,6 +1104,7 @@ const Annotator = ({
       if (e.touches.length === 2 && window.innerWidth < 768) {
         // Prevent browser committing to a pan/zoom gesture so our JS handler takes over
         e.preventDefault();
+        isPinchingRef.current = true;
         const t1 = e.touches[0], t2 = e.touches[1];
         pinchStartDistanceRef.current = Math.hypot(
           t2.clientX - t1.clientX, t2.clientY - t1.clientY
@@ -1093,16 +1123,35 @@ const Annotator = ({
       }
     };
 
-    const onTouchEnd = () => { pinchStartDistanceRef.current = 0; };
+    const onTouchEnd = (e) => {
+      if (e.touches.length < 2) {
+        pinchStartDistanceRef.current = 0;
+        isPinchingRef.current = false;
+      }
+    };
 
-    el.addEventListener('touchstart', onTouchStart, { passive: false }); // non-passive to allow preventDefault on 2-finger
-    el.addEventListener('touchmove',  onTouchMove,  { passive: false }); // non-passive!
-    el.addEventListener('touchend',   onTouchEnd,   { passive: true });
+    // Safari iOS fires proprietary gesture* events alongside the W3C touch events.
+    // preventDefault() on touchstart/touchmove does NOT stop these — they must be
+    // cancelled separately, otherwise Safari applies its own rotate/scale transform
+    // on top of the canvas, which appears as a visual rotation to the user.
+    const onGestureStart  = (e) => e.preventDefault();
+    const onGestureChange = (e) => e.preventDefault();
+    const onGestureEnd    = (e) => e.preventDefault();
+
+    el.addEventListener('touchstart',    onTouchStart,    { passive: false });
+    el.addEventListener('touchmove',     onTouchMove,     { passive: false });
+    el.addEventListener('touchend',      onTouchEnd,      { passive: true });
+    el.addEventListener('gesturestart',  onGestureStart,  { passive: false });
+    el.addEventListener('gesturechange', onGestureChange, { passive: false });
+    el.addEventListener('gestureend',    onGestureEnd,    { passive: false });
 
     return () => {
-      el.removeEventListener('touchstart', onTouchStart);
-      el.removeEventListener('touchmove',  onTouchMove);
-      el.removeEventListener('touchend',   onTouchEnd);
+      el.removeEventListener('touchstart',    onTouchStart);
+      el.removeEventListener('touchmove',     onTouchMove);
+      el.removeEventListener('touchend',      onTouchEnd);
+      el.removeEventListener('gesturestart',  onGestureStart);
+      el.removeEventListener('gesturechange', onGestureChange);
+      el.removeEventListener('gestureend',    onGestureEnd);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewUrl]);
@@ -1243,7 +1292,14 @@ const Annotator = ({
   };
 
   useEffect(() => {
-    if (results) {
+    // Guard: only run when there are actual OCR results.
+    // Without this guard the effect fires on mount with results=[] and calls
+    // setAllRooms([]), racing with (and overwriting) the sessionStorage restore
+    // that also runs on mount.  It also triggers the [allRooms] persist effect
+    // which immediately writes [] back to sessionStorage, corrupting future
+    // back-navigation restores — the root cause of the "echo calculation table"
+    // bug on Safari iOS small screens.
+    if (results?.length) {
       setAllRooms(
         results.map((result) => {
           const roomsWithIds = (result.rooms || []).map((room) => ({
@@ -2015,6 +2071,10 @@ const Annotator = ({
     let resizeTimeout;
     
     const handleWindowResize = () => {
+      // Ignore resize events fired by Safari's pinch-zoom gesture — the visual
+      // viewport change is temporary and corrects itself; re-rendering the PDF
+      // during a pinch causes the canvas to flash back to its unzoomed state.
+      if (isPinchingRef.current) return;
       // Debounce resize events to avoid excessive re-renders
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(async () => {

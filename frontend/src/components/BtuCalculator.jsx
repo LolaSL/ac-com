@@ -33,8 +33,9 @@ const CONSTANTS = {
   CONVERT_FEET_TO_METERS: 0.3048,
 };
 function BtuCalculator({ roomData, acAnnotations = [] }) {
-  const { dispatch: ctxDispatch } = useContext(Store);
+  const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
+  const prevProject = state?.btuData?.currentProject ?? null;
 
   // Parse AC annotations (e.g., "ac-1.1", "ac-1.2", "condenser-1", "Flat 1", etc.)
   const parseAcAnnotations = useCallback((annotations) => {
@@ -236,6 +237,7 @@ useEffect(() => {
   const [numPeople, setNumPeople] = useState(0);
   const [error, setError] = useState("");
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showPrevSummary, setShowPrevSummary] = useState(true);
 
   const [options, setOptions] = useState({
     OutdoorUnitLocation: {
@@ -269,8 +271,11 @@ useEffect(() => {
     },
     appliances: {
       Oven: false,
-      Television: false,
-      Computer: false,
+      ServerRoom: false,
+      CommercialKitchen: false,
+      Gym: false,
+      HomeTheater: false,
+      Workshop: false,
     },
     windowType: {
       SingleGlazed: false,
@@ -322,7 +327,7 @@ useEffect(() => {
   // ── System mode (cooling / heating / both) ───────────────────────────────
   // Drives which capacity field (coolingBtu / heatingBtu) the backend matches.
   // 'both' lets the backend size on max(coolingBtu, heatingBtu) for heat pumps.
-  const [systemMode, setSystemMode] = useState('cooling'); // 'cooling' | 'heating' | 'both'
+  const [systemMode, setSystemMode] = useState('heatpump'); // 'heatpump' | 'recovery'
 
 
 
@@ -506,8 +511,8 @@ useEffect(() => {
       ? { Flat: 1.10, Pitched: 1.0, Gable: 1.0, Roof: 1.0 }
       : { Flat: 1.05, Pitched: 1.0, Gable: 1.0, Roof: 1.0 });
     applyMultiplier("appliances", isHeating
-      ? { Oven: 0.95, Television: 0.99, Computer: 0.98 } // internal gains offset heat
-      : { Oven: 1.08, Television: 1.02, Computer: 1.03 });
+      ? { Oven: 0.95, ServerRoom: 0.85, CommercialKitchen: 0.80, Gym: 0.90, HomeTheater: 0.97, Workshop: 0.94 } // internal gains offset heat
+      : { Oven: 1.08, ServerRoom: 1.35, CommercialKitchen: 1.45, Gym: 1.20, HomeTheater: 1.06, Workshop: 1.12 });
 
     applyMultiplier("sunExposure", isHeating
       ? { FullSunlight: 0.90, Average: 1, HeavilyShaded: 1.08 } // passive solar helps in winter
@@ -563,27 +568,18 @@ useEffect(() => {
     return { btu: Math.max(0, Math.round(btu)), error: null };
   };
 
-  // Per-room load wrapper. For systemMode='both', sizes on max(cool, heat)
-  // and also returns the split so downstream views can show both numbers.
+  // Per-room load wrapper. Both modes (heatpump / recovery) calculate cool + heat
+  // and size on max(cool, heat) so the product covers the dominant season.
   const calculateRoomLoad = (room, peopleOverride, currentMode) => {
-    if (currentMode === 'both') {
-      const cool = calculateBTUForRoom(room, peopleOverride, 'cooling');
-      if (cool.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: cool.error };
-      const heat = calculateBTUForRoom(room, peopleOverride, 'heating');
-      if (heat.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: heat.error };
-      return {
-        btu: Math.max(cool.btu || 0, heat.btu || 0),
-        coolBtu: cool.btu,
-        heatBtu: heat.btu,
-        error: null,
-      };
-    }
-    const r = calculateBTUForRoom(room, peopleOverride, currentMode);
+    const cool = calculateBTUForRoom(room, peopleOverride, 'cooling');
+    if (cool.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: cool.error };
+    const heat = calculateBTUForRoom(room, peopleOverride, 'heating');
+    if (heat.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: heat.error };
     return {
-      btu: r.btu,
-      coolBtu: currentMode === 'cooling' ? r.btu : null,
-      heatBtu: currentMode === 'heating' ? r.btu : null,
-      error: r.error,
+      btu: Math.max(cool.btu || 0, heat.btu || 0),
+      coolBtu: cool.btu,
+      heatBtu: heat.btu,
+      error: null,
     };
   };
 
@@ -1201,8 +1197,11 @@ useEffect(() => {
       },
       appliances: {
         Oven: false,
-        Television: false,
-        Computer: false,
+        ServerRoom: false,
+        CommercialKitchen: false,
+        Gym: false,
+        HomeTheater: false,
+        Workshop: false,
       },
       windowType: {
         SingleGlazed: false,
@@ -1241,6 +1240,51 @@ useEffect(() => {
   return (
     <Container className="btu-calculator-container mt-4 mb-4 rounded">
       <Form className="btu-form">
+        {/* Mobile-only previous calculation echo — only on xs/sm screens */}
+        {prevProject && showPrevSummary && (
+          <div className="d-block d-md-none btu-prev-summary mb-3">
+            <div className="btu-prev-summary__header">
+              <span className="btu-prev-summary__title">Previous calculation</span>
+              <button
+                type="button"
+                className="btu-prev-summary__close"
+                aria-label="Dismiss"
+                onClick={() => setShowPrevSummary(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="btu-prev-summary__meta">
+              {prevProject.numberOfRooms} room{prevProject.numberOfRooms !== 1 ? 's' : ''}
+              {' · '}
+              <strong>{(prevProject.totalBTU || 0).toLocaleString()} BTU</strong> total
+              {prevProject.totalSquareFootage > 0 && (
+                <span> · {Math.round(prevProject.totalSquareFootage)} m²</span>
+              )}
+            </div>
+            {Array.isArray(prevProject.rooms) && prevProject.rooms.length > 0 && (
+              <ul className="btu-prev-summary__rooms">
+                {prevProject.rooms
+                  .filter((r) => !r.product?.isCondenser)
+                  .map((r, i) => (
+                    <li key={i}>
+                      <span className="btu-prev-summary__room-name">{r.name}</span>
+                      <span className="btu-prev-summary__room-btu">
+                        {(r.coolBtu || r.btu || 0).toLocaleString()} BTU
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              className="btu-prev-summary__view-btn"
+              onClick={() => navigate('/recommendations')}
+            >
+              View Recommendations →
+            </button>
+          </div>
+        )}
         <h3 className="mt-4 mb-4 text-center title">BTU Calculator</h3>
         <Form.Group className="mb-4">
           <Form.Label>Measurement System</Form.Label>
@@ -1387,9 +1431,8 @@ useEffect(() => {
                 value={systemMode}
                 onChange={(e) => setSystemMode(e.target.value)}
               >
-                <option value="cooling">Cooling only</option>
-                <option value="heating">Heating only (heat pump)</option>
-                <option value="both">Cooling + Heating (heat pump)</option>
+                <option value="heatpump">Cooling or Heating (heat pump)</option>
+                <option value="recovery">Cooling &amp; Heat Recovery</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -1522,6 +1565,14 @@ useEffect(() => {
               name="appliances"
               options={options.appliances}
               onChange={handleAppliancesChange}
+              tooltips={{
+                Oven: '+8% cooling · −5% heating — Cooking adds heat; offsets some heating load',
+                ServerRoom: '+35% cooling · −15% heating — Servers and IT equipment generate continuous high heat',
+                CommercialKitchen: '+45% cooling · −20% heating — Multiple cooking appliances generate intense, sustained heat',
+                Gym: '+20% cooling · −10% heating — Exercise equipment and high metabolic activity from occupants',
+                HomeTheater: '+6% cooling · −3% heating — AV receivers, projectors and amplifiers add moderate heat',
+                Workshop: '+12% cooling · −6% heating — Power tools and compressors generate heat during operation',
+              }}
             />
 
             <CheckboxGroup

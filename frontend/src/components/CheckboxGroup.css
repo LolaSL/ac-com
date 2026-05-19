@@ -10,6 +10,29 @@
   width: 66%;
 }
 
+.cb-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #6c757d;
+  color: #fff;
+  font-size: 0.6rem;
+  font-style: italic;
+  font-weight: 700;
+  cursor: help;
+  vertical-align: middle;
+  margin-left: 4px;
+  line-height: 1;
+  user-select: none;
+}
+
+.cb-info-icon:hover {
+  background: #495057;
+}
+
 @media (max-width: 768px) {
   .checkbox-group hr {
     width: 100%;
