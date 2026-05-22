@@ -392,7 +392,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                     <strong>Climate:</strong> Average Europe, Hot Middle East, or Cold Alaska
                   </li>
                   <li>
-                    <strong>Appliances:</strong> Oven, Television, Computer (adds heat load)
+                    <strong>Room Usage & Appliances:</strong> Oven, Server Room (adds heat load), Gym, Home Theater and etc., (see BTU calculation details below)
                   </li>
                   <li>
                     <strong>Window Type:</strong> Single Glazed, Double Glazed, Triple Glazed, or Louvered

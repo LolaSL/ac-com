@@ -1,8 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import axios from "axios";
-import { getError } from "../utils";
-import { useContext } from "react";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
 import CheckboxGroup from "./CheckboxGroup.jsx";
@@ -20,9 +18,9 @@ const CONSTANTS = {
   BTU_PER_ADDITIONAL_PERSON: 450,
   KITCHEN_BTU_ADDITION: 600,
   OUTDOOR_LOCATION_BTU_ADJUSTMENTS: {
-    Roof: 1.0,
-    WallBrackets: 1.0,
-    HardGround: 1.0,
+    Roof: 1.05, // Roof increases load by 5%
+    WallBrackets: 1.02, // Wall brackets by 2%
+    HardGround: 1.0, // No effect
   },
   apartmentOrientationMultipliers: {
     North: 0.95,
@@ -276,6 +274,8 @@ useEffect(() => {
       Gym: false,
       HomeTheater: false,
       Workshop: false,
+      OfficeRoom: false,
+      HotelRoom: false,
     },
     windowType: {
       SingleGlazed: false,
@@ -309,6 +309,7 @@ useEffect(() => {
     },
   });
 
+  // VRF system is always true for now; if needed, make this a prop or state
   const isVRFSystem = true;
   const [isMultiFlatProperty, setIsMultiFlatProperty] = useState(false);
   const [detectedFlats, setDetectedFlats] = useState([]);
@@ -333,7 +334,6 @@ useEffect(() => {
 
 
 
-  // hvacSystemType was removed to avoid unused variable; use `isVRFSystem` directly
 
   // VRF system limits and validations
   const MAX_VRF_INDOOR_UNITS = 64;
@@ -511,8 +511,26 @@ useEffect(() => {
       ? { Flat: 1.10, Pitched: 1.0, Gable: 1.0, Roof: 1.0 }
       : { Flat: 1.05, Pitched: 1.0, Gable: 1.0, Roof: 1.0 });
     applyMultiplier("appliances", isHeating
-      ? { Oven: 0.95, ServerRoom: 0.85, CommercialKitchen: 0.80, Gym: 0.90, HomeTheater: 0.97, Workshop: 0.94 } // internal gains offset heat
-      : { Oven: 1.08, ServerRoom: 1.35, CommercialKitchen: 1.45, Gym: 1.20, HomeTheater: 1.06, Workshop: 1.12 });
+      ? {
+          Oven: 0.95,
+          ServerRoom: 0.85,
+          CommercialKitchen: 0.80,
+          Gym: 0.90,
+          HomeTheater: 0.97,
+          Workshop: 0.94,
+          OfficeRoom: 0.92, // Offices have moderate internal gains in heating
+          HotelRoom: 0.96,  // Hotel rooms have some internal gains in heating
+        }
+      : {
+          Oven: 1.08,
+          ServerRoom: 1.35,
+          CommercialKitchen: 1.45,
+          Gym: 1.20,
+          HomeTheater: 1.06,
+          Workshop: 1.12,
+          OfficeRoom: 1.18, // Offices have moderate internal gains in cooling
+          HotelRoom: 1.10,  // Hotel rooms have some internal gains in cooling
+        });
 
     applyMultiplier("sunExposure", isHeating
       ? { FullSunlight: 0.90, Average: 1, HeavilyShaded: 1.08 } // passive solar helps in winter
@@ -570,7 +588,7 @@ useEffect(() => {
 
   // Per-room load wrapper. Both modes (heatpump / recovery) calculate cool + heat
   // and size on max(cool, heat) so the product covers the dominant season.
-  const calculateRoomLoad = (room, peopleOverride, currentMode) => {
+  const calculateRoomLoad = (room, peopleOverride) => {
     const cool = calculateBTUForRoom(room, peopleOverride, 'cooling');
     if (cool.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: cool.error };
     const heat = calculateBTUForRoom(room, peopleOverride, 'heating');
@@ -731,11 +749,19 @@ useEffect(() => {
       }
     });
 
+
     let condenser = condenserCandidates[0] || null;
     let sizingStatus = "";
     let selectedCondensers = [];
 
-    // Determine system type from fetched products
+    // Define propertyType before any use
+    let propertyType = "residential-single";
+    if (isMultiFlatProperty || detectedFlats.length > 1 || actualRooms.length >= 10) {
+      propertyType = "residential-multi";
+    } else if (actualRooms.length >= 3) {
+      propertyType = "residential-multi";
+    }
+
     // VRF capacity validation (show warning but continue calculations)
     if (totalBTU > MAX_VRF_TOTAL_CAPACITY) {
       setError(
@@ -745,8 +771,12 @@ useEffect(() => {
     }
 
     if (!condenser) {
-      // Calculate required condenser BTU based on system type
-      const multiplier = 1.0;
+      // Calculate required condenser BTU based on property type
+      // Flats/apartments: multiplier = 0.8; Villas/other: multiplier = 1.0
+      let multiplier = 1.0;
+      if (propertyType === "residential-multi") {
+        multiplier = 0.8;
+      }
 
       // Helper function to find suitable condenser for a given BTU
       const findSuitableCondenser = async (requiredBTU, label = "") => {
@@ -795,7 +825,6 @@ useEffect(() => {
           }
         }
 
-        console.log(`Suitable condenser found:`, suitableCondenser);
 
         if (suitableCondenser && suitableCondenser.btu < requiredBTU * 0.9) {
           const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
@@ -814,21 +843,16 @@ useEffect(() => {
             flatName: label || undefined,
           };
         } else if (suitableCondenser) {
-          console.log(`Found suitable condenser:`, suitableCondenser);
-          console.log(`Condenser BTU: ${suitableCondenser.btu}, type: ${typeof suitableCondenser.btu}`);
           // Extract BTU from name since btu field may be corrupted
           const btuFromName = suitableCondenser.name.match(/(\d+)\s*BTU/)?.[1];
           const btuValue = btuFromName ? parseInt(btuFromName) : suitableCondenser.btu;
-          console.log(`Using BTU value: ${btuValue} (from name: ${btuFromName})`);
           const result = {
             ...suitableCondenser,
-            _id: `condenser-${btuValue}`, // Use extracted BTU for grouping identical models
+            _id: `condenser-${btuValue}`,
             flatName: label || undefined,
-            // Keep original name for cart grouping
             name: suitableCondenser.name,
-            btu: btuValue, // Ensure BTU is correct
+            btu: btuValue,
           };
-          console.log(`Returning condenser result:`, result);
           return result;
         } else {
           const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
@@ -856,9 +880,6 @@ useEffect(() => {
         acAnnotations?.length > 0
       ) {
         // Multi-flat property: calculate separate condensers per flat
-        console.log(
-          "Multi-flat property detected - calculating per-flat condensers"
-        );
 
         const { flats, acUnits } = groupFlatsByAnnotations(acAnnotations);
 
@@ -899,18 +920,13 @@ useEffect(() => {
         // Create separate condenser for each flat
         selectedCondensers = [];
 
-        console.log("Creating condensers for flats:", Object.entries(flatBTUs));
 
         for (const [flatName, flatBTU] of Object.entries(flatBTUs)) {
           const flatRequiredBTU = flatBTU * multiplier;
-          console.log(
-            `Creating condenser for ${flatName}: ${flatBTU} BTU * ${multiplier} = ${flatRequiredBTU} BTU`
-          );
           const condResult = await findSuitableCondenser(
             flatRequiredBTU,
             flatName
           );
-          console.log(`Created condenser:`, condResult);
           selectedCondensers.push(condResult);
         }
 
@@ -976,7 +992,6 @@ useEffect(() => {
 
     const totalEquipmentCost = totalIndoorUnitsCost + condenserCost;
 
-    let propertyType = "residential-single";
     if (isMultiFlatProperty || detectedFlats.length > 1 || actualRooms.length >= 10) {
       propertyType = "residential-multi";
     } else if (actualRooms.length >= 3) {
@@ -1054,7 +1069,7 @@ useEffect(() => {
       hasAnnotatedCondenser,
       rooms: productResults
         .filter(({ product }) => product && !product.isCondenser)
-        .map(({ room, product, btu, coolBtu, heatBtu }, index) => ({
+        .map(({ room, product, btu, coolBtu, heatBtu }) => ({
           name: room.name,
           size: room.size,
           btu: btu,
@@ -1561,7 +1576,7 @@ useEffect(() => {
             />
 
             <CheckboxGroup
-              title="Appliances"
+              title="Room Usage & Appliances"
               name="appliances"
               options={options.appliances}
               onChange={handleAppliancesChange}
@@ -1572,6 +1587,8 @@ useEffect(() => {
                 Gym: '+20% cooling · −10% heating — Exercise equipment and high metabolic activity from occupants',
                 HomeTheater: '+6% cooling · −3% heating — AV receivers, projectors and amplifiers add moderate heat',
                 Workshop: '+12% cooling · −6% heating — Power tools and compressors generate heat during operation',
+                OfficeRoom: '+18% cooling · −8% heating — Office equipment and occupants add moderate heat in cooling, reduce heating need',
+                HotelRoom: '+10% cooling · −4% heating — Hotel rooms have some internal gains from appliances and occupants',
               }}
             />
 
@@ -1610,7 +1627,7 @@ useEffect(() => {
               error.startsWith("⚠️") ? "alert-warning" : "alert-danger"
             }`}
           >
-            {getError({ response: { data: { message: error } } })}
+            {error}
           </div>
         )}
 
