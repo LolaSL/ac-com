@@ -1180,12 +1180,8 @@ const Annotator = ({
     const checkAllScriptsLoaded = () => {
       if (tesseractLoaded && pdfjsLoaded) {
         Tesseract = window.Tesseract;
-        pdfjsLib = window.pdfjsLib || window.pdfjs;
-        if (pdfjsLib?.GlobalWorkerOptions) {
-          const ver = pdfjsLib.version || "2.10.377";
-          pdfjsLib.GlobalWorkerOptions.workerSrc =
-            `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${ver}/pdf.worker.min.js`;
-        }
+        // pdfjsLib is already imported from pdfjs-dist at the top of the file;
+        // reassigning the const import binding here would throw a TypeError.
         setScriptsLoaded(true);
       }
     };
@@ -1262,7 +1258,6 @@ const Annotator = ({
           totalSf,
           rooms: normalizedRooms,
         });
-        console.log(text);
         if (!previewSet) {
           setPreviewUrl(URL.createObjectURL(file));
           setFile(file);
@@ -1346,15 +1341,6 @@ const Annotator = ({
     if (isMultiFlat) {
       const numFlats = flatNumsArray.length;
       // Count how many times each room type appears
-      const typeCounters = {};
-      validRooms.forEach((room) => {
-        const base = room.roomType || "Room";
-        const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
-        if (alreadyPrefixed) return; // skip, handled below
-        const key = base.toLowerCase();
-        typeCounters[key] = (typeCounters[key] || 0);
-      });
-
       // Assign each room to a flat based on its occurrence index among same type
       const typeOccurrence = {};
       formattedRooms = validRooms.map((room) => {
@@ -1424,7 +1410,6 @@ const Annotator = ({
       if (validRooms.length > 0) {
         const { formattedRooms, isMultiFlat, annotations } = formatRoomsWithFlatPrefixes(validRooms);
         
-        console.log("Sending to BTU Calculator (multi-flat:", isMultiFlat, "):", formattedRooms);
         // Pass rooms AND annotations so BtuCalculator can detect multi-flat
         setRoomData(formattedRooms, isMultiFlat ? annotations : []);
       }
@@ -1623,7 +1608,6 @@ const Annotator = ({
   const confirmAcUnitAnnotation = useCallback((commentText, position) => {
     
     if (!commentText) {
-      console.log('confirmAcUnitAnnotation: no comment text, returning');
       return;
     }
 
@@ -1646,7 +1630,6 @@ const Annotator = ({
     });
 
     if (existingComment) {
-      console.log('confirmAcUnitAnnotation: comment already exists');
       toast.error('This comment already exists.');
       return;
     }
@@ -1655,7 +1638,6 @@ const Annotator = ({
     const trimmedText = normalizedCommentText;
     const isCondenser = /^condenser/i.test(trimmedText) || trimmedText.includes('condenser');
     const rectSize = getResponsiveRectSize();
-    console.log('confirmAcUnitAnnotation: creating rect at position', position, 'with size', rectSize, { trimmedText, isCondenser });
     
     const newRect = {
       id: newRectId,
@@ -1872,13 +1854,6 @@ const Annotator = ({
 
   // Note: Comments are now rendered via Konva Stage text elements, not canvas
   
-  const memoizedCallback = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-  }, []);
-
   const drawRotatedRectangle = useCallback(
     (context, x, y, width, height, angle) => {
       // compute center
@@ -1989,13 +1964,11 @@ const Annotator = ({
         );
       });
 
-      memoizedCallback(context);
     },
     [
       drawRotatedRectangle,
       file,
       iconPositions,
-      memoizedCallback,
       setPdfSize,
       pdfRotation,
       currentPage,
@@ -2154,22 +2127,16 @@ const Annotator = ({
     const seenRoomNames = new Set();
     const roomsToSave = formattedRooms.filter((room) => {
       const key = room.name;
-      if (seenRoomNames.has(key)) {
-        console.log(`Removing duplicate room: ${key}`);
-        return false;
-      }
-      seenRoomNames.add(key);
-      return true;
-    });
-    
-    console.log(`Saving ${roomsToSave.length} unique rooms:`, roomsToSave.map(r => r.name));
-    
+        if (seenRoomNames.has(key)) return false;
+        seenRoomNames.add(key);
+        return true;
+      });
+      
     // Get canvas dimensions for converting to percentages
     const canvas = document.getElementById("my-canvas");
     const canvasWidth = canvas?.width || 1;
     const canvasHeight = canvas?.height || 1;
-    console.log('Saving annotations with canvas dimensions:', { canvasWidth, canvasHeight, screenWidth: window.innerWidth, pdfRotation });
-    
+
     // Convert rectangles to percentage-based coordinates
     const rectanglesWithPercent = rectangles.map((rect) => ({
       ...rect,
@@ -2230,7 +2197,6 @@ const Annotator = ({
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Data saved to backend:", data);
         toast.success("PDF and annotations saved successfully!", { autoClose: 3000 });
         // Store annotation ID so iOS Safari can re-fetch on navigation restore.
         try { sessionStorage.setItem('annotator_annotation_id', data.id); } catch (e) { /* silent */ }
@@ -2249,7 +2215,7 @@ const Annotator = ({
       isSavingRef.current = false;
       setIsSaving(false);
     }
-  }, [file, formatRoomsWithFlatPrefixes, pdfRotation, rectangles, comments, lines, pdfId, selectedAcTypeForSave, token]);
+  }, [file, formatRoomsWithFlatPrefixes, rectangles, comments, lines, pdfId, selectedAcTypeForSave, token]);
 
   useEffect(() => {
     if (!results.length || !images.length) return;
@@ -2400,7 +2366,6 @@ const Annotator = ({
   useEffect(() => {
     if (setRoomData && allRooms.length > 0) {
       const flattenedRooms = allRooms.flat().filter(Boolean);
-      console.log("Syncing rooms to parent:", flattenedRooms);
       setRoomData(flattenedRooms);
     }
     // Avoid including `setRoomData` in deps to prevent update loops when parent
@@ -2417,8 +2382,6 @@ const Annotator = ({
         ? roomsToExport
         : allRooms.flat().filter(Boolean);
 
-    console.log("Exporting filtered rooms to BTU Calculator:", flatRooms);
-
     // Extract AC annotations (ac-1.1, condenser-1, condenser, etc.)
     const acAnnotations = comments
       .filter(
@@ -2433,8 +2396,6 @@ const Annotator = ({
         label: comment.text,
         coordinates: { x: comment.x, y: comment.y },
       }));
-
-    console.log("Raw AC annotations:", acAnnotations);
 
     // Parse annotations to detect flats - look for specific patterns
     const flatNumbers = new Set();
@@ -2456,8 +2417,6 @@ const Annotator = ({
     });
 
     const flatArray = Array.from(flatNumbers).sort((a, b) => a - b);
-    console.log("Detected flat numbers:", flatArray);
-    console.log("Number of flats detected:", flatArray.length);
     // NOTE: We intentionally do NOT infer flats from duplicate room names.
     // A single large apartment can have multiple rooms with the same name.
     // Multi-flat must be indicated explicitly via condenser-N, flat-N, or ac-N.M labels.
@@ -2473,18 +2432,12 @@ const Annotator = ({
     }));
 
     // If we have multiple flats, distribute rooms among them
-    console.log("Checking if multi-flat:", flatArray.length, ">", 1);
     if (flatArray.length > 1) {
-      console.log("Multi-flat property detected, assigning rooms to flats");
-
       // Distribute rooms in alternating pattern across flats
       // This handles the case where rooms are interleaved: Flat1Room1, Flat2Room1, Flat1Room2, Flat2Room2, etc.
       formattedRooms = flatRooms.map((room, idx) => {
         const flatIndex = idx % flatArray.length;
         const flatNum = flatArray[flatIndex];
-        console.log(
-          `Room ${idx} (${room.roomType}) -> Flat ${flatNum} (alternating pattern)`
-        );
         return {
           name: `Flat ${flatNum}: ${room.roomType || "Room"}`,
           size:
@@ -2502,9 +2455,6 @@ const Annotator = ({
       // Remove the temporary _flatNum property
       formattedRooms = formattedRooms.map(({ _flatNum, ...room }) => room);
     }
-
-    console.log("Formatted rooms:", formattedRooms);
-    console.log("AC annotations for BTU:", acAnnotations);
 
     if (typeof setRoomData === "function") {
       setRoomData(formattedRooms, acAnnotations);
@@ -2723,7 +2673,6 @@ const Annotator = ({
     ['annotator_annotation_id', 'annotator_pdf_data', 'annotator_pdf_name',
      'annotator_rectangles', 'annotator_comments', 'annotator_lines',
      'annotator_rooms', 'annotator_pdf_rotation'].forEach(k => sessionStorage.removeItem(k));
-    console.log("Canvas and table data cleared.");
   };
 
   return (

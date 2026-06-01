@@ -22,23 +22,16 @@ export default function Recommendations() {
     state?.btuData?.currentProject ||
     null;
 
-  console.log('Recommendations - Full state:', state);
-  console.log('Recommendations - state.btuData:', state?.btuData);
-  console.log('Recommendations - state.btuData.currentProject:', state?.btuData?.currentProject);
-  console.log('Recommendations - btuProject:', btuProject);
-
   const perRoomResults =
     Array.isArray(btuProject?.rooms) && btuProject.rooms.length > 0
       ? btuProject.rooms
       : null;
 
   // Show all rows including condensers — they are only added to btuData.rooms when warranted
-  const visibleRoomResults = perRoomResults ?? null;
+  const visibleRoomResults = perRoomResults;
 
   // Component-level mode flags (used in both JSX and the print callback)
   const isBoth = btuProject?.systemMode === 'heatpump' || btuProject?.systemMode === 'recovery';
-
-  console.log('Recommendations - perRoomResults:', perRoomResults);
 
   const handlePrint = useCallback(() => {
     if (!visibleRoomResults || visibleRoomResults.length === 0) {
@@ -54,12 +47,12 @@ export default function Recommendations() {
       minute: '2-digit' 
     });
 
-    // Build room rows
-    const isHeatingOnly = false; // removed — no standalone heating mode
+    // Build room rows — exclude condenser rows to avoid double-counting
+    const nonCondenserRows = visibleRoomResults.filter(r => !r.product?.isCondenser);
     const roomBtuLabel = isBoth
       ? 'Room Load (Cool / Heat BTU)'
       : 'Room BTU';
-    const roomRowsHtml = visibleRoomResults.map((room, i) => {
+    const roomRowsHtml = nonCondenserRows.map((room, i) => {
       const product = room.product || {};
       const productPrice = product.price
         ? product.discount
@@ -83,9 +76,9 @@ export default function Recommendations() {
     }).join('');
 
     // Calculate totals
-    const totalBTU = visibleRoomResults.reduce((sum, room) => sum + (room.btu || 0), 0);
-    const totalProductBTU = visibleRoomResults.reduce((sum, room) => sum + (room.product?.btu || 0), 0);
-    const totalPrice = visibleRoomResults.reduce((sum, room) => {
+    const totalBTU = nonCondenserRows.reduce((sum, room) => sum + (room.btu || 0), 0);
+    const totalProductBTU = nonCondenserRows.reduce((sum, room) => sum + (room.product?.btu || 0), 0);
+    const totalPrice = nonCondenserRows.reduce((sum, room) => {
       const product = room.product || {};
       if (product.price) {
         const price = product.discount
@@ -137,7 +130,7 @@ export default function Recommendations() {
             <tr class="total-row">
               <td><strong>Total</strong></td>
               <td><strong>${totalBTU.toLocaleString()}</strong></td>
-              <td><strong>${visibleRoomResults.length}</strong></td>
+              <td><strong>${nonCondenserRows.length}</strong></td>
               <td><strong>—</strong></td>
               <td><strong>${totalProductBTU.toLocaleString()}</strong></td>
               <td><strong>$${totalPrice.toFixed(2)}</strong></td>
@@ -234,7 +227,7 @@ export default function Recommendations() {
         }
       `,
     });
-  }, [visibleRoomResults, btuProject]);
+  }, [visibleRoomResults, isBoth, btuProject?.systemMode, btuProject?.totalSquareFootage, btuProject?.totalCoolingBTU, btuProject?.totalHeatingBTU]);
 
   // Add keyboard shortcut support (Ctrl+P)
   useEffect(() => {
@@ -744,14 +737,9 @@ export default function Recommendations() {
                             fontWeight: '600',
                             whiteSpace: 'nowrap',
                             color: '#1a1a2e',
-                            // Prevent iOS Safari from auto-linking $/numeric content
-                            // and re-styling it (invisible/colored link).
                             WebkitTextFillColor: '#1a1a2e',
                           }}
-                          // Belt-and-suspenders: opt out of Apple's data detectors
-                          // for this cell specifically.
-                          // eslint-disable-next-line react/no-unknown-property
-                          x-apple-data-detectors="false"
+                          data-apple-data-detectors="false"
                         >
                           <span style={{ color: '#1a1a2e', WebkitTextFillColor: '#1a1a2e' }}>
                             {getPrice(product)}
@@ -809,8 +797,7 @@ export default function Recommendations() {
                     <td>{unit.btu || "—"}</td>
                     <td
                       style={{ whiteSpace: 'nowrap', color: '#1a1a2e', WebkitTextFillColor: '#1a1a2e' }}
-                      // eslint-disable-next-line react/no-unknown-property
-                      x-apple-data-detectors="false"
+                      data-apple-data-detectors="false"
                     >
                       <span style={{ color: '#1a1a2e', WebkitTextFillColor: '#1a1a2e' }}>
                         {getPrice(unit)}

@@ -19,12 +19,43 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
 
   if (!btuProject) return null;
 
+  const measurementSystem = btuProject?.inputParams?.measurementSystem || "meters";
+  const areaUnitLabel = measurementSystem === "feet" ? "sq ft" : "sq m";
+  const areaConvert = measurementSystem === "feet" ? 10.764 : 1;
+  const totalAreaBase = Number(btuProject?.totalSquareFootage || 0);
+  const displayTotalArea = measurementSystem === "feet"
+    ? totalAreaBase * 10.764
+    : totalAreaBase;
+  const totalAreaText = Number.isFinite(displayTotalArea) && displayTotalArea > 0
+    ? `${displayTotalArea.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${areaUnitLabel}`
+    : "N/A";
+
   // Calculate total product sum from all rooms
   const totalProductSum = perRoomResults?.reduce((sum, room) => {
-    const productPrice = room.product?.price || 0;
-    const condenserPrice = room.condenser?.price || 0;
-    return sum + productPrice + condenserPrice;
+    return sum + (room.product?.price || 0);
   }, 0) || 0;
+
+  // --- Multi-flat detection ---
+  const flatPattern = /^Flat\s+(\d+)/i;
+  const flatSet = new Set();
+  (perRoomResults || []).forEach(r => {
+    const m = (r.name || '').match(flatPattern);
+    if (m) flatSet.add(Number(m[1]));
+  });
+  const flatList = Array.from(flatSet).sort((a, b) => a - b);
+  const isMultiFlat = flatList.length >= 2;
+
+  const flatStats = isMultiFlat ? flatList.map(flatNum => {
+    const flatRooms = (perRoomResults || []).filter(r =>
+      new RegExp(`^Flat\\s+${flatNum}[\\s:]`, 'i').test(r.name || '')
+    );
+    const indoorRooms = flatRooms.filter(r => !r.product?.isCondenser);
+    const area = indoorRooms.reduce((s, r) => s + (Number(r.size) || 0), 0) * areaConvert;
+    const btu = indoorRooms.reduce((s, r) => s + (r.btu || 0), 0);
+    const units = flatRooms.length;
+    const cost = flatRooms.reduce((s, r) => s + (r.product?.price || 0), 0);
+    return { flatNum, rooms: indoorRooms.length, area, btu, units, cost };
+  }) : [];
 
   // const projectCost = Number(btuProject.estimatedProjectCost || 0);
   // const multiplier = totalProductSum > 0 ? projectCost / totalProductSum : 0;
@@ -42,7 +73,45 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
         <Card.Title className="card-title" style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem' }}>
           🏗️ System Summary
         </Card.Title>
-        <div className="row g-3">
+        {isMultiFlat ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #dee2e6', background: 'rgba(102, 126, 234, 0.1)' }}>
+                  <th style={{ padding: '8px 10px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Flat</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Rooms</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Area ({areaUnitLabel})</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>BTU Load</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Units</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Equipment Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {flatStats.map(f => (
+                  <tr key={f.flatNum} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '7px 10px', fontWeight: '600' }}>Flat {f.flatNum}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{f.rooms}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{f.area.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{f.btu.toLocaleString()}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{f.units}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: '600', color: '#28a745' }}>${f.cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr style={{ borderTop: '2px solid #1a1a2e', background: 'rgba(102, 126, 234, 0.08)', fontWeight: '700' }}>
+                  <td style={{ padding: '8px 10px' }}>All Flats</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{flatStats.reduce((s, f) => s + f.rooms, 0)}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{displayTotalArea > 0 ? displayTotalArea.toLocaleString(undefined, { maximumFractionDigits: 1 }) : 'N/A'}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{flatStats.reduce((s, f) => s + f.btu, 0).toLocaleString()}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{flatStats.reduce((s, f) => s + f.units, 0)}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right', color: '#28a745' }}>${totalProductSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        ) : (
+          <div className="row g-3">
             <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
               <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Rooms</div>
@@ -55,7 +124,7 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
               <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total Area</div>
               <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
-                {btuProject.totalSquareFootage ? `${Number(btuProject.totalSquareFootage).toFixed(2)} m²` : 'N/A'}
+                {totalAreaText}
               </div>
             </div>
           </div>
@@ -67,8 +136,6 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
               </div>
             </div>
           </div>
-        
-        
           <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
               <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Units</div>
@@ -85,7 +152,8 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        )}
         
         {/* {btuProject.estimatedProjectCost && (
           <div className="mt-4 pt-3 border-top">

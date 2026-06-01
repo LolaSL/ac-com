@@ -30,6 +30,39 @@ const CONSTANTS = {
   },
   CONVERT_FEET_TO_METERS: 0.3048,
 };
+
+// Per-flat appliance defaults — used when initialising each flat's appliance state
+const DEFAULT_APPLIANCES = {
+  Oven: false,
+  ServerRoom: false,
+  CommercialKitchen: false,
+  Gym: false,
+  HomeTheater: false,
+  Workshop: false,
+  OfficeRoom: false,
+  HotelRoom: false,
+};
+
+const DEFAULT_FLOOR_TYPE = {
+  Marble: false,
+  Timber: false,
+  Concrete: false,
+  Carpeted: false,
+};
+
+const DEFAULT_ORIENTATION = {
+  North: false,
+  East: false,
+  South: false,
+  West: false,
+};
+
+const DEFAULT_OUTDOOR_LOCATION = {
+  Roof: false,
+  WallBrackets: false,
+  HardGround: false,
+};
+
 function BtuCalculator({ roomData, acAnnotations = [] }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
@@ -230,7 +263,7 @@ useEffect(() => {
   
   
   const [measurementSystem, setMeasurementSystem] = useState("meters");
-  const [rooms, setRooms] = useState([{ name: "Bedroom 1", size: "", btu: 0 }]);
+  const [rooms, setRooms] = useState([{ name: "", size: "", btu: 0, unit: "meters" }]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
   const [numPeople, setNumPeople] = useState(0);
   const [error, setError] = useState("");
@@ -315,6 +348,14 @@ useEffect(() => {
   const [detectedFlats, setDetectedFlats] = useState([]);
   // Per-flat people count (only used when isMultiFlatProperty && detectedFlats.length > 1)
   const [flatPeopleCount, setFlatPeopleCount] = useState({});
+  // Per-flat appliances (only used when isMultiFlatProperty && detectedFlats.length > 1)
+  const [flatAppliances, setFlatAppliances] = useState({});
+  // Per-flat floor type (only used when isMultiFlatProperty && detectedFlats.length > 1)
+  const [flatFloorType, setFlatFloorType] = useState({});
+  // Per-flat apartment orientation (only used when isMultiFlatProperty && detectedFlats.length > 1)
+  const [flatOrientation, setFlatOrientation] = useState({});
+  // Per-flat outdoor unit location (only used when isMultiFlatProperty && detectedFlats.length > 1)
+  const [flatOutdoorLocation, setFlatOutdoorLocation] = useState({});
 
   // ── Humidity input ────────────────────────────────────────────────────────
   const [humidity, setHumidity]       = useState('average');   // 'low' | 'average' | 'high'
@@ -425,13 +466,58 @@ useEffect(() => {
   const handleFloorChange = (e) =>
     handleOptionChange("floorType", e.target.name);
 
+  // Initialise per-flat appliance and floor state when detectedFlats changes (preserve existing selections)
+  useEffect(() => {
+    if (detectedFlats.length < 2) return;
+    setFlatAppliances(prev => {
+      const next = {};
+      detectedFlats.forEach(flatName => {
+        next[flatName] = prev[flatName] ?? { ...DEFAULT_APPLIANCES };
+      });
+      return next;
+    });
+    setFlatFloorType(prev => {
+      const next = {};
+      detectedFlats.forEach(flatName => {
+        next[flatName] = prev[flatName] ?? { ...DEFAULT_FLOOR_TYPE };
+      });
+      return next;
+    });
+    setFlatOrientation(prev => {
+      const next = {};
+      detectedFlats.forEach(flatName => {
+        next[flatName] = prev[flatName] ?? { ...DEFAULT_ORIENTATION };
+      });
+      return next;
+    });
+    setFlatOutdoorLocation(prev => {
+      const next = {};
+      detectedFlats.forEach(flatName => {
+        next[flatName] = prev[flatName] ?? { ...DEFAULT_OUTDOOR_LOCATION };
+      });
+      return next;
+    });
+  }, [detectedFlats]);
+
   // Clear error whenever any calculation input changes
   useEffect(() => {
     setError("");
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, ceilingHeight, numPeople, flatPeopleCount, measurementSystem, rooms]);
+  }, [options, ceilingHeight, numPeople, flatPeopleCount, flatAppliances, flatFloorType, flatOrientation, flatOutdoorLocation, measurementSystem, rooms]);
 
-  const calculateBTUForRoom = (room, peopleOverride, mode = 'cooling') => {
+  const calculateBTUForRoom = (room, peopleOverride, mode = 'cooling', appliancesOverride, floorTypeOverride, orientationOverride, outdoorLocationOverride) => {
+    // When overrides are provided (per-flat mode), use them instead of global options.
+    // All other option categories (roofType, climate, etc.) remain global.
+    const effectiveOptions = (appliancesOverride || floorTypeOverride || orientationOverride || outdoorLocationOverride)
+      ? {
+          ...options,
+          ...(appliancesOverride      ? { appliances:           appliancesOverride      } : {}),
+          ...(floorTypeOverride       ? { floorType:            floorTypeOverride       } : {}),
+          ...(orientationOverride     ? { apartmentOrientation: orientationOverride     } : {}),
+          ...(outdoorLocationOverride ? { OutdoorUnitLocation:  outdoorLocationOverride } : {}),
+        }
+      : options;
+
     let area = convertArea(parseFloat(room.size));
     let height = parseFloat(ceilingHeight);
     const effectivePeople = peopleOverride !== undefined
@@ -475,8 +561,8 @@ useEffect(() => {
     };
 
     if (!isHeating && room.name === "Dining Room") {
-      const selectedClimate = Object.keys(options.climate || {}).find(
-        (k) => options.climate[k]
+      const selectedClimate = Object.keys(effectiveOptions.climate || {}).find(
+        (k) => effectiveOptions.climate[k]
       );
       // Only add climate-based dining bonus when a climate is explicitly selected
       btu += diningRoomBtuByClimate[selectedClimate] || 0;
@@ -487,10 +573,10 @@ useEffect(() => {
 
     const applyMultiplier = (category, multipliers) => {
       if (!multipliers || typeof multipliers !== "object") return;
-      if (!options[category] || typeof options[category] !== "object") return;
+      if (!effectiveOptions[category] || typeof effectiveOptions[category] !== "object") return;
 
       Object.keys(multipliers).forEach((key) => {
-        if (options[category][key]) {
+        if (effectiveOptions[category][key]) {
           btu *= multipliers[key];
         }
       });
@@ -588,10 +674,10 @@ useEffect(() => {
 
   // Per-room load wrapper. Both modes (heatpump / recovery) calculate cool + heat
   // and size on max(cool, heat) so the product covers the dominant season.
-  const calculateRoomLoad = (room, peopleOverride) => {
-    const cool = calculateBTUForRoom(room, peopleOverride, 'cooling');
+  const calculateRoomLoad = (room, peopleOverride, _systemMode, appliancesOverride, floorTypeOverride, orientationOverride, outdoorLocationOverride) => {
+    const cool = calculateBTUForRoom(room, peopleOverride, 'cooling', appliancesOverride, floorTypeOverride, orientationOverride, outdoorLocationOverride);
     if (cool.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: cool.error };
-    const heat = calculateBTUForRoom(room, peopleOverride, 'heating');
+    const heat = calculateBTUForRoom(room, peopleOverride, 'heating', appliancesOverride, floorTypeOverride, orientationOverride, outdoorLocationOverride);
     if (heat.error) return { btu: cool.btu, coolBtu: cool.btu, heatBtu: null, error: heat.error };
     return {
       btu: Math.max(cool.btu || 0, heat.btu || 0),
@@ -653,8 +739,12 @@ useEffect(() => {
     );
 
     const productRequests = actualRooms.map(async (room) => {
-      // Resolve per-flat people count for multi-flat properties
+      // Resolve per-flat people count and per-flat appliances for multi-flat properties
       let peopleOverride;
+      let appliancesOverride;
+      let floorTypeOverride;
+      let orientationOverride;
+      let outdoorLocationOverride;
       if (isMultiFlatProperty && detectedFlats.length > 1) {
         const flatMatch = room.name.match(/^(Flat\s*\d+|Unit\s*[A-Z0-9]+|Apt\s*\d+)[\s:]/i);
         const flatKey = flatMatch
@@ -663,8 +753,20 @@ useEffect(() => {
         peopleOverride = flatKey !== null && flatPeopleCount[flatKey] !== undefined
           ? flatPeopleCount[flatKey]
           : 0;
+        appliancesOverride = flatKey !== null && flatAppliances[flatKey] !== undefined
+          ? flatAppliances[flatKey]
+          : options.appliances;
+        floorTypeOverride = flatKey !== null && flatFloorType[flatKey] !== undefined
+          ? flatFloorType[flatKey]
+          : options.floorType;
+        orientationOverride = flatKey !== null && flatOrientation[flatKey] !== undefined
+          ? flatOrientation[flatKey]
+          : options.apartmentOrientation;
+        outdoorLocationOverride = flatKey !== null && flatOutdoorLocation[flatKey] !== undefined
+          ? flatOutdoorLocation[flatKey]
+          : options.OutdoorUnitLocation;
       }
-      const { btu, coolBtu, heatBtu, error } = calculateRoomLoad(room, peopleOverride, systemMode);
+      const { btu, coolBtu, heatBtu, error } = calculateRoomLoad(room, peopleOverride, systemMode, appliancesOverride, floorTypeOverride, orientationOverride, outdoorLocationOverride);
       if (error) {
         setError(error);
         return { room, product: null, btu, coolBtu, heatBtu };
@@ -893,9 +995,9 @@ useEffect(() => {
 
           // Sum BTU for every room whose name starts with "Flat N:"
           let flatTotalBTU = 0;
-          rooms.forEach((room, roomIdx) => {
+          productResults.forEach(({ room, btu }) => {
             if (room.name.toLowerCase().includes(`flat ${flatNum}:`)) {
-              flatTotalBTU += results[roomIdx] || 0;
+              flatTotalBTU += btu || 0;
             }
           });
 
@@ -991,12 +1093,6 @@ useEffect(() => {
       : 0;
 
     const totalEquipmentCost = totalIndoorUnitsCost + condenserCost;
-
-    if (isMultiFlatProperty || detectedFlats.length > 1 || actualRooms.length >= 10) {
-      propertyType = "residential-multi";
-    } else if (actualRooms.length >= 3) {
-      propertyType = "residential-multi";
-    }
 
     const estimatedDays = Math.max(
       1,
@@ -1175,14 +1271,18 @@ useEffect(() => {
   };
 
   const handleClear = () => {
-    setRooms([{ name: "Bedroom 1", size: "", btu: 0, unit: "meters" }]);
+    setRooms([{ name: "", size: "", btu: 0, unit: "meters" }]);
     setCeilingHeight("2.5");
     setNumPeople(0);
     setFlatPeopleCount({});
+    setFlatAppliances({});
+    setFlatFloorType({});
+    setFlatOrientation({});
+    setFlatOutdoorLocation({});
     setMeasurementSystem("meters");
     setOptions({
       OutdoorUnitLocation: {
-        PitchedRoof: false,
+        Roof: false,
         WallBrackets: false,
         HardGround: false,
       },
@@ -1217,6 +1317,8 @@ useEffect(() => {
         Gym: false,
         HomeTheater: false,
         Workshop: false,
+        OfficeRoom: false,
+        HotelRoom: false,
       },
       windowType: {
         SingleGlazed: false,
@@ -1515,12 +1617,35 @@ useEffect(() => {
         <hr className="ms-2 mt-1 mb-5 btu-hr" />
         <Row className="g-3">
           <Col md={6}>
+            {isMultiFlatProperty && detectedFlats.length > 1 ? (
+              <div className="mb-3">
+                <div className="checkbox-group-section-title">Outdoor Unit Location (per flat):</div>
+                {detectedFlats.map(flatName => (
+                  <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
+                    <CheckboxGroup
+                      title=""
+                      name={`OutdoorUnitLocation-${flatName}`}
+                      options={flatOutdoorLocation[flatName] ?? DEFAULT_OUTDOOR_LOCATION}
+                      onChange={(e) => setFlatOutdoorLocation(prev => ({
+                        ...prev,
+                        [flatName]: {
+                          ...(prev[flatName] ?? DEFAULT_OUTDOOR_LOCATION),
+                          [e.target.name]: !(prev[flatName] ?? DEFAULT_OUTDOOR_LOCATION)[e.target.name],
+                        },
+                      }))}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
             <CheckboxGroup
               title="Outdoor Unit Location"
               name="OutdoorUnitLocation"
               options={options.OutdoorUnitLocation}
               onChange={handleOutdoorUnitLocationChange}
             />
+            )}
 
             <CheckboxGroup
               title="Insulation Condition"
@@ -1552,12 +1677,35 @@ useEffect(() => {
               onChange={handleWindowChange}
             />
 
+            {isMultiFlatProperty && detectedFlats.length > 1 ? (
+              <div className="mb-3">
+                <div className="checkbox-group-section-title">Apartment Orientation (per flat):</div>
+                {detectedFlats.map(flatName => (
+                  <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
+                    <CheckboxGroup
+                      title=""
+                      name={`orientation-${flatName}`}
+                      options={flatOrientation[flatName] ?? DEFAULT_ORIENTATION}
+                      onChange={(e) => setFlatOrientation(prev => ({
+                        ...prev,
+                        [flatName]: {
+                          ...(prev[flatName] ?? DEFAULT_ORIENTATION),
+                          [e.target.name]: !(prev[flatName] ?? DEFAULT_ORIENTATION)[e.target.name],
+                        },
+                      }))}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
             <CheckboxGroup
               title="Apartment Orientation"
               name="apartment"
               options={options.apartmentOrientation}
               onChange={handleApartmentChange}
             />
+            )}
           </Col>
 
           <Col md={6}>
@@ -1575,6 +1723,38 @@ useEffect(() => {
               onChange={handleSunExposureChange}
             />
 
+{isMultiFlatProperty && detectedFlats.length > 1 ? (
+              <div className="mb-3">
+                <div className="checkbox-group-section-title">Room Usage & Appliances (per flat):</div>
+                {detectedFlats.map(flatName => (
+                  <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
+                    <CheckboxGroup
+                      title=""
+                      name={`appliances-${flatName}`}
+                      options={flatAppliances[flatName] ?? DEFAULT_APPLIANCES}
+                      onChange={(e) => setFlatAppliances(prev => ({
+                        ...prev,
+                        [flatName]: {
+                          ...(prev[flatName] ?? DEFAULT_APPLIANCES),
+                          [e.target.name]: !(prev[flatName] ?? DEFAULT_APPLIANCES)[e.target.name],
+                        },
+                      }))}
+                      tooltips={{
+                        Oven: '+8% cooling · −5% heating — Cooking adds heat; offsets some heating load',
+                        ServerRoom: '+35% cooling · −15% heating — Servers and IT equipment generate continuous high heat',
+                        CommercialKitchen: '+45% cooling · −20% heating — Multiple cooking appliances generate intense, sustained heat',
+                        Gym: '+20% cooling · −10% heating — Exercise equipment and high metabolic activity from occupants',
+                        HomeTheater: '+6% cooling · −3% heating — AV receivers, projectors and amplifiers add moderate heat',
+                        Workshop: '+12% cooling · −6% heating — Power tools and compressors generate heat during operation',
+                        OfficeRoom: '+18% cooling · −8% heating — Office equipment and occupants add moderate heat in cooling, reduce heating need',
+                        HotelRoom: '+10% cooling · −4% heating — Hotel rooms have some internal gains from appliances and occupants',
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
             <CheckboxGroup
               title="Room Usage & Appliances"
               name="appliances"
@@ -1591,6 +1771,7 @@ useEffect(() => {
                 HotelRoom: '+10% cooling · −4% heating — Hotel rooms have some internal gains from appliances and occupants',
               }}
             />
+            )}
 
             <CheckboxGroup
               title="Roof Type"
@@ -1598,12 +1779,35 @@ useEffect(() => {
               options={options.roofType}
               onChange={handleRoofChange}
             />
+            {isMultiFlatProperty && detectedFlats.length > 1 ? (
+              <div className="mb-3">
+                <div className="checkbox-group-section-title">Floor (per flat):</div>
+                {detectedFlats.map(flatName => (
+                  <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
+                    <CheckboxGroup
+                      title=""
+                      name={`floorType-${flatName}`}
+                      options={flatFloorType[flatName] ?? DEFAULT_FLOOR_TYPE}
+                      onChange={(e) => setFlatFloorType(prev => ({
+                        ...prev,
+                        [flatName]: {
+                          ...(prev[flatName] ?? DEFAULT_FLOOR_TYPE),
+                          [e.target.name]: !(prev[flatName] ?? DEFAULT_FLOOR_TYPE)[e.target.name],
+                        },
+                      }))}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
             <CheckboxGroup
               title="Floor"
-              name=" floorType"
+              name="floorType"
               options={options.floorType}
               onChange={handleFloorChange}
             />
+            )}
           </Col>
         </Row>
         <Button

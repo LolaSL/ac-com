@@ -4,6 +4,7 @@ import "./CheckboxGroup.css";
 
 const CheckboxGroup = ({ title, name, options, onChange, labels, tooltips }) => {
   const safeOptions = options || {};
+  const groupId = name || title || "group";
 
   return (
     <div className="checkbox-group">
@@ -17,7 +18,7 @@ const CheckboxGroup = ({ title, name, options, onChange, labels, tooltips }) => 
             {labelText}{' '}
             <OverlayTrigger
               placement="top"
-              overlay={<Tooltip id={`tip-${key}`}>{tip}</Tooltip>}
+              overlay={<Tooltip id={`tip-${groupId}-${key}`}>{tip}</Tooltip>}
             >
               <span className="cb-info-icon">i</span>
             </OverlayTrigger>
@@ -30,6 +31,7 @@ const CheckboxGroup = ({ title, name, options, onChange, labels, tooltips }) => 
             type="checkbox"
             label={label}
             name={key}
+            data-group={groupId}
             checked={safeOptions[key] || false}
             onChange={onChange}
           />
