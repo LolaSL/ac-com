@@ -52,7 +52,7 @@ const PdfHelpVideoModal = () => {
                 {playing ? (
                   <iframe
                     src={`${EMBED_URL}?autoplay=1`}
-                    title="PDF Annotation Instruction Video"
+                    title="PDF Notation Instruction Video"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
