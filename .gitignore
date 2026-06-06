@@ -26,6 +26,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# seed/demo data
+# misc — VS Code local file history (may contain .env snapshots with real secrets)
+.history/
+.dist/
+.DS_Store
 backend/data.js
 backend/null
