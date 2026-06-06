@@ -490,6 +490,11 @@ export default function OrderPage() {
               {!order.isPaid && !isAdmin && (
                 <div className="op-paypal">
                   <p className="op-paypal__label">Pay with PayPal</p>
+                  <p className="op-paypal__notice">
+                    Note: PayPal may open two windows. The larger window may
+                    appear blank — please complete your login in the smaller
+                    window. Do not close either window until payment finishes.
+                  </p>
                   {isPending ? (
                     <LoadingBox />
                   ) : (
@@ -500,6 +505,26 @@ export default function OrderPage() {
                     />
                   )}
                   {loadingPay && <LoadingBox />}
+                </div>
+              )}
+
+              {loadingPay && (
+                <div
+                  className="op-pay-overlay"
+                  role="alertdialog"
+                  aria-busy="true"
+                  aria-label="Processing payment"
+                >
+                  <div className="op-pay-overlay__box">
+                    <div className="op-pay-overlay__spinner" />
+                    <h3 className="op-pay-overlay__title">
+                      Processing your payment…
+                    </h3>
+                    <p className="op-pay-overlay__text">
+                      Please wait — this can take up to a minute. Do not close
+                      this page or the PayPal windows.
+                    </p>
+                  </div>
                 </div>
               )}
 
