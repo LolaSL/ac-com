@@ -13,8 +13,14 @@ build
 dist
 frontend/build
 
+
+# editor/local history
+.history/
+
+
 # environment files (all variants, both folders)
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
