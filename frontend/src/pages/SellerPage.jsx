@@ -218,26 +218,49 @@ export default function SellerPage() {
           </div>
 
           {/* ── Video ── */}
-          {seller.link && (
-            <div className="sp-section sp-video-section">
-              <h2 className="sp-section__title">📹 Product Video</h2>
-              <div className="sp-iframe-wrap">
-                <iframe
-                  src={toEmbedUrl(seller.link)}
-                  title={`${seller.name} Product Video`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  onError={() => {}}
-                />
+          {seller.link && (() => {
+            const embedUrl = toEmbedUrl(seller.link);
+            const videoId = embedUrl.match(/embed\/([^?]+)/)?.[1];
+            const thumbUrl = videoId
+              ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+              : null;
+            const watchUrl = videoId
+              ? `https://www.youtube.com/watch?v=${videoId}`
+              : seller.link;
+            return (
+              <div className="sp-section sp-video-section">
+                <h2 className="sp-section__title">📹 Product Video</h2>
+                {thumbUrl ? (
+                  <a
+                    href={watchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sp-video-thumb-link"
+                    aria-label="Watch video on YouTube"
+                  >
+                    <div className="sp-video-thumb-wrap">
+                      <img
+                        src={thumbUrl}
+                        alt={`${seller.name} product video`}
+                        className="sp-video-thumb"
+                      />
+                      <span className="sp-video-play-btn" aria-hidden="true">▶</span>
+                    </div>
+                    <p className="sp-video-cta">▶ Watch on YouTube</p>
+                  </a>
+                ) : (
+                  <div className="sp-iframe-wrap">
+                    <iframe
+                      src={embedUrl}
+                      title={`${seller.name} Product Video`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
               </div>
-              <p className="sp-video-fallback">
-                Can't see the video?{" "}
-                <a href={seller.link} target="_blank" rel="noopener noreferrer">
-                  Watch on YouTube
-                </a>
-              </p>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ── Reviews ── */}
           <div className="sp-section" ref={reviewsRef}>
