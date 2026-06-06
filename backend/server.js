@@ -184,7 +184,7 @@ const __dirname = path.resolve();
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 // Serve React SPA — must come AFTER all API routes
 app.use(express.static(path.join(__dirname, '/frontend/build')));
-app.get('*', (req, res) =>
+app.get('/{*path}', (req, res) =>
     res.sendFile(path.join(__dirname, '/frontend/build/index.html'))
 );
 app.use((err, req, res, next) => {
