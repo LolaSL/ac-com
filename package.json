@@ -4,7 +4,7 @@
   "description": "AC Commerce — HVAC marketplace with BTU calculator, ROI calculator and PDF annotator",
   "main": "backend/server.js",
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x"
   },
   "scripts": {
     "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
