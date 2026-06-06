@@ -46,7 +46,7 @@ export default function HomeBannerPage() {
     {
       title: "Advanced Design Technology",
       description:
-        "Upload floor plans and receive professional AC unit notations, BTU calculations, and installation specifications instantly.",
+        "Upload floor plans and receive professional AC unit annotations, BTU calculations, and installation specifications instantly.",
       imageSrc: "/images/floor-plan.jpg",
       linkText: "Try Design Tools",
       linkTo: "/measurement",
@@ -200,7 +200,7 @@ export default function HomeBannerPage() {
         <div className="home-hero__overlay" />
         <div className="home-hero__inner">
           <h1 className="home-hero__title">Welcome to AC-Commerce</h1>
-          <p className="home-hero__sub">Smarter HVAC designed planning, shopping, and installation — powered by technology, delivered with trust.</p>
+          <p className="home-hero__sub">Smarter HVAC design, planning, shopping, and installation — powered by technology, delivered with trust.</p>
         </div>
         <p className="home-hero__corner-tag">Any space. Any size. Always cool.</p>
       </div>

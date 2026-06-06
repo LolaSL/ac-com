@@ -562,7 +562,7 @@ function ProductPage() {
                     )}
                     {product.energyEfficiency && (
                       <ListGroup.Item>
-                        <strong>Energy eficiency:</strong>{" "}
+                        <strong>Energy efficiency:</strong>{" "}
                         {product.energyEfficiency}
                       </ListGroup.Item>
                     )}

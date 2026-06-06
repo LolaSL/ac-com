@@ -443,7 +443,7 @@ export default function SearchPage() {
                     </div>
                   </div>
                   {products.length === 0 && (
-                    <MessageBox>No Product Found</MessageBox>
+                    <MessageBox>No Products Found</MessageBox>
                   )}
                   <Row className="g-3 mx-0">
                     {products.map((product) => (

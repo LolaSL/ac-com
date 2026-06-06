@@ -18,7 +18,7 @@ const AboutUs = () => {
     {
       icon: "fas fa-hard-hat",
       title: "AI-Engineer Review",
-      text: "After making an order submission, a certified AI-HVAC engineer opens your submitted plan, adds professional VRF refrigerant lines, and signs off with a digital signature — producing a verified 2-page review PDF. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations. Symbols of ducted HVAC elements/accessories for both ducted and ductless VRF modes-comming soon",
+      text: "After making an order submission, a certified AI-HVAC engineer opens your submitted plan, adds professional VRF refrigerant lines, and signs off with a digital signature — producing a verified 2-page review PDF. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations. Symbols of ducted HVAC elements/accessories for both ducted and ductless VRF modes — coming soon",
     },
     {
       icon: "fas fa-file-pdf",
@@ -46,7 +46,7 @@ const AboutUs = () => {
     {
       icon: "fas fa-pencil-ruler",
       title: "Professional Notation Tools",
-      text: "Browser-based PDF notifications with coloured air conditioner symbols, text comments, VRF refrigerant lines, (ducted air diffusers -comming soon).",
+      text: "Browser-based PDF annotations with coloured air conditioner symbols, text comments, VRF refrigerant lines, (ducted air diffusers — coming soon).",
     },
     {
       icon: "fas fa-user-check",
@@ -66,8 +66,8 @@ const AboutUs = () => {
     },
         {
       icon: "fas fa-hand-holding-usd",
-      title: "Friend Bring Friend Commission Program",
-      text: "Industry professionals and businesses can list products on the marketplace, earn commission through \"friend bring friend\"",
+      title: "Bring-a-Friend Commission Program",
+      text: "Industry professionals and businesses can list products on the marketplace, earn commission through our bring-a-friend referral programme",
     }
   ];
 
@@ -100,7 +100,7 @@ const AboutUs = () => {
         {/* Intro */}
         <div className="au-card au-intro">
           <p className="au-lead">
-            <strong>AC-Commerce Home Supply</strong> is HVAC marketplace that combines product commerce with
+            <strong>AC-Commerce Home Supply</strong> is an HVAC marketplace that combines product commerce with
             professional-grade planning tools. Whether you're buying a mini-split, designing a
             VRF system for a multi-room property, or getting a certified engineer to review your
             floor plan — everything happens in one platform.

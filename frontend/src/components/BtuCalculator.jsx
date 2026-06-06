@@ -856,11 +856,13 @@ useEffect(() => {
     let sizingStatus = "";
     let selectedCondensers = [];
 
-    // Define propertyType before any use
+    // Define propertyType before any use.
+    // "residential-multi" means actual separate units (flats/apartments) — NOT just
+    // a single dwelling with many rooms. Only set it when the user explicitly marked
+    // multi-flat OR room prefixes indicate separate flats. A 3-bedroom house/flat is
+    // still residential-single and should size the condenser at 100% of the total load.
     let propertyType = "residential-single";
-    if (isMultiFlatProperty || detectedFlats.length > 1 || actualRooms.length >= 10) {
-      propertyType = "residential-multi";
-    } else if (actualRooms.length >= 3) {
+    if (isMultiFlatProperty || detectedFlats.length > 1) {
       propertyType = "residential-multi";
     }
 
@@ -873,8 +875,9 @@ useEffect(() => {
     }
 
     if (!condenser) {
-      // Calculate required condenser BTU based on property type
-      // Flats/apartments: multiplier = 0.8; Villas/other: multiplier = 1.0
+      // Diversity multiplier: multi-unit buildings apply 0.8 because not all rooms
+      // in every flat run simultaneously. Single-flat properties use 1.0 — the
+      // condenser must cover the full combined room load.
       let multiplier = 1.0;
       if (propertyType === "residential-multi") {
         multiplier = 0.8;
@@ -1447,7 +1450,7 @@ useEffect(() => {
   )}
   {acAnnotations?.length > 0 && (
     <small className="text-success d-block mt-2">
-      ✓ AC notifications found: {acAnnotations.length} label(s) detected
+      ✓ AC annotations found: {acAnnotations.length} label(s) detected
       {detectedFlats.length > 1 && (
         <>
           <br />

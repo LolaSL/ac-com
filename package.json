@@ -1,0 +1,26 @@
+{
+  "name": "ac-commerce",
+  "version": "1.0.0",
+  "description": "AC Commerce — HVAC marketplace with BTU calculator, ROI calculator and PDF annotator",
+  "main": "backend/server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
+    "start": "node backend/server.js",
+    "dev:backend": "nodemon backend/server.js",
+    "dev:frontend": "npm start --prefix frontend",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LolaSL/ac-com.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LolaSL/ac-com/issues"
+  },
+  "homepage": "https://github.com/LolaSL/ac-com#readme"
+}

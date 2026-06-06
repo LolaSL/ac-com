@@ -26,10 +26,8 @@ import hvacZoneRouter from './routes/hvacZoneRoutes.js';
 import { isAuth } from './utils.js';
 import path from "path";
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import Notification from './models/notificationModel.js';
 import { startPaymentReminderJob } from './utils/paymentReminderJob.js';
-
 
 dotenv.config();
 
@@ -40,8 +38,8 @@ async function start() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to MongoDB");
 
-    const notifications = await Notification.find();
-    console.log(notifications);
+    // const notifications = await Notification.find();
+    // console.log(notifications);
 
     // Start scheduled jobs
     startPaymentReminderJob();
@@ -132,8 +130,6 @@ app.use('/api/users/forget-password', authLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 
-app.use(bodyParser.json({ limit: '10mb' }));
-
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -158,7 +154,9 @@ app.get("/api/keys/google", isAuth, (req, res) => {
   res.send({ key: process.env.GOOGLE_API_KEY || "" });
 });
 
-app.use('/api/seed', seedRouter);
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/seed', seedRouter);
+}
 
 app.use("/api/upload", uploadRouter);
 app.use('/api/products', productRouter);
@@ -182,15 +180,13 @@ app.use('/api/hvac-zones', hvacZoneRouter);
 
 
 const __dirname = path.resolve();
-// app.use(express.static(path.join(__dirname, "/frontend/build")));
-// app.get("*", (req, res) =>
-//     res.sendFile(path.join(__dirname, "/frontend/build/index.html"))
-// );
-
+// Serve uploaded/static images first, before the SPA catch-all
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
-});
+// Serve React SPA — must come AFTER all API routes
+app.use(express.static(path.join(__dirname, '/frontend/build')));
+app.get('*', (req, res) =>
+    res.sendFile(path.join(__dirname, '/frontend/build/index.html'))
+);
 app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
 });
