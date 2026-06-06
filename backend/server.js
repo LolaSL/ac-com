@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 import multer from 'multer';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import seedRouter from './routes/seedRoutes.js';
 import productRouter from './routes/productRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
@@ -155,6 +154,7 @@ app.get("/api/keys/google", isAuth, (req, res) => {
 });
 
 if (process.env.NODE_ENV !== 'production') {
+  const { default: seedRouter } = await import('./routes/seedRoutes.js');
   app.use('/api/seed', seedRouter);
 }
 
