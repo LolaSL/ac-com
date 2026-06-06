@@ -49,8 +49,25 @@ const trackSellerClick = (sellerId, userId) => {
   });
 };
 
-const shouldOpenExternalInSameTab = () => {
-  const ua = navigator.userAgent || "";
+const toEmbedUrl = (url) => {
+  try {
+    const u = new URL(url);
+    // Standard watch URL: youtube.com/watch?v=ID
+    if (u.hostname.includes('youtube.com') && u.searchParams.get('v')) {
+      return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
+    }
+    // Short URL: youtu.be/ID
+    if (u.hostname === 'youtu.be') {
+      return `https://www.youtube.com/embed${u.pathname}`;
+    }
+    // Already an embed URL or other — use as-is
+    return url;
+  } catch {
+    return url;
+  }
+};
+
+const shouldOpenExternalInSameTab = () => {  const ua = navigator.userAgent || "";
   const iOSDevice = /iPhone|iPad|iPod/i.test(ua);
   const iPadOSDesktopUA =
     navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
@@ -206,12 +223,19 @@ export default function SellerPage() {
               <h2 className="sp-section__title">📹 Product Video</h2>
               <div className="sp-iframe-wrap">
                 <iframe
-                  src={seller.link}
+                  src={toEmbedUrl(seller.link)}
                   title={`${seller.name} Product Video`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  onError={() => {}}
                 />
               </div>
+              <p className="sp-video-fallback">
+                Can't see the video?{" "}
+                <a href={seller.link} target="_blank" rel="noopener noreferrer">
+                  Watch on YouTube
+                </a>
+              </p>
             </div>
           )}
 
