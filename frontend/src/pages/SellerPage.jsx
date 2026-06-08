@@ -246,7 +246,6 @@ export default function SellerPage() {
                       />
                       <span className="sp-video-play-btn" aria-hidden="true">▶</span>
                     </div>
-                    <p className="sp-video-cta">▶ Watch on YouTube</p>
                   </a>
                 ) : (
                   <div className="sp-iframe-wrap">
