@@ -75,8 +75,11 @@ app.use(cors({
 // CSP is disabled here because React uses inline scripts and loads PayPal/
 // Google SDKs from external domains. Enable and tune it once you have a
 // fixed list of trusted origins.
+// COOP is relaxed to `same-origin-allow-popups` so the Google OAuth popup
+// can communicate back to the opener window when it closes.
 app.use(helmet({
   contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
 }));
 
 // NoSQL injection prevention — strips $ and . keys from req.body only

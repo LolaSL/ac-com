@@ -255,8 +255,8 @@ export default function Offers() {
         ))}
         <div className="of-hero__inner">
           <div className="of-hero__icon"><FaTag /></div>
-          <h1 className="of-hero__title">🌸 Spring Sale — May 2026</h1>
-          <p className="of-hero__sub">Fresh deals on HVAC units — spring into savings today.</p>
+          <h1 className="of-hero__title">🌞 Summer Sale 2026 — June, July & August</h1>
+          <p className="of-hero__sub">Cool savings on top HVAC units — beat the heat and the price.</p>
           <div className="of-timer">
             <FaClock className="of-timer__clock" />
             <span className="of-timer__label">Ends in</span>
