@@ -1001,18 +1001,27 @@ const EngineerViewPage = () => {
       return rectGroup.reduce((s, r) => s + getVisuals(r).vcy, 0) / rectGroup.length;
     };
 
+    // Scale HVAC item sizes proportionally to the average rectangle size,
+    // so multi-flat drawings with many small rects don't get overlapping items.
+    // Baseline (scale = 1) is tuned for indoor-unit rects ~0.05 of canvas.
+    const allRectVisuals = rects.map((r) => getVisuals(r));
+    const avgRectDim = allRectVisuals.length
+      ? allRectVisuals.reduce((s, v) => s + Math.min(v.vw, v.vh), 0) / allRectVisuals.length
+      : 0.05;
+    const sizeScale = Math.max(0.4, Math.min(1.2, avgRectDim / 0.05));
+
     // Process each flat group separately (each flat has its own center)
     const processRectGroup = (rectGroup, groupAvgX, groupAvgY) => {
-      // Duct sizing constants (normalised 0-1)
-      const baseLen = rectGroup.length > 2 ? 0.055 : 0.08; // shorter ducts for dense groups
+      // Duct sizing constants (normalised 0-1), scaled to rect size
+      const baseLen = (rectGroup.length > 2 ? 0.055 : 0.08) * sizeScale;
       const DUCT_LEN   = baseLen;
-      const DUCT_H     = rectGroup.length > 2 ? 0.016 : 0.02;
-      const GAP        = 0.005;
-      const FLEX_LEN   = rectGroup.length > 2 ? 0.018 : 0.025;
-      const FLEX_H     = 0.015;
-      const DIFF_SIZE  = rectGroup.length > 2 ? 0.025 : 0.03;
-      const DAMP_SIZE  = 0.018;
-      const THERM_SIZE = 0.02;
+      const DUCT_H     = (rectGroup.length > 2 ? 0.016 : 0.02) * sizeScale;
+      const GAP        = 0.005 * sizeScale;
+      const FLEX_LEN   = (rectGroup.length > 2 ? 0.018 : 0.025) * sizeScale;
+      const FLEX_H     = 0.015 * sizeScale;
+      const DIFF_SIZE  = (rectGroup.length > 2 ? 0.025 : 0.03) * sizeScale;
+      const DAMP_SIZE  = 0.018 * sizeScale;
+      const THERM_SIZE = 0.02 * sizeScale;
 
       // Detect wet rooms from comments for exhaust grille placement
       const WET_ROOM_RE = /\b(bath|wc|toilet|shower|laundry|kitchen|kitc?hen|ktcn|restroom|powder)\b/i;

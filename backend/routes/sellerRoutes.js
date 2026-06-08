@@ -314,7 +314,11 @@ sellerRouter.post(
   expressAsyncHandler(async (req, res) => {
     const seller = await Seller.findById(req.params.id);
     if (seller) {
-      if (seller.reviews.find((x) => x.user.toString() === req.user._id.toString())) {
+      if (
+        seller.reviews.find(
+          (x) => x.user?.toString() === req.user._id.toString() && !x.deleted
+        )
+      ) {
         return res.status(400).send({ message: 'You already submitted a review' });
       }
 
@@ -326,9 +330,11 @@ sellerRouter.post(
       };
 
       seller.reviews.push(review);
-      seller.numReviews = seller.reviews.length;
-      seller.rating =
-        seller.reviews.reduce((a, c) => c.rating + a, 0) / seller.reviews.length;
+      const activeReviews = seller.reviews.filter((r) => !r.deleted);
+      seller.numReviews = activeReviews.length;
+      seller.rating = activeReviews.length
+        ? activeReviews.reduce((a, c) => c.rating + a, 0) / activeReviews.length
+        : 0;
 
       const updatedSeller = await seller.save();
       res.status(201).send({

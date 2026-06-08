@@ -3291,7 +3291,7 @@ const Annotator = ({
             type="text"
             className="form-control form-control-sm"
             style={{ maxWidth: '200px' }}
-            placeholder="ac-1, ac-2, condenser…"
+            placeholder="ac-1, ..., ac-1.1, condenser…"
             value={acUnitInput}
             onChange={(e) => setAcUnitInput(e.target.value)}
           />
@@ -3311,8 +3311,8 @@ const Annotator = ({
             <input
               type="text"
               className="form-control form-control-sm"
-              style={{ maxWidth: '180px' }}
-              placeholder="ac-1, ac-2, condenser…"
+              style={{ maxWidth: '260px' }}
+              placeholder="ac-1, ..., ac-1.1, condenser, condenser-1..."
               value={acUnitInput}
               onChange={(e) => setAcUnitInput(e.target.value)}
             />
