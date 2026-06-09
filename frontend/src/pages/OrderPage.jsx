@@ -490,11 +490,11 @@ export default function OrderPage() {
               {!order.isPaid && !isAdmin && (
                 <div className="op-paypal">
                   <p className="op-paypal__label">Pay with PayPal</p>
-                  <p className="op-paypal__notice">
+                  {/* <p className="op-paypal__notice">
                     Note: PayPal may open two windows. The larger window may
                     appear blank — please complete your login in the smaller
                     window. Do not close either window until payment finishes.
-                  </p>
+                  </p> */}
                   {isPending ? (
                     <LoadingBox />
                   ) : (
