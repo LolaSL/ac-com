@@ -1319,7 +1319,36 @@ const Annotator = ({
         coordinates: { x: c.x, y: c.y },
       }));
 
-    // Detect flat numbers from annotations
+    // ── Preferred multi-flat source: one uploaded drawing per flat ──
+    // filteredRoomsRef.current is shaped as [fileIdx => roomsForThatFile[]].
+    // When the user uploads >1 drawing, treat each non-empty file slot as a
+    // distinct flat and prefix its rooms with "Flat N: ...". This guarantees
+    // rooms stay grouped per flat in BTU Calculator + Recommendations,
+    // instead of being interleaved by duplicate-name occurrence.
+    const perFileGroups = (filteredRoomsRef.current || [])
+      .map((rooms) => (rooms || []).filter((r) => r && r.roomType && r.areaSqM))
+      .filter((rooms) => rooms.length > 0);
+
+    if (perFileGroups.length > 1) {
+      const formattedRooms = perFileGroups.flatMap((rooms, flatIdx) =>
+        rooms.map((room) => {
+          const base = room.roomType || "Room";
+          const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
+          return {
+            name: alreadyPrefixed ? base : `Flat ${flatIdx + 1}: ${base}`,
+            size:
+              parseFloat(
+                (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+              ) || 0,
+            btu: 0,
+            unit: "meters",
+          };
+        })
+      );
+      return { formattedRooms, isMultiFlat: true, annotations };
+    }
+
+    // ── Fallback: single uploaded drawing — detect multi-flat via labels ──
     const detectedFlatNums = new Set();
     annotations.forEach(({ label }) => {
       const t = label.toLowerCase();
@@ -1334,31 +1363,20 @@ const Annotator = ({
     let flatNumsArray = Array.from(detectedFlatNums).sort((a, b) => a - b);
     const isMultiFlat = flatNumsArray.length > 1;
 
-    // Format rooms, adding flat prefixes when multi-flat
-    // Strategy: group duplicate room types and distribute them round-robin
-    // across flats. e.g. Kitchen#1 → Flat 1, Kitchen#2 → Flat 2
     let formattedRooms = [];
     if (isMultiFlat) {
+      // Single PDF that contains N flats: split the room list into N
+      // contiguous chunks. OCR tables typically list rooms flat-by-flat, so
+      // a contiguous split preserves grouping better than round-robin.
       const numFlats = flatNumsArray.length;
-      // Count how many times each room type appears
-      // Assign each room to a flat based on its occurrence index among same type
-      const typeOccurrence = {};
-      formattedRooms = validRooms.map((room) => {
+      const chunkSize = Math.ceil(validRooms.length / numFlats);
+      formattedRooms = validRooms.map((room, idx) => {
         const base = room.roomType || "Room";
         const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
-        let name = base;
-
-        if (!alreadyPrefixed) {
-          const key = base.toLowerCase();
-          const occurrence = typeOccurrence[key] || 0;
-          typeOccurrence[key] = occurrence + 1;
-          const flatIndex = Math.min(occurrence, numFlats - 1);
-          const flatNum = flatNumsArray[flatIndex];
-          name = `Flat ${flatNum}: ${base}`;
-        }
-
+        const flatIndex = Math.min(Math.floor(idx / chunkSize), numFlats - 1);
+        const flatNum = flatNumsArray[flatIndex];
         return {
-          name,
+          name: alreadyPrefixed ? base : `Flat ${flatNum}: ${base}`,
           size:
             parseFloat(
               (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
@@ -1368,29 +1386,15 @@ const Annotator = ({
         };
       });
     } else {
-      formattedRooms = validRooms.map((room) => {
-        const base = room.roomType || "Room";
-        return {
-          name: base,
-          size:
-            parseFloat(
-              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-            ) || 0,
-          btu: 0,
-          unit: "meters",
-        };
-      });
-    }
-
-    // When multi-flat: sort by flat number so flats are grouped
-    if (isMultiFlat) {
-      formattedRooms = formattedRooms
-        .map((r) => ({
-          ...r,
-          _flatNum: parseInt(r.name.match(/^flat\s*(\d+)/i)?.[1] || "1", 10),
-        }))
-        .sort((a, b) => a._flatNum - b._flatNum)
-        .map(({ _flatNum, ...r }) => r);
+      formattedRooms = validRooms.map((room) => ({
+        name: room.roomType || "Room",
+        size:
+          parseFloat(
+            (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
+          ) || 0,
+        btu: 0,
+        unit: "meters",
+      }));
     }
 
     return { formattedRooms, isMultiFlat, annotations };
@@ -2371,13 +2375,19 @@ const Annotator = ({
   }, [allRooms]);
 
   const handleExportToBtuCalculator = (roomsToExport) => {
-    const refRooms = filteredRoomsRef.current.flat().filter(Boolean);
-    const flatRooms =
-      refRooms && refRooms.length > 0
+    // Source of rooms: filtered per-file table, falling back to the explicit
+    // argument or the full allRooms set.
+    const refRooms = (filteredRoomsRef.current || []).flat().filter(Boolean);
+    const sourceRooms =
+      refRooms.length > 0
         ? refRooms
         : roomsToExport && roomsToExport.length > 0
         ? roomsToExport
         : allRooms.flat().filter(Boolean);
+
+    const validRooms = sourceRooms.filter(
+      (room) => room && room.roomType && room.areaSqM
+    );
 
     // Extract AC annotations (ac-1.1, condenser-1, condenser, etc.)
     const acAnnotations = comments
@@ -2394,68 +2404,16 @@ const Annotator = ({
         coordinates: { x: comment.x, y: comment.y },
       }));
 
-    // Parse annotations to detect flats - look for specific patterns
-    const flatNumbers = new Set();
-
-    acAnnotations.forEach((ann) => {
-      const text = ann.label.toLowerCase();
-
-      // Pattern 1: condenser-1, condenser-2
-      const condenserMatch = text.match(/condenser-(\d+)/);
-      if (condenserMatch) {
-        flatNumbers.add(parseInt(condenserMatch[1]));
-      }
-
-      // Pattern 2: Flat 1, Unit 1
-      const flatMatch = text.match(/(?:flat|unit)\s+(\d+)/);
-      if (flatMatch) {
-        flatNumbers.add(parseInt(flatMatch[1]));
-      }
-    });
-
-    const flatArray = Array.from(flatNumbers).sort((a, b) => a - b);
-    // NOTE: We intentionally do NOT infer flats from duplicate room names.
-    // A single large apartment can have multiple rooms with the same name.
-    // Multi-flat must be indicated explicitly via condenser-N, flat-N, or ac-N.M labels.
-
-    // Format rooms with flat prefixes if multiple flats detected
-    let formattedRooms = flatRooms.map((room, idx) => ({
-      name: room.roomType || "Room",
-      size:
-        parseFloat((room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")) ||
-        0,
-      btu: 0,
-      unit: "meters",
-    }));
-
-    // If we have multiple flats, distribute rooms among them
-    if (flatArray.length > 1) {
-      // Distribute rooms in alternating pattern across flats
-      // This handles the case where rooms are interleaved: Flat1Room1, Flat2Room1, Flat1Room2, Flat2Room2, etc.
-      formattedRooms = flatRooms.map((room, idx) => {
-        const flatIndex = idx % flatArray.length;
-        const flatNum = flatArray[flatIndex];
-        return {
-          name: `Flat ${flatNum}: ${room.roomType || "Room"}`,
-          size:
-            parseFloat(
-              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-            ) || 0,
-          btu: 0,
-          unit: "meters",
-          _flatNum: flatNum, // Store flat number for sorting
-        };
-      });
-
-      // Sort rooms by flat number to group them together
-      formattedRooms.sort((a, b) => a._flatNum - b._flatNum);
-      // Remove the temporary _flatNum property
-      formattedRooms = formattedRooms.map(({ _flatNum, ...room }) => room);
-    }
+    // Delegate flat-grouping to formatRoomsWithFlatPrefixes so BTU Calculator,
+    // Recommendations page, and the save-flow all stay in sync (one drawing
+    // per flat → "Flat N: <room>", grouped by flat).
+    const { formattedRooms } = formatRoomsWithFlatPrefixes(
+      validRooms,
+      acAnnotations
+    );
 
     if (typeof setRoomData === "function") {
       setRoomData(formattedRooms, acAnnotations);
-      // Scroll to BTU Calculator after setting room data
       if (typeof onExportToBtuCalculator === "function") {
         onExportToBtuCalculator();
       }
