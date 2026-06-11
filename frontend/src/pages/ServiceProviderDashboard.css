@@ -203,6 +203,15 @@
 .spd-social-btn--twitter   { background: #1da1f2; }
 .spd-social-btn--facebook  { background: #1877f2; }
 
+.spd-social-row {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* ─── KPI Grid ────────────────────────────────────────────── */
 .spd-kpi-grid {
   display: grid;
@@ -427,5 +436,27 @@
 
   .spd-kpi-value {
     font-size: 1.2rem;
+  }
+
+  .spd-social-row {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .spd-social-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .spd-social-row {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+  .spd-social-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
   }
 }

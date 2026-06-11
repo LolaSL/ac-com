@@ -1710,15 +1710,12 @@ const Annotator = ({
     }
 
     // Use pre-typed label from stable input — skip if empty
-    let pointerPosition = stageRef.current.getPointerPosition();
+    // Konva's getPointerPosition() already returns coordinates in the stage's
+    // own coordinate space (independent of container scroll), so we must NOT
+    // add scrollLeft/scrollTop here — doing so shifted placements off-canvas
+    // on small screens with multi-flat drawings.
+    const pointerPosition = stageRef.current.getPointerPosition();
     if (!pointerPosition) return;
-    const containerMain = document.querySelector('.container-main');
-    if (containerMain && window.innerWidth < 768) {
-      pointerPosition = {
-        x: pointerPosition.x + containerMain.scrollLeft,
-        y: pointerPosition.y + containerMain.scrollTop,
-      };
-    }
     if (!acUnitInput.trim()) return;
     confirmAcUnitAnnotation(acUnitInput.trim(), { x: pointerPosition.x, y: pointerPosition.y });
   };

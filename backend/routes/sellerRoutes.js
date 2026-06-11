@@ -349,6 +349,52 @@ sellerRouter.post(
   })
 );
 
+sellerRouter.put(
+  '/:id/reviews/:reviewId',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const { id, reviewId } = req.params;
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).send({ message: 'Seller Not Found' });
+    }
+
+    const review = seller.reviews.id(reviewId);
+    if (!review || review.deleted) {
+      return res.status(404).send({ message: 'Review Not Found' });
+    }
+
+    if (review.user?.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ message: 'You can only edit your own review' });
+    }
+
+    const { rating, comment } = req.body;
+    if (!rating || Number(rating) < 1 || Number(rating) > 5) {
+      return res.status(400).send({ message: 'Rating must be between 1 and 5' });
+    }
+    if (!comment || !comment.trim()) {
+      return res.status(400).send({ message: 'Comment is required' });
+    }
+
+    review.rating = Number(rating);
+    review.comment = comment.trim();
+
+    const activeReviews = seller.reviews.filter((r) => !r.deleted);
+    seller.numReviews = activeReviews.length;
+    seller.rating = activeReviews.length
+      ? activeReviews.reduce((a, c) => c.rating + a, 0) / activeReviews.length
+      : 0;
+
+    const updatedSeller = await seller.save();
+    res.send({
+      message: 'Review Updated',
+      review: updatedSeller.reviews.id(reviewId),
+      numReviews: updatedSeller.numReviews,
+      rating: updatedSeller.rating,
+    });
+  })
+);
+
 sellerRouter.delete(
   '/:id',
   isAuth,

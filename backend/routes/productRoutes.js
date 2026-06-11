@@ -266,6 +266,61 @@ productRouter.post(
   })
 );
 
+productRouter.put(
+  '/:id/reviews/:reviewId',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const { id, reviewId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ message: 'Invalid product ID' });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).send({ message: 'Product Not Found' });
+    }
+
+    const review = product.reviews.id(reviewId);
+    if (!review || review.deleted) {
+      return res.status(404).send({ message: 'Review Not Found' });
+    }
+
+    if (review.user?.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ message: 'You can only edit your own review' });
+    }
+
+    const { rating, comment } = req.body;
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).send({ message: 'Rating must be between 1 and 5' });
+    }
+    if (!comment || comment.trim().length < 10) {
+      return res.status(400).send({ message: 'Comment must be at least 10 characters' });
+    }
+    if (comment.trim().length > 500) {
+      return res.status(400).send({ message: 'Comment must be less than 500 characters' });
+    }
+
+    review.rating = Number(rating);
+    review.comment = comment.trim();
+
+    const activeReviews = product.reviews.filter((r) => !r.deleted);
+    product.numReviews = activeReviews.length;
+    product.rating =
+      activeReviews.reduce((a, c) => c.rating + a, 0) /
+      (activeReviews.length || 1);
+
+    const updatedProduct = await product.save();
+
+    res.send({
+      message: 'Review Updated',
+      review: updatedProduct.reviews.id(reviewId),
+      numReviews: updatedProduct.numReviews,
+      rating: updatedProduct.rating,
+    });
+  })
+);
+
 const PAGE_SIZE = 12;
 
 productRouter.get(

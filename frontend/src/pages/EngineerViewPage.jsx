@@ -333,26 +333,70 @@ const EngineerViewPage = () => {
     const colorIndex = (zoneNumber - 1) % zoneColorPalette.length;
     const colors = zoneColorPalette[colorIndex];
 
-    // Derive zone label from the nearest AC comment whose rect center falls inside (or near) the drawn zone
+    // Derive zone label based on AC naming convention:
+    //   - Single-flat drawing (ac-N):       label = "N"
+    //   - Multi-flat drawing  (ac-N.M):     label = "N.M"
+    // M = next available zone index within flat N.
+    const zoneX1 = zoneData.x;
+    const zoneY1 = zoneData.y;
+    const zoneX2 = zoneData.x + zoneData.width;
+    const zoneY2 = zoneData.y + zoneData.height;
     const zoneCenterX = zoneData.x + zoneData.width / 2;
     const zoneCenterY = zoneData.y + zoneData.height / 2;
     const rects = annotation?.annotations?.rectangles || [];
     const comments = annotation?.annotations?.comments || [];
-    let bestLabel = null;
-    let bestDist = Infinity;
+    const existingZones = annotation?.annotations?.hvac?.zones || [];
+
+    // Scan all AC comments project-wide to detect whether this is a multi-flat drawing
+    // (any ac-N.M present) vs single-flat (only ac-N).
+    let isMultiFlat = false;
+    const insideFlats = [];
+    let nearestFlat = null;
+    let nearestDist = Infinity;
     rects.forEach((r) => {
       const comment = comments.find((c) => String(c.rectId) === String(r.id));
       if (!comment) return;
-      const acMatch = comment.text.match(/^ac-(\d+(?:\.\d+)?)/i);
+      const acMatch = comment.text.match(/^ac-(\d+)(?:\.(\d+))?/i);
       if (!acMatch) return;
+      if (acMatch[2] !== undefined) isMultiFlat = true;
+      const flatNum = acMatch[1];
       const rx = (r.xPercent || 0) + (r.widthPercent || 0) / 2;
       const ry = (r.yPercent || 0) + (r.heightPercent || 0) / 2;
+      const inside =
+        rx >= zoneX1 && rx <= zoneX2 && ry >= zoneY1 && ry <= zoneY2;
+      if (inside) insideFlats.push(flatNum);
       const dist = Math.hypot(rx - zoneCenterX, ry - zoneCenterY);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestLabel = acMatch[1]; // e.g. '1.1' or '1'
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestFlat = flatNum;
       }
     });
+
+    // Pick the flat number: most common flat among inside ACs, else nearest, else zone counter.
+    let flatNumber = null;
+    if (insideFlats.length > 0) {
+      const counts = insideFlats.reduce((acc, f) => {
+        acc[f] = (acc[f] || 0) + 1;
+        return acc;
+      }, {});
+      flatNumber = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+    } else if (nearestFlat) {
+      flatNumber = nearestFlat;
+    } else {
+      flatNumber = String(zoneNumber);
+    }
+
+    let bestLabel;
+    if (isMultiFlat) {
+      // M = next zone index within this flat
+      const sameFlatCount = existingZones.filter((z) => {
+        const lbl = String(z.zoneLabel || '');
+        return lbl.startsWith(`${flatNumber}.`);
+      }).length;
+      bestLabel = `${flatNumber}.${sameFlatCount + 1}`;
+    } else {
+      bestLabel = String(flatNumber);
+    }
 
     const newZone = {
       id: `zone-manual-${Date.now()}`,
@@ -363,7 +407,7 @@ const EngineerViewPage = () => {
       fill: colors.fill,
       stroke: colors.stroke,
       zoneNumber: zoneNumber,
-      zoneLabel: bestLabel || String(zoneNumber),
+      zoneLabel: bestLabel,
     };
 
     setAnnotation((prev) => ({
@@ -1008,20 +1052,25 @@ const EngineerViewPage = () => {
     const avgRectDim = allRectVisuals.length
       ? allRectVisuals.reduce((s, v) => s + Math.min(v.vw, v.vh), 0) / allRectVisuals.length
       : 0.05;
-    const sizeScale = Math.max(0.4, Math.min(1.2, avgRectDim / 0.05));
+    // Multi-flat drawings shrink further so HVAC items don't merge with
+    // those of neighbouring flats. Single-flat drawings keep a moderate scale.
+    const isMultiFlat = flatGroups.size > 1;
+    const multiFlatShrink = isMultiFlat ? 0.55 : 1;
+    const sizeScale =
+      Math.max(0.35, Math.min(1.0, avgRectDim / 0.05)) * multiFlatShrink;
 
     // Process each flat group separately (each flat has its own center)
     const processRectGroup = (rectGroup, groupAvgX, groupAvgY) => {
       // Duct sizing constants (normalised 0-1), scaled to rect size
-      const baseLen = (rectGroup.length > 2 ? 0.055 : 0.08) * sizeScale;
+      const baseLen = (rectGroup.length > 2 ? 0.045 : 0.065) * sizeScale;
       const DUCT_LEN   = baseLen;
-      const DUCT_H     = (rectGroup.length > 2 ? 0.016 : 0.02) * sizeScale;
-      const GAP        = 0.005 * sizeScale;
-      const FLEX_LEN   = (rectGroup.length > 2 ? 0.018 : 0.025) * sizeScale;
-      const FLEX_H     = 0.015 * sizeScale;
-      const DIFF_SIZE  = (rectGroup.length > 2 ? 0.025 : 0.03) * sizeScale;
-      const DAMP_SIZE  = 0.018 * sizeScale;
-      const THERM_SIZE = 0.02 * sizeScale;
+      const DUCT_H     = (rectGroup.length > 2 ? 0.013 : 0.016) * sizeScale;
+      const GAP        = 0.004 * sizeScale;
+      const FLEX_LEN   = (rectGroup.length > 2 ? 0.015 : 0.02) * sizeScale;
+      const FLEX_H     = 0.012 * sizeScale;
+      const DIFF_SIZE  = (rectGroup.length > 2 ? 0.02 : 0.025) * sizeScale;
+      const DAMP_SIZE  = 0.014 * sizeScale;
+      const THERM_SIZE = 0.016 * sizeScale;
 
       // Detect wet rooms from comments for exhaust grille placement
       const WET_ROOM_RE = /\b(bath|wc|toilet|shower|laundry|kitchen|kitc?hen|ktcn|restroom|powder)\b/i;

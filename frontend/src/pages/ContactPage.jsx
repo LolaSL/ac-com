@@ -7,6 +7,7 @@ import {
   FaClock, FaMapMarkerAlt, FaHeadset, FaComment, FaPaperPlane,
 } from "react-icons/fa";
 import "./ContactPage.css";
+import { COUNTRIES } from "../utils/countries";
 
 const SERVICE_TYPES = [
   "Product Inquiry", "Order Support", "AC Installation", "AC Repair",
@@ -103,7 +104,21 @@ const ContactPage = () => {
               </div>
               <div className="ct-field">
                 <label className="ct-label"><FaGlobe className="ct-label__icon" />Country</label>
-                <input className="ct-input" type="text" placeholder="Your country" value={country} onChange={e => setCountry(e.target.value)} required />
+                <input
+                  className="ct-input"
+                  type="text"
+                  list="ct-country-list"
+                  placeholder="Select or type your country"
+                  value={country}
+                  onChange={e => setCountry(e.target.value)}
+                  autoComplete="country-name"
+                  required
+                />
+                <datalist id="ct-country-list">
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
               </div>
               <div className="ct-field">
                 <label className="ct-label"><FaWrench className="ct-label__icon" />Service Type</label>

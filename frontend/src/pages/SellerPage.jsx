@@ -100,6 +100,7 @@ export default function SellerPage() {
   const { userInfo } = state;
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [editingReviewId, setEditingReviewId] = useState(null);
 
   const [{ loading, error, seller, loadingCreateReview }, dispatch] =
     useReducer(reducer, {
@@ -138,22 +139,34 @@ export default function SellerPage() {
       return;
     }
     try {
-      const { data } = await axios.post(
-        `/api/sellers/${id}/reviews`,
-        { rating, comment, name: userInfo.name },
-        {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        }
-      );
+      let data;
+      if (editingReviewId) {
+        ({ data } = await axios.put(
+          `/api/sellers/${id}/reviews/${editingReviewId}`,
+          { rating, comment },
+          { headers: { Authorization: `Bearer ${userInfo.token}` } }
+        ));
+        const idx = seller.reviews.findIndex((r) => r._id === editingReviewId);
+        if (idx !== -1) seller.reviews[idx] = data.review;
+      } else {
+        ({ data } = await axios.post(
+          `/api/sellers/${id}/reviews`,
+          { rating, comment, name: userInfo.name },
+          { headers: { Authorization: `Bearer ${userInfo.token}` } }
+        ));
+        seller.reviews.unshift(data.review);
+      }
 
-      dispatch({
-        type: "CREATE_SUCCESS",
-      });
-      toast.success("Review submitted successfully");
-      seller.reviews.unshift(data.review);
+      dispatch({ type: "CREATE_SUCCESS" });
+      toast.success(
+        editingReviewId ? "Review updated successfully" : "Review submitted successfully"
+      );
       seller.numReviews = data.numReviews;
       seller.rating = data.rating;
       dispatch({ type: "FETCH_SUCCESS", payload: seller });
+      setRating(0);
+      setComment("");
+      setEditingReviewId(null);
       window.scrollTo({
         behavior: "smooth",
         top: reviewsRef.current.offsetTop,
@@ -162,6 +175,19 @@ export default function SellerPage() {
       toast.error(getError(error));
       dispatch({ type: "CREATE_FAIL" });
     }
+  };
+
+  const handleEditReview = (review) => {
+    setEditingReviewId(review._id);
+    setRating(review.rating);
+    setComment(review.comment);
+    window.scrollTo({ behavior: "smooth", top: reviewsRef.current.offsetTop });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReviewId(null);
+    setRating(0);
+    setComment("");
   };
 
   return (
@@ -276,6 +302,17 @@ export default function SellerPage() {
                     </div>
                     <Rating rating={review.rating} caption=" " />
                     <p className="sp-review-card__comment">{review.comment}</p>
+                    {userInfo &&
+                      review.user &&
+                      review.user.toString() === userInfo._id.toString() && (
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          onClick={() => handleEditReview(review)}
+                        >
+                          Edit your review
+                        </Button>
+                      )}
                   </div>
                 ))}
               </div>
@@ -297,7 +334,9 @@ export default function SellerPage() {
           {/* ── Write Review ── */}
           {userInfo ? (
             <div className="sp-section sp-review-form-section">
-              <h2 className="sp-section__title">✍️ Write a Review</h2>
+              <h2 className="sp-section__title">
+                {editingReviewId ? "✍️ Edit your review" : "✍️ Write a Review"}
+              </h2>
               <form onSubmit={submitHandler} className="sp-review-form">
                 <Form.Group className="mb-3" controlId="rating">
                   <Form.Label className="sp-form-label">Your Rating</Form.Label>
@@ -331,8 +370,23 @@ export default function SellerPage() {
                   className="sp-submit-btn"
                   type="submit"
                 >
-                  {loadingCreateReview ? "Submitting…" : "Submit Review"}
+                  {loadingCreateReview
+                    ? "Submitting…"
+                    : editingReviewId
+                    ? "Update Review"
+                    : "Submit Review"}
                 </Button>
+                {editingReviewId && (
+                  <Button
+                    variant="outline-secondary"
+                    className="ms-2"
+                    type="button"
+                    onClick={handleCancelEdit}
+                    disabled={loadingCreateReview}
+                  >
+                    Cancel
+                  </Button>
+                )}
                 {loadingCreateReview && <LoadingBox />}
               </form>
             </div>

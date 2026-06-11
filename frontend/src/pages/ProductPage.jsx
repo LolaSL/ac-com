@@ -84,6 +84,7 @@ function ProductPage() {
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [editingReviewId, setEditingReviewId] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
@@ -294,21 +295,30 @@ function ProductPage() {
     try {
       dispatch({ type: "CREATE_REQUEST" });
 
-      const { data } = await axios.post(
-        `/api/products/${product._id}/reviews`,
-        { rating, comment: comment.trim(), name: userInfo.name },
-        {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        }
+      let data;
+      if (editingReviewId) {
+        ({ data } = await axios.put(
+          `/api/products/${product._id}/reviews/${editingReviewId}`,
+          { rating, comment: comment.trim() },
+          { headers: { Authorization: `Bearer ${userInfo.token}` } }
+        ));
+        const idx = product.reviews.findIndex((r) => r._id === editingReviewId);
+        if (idx !== -1) product.reviews[idx] = data.review;
+      } else {
+        ({ data } = await axios.post(
+          `/api/products/${product._id}/reviews`,
+          { rating, comment: comment.trim(), name: userInfo.name },
+          { headers: { Authorization: `Bearer ${userInfo.token}` } }
+        ));
+        product.reviews.unshift(data.review);
+      }
+
+      dispatch({ type: "CREATE_SUCCESS" });
+
+      toast.success(
+        editingReviewId ? "Review updated successfully" : "Review submitted successfully"
       );
 
-      dispatch({
-        type: "CREATE_SUCCESS",
-      });
-
-      toast.success("Review submitted successfully");
-
-      product.reviews.unshift(data.review);
       product.numReviews = data.numReviews;
       product.rating = data.rating;
       dispatch({ type: "REFRESH_PRODUCT", payload: product });
@@ -316,6 +326,7 @@ function ProductPage() {
       // Reset form
       setRating(0);
       setComment("");
+      setEditingReviewId(null);
 
       window.scrollTo({
         behavior: "smooth",
@@ -325,6 +336,19 @@ function ProductPage() {
       toast.error(getError(error));
       dispatch({ type: "CREATE_FAIL" });
     }
+  };
+
+  const handleEditReview = (review) => {
+    setEditingReviewId(review._id);
+    setRating(review.rating);
+    setComment(review.comment);
+    window.scrollTo({ behavior: "smooth", top: reviewsRef.current.offsetTop });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReviewId(null);
+    setRating(0);
+    setComment("");
   };
 
   const discountedPrice = useMemo(() => {
@@ -783,13 +807,26 @@ function ProductPage() {
               <Rating rating={review.rating} caption=" "></Rating>
               <p>{review.createdAt.substring(0, 10)}</p>
               <p>{review.comment}</p>
+              {userInfo &&
+                review.user &&
+                review.user.toString() === userInfo._id.toString() && (
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => handleEditReview(review)}
+                  >
+                    Edit your review
+                  </Button>
+                )}
             </ListGroup.Item>
           ))}
         </ListGroup>
         <div className="my-3">
           {userInfo ? (
             <form onSubmit={submitHandler}>
-              <h3 className="product-title">Write a customer review</h3>
+              <h3 className="product-title">
+                {editingReviewId ? "Edit your review" : "Write a customer review"}
+              </h3>
               <Form.Group className="mb-3" controlId="rating">
                 <Form.Label className="sp-form-label">Your Rating</Form.Label>
                 <Form.Control
@@ -841,10 +878,23 @@ function ProductPage() {
                       />
                       Submitting...
                     </>
+                  ) : editingReviewId ? (
+                    "Update Review"
                   ) : (
                     "Submit Review"
                   )}
                 </Button>
+                {editingReviewId && (
+                  <Button
+                    variant="outline-secondary"
+                    className="ms-2"
+                    type="button"
+                    onClick={handleCancelEdit}
+                    disabled={loadingCreateReview}
+                  >
+                    Cancel
+                  </Button>
+                )}
               </div>
             </form>
           ) : (

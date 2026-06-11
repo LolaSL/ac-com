@@ -119,26 +119,28 @@ export default function ServiceProviderDashboard() {
                   <FaExternalLinkAlt /> Portfolio
                 </a>
               )}
-              {sp?.socialLinks?.linkedin?.startsWith('http') && (
-                <a href={sp.socialLinks.linkedin} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--linkedin" title="LinkedIn">
-                  <FaLinkedin />
-                </a>
-              )}
-              {sp?.socialLinks?.instagram?.startsWith('http') && (
-                <a href={sp.socialLinks.instagram} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--instagram" title="Instagram">
-                  <FaInstagram />
-                </a>
-              )}
-              {sp?.socialLinks?.twitter?.startsWith('http') && (
-                <a href={sp.socialLinks.twitter} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--twitter" title="Twitter / X">
-                  <FaTwitter />
-                </a>
-              )}
-              {sp?.socialLinks?.facebook?.startsWith('http') && (
-                <a href={sp.socialLinks.facebook} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--facebook" title="Facebook">
-                  <FaFacebook />
-                </a>
-              )}
+              <div className="spd-social-row">
+                {sp?.socialLinks?.linkedin?.startsWith('http') && (
+                  <a href={sp.socialLinks.linkedin} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--linkedin" title="LinkedIn">
+                    <FaLinkedin />
+                  </a>
+                )}
+                {sp?.socialLinks?.instagram?.startsWith('http') && (
+                  <a href={sp.socialLinks.instagram} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--instagram" title="Instagram">
+                    <FaInstagram />
+                  </a>
+                )}
+                {sp?.socialLinks?.twitter?.startsWith('http') && (
+                  <a href={sp.socialLinks.twitter} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--twitter" title="Twitter / X">
+                    <FaTwitter />
+                  </a>
+                )}
+                {sp?.socialLinks?.facebook?.startsWith('http') && (
+                  <a href={sp.socialLinks.facebook} target="_blank" rel="noreferrer" className="spd-social-btn spd-social-btn--facebook" title="Facebook">
+                    <FaFacebook />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
