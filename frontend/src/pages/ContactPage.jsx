@@ -104,21 +104,18 @@ const ContactPage = () => {
               </div>
               <div className="ct-field">
                 <label className="ct-label"><FaGlobe className="ct-label__icon" />Country</label>
-                <input
+                <select
                   className="ct-input"
-                  type="text"
-                  list="ct-country-list"
-                  placeholder="Select or type your country"
                   value={country}
                   onChange={e => setCountry(e.target.value)}
                   autoComplete="country-name"
                   required
-                />
-                <datalist id="ct-country-list">
+                >
+                  <option value="">Select a country…</option>
                   {COUNTRIES.map((c) => (
-                    <option key={c} value={c} />
+                    <option key={c} value={c}>{c}</option>
                   ))}
-                </datalist>
+                </select>
               </div>
               <div className="ct-field">
                 <label className="ct-label"><FaWrench className="ct-label__icon" />Service Type</label>
