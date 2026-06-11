@@ -2366,13 +2366,20 @@ const Annotator = ({
 
   useEffect(() => {
     if (setRoomData && allRooms.length > 0) {
-      const flattenedRooms = allRooms.flat().filter(Boolean);
-      setRoomData(flattenedRooms);
+        const validRooms = allRooms
+          .flat()
+          .filter((room) => room && room.roomType && room.areaSqM);
+
+        if (validRooms.length > 0) {
+          const { formattedRooms, isMultiFlat, annotations } =
+            formatRoomsWithFlatPrefixes(validRooms);
+          setRoomData(formattedRooms, isMultiFlat ? annotations : []);
+        }
     }
     // Avoid including `setRoomData` in deps to prevent update loops when parent
     // passes a non-memoized function. We still call it conditionally inside.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRooms]);
+    }, [allRooms, comments, formatRoomsWithFlatPrefixes]);
 
   const handleExportToBtuCalculator = (roomsToExport) => {
     // Source of rooms: filtered per-file table, falling back to the explicit
