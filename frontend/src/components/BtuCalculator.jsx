@@ -885,22 +885,21 @@ useEffect(() => {
 
       // Helper function to find suitable condenser for a given BTU
       const findSuitableCondenser = async (requiredBTU, label = "") => {
-        let availableCondensers =
-          condenserCandidates.length > 0 ? condenserCandidates : [];
-
-        if (availableCondensers.length === 0) {
-          try {
-            const { data: condenserList } = await axios.get(
-              `/api/products/condensers/${Math.round(requiredBTU)}`
-            );
-            if (Array.isArray(condenserList)) {
-              availableCondensers = condenserList;
-            }
-          } catch (err) {
-            console.log(
-              `Could not fetch condensers for ${label}, will use estimate`
-            );
+        // Always fetch the full condenser catalog — do NOT use condenserCandidates,
+        // which are per-room indoor-unit lookups that may accidentally match "condenser"
+        // and would prevent fetching the real catalog.
+        let availableCondensers = [];
+        try {
+          const { data: condenserList } = await axios.get(
+            `/api/products/condensers/${Math.round(requiredBTU)}`
+          );
+          if (Array.isArray(condenserList)) {
+            availableCondensers = condenserList;
           }
+        } catch (err) {
+          console.log(
+            `Could not fetch condensers for ${label}, will use estimate`
+          );
         }
 
         // Outdoor unit selection: prefer smallest unit that covers the load.
