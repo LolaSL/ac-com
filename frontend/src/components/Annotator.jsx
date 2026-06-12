@@ -763,6 +763,76 @@ const parseRoomDataFromText = (rawText, fileName) => {
     });
   }
 
+  // Detect multi-flat structure from OCR text
+  const detectAndGroupByFlats = (rooms, textContent) => {
+    // Look for flat/unit section headers like "Flat 1:", "Flat 2:", "Unit 1:", etc.
+    // Must use rawText (before normalisation) because the normalised `text` variable
+    // collapses all whitespace incl. newlines into spaces, making split('\n') useless.
+    // Regex avoids single-letter abbreviations to prevent false positives.
+    const flatSectionPattern = /^(?:flat|unit|apartment|apt)\s*[#:]?\s*(\d+)\s*[:\-]?/im;
+    const lines = textContent.split(/\r?\n/).filter(l => l.trim());
+    
+    const flatSections = [];
+    let currentFlatNum = null;
+    let currentFlatStartLine = 0;
+
+    // Map lines to flat sections
+    lines.forEach((line, idx) => {
+      const flatMatch = line.match(flatSectionPattern);
+      if (flatMatch) {
+        if (currentFlatNum !== null) {
+          flatSections.push({ flatNum: currentFlatNum, startLine: currentFlatStartLine, endLine: idx - 1 });
+        }
+        currentFlatNum = flatMatch[1];
+        currentFlatStartLine = idx;
+      }
+    });
+    
+    // Add final section
+    if (currentFlatNum !== null) {
+      flatSections.push({ flatNum: currentFlatNum, startLine: currentFlatStartLine, endLine: lines.length - 1 });
+    }
+
+    // If no flat sections found, return rooms as-is
+    if (flatSections.length < 2) {
+      return rooms;
+    }
+
+    // Distribute rooms to flats based on position
+    const totalRooms = rooms.length;
+    const totalFlatSections = flatSections.length;
+    const roomsPerFlat = Math.ceil(totalRooms / totalFlatSections);
+
+    const groupedRooms = rooms.map((room, idx) => {
+      const flatIndex = Math.min(Math.floor(idx / roomsPerFlat), totalFlatSections - 1);
+      const flatSection = flatSections[flatIndex];
+      return {
+        ...room,
+        flatNum: flatSection.flatNum,
+        alreadyGrouped: true,
+      };
+    });
+
+    return groupedRooms;
+  };
+
+  // Apply flat detection — pass rawText so newlines are intact for section header scanning
+  const roomsWithFlats = detectAndGroupByFlats(table, rawText);
+  
+  // Add flat prefixes to room types if we detected multiple flats
+  const flatNums = new Set(roomsWithFlats.map(r => r.flatNum).filter(Boolean));
+  if (flatNums.size > 1) {
+    roomsWithFlats.forEach(room => {
+      if (room.flatNum && !room.roomType.toLowerCase().startsWith(`flat ${room.flatNum}`)) {
+        room.roomType = `Flat ${room.flatNum}: ${room.roomType}`;
+      }
+    });
+    // Clean up temp field
+    roomsWithFlats.forEach(r => delete r.alreadyGrouped);
+    table.length = 0;
+    table.push(...roomsWithFlats);
+  }
+
   return { apartmentType, rooms: table, totalSf, fileName };
 };
 
@@ -1309,6 +1379,23 @@ const Annotator = ({
     }
   }, [results]);
 
+  // Maps any room type name to a broad category used ONLY for occurrence-based
+  // flat assignment. This ensures OCR variants of the same room (e.g.
+  // "LivingDiningRoom" vs "LivingRoom") are counted together so the first
+  // occurrence goes to Flat 1 and the second to Flat 2, etc.
+  const normalizeForGrouping = (roomType) => {
+    const t = (roomType || '').toLowerCase();
+    if (/living|lounge|dining|sitting/.test(t)) return 'living';
+    if (/bed|bedroom|bdrm|borm/.test(t)) return 'bedroom';
+    if (/kitchen|kitchn/.test(t)) return 'kitchen';
+    if (/bath|bathroom|shower/.test(t)) return 'bathroom';
+    if (/office|study|den/.test(t)) return 'office';
+    if (/garage/.test(t)) return 'garage';
+    if (/laundry/.test(t)) return 'laundry';
+    if (/foyer|entry|hall/.test(t)) return 'entry';
+    return t; // unknown types fall back to exact name
+  };
+
   // Helper function to format rooms with flat prefixes
   const formatRoomsWithFlatPrefixes = useCallback((validRooms, acAnnotations) => {
     // Build AC annotations from current canvas comments if not provided
@@ -1320,35 +1407,42 @@ const Annotator = ({
       }));
 
     // ── Preferred multi-flat source: one uploaded drawing per flat ──
-    // filteredRoomsRef.current is shaped as [fileIdx => roomsForThatFile[]].
-    // When the user uploads >1 drawing, treat each non-empty file slot as a
-    // distinct flat and prefix its rooms with "Flat N: ...". This guarantees
-    // rooms stay grouped per flat in BTU Calculator + Recommendations,
-    // instead of being interleaved by duplicate-name occurrence.
+    // When the user uploads >1 PDF, each file is a distinct flat.
     const perFileGroups = (filteredRoomsRef.current || [])
       .map((rooms) => (rooms || []).filter((r) => r && r.roomType && r.areaSqM))
       .filter((rooms) => rooms.length > 0);
 
     if (perFileGroups.length > 1) {
+      const seenPerFlat = {};
       const formattedRooms = perFileGroups.flatMap((rooms, flatIdx) =>
-        rooms.map((room) => {
-          const base = room.roomType || "Room";
-          const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
-          return {
-            name: alreadyPrefixed ? base : `Flat ${flatIdx + 1}: ${base}`,
-            size:
-              parseFloat(
-                (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-              ) || 0,
-            btu: 0,
-            unit: "meters",
-          };
-        })
+        rooms
+          .map((room) => {
+            const base = room.roomType || "Room";
+            const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
+            const unprefixedBase = alreadyPrefixed
+              ? base.replace(/^flat\s*\d+\s*[:\s-]+/i, '').trim()
+              : base;
+            return {
+              flatIdx,
+              base: unprefixedBase,
+              name: alreadyPrefixed ? base : `Flat ${flatIdx + 1}: ${unprefixedBase}`,
+              size: parseFloat((room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")) || 0,
+              btu: 0,
+              unit: "meters",
+            };
+          })
+          .filter((room) => {
+            const key = `${room.flatIdx}-${String(room.base).toLowerCase().trim()}-${Number(room.size || 0).toFixed(2)}`;
+            if (seenPerFlat[key]) return false;
+            seenPerFlat[key] = true;
+            return true;
+          })
+          .map(({ base, flatIdx, ...rest }) => ({ ...rest }))
       );
       return { formattedRooms, isMultiFlat: true, annotations };
     }
 
-    // ── Fallback: single uploaded drawing — detect multi-flat via labels ──
+    // ── Single uploaded drawing — detect multi-flat via AC annotations ──
     const detectedFlatNums = new Set();
     annotations.forEach(({ label }) => {
       const t = label.toLowerCase();
@@ -1365,33 +1459,42 @@ const Annotator = ({
 
     let formattedRooms = [];
     if (isMultiFlat) {
-      // Single PDF that contains N flats: split the room list into N
-      // contiguous chunks. OCR tables typically list rooms flat-by-flat, so
-      // a contiguous split preserves grouping better than round-robin.
       const numFlats = flatNumsArray.length;
-      const chunkSize = Math.ceil(validRooms.length / numFlats);
-      formattedRooms = validRooms.map((room, idx) => {
+      // Occurrence-based assignment: the Nth occurrence of a room type goes to flat N.
+      // e.g. Kitchen#1 → Flat 1, Kitchen#2 → Flat 2, PrimaryBedroom#1 → Flat 1 …
+      // This correctly handles side-by-side floor plans where OCR interleaves rooms.
+      const typeOccurrence = {};
+      formattedRooms = validRooms.map((room) => {
         const base = room.roomType || "Room";
         const alreadyPrefixed = /^flat\s*\d+\s*[: ]/i.test(base);
-        const flatIndex = Math.min(Math.floor(idx / chunkSize), numFlats - 1);
-        const flatNum = flatNumsArray[flatIndex];
+        let name = base;
+        if (!alreadyPrefixed) {
+          // Use a broad category key for grouping so that OCR name variants of
+          // the same room type (e.g. "LivingDiningRoom" vs "LivingRoom") are
+          // treated as the same category and distributed one-per-flat.
+          const groupKey = normalizeForGrouping(base);
+          const occurrence = typeOccurrence[groupKey] || 0;
+          typeOccurrence[groupKey] = occurrence + 1;
+          const flatIndex = Math.min(occurrence, numFlats - 1);
+          const flatNum = flatNumsArray[flatIndex];
+          name = `Flat ${flatNum}: ${base}`;
+        }
         return {
-          name: alreadyPrefixed ? base : `Flat ${flatNum}: ${base}`,
-          size:
-            parseFloat(
-              (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-            ) || 0,
+          name,
+          size: parseFloat((room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")) || 0,
           btu: 0,
           unit: "meters",
         };
       });
+      // Sort by flat number so flats are grouped together
+      formattedRooms = formattedRooms
+        .map((r) => ({ ...r, _flatNum: parseInt(r.name.match(/^flat\s*(\d+)/i)?.[1] || "1", 10) }))
+        .sort((a, b) => a._flatNum - b._flatNum)
+        .map(({ _flatNum, ...r }) => r);
     } else {
       formattedRooms = validRooms.map((room) => ({
         name: room.roomType || "Room",
-        size:
-          parseFloat(
-            (room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")
-          ) || 0,
+        size: parseFloat((room.areaSqM || "0").toString().replace(/[^\d.-]/g, "")) || 0,
         btu: 0,
         unit: "meters",
       }));
@@ -2124,10 +2227,10 @@ const Annotator = ({
     // Format rooms with flat prefixes using the same logic as BTU Calculator export
     const { formattedRooms } = formatRoomsWithFlatPrefixes(validRooms);
     
-    // Deduplicate rooms by name (keep first occurrence)
+    // Deduplicate only exact duplicates (same name + same size)
     const seenRoomNames = new Set();
     const roomsToSave = formattedRooms.filter((room) => {
-      const key = room.name;
+      const key = `${room.name}-${Number(room.size || 0).toFixed(2)}`;
         if (seenRoomNames.has(key)) return false;
         seenRoomNames.add(key);
         return true;
