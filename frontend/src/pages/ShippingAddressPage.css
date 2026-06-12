@@ -121,6 +121,16 @@
   color: rgba(255,255,255,0.35) !important;
 }
 
+/* ---- Select option text — large screens only ---- */
+/* On large screens the dark background makes white option text invisible.
+   Force a dark background + light text on the native OS dropdown list.    */
+@media (min-width: 992px) {
+  .sa-input option {
+    background-color: #1a1a2e !important;
+    color: #fff !important;
+  }
+}
+
 /* ---- Location box ---- */
 .sa-location {
   display: flex;
