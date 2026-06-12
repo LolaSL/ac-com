@@ -1023,7 +1023,10 @@ useEffect(() => {
 
 
         for (const [flatName, flatBTU] of Object.entries(flatBTUs)) {
-          const flatRequiredBTU = flatBTU * multiplier;
+          // Each flat needs its own condenser sized to cover 100% of that flat's
+          // load — do NOT apply the diversity multiplier here. The multiplier is
+          // only relevant when a single shared condenser serves the whole building.
+          const flatRequiredBTU = flatBTU;
           const condResult = await findSuitableCondenser(
             flatRequiredBTU,
             flatName
