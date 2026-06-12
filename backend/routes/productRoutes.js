@@ -604,7 +604,9 @@ productRouter.get('/condensers/:btu', async (req, res) => {
       $or: [
         { category: "Outdoor Condenser" },
         { category: "VRF Heat Recovery" },
-        { category: { $regex: /VRF/i } }
+        { category: { $regex: /VRF/i } },
+        { category: { $regex: /outdoor/i } },
+        { name: { $regex: /outdoor/i } },
       ]
     }).sort({ btu: 1 });
 

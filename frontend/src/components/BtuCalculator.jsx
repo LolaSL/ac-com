@@ -903,19 +903,15 @@ useEffect(() => {
           }
         }
 
-        // Outdoor unit selection: small loads (< 30k BTU) prefer single/multi-zone
-        // heat-pump outdoors over VRF (which starts at 40k and would be 2x+ oversized).
-        // Larger loads stay on the VRF ladder.
-        const SMALL_LOAD_THRESHOLD = 30000;
-        const isSmallLoad = requiredBTU < SMALL_LOAD_THRESHOLD;
+        // Outdoor unit selection: prefer smallest unit that covers the load.
+        // Include both VRF and non-VRF outdoor condensers at all load sizes.
         availableCondensers = availableCondensers.filter(cond => {
           const isVRF = /vrf/i.test(cond.name) || /vrf/i.test(cond.category || '');
-          const isNonVrfOutdoor =
-            /outdoor condenser/i.test(cond.category || '') ||
-            /single-zone|multi-zone/i.test(cond.name);
-          return isSmallLoad
-            ? (isVRF || isNonVrfOutdoor)   // small loads: VRF + non-VRF outdoor heat-pumps
-            : isVRF;                       // large loads: VRF only (original behaviour)
+          const isOutdoor =
+            /outdoor/i.test(cond.category || '') ||
+            /single-zone|multi-zone/i.test(cond.name) ||
+            /condenser/i.test(cond.category || '');
+          return isVRF || isOutdoor;
         });
 
         availableCondensers.sort((a, b) => a.btu - b.btu);
@@ -928,8 +924,12 @@ useEffect(() => {
           availableCondensers[availableCondensers.length - 1] ||
           null;
 
+        // Resolve effective BTU from product name (DB btu field can be a string or stale)
+        const resolvedBtu = suitableCondenser
+          ? (parseInt(suitableCondenser.name?.match(/(\d+)\s*BTU/i)?.[1]) || Number(suitableCondenser.btu) || 0)
+          : 0;
 
-        if (suitableCondenser && suitableCondenser.btu < requiredBTU * 0.9) {
+        if (suitableCondenser && resolvedBtu < requiredBTU * 0.9) {
           const estimatedPrice = Math.round(requiredBTU * 0.065 * 100) / 100;
           return {
             _id: `condenser-${Math.round(requiredBTU)}`, // Consistent _id for custom condensers of same BTU
@@ -947,8 +947,7 @@ useEffect(() => {
           };
         } else if (suitableCondenser) {
           // Extract BTU from name since btu field may be corrupted
-          const btuFromName = suitableCondenser.name.match(/(\d+)\s*BTU/)?.[1];
-          const btuValue = btuFromName ? parseInt(btuFromName) : suitableCondenser.btu;
+          const btuValue = resolvedBtu || Math.round(requiredBTU);
           const result = {
             ...suitableCondenser,
             _id: `condenser-${btuValue}`,
