@@ -920,15 +920,13 @@ useEffect(() => {
 
         availableCondensers.sort((a, b) => a.btu - b.btu);
 
-        let suitableCondenser = null;
-        let minDiff = Infinity;
-        for (const cond of availableCondensers) {
-          const diff = Math.abs(cond.btu - requiredBTU);
-          if (diff < minDiff) {
-            minDiff = diff;
-            suitableCondenser = cond;
-          }
-        }
+        // Always pick the smallest condenser that meets or exceeds the required BTU.
+        // Only fall back to the largest available if nothing is big enough (triggers
+        // the custom-condenser path below).
+        let suitableCondenser =
+          availableCondensers.find((c) => c.btu >= requiredBTU) ||
+          availableCondensers[availableCondensers.length - 1] ||
+          null;
 
 
         if (suitableCondenser && suitableCondenser.btu < requiredBTU * 0.9) {
