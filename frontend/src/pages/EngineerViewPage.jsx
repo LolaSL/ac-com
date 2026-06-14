@@ -1045,22 +1045,65 @@ const EngineerViewPage = () => {
       return rectGroup.reduce((s, r) => s + getVisuals(r).vcy, 0) / rectGroup.length;
     };
 
-    // Scale HVAC item sizes proportionally to the average rectangle size,
-    // so multi-flat drawings with many small rects don't get overlapping items.
+    // Scale HVAC item sizes proportionally to the average rectangle size.
+    // Keep multi-flat items readable while still avoiding excessive overlap.
     // Baseline (scale = 1) is tuned for indoor-unit rects ~0.05 of canvas.
     const allRectVisuals = rects.map((r) => getVisuals(r));
     const avgRectDim = allRectVisuals.length
       ? allRectVisuals.reduce((s, v) => s + Math.min(v.vw, v.vh), 0) / allRectVisuals.length
       : 0.05;
-    // Multi-flat drawings shrink further so HVAC items don't merge with
-    // those of neighbouring flats. Single-flat drawings keep a moderate scale.
+    // Multi-flat drawings use a lighter shrink than before so symbols stay readable.
     const isMultiFlat = flatGroups.size > 1;
-    const multiFlatShrink = isMultiFlat ? 0.55 : 1;
+    const multiFlatShrink = isMultiFlat ? 0.72 : 1;
     const sizeScale =
-      Math.max(0.35, Math.min(1.0, avgRectDim / 0.05)) * multiFlatShrink;
+      Math.max(0.45, Math.min(1.15, avgRectDim / 0.05)) * multiFlatShrink;
+
+    // Build deterministic lane offsets so nearby indoor units don't stack HVAC
+    // symbols on top of each other.
+    const buildLaneOffsets = (rectGroup) => {
+      const LANE_THRESHOLD_X = 0.14;
+      const LANE_THRESHOLD_Y = 0.12;
+      const laneSpacing = Math.max(0.004, 0.009 * sizeScale);
+
+      const sorted = rectGroup
+        .map((r) => {
+          const v = getVisuals(r);
+          return { rect: r, ...v };
+        })
+        .sort((a, b) => a.vcy - b.vcy || a.vcx - b.vcx);
+
+      const assigned = [];
+      const offsets = new Map();
+
+      sorted.forEach((current) => {
+        const blockedLanes = new Set();
+
+        assigned.forEach((prev) => {
+          const closeX = Math.abs(prev.vcx - current.vcx) <= LANE_THRESHOLD_X;
+          const closeY = Math.abs(prev.vcy - current.vcy) <= LANE_THRESHOLD_Y;
+          if (closeX && closeY) {
+            blockedLanes.add(prev.lane);
+          }
+        });
+
+        let lane = 0;
+        while (blockedLanes.has(lane)) lane += 1;
+
+        const dir = lane % 2 === 1 ? 1 : -1;
+        const step = Math.ceil(lane / 2);
+        const offset = lane === 0 ? 0 : dir * step * laneSpacing;
+
+        assigned.push({ ...current, lane });
+        offsets.set(String(current.rect.id), offset);
+      });
+
+      return offsets;
+    };
 
     // Process each flat group separately (each flat has its own center)
     const processRectGroup = (rectGroup, groupAvgX, groupAvgY) => {
+      const laneOffsets = buildLaneOffsets(rectGroup);
+
       // Duct sizing constants (normalised 0-1), scaled to rect size
       const baseLen = (rectGroup.length > 2 ? 0.045 : 0.065) * sizeScale;
       const DUCT_LEN   = baseLen;
@@ -1077,9 +1120,12 @@ const EngineerViewPage = () => {
 
       rectGroup.forEach((rect, i) => {
         // Use the visual centre and visual dimensions (accounts for Konva rotation)
-        const { vcx: cx, vcy: cy, vw: rw, vh: rh } = getVisuals(rect);
+        const { vcx: rawCx, vcy: rawCy, vw: rw, vh: rh } = getVisuals(rect);
         // Portrait-oriented unit: use vertical HVAC layout
         const isVertical = rh > rw;
+        const laneShift = laneOffsets.get(String(rect.id)) || 0;
+        const cx = rawCx + (isVertical ? laneShift : 0);
+        const cy = rawCy + (!isVertical ? laneShift : 0);
 
         if (!isVertical) {
         // Pick horizontal direction: extend ducts toward the centre of THIS flat's layout
