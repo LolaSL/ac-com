@@ -1460,11 +1460,16 @@ const EngineerViewPage = () => {
             airflow: 400,
           });
 
-          // Return grille: at far end of return flex
+          // Return grille: keep a clear margin from SD so RG/SD never combine
+          // visually for rotated vertical units.
+          const rgGapX = DIFF_SIZE * 0.9 + GAP * 2;
+          const rgGapY = (toDown ? 1 : -1) * (DIFF_SIZE * 0.35 + GAP);
+          const rgXv = rDuctXv + rDuctWv / 2 + openSide * rgGapX;
+          const rgYv = sdYv + rgGapY;
           newDiffusers.push({
             id: `diffuser-auto-rg-${ts}-${rect.id}`,
-            xPercent: Math.max(0.02, Math.min(0.98, rDuctXv + rDuctWv / 2)),
-            yPercent: Math.max(0.02, Math.min(0.98, sdYv)),
+            xPercent: Math.max(0.02, Math.min(0.98, rgXv)),
+            yPercent: Math.max(0.02, Math.min(0.98, rgYv)),
             sizePercent: DIFF_SIZE,
             shape: 'square',
             diffuserType: 'return-grille',
