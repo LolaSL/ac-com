@@ -477,6 +477,30 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
   });
 
   // ─── RENDER DIFFUSERS ───
+  // Keep label anchors unique so nearby RG/SD tags don't combine visually.
+  const reservedTagAnchors = [];
+  const reservedAirflowAnchors = [];
+  const reserveLabelSlot = (baseX, baseY, reserved) => {
+    const X_GAP = 24 * scaleFactor;
+    const Y_GAP = 10 * scaleFactor;
+    const STEP = 8 * scaleFactor;
+    let y = baseY;
+    let tries = 0;
+
+    while (
+      tries < 8 &&
+      reserved.some((p) => Math.abs(p.x - baseX) < X_GAP && Math.abs(p.y - y) < Y_GAP)
+    ) {
+      const stepIndex = Math.floor(tries / 2) + 1;
+      const dir = tries % 2 === 0 ? 1 : -1;
+      y = baseY + dir * stepIndex * STEP;
+      tries += 1;
+    }
+
+    reserved.push({ x: baseX, y });
+    return { x: baseX, y };
+  };
+
   hvacAnnotations?.diffusers?.forEach((diffuser) => {
     const x = diffuser.xPercent * canvasWidth;
     const y = diffuser.yPercent * canvasHeight;
@@ -693,10 +717,15 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
 
     // CFM / airflow label
     if (diffuser.airflow) {
+      const airflowPos = reserveLabelSlot(
+        x,
+        y + size / 2 + 10 * scaleFactor,
+        reservedAirflowAnchors
+      );
       context.font = `bold ${8 * scaleFactor}px Arial`;
       context.fillStyle = style.stroke;
       context.textAlign = "center";
-      context.fillText(`${diffuser.airflow} CFM`, x, y + size / 2 + 10 * scaleFactor);
+      context.fillText(`${diffuser.airflow} CFM`, airflowPos.x, airflowPos.y);
     }
 
     // Diffuser type tag
@@ -706,10 +735,13 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     };
     const tag = tagMap[diffuserType];
     if (tag) {
+      const baseTagX = x;
+      const baseTagY = y - size / 2 - 3 * scaleFactor;
+      const tagPos = reserveLabelSlot(baseTagX, baseTagY, reservedTagAnchors);
       context.font = `bold ${8 * scaleFactor}px Arial`;
       context.fillStyle = style.stroke;
       context.textAlign = "center";
-      context.fillText(tag, x, y - size / 2 - 3 * scaleFactor);
+      context.fillText(tag, tagPos.x, tagPos.y);
     }
 
     context.restore();
