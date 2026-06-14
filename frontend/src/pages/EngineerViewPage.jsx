@@ -1374,18 +1374,22 @@ const EngineerViewPage = () => {
           const vDUCT_LEN = DUCT_LEN * 0.75;
           const vFLEX_LEN = FLEX_LEN * 0.75;
 
-          // Prefer the horizontal side with more space for secondary items
+          // Put the vertical duct chain on the side with more room, and keep
+          // labels/secondary accessories on the opposite side to reduce crowding.
           const spaceRight = 1 - (cx + rw / 2);
           const spaceLeft  = cx - rw / 2;
-          const openSide = spaceLeft >= spaceRight ? -1 : 1; // -1=left, +1=right
-
-          // Shift the whole vertical chain left so items clear the right wall
-          const vShiftX = -0.03;
+          const chainSide = spaceLeft >= spaceRight ? -1 : 1; // -1=left, +1=right
+          const openSide = -chainSide;
+          const columnGap = Math.max(DIFF_SIZE * 1.15, DUCT_H * 2 + GAP * 6);
+          const chainClearance = Math.max(rw / 2 + GAP * 6, columnGap * 0.7);
+          const chainCenterX = Math.max(0.08, Math.min(0.92, cx + chainSide * chainClearance));
+          const supplyColumnX = chainCenterX - columnGap / 2;
+          const returnColumnX = chainCenterX + columnGap / 2;
 
           // Supply duct: vertical, narrow, centered on unit
           const sDuctWv = DUCT_H;
           const sDuctHv = vDUCT_LEN;
-          const sDuctXv = cx + vShiftX - sDuctWv / 2;
+          const sDuctXv = supplyColumnX - sDuctWv / 2;
           const sDuctYv = toDown ? cy + rh / 2 + GAP : cy - rh / 2 - GAP - sDuctHv;
           newDucts.push({
             id: `duct-auto-s-${ts}-${rect.id}`,
@@ -1401,7 +1405,7 @@ const EngineerViewPage = () => {
           // Return duct: vertical, offset to the right of supply
           const rDuctWv = DUCT_H;
           const rDuctHv = vDUCT_LEN;
-          const rDuctXv = sDuctXv + sDuctWv + GAP;
+          const rDuctXv = returnColumnX - rDuctWv / 2;
           const rDuctYv = sDuctYv;
           newDucts.push({
             id: `duct-auto-r-${ts}-${rect.id}`,
@@ -1452,7 +1456,7 @@ const EngineerViewPage = () => {
             : sFlexYv - GAP - DIFF_SIZE / 2;
           newDiffusers.push({
             id: `diffuser-auto-sd-${ts}-${rect.id}`,
-            xPercent: Math.max(0.02, Math.min(0.98, cx + vShiftX)),
+            xPercent: Math.max(0.02, Math.min(0.98, supplyColumnX)),
             yPercent: Math.max(0.02, Math.min(0.98, sdYv)),
             sizePercent: DIFF_SIZE,
             shape: 'square',
@@ -1462,9 +1466,8 @@ const EngineerViewPage = () => {
 
           // Return grille: keep a clear margin from SD so RG/SD never combine
           // visually for rotated vertical units.
-          const rgGapX = DIFF_SIZE * 0.9 + GAP * 2;
           const rgGapY = (toDown ? 1 : -1) * (DIFF_SIZE * 0.35 + GAP);
-          const rgXv = rDuctXv + rDuctWv / 2 + openSide * rgGapX;
+          const rgXv = returnColumnX;
           const rgYv = sdYv + rgGapY;
           newDiffusers.push({
             id: `diffuser-auto-rg-${ts}-${rect.id}`,
@@ -1479,7 +1482,7 @@ const EngineerViewPage = () => {
           // Volume damper: on supply duct midway
           newDampers.push({
             id: `damper-auto-vd-${ts}-${rect.id}`,
-            xPercent: Math.max(0.02, Math.min(0.96, cx + vShiftX)),
+            xPercent: Math.max(0.02, Math.min(0.96, supplyColumnX)),
             yPercent: toDown ? sDuctYv + sDuctHv * 0.4 : sDuctYv + sDuctHv * 0.6,
             sizePercent: DAMP_SIZE,
             damperType: 'volume',
@@ -1488,7 +1491,7 @@ const EngineerViewPage = () => {
           // Fire damper: at duct origin closest to unit
           newDampers.push({
             id: `damper-auto-fd-${ts}-${rect.id}`,
-            xPercent: Math.max(0.02, Math.min(0.96, cx + vShiftX)),
+            xPercent: Math.max(0.02, Math.min(0.96, supplyColumnX)),
             yPercent: toDown ? sDuctYv + 0.002 : sDuctYv + sDuctHv - 0.002,
             sizePercent: DAMP_SIZE,
             damperType: 'fire',
@@ -1496,8 +1499,8 @@ const EngineerViewPage = () => {
 
           // Thermostat: place on the open side (reuses openSide computed above)
           const thermXv = openSide === 1
-            ? (cx + vShiftX) + rw / 2 + GAP + THERM_SIZE
-            : (cx + vShiftX) - rw / 2 - GAP - THERM_SIZE;
+            ? cx + rw / 2 + GAP + THERM_SIZE
+            : cx - rw / 2 - GAP - THERM_SIZE;
           const rectCommentV = comments.find((c) => String(c.rectId) === String(rect.id));
           let thermLabelV = 'T';
           if (rectCommentV) {
@@ -1515,7 +1518,7 @@ const EngineerViewPage = () => {
           // Drain: on the open horizontal side of the unit
           newDiffusers.push({
             id: `diffuser-auto-drain-${ts}-${rect.id}`,
-            xPercent: Math.max(0.03, Math.min(0.95, (cx + vShiftX) + openSide * (rw / 2 + GAP * 3))),
+            xPercent: Math.max(0.03, Math.min(0.95, cx + openSide * (rw / 2 + GAP * 3))),
             yPercent: Math.max(0.03, Math.min(0.95, cy)),
             sizePercent: DIFF_SIZE * 0.7,
             shape: 'drain',
@@ -1529,7 +1532,7 @@ const EngineerViewPage = () => {
             : sdYv - DIFF_SIZE - GAP * 3;
           newDiffusers.push({
             id: `diffuser-auto-jet-${ts}-${rect.id}`,
-            xPercent: Math.max(0.03, Math.min(0.95, cx + vShiftX)),
+            xPercent: Math.max(0.03, Math.min(0.95, chainCenterX)),
             yPercent: Math.max(0.03, Math.min(0.95, jetY)),
             sizePercent: DIFF_SIZE * 0.85,
             shape: 'jet',
@@ -1540,7 +1543,7 @@ const EngineerViewPage = () => {
           // Wall diffuser: on the open horizontal side
           newDiffusers.push({
             id: `diffuser-auto-wall-${ts}-${rect.id}`,
-            xPercent: Math.max(0.03, Math.min(0.95, (cx + vShiftX) + openSide * (rw / 2 + GAP * 5))),
+            xPercent: Math.max(0.03, Math.min(0.95, cx + openSide * (rw / 2 + GAP * 5))),
             yPercent: Math.max(0.03, Math.min(0.95, cy + (toDown ? rh / 4 : -rh / 4))),
             sizePercent: DIFF_SIZE * 0.9,
             shape: 'wall',
@@ -1551,12 +1554,12 @@ const EngineerViewPage = () => {
           // Insulated duct: vertical stub — placed on whichever side has more canvas space
           const insDuctWv = DUCT_H * 0.6;
           const insDuctHv = DUCT_LEN * 0.5;
-          const insSpaceLeft  = (cx + vShiftX) - rw / 2;
-          const insSpaceRight = 1 - ((cx + vShiftX) + rw / 2);
+          const insSpaceLeft  = chainCenterX - rw / 2;
+          const insSpaceRight = 1 - (chainCenterX + rw / 2);
           const insOnRight = insSpaceRight > insSpaceLeft;
           const insDuctXv = insOnRight
-            ? (cx + vShiftX) + rw / 2 + GAP
-            : (cx + vShiftX) - rw / 2 - GAP - insDuctWv;
+            ? chainCenterX + rw / 2 + GAP
+            : chainCenterX - rw / 2 - GAP - insDuctWv;
           newDucts.push({
             id: `duct-auto-ins-${ts}-${rect.id}`,
             xPercent: Math.max(0.02, Math.min(0.92, insDuctXv)),
