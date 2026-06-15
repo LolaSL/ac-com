@@ -87,6 +87,7 @@ const engineerAnnotationSchema = new Schema(
                         fill: { type: String },
                         stroke: { type: String },
                         zoneNumber: { type: Number },
+                        zoneLabel: { type: String },
                     },
                 ],
                 ducts: [

@@ -149,7 +149,16 @@ router.post(
                 heightPercent: zone.heightPercent || 0.12,
                 fill: zone.fill || 'rgba(0,150,255,0.12)',
                 stroke: zone.stroke || 'rgba(0,100,200,0.3)',
-                zoneNumber: zone.zoneNumber || null,
+                zoneNumber:
+                    zone.zoneNumber !== undefined && zone.zoneNumber !== null && zone.zoneNumber !== ""
+                        ? Number(zone.zoneNumber)
+                        : null,
+                zoneLabel:
+                    zone.zoneLabel !== undefined && zone.zoneLabel !== null && String(zone.zoneLabel).trim() !== ""
+                        ? String(zone.zoneLabel).trim()
+                        : (zone.zoneNumber !== undefined && zone.zoneNumber !== null && zone.zoneNumber !== ""
+                            ? String(zone.zoneNumber)
+                            : null),
             })),
             ducts: (parsedHvac.ducts || []).map((duct) => ({
                 id: duct.id,

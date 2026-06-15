@@ -109,6 +109,7 @@ const annotationSchema = new Schema(
             fill: { type: String },  // zone background color (e.g. "rgba(0,150,255,0.12)")
             stroke: { type: String }, // zone border color
             zoneNumber: { type: Number },
+            zoneLabel: { type: String },
           },
         ],
       },
