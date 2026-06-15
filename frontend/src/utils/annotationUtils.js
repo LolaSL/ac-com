@@ -331,8 +331,10 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     context.stroke();
 
     // Draw zone label in top-left corner
-    if (zone.zoneNumber) {
-      const label = zone.zoneLabel || String(zone.zoneNumber);
+    const hasZoneNumber = zone.zoneNumber !== undefined && zone.zoneNumber !== null && zone.zoneNumber !== "";
+    const hasZoneLabel = zone.zoneLabel !== undefined && zone.zoneLabel !== null && String(zone.zoneLabel).trim() !== "";
+    if (hasZoneNumber || hasZoneLabel) {
+      const label = hasZoneLabel ? String(zone.zoneLabel) : String(zone.zoneNumber);
       const fontSize = Math.max(12, 16 * scaleFactor);
       context.font = `bold ${fontSize}px Arial`;
       context.fillStyle = 'rgba(0,80,160,0.9)';

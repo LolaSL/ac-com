@@ -1683,10 +1683,25 @@ const EngineerViewPage = () => {
       processRectGroup(ungroupedRects, ungroupedAvgX, ungroupedAvgY);
     }
 
-    // Preserve manually-drawn zones (keep those with 'zone-manual-' prefix)
-    const existingManualZones = (annotation?.annotations?.hvac?.zones || []).filter(
-      zone => zone.id && zone.id.startsWith('zone-manual-')
-    );
+    // Preserve all existing zones and normalize styling/labels so they always
+    // render with visible color and title after Auto Place.
+    const existingZones = (annotation?.annotations?.hvac?.zones || []).map((zone, idx) => {
+      const fallbackZoneNumber = zone?.zoneNumber ?? (idx + 1);
+      const paletteIndex = (Number(fallbackZoneNumber) - 1 + zoneColorPalette.length) % zoneColorPalette.length;
+      const fallbackColors = zoneColorPalette[Number.isFinite(paletteIndex) ? paletteIndex : 0];
+      const label =
+        zone?.zoneLabel !== undefined && zone?.zoneLabel !== null && String(zone.zoneLabel).trim() !== ""
+          ? String(zone.zoneLabel)
+          : String(fallbackZoneNumber);
+
+      return {
+        ...zone,
+        zoneNumber: fallbackZoneNumber,
+        zoneLabel: label,
+        fill: zone?.fill || fallbackColors.fill,
+        stroke: zone?.stroke || fallbackColors.stroke,
+      };
+    });
 
     setAnnotation((prev) => ({
       ...prev,
@@ -1694,7 +1709,7 @@ const EngineerViewPage = () => {
         ...(prev.annotations || {}),
         hvac: {
           ...(prev.annotations?.hvac || {}),
-          zones: [...existingManualZones],
+          zones: [...existingZones],
           ducts: [...newDucts],
           diffusers: [...newDiffusers],
           dampers: [...newDampers],
