@@ -1127,14 +1127,48 @@ const EngineerViewPage = () => {
         const cx = rawCx + (isVertical ? laneShift : 0);
         const cy = rawCy + (!isVertical ? laneShift : 0);
 
+        // Keep each unit's auto-placed items within its containing zone when possible.
+        const allZones = ann?.hvac?.zones || [];
+        const containingZone = allZones.find((z) => (
+          cx >= (z.xPercent || 0) &&
+          cx <= (z.xPercent || 0) + (z.widthPercent || 0) &&
+          cy >= (z.yPercent || 0) &&
+          cy <= (z.yPercent || 0) + (z.heightPercent || 0)
+        ));
+        const zonePad = 0.008;
+        const localMinX = containingZone
+          ? (containingZone.xPercent || 0) + zonePad
+          : 0.01;
+        const localMaxX = containingZone
+          ? (containingZone.xPercent || 0) + (containingZone.widthPercent || 0) - zonePad
+          : 0.98;
+        const localMinY = containingZone
+          ? (containingZone.yPercent || 0) + zonePad
+          : 0.01;
+        const localMaxY = containingZone
+          ? (containingZone.yPercent || 0) + (containingZone.heightPercent || 0) - zonePad
+          : 0.98;
+        const clampLocalX = (v) => Math.max(localMinX, Math.min(localMaxX, v));
+        const clampLocalY = (v) => Math.max(localMinY, Math.min(localMaxY, v));
+
         if (!isVertical) {
-        // Pick horizontal direction: extend ducts toward the centre of THIS flat's layout
-        const toRight = cx <= groupAvgX;
+        // Pick horizontal direction by available in-zone space first.
+        const chainReach = GAP + DUCT_LEN + GAP + FLEX_LEN + GAP + DIFF_SIZE / 2;
+        const roomSpaceRight = localMaxX - (cx + rw / 2);
+        const roomSpaceLeft = (cx - rw / 2) - localMinX;
+        let toRight;
+        if (roomSpaceRight < chainReach && roomSpaceLeft >= roomSpaceRight) {
+          toRight = false;
+        } else if (roomSpaceLeft < chainReach && roomSpaceRight >= roomSpaceLeft) {
+          toRight = true;
+        } else {
+          toRight = roomSpaceRight >= roomSpaceLeft ? true : cx <= groupAvgX;
+        }
 
         // --- Supply duct: offset from unit in chosen direction ---
         // Place supply above or below depending on which side has more space
-        const hSpaceAbove = (cy - rh / 2) - 0.03;
-        const hSpaceBelow = 0.97 - (cy + rh / 2);
+        const hSpaceAbove = (cy - rh / 2) - localMinY;
+        const hSpaceBelow = localMaxY - (cy + rh / 2);
         const supplyAbove = hSpaceAbove >= hSpaceBelow;
         const sDuctX = toRight ? cx + rw / 2 + GAP : cx - rw / 2 - GAP - DUCT_LEN;
         const sDuctY = supplyAbove
@@ -1142,8 +1176,8 @@ const EngineerViewPage = () => {
           : cy + rh / 2 + GAP;
         newDucts.push({
           id: `duct-auto-s-${ts}-${rect.id}`,
-          xPercent: Math.max(0.01, Math.min(0.89, sDuctX)),
-          yPercent: Math.max(0.01, Math.min(0.95, sDuctY)),
+          xPercent: clampLocalX(sDuctX),
+          yPercent: clampLocalY(sDuctY),
           width: DUCT_LEN,
           height: DUCT_H,
           ductType: 'supply',
@@ -1158,8 +1192,8 @@ const EngineerViewPage = () => {
           : cy - rh / 2;                            // near top wall: return aligned with top edge of unit
         newDucts.push({
           id: `duct-auto-r-${ts}-${rect.id}`,
-          xPercent: Math.max(0.01, Math.min(0.89, rDuctX)),
-          yPercent: Math.max(0.01, Math.min(0.95, rDuctY)),
+          xPercent: clampLocalX(rDuctX),
+          yPercent: clampLocalY(rDuctY),
           width: DUCT_LEN,
           height: DUCT_H,
           ductType: 'return',
@@ -1171,8 +1205,8 @@ const EngineerViewPage = () => {
         const sFlexX = toRight ? sDuctX + DUCT_LEN + GAP : sDuctX - GAP - FLEX_LEN;
         newDucts.push({
           id: `duct-auto-sf-${ts}-${rect.id}`,
-          xPercent: Math.max(0.01, Math.min(0.92, sFlexX)),
-          yPercent: Math.max(0.01, Math.min(0.95, sDuctY + (DUCT_H - FLEX_H) / 2)),
+          xPercent: clampLocalX(sFlexX),
+          yPercent: clampLocalY(sDuctY + (DUCT_H - FLEX_H) / 2),
           width: FLEX_LEN,
           height: FLEX_H,
           ductType: 'flex',
@@ -1183,8 +1217,8 @@ const EngineerViewPage = () => {
         const rFlexX = toRight ? rDuctX + DUCT_LEN + GAP : rDuctX - GAP - FLEX_LEN;
         newDucts.push({
           id: `duct-auto-rf-${ts}-${rect.id}`,
-          xPercent: Math.max(0.01, Math.min(0.92, rFlexX)),
-          yPercent: Math.max(0.01, Math.min(0.95, rDuctY + (DUCT_H - FLEX_H) / 2)),
+          xPercent: clampLocalX(rFlexX),
+          yPercent: clampLocalY(rDuctY + (DUCT_H - FLEX_H) / 2),
           width: FLEX_LEN,
           height: FLEX_H,
           ductType: 'flex',
@@ -1198,8 +1232,8 @@ const EngineerViewPage = () => {
           : sFlexX - GAP - DIFF_SIZE / 2;
         newDiffusers.push({
           id: `diffuser-auto-sd-${ts}-${rect.id}`,
-          xPercent: Math.max(0.02, Math.min(0.98, sdX)),
-          yPercent: sDuctY + DUCT_H / 2,
+          xPercent: clampLocalX(sdX),
+          yPercent: clampLocalY(sDuctY + DUCT_H / 2),
           sizePercent: DIFF_SIZE,
           shape: 'square',
           diffuserType: 'supply-4way',
@@ -1212,8 +1246,8 @@ const EngineerViewPage = () => {
           : rFlexX - GAP - DIFF_SIZE / 2;
         newDiffusers.push({
           id: `diffuser-auto-rg-${ts}-${rect.id}`,
-          xPercent: Math.max(0.02, Math.min(0.98, rgX)),
-          yPercent: rDuctY + DUCT_H / 2,
+          xPercent: clampLocalX(rgX),
+          yPercent: clampLocalY(rDuctY + DUCT_H / 2),
           sizePercent: DIFF_SIZE,
           shape: 'square',
           diffuserType: 'return-grille',
@@ -1224,8 +1258,8 @@ const EngineerViewPage = () => {
         const vdX = toRight ? sDuctX + DUCT_LEN * 0.4 : sDuctX + DUCT_LEN * 0.6;
         newDampers.push({
           id: `damper-auto-vd-${ts}-${rect.id}`,
-          xPercent: vdX,
-          yPercent: sDuctY + DUCT_H / 2,
+          xPercent: clampLocalX(vdX),
+          yPercent: clampLocalY(sDuctY + DUCT_H / 2),
           sizePercent: DAMP_SIZE,
           damperType: 'volume',
         });
@@ -1234,8 +1268,8 @@ const EngineerViewPage = () => {
         const fdX = toRight ? sDuctX + 0.002 : sDuctX + DUCT_LEN - 0.002;
         newDampers.push({
           id: `damper-auto-fd-${ts}-${rect.id}`,
-          xPercent: fdX,
-          yPercent: sDuctY + DUCT_H / 2,
+          xPercent: clampLocalX(fdX),
+          yPercent: clampLocalY(sDuctY + DUCT_H / 2),
           sizePercent: DAMP_SIZE,
           damperType: 'fire',
         });
@@ -1257,8 +1291,8 @@ const EngineerViewPage = () => {
         
         newThermostats.push({
           id: `thermo-auto-${ts}-${rect.id}`,
-          xPercent: Math.max(0.02, Math.min(0.98, thermX)),
-          yPercent: cy,
+          xPercent: clampLocalX(thermX),
+          yPercent: clampLocalY(cy),
           sizePercent: THERM_SIZE,
           label: thermLabel,
         });
@@ -1268,8 +1302,8 @@ const EngineerViewPage = () => {
         const drainY = cy + rh / 2 + GAP * 2;
         newDiffusers.push({
           id: `diffuser-auto-drain-${ts}-${rect.id}`,
-          xPercent: Math.max(0.02, Math.min(0.98, drainX)),
-          yPercent: Math.max(0.02, Math.min(0.98, drainY)),
+          xPercent: clampLocalX(drainX),
+          yPercent: clampLocalY(drainY),
           sizePercent: DIFF_SIZE * 0.7,
           shape: 'drain',
           diffuserType: 'drain-point',
@@ -1281,8 +1315,8 @@ const EngineerViewPage = () => {
         const jetY = supplyAbove ? cy - rh / 2 - GAP * 4 : cy + rh / 2 + GAP * 4;
         newDiffusers.push({
           id: `diffuser-auto-jet-${ts}-${rect.id}`,
-          xPercent: Math.max(0.02, Math.min(0.98, jetX)),
-          yPercent: Math.max(0.02, Math.min(0.98, jetY)),
+          xPercent: clampLocalX(jetX),
+          yPercent: clampLocalY(jetY),
           sizePercent: DIFF_SIZE * 0.85,
           shape: 'jet',
           diffuserType: 'jet',
@@ -1294,8 +1328,8 @@ const EngineerViewPage = () => {
         const wallDiffY = supplyAbove ? cy - rh / 2 : cy + rh / 2;
         newDiffusers.push({
           id: `diffuser-auto-wall-${ts}-${rect.id}`,
-          xPercent: Math.max(0.02, Math.min(0.98, wallDiffX)),
-          yPercent: Math.max(0.02, Math.min(0.98, wallDiffY)),
+          xPercent: clampLocalX(wallDiffX),
+          yPercent: clampLocalY(wallDiffY),
           sizePercent: DIFF_SIZE * 0.9,
           shape: 'wall',
           diffuserType: 'wall-diffuser',
@@ -1311,8 +1345,8 @@ const EngineerViewPage = () => {
           : cy + rh / 2 + GAP + DUCT_H * 1.0;
         newDucts.push({
           id: `duct-auto-ins-${ts}-${rect.id}`,
-          xPercent: Math.max(0.01, Math.min(0.89, insDuctX)),
-          yPercent: Math.max(0.01, Math.min(0.95, insDuctY)),
+          xPercent: clampLocalX(insDuctX),
+          yPercent: clampLocalY(insDuctY),
           width: insDuctWidth,
           height: insDuctHeight,
           ductType: 'insulated',
@@ -1329,8 +1363,8 @@ const EngineerViewPage = () => {
           const exhDuctY = cy + rh / 2 + GAP;
           newDucts.push({
             id: `duct-auto-exh-${ts}-${rect.id}`,
-            xPercent: Math.max(0.01, Math.min(0.89, exhDuctX)),
-            yPercent: Math.max(0.01, Math.min(0.95, exhDuctY)),
+            xPercent: clampLocalX(exhDuctX),
+            yPercent: clampLocalY(exhDuctY),
             width: DUCT_LEN * 0.7,
             height: DUCT_H,
             ductType: 'exhaust',
@@ -1341,8 +1375,8 @@ const EngineerViewPage = () => {
           const exhY = cy + rh / 2 + GAP + DIFF_SIZE;
           newDiffusers.push({
             id: `diffuser-auto-exh-${ts}-${rect.id}`,
-            xPercent: cx,
-            yPercent: Math.max(0.02, Math.min(0.98, exhY)),
+            xPercent: clampLocalX(cx),
+            yPercent: clampLocalY(exhY),
             sizePercent: DIFF_SIZE,
             shape: 'square',
             diffuserType: 'exhaust',
@@ -1353,8 +1387,8 @@ const EngineerViewPage = () => {
           const transferX = toRight ? cx - rw / 2 - GAP * 3 : cx + rw / 2 + GAP * 3;
           newDiffusers.push({
             id: `diffuser-auto-tg-${ts}-${rect.id}`,
-            xPercent: Math.max(0.02, Math.min(0.98, transferX)),
-            yPercent: cy,
+            xPercent: clampLocalX(transferX),
+            yPercent: clampLocalY(cy),
             sizePercent: DIFF_SIZE * 0.9,
             shape: 'square',
             diffuserType: 'transfer-grille',
