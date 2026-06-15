@@ -1374,15 +1374,38 @@ const EngineerViewPage = () => {
           const vDUCT_LEN = DUCT_LEN * 0.75;
           const vFLEX_LEN = FLEX_LEN * 0.75;
 
-          // Put the vertical duct chain on the side with more room, and keep
+          // Put the vertical chain inside the containing zone (if available) to
+          // avoid crossing room walls in multi-flat layouts.
+          const allZones = ann?.hvac?.zones || [];
+          const containingZone = allZones.find((z) => (
+            cx >= (z.xPercent || 0) &&
+            cx <= (z.xPercent || 0) + (z.widthPercent || 0) &&
+            cy >= (z.yPercent || 0) &&
+            cy <= (z.yPercent || 0) + (z.heightPercent || 0)
+          ));
+
+          const zonePad = 0.01;
+          const localLeft = containingZone
+            ? (containingZone.xPercent || 0) + zonePad
+            : 0.02;
+          const localRight = containingZone
+            ? (containingZone.xPercent || 0) + (containingZone.widthPercent || 0) - zonePad
+            : 0.98;
+
+          // Put the vertical duct chain on the side with more local room, and keep
           // labels/secondary accessories on the opposite side to reduce crowding.
-          const spaceRight = 1 - (cx + rw / 2);
-          const spaceLeft  = cx - rw / 2;
+          const spaceRight = localRight - (cx + rw / 2);
+          const spaceLeft  = (cx - rw / 2) - localLeft;
           const chainSide = spaceLeft >= spaceRight ? -1 : 1; // -1=left, +1=right
           const openSide = -chainSide;
           const columnGap = Math.max(DIFF_SIZE * 1.15, DUCT_H * 2 + GAP * 6);
           const chainClearance = Math.max(rw / 2 + GAP * 6, columnGap * 0.7);
-          const chainCenterX = Math.max(0.08, Math.min(0.92, cx + chainSide * chainClearance));
+          const preferredChainCenterX = cx + chainSide * chainClearance;
+          const minCenterX = localLeft + columnGap / 2;
+          const maxCenterX = localRight - columnGap / 2;
+          const chainCenterX = minCenterX <= maxCenterX
+            ? Math.max(minCenterX, Math.min(maxCenterX, preferredChainCenterX))
+            : Math.max(0.08, Math.min(0.92, preferredChainCenterX));
           const supplyColumnX = chainCenterX - columnGap / 2;
           const returnColumnX = chainCenterX + columnGap / 2;
 
