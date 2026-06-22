@@ -130,10 +130,10 @@ const Footer = () => {
             <div className="contact-item">
               <i className="fa-solid fa-envelope"></i>{" "}
               <span>
-                <a href="mailto:support@accomhomesupply.com">Default Mail</a>
+                <a href="mailto:accomhomesupply.support@gmail.com">Default Mail</a>
                 {" | "}
                 <a
-                  href="https://mail.google.com/mail/?view=cm&to=support@accomhomesupply.com"
+                  href="https://mail.google.com/mail/?view=cm&to=accomhomesupply.support@gmail.com"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

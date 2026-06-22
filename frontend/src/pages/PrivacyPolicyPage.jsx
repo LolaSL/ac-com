@@ -72,7 +72,7 @@ const PrivacyPolicyPage = () => {
 
       <h4>Questions and Feedback</h4>
       <p className="fs-5">
-        For questions or concerns about privacy, please contact us at <a href="mailto:support@accomhomesupply.com">support@accomhomesupply.com</a>.
+        For questions or concerns about privacy, please contact us at <a href="mailto:accomhomesupply.support@gmail.com">accomhomesupply.support@gmail.com</a>.
       </p>
 
       <h4>Age Restrictions</h4>

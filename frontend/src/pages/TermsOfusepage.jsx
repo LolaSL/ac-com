@@ -59,8 +59,8 @@ const TermsOfusePage = () => {
       <h4>Cancellations</h4>
       <p className="fs-5">
         Orders that have not yet shipped may be cancelled by contacting{" "}
-        <a href="mailto:support@accomhomesupply.com">
-          support@accomhomesupply.com
+        <a href="mailto:accomhomesupply.support@gmail.com">
+          accomhomesupply.support@gmail.com
         </a>
         . Once an order has shipped, cancellations are not allowed. Refused
         shipments are subject to a 25% restocking fee plus shipping/freight
@@ -199,8 +199,8 @@ const TermsOfusePage = () => {
       <h4>Contact</h4>
       <p className="fs-5">
         Questions about these Terms of Use can be sent to{" "}
-        <a href="mailto:support@accomhomesupply.com">
-          support@accomhomesupply.com
+        <a href="mailto:accomhomesupply.support@gmail.com">
+          accomhomesupply.support@gmail.com
         </a>
         .
       </p>

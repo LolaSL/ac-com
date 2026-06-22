@@ -100,7 +100,7 @@ const ReturnsPage = () => {
           canceled and must follow our return procedures. Refused shipments will
           incur a 25% restocking fee plus all shipping/freight charges.
           Cancellation requests must be sent via email to{" "}
-          <strong>support@accomhomesupply.com</strong>.
+          <strong>accomhomesupply.support@gmail.com</strong>.
         </p>
 
         <h4>Special Orders</h4>

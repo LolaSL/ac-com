@@ -34,8 +34,8 @@ const CancellationPage = () => {
       <p className="fs-5">
         Cancellation requests can <strong>only</strong> be accepted via email.
         Please send your request to:{" "}
-        <a href="mailto:support@accomhomesupply.com">
-          support@accomhomesupply.com
+        <a href="mailto:accomhomesupply.support@gmail.com">
+          accomhomesupply.support@gmail.com
         </a>
       </p>
 
