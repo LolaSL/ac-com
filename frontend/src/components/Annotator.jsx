@@ -887,7 +887,7 @@ const Annotator = ({
 
   const [downloadedFiles, setDownloadedFiles] = useState([]);
   const [pdfRotation, setPdfRotation] = useState(0); // Store rotation in degrees
-  const [pdfZoom, setPdfZoom] = useState(1); // Store pinch zoom level for small screens
+  const [pdfZoom, setPdfZoom] = useState(1.5); // Store pinch zoom level (1.5 = 150% default for better mobile display)
 
   // Mobile-friendly prompt modal state (replaces window.prompt)
   const [acUnitInput, setAcUnitInput] = useState('');
@@ -1990,24 +1990,9 @@ const Annotator = ({
       const requestedPage = Math.max(1, Math.min(pageNum || currentPage, pdf.numPages));
       const page = await pdf.getPage(requestedPage);
 
-      // On small screens, keep PDF at native size for horizontal scrolling
-      // On larger screens, scale to fit the viewport
-      let scale = 1;
-      const screenWidth = window.innerWidth;
-      
-      let initialViewport = page.getViewport({ scale: 1 });
-      const maxContainerWidth = screenWidth * 0.95;
-      
-      // Apply responsive scaling on all screens to prevent PDF from being too huge
-      // On small screens, this still allows horizontal scrolling if needed
-      if (initialViewport.width > maxContainerWidth) {
-        scale = maxContainerWidth / initialViewport.width;
-      }
-      // On small screens (< 768px), minimum scale is 0.8 to keep it manageable
-      if (screenWidth < 768 && scale > 0.8) {
-        scale = Math.min(scale, 0.85);
-      }
-      
+      // Always render PDF at native scale=1 (matches Sidebar.jsx approach)
+      // CSS transform via pdfZoom handles all magnification for consistent quality
+      const scale = 1;
       let viewport = page.getViewport({ scale });
 
       // Apply rotation to viewport
@@ -2141,6 +2126,7 @@ const Annotator = ({
     // pdfZoom intentionally omitted: zoom is applied via CSS transform only,
     // re-rendering the PDF on every pinch event causes the
     // "multiple render() operations" canvas error.
+    // Default 1.5x zoom provides good mobile visibility matching Sidebar.jsx behavior.
   ]);
 
   // Handle responsive PDF resizing when window is resized
@@ -3399,21 +3385,21 @@ const Annotator = ({
               ref={containerMainRef}
             >
               {/* Size-holder: expands to actual zoomed pixel size so scroll area is correct */}
-              <div style={pdfZoom !== 1 ? {
+              <div style={{
                 position: 'relative',
                 width: pdfSize.width * pdfZoom,
                 height: pdfSize.height * pdfZoom,
                 flexShrink: 0,
-              } : { position: 'relative' }}>
+              }}>
               <div 
                 className="canvas-wrapper"
-                style={pdfZoom !== 1 ? {
+                style={{
                   transform: `scale(${pdfZoom})`,
                   transformOrigin: '0 0',
                   position: 'absolute',
                   top: 0,
                   left: 0,
-                } : {}}
+                }}
               >
                 <canvas
                   id="my-canvas"
