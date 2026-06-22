@@ -27,6 +27,9 @@ export default function SignInPage() {
   const { userInfo } = state;
 
   const googleSignIn = useGoogleLogin({
+    flow: 'implicit',
+    ux_mode: 'redirect',
+    redirect_uri: window.location.origin + '/signin',
     onSuccess: async (tokenResponse) => {
       try {
         const { data } = await Axios.post("/api/users/google-auth", {

@@ -50,6 +50,9 @@ export default function SignUpPage() {
   const pwStrength = getPasswordStrength(password);
 
   const googleSignUp = useGoogleLogin({
+    flow: 'implicit',
+    ux_mode: 'redirect',
+    redirect_uri: window.location.origin + '/signup',
     onSuccess: async (tokenResponse) => {
       try {
         const { data } = await Axios.post("/api/users/google-auth", {
