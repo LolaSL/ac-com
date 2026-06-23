@@ -292,10 +292,19 @@ export default function SellerPage() {
   // Extract video ID from embed URL (handles both /embed/ID and /embed/ID?params formats)
   const videoId = baseEmbedUrl.match(/embed\/([a-zA-Z0-9_-]+)/)?.[1];
 
+  // Brands with embedding restrictions (Error 153)
+  const RESTRICTED_BRANDS = /lennox|haier|fujitsu|electra/i;
+  const isEmbedRestricted = seller.name && RESTRICTED_BRANDS.test(seller.name);
+
   const parameterSeparator = baseEmbedUrl.includes('?') ? '&' : '?';
   const embedUrl = `${baseEmbedUrl}${parameterSeparator}rel=0&modestbranding=1`;
 
-  // Direct YouTube watch URL for fallback link
+  // YouTube thumbnail for restricted videos
+  const thumbUrl = videoId
+    ? `https://img.youtube.com/vi/${videoId}/sddefault.jpg`
+    : null;
+
+  // Direct YouTube watch URL
   const watchUrl = videoId
     ? `https://www.youtube.com/watch?v=${videoId}`
     : seller.link;
@@ -304,29 +313,48 @@ export default function SellerPage() {
     <div className="sp-section sp-video-section">
       <h2 className="sp-section__title">📹 Product Video</h2>
       
-      {/* Try to embed video directly in app */}
-      <div className="sp-iframe-wrap">
-        <iframe
-          src={embedUrl}
-          title={`${seller.name} Product Video`}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          loading="lazy"
-        />
-      </div>
-      
-      {/* Fallback link for restricted videos that can't embed */}
-      {videoId && (
-        <div className="sp-video-fallback-notice">
-          <span className="sp-video-fallback-text">Video not loading?</span>
-          <a
-            href={watchUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sp-video-fallback-btn"
-          >
-            ▶ Watch on YouTube
-          </a>
+      {isEmbedRestricted && thumbUrl ? (
+        // Show thumbnail link for restricted videos (Lennox, Haier, Fujitsu, Electra)
+        <a
+          href={watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sp-video-thumb-link"
+          aria-label={`Watch ${seller.name} product video on YouTube`}
+        >
+          <div className="sp-video-thumb-wrap">
+            <img
+              src={thumbUrl}
+              alt={`${seller.name} product video`}
+              className="sp-video-thumb"
+              onError={(e) => { 
+                // Cascading fallback: try different thumbnail sizes
+                if (e.target.src.includes('sddefault')) {
+                  e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                } else if (e.target.src.includes('hqdefault')) {
+                  e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+                } else if (e.target.src.includes('mqdefault')) {
+                  e.target.src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
+                } else {
+                  // Final fallback - show gradient background
+                  e.target.style.display = 'none';
+                  e.target.parentElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }
+              }}
+            />
+            <span className="sp-video-play-btn" aria-hidden="true">Watch Video</span>
+          </div>
+        </a>
+      ) : (
+        // Embed video directly for non-restricted brands (LG, Samsung, etc.)
+        <div className="sp-iframe-wrap">
+          <iframe
+            src={embedUrl}
+            title={`${seller.name} Product Video`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+          />
         </div>
       )}
     </div>
