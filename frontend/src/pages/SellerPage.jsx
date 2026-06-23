@@ -293,7 +293,7 @@ export default function SellerPage() {
   const videoId = baseEmbedUrl.match(/embed\/([a-zA-Z0-9_-]+)/)?.[1];
 
   // Brands with embedding restrictions (Error 153)
-  const RESTRICTED_BRANDS = /lennox|haier|fujitsu|electra/i;
+  const RESTRICTED_BRANDS = /lg|samsung|daikin|mitsubishi/i;
   const isEmbedRestricted = seller.name && RESTRICTED_BRANDS.test(seller.name);
 
   const parameterSeparator = baseEmbedUrl.includes('?') ? '&' : '?';
@@ -314,7 +314,7 @@ export default function SellerPage() {
       <h2 className="sp-section__title">📹 Product Video</h2>
       
       {isEmbedRestricted && thumbUrl ? (
-        // Show thumbnail link for restricted videos (Lennox, Haier, Fujitsu, Electra)
+        // Show thumbnail link for restricted videos (LG, Samsung, Daikin, Mitsubishi)
         <a
           href={watchUrl}
           target="_blank"
@@ -346,7 +346,7 @@ export default function SellerPage() {
           </div>
         </a>
       ) : (
-        // Embed video directly for non-restricted brands (LG, Samsung, etc.)
+        // Embed video directly for non-restricted brands (Lennox, Haier, Fujitsu, Electra)
         <div className="sp-iframe-wrap">
           <iframe
             src={embedUrl}
