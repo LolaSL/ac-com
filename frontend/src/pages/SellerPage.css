@@ -442,4 +442,11 @@
     flex-direction: column;
     align-items: flex-start;
   }
+  
+  /* ── Fix video thumbnail black row on small screens ── */
+  .sp-video-thumb-wrap {
+    min-height: unset;
+    display: flex;
+    align-items: center;
+  }
 }
