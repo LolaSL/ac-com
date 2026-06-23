@@ -133,9 +133,16 @@ const Footer = () => {
                 <a href="mailto:accomhomesupply.support@gmail.com">Default Mail</a>
                 {" | "}
                 <a
-                  href="https://mail.google.com/mail/?view=cm&to=accomhomesupply.support@gmail.com"
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(e) => {
+                    // On mobile, use mailto instead of Gmail web interface
+                    if (window.innerWidth <= 768) {
+                      e.preventDefault();
+                      window.location.href = 'mailto:accomhomesupply.support@gmail.com';
+                    }
+                  }}
                 >
                   Gmail
                 </a>

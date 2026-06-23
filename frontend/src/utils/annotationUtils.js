@@ -486,21 +486,25 @@ export const overlayHVAC = (context, hvacAnnotations, symbolImages, comments, ac
     const X_GAP = 24 * scaleFactor;
     const Y_GAP = 10 * scaleFactor;
     const STEP = 8 * scaleFactor;
-    let y = baseY;
+    
+    const checkCollision = (testY) => {
+      return reserved.some(
+        (p) => Math.abs(p.x - baseX) < X_GAP && Math.abs(p.y - testY) < Y_GAP
+      );
+    };
+    
+    let currentY = baseY;
     let tries = 0;
 
-    while (
-      tries < 8 &&
-      reserved.some((p) => Math.abs(p.x - baseX) < X_GAP && Math.abs(p.y - y) < Y_GAP)
-    ) {
+    while (tries < 8 && checkCollision(currentY)) {
       const stepIndex = Math.floor(tries / 2) + 1;
       const dir = tries % 2 === 0 ? 1 : -1;
-      y = baseY + dir * stepIndex * STEP;
+      currentY = baseY + dir * stepIndex * STEP;
       tries += 1;
     }
 
-    reserved.push({ x: baseX, y });
-    return { x: baseX, y };
+    reserved.push({ x: baseX, y: currentY });
+    return { x: baseX, y: currentY };
   };
 
   hvacAnnotations?.diffusers?.forEach((diffuser) => {
@@ -1063,8 +1067,8 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
     const x = comment.xPercent * canvasWidth;
     const y = comment.yPercent * canvasHeight;
     const scaleFactor = pdfScale / 1.5;
-    const padding = 10 * scaleFactor;
-    const fontSize = 17 * scaleFactor;
+    const padding = 8 * scaleFactor;
+    const fontSize = 11 * scaleFactor;
     const text = comment.text;
     context.font = `bold ${fontSize}px Arial`;
     const textWidth = context.measureText(text).width;
