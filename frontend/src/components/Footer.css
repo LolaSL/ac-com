@@ -224,3 +224,22 @@
     margin-right: 0;
   }
 }
+
+/* ── NEW Badge Pulse Animation ── */
+.quote-badge-pulse {
+  display: inline-block !important;
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+  animation: quote-pulse 1.2s ease-in-out infinite !important;
+}
+
+@keyframes quote-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.08);
+  }
+}

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import NavLink from "react-bootstrap/NavLink";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Badge from "react-bootstrap/Badge";
 import { useNavigate } from "react-router-dom";
 import { Store } from "../Store";
 import "./Footer.css";
@@ -63,7 +64,7 @@ const Footer = () => {
               href="/measurement"
               onClick={(e) => handleNavigation(e, "/measurement")}
             >
-              Get A Quote
+              Get A Quote <Badge bg="danger" className="quote-badge-pulse ms-1">NEW</Badge>
             </NavLink>
             {/* <NavLink
               className="text-white d-block"
