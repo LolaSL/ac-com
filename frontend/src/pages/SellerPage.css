@@ -196,6 +196,8 @@
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
   cursor: pointer;
+  background: #1a1a2e; /* Fallback color instead of black */
+  min-height: 250px; /* Ensure visible area even if image fails */
 }
 
 .sp-video-thumb {
@@ -203,6 +205,7 @@
   display: block;
   aspect-ratio: 16/9;
   object-fit: cover;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradient fallback */
 }
 
 .sp-video-play-btn {
@@ -211,10 +214,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 4rem;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #fff;
   background: rgba(0,0,0,0.35);
   transition: background 0.2s;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 0.02em;
+}
+
+.sp-video-play-btn::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 12px 0 12px 20px;
+  border-color: transparent transparent transparent #fff;
+  margin-right: 4px;
 }
 
 .sp-video-thumb-wrap:hover .sp-video-play-btn {

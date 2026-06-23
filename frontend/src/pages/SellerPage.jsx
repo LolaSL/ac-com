@@ -288,35 +288,41 @@ export default function SellerPage() {
           })()} */}
               {/* ── Video ── */}
 {seller.link && (() => {
-  // 1. Run your utility first to guarantee we have a normalized embed URL format
   const baseEmbedUrl = toEmbedUrl(seller.link);
-
-  // 2. Safely extract the clean video ID out of the normalized embed structure
   const videoId = baseEmbedUrl.match(/embed\/([^?&]+)/)?.[1];
   
-  // 3. Smart check: Ensure we handle URL parameters gracefully.
-  // If your helper function output already has a '?' (like your example), append with '&'. Otherwise, start with '?'.
-  const parameterSeparator = baseEmbedUrl.includes('?') ? '&' : '?';
-  const embedUrl = `${baseEmbedUrl}${parameterSeparator}rel=0&modestbranding=1`;
-
-  // 4. Handle known restricted brands (Samsung/LG) for the fallback thumbnail approach
+  // List of restricted video IDs and brand patterns
+  const RESTRICTED_VIDEO_IDS = [
+    "df0y4MynElM",  // LG video
+    // Add more specific video IDs here as needed
+  ];
+  
+  const RESTRICTED_BRANDS = /samsung|lg|sony|panasonic|daikin|mitsubishi|carrier|trane/i;
+  
+  // Check if video should use thumbnail link instead of iframe embed
   const isEmbedRestricted = videoId && (
-    (seller.name && /samsung|lg/i.test(seller.name))
+    RESTRICTED_VIDEO_IDS.includes(videoId) ||
+    (seller.name && RESTRICTED_BRANDS.test(seller.name))
   );
 
+  // Use more reliable thumbnail (sddefault is more widely available)
   const thumbUrl = videoId
-    ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+    ? `https://img.youtube.com/vi/${videoId}/sddefault.jpg`
     : null;
 
-  // 5. Build the dedicated, distraction-free direct playback layout 
+  // Use proper YouTube watch URL
   const watchUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1`
+    ? `https://www.youtube.com/watch?v=${videoId}`
     : seller.link;
+
+  const parameterSeparator = baseEmbedUrl.includes('?') ? '&' : '?';
+  const embedUrl = `${baseEmbedUrl}${parameterSeparator}rel=0&modestbranding=1`;
 
   return (
     <div className="sp-section sp-video-section">
       <h2 className="sp-section__title">📹 Product Video</h2>
       
+      {/* Render as clickable thumbnail link for restricted videos */}
       {isEmbedRestricted && thumbUrl ? (
         <a
           href={watchUrl}
@@ -325,16 +331,24 @@ export default function SellerPage() {
           className="sp-video-thumb-link"
           aria-label="Watch video on YouTube"
         >
-          <div className="sp-video-thumb-wrap" style={{ position: 'relative' }}>
+          <div className="sp-video-thumb-wrap">
             <img
               src={thumbUrl}
               alt={`${seller.name} product video`}
               className="sp-video-thumb"
               onError={(e) => { 
-                e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; 
+                // Cascading fallback: try hqdefault, then mqdefault, then gradient
+                if (e.target.src.includes('sddefault')) {
+                  e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                } else if (e.target.src.includes('hqdefault')) {
+                  e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+                } else {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }
               }}
             />
-            <span className="sp-video-play-btn" aria-hidden="true">▶</span>
+            <span className="sp-video-play-btn" aria-hidden="true">Watch Video</span>
           </div>
         </a>
       ) : (
