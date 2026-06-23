@@ -292,14 +292,7 @@ export default function SellerPage() {
   // Extract video ID from embed URL (handles both /embed/ID and /embed/ID?params formats)
   const videoId = baseEmbedUrl.match(/embed\/([a-zA-Z0-9_-]+)/)?.[1];
 
-  // Brands with embedding restrictions (Error 153)
-  const RESTRICTED_BRANDS = /lg|samsung|daikin|mitsubishi/i;
-  const isEmbedRestricted = seller.name && RESTRICTED_BRANDS.test(seller.name);
-
-  const parameterSeparator = baseEmbedUrl.includes('?') ? '&' : '?';
-  const embedUrl = `${baseEmbedUrl}${parameterSeparator}rel=0&modestbranding=1`;
-
-  // YouTube thumbnail for restricted videos
+  // YouTube thumbnail - use sddefault for better reliability
   const thumbUrl = videoId
     ? `https://img.youtube.com/vi/${videoId}/sddefault.jpg`
     : null;
@@ -313,8 +306,8 @@ export default function SellerPage() {
     <div className="sp-section sp-video-section">
       <h2 className="sp-section__title">📹 Product Video</h2>
       
-      {isEmbedRestricted && thumbUrl ? (
-        // Show thumbnail link for restricted videos (LG, Samsung, Daikin, Mitsubishi)
+      {/* All videos render as thumbnail links to avoid Error 153 */}
+      {thumbUrl ? (
         <a
           href={watchUrl}
           target="_blank"
@@ -346,15 +339,16 @@ export default function SellerPage() {
           </div>
         </a>
       ) : (
-        // Embed video directly for non-restricted brands (Lennox, Haier, Fujitsu, Electra)
-        <div className="sp-iframe-wrap">
-          <iframe
-            src={embedUrl}
-            title={`${seller.name} Product Video`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            loading="lazy"
-          />
+        // Fallback for non-YouTube videos
+        <div className="sp-video-fallback">
+          <a 
+            href={seller.link} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="sp-video-fallback-link"
+          >
+            🎥 Watch Video
+          </a>
         </div>
       )}
     </div>
