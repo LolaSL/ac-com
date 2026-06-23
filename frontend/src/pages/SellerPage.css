@@ -239,6 +239,78 @@
   background: rgba(0,0,0,0.55);
 }
 
+/* Fallback notice below iframe for videos that don't embed */
+.sp-video-fallback-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.sp-video-fallback-text {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.sp-video-fallback-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #c4302b 0%, #d9534f 100%);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(196, 48, 43, 0.25);
+}
+
+.sp-video-fallback-btn:hover {
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(196, 48, 43, 0.35);
+  text-decoration: none;
+}
+
+/* Fallback link when no video ID extracted */
+.sp-video-fallback {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+  border-radius: 10px;
+  border: 2px dashed #cbd5e0;
+}
+
+.sp-video-fallback-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.sp-video-fallback-link:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  text-decoration: none;
+}
+
 .sp-video-cta {
   margin-top: 0.5rem;
   text-align: center;

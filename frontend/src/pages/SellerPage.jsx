@@ -289,77 +289,44 @@ export default function SellerPage() {
               {/* ── Video ── */}
 {seller.link && (() => {
   const baseEmbedUrl = toEmbedUrl(seller.link);
-  const videoId = baseEmbedUrl.match(/embed\/([^?&]+)/)?.[1];
-  
-  // List of restricted video IDs and brand patterns
-  const RESTRICTED_VIDEO_IDS = [
-    "df0y4MynElM",  // LG video
-    // Add more specific video IDs here as needed
-  ];
-  
-  const RESTRICTED_BRANDS = /samsung|lg|sony|panasonic|daikin|mitsubishi|carrier|trane/i;
-  
-  // Check if video should use thumbnail link instead of iframe embed
-  const isEmbedRestricted = videoId && (
-    RESTRICTED_VIDEO_IDS.includes(videoId) ||
-    (seller.name && RESTRICTED_BRANDS.test(seller.name))
-  );
-
-  // Use more reliable thumbnail (sddefault is more widely available)
-  const thumbUrl = videoId
-    ? `https://img.youtube.com/vi/${videoId}/sddefault.jpg`
-    : null;
-
-  // Use proper YouTube watch URL
-  const watchUrl = videoId
-    ? `https://www.youtube.com/watch?v=${videoId}`
-    : seller.link;
+  // Extract video ID from embed URL (handles both /embed/ID and /embed/ID?params formats)
+  const videoId = baseEmbedUrl.match(/embed\/([a-zA-Z0-9_-]+)/)?.[1];
 
   const parameterSeparator = baseEmbedUrl.includes('?') ? '&' : '?';
   const embedUrl = `${baseEmbedUrl}${parameterSeparator}rel=0&modestbranding=1`;
+
+  // Direct YouTube watch URL for fallback link
+  const watchUrl = videoId
+    ? `https://www.youtube.com/watch?v=${videoId}`
+    : seller.link;
 
   return (
     <div className="sp-section sp-video-section">
       <h2 className="sp-section__title">📹 Product Video</h2>
       
-      {/* Render as clickable thumbnail link for restricted videos */}
-      {isEmbedRestricted && thumbUrl ? (
-        <a
-          href={watchUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="sp-video-thumb-link"
-          aria-label="Watch video on YouTube"
-        >
-          <div className="sp-video-thumb-wrap">
-            <img
-              src={thumbUrl}
-              alt={`${seller.name} product video`}
-              className="sp-video-thumb"
-              onError={(e) => { 
-                // Cascading fallback: try hqdefault, then mqdefault, then gradient
-                if (e.target.src.includes('sddefault')) {
-                  e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                } else if (e.target.src.includes('hqdefault')) {
-                  e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-                } else {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                }
-              }}
-            />
-            <span className="sp-video-play-btn" aria-hidden="true">Watch Video</span>
-          </div>
-        </a>
-      ) : (
-        <div className="sp-iframe-wrap">
-          <iframe
-            src={embedUrl}
-            title={`${seller.name} Product Video`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            loading="lazy"
-          />
+      {/* Try to embed video directly in app */}
+      <div className="sp-iframe-wrap">
+        <iframe
+          src={embedUrl}
+          title={`${seller.name} Product Video`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          loading="lazy"
+        />
+      </div>
+      
+      {/* Fallback link for restricted videos that can't embed */}
+      {videoId && (
+        <div className="sp-video-fallback-notice">
+          <span className="sp-video-fallback-text">Video not loading?</span>
+          <a
+            href={watchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sp-video-fallback-btn"
+          >
+            ▶ Watch on YouTube
+          </a>
         </div>
       )}
     </div>
