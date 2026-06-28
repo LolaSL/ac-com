@@ -197,6 +197,11 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                   <li><strong>Clear:</strong> Resets all rooms, parameters, and environmental options back to defaults</li>
                 </ul>
 
+                <h6 className="mb-2 mt-3 text-warning">⚠️ Important: Parameter Selection</h6>
+                <p className="fs-6 mb-2">
+                  <strong>Should be checked only one checkbox</strong> of needed parameter such as <em>Outdoor Unit Location</em>, <em>Insulation Condition</em>, and etc.
+                </p>
+
                 <h6 className="mb-2 mt-3 text-primary">🎯 Interaction Notes</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li><strong>Single Flat:</strong> Standard workflow — upload PDF, notate AC locations, export rooms, calculate BTU</li>

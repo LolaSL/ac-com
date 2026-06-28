@@ -242,50 +242,6 @@ export default function SellerPage() {
               </div>
             </div>
           </div>
-
-          {/* ── Video ── */}
-          {/* {seller.link && (() => {
-            const embedUrl = toEmbedUrl(seller.link);
-            const videoId = embedUrl.match(/embed\/([^?]+)/)?.[1];
-            const thumbUrl = videoId
-              ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-              : null;
-            const watchUrl = videoId
-              ? `https://www.youtube.com/watch?v=${videoId}`
-              : seller.link;
-            return (
-              <div className="sp-section sp-video-section">
-                <h2 className="sp-section__title">📹 Product Video</h2>
-                {thumbUrl ? (
-                  <a
-                    href={watchUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="sp-video-thumb-link"
-                    aria-label="Watch video on YouTube"
-                  >
-                    <div className="sp-video-thumb-wrap">
-                      <img
-                        src={thumbUrl}
-                        alt={`${seller.name} product video`}
-                        className="sp-video-thumb"
-                      />
-                      <span className="sp-video-play-btn" aria-hidden="true">▶</span>
-                    </div>
-                  </a>
-                ) : (
-                  <div className="sp-iframe-wrap">
-                    <iframe
-                      src={embedUrl}
-                      title={`${seller.name} Product Video`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })()} */}
               {/* ── Video ── */}
 {seller.link && (() => {
   const baseEmbedUrl = toEmbedUrl(seller.link);

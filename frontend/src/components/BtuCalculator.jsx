@@ -780,7 +780,8 @@ useEffect(() => {
           params: {
             // System mode: cooling | heating | both. Backend uses this to
             // pick between coolingBtu and heatingBtu when filtering candidates.
-            mode: systemMode,
+            // Both heatpump and recovery modes require products with both capacities
+            mode: (systemMode === 'heatpump' || systemMode === 'recovery') ? 'both' : 'cooling',
             ...Object.fromEntries(
               Object.entries(options).map(([category, values]) => [
                 category,
@@ -1125,7 +1126,7 @@ useEffect(() => {
         type: p.model || "Split System",
         btu: p.btu || 0,
         coolingBtu: p.coolingBtu,
-        heatingBtu: p.heatingBtu,
+        heatingBtu: p.heatingBtu || (systemMode === 'heatpump' || systemMode === 'recovery' ? (p.coolingBtu || p.btu) : undefined),
         productType: p.productType,
         estimatedCost: p.price || 0,
       }));
@@ -1136,7 +1137,7 @@ useEffect(() => {
           type: c.model || c.name || "Condenser",
           btu: c.btu || 0,
           coolingBtu: c.coolingBtu,
-          heatingBtu: c.heatingBtu,
+          heatingBtu: c.heatingBtu || (systemMode === 'heatpump' || systemMode === 'recovery' ? (c.coolingBtu || c.btu) : undefined),
           productType: c.productType,
           estimatedCost: c.price || 0,
           flatName: c.flatName || undefined,
@@ -1177,6 +1178,8 @@ useEffect(() => {
             ...product,
             name: product.name || "No product available",
             price: typeof product.price === "number" ? product.price : null,
+            // Fallback: if heatingBtu is missing for heat pump/recovery systems, use coolingBtu
+            heatingBtu: product.heatingBtu || (systemMode === 'heatpump' || systemMode === 'recovery' ? (product.coolingBtu || product.btu) : undefined),
           },
         }))
         .concat(
@@ -1222,7 +1225,7 @@ useEffect(() => {
                     model: cond.model,
                     btu: cond.btu,
                     coolingBtu: cond.coolingBtu,
-                    heatingBtu: cond.heatingBtu,
+                    heatingBtu: cond.heatingBtu || (systemMode === 'heatpump' || systemMode === 'recovery' ? (cond.coolingBtu || cond.btu) : undefined),
                     category: cond.category,
                     productType: cond.productType || 'outdoor',
                     numberOfMaximumIndoorUnits: cond.numberOfMaximumIndoorUnits,

@@ -723,9 +723,9 @@ export default function Recommendations() {
                           <div style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={getName(product)}>{getName(product)}</div>
                         </td>
                         <td style={{ padding: '5px 8px', textAlign: 'right' }}>
-                          {(product.coolingBtu || product.btu) || "—"}
+                          {(product.coolingBtu || product.btu)?.toLocaleString() || "—"}
                           {product.heatingBtu && isBoth ? (
-                            <div style={{ fontSize: '0.75em', color: '#888' }}>
+                            <div style={{ fontSize: '0.75em', color: '#c0392b' }}>
                               Heat: {product.heatingBtu.toLocaleString()}
                             </div>
                           ) : null}
