@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
-import { FaPlayCircle, FaTimes } from "react-icons/fa";
+import { FaPlayCircle, FaTimes, FaVideo } from "react-icons/fa";
 import "./PdfHelpVideo.css";
-
-const VIDEO_ID = "-s4pdK35YZk";
-// const THUMB_URL = `https://img.youtube.com/vi/${VIDEO_ID}/hqdefault.jpg`;
-const WATCH_URL = `https://www.youtube.com/watch?v=${VIDEO_ID}`;
-// const EMBED_URL = `https://www.youtube.com/embed/${VIDEO_ID}`;
+import { VIDEO_LIBRARY } from "../data/videoLibrary";
 
 const PdfHelpVideoModal = () => {
   const [show, setShow] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(VIDEO_LIBRARY[0]);
   const [playing, setPlaying] = useState(false);
 
   // Prevent body scroll when open
@@ -17,14 +14,22 @@ const PdfHelpVideoModal = () => {
     return () => { document.body.style.overflow = ""; };
   }, [show]);
 
-  const handleClose = () => { setShow(false); setPlaying(false); };
+  const handleClose = () => { 
+    setShow(false); 
+    setPlaying(false); 
+  };
+
+  const handleVideoSelect = (video) => {
+    setSelectedVideo(video);
+    setPlaying(false); // Reset playing state when switching videos
+  };
 
   return (
     <>
       {/* Trigger button */}
       <button className="phv-trigger" onClick={() => setShow(true)}>
         <FaPlayCircle className="phv-trigger__icon" />
-        Learn with Video
+        Video Tutorials ({VIDEO_LIBRARY.length})
       </button>
 
       {/* Modal overlay */}
@@ -35,8 +40,8 @@ const PdfHelpVideoModal = () => {
             {/* Header */}
             <div className="phv-header">
               <div className="phv-header__left">
-                <FaPlayCircle className="phv-header__icon" />
-                <h2 className="phv-header__title">PDF Notation Tutorial</h2>
+                <FaVideo className="phv-header__icon" />
+                <h2 className="phv-header__title">Video Tutorial Library</h2>
               </div>
               <button className="phv-close" onClick={handleClose} aria-label="Close">
                 <FaTimes />
@@ -45,36 +50,78 @@ const PdfHelpVideoModal = () => {
 
             {/* Body */}
             <div className="phv-body">
-              <p className="phv-subtitle">
-                Watch this short tutorial to learn how to notate, edit, and download your PDF file.
-              </p>
-              {/* <div className="phv-video-wrap"> */}
-                {/* {playing ? (
-                  <iframe
-                    src={`${EMBED_URL}?autoplay=1`}
-                    title="PDF Notation Instruction Video"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : ( */}
-                  {/* <button className="phv-thumb-btn" onClick={() => setPlaying(true)} aria-label="Play video">
-                    <img src={THUMB_URL} alt="PDF Notation Tutorial thumbnail" className="phv-thumb" />
-                    <span className="phv-play-icon" aria-hidden="true">▶</span>
-                  </button> */}
-                {/* )} */}
-              {/* </div> */}
-              {!playing && (
-                <p className="phv-video-cta">
-                  {/* Can't play?{" "} */}
-                  <a href={WATCH_URL} target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
-                </p>
-              )}
+              {/* Video Selector Grid */}
+              <div className="phv-video-grid">
+                {VIDEO_LIBRARY.map((video) => (
+                  <button
+                    key={video.id}
+                    className={`phv-video-card ${selectedVideo.id === video.id ? 'phv-video-card--active' : ''}`}
+                    onClick={() => handleVideoSelect(video)}
+                  >
+                    <div className="phv-video-card__thumb">
+                      <img src={video.thumbnail} alt={video.title} />
+                      {selectedVideo.id === video.id && (
+                        <div className="phv-video-card__playing-badge">
+                          <FaPlayCircle /> Now Playing
+                        </div>
+                      )}
+                    </div>
+                    <div className="phv-video-card__content">
+                      <span className="phv-video-card__category">{video.category}</span>
+                      <h3 className="phv-video-card__title">{video.title}</h3>
+                      <p className="phv-video-card__duration">{video.duration}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Selected Video Player */}
+              <div className="phv-player-section">
+                <h3 className="phv-player-title">
+                  <FaPlayCircle className="phv-player-title__icon" />
+                  {selectedVideo.title}
+                </h3>
+                <p className="phv-player-description">{selectedVideo.description}</p>
+                
+                <div className="phv-video-wrap">
+                  {playing ? (
+                    <iframe
+                      src={`${selectedVideo.embedUrl}&autoplay=1`}
+                      title={selectedVideo.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="phv-iframe"
+                    />
+                  ) : (
+                    <button 
+                      className="phv-thumb-btn" 
+                      onClick={() => setPlaying(true)} 
+                      aria-label={`Play ${selectedVideo.title}`}
+                    >
+                      <img 
+                        src={selectedVideo.thumbnail} 
+                        alt={`${selectedVideo.title} thumbnail`} 
+                        className="phv-thumb" 
+                      />
+                      <span className="phv-play-icon" aria-hidden="true">▶</span>
+                    </button>
+                  )}
+                </div>
+
+                {!playing && (
+                  <p className="phv-video-cta">
+                    <a href={selectedVideo.watchUrl} target="_blank" rel="noopener noreferrer">
+                      Watch on YouTube
+                    </a>
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Footer */}
             <div className="phv-footer">
               <button className="phv-close-btn" onClick={handleClose}>
-                Close Video
+                Close
               </button>
             </div>
           </div>
