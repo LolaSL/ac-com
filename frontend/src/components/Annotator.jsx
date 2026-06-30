@@ -1180,6 +1180,11 @@ const Annotator = ({
           t2.clientX - t1.clientX, t2.clientY - t1.clientY
         );
         pinchStartZoomRef.current = pdfZoomRef.current;
+      } else if (e.touches.length === 1) {
+        // Single touch - allow tap events for creating rectangles
+        // Do NOT preventDefault here, let it bubble to Konva's onTap handler
+        isPinchingRef.current = false;
+        pinchStartDistanceRef.current = 0;
       }
     };
 
@@ -1805,8 +1810,8 @@ const Annotator = ({
 
   // Handle touch tap on stage for placing annotations (mobile equivalent of click)
   const handleStageTouchEnd = (event) => {
-    // Don't place during drag or rotation
-    if (isDraggingRef.current || isRotating) return;
+    // Don't place during drag, rotation, or pinch-zoom gestures
+    if (isDraggingRef.current || isRotating || isPinchingRef.current) return;
 
     // Only act on blank stage area (not on existing shapes)
     if (event.target.name && event.target.name() === 'rect') return;

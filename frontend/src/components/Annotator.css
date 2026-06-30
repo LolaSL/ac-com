@@ -347,19 +347,22 @@
   .container-main {
     /* Allow native pinch-zoom as a fallback in addition to JS pinch handler,
        and allow panning in both axes so the zoomed PDF can be moved. */
-    touch-action: pan-x pan-y pinch-zoom !important;
+    touch-action: manipulation !important;
   }
 
   .container-main .konvajs-content,
   .container-main .konvajs-content canvas,
   .container-main .konva-stage,
   .container-main .konva-stage canvas {
-    touch-action: pan-x pan-y pinch-zoom !important;
+    /* Use manipulation to allow taps for creating rectangles */
+    touch-action: manipulation !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
   }
 
   .container-main .canvas-wrapper,
   .container-main .canvas-wrapper canvas {
-    touch-action: pan-x pan-y pinch-zoom !important;
+    touch-action: manipulation !important;
   }
 }
 
@@ -405,6 +408,9 @@
       -webkit-backface-visibility: hidden !important;
       will-change: auto !important;
       pointer-events: auto !important;
+      /* Allow tap events for creating rectangles */
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: transparent !important;
     }
 
     /* Ensure konva canvas layer respects boundaries */
