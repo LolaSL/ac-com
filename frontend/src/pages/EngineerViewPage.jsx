@@ -1033,6 +1033,38 @@ const EngineerViewPage = () => {
       return { vcx, vcy, vw, vh };
     };
 
+    // Compute actual bounding box extents for a rotated rectangle
+    // Returns the physical left/right/top/bottom bounds after rotation
+    const getBoundingBox = (r) => {
+      const px = r.xPercent;
+      const py = r.yPercent;
+      const sw = r.widthPercent  || 0.06;
+      const sh = r.heightPercent || 0.04;
+      const angle = (r.rotation || 0) * (Math.PI / 180);
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      
+      // Compute all 4 corners after rotation around top-left origin (px, py)
+      const corners = [
+        { x: 0, y: 0 },              // top-left (origin)
+        { x: sw, y: 0 },             // top-right
+        { x: sw, y: sh },            // bottom-right
+        { x: 0, y: sh },             // bottom-left
+      ];
+      
+      const rotatedCorners = corners.map(corner => ({
+        x: px + corner.x * cos - corner.y * sin,
+        y: py + corner.x * sin + corner.y * cos,
+      }));
+      
+      const minX = Math.min(...rotatedCorners.map(c => c.x));
+      const maxX = Math.max(...rotatedCorners.map(c => c.x));
+      const minY = Math.min(...rotatedCorners.map(c => c.y));
+      const maxY = Math.max(...rotatedCorners.map(c => c.y));
+      
+      return { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
+    };
+
     // Helper to compute avgX of visual centres for a group
     const computeAvgX = (rectGroup) => {
       if (rectGroup.length === 0) return 0.5;
@@ -1426,14 +1458,24 @@ const EngineerViewPage = () => {
             ? (containingZone.xPercent || 0) + (containingZone.widthPercent || 0) - zonePad
             : 0.98;
 
+          // CRITICAL FIX: Use actual bounding box for rotated rectangles
+          // to prevent overflow into adjacent flats
+          const bbox = getBoundingBox(rect);
+          const actualLeft = bbox.minX;
+          const actualRight = bbox.maxX;
+          const actualHalfWidth = bbox.width / 2;
+
           // Put the vertical duct chain on the side with more local room, and keep
           // labels/secondary accessories on the opposite side to reduce crowding.
-          const spaceRight = localRight - (cx + rw / 2);
-          const spaceLeft  = (cx - rw / 2) - localLeft;
+          // Use ACTUAL bounds instead of visual dimensions for rotated rects
+          const spaceRight = localRight - actualRight;
+          const spaceLeft  = actualLeft - localLeft;
           const chainSide = spaceLeft >= spaceRight ? -1 : 1; // -1=left, +1=right
           const openSide = -chainSide;
           const columnGap = Math.max(DIFF_SIZE * 1.15, DUCT_H * 2 + GAP * 6);
-          const chainClearance = Math.max(rw / 2 + GAP * 6, columnGap * 0.7);
+          
+          // Use actual half-width for proper clearance of rotated rectangles
+          const chainClearance = Math.max(actualHalfWidth + GAP * 6, columnGap * 0.7);
           const preferredChainCenterX = cx + chainSide * chainClearance;
           const minCenterX = localLeft + columnGap / 2;
           const maxCenterX = localRight - columnGap / 2;
@@ -1555,9 +1597,10 @@ const EngineerViewPage = () => {
           });
 
           // Thermostat: place on the open side (reuses openSide computed above)
+          // Use actual bounds to avoid crossing into adjacent flats
           const thermXv = openSide === 1
-            ? cx + rw / 2 + GAP + THERM_SIZE
-            : cx - rw / 2 - GAP - THERM_SIZE;
+            ? actualRight + GAP + THERM_SIZE
+            : actualLeft - GAP - THERM_SIZE;
           const rectCommentV = comments.find((c) => String(c.rectId) === String(rect.id));
           let thermLabelV = 'T';
           if (rectCommentV) {
@@ -1572,10 +1615,10 @@ const EngineerViewPage = () => {
             label: thermLabelV,
           });
 
-          // Drain: on the open horizontal side of the unit
+          // Drain: on the open horizontal side of the unit, use actual bounds
           newDiffusers.push({
             id: `diffuser-auto-drain-${ts}-${rect.id}`,
-            xPercent: Math.max(0.03, Math.min(0.95, cx + openSide * (rw / 2 + GAP * 3))),
+            xPercent: Math.max(0.03, Math.min(0.95, cx + openSide * (actualHalfWidth + GAP * 3))),
             yPercent: Math.max(0.03, Math.min(0.95, cy)),
             sizePercent: DIFF_SIZE * 0.7,
             shape: 'drain',
@@ -1597,10 +1640,10 @@ const EngineerViewPage = () => {
             airflow: 500,
           });
 
-          // Wall diffuser: on the open horizontal side
+          // Wall diffuser: on the open horizontal side, use actual bounds
           newDiffusers.push({
             id: `diffuser-auto-wall-${ts}-${rect.id}`,
-            xPercent: Math.max(0.03, Math.min(0.95, cx + openSide * (rw / 2 + GAP * 5))),
+            xPercent: Math.max(0.03, Math.min(0.95, cx + openSide * (actualHalfWidth + GAP * 5))),
             yPercent: Math.max(0.03, Math.min(0.95, cy + (toDown ? rh / 4 : -rh / 4))),
             sizePercent: DIFF_SIZE * 0.9,
             shape: 'wall',
@@ -1611,12 +1654,12 @@ const EngineerViewPage = () => {
           // Insulated duct: vertical stub — placed on whichever side has more canvas space
           const insDuctWv = DUCT_H * 0.6;
           const insDuctHv = DUCT_LEN * 0.5;
-          const insSpaceLeft  = chainCenterX - rw / 2;
-          const insSpaceRight = 1 - (chainCenterX + rw / 2);
+          const insSpaceLeft  = chainCenterX - actualHalfWidth;
+          const insSpaceRight = 1 - (chainCenterX + actualHalfWidth);
           const insOnRight = insSpaceRight > insSpaceLeft;
           const insDuctXv = insOnRight
-            ? chainCenterX + rw / 2 + GAP
-            : chainCenterX - rw / 2 - GAP - insDuctWv;
+            ? chainCenterX + actualHalfWidth + GAP
+            : chainCenterX - actualHalfWidth - GAP - insDuctWv;
           newDucts.push({
             id: `duct-auto-ins-${ts}-${rect.id}`,
             xPercent: Math.max(0.02, Math.min(0.92, insDuctXv)),
@@ -1631,7 +1674,7 @@ const EngineerViewPage = () => {
           // Exhaust grille: if linked comment suggests a wet room
           const linkedCommentV = comments.find((c) => String(c.rectId) === String(rect.id));
           if (linkedCommentV && WET_ROOM_RE.test(linkedCommentV.text)) {
-            const exhDuctX2 = cx - rw / 2 - GAP - DUCT_LEN * 0.7;
+            const exhDuctX2 = actualLeft - GAP - DUCT_LEN * 0.7;
             const exhDuctY2 = toDown ? cy + rh / 2 + GAP : cy - rh / 2 - GAP - DUCT_H;
             newDucts.push({
               id: `duct-auto-exh-${ts}-${rect.id}`,
@@ -1657,7 +1700,7 @@ const EngineerViewPage = () => {
             });
             newDiffusers.push({
               id: `diffuser-auto-tg-${ts}-${rect.id}`,
-              xPercent: Math.max(0.02, Math.min(0.98, cx - rw / 2 - GAP * 3)),
+              xPercent: Math.max(0.02, Math.min(0.98, actualLeft - GAP * 3)),
               yPercent: cy,
               sizePercent: DIFF_SIZE * 0.9,
               shape: 'square',
