@@ -343,22 +343,26 @@
 .phv-close-btn:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-}modal {
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .phv-modal {
     max-width: 100%;
     border-radius: 12px;
   }
 
-  .phv-header__title { 
-    font-size: 0.92rem; 
+  .phv-header__title {
+    font-size: 0.92rem;
   }
 
-  .phv-body { 
+  .phv-body {
     padding: 1rem 1rem 0;
     max-height: calc(90vh - 140px);
   }
 
-  .phv-footer { 
-    padding: 0.85rem 1rem 1rem; 
+  .phv-footer {
+    padding: 0.85rem 1rem 1rem;
   }
 
   .phv-video-grid {
@@ -377,9 +381,5 @@
 
   .phv-video-card__title {
     font-size: 0.88rem;
- ───────────────── */
-@media (max-width: 600px) {
-  .phv-header__title { font-size: 0.92rem; }
-  .phv-body { padding: 1rem 1rem 0; }
-  .phv-footer { padding: 0.85rem 1rem 1rem; }
+  }
 }

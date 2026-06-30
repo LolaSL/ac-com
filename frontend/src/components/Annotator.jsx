@@ -769,7 +769,7 @@ const parseRoomDataFromText = (rawText, fileName) => {
     // Must use rawText (before normalisation) because the normalised `text` variable
     // collapses all whitespace incl. newlines into spaces, making split('\n') useless.
     // Regex avoids single-letter abbreviations to prevent false positives.
-    const flatSectionPattern = /^(?:flat|unit|apartment|apt)\s*[#:]?\s*(\d+)\s*[:\-]?/im;
+    const flatSectionPattern = /^(?:flat|unit|apartment|apt)\s*[#:]?\s*(\d+)\s*[:-]?/im;
     const lines = textContent.split(/\r?\n/).filter(l => l.trim());
     
     const flatSections = [];
