@@ -6,7 +6,6 @@ import { VIDEO_LIBRARY } from "../data/videoLibrary";
 const PdfHelpVideoModal = () => {
   const [show, setShow] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(VIDEO_LIBRARY[0]);
-  const [playing, setPlaying] = useState(false);
 
   // Prevent body scroll when open
   useEffect(() => {
@@ -14,14 +13,34 @@ const PdfHelpVideoModal = () => {
     return () => { document.body.style.overflow = ""; };
   }, [show]);
 
-  const handleClose = () => { 
-    setShow(false); 
-    setPlaying(false); 
+  const handleClose = () => {
+    setShow(false);
   };
 
   const handleVideoSelect = (video) => {
     setSelectedVideo(video);
-    setPlaying(false); // Reset playing state when switching videos
+  };
+
+  // Prefer higher-quality thumbnail (sddefault) with cascading fallback
+  const getThumbUrl = (video) =>
+    `https://img.youtube.com/vi/${video.videoId}/sddefault.jpg`;
+
+  const handleThumbError = (e, videoId) => {
+    // Cascading fallback: sddefault → hqdefault → mqdefault → default → gradient
+    const src = e.target.src;
+    if (src.includes('sddefault')) {
+      e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    } else if (src.includes('hqdefault')) {
+      e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+    } else if (src.includes('mqdefault')) {
+      e.target.src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
+    } else {
+      e.target.style.display = 'none';
+      if (e.target.parentElement) {
+        e.target.parentElement.style.background =
+          'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      }
+    }
   };
 
   return (
@@ -59,10 +78,14 @@ const PdfHelpVideoModal = () => {
                     onClick={() => handleVideoSelect(video)}
                   >
                     <div className="phv-video-card__thumb">
-                      <img src={video.thumbnail} alt={video.title} />
+                      <img
+                        src={getThumbUrl(video)}
+                        alt={video.title}
+                        onError={(e) => handleThumbError(e, video.videoId)}
+                      />
                       {selectedVideo.id === video.id && (
                         <div className="phv-video-card__playing-badge">
-                          <FaPlayCircle /> Now Playing
+                          <FaPlayCircle /> Selected
                         </div>
                       )}
                     </div>
@@ -75,46 +98,37 @@ const PdfHelpVideoModal = () => {
                 ))}
               </div>
 
-              {/* Selected Video Player */}
+              {/* Selected Video Player — thumbnail link (opens YouTube in new tab) */}
               <div className="phv-player-section">
                 <h3 className="phv-player-title">
                   <FaPlayCircle className="phv-player-title__icon" />
                   {selectedVideo.title}
                 </h3>
                 <p className="phv-player-description">{selectedVideo.description}</p>
-                
+
                 <div className="phv-video-wrap">
-                  {playing ? (
-                    <iframe
-                      src={`${selectedVideo.embedUrl}&autoplay=1`}
-                      title={selectedVideo.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="phv-iframe"
+                  <a
+                    href={selectedVideo.watchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="phv-thumb-btn"
+                    aria-label={`Watch ${selectedVideo.title} on YouTube`}
+                  >
+                    <img
+                      src={getThumbUrl(selectedVideo)}
+                      alt={`${selectedVideo.title} thumbnail`}
+                      className="phv-thumb"
+                      onError={(e) => handleThumbError(e, selectedVideo.videoId)}
                     />
-                  ) : (
-                    <button 
-                      className="phv-thumb-btn" 
-                      onClick={() => setPlaying(true)} 
-                      aria-label={`Play ${selectedVideo.title}`}
-                    >
-                      <img 
-                        src={selectedVideo.thumbnail} 
-                        alt={`${selectedVideo.title} thumbnail`} 
-                        className="phv-thumb" 
-                      />
-                      <span className="phv-play-icon" aria-hidden="true">▶</span>
-                    </button>
-                  )}
+                    <span className="phv-play-icon" aria-hidden="true">▶</span>
+                  </a>
                 </div>
 
-                {!playing && (
-                  <p className="phv-video-cta">
-                    <a href={selectedVideo.watchUrl} target="_blank" rel="noopener noreferrer">
-                      Watch on YouTube
-                    </a>
-                  </p>
-                )}
+                <p className="phv-video-cta">
+                  <a href={selectedVideo.watchUrl} target="_blank" rel="noopener noreferrer">
+                    Watch on YouTube
+                  </a>
+                </p>
               </div>
             </div>
 
