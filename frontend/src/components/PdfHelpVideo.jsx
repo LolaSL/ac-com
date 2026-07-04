@@ -123,12 +123,6 @@ const PdfHelpVideoModal = () => {
                     <span className="phv-play-icon" aria-hidden="true">▶</span>
                   </a>
                 </div>
-
-                <p className="phv-video-cta">
-                  <a href={selectedVideo.watchUrl} target="_blank" rel="noopener noreferrer">
-                    Watch on YouTube
-                  </a>
-                </p>
               </div>
             </div>
 
