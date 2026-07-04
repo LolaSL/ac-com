@@ -30,7 +30,7 @@ const CancellationPage = () => {
         <strong>How to cancel before shipment:</strong>
       </p>
       <ul className="fs-5">
-        <li>Send an email to <a href="mailto:accomhomesupply.support@gmail.com">accomhomesupply.support@gmail.com</a> with subject line "Order Cancellation Request"</li>
+        <li>Send an email to <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">accomhomesupply.support@gmail.com</a> with subject line "Order Cancellation Request"</li>
         <li>Include your order number and reason for cancellation</li>
         <li>We will confirm cancellation within 24 hours (1 business day)</li>
         <li>Full refund will be processed to your original payment method within 5-14 business days</li>
@@ -91,7 +91,7 @@ const CancellationPage = () => {
         <li>Sealed goods that have been unsealed and are not suitable for return (e.g., certain electrical items)</li>
       </ul>
       <p className="fs-5">
-        <strong>To exercise your right of withdrawal:</strong> Email us at <a href="mailto:accomhomesupply.support@gmail.com">accomhomesupply.support@gmail.com</a> with subject line "EU/UK Right of Withdrawal" and include your order number
+        <strong>To exercise your right of withdrawal:</strong> Email us at <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">accomhomesupply.support@gmail.com</a> with subject line "EU/UK Right of Withdrawal" and include your order number
         and clear statement that you wish to cancel.
       </p>
 
@@ -159,7 +159,7 @@ const CancellationPage = () => {
       <h4>Contact Information</h4>
       <p className="fs-5">
         For all cancellation requests or questions about this policy, please email:{" "}
-        <a href="mailto:accomhomesupply.support@gmail.com">
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">
           accomhomesupply.support@gmail.com
         </a>
       </p>

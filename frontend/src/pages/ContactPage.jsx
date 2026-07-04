@@ -177,8 +177,8 @@ const ContactPage = () => {
               <div>
                 <div className="ct-info-item__label">Email</div>
                 <div className="ct-info-item__value">
-                  <a href="mailto:accomhomesupply.support@gmail.com" className="ct-link">accomhomesupply.support@gmail.com</a><br />
-                  <a href="mailto:accomhomesupply.support@gmail.com" className="ct-link">accomhomesupply.support@gmail.com</a>
+                  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer" className="ct-link">accomhomesupply.support@gmail.com</a><br />
+                  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer" className="ct-link">accomhomesupply.support@gmail.com</a>
                 </div>
               </div>
             </div>

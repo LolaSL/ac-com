@@ -131,7 +131,16 @@ const Footer = () => {
             <div className="contact-item">
               <i className="fa-solid fa-envelope"></i>{" "}
               <span>
-                <a href="mailto:accomhomesupply.support@gmail.com">Default Mail</a>
+                <a
+                  href="mailto:accomhomesupply.support@gmail.com"
+                  onClick={(e) => {
+                    // On large screens, open Gmail web since no desktop mail client may be set
+                    if (window.innerWidth > 768) {
+                      e.preventDefault();
+                      window.open('https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request', '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                >Default Mail</a>
                 {" | "}
                 <a
                   href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request"
