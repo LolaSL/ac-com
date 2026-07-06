@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 // Shared support-email link. On desktop (>768px) opens Gmail compose in a
-// new tab; on small screens uses mailto: so the device's default mail app
-// launches a compose window instead of the Gmail inbox.
+// new tab; on small screens renders a plain mailto: so the device's default
+// mail app launches its compose window (never the Gmail inbox).
 const SUPPORT_EMAIL = "accomhomesupply.support@gmail.com";
-const GMAIL_COMPOSE_URL =
-  `https://mail.google.com/mail/?view=cm&fs=1&to=${SUPPORT_EMAIL}` +
-  `&su=Support%20Request`;
+const SMALL_SCREEN_MAX = 768;
+
+const isSmallScreen = () =>
+  typeof window !== "undefined" && window.innerWidth <= SMALL_SCREEN_MAX;
 
 const SupportEmailLink = ({
   subject,
@@ -14,20 +15,28 @@ const SupportEmailLink = ({
   className,
   ...rest
 }) => {
-  const gmailHref = subject
-    ? `https://mail.google.com/mail/?view=cm&fs=1&to=${SUPPORT_EMAIL}` +
-      `&su=${encodeURIComponent(subject)}`
-    : GMAIL_COMPOSE_URL;
-  const mailtoHref = subject
-    ? `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`
-    : `mailto:${SUPPORT_EMAIL}`;
+  const [small, setSmall] = useState(isSmallScreen);
 
-  const handleClick = (e) => {
-    if (typeof window !== "undefined" && window.innerWidth <= 768) {
-      e.preventDefault();
-      window.location.href = mailtoHref;
-    }
-  };
+  useEffect(() => {
+    const onResize = () => setSmall(isSmallScreen());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const encodedSubject = encodeURIComponent(subject || "Support Request");
+
+  const mailtoHref = `mailto:${SUPPORT_EMAIL}?subject=${encodedSubject}`;
+  const gmailHref =
+    `https://mail.google.com/mail/?view=cm&fs=1&to=${SUPPORT_EMAIL}` +
+    `&su=${encodedSubject}`;
+
+  if (small) {
+    return (
+      <a href={mailtoHref} className={className} {...rest}>
+        {label}
+      </a>
+    );
+  }
 
   return (
     <a
@@ -35,7 +44,6 @@ const SupportEmailLink = ({
       target="_blank"
       rel="noopener noreferrer"
       className={className}
-      onClick={handleClick}
       {...rest}
     >
       {label}
