@@ -1,5 +1,6 @@
 import React from "react";
 import { FaFileAlt } from "react-icons/fa";
+import SupportEmailLink from "../components/SupportEmailLink.jsx";
 import "./TermsOfusePage.css";
 
 const TermsOfusePage = () => {
@@ -81,9 +82,7 @@ const TermsOfusePage = () => {
       <h4>Cancellations</h4>
       <p className="fs-5">
         Orders that have not yet shipped may be cancelled by contacting{" "}
-        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">
-          accomhomesupply.support@gmail.com
-        </a>
+        <SupportEmailLink subject="Order Cancellation Request" />
         . Once an order has shipped, cancellations are not allowed. Refused
         shipments are subject to a 25% restocking fee plus shipping/freight
         charges.
@@ -300,9 +299,7 @@ const TermsOfusePage = () => {
       <p className="fs-5">
         For questions, concerns, or requests regarding these Terms of Use, data protection inquiries,
         or general customer support, please contact us at:{" "}
-        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">
-          accomhomesupply.support@gmail.com
-        </a>
+        <SupportEmailLink />
       </p>
       <p className="fs-5">
         <em>Last Updated: June 28, 2026</em>

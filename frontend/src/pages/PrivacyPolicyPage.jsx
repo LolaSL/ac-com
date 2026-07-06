@@ -1,5 +1,6 @@
 import React from "react";
 import { FaShieldAlt } from "react-icons/fa";
+import SupportEmailLink from "../components/SupportEmailLink.jsx";
 import "./PrivacyPolicyPage.css";
 
 const PrivacyPolicyPage = () => {
@@ -186,7 +187,7 @@ const PrivacyPolicyPage = () => {
         <li>Non-discrimination for exercising your rights</li>
       </ul>
       <p className="fs-5">
-        <strong>To exercise your rights:</strong> Contact us at <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">accomhomesupply.support@gmail.com</a> with subject line "Privacy Rights Request."
+        <strong>To exercise your rights:</strong> Contact us at <SupportEmailLink subject="Privacy Rights Request" /> with subject line "Privacy Rights Request."
         We will respond within 30 days (or as required by applicable law). We may require identity verification before
         processing requests.
       </p>
@@ -226,7 +227,7 @@ const PrivacyPolicyPage = () => {
         privacy rights, please contact us:
       </p>
       <p className="fs-5">
-        <strong>Email:</strong> <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">accomhomesupply.support@gmail.com</a><br/>
+        <strong>Email:</strong> <SupportEmailLink /><br/>
         <strong>Subject Line:</strong> Privacy Inquiry or Data Subject Rights Request
       </p>
       <p className="fs-5">
@@ -243,7 +244,7 @@ const PrivacyPolicyPage = () => {
         Our website and services are not intended for children under the age of 16 (or the applicable age of digital
         consent in your jurisdiction, which may be 13-16 depending on location). We do not knowingly collect personal
         information from children. If you believe we have inadvertently collected information from a child, please
-        contact us immediately at <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer">accomhomesupply.support@gmail.com</a>,
+        contact us immediately at <SupportEmailLink subject="Security Concern" />,
         and we will take steps to delete it promptly.
       </p>
       <p className="fs-5">

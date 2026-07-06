@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaUndoAlt } from 'react-icons/fa';
+import SupportEmailLink from '../components/SupportEmailLink.jsx';
 import './ReturnsPage.css';
 
 const ReturnsPage = () => {
@@ -83,7 +84,7 @@ const ReturnsPage = () => {
         <ul className="custom-ul">
           <li className="fs-5">Verify that the product meets the return eligibility requirements above.</li>
           <li className="fs-5">
-            Contact us via email at <strong>accomhomesupply.support@gmail.com</strong> to
+            Contact us via email at <SupportEmailLink subject="RMA Request" /> to
             request an RMA number. Include your order number, reason for return, and photos
             if applicable. Returns without a valid RMA will be refused.
           </li>
@@ -169,7 +170,7 @@ const ReturnsPage = () => {
         </p>
         <p className="fs-5">
           Cancellation requests must be sent via email to{" "}
-          <strong>accomhomesupply.support@gmail.com</strong>. Include your order number and reason
+          <SupportEmailLink subject="Order Cancellation Request" />. Include your order number and reason
           for cancellation.
         </p>
 

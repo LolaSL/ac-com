@@ -302,6 +302,113 @@ export default function OrderPage() {
     }
   }
 
+  // Delivery Duration Guide (admin helper on /admin/orders → order details).
+  // Windows mirror ShipMentPage.jsx: 1–3 processing + 1–10 domestic
+  // or 5–30 international business days.
+  const DOMESTIC_COUNTRIES = new Set([
+    "usa",
+    "us",
+    "united states",
+    "united states of america",
+  ]);
+
+  const isDomesticCountry = (country = "") =>
+    DOMESTIC_COUNTRIES.has(String(country).trim().toLowerCase());
+
+  const businessDaysBetween = (from, to) => {
+    if (!from || !to) return 0;
+    const start = new Date(from);
+    const end = new Date(to);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+    const cursor = new Date(start);
+    cursor.setHours(0, 0, 0, 0);
+    const endDay = new Date(end);
+    endDay.setHours(0, 0, 0, 0);
+    let days = 0;
+    while (cursor <= endDay) {
+      const dow = cursor.getDay();
+      if (dow !== 0 && dow !== 6) days += 1;
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return Math.max(0, days - 1);
+  };
+
+  const buildDeliveryGuide = () => {
+    if (!order?.isPaid || !order?.paidAt) return null;
+    const domestic = isDomesticCountry(order.shippingAddress?.country);
+    const minDays = 1 + (domestic ? 1 : 5);
+    const maxDays = 3 + (domestic ? 10 : 30);
+    const elapsed = businessDaysBetween(order.paidAt, new Date());
+
+    let status = "ontime";
+    let statusLabel = "On schedule";
+    if (elapsed > maxDays) {
+      status = "overdue";
+      const over = elapsed - maxDays;
+      statusLabel = `Overdue by ${over} business day${over === 1 ? "" : "s"}`;
+    } else if (elapsed >= maxDays - 2) {
+      status = "approaching";
+      statusLabel = "Approaching deadline";
+    } else if (elapsed < minDays) {
+      statusLabel = "Still in processing window";
+    }
+
+    return {
+      domestic,
+      minDays,
+      maxDays,
+      elapsed,
+      status,
+      statusLabel,
+      country: order.shippingAddress?.country || "—",
+    };
+  };
+
+  const renderDeliveryGuide = () => {
+    const guide = buildDeliveryGuide();
+    if (!guide) return null;
+    return (
+      <div className={`op-delivery-guide op-delivery-guide--${guide.status}`}>
+        <div className="op-delivery-guide__title">
+          🚚 Delivery Duration Guide
+        </div>
+        <div className="op-delivery-guide__row">
+          <span>Destination</span>
+          <strong>
+            {guide.country}{" "}
+            <span className="op-delivery-guide__tag">
+              {guide.domestic ? "Domestic" : "International"}
+            </span>
+          </strong>
+        </div>
+        <div className="op-delivery-guide__row">
+          <span>Expected window</span>
+          <strong>
+            {guide.minDays}–{guide.maxDays} business days
+          </strong>
+        </div>
+        <div className="op-delivery-guide__row">
+          <span>Elapsed since payment</span>
+          <strong>
+            {guide.elapsed} business day
+            {guide.elapsed === 1 ? "" : "s"}
+          </strong>
+        </div>
+        <div
+          className={`op-delivery-guide__status op-delivery-guide__status--${guide.status}`}
+        >
+          {guide.statusLabel}
+        </div>
+        <div className="op-delivery-guide__hint">
+          Includes 1–3 day processing +{" "}
+          {guide.domestic ? "1–10" : "5–30"} day{" "}
+          {guide.domestic ? "domestic" : "international"} shipping window (see
+          Shipping policy).
+        </div>
+      </div>
+    );
+  };
+
   function createOrder(data, actions) {
     const roundedTotal = Math.round(order.totalPrice * 100) / 100;
     return actions.order
@@ -413,7 +520,10 @@ export default function OrderPage() {
                   })}
                 </div>
               ) : (
-                <div className="op-status op-status--warning">Not Delivered Yet</div>
+                <>
+                  <div className="op-status op-status--warning">Not Delivered Yet</div>
+                  {renderDeliveryGuide()}
+                </>
               )}
             </div>
 

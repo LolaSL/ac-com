@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import "./ContactPage.css";
 import { COUNTRIES } from "../utils/countries";
+import SupportEmailLink from "../components/SupportEmailLink.jsx";
 
 const SERVICE_TYPES = [
   "Product Inquiry", "Order Support", "AC Installation", "AC Repair",
@@ -177,8 +178,8 @@ const ContactPage = () => {
               <div>
                 <div className="ct-info-item__label">Email</div>
                 <div className="ct-info-item__value">
-                  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer" className="ct-link">accomhomesupply.support@gmail.com</a><br />
-                  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request" target="_blank" rel="noopener noreferrer" className="ct-link">accomhomesupply.support@gmail.com</a>
+                  <SupportEmailLink className="ct-link" /><br />
+                  <SupportEmailLink className="ct-link" />
                 </div>
               </div>
             </div>

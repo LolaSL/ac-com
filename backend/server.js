@@ -27,6 +27,7 @@ import path from "path";
 import cors from 'cors';
 import Notification from './models/notificationModel.js';
 import { startPaymentReminderJob } from './utils/paymentReminderJob.js';
+import { startOverdueDeliveryReminders } from './utils/cronJobs.js';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ async function start() {
 
     // Start scheduled jobs
     startPaymentReminderJob();
+    startOverdueDeliveryReminders();
 
     const port = process.env.PORT || 5020;
     server = app.listen(port, () => {

@@ -154,3 +154,125 @@ export const startCleanupTasks = () => {
 
   console.log('✅ Cleanup tasks scheduled (runs daily at 2 AM)');
 };
+
+// ─────────────────────────────────────────────────────────────
+// Overdue delivery reminders
+// Scans paid + not-delivered orders and notifies admins when the
+// expected delivery window (mirroring ShipMentPage rules) is being
+// approached or has been exceeded. Deduped by (title + orderId) so
+// each order generates at most one "Approaching" and one "Overdue"
+// admin notification.
+// ─────────────────────────────────────────────────────────────
+const DOMESTIC_COUNTRIES = new Set([
+  'usa',
+  'us',
+  'united states',
+  'united states of america',
+]);
+
+const isDomesticCountry = (country = '') =>
+  DOMESTIC_COUNTRIES.has(String(country).trim().toLowerCase());
+
+// Inclusive business-day count between two dates (skips Sat/Sun).
+// Returns full business days elapsed (0 on the same day).
+const businessDaysBetween = (from, to) => {
+  if (!from || !to) return 0;
+  const start = new Date(from);
+  const end = new Date(to);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+  const cursor = new Date(start);
+  cursor.setHours(0, 0, 0, 0);
+  const endDay = new Date(end);
+  endDay.setHours(0, 0, 0, 0);
+  let days = 0;
+  while (cursor <= endDay) {
+    const dow = cursor.getDay();
+    if (dow !== 0 && dow !== 6) days += 1;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return Math.max(0, days - 1);
+};
+
+export const startOverdueDeliveryReminders = () => {
+  // Run once a day at 08:00 server time
+  cron.schedule('0 8 * * *', async () => {
+    console.log('📦 Running overdue delivery reminder cron job...');
+
+    try {
+      const pendingOrders = await Order.find({
+        isPaid: true,
+        isDelivered: false,
+        isCancelled: { $ne: true },
+      }).populate('user', '_id name email');
+
+      console.log(`Found ${pendingOrders.length} paid + not-delivered orders`);
+
+      let approachingCreated = 0;
+      let overdueCreated = 0;
+
+      for (const order of pendingOrders) {
+        if (!order.paidAt) continue;
+
+        const domestic = isDomesticCountry(order.shippingAddress?.country);
+        // Processing (1–3) + shipping (domestic 1–10, international 5–30)
+        const maxDays = 3 + (domestic ? 10 : 30);
+        const elapsed = businessDaysBetween(order.paidAt, new Date());
+
+        let title = null;
+        let type = 'info';
+        let messageBody = '';
+
+        if (elapsed > maxDays) {
+          title = 'Delivery Overdue';
+          type = 'urgent';
+          const over = elapsed - maxDays;
+          messageBody =
+            `Order #${order._id.toString().slice(-6).toUpperCase()} is ` +
+            `${over} business day${over === 1 ? '' : 's'} past the expected ` +
+            `${domestic ? 'domestic' : 'international'} delivery window ` +
+            `(max ${maxDays} business days). Customer: ` +
+            `${order.user?.name || 'Unknown'}. Destination: ` +
+            `${order.shippingAddress?.country || '—'}.`;
+        } else if (elapsed >= maxDays - 2) {
+          title = 'Delivery Approaching Deadline';
+          type = 'info';
+          messageBody =
+            `Order #${order._id.toString().slice(-6).toUpperCase()} is at ` +
+            `${elapsed}/${maxDays} business days for a ` +
+            `${domestic ? 'domestic' : 'international'} shipment. ` +
+            `Please confirm delivery status before it becomes overdue.`;
+        } else {
+          continue; // still comfortably within window
+        }
+
+        // Dedup: don't create the same admin notification twice for this order
+        const alreadySent = await Notification.findOne({
+          title,
+          orderId: order._id,
+          recipientType: 'admin',
+        });
+        if (alreadySent) continue;
+
+        await Notification.create({
+          title,
+          message: messageBody,
+          type,
+          recipientType: 'admin',
+          orderId: order._id,
+          link: `/order/${order._id}`,
+        });
+
+        if (title === 'Delivery Overdue') overdueCreated += 1;
+        else approachingCreated += 1;
+      }
+
+      console.log(
+        `✅ Overdue delivery cron completed — approaching: ${approachingCreated}, overdue: ${overdueCreated}`
+      );
+    } catch (error) {
+      console.error('❌ Error in overdue delivery cron job:', error.message);
+    }
+  });
+
+  console.log('✅ Overdue delivery reminder cron job scheduled (daily 08:00)');
+};
