@@ -200,10 +200,19 @@ function UserReviewsPage() {
       ) : (
         <Row>
           <Col md={6} className="mb-4">
-            <h3 className="urv-section-title">Product Reviews</h3>
+            <div className="urv-section-header">
+              <h3 className="urv-section-title">Product Reviews</h3>
+              <Link to="/search" className="urv-new-review-link">
+                <FaStar className="me-1" />
+                Write a product review
+              </Link>
+            </div>
             {productReviews.length === 0 ? (
               <Alert variant="info">
-                You haven't reviewed any products yet.
+                You haven't reviewed any products yet.{" "}
+                <Link to="/search">Browse products</Link> or{" "}
+                <Link to="/orderhistory">visit your orders</Link> to leave your
+                first review.
               </Alert>
             ) : (
               productReviews.map((r) => (
@@ -242,10 +251,18 @@ function UserReviewsPage() {
           </Col>
 
           <Col md={6} className="mb-4">
-            <h3 className="urv-section-title">Seller Reviews</h3>
+            <div className="urv-section-header">
+              <h3 className="urv-section-title">Seller Reviews</h3>
+              <Link to="/sellers" className="urv-new-review-link">
+                <FaStar className="me-1" />
+                Write a seller review
+              </Link>
+            </div>
             {sellerReviews.length === 0 ? (
               <Alert variant="info">
-                You haven't reviewed any sellers yet.
+                You haven't reviewed any sellers yet.{" "}
+                <Link to="/sellers">Browse our network</Link> to leave your
+                first seller review.
               </Alert>
             ) : (
               sellerReviews.map((r, idx) => (
@@ -253,7 +270,18 @@ function UserReviewsPage() {
                   <Card.Body className="urv-card__body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <Card.Title className="mb-1 urv-card__title">{r.sellerName}</Card.Title>
+                        <Card.Title className="mb-1 urv-card__title">
+                          {r.sellerId ? (
+                            <Link
+                              to={`/sellers/${r.sellerId}`}
+                              className="urv-card__link"
+                            >
+                              {r.sellerName}
+                            </Link>
+                          ) : (
+                            r.sellerName
+                          )}
+                        </Card.Title>
                         <div className="urv-card__date">
                           Reviewed on{" "}
                           {new Date(r.createdAt).toLocaleDateString()}
