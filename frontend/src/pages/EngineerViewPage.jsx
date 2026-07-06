@@ -1086,9 +1086,9 @@ const EngineerViewPage = () => {
       : 0.05;
     // Multi-flat drawings use a lighter shrink than before so symbols stay readable.
     const isMultiFlat = flatGroups.size > 1;
-    const multiFlatShrink = isMultiFlat ? 0.72 : 1;
+    const multiFlatShrink = isMultiFlat ? 0.85 : 1;
     const sizeScale =
-      Math.max(0.45, Math.min(1.15, avgRectDim / 0.05)) * multiFlatShrink;
+      Math.max(0.55, Math.min(1.35, avgRectDim / 0.05)) * multiFlatShrink * 1.15;
 
     // Build deterministic lane offsets so nearby indoor units don't stack HVAC
     // symbols on top of each other.
