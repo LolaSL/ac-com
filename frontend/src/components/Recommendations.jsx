@@ -138,7 +138,7 @@ export default function Recommendations() {
           </tbody>
         </table>
         <div class="print-footer">
-          <p>AC Commerce - Professional HVAC Solutions | www.accommerce.com</p>
+          <p>AC-Commerce - Professional HVAC Solutions | www.accommerce.com</p>
         </div>
       </div>
     `;
@@ -472,7 +472,7 @@ export default function Recommendations() {
       : "AC Unit Recommendations";
 
     return {
-      title: "AC Commerce - System Recommendations",
+      title: "AC-Commerce - System Recommendations",
       text: summary,
       url: window.location.href,
     };
@@ -585,7 +585,7 @@ export default function Recommendations() {
             })}
           </p>
           <p style={{ fontSize: '0.85rem', opacity: 0.85, margin: '0.25rem 0 0 0' }}>
-            AC Commerce - Professional HVAC Solutions 
+            AC-Commerce - Professional HVAC Solutions 
           </p>
         </div>
 

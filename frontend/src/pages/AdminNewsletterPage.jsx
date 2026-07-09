@@ -66,7 +66,7 @@ export default function AdminNewsletterPage() {
     setResult(null);
     const t = TEMPLATES.find((t) => t.key === key);
     if (t) {
-      setSubject(`AC Commerce — ${t.label}`);
+      setSubject(`AC-Commerce — ${t.label}`);
     }
   };
 

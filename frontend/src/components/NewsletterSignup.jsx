@@ -84,7 +84,7 @@ export default function NewsletterSignup() {
             <h2 className="nl-title">{mode === "unsubscribe" ? "Manage Subscription" : "Stay Updated"}</h2>
             <p className="nl-desc">
               {mode === "unsubscribe"
-                ? "Enter your email address to stop receiving newsletter updates from AC Commerce."
+                ? "Enter your email address to stop receiving newsletter updates from AC-Commerce."
                 : "Get exclusive updates on new features, pricing options, and industry insights delivered to your inbox"}
             </p>
           </div>

@@ -126,7 +126,7 @@ userRouter.post(
                 </p>
                 <p>If you didn't request this password reset, please ignore this email.</p>
                 <p>This link will expire in 3 hours.</p>
-                <p>Best regards,<br>The AC Commerce Team</p>
+                <p>Best regards,<br>The AC-Commerce Team</p>
               </div>
             `
           });

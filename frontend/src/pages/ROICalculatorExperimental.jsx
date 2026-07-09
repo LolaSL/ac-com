@@ -869,9 +869,9 @@ export default function ROICalculatorExperimental() {
 
     // 4 -- Property-type tip
     if (calculation.propertyType === "residential-multi" && calculation.numberOfUnits) {
-      insights.push(`[MULTI-UNIT] ${calculation.numberOfUnits} unit${calculation.numberOfUnits !== 1 ? "s" : ""} - AC Commerce's multi-unit platform discount offsets bulk coordination overhead.`);
+      insights.push(`[MULTI-UNIT] ${calculation.numberOfUnits} unit${calculation.numberOfUnits !== 1 ? "s" : ""} - AC-Commerce's multi-unit platform discount offsets bulk coordination overhead.`);
     } else if (calculation.propertyType === "industrial-commercial") {
-      insights.push(`[COMMERCIAL] Maintenance cost drops from 5% to 2% of project value on the AC Commerce platform.`);
+      insights.push(`[COMMERCIAL] Maintenance cost drops from 5% to 2% of project value on the AC-Commerce platform.`);
     }
 
     // 5 -- Scale/ROI opportunity
@@ -1013,7 +1013,7 @@ export default function ROICalculatorExperimental() {
   if (isFromBTU) {
     // Use actual equipment cost from BTU Calculator with markup/discount
     // Traditional: Add 15% contractor markup
-    // AC Commerce: Platform provides 8% discount
+    // AC-Commerce: Platform provides 8% discount
     baseEquipmentTradCost = capturedBtuData.equipmentCost * 1.15;
     baseEquipmentAccCost = capturedBtuData.equipmentCost * 0.92;
   } else {
@@ -2156,7 +2156,7 @@ export default function ROICalculatorExperimental() {
                           <Col md={6}>
                             <div className="breakdown-section">
                               <h6 className="breakdown-subtitle">
-                                AC Commerce Platform
+                                AC-Commerce Platform
                               </h6>
                               <div className="breakdown-item">
                                 <span>Equipment Cost:</span>
@@ -2222,7 +2222,7 @@ export default function ROICalculatorExperimental() {
                           </span>
                         </div>
                         <div className="breakdown-item">
-                          <span>AC Commerce Platform:</span>
+                          <span>AC-Commerce Platform:</span>
                           <span className="cost platform">
                             $
                             {acCommerceCostPerProject.toLocaleString("en-US", {

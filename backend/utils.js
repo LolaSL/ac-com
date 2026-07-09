@@ -20,7 +20,7 @@ export const sendEmail = async ({ to, subject, html }) => {
     return null;
   }
   return transporter.sendMail({
-    from: `"AC Commerce" <${process.env.GMAIL_USER}>`,
+    from: `"AC-Commerce" <${process.env.GMAIL_USER}>`,
     to,
     subject,
     html,

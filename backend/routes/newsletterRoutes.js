@@ -8,7 +8,7 @@ const newsletterRouter = express.Router();
 
 const buildWelcomeEmailHtml = (unsubscribeUrl) => `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #0066ff;">Welcome to AC Commerce!</h2>
+        <h2 style="color: #0066ff;">Welcome to AC-Commerce!</h2>
         <p>Thank you for subscribing to our newsletter. You'll receive updates on:</p>
         <ul>
             <li>New features and platform updates</li>
@@ -25,7 +25,7 @@ const buildWelcomeEmailHtml = (unsubscribeUrl) => `
             If the button does not work, copy and paste this link into your browser:<br />
             <a href="${unsubscribeUrl}" style="color: #0f766e;">${unsubscribeUrl}</a>
         </p>
-        <p>Best regards,<br>The AC Commerce Team</p>
+        <p>Best regards,<br>The AC-Commerce Team</p>
     </div>
 `;
 
@@ -66,7 +66,7 @@ newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
                         const unsubscribeUrl = `${baseUrl()}/api/newsletter/unsubscribe/${existingSubscriber.unsubscribeToken}`;
                         await sendEmail({
                             to: existingSubscriber.email,
-                            subject: 'Welcome back to AC Commerce Newsletter!',
+                            subject: 'Welcome back to AC-Commerce Newsletter!',
                             html: buildWelcomeEmailHtml(unsubscribeUrl)
                         });
                     } catch (emailError) {
@@ -108,7 +108,7 @@ newsletterRouter.post('/subscribe', expressAsyncHandler(async (req, res) => {
                 const unsubscribeUrl = `${baseUrl()}/api/newsletter/unsubscribe/${subscriber.unsubscribeToken}`;
                 await sendEmail({
                     to: subscriber.email,
-                    subject: 'Welcome to AC Commerce Newsletter!',
+                    subject: 'Welcome to AC-Commerce Newsletter!',
                     html: buildWelcomeEmailHtml(unsubscribeUrl)
                 });
             } catch (emailError) {
@@ -173,10 +173,10 @@ newsletterRouter.post('/unsubscribe', expressAsyncHandler(async (req, res) => {
                     html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #0066ff;">Unsubscription Confirmed</h2>
-            <p>You have been successfully unsubscribed from the AC Commerce newsletter.</p>
+            <p>You have been successfully unsubscribed from the AC-Commerce newsletter.</p>
             <p>If you change your mind, you can always resubscribe from our website.</p>
-            <p>Thank you for your interest in AC Commerce.</p>
-            <p>Best regards,<br>The AC Commerce Team</p>
+            <p>Thank you for your interest in AC-Commerce.</p>
+            <p>Best regards,<br>The AC-Commerce Team</p>
           </div>
         `
                 });
@@ -223,7 +223,7 @@ newsletterRouter.get('/unsubscribe/:token', expressAsyncHandler(async (req, res)
           <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
             <h2 style="color: #28a745;">Already Unsubscribed</h2>
             <p>You have already been unsubscribed from our newsletter.</p>
-            <p>Thank you for your previous interest in AC Commerce.</p>
+            <p>Thank you for your previous interest in AC-Commerce.</p>
           </body>
         </html>
       `);
@@ -239,9 +239,9 @@ newsletterRouter.get('/unsubscribe/:token', expressAsyncHandler(async (req, res)
       <html>
         <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
           <h2 style="color: #28a745;">Successfully Unsubscribed</h2>
-          <p>You have been successfully unsubscribed from the AC Commerce newsletter.</p>
+          <p>You have been successfully unsubscribed from the AC-Commerce newsletter.</p>
           <p>If you change your mind, you can always resubscribe from our website.</p>
-          <p>Thank you for your interest in AC Commerce.</p>
+          <p>Thank you for your interest in AC-Commerce.</p>
         </body>
       </html>
     `);
@@ -424,7 +424,7 @@ newsletterRouter.post('/admin/send', isAuth, isAdmin, expressAsyncHandler(async 
 function buildNewsletterHtml(template, email, unsubscribeUrl, appUrl) {
     const templates = {
         welcome: {
-            heading: 'Welcome to AC Commerce!',
+            heading: 'Welcome to AC-Commerce!',
             body: `
                 <p>We're thrilled to have you join our HVAC marketplace community.</p>
                 <p>Here's what you can explore:</p>
@@ -488,7 +488,7 @@ function buildNewsletterHtml(template, email, unsubscribeUrl, appUrl) {
             heading: 'Your HVAC ROI Report',
             body: `
                 <p>Smart HVAC investments pay for themselves. Our ROI Calculator shows you exactly how much you'll save.</p>
-                <p>Compare traditional vs. AC Commerce pricing, calculate payback periods, and make data-driven decisions for your projects.</p>
+                <p>Compare traditional vs. AC-Commerce pricing, calculate payback periods, and make data-driven decisions for your projects.</p>
                 <p>Contractors and homeowners alike are seeing significant savings through our platform.</p>`,
             ctaText: 'Calculate Your ROI',
             ctaUrl: `${appUrl}/roi-calculator`,
@@ -548,7 +548,7 @@ function buildNewsletterHtml(template, email, unsubscribeUrl, appUrl) {
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="color: #ffffff; margin: 0 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">AC Commerce</h1>
+            <h1 style="color: #ffffff; margin: 0 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">AC-Commerce</h1>
             <p style="color: rgba(255,255,255,0.85); margin: 0; font-size: 14px;">Your Trusted HVAC Marketplace</p>
         </div>
 
@@ -568,7 +568,7 @@ function buildNewsletterHtml(template, email, unsubscribeUrl, appUrl) {
 
         <!-- Footer -->
         <div style="padding: 24px 30px; text-align: center; color: #a0aec0; font-size: 12px;">
-            <p style="margin: 0 0 8px;">AC Commerce — HVAC Solutions Marketplace</p>
+            <p style="margin: 0 0 8px;">AC-Commerce — HVAC Solutions Marketplace</p>
             <p style="margin: 0;">You're receiving this because you subscribed at <a href="${appUrl}" style="color: #6366f1; text-decoration: none;">${appUrl}</a></p>
         </div>
     </div>`;
