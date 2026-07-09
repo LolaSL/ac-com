@@ -55,7 +55,7 @@ export default function HomeBannerPage() {
       title: "✅ View Results on Recommendations Page",
       description:
         "See your BTU calculations, matched AC products, system summaries, and installation accessories — all tailored to your floor plan.",
-      imageSrc: "/images/hero.jpg",
+      imageSrc: "/images/offer01",
       linkText: "View Recommendations",
       linkTo: "/recommendations",
     },
@@ -63,7 +63,7 @@ export default function HomeBannerPage() {
       title: "Special offers and discounts",
       description:
         "Exclusive deals on top HVAC brands, available only through AC-Commerce. Check back regularly for new promotions and savings opportunities.",
-      imageSrc: "/images/offer02.png",
+      imageSrc: "/images/offer-summer01",
       linkText: "Explore Now",
       linkTo: "/offers",
     },
