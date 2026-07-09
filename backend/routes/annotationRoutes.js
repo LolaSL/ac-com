@@ -373,7 +373,7 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
       let formattedDate = createdAtDate
         ? new Date(createdAtDate).toLocaleString()
         : 'Unknown Date';
-      const watermarkText = `AC Commerce — User: ${email || 'Unknown User'} —  Saved: ${formattedDate}`;
+      const watermarkText = `AC-Commerce — User: ${email || 'Unknown User'} —  Saved: ${formattedDate}`;
 
       console.log('Drawing watermark on all pages:', watermarkText);
       pages.forEach((page) => {
@@ -525,7 +525,7 @@ router.get(
         pages,
         font,
         isPaid: hasPaidAccess,
-        text: `AC Commerce — ${email || 'User'} — ${formattedDate}`,
+        text: `AC-Commerce — ${email || 'User'} — ${formattedDate}`,
       });
 
       // 3️⃣ Approval stamp (PAID ONLY)

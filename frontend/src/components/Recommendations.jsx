@@ -585,7 +585,7 @@ export default function Recommendations() {
             })}
           </p>
           <p style={{ fontSize: '0.85rem', opacity: 0.85, margin: '0.25rem 0 0 0' }}>
-            AC Commerce - Professional HVAC Solutions | www.accommerce.com
+            AC Commerce - Professional HVAC Solutions 
           </p>
         </div>
 

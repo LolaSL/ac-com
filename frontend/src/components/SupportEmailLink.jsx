@@ -13,8 +13,17 @@ const SupportEmailLink = ({
   subject,
   label = SUPPORT_EMAIL,
   className,
+  style,
   ...rest
 }) => {
+  const mergedStyle = {
+    fontSize: "0.9em",
+    wordBreak: "break-all",
+    overflowWrap: "anywhere",
+    maxWidth: "100%",
+    display: "inline-block",
+    ...(style || {}),
+  };
   const [small, setSmall] = useState(isSmallScreen);
 
   useEffect(() => {
@@ -32,7 +41,7 @@ const SupportEmailLink = ({
 
   if (small) {
     return (
-      <a href={mailtoHref} className={className} {...rest}>
+      <a href={mailtoHref} className={className} style={mergedStyle} {...rest}>
         {label}
       </a>
     );
@@ -44,6 +53,7 @@ const SupportEmailLink = ({
       target="_blank"
       rel="noopener noreferrer"
       className={className}
+      style={mergedStyle}
       {...rest}
     >
       {label}

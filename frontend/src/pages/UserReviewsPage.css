@@ -1,5 +1,13 @@
 /* UserReviewsPage */
 
+.urv-page a {
+  text-decoration: none;
+}
+.urv-page a:hover,
+.urv-page a:focus {
+  text-decoration: none;
+}
+
 /* Override any parent container padding */
 .urv-page,
 .urv-page * .container,

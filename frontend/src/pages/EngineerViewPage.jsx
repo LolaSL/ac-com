@@ -470,10 +470,53 @@ const EngineerViewPage = () => {
       container.appendChild(overlayCanvas);
       const overlayContext = overlayCanvas.getContext("2d");
       overlayAnnotations(overlayContext, annotation.annotations, acType, { pdfScale });
+
+      // Always render zones (fill + stroke + "Zone N" label) regardless of
+      // showHVAC — so the engineer sees their zones as soon as they draw them.
+      // overlayHVAC below also draws zones, but only when showHVAC is on; we
+      // skip its zone pass to avoid double-drawing when both are active.
+      const zones = annotation?.annotations?.hvac?.zones || [];
+      if (zones.length > 0) {
+        const cw = overlayCanvas.width;
+        const ch = overlayCanvas.height;
+        const scaleFactor = pdfScale / 1.5;
+        zones.forEach((zone) => {
+          const zx = (zone.xPercent || 0) * cw;
+          const zy = (zone.yPercent || 0) * ch;
+          const zw = (zone.widthPercent || 0.15) * cw;
+          const zh = (zone.heightPercent || 0.12) * ch;
+          overlayContext.save();
+          overlayContext.beginPath();
+          overlayContext.rect(zx, zy, zw, zh);
+          overlayContext.fillStyle = zone.fill || 'rgba(0,150,255,0.12)';
+          overlayContext.fill();
+          overlayContext.lineWidth = 1 * scaleFactor;
+          overlayContext.strokeStyle = zone.stroke || 'rgba(0,100,200,0.5)';
+          overlayContext.stroke();
+
+          const hasZoneNumber = zone.zoneNumber !== undefined && zone.zoneNumber !== null && zone.zoneNumber !== "";
+          const hasZoneLabel = zone.zoneLabel !== undefined && zone.zoneLabel !== null && String(zone.zoneLabel).trim() !== "";
+          if (hasZoneNumber || hasZoneLabel) {
+            const label = hasZoneLabel ? String(zone.zoneLabel) : String(zone.zoneNumber);
+            // Font is sized in canvas pixels (canvas is rendered at pdfScale),
+            // so a larger min ensures it survives CSS-downscaling on small screens.
+            const fontSize = Math.max(16, 18 * scaleFactor);
+            overlayContext.font = `bold ${fontSize}px Arial`;
+            overlayContext.fillStyle = 'rgba(0,80,160,0.95)';
+            overlayContext.textAlign = 'left';
+            overlayContext.textBaseline = 'top';
+            overlayContext.fillText(`Zone ${label}`, zx + 6 * scaleFactor, zy + 6 * scaleFactor);
+          }
+          overlayContext.restore();
+        });
+      }
+
       if (showHVAC && annotation.annotations.hvac && (acType === "ducted" || acType === "vrf-ducted")) {
+        // Skip zones inside overlayHVAC — we already drew them above
+        const hvacNoZones = { ...(annotation.annotations.hvac || {}), zones: [] };
         overlayHVAC(
           overlayContext,
-          annotation.annotations.hvac,
+          hvacNoZones,
           hvacSymbols,
           annotation.annotations.comments,
           acType,
@@ -861,6 +904,19 @@ const EngineerViewPage = () => {
       },
     }));
     toast.info('Cleared HVAC elements (zones preserved)');
+  };
+
+  // Toggle manual zone drawing mode with guard: user must have annotated at
+  // least one rectangle first (same pre-condition as Auto-Place HVAC).
+  const handleToggleDrawZone = () => {
+    if (!isDrawingZone) {
+      const rects = annotation?.annotations?.rectangles || [];
+      if (rects.length === 0) {
+        toast.warn('No user annotations found. User must draw rectangles first before zones can be added.');
+        return;
+      }
+    }
+    setIsDrawingZone((v) => !v);
   };
 
   // Delete a specific zone by index
@@ -2265,7 +2321,7 @@ const EngineerViewPage = () => {
                   🖊 Zones
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => setIsDrawingZone(!isDrawingZone)}>
+                  <Dropdown.Item onClick={handleToggleDrawZone}>
                     {isDrawingZone ? '🔲 Stop Drawing' : '🖊 Draw Zone'}
                   </Dropdown.Item>
                   <Dropdown.Divider />
@@ -2301,7 +2357,7 @@ const EngineerViewPage = () => {
                 <Button
                   size="sm"
                   variant={isDrawingZone ? "primary" : "outline-primary"}
-                  onClick={() => setIsDrawingZone(!isDrawingZone)}
+                  onClick={handleToggleDrawZone}
                   title="Draw HVAC zones manually by dragging on the canvas"
                 >
                   {isDrawingZone ? '🔲 Stop Drawing' : '🖊 Draw Zone'}
