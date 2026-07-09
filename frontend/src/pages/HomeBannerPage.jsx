@@ -63,7 +63,7 @@ export default function HomeBannerPage() {
       title: "Special offers and discounts",
       description:
         "Exclusive deals on top HVAC brands, available only through AC-Commerce. Check back regularly for new promotions and savings opportunities.",
-      imageSrc: "/images/offer-spring1.png",
+      imageSrc: "/images/offer02.png",
       linkText: "Explore Now",
       linkTo: "/offers",
     },
