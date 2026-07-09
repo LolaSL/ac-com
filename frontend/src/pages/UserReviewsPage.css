@@ -262,6 +262,30 @@
   .urv-card__body {
     padding: 0.9rem 1rem;
   }
+
+  /* Keep section title and "Write a product review" link on the same row */
+  .urv-section-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .urv-section-title {
+    font-size: 1.05rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .urv-new-review-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -271,5 +295,15 @@
 
   .urv-card__comment {
     font-size: 0.82rem;
+  }
+
+  .urv-section-title {
+    font-size: 0.95rem;
+  }
+
+  .urv-new-review-link {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.6rem;
+    gap: 0.25rem;
   }
 }
