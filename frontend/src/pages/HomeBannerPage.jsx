@@ -55,7 +55,7 @@ export default function HomeBannerPage() {
       title: "✅ View Results on Recommendations Page",
       description:
         "See your BTU calculations, matched AC products, system summaries, and installation accessories — all tailored to your floor plan.",
-      imageSrc: "/images/offer01.png",
+      imageSrc: "/images/offer01.jpg",
       linkText: "View Recommendations",
       linkTo: "/recommendations",
     },
