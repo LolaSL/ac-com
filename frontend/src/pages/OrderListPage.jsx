@@ -444,18 +444,26 @@ export default function OrderListPage() {
                     ${(order.totalPrice ?? 0).toFixed(2)}
                   </td>
                   <td data-label="PAID">
-                    <Badge bg={order.isPaid ? "success" : "danger"}>
-                      {order.isPaid && order.paidAt
-                        ? order.paidAt.substring(0, 10)
-                        : "Pending"}
-                    </Badge>
+                    {order.isCancelled ? (
+                      <Badge bg="danger">Cancelled</Badge>
+                    ) : (
+                      <Badge bg={order.isPaid ? "success" : "danger"}>
+                        {order.isPaid && order.paidAt
+                          ? order.paidAt.substring(0, 10)
+                          : "Pending"}
+                      </Badge>
+                    )}
                   </td>
                   <td data-label="DELIVERED">
-                    <Badge bg={order.isDelivered ? "success" : "warning"}>
-                      {order.isDelivered && order.deliveredAt
-                        ? order.deliveredAt.substring(0, 10)
-                        : "Not Delivered"}
-                    </Badge>
+                    {order.isCancelled ? (
+                      <Badge bg="danger">Cancelled</Badge>
+                    ) : (
+                      <Badge bg={order.isDelivered ? "success" : "warning"}>
+                        {order.isDelivered && order.deliveredAt
+                          ? order.deliveredAt.substring(0, 10)
+                          : "Not Delivered"}
+                      </Badge>
+                    )}
                   </td>
                   <td className="actions-cell" data-label="ACTIONS">
                     <Button

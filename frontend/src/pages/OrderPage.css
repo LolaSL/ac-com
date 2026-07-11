@@ -25,6 +25,12 @@
   color: #fff; 
   box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
+.op-badge--red {
+  background: rgba(239,68,68,.9);
+  border: 1px solid rgba(239,68,68,1);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(239,68,68,.4);
+}
 
 .op-grid {
   max-width: 1400px;

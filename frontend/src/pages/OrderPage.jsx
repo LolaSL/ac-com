@@ -473,16 +473,22 @@ export default function OrderPage() {
                 Order <span style={{ fontFamily: 'monospace', opacity: 0.85 }}>#{orderId}</span>
               </h1>
               <div className="adm-hero__sub" style={{ marginTop: '0.5rem' }}>
-                {order.isPaid ? (
-                  <span className="op-badge op-badge--green">✓ Paid</span>
+                {order.isCancelled ? (
+                  <span className="op-badge op-badge--red">✕ Cancelled</span>
                 ) : (
-                  <span className="op-badge op-badge--yellow">⏳ Unpaid</span>
-                )}
-                {' '}
-                {order.isDelivered ? (
-                  <span className="op-badge op-badge--green">✓ Delivered</span>
-                ) : (
-                  <span className="op-badge op-badge--grey">🚚 Pending Delivery</span>
+                  <>
+                    {order.isPaid ? (
+                      <span className="op-badge op-badge--green">✓ Paid</span>
+                    ) : (
+                      <span className="op-badge op-badge--yellow">⏳ Unpaid</span>
+                    )}
+                    {' '}
+                    {order.isDelivered ? (
+                      <span className="op-badge op-badge--green">✓ Delivered</span>
+                    ) : (
+                      <span className="op-badge op-badge--grey">🚚 Pending Delivery</span>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -597,7 +603,7 @@ export default function OrderPage() {
                 </button>
               )}
 
-              {!order.isPaid && !isAdmin && (
+              {!order.isPaid && !order.isCancelled && !isAdmin && (
                 <div className="op-paypal">
                   <p className="op-paypal__label">Pay with PayPal</p>
                   {/* <p className="op-paypal__notice">

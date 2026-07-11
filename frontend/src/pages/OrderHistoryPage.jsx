@@ -112,14 +112,18 @@ export default function OrderHistoryPage() {
                       <strong>${order.totalPrice.toFixed(2)}</strong>
                     </td>
                     <td data-label="Payment">
-                      {order.isPaid ? (
+                      {order.isCancelled ? (
+                        <Badge bg="danger">Cancelled&nbsp;{order.cancelledAt ? new Date(order.cancelledAt).toLocaleDateString() : ''}</Badge>
+                      ) : order.isPaid ? (
                         <Badge bg="success">Paid &nbsp;{new Date(order.paidAt).toLocaleDateString()}</Badge>
                       ) : (
                         <Badge bg="warning" text="dark">Pending</Badge>
                       )}
                     </td>
                     <td data-label="Delivery">
-                      {order.isDelivered ? (
+                      {order.isCancelled ? (
+                        <Badge bg="danger">Cancelled</Badge>
+                      ) : order.isDelivered ? (
                         <Badge bg="primary">Delivered &nbsp;{new Date(order.deliveredAt).toLocaleDateString()}</Badge>
                       ) : (
                         <Badge bg="secondary">Not Shipped</Badge>
