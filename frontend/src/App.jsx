@@ -10,6 +10,7 @@ import AppRoutes from "./routes/AppRoutes.jsx";
 import Footer from "./components/Footer.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import WhatsAppButton from "./components/WhatsAppButton.jsx";
+import TranslatePrompt from "./components/TranslatePrompt.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -56,6 +57,7 @@ function AppContent() {
       <Footer />
       <CookieConsent />
       <WhatsAppButton />
+      <TranslatePrompt />
     </>
   );
 }

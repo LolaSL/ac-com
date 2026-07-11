@@ -61,21 +61,21 @@
 }
 
 .tou-hero__icon {
-  font-size: 2.6rem;
+  font-size: 2.262rem;
   margin-bottom: 0.75rem;
   color: #a855f7;
   filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
 }
 
 .tou-hero__title {
-  font-size: 2rem;
+  font-size: 1.74rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: #f1f5f9;
 }
 
 .tou-hero__sub {
-  font-size: 1rem;
+  font-size: 0.87rem;
   color: #94a3b8;
   margin: 0;
 }

@@ -6,6 +6,7 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import Container from "react-bootstrap/Container";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
+import axios from "axios";
 import { Store } from "../Store.js";
 import SearchBox from "../components/SearchBox.jsx";
 import "./Header.css";
@@ -17,8 +18,42 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navRef = useRef(null);
   const location = useLocation();
+
+  const authToken =
+    userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
+
+  // Fetch unread notifications count for the bell badge
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchUnread = async () => {
+      if (!authToken) {
+        setUnreadCount(0);
+        return;
+      }
+      try {
+        const { data } = await axios.get("/api/notifications", {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        if (!cancelled && Array.isArray(data)) {
+          setUnreadCount(data.filter((n) => !n.isRead).length);
+        }
+      } catch {
+        if (!cancelled) setUnreadCount(0);
+      }
+    };
+
+    fetchUnread();
+    // Poll every 60s so the badge stays fresh without being aggressive
+    const interval = setInterval(fetchUnread, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [authToken, location.pathname]);
 
   // Close dropdowns on outside click/touch (mobile fix for onMouseLeave)
   useEffect(() => {
@@ -74,7 +109,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             <p className="handwritten">Cooling Solutions For Every Space</p>
           </Link>
 
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Toggle aria-controls="basic-navbar-nav" className="account-toggler">
+            <i className="fas fa-user-circle"></i>
+            <i className="fas fa-chevron-down chevron"></i>
+          </Navbar.Toggle>
           <Navbar.Collapse
             id="basic-navbar-nav"
             className="justify-content-start"
@@ -83,6 +121,21 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
               <SearchBox />
             </div>
             <Nav className=" align-items-center gap-3 ms-auto me-4">
+              {authToken && (
+                <Link
+                  to="/notifications"
+                  className={`notification-bell${location.pathname === "/notifications" ? " active-link" : ""}`}
+                  title="Notifications"
+                  aria-label="Notifications"
+                >
+                  <i className="fas fa-bell"></i>
+                  {unreadCount > 0 && (
+                    <span className="notification-bell-badge">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              )}
               <div className="d-flex align-items-center gap-1 cart-wrapper">
                 <Link
                   to="/cart"

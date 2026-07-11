@@ -1,5 +1,4 @@
-import { useState, useEffect, useContext } from "react";
-import NotificationPopUp from "../components/NotificationPopUp";
+import { useContext } from "react";
 import TrustSection from "../components/TrustSection";
 import ValuePropositionSection from "../components/ValuePropositionSection";
 import TestimonialsSection from "../components/TestimonialsSection";
@@ -7,13 +6,11 @@ import TestimonialsSection from "../components/TestimonialsSection";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "./HomeBannerPage.css";
 
 export default function HomeBannerPage() {
-  const [fetchedNotifications, setFetchedNotifications] = useState([]);
-  const [currentNotification, setCurrentNotification] = useState(null);
-
+  // Notification auto-popup removed. Users access notifications via the bell icon
+  // in the header, which navigates to /notifications for a dedicated view.
   const { state } = useContext(Store);
   const { userInfo, adminInfo, serviceProviderInfo } = state;
   const navigate = useNavigate();
@@ -63,100 +60,15 @@ export default function HomeBannerPage() {
       title: "Special offers and discounts",
       description:
         "Exclusive deals on top HVAC brands, available only through AC-Commerce. Check back regularly for new promotions and savings opportunities.",
-      imageSrc: "/images/offer-summer01.png",
+      imageSrc: "/images/offer1.jpg",
       linkText: "Explore Now",
       linkTo: "/offers",
     },
 
   ];
 
-  useEffect(() => {
-    const fetchNotifications = async (token) => {
-      try {
-        const { data } = await axios.get("/api/notifications", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFetchedNotifications(data);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-      }
-    };
-
-    const userToken =
-      userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
-
-    if (userToken) {
-      fetchNotifications(userToken);
-    }
-  }, [userInfo, adminInfo, serviceProviderInfo]);
-  useEffect(() => {
-    let timer;
-
-    if (fetchedNotifications.length > 0) {
-      const firstUnread = fetchedNotifications.find(
-        (notification) => !notification.isRead
-      );
-
-      if (firstUnread) {
-        setCurrentNotification(firstUnread);
-
-        const updatedNotifications = fetchedNotifications.filter(
-          (n) => n._id !== firstUnread._id
-        );
-
-        timer = setTimeout(() => {
-          setCurrentNotification(null);
-          setFetchedNotifications(updatedNotifications);
-        }, 4000);
-      }
-    }
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [fetchedNotifications]);
-
-  const resolveNotificationLink = async (notification) => {
-    // Use stored link first (new notifications)
-    if (notification.link) return notification.link;
-
-    // Fall back: extract short order ID from message for old notifications
-    const orderMatch =
-      notification.message && notification.message.match(/#([a-zA-Z0-9]{6})/);
-    if (orderMatch) {
-      try {
-        const token =
-          userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
-        const { data } = await axios.get(
-          `/api/orders/by-short-id/${orderMatch[1]}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        return adminInfo
-          ? `/admin/order/${data.orderId}`
-          : `/order/${data.orderId}`;
-      } catch {
-        return null;
-      }
-    }
-
-    // Other known routes
-    const { title, recipientType } = notification;
-    if (title === 'Get A Quote') return userInfo || adminInfo || serviceProviderInfo ? '/measurement' : '/signin?redirect=/measurement';
-    if (title === 'Discount Offer') return '/offers';
-    if (recipientType === 'serviceProvider') return '/serviceprovider/messages';
-
-    // Fallback: send each role to their notifications view
-    if (adminInfo) return '/admin/dashboard/notification';
-    if (serviceProviderInfo) return '/serviceprovider/notifications';
-    return '/profile';
-  };
-
-  const handleNotificationClick = async () => {
-    if (!currentNotification) return;
-    const link = await resolveNotificationLink(currentNotification);
-    setCurrentNotification(null);
-    if (link) navigate(link);
-  };
+  // Auto-fetch + auto-popup disabled. Users now access notifications via the bell icon
+  // in the header, which navigates to /notifications for a dedicated view.
 
   const handleSlideClick = (index) => {
     const banner = banners[index];
@@ -171,19 +83,7 @@ export default function HomeBannerPage() {
 
   return (
     <div className="home-banner-page">
-      {/* Notification Popup */}
-      {currentNotification && (
-        <NotificationPopUp
-          notification={currentNotification}
-          onClose={() => setCurrentNotification(null)}
-          buttonText={
-            currentNotification.title === "Get A Quote"
-              ? "Get Quote"
-              : "Review Details"
-          }
-          onButtonClick={handleNotificationClick}
-        />
-      )}
+      {/* Notification popup removed — replaced by header bell + /notifications page */}
       
       {/* Hero with video background - Full bleed */}
       <div className="home-hero">

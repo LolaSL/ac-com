@@ -53,20 +53,20 @@
 }
 
 .au-hero__icon {
-  font-size: 2.4rem;
+  font-size: 2.088rem;
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 0.5rem;
 }
 
 .au-hero__title {
-  font-size: 1.7rem;
+  font-size: 1.479rem;
   font-weight: 700;
   color: #fff;
   margin: 0 0 0.35rem;
 }
 
 .au-hero__sub {
-  font-size: 0.9rem;
+  font-size: 0.783rem;
   color: rgba(255, 255, 255, 0.78);
   margin: 0;
 }
@@ -112,7 +112,7 @@
 }
 
 .au-lead {
-  font-size: 0.97rem;
+  font-size: 0.844rem;
   line-height: 1.8;
   color: #374151;
   margin: 0 0 0.85rem;
@@ -132,7 +132,7 @@ text-align: justify;
 }
 
 .au-section__title {
-  font-size: 1.25rem;
+  font-size: 1.087rem;
   font-weight: 700;
   color: #1e3a5f;
   margin: 0 0 1.25rem;
@@ -219,7 +219,7 @@ text-align: justify;
   background: linear-gradient(135deg, #a8112a, #ec133e);
   color: #fff;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.713rem;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -227,20 +227,20 @@ text-align: justify;
 }
 
 .au-step__icon {
-  font-size: 1.55rem;
+  font-size: 1.349rem;
   color: #2563a8;
   margin-bottom: 0.55rem;
 }
 
 .au-step__title {
-  font-size: 0.97rem;
+  font-size: 0.844rem;
   font-weight: 700;
   color: #1e3a5f;
   margin: 0 0 0.4rem;
 }
 
 .au-step__text {
-  font-size: 0.87rem;
+  font-size: 0.757rem;
   color: #4b5563;
   line-height: 1.6;
   margin: 0;
@@ -262,20 +262,20 @@ text-align: justify;
 }
 
 .au-feature__icon {
-  font-size: 1.5rem;
+  font-size: 1.305rem;
   color: #ec133e;
   margin-bottom: 0.55rem;
 }
 
 .au-feature__title {
-  font-size: 0.95rem;
+  font-size: 0.827rem;
   font-weight: 700;
   color: #1e3a5f;
   margin: 0 0 0.35rem;
 }
 
 .au-feature__text {
-  font-size: 0.85rem;
+  font-size: 0.739rem;
   color: #4b5563;
   line-height: 1.55;
   margin: 0;
@@ -303,7 +303,7 @@ text-align: justify;
 }
 
 .au-audience__icon {
-  font-size: 1.8rem;
+  font-size: 1.566rem;
   color: #ec133e;
   display: block;
   margin-bottom: 0.55rem;
@@ -311,13 +311,13 @@ text-align: justify;
 
 .au-audience__label {
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.766rem;
   color: #1e3a5f;
   margin-bottom: 0.3rem;
 }
 
 .au-audience__desc {
-  font-size: 0.77rem;
+  font-size: 0.67rem;
   color: #6b7280;
   line-height: 1.4;
   text-align: justify;

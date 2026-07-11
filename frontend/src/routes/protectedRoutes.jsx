@@ -19,9 +19,18 @@ import SellerDashboard from "../pages/SellerDashboard.jsx";
 import TotalSellerDashboard from "../pages/TotalSellerDashboard.jsx";
 import AdminAllAnnotationsPage from "../pages/AdminAllAnnotationsPage.jsx";
 import SPPaymentsPage from "../pages/SPPaymentsPage.jsx";
+import NotificationsPage from "../pages/NotificationsPage.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.js";
 
 export const protectedRoutes = [
+  {
+    path: "/notifications",
+    element: (
+      <ProtectedRoute>
+        <NotificationsPage />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "/recommendations",
     element: (
