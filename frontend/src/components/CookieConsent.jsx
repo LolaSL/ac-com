@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUniversalAccess, FaLock, FaTimes } from "react-icons/fa";
+import { FaUniversalAccess, FaLock, FaTimes, FaCookieBite } from "react-icons/fa";
 import "./CookieConsent.css";
 
 const STORAGE_KEY = "cookieConsent";
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
+  const [accepted, setAccepted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [settings, setSettings] = useState({
     analytics: true,
@@ -15,30 +16,61 @@ export default function CookieConsent() {
   });
 
   useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
       setVisible(true);
+      return;
+    }
+    setAccepted(true);
+    try {
+      const parsed = JSON.parse(stored);
+      setSettings({
+        analytics: !!parsed.analytics,
+        personalization: !!parsed.personalization,
+        marketing: !!parsed.marketing,
+      });
+    } catch {
+      // ignore parse errors
     }
   }, []);
 
   const handleAcceptAll = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ essential: true, analytics: true, personalization: true, marketing: true }));
+    setSettings({ analytics: true, personalization: true, marketing: true });
+    setAccepted(true);
     setVisible(false);
     setShowModal(false);
   };
 
   const handleSaveSettings = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ essential: true, ...settings }));
+    setAccepted(true);
     setVisible(false);
     setShowModal(false);
   };
 
   const toggle = (key) => setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  if (!visible) return null;
+  // Once accepted, keep the floating icon (and possibly the modal) available.
+  if (!visible && !accepted) return null;
 
   return (
     <>
+      {/* Floating cookie icon (only after acceptance) */}
+      {accepted && !visible && (
+        <button
+          type="button"
+          className="cookie-fab"
+          onClick={() => setShowModal(true)}
+          aria-label="Cookie settings"
+          title="Cookie settings"
+        >
+          <FaCookieBite />
+        </button>
+      )}
+
       {/* Banner */}
+      {visible && (
       <div className="cookie-banner" role="alert" aria-live="polite">
         <FaUniversalAccess className="cookie-banner__icon" />
         <div className="cookie-banner__text">
@@ -64,6 +96,7 @@ export default function CookieConsent() {
           </button>
         </div>
       </div>
+      )}
 
       {/* Modal */}
       {showModal && (

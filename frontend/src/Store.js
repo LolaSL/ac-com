@@ -1,4 +1,5 @@
 import { createContext, useReducer } from 'react';
+import { getShippingPrice, getTaxPrice, round2 } from './utils/pricing.js';
 
 export const Store = createContext();
 
@@ -101,15 +102,12 @@ function reducer(state, action) {
         0
       );
 
-      const taxPrice = itemsPrice * 0.1;
-      const shippingPrice = itemsPrice > 100 ? 0 : 10;
-      const totalPrice = itemsPrice + taxPrice + shippingPrice;
-
-      // Round to 2 decimal places to avoid precision issues
-      const roundedItemsPrice = Math.round(itemsPrice * 100) / 100;
-      const roundedTaxPrice = Math.round(taxPrice * 100) / 100;
-      const roundedShippingPrice = Math.round(shippingPrice * 100) / 100;
-      const roundedTotalPrice = Math.round(totalPrice * 100) / 100;
+      const roundedItemsPrice = round2(itemsPrice);
+      const roundedTaxPrice = getTaxPrice(roundedItemsPrice);
+      const roundedShippingPrice = getShippingPrice(roundedItemsPrice);
+      const roundedTotalPrice = round2(
+        roundedItemsPrice + roundedTaxPrice + roundedShippingPrice
+      );
 
       return {
         ...state,

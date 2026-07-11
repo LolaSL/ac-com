@@ -3,6 +3,11 @@ import { Store } from "../Store";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ModalWindow from "../components/ModalWindow.jsx";
+import {
+  getShippingPrice,
+  getNextShippingTier,
+  FREE_SHIPPING_THRESHOLD,
+} from "../utils/pricing.js";
 import "./CartPage.css";
 
 export default function CartPage() {
@@ -471,17 +476,28 @@ export default function CartPage() {
               )}
               <div className="cp-summary__row">
                 <span className="cp-summary__label">Shipping</span>
-                <span>Calculated at checkout</span>
+                <span>
+                  {subtotal >= FREE_SHIPPING_THRESHOLD
+                    ? "Free"
+                    : `$${getShippingPrice(subtotal).toFixed(2)}`}
+                </span>
               </div>
-              {subtotal >= 5000 ? (
+              {subtotal >= FREE_SHIPPING_THRESHOLD ? (
                 <div style={{ margin: '6px 0 2px', padding: '7px 10px', borderRadius: '6px', background: '#dcfce7', color: '#15803d', fontSize: '0.82rem', fontWeight: 600, textAlign: 'center' }}>
                   🎉 You qualify for free shipping!
                 </div>
-              ) : (
-                <div style={{ margin: '6px 0 2px', padding: '7px 10px', borderRadius: '6px', background: '#eff6ff', color: '#1d4ed8', fontSize: '0.82rem', textAlign: 'center' }}>
-                  Add <strong>${(5000 - subtotal).toFixed(2)}</strong> more for free shipping
-                </div>
-              )}
+              ) : (() => {
+                const nextTier = getNextShippingTier(subtotal);
+                if (!nextTier) return null;
+                return (
+                  <div style={{ margin: '6px 0 2px', padding: '7px 10px', borderRadius: '6px', background: '#eff6ff', color: '#1d4ed8', fontSize: '0.82rem', textAlign: 'center' }}>
+                    Add <strong>${nextTier.amountNeeded.toFixed(2)}</strong> more to{' '}
+                    {nextTier.isFree
+                      ? 'get free shipping'
+                      : `lower shipping to $${nextTier.price.toFixed(2)}`}
+                  </div>
+                );
+              })()}
               <div className="cp-summary__total">
                 <span>Total</span>
                 <span>${subtotal.toFixed(2)}</span>

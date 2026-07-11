@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Store } from "../Store.js";
 import "./NotificationsPage.css";
-
 const FILTERS = [
   { key: "all", label: "All" },
   { key: "unread", label: "Unread" },
@@ -42,6 +41,13 @@ export default function NotificationsPage() {
 
   const token =
     userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
+
+  // Admins have their own management page — redirect to avoid duplication.
+  useEffect(() => {
+    if (adminInfo) {
+      navigate("/admin/dashboard/notification", { replace: true });
+    }
+  }, [adminInfo, navigate]);
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);

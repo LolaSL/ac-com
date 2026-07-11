@@ -123,8 +123,13 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             <Nav className=" align-items-center gap-3 ms-auto me-4">
               {authToken && (
                 <Link
-                  to="/notifications"
-                  className={`notification-bell${location.pathname === "/notifications" ? " active-link" : ""}`}
+                  to={adminInfo ? "/admin/dashboard/notification" : "/notifications"}
+                  className={`notification-bell${
+                    location.pathname === "/notifications" ||
+                    location.pathname === "/admin/dashboard/notification"
+                      ? " active-link"
+                      : ""
+                  }`}
                   title="Notifications"
                   aria-label="Notifications"
                 >

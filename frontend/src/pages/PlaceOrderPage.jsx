@@ -6,6 +6,11 @@ import { getError } from "../utils";
 import { Store } from "../Store";
 import CheckoutSteps from "../components/CheckoutSteps";
 import { FaTruck, FaCreditCard, FaShoppingBag, FaEdit } from "react-icons/fa";
+import {
+  getShippingPrice,
+  getTaxPrice,
+  round2,
+} from "../utils/pricing.js";
 import "./PlaceOrderPage.css";
 
 const reducer = (state, action) => {
@@ -31,8 +36,6 @@ export default function PlaceOrderPage() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo } = state;
 
-  const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100;
-
   cart.itemsPrice = cart.cartItems?.length
     ? round2(
         cart.cartItems.reduce(
@@ -41,16 +44,12 @@ export default function PlaceOrderPage() {
         )
       )
     : 0;
-  const getShippingPrice = (itemsPrice, items) => {
-    if (itemsPrice > 5000) return round2(0);
-    if (itemsPrice > 2000) return round2(100);
-    if (itemsPrice > 500) return round2(50);
-    return round2(25);
-  };
 
-  cart.shippingPrice = getShippingPrice(cart.itemsPrice, cart.cartItems);
-  cart.taxPrice = round2(0.08 * cart.itemsPrice);
-  cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
+  cart.shippingPrice = getShippingPrice(cart.itemsPrice);
+  cart.taxPrice = getTaxPrice(cart.itemsPrice);
+  cart.totalPrice = round2(
+    cart.itemsPrice + cart.shippingPrice + cart.taxPrice
+  );
 
   const placeOrderHandler = async () => {
     try {
