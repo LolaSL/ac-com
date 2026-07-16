@@ -2,6 +2,8 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import expressAsyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
+import speakeasy from 'speakeasy';
+import QRCode from 'qrcode';
 import { OAuth2Client } from 'google-auth-library';
 import User from '../models/userModel.js';
 import Seller from '../models/sellerModel.js';
@@ -211,21 +213,152 @@ userRouter.post(
   expressAsyncHandler(async (req, res) => {
     const admin = await User.findOne({ email: req.body.email });
     if (
-      admin &&
-      bcrypt.compareSync(req.body.password, admin.password) &&
-      admin.isAdmin
+      !admin ||
+      !bcrypt.compareSync(req.body.password, admin.password) ||
+      !admin.isAdmin
     ) {
-      res.send({
-        _id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        isAdmin: true,
-        type: 'admin',
-        token: generateToken(admin),
-      });
-    } else {
-      res.status(401).send({ message: 'Invalid admin credentials' });
+      return res.status(401).send({ message: 'Invalid admin credentials' });
     }
+
+    // If MFA is enabled, require a valid TOTP code before issuing a token.
+    if (admin.mfaEnabled && admin.mfaSecret) {
+      const code = (req.body.totp || '').toString().trim();
+      if (!code) {
+        return res
+          .status(401)
+          .send({ mfaRequired: true, message: 'Authenticator code required' });
+      }
+      const verified = speakeasy.totp.verify({
+        secret: admin.mfaSecret,
+        encoding: 'base32',
+        token: code,
+        window: 1,
+      });
+      if (!verified) {
+        return res
+          .status(401)
+          .send({ mfaRequired: true, message: 'Invalid authenticator code' });
+      }
+    }
+
+    res.send({
+      _id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      isAdmin: true,
+      mfaEnabled: !!admin.mfaEnabled,
+      type: 'admin',
+      token: generateToken(admin),
+    });
+  })
+);
+
+// ── Admin MFA management ────────────────────────────────────────────────────
+// Returns whether MFA is currently enabled for the signed-in admin.
+userRouter.get(
+  '/admin/mfa/status',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const admin = await User.findById(req.user._id).select('mfaEnabled');
+    res.send({ enabled: !!admin?.mfaEnabled });
+  })
+);
+
+// Generates a fresh TOTP secret and returns an otpauth URL + data-URL QR image.
+// The secret is stored as `mfaPendingSecret` and only becomes active after
+// the admin confirms a valid code via /admin/mfa/enable.
+userRouter.post(
+  '/admin/mfa/setup',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const admin = await User.findById(req.user._id);
+    if (!admin) return res.status(404).send({ message: 'Admin not found' });
+
+    const secret = speakeasy.generateSecret({
+      name: `AC-Commerce Admin (${admin.email})`,
+      issuer: 'AC-Commerce',
+      length: 20,
+    });
+
+    admin.mfaPendingSecret = secret.base32;
+    await admin.save();
+
+    const qrDataUrl = await QRCode.toDataURL(secret.otpauth_url);
+    res.send({
+      otpauthUrl: secret.otpauth_url,
+      base32: secret.base32,
+      qrDataUrl,
+    });
+  })
+);
+
+// Confirms enrollment: verify the code against the pending secret, then
+// promote it to the active mfaSecret and flip mfaEnabled to true.
+userRouter.post(
+  '/admin/mfa/enable',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const admin = await User.findById(req.user._id);
+    if (!admin?.mfaPendingSecret) {
+      return res
+        .status(400)
+        .send({ message: 'No pending MFA setup — start setup first.' });
+    }
+    const code = (req.body.totp || '').toString().trim();
+    const verified = speakeasy.totp.verify({
+      secret: admin.mfaPendingSecret,
+      encoding: 'base32',
+      token: code,
+      window: 1,
+    });
+    if (!verified) {
+      return res.status(400).send({ message: 'Invalid authenticator code' });
+    }
+    admin.mfaSecret = admin.mfaPendingSecret;
+    admin.mfaPendingSecret = undefined;
+    admin.mfaEnabled = true;
+    await admin.save();
+    res.send({ message: 'MFA enabled', enabled: true });
+  })
+);
+
+// Disable MFA. Requires the current password AND a valid TOTP code so that
+// a stolen session token alone cannot turn MFA off.
+userRouter.post(
+  '/admin/mfa/disable',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const admin = await User.findById(req.user._id);
+    if (!admin) return res.status(404).send({ message: 'Admin not found' });
+    if (!admin.mfaEnabled) {
+      return res.send({ message: 'MFA already disabled', enabled: false });
+    }
+
+    const password = (req.body.password || '').toString();
+    const code = (req.body.totp || '').toString().trim();
+
+    if (!password || !bcrypt.compareSync(password, admin.password)) {
+      return res.status(401).send({ message: 'Invalid password' });
+    }
+    const verified = speakeasy.totp.verify({
+      secret: admin.mfaSecret,
+      encoding: 'base32',
+      token: code,
+      window: 1,
+    });
+    if (!verified) {
+      return res.status(400).send({ message: 'Invalid authenticator code' });
+    }
+
+    admin.mfaEnabled = false;
+    admin.mfaSecret = undefined;
+    admin.mfaPendingSecret = undefined;
+    await admin.save();
+    res.send({ message: 'MFA disabled', enabled: false });
   })
 );
 

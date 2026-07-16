@@ -15,6 +15,8 @@ export default function AdminLoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [totp, setTotp] = useState("");
+  const [mfaRequired, setMfaRequired] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [loginError, setLoginError] = useState("");
@@ -54,10 +56,13 @@ export default function AdminLoginPage() {
     setSubmitting(true);
 
     try {
-      const { data } = await axios.post(`/api/users/admin/signin`, {
+      const payload = {
         email: trimmedEmail,
         password: trimmedPassword,
-      });
+      };
+      if (mfaRequired) payload.totp = totp.trim();
+
+      const { data } = await axios.post(`/api/users/admin/signin`, payload);
 
       ctxDispatch({ type: "ADMIN_LOGIN", payload: data });
       localStorage.setItem("adminInfo", JSON.stringify(data));
@@ -65,9 +70,15 @@ export default function AdminLoginPage() {
       toast.success("Welcome, Admin!");
       navigate("/admin/dashboard");
     } catch (error) {
-      const msg =
-        error.response?.data?.message || "Invalid email or password";
-      setLoginError(msg);
+      const resp = error.response?.data;
+      if (resp?.mfaRequired) {
+        setMfaRequired(true);
+        setLoginError(
+          totp ? resp.message || "Invalid authenticator code" : ""
+        );
+      } else {
+        setLoginError(resp?.message || "Invalid email or password");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -181,6 +192,32 @@ export default function AdminLoginPage() {
                     {fieldErrors.password}
                   </Form.Control.Feedback>
                 </Form.Group>
+
+                {mfaRequired && (
+                  <Form.Group controlId="totp" className="admin-form-group">
+                    <Form.Label className="admin-form-label">
+                      <i className="fas fa-shield-alt me-2"></i>
+                      Authenticator Code
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      placeholder="6-digit code"
+                      value={totp}
+                      onChange={(e) => {
+                        setTotp(e.target.value.replace(/\D/g, ""));
+                        if (loginError) setLoginError("");
+                      }}
+                      className="admin-form-input"
+                      autoFocus
+                    />
+                    <Form.Text className="text-muted">
+                      Enter the code from your authenticator app.
+                    </Form.Text>
+                  </Form.Group>
+                )}
 
                 <div className="d-grid">
                   <Button

@@ -354,6 +354,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link to="/admin/newsletter" className="dropdown-item">
                     Newsletter
                   </Link>
+                  <Link to="/admin/security" className="dropdown-item">
+                    <i className="fas fa-shield-alt me-2"></i>
+                    Security (MFA)
+                  </Link>
                   <NavDropdown.Divider />
                   <Link
                     className="dropdown-item"
@@ -383,10 +387,6 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   <Link className="dropdown-item" to="/serviceprovider/login">
                     <i className="fas fa-hard-hat me-2"></i>
                     Service Provider Login
-                  </Link>
-                  <Link className="dropdown-item" to="/admin-login">
-                    <i className="fas fa-shield-alt me-2"></i>
-                    Admin Login
                   </Link>
                 </NavDropdown>
               )}

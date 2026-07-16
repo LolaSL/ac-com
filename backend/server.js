@@ -113,16 +113,30 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 
 // Stricter limit on auth endpoints: 20 req / 15 min per IP (production), 100 for dev
+// Only counts failed attempts (skipSuccessfulRequests) so legitimate logins
+// don't burn through the budget.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === 'production' ? 20 : 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
   message: { message: 'Too many login attempts, please try again later.' },
 });
 app.use('/api/users/signin', authLimiter);
 app.use('/api/users/register', authLimiter);
 app.use('/api/users/forget-password', authLimiter);
+
+// Extra-strict limit dedicated to admin login: 5 failed attempts / 15 min per IP.
+const adminAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 5 : 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  message: { message: 'Too many admin login attempts, please try again later.' },
+});
+app.use('/api/users/admin/signin', adminAuthLimiter);
 // ─────────────────────────────────────────────────────────────────────────────
 
 
