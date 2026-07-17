@@ -47,25 +47,42 @@ export default function Recommendations() {
       minute: '2-digit' 
     });
 
-    // Build room rows — exclude condenser rows to avoid double-counting
+    // Build room rows — include ALL rows (condensers too) so the printable
+    // quote matches what the app shows. Totals still sum only non-condenser
+    // room BTU / product BTU to avoid double-counting the outdoor unit.
     const nonCondenserRows = visibleRoomResults.filter(r => !r.product?.isCondenser);
     const roomBtuLabel = isBoth
       ? 'Room Load (Cool / Heat BTU)'
       : 'Room BTU';
-    const roomRowsHtml = nonCondenserRows.map((room, i) => {
+    const roomRowsHtml = visibleRoomResults.map((room, i) => {
       const product = room.product || {};
+      const isCondenserRow = !!product.isCondenser;
       const productPrice = product.price
         ? product.discount
           ? (product.price - (product.price * product.discount) / 100).toFixed(2)
           : product.price.toFixed(2)
         : '—';
-      const roomBtuCell = isBoth && (room.coolBtu != null || room.heatBtu != null)
-        ? `${(room.coolBtu || 0).toLocaleString()} / ${(room.heatBtu || 0).toLocaleString()}`
-        : (room.btu?.toLocaleString() || '—');
+      // Condenser rows don't have a room BTU — show em-dash for cool side and
+      // the combined heat/system BTU (or the product's own BTU) when available.
+      let roomBtuCell;
+      if (isCondenserRow) {
+        const heat = room.heatBtu || product.heatingBtu || product.btu;
+        roomBtuCell = isBoth
+          ? `— / ${(heat || 0).toLocaleString()}`
+          : (heat ? heat.toLocaleString() : '—');
+      } else {
+        roomBtuCell = isBoth && (room.coolBtu != null || room.heatBtu != null)
+          ? `${(room.coolBtu || 0).toLocaleString()} / ${(room.heatBtu || 0).toLocaleString()}`
+          : (room.btu?.toLocaleString() || '—');
+      }
+
+      const rowLabel = isCondenserRow
+        ? (room.name || 'Condenser')
+        : (room.name || `Room ${i + 1}`);
 
       return `
-        <tr>
-          <td>${room.name || `Room ${i + 1}`}</td>
+        <tr${isCondenserRow ? ' class="condenser-row"' : ''}>
+          <td>${rowLabel}</td>
           <td>${roomBtuCell}</td>
           <td>${product.name || product.model || '—'}</td>
           <td>${product.model || 'N/A'}</td>
@@ -75,10 +92,12 @@ export default function Recommendations() {
       `;
     }).join('');
 
-    // Calculate totals
+    // Calculate totals — sum non-condenser room BTU (room load) and
+    // non-condenser product BTU. Price total includes ALL products
+    // (indoor + outdoor condenser) so the quote reflects real cost.
     const totalBTU = nonCondenserRows.reduce((sum, room) => sum + (room.btu || 0), 0);
     const totalProductBTU = nonCondenserRows.reduce((sum, room) => sum + (room.product?.btu || 0), 0);
-    const totalPrice = nonCondenserRows.reduce((sum, room) => {
+    const totalPrice = visibleRoomResults.reduce((sum, room) => {
       const product = room.product || {};
       if (product.price) {
         const price = product.discount
@@ -231,6 +250,13 @@ export default function Recommendations() {
         }
         tbody tr:hover {
           background: #eff6ff;
+        }
+        tbody tr.condenser-row {
+          background: #eef4ff !important;
+        }
+        tbody tr.condenser-row td:first-child {
+          font-style: italic;
+          color: #0f3460;
         }
         .total-row td {
           background-color: #0f3460;
