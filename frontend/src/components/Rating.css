@@ -19,6 +19,17 @@
   color: #6c757d;
 }
 
+.rating--empty {
+  min-height: 1.25rem;
+}
+
+.rating-empty-text {
+  margin-left: 0 !important;
+  font-style: italic;
+  color: #8a94a6 !important;
+  font-size: 0.85rem !important;
+}
+
 @media (max-width: 768px) {
   .rating {
     gap: 0.125rem;

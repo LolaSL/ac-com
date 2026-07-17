@@ -4,6 +4,19 @@ import "./Rating.css";
 export default function Rating(props) {
   const { rating, numReviews, caption } = props;
 
+  // Zero-review empty state: don't render stars at all — show a friendly
+  // "No reviews yet" placeholder so we never display a fabricated rating.
+  const hasReviews = Number(numReviews) > 0 && Number(rating) > 0;
+  if (!hasReviews) {
+    return (
+      <div className="rating rating--empty">
+        <span className="rating-text rating-empty-text">
+          {caption || "No reviews yet — be the first to review"}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="rating">
       <span>
