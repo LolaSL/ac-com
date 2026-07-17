@@ -36,7 +36,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
           <h3 style="color:#dc3545">📋 AC-Commerce: Measurement System Instructions</h3>
           <p style="color:#6c757d;font-size:12px">Generated: ${new Date().toLocaleString()}</p>
           ${content.innerHTML}
-          <div class="footer">AC-Commerce &mdash; Professional HVAC Solutions &mdash; www.accommerce.com</div>
+          <div class="footer">AC-Commerce &mdash; Professional HVAC Solutions &mdash; www.ac-commerce.com</div>
         </body>
       </html>
     `);

@@ -115,6 +115,14 @@ export default function Recommendations() {
           }
         </div>
         <table class="quote-table">
+          <colgroup>
+            <col class="col-room" />
+            <col class="col-roombtu" />
+            <col class="col-product" />
+            <col class="col-model" />
+            <col class="col-pbtu" />
+            <col class="col-price" />
+          </colgroup>
           <thead>
             <tr>
               <th>Room</th>
@@ -138,7 +146,7 @@ export default function Recommendations() {
           </tbody>
         </table>
         <div class="print-footer">
-          <p>AC-Commerce - Professional HVAC Solutions | www.accommerce.com</p>
+          <p>AC-Commerce - Professional HVAC Solutions | www.ac-commerce.com</p>
         </div>
       </div>
     `;
@@ -183,7 +191,14 @@ export default function Recommendations() {
           border-radius: 10px;
           overflow: hidden;
           box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+          table-layout: fixed;
         }
+        .quote-table col.col-room     { width: 16%; }
+        .quote-table col.col-roombtu  { width: 15%; }
+        .quote-table col.col-product  { width: 22%; }
+        .quote-table col.col-model    { width: 15%; }
+        .quote-table col.col-pbtu     { width: 16%; }
+        .quote-table col.col-price    { width: 16%; }
         th {
           background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
           color: #fff;
@@ -193,6 +208,8 @@ export default function Recommendations() {
           text-transform: uppercase;
           letter-spacing: 0.06em;
           text-align: center;
+          word-break: break-word;
+          overflow-wrap: anywhere;
         }
         td {
           padding: 10px 14px;
@@ -200,6 +217,8 @@ export default function Recommendations() {
           border-bottom: 1px solid #f3f4f6;
           font-size: 0.88rem;
           color: #1f2937;
+          word-break: break-word;
+          overflow-wrap: anywhere;
         }
         tbody tr:nth-child(even) {
           background: #f9fafb;
@@ -243,10 +262,27 @@ export default function Recommendations() {
 <html>
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Force a wider layout viewport so the 6-column quote table lays out
+     at desktop width on iOS. Without this, Chrome iOS lays it out at the
+     phone's 428px width and the last two columns (Product BTU / Price)
+     get clipped off the printed page. -->
+<meta name="viewport" content="width=1024, initial-scale=1" />
 <title>HVAC System Quote</title>
 <style>${printStyle}
-@media print { body { background: #fff !important; } .print-container { box-shadow: none !important; margin: 0 auto !important; } }
+@page { size: A4 landscape; margin: 8mm; }
+@media print {
+  html, body { width: 100%; background: #fff !important; }
+  .print-container { box-shadow: none !important; margin: 0 auto !important; max-width: 100% !important; border-radius: 0 !important; }
+  .print-container > h1 { border-radius: 0 !important; padding: 0.9rem !important; font-size: 1.15rem !important; }
+  .print-meta { padding: 0.5rem 0.75rem !important; }
+  .print-meta p { font-size: 0.72rem !important; }
+  .quote-table { width: 100% !important; margin: 0.5rem 0 0 !important; box-shadow: none !important; border-radius: 0 !important; page-break-inside: auto; }
+  .quote-table th { padding: 6px 4px !important; font-size: 0.62rem !important; letter-spacing: 0.02em !important; }
+  .quote-table td { padding: 5px 4px !important; font-size: 0.66rem !important; }
+  .total-row td { font-size: 0.7rem !important; }
+  .print-footer { font-size: 0.65rem !important; padding: 0.5rem !important; }
+  tr { page-break-inside: avoid; }
+}
 </style>
 </head>
 <body>${tableHtml}</body>
