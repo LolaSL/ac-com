@@ -152,8 +152,8 @@ export default function Recommendations() {
     `;
 
     const printStyle = `
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background: #f5f6fa; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background: #f5f6fa; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         .print-container {
           max-width: 960px;
           margin: 24px auto;
@@ -164,8 +164,9 @@ export default function Recommendations() {
           overflow: hidden;
         }
         .print-container > h1 {
+          background-color: #0f3460;
           background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
-          color: #fff;
+          color: #fff !important;
           text-align: center;
           padding: 1.4rem 1rem;
           font-size: 1.5rem;
@@ -173,6 +174,8 @@ export default function Recommendations() {
           letter-spacing: 0.02em;
           margin: 0;
           border-radius: 14px 14px 0 0;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
         .print-meta {
           padding: 1rem 1.5rem;
@@ -200,8 +203,9 @@ export default function Recommendations() {
         .quote-table col.col-pbtu     { width: 16%; }
         .quote-table col.col-price    { width: 16%; }
         th {
+          background-color: #0f3460;
           background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
-          color: #fff;
+          color: #fff !important;
           padding: 12px 14px;
           font-size: 0.8rem;
           font-weight: 700;
@@ -210,6 +214,8 @@ export default function Recommendations() {
           text-align: center;
           word-break: break-word;
           overflow-wrap: anywhere;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
         td {
           padding: 10px 14px;
@@ -227,11 +233,15 @@ export default function Recommendations() {
           background: #eff6ff;
         }
         .total-row td {
+          background-color: #0f3460;
           background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
           color: #fff !important;
           font-weight: 700;
           font-size: 0.9rem;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
+        .total-row td strong { color: #fff !important; }
         .print-footer {
           text-align: center;
           padding: 1rem;
