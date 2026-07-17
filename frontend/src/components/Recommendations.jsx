@@ -280,8 +280,42 @@ export default function Recommendations() {
 <title>HVAC System Quote</title>
 <style>${printStyle}
 @page { size: A4 landscape; margin: 8mm; }
+/* Screen-only "Back" bar so iOS users can return to the app after
+   printing/saving the PDF — the new tab has no browser back history. */
+.ios-print-topbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #0f3460;
+  color: #fff;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.ios-print-topbar button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: #fff;
+  color: #0f3460;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(255,255,255,0.3);
+}
+.ios-print-topbar button:active { transform: scale(0.96); }
+.ios-print-topbar .title { font-size: 14px; font-weight: 600; opacity: 0.95; }
 @media print {
   html, body { width: 100%; background: #fff !important; }
+  .ios-print-topbar { display: none !important; }
   .print-container { box-shadow: none !important; margin: 0 auto !important; max-width: 100% !important; border-radius: 0 !important; }
   .print-container > h1 { border-radius: 0 !important; padding: 0.9rem !important; font-size: 1.15rem !important; }
   .print-meta { padding: 0.5rem 0.75rem !important; }
@@ -295,7 +329,37 @@ export default function Recommendations() {
 }
 </style>
 </head>
-<body>${tableHtml}</body>
+<body>
+<div class="ios-print-topbar" role="toolbar" aria-label="Print controls">
+  <button type="button" id="ios-print-back" aria-label="Back to app">&larr; Back to app</button>
+  <span class="title">HVAC System Quote</span>
+  <button type="button" id="ios-print-again" style="margin-left:auto;">Print again</button>
+</div>
+${tableHtml}
+<script>
+  (function () {
+    var closeTab = function () {
+      try { window.close(); } catch (e) {}
+      // Fallback: if the tab can't be closed programmatically on iOS Chrome,
+      // send the user back in history or to the app root.
+      setTimeout(function () {
+        if (!window.closed) {
+          try { window.history.back(); } catch (e) {}
+          setTimeout(function () {
+            if (!window.closed) {
+              window.location.replace(${JSON.stringify(window.location.origin + '/')});
+            }
+          }, 150);
+        }
+      }, 120);
+    };
+    var backBtn = document.getElementById('ios-print-back');
+    if (backBtn) backBtn.addEventListener('click', closeTab);
+    var againBtn = document.getElementById('ios-print-again');
+    if (againBtn) againBtn.addEventListener('click', function () { window.print(); });
+  })();
+<\/script>
+</body>
 </html>`);
       doc.close();
 
