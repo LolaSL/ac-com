@@ -143,14 +143,9 @@ export default function Recommendations() {
       </div>
     `;
 
-    printJS({
-      printable: tableHtml,
-      type: "raw-html",
-      header: null,
-      style: `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f5f6fa; }
+    const printStyle = `
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background: #f5f6fa; }
         .print-container {
           max-width: 960px;
           margin: 24px auto;
@@ -225,7 +220,59 @@ export default function Recommendations() {
           font-size: 0.85rem;
           color: #6c757d;
         }
-      `,
+      `;
+
+    // iOS (iPhone/iPad) — including Chrome iOS (CriOS) — has known issues
+    // with print-js hidden-iframe raw-html printing (renders blank page).
+    // Detect iOS/iPadOS and use a new-window fallback that we control end-to-end.
+    const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+    const isIOS =
+      /iPad|iPhone|iPod/.test(ua) ||
+      // iPadOS 13+ reports as MacIntel with touch support
+      (ua.includes('Macintosh') && typeof document !== 'undefined' && 'ontouchend' in document);
+
+    if (isIOS) {
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('Please allow pop-ups to print this page.');
+        return;
+      }
+      const doc = printWindow.document;
+      doc.open();
+      doc.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HVAC System Quote</title>
+<style>${printStyle}
+@media print { body { background: #fff !important; } .print-container { box-shadow: none !important; margin: 0 auto !important; } }
+</style>
+</head>
+<body>${tableHtml}</body>
+</html>`);
+      doc.close();
+
+      const triggerPrint = () => {
+        try {
+          printWindow.focus();
+          printWindow.print();
+        } catch (_) { /* noop */ }
+      };
+      // Wait for full load (images/fonts) before printing on iOS WebKit
+      if (printWindow.document.readyState === 'complete') {
+        setTimeout(triggerPrint, 400);
+      } else {
+        printWindow.addEventListener('load', () => setTimeout(triggerPrint, 400));
+      }
+      return;
+    }
+
+    printJS({
+      printable: tableHtml,
+      type: "raw-html",
+      header: null,
+      style: printStyle,
     });
   }, [visibleRoomResults, isBoth, btuProject?.systemMode, btuProject?.totalSquareFootage, btuProject?.totalCoolingBTU, btuProject?.totalHeatingBTU]);
 
