@@ -329,9 +329,11 @@ const Product = memo(({ product }) => {
         {/* Rating */}
         <div className="product-rating-section">
           <Rating rating={product.rating} numReviews={product.numReviews} />
-          <span className="product-views">
-            <i className="fas fa-eye"></i> {product.views || 0}
-          </span>
+          {Number(product.views) >= 10 && (
+            <span className="product-views" title={`${product.views} views`}>
+              <i className="fas fa-eye"></i> {product.views}
+            </span>
+          )}
         </div>
 
         {/* Price Section */}

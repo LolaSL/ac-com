@@ -4,14 +4,18 @@ import "./Rating.css";
 export default function Rating(props) {
   const { rating, numReviews, caption } = props;
 
-  // Zero-review empty state: don't render stars at all — show a friendly
-  // "No reviews yet" placeholder so we never display a fabricated rating.
+  // Empty-state rule: only apply the "No reviews yet" placeholder when we're
+  // rendering an actual product rating (no caption + no reviews).
+  // If a `caption` is passed (e.g., search-page filter "& up" thresholds,
+  // or explicit labels), always render the stars for the given rating —
+  // those are threshold indicators, not real ratings.
+  const isThresholdOrLabeled = caption != null && caption !== "";
   const hasReviews = Number(numReviews) > 0 && Number(rating) > 0;
-  if (!hasReviews) {
+  if (!isThresholdOrLabeled && !hasReviews) {
     return (
       <div className="rating rating--empty">
         <span className="rating-text rating-empty-text">
-          {caption || "No reviews yet — be the first to review"}
+          No reviews yet — be the first to review
         </span>
       </div>
     );
