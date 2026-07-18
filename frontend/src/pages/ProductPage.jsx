@@ -359,6 +359,11 @@ function ProductPage() {
     return product.price.toFixed(2);
   }, [product.price, product.discount]);
 
+  const visibleReviews = useMemo(
+    () => (product.reviews || []).filter((review) => !review.deleted),
+    [product.reviews]
+  );
+
   const allImages = useMemo(() => {
     if (!product.image) return [];
     return [product.image, ...(product.images || [])];
@@ -796,12 +801,12 @@ function ProductPage() {
           Reviews
         </h3>
         <div className="mb-3">
-          {product.reviews.length === 0 && (
+          {visibleReviews.length === 0 && (
             <MessageBox>No review found</MessageBox>
           )}
         </div>
         <ListGroup>
-          {product.reviews.map((review) => (
+          {visibleReviews.map((review) => (
             <ListGroup.Item key={review._id}>
               <strong>{review.name}</strong>
               <Rating rating={review.rating} caption=" "></Rating>
