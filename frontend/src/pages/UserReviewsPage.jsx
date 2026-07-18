@@ -96,17 +96,17 @@ function UserReviewsPage() {
     );
   };
 
-  const deleteProductReview = async (productId) => {
+  const deleteProductReview = async (productId, reviewId) => {
     if (!window.confirm("Remove your review for this product?")) return;
     try {
       setActionLoading(true);
-      await axios.delete(`/api/user-reviews/products/${productId}`, {
+      await axios.delete(`/api/user-reviews/products/${productId}/reviews/${reviewId}`, {
         headers: { Authorization: `Bearer ${userInfo.token}` },
       });
       toast.success("Product review removed");
       undoToast("Review removed.", async () => {
         await axios.post(
-          `/api/user-reviews/products/${productId}/restore`,
+          `/api/user-reviews/products/${productId}/reviews/${reviewId}/restore`,
           {},
           {
             headers: { Authorization: `Bearer ${userInfo.token}` },
@@ -123,17 +123,17 @@ function UserReviewsPage() {
     }
   };
 
-  const deleteSellerReview = async (sellerId) => {
+  const deleteSellerReview = async (sellerId, reviewId) => {
     if (!window.confirm("Remove your review for this seller?")) return;
     try {
       setActionLoading(true);
-      await axios.delete(`/api/user-reviews/sellers/${sellerId}`, {
+      await axios.delete(`/api/user-reviews/sellers/${sellerId}/reviews/${reviewId}`, {
         headers: { Authorization: `Bearer ${userInfo.token}` },
       });
       toast.success("Seller review removed");
       undoToast("Review removed.", async () => {
         await axios.post(
-          `/api/user-reviews/sellers/${sellerId}/restore`,
+          `/api/user-reviews/sellers/${sellerId}/reviews/${reviewId}/restore`,
           {},
           {
             headers: { Authorization: `Bearer ${userInfo.token}` },
@@ -216,7 +216,7 @@ function UserReviewsPage() {
               </Alert>
             ) : (
               productReviews.map((r) => (
-                <Card key={`${r.productId}-${r.createdAt}`} className="mb-3 urv-card">
+                <Card key={r.reviewId || `${r.productId}-${r.createdAt}`} className="mb-3 urv-card">
                   <Card.Body className="urv-card__body">
                     <div className="d-flex justify-content-between">
                       <div>
@@ -235,8 +235,8 @@ function UserReviewsPage() {
                         <Button
                           size="sm"
                           variant="outline-danger"
-                          onClick={() => deleteProductReview(r.productId)}
-                          disabled={actionLoading}
+                          onClick={() => deleteProductReview(r.productId, r.reviewId)}
+                          disabled={actionLoading || !r.reviewId}
                           className="urv-remove-btn"
                         >
                           Clear
@@ -266,7 +266,7 @@ function UserReviewsPage() {
               </Alert>
             ) : (
               sellerReviews.map((r, idx) => (
-                <Card key={idx} className="mb-3 urv-card">
+                <Card key={r.reviewId || idx} className="mb-3 urv-card">
                   <Card.Body className="urv-card__body">
                     <div className="d-flex justify-content-between">
                       <div>
@@ -292,8 +292,8 @@ function UserReviewsPage() {
                         <Button
                           size="sm"
                           variant="outline-danger"
-                          onClick={() => deleteSellerReview(r.sellerId)}
-                          disabled={actionLoading}
+                          onClick={() => deleteSellerReview(r.sellerId, r.reviewId)}
+                          disabled={actionLoading || !r.sellerId || !r.reviewId}
                           className="urv-remove-btn"
                         >
                           Clear
