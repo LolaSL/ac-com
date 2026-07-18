@@ -27,6 +27,7 @@ const CONSTANTS = {
     East: 1.08,     // Increased from 1.05 (morning sun important)
     South: 1.12,    // Increased from 1.10 (all-day sun critical)
     West: 1.08,     // Increased from 1.05 (afternoon heat)
+    LivingRoom: 1.10, // Living rooms often have large windows facing sun
   },
   CONVERT_FEET_TO_METERS: 0.3048,
 };
@@ -90,7 +91,11 @@ const createDefaultRoom = () => ({
   unit: "meters",
 });
 
-function BtuCalculator({ roomData, acAnnotations = [] }) {
+function BtuCalculator({
+  roomData,
+  acAnnotations = [],
+  forceCondenserForRecommendations = false,
+}) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
   const prevProject = state?.btuData?.currentProject ?? null;
@@ -375,6 +380,7 @@ useEffect(() => {
       East: false,
       South: false,
       West: false,
+      LivingRoom: false,
     },
 
     outputUnit: {
@@ -1151,6 +1157,11 @@ useEffect(() => {
         ? [condenser]
         : [];
 
+    const shouldIncludeCondenserInRecommendations =
+      condensersForDisplay.length > 0 &&
+      (totalBTU >= 10000 ||
+        (forceCondenserForRecommendations && roomInputMode === "manual"));
+
     const totalIndoorUnitsCost =
       acProducts.length > 0
         ? acProducts.reduce((total, product) => {
@@ -1160,7 +1171,7 @@ useEffect(() => {
           }, 0)
         : 0;
 
-    const condenserCost = totalBTU >= 10000
+    const condenserCost = shouldIncludeCondenserInRecommendations
       ? condensersForDisplay.reduce((sum, c) => {
           if (!c) return sum;
           const price = c.price
@@ -1208,7 +1219,7 @@ useEffect(() => {
         estimatedCost: p.price || 0,
       }));
 
-    if (totalBTU >= 10000 && condensersForDisplay.length > 0) {
+    if (shouldIncludeCondenserInRecommendations) {
       recommendedUnits = recommendedUnits.concat(
         condensersForDisplay.map((c) => ({
           type: c.model || c.name || "Condenser",
@@ -1260,7 +1271,7 @@ useEffect(() => {
           },
         }))
         .concat(
-          totalBTU >= 10000 && condensersForDisplay.length > 0
+          shouldIncludeCondenserInRecommendations
             ? condensersForDisplay.map((cond, idx) => {
                 let condenserBtuRequirement = 0;
                 if (cond?.flatName && isMultiFlatProperty) {
@@ -1425,6 +1436,7 @@ useEffect(() => {
         East: false,
         South: false,
         West: false,
+        LivingRoom: false,
       },
       outputUnit: {
         BTU: true,

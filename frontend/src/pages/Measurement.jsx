@@ -285,7 +285,7 @@ const Measurement = () => {
                 minHeight: "42px",
               }}
             >
-              With Annotator (PDF + Notations)
+              With PDF Uploading + Notations
             </button>
             <button
               type="button"
@@ -302,7 +302,7 @@ const Measurement = () => {
                 minHeight: "42px",
               }}
             >
-              Without Annotator (Manual BTU)
+              Manual BTU Calculator (No PDF + Notations)
             </button>
           </div>
         </div>
@@ -390,6 +390,7 @@ const Measurement = () => {
                   : (storedBtuProject?.rooms || [])
               }
               acAnnotations={isWithAnnotator ? acAnnotations : []} 
+              forceCondenserForRecommendations={!isWithAnnotator}
             />
         </div>
 
