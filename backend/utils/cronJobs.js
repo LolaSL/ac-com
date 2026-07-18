@@ -3,6 +3,12 @@ import Order from '../models/orderModel.js';
 import Notification from '../models/notificationModel.js';
 import Product from '../models/productModel.js';
 
+const DISCOUNT_OFFER_TITLE = 'Discount Offer';
+const DISCOUNT_OFFER_MESSAGE = 'Check out the latest discount offers!';
+const DISCOUNT_OFFER_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000;
+// Fallback baseline provided by user: 5/16/2026, 8:04:27 PM.
+const DISCOUNT_OFFER_LAST_SENT_FALLBACK = new Date('2026-05-16T20:04:27');
+
 /**
  * Start cron job to send unpaid order reminders after 24 hours
  * Runs every hour to check for unpaid orders
@@ -275,4 +281,54 @@ export const startOverdueDeliveryReminders = () => {
   });
 
   console.log('✅ Overdue delivery reminder cron job scheduled (daily 08:00)');
+};
+
+/**
+ * Broadcast discount offer to users at most once every 3 days.
+ *
+ * Why hourly check instead of every 3 days cron:
+ * - resilient to server restarts/downtime
+ * - sends as soon as eligible window is reached
+ */
+export const startDiscountOfferNotifications = () => {
+  cron.schedule('0 * * * *', async () => {
+    try {
+      const latestDiscount = await Notification.findOne({
+        title: DISCOUNT_OFFER_TITLE,
+        message: DISCOUNT_OFFER_MESSAGE,
+        type: 'discount',
+        recipientType: 'user',
+      })
+        .sort({ createdAt: -1 })
+        .select('createdAt')
+        .lean();
+
+      const lastSentAt = latestDiscount?.createdAt
+        ? new Date(latestDiscount.createdAt)
+        : DISCOUNT_OFFER_LAST_SENT_FALLBACK;
+
+      const now = new Date();
+      const elapsedMs = now.getTime() - lastSentAt.getTime();
+
+      if (elapsedMs < DISCOUNT_OFFER_INTERVAL_MS) {
+        return;
+      }
+
+      await Notification.create({
+        title: DISCOUNT_OFFER_TITLE,
+        message: DISCOUNT_OFFER_MESSAGE,
+        type: 'discount',
+        recipientType: 'user', // broadcast to all users via existing query logic
+        isRead: false,
+      });
+
+      console.log(
+        `✅ Discount offer notification sent. Previous send: ${lastSentAt.toISOString()}`
+      );
+    } catch (error) {
+      console.error('❌ Error in discount offer cron job:', error.message);
+    }
+  });
+
+  console.log('✅ Discount offer cron job scheduled (eligibility check: hourly, send cadence: every 3 days)');
 };
