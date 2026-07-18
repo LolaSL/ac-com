@@ -213,6 +213,10 @@ const normalizeRoomData = (room) => {
   };
 };
 
+const CONDENSER_RECT_FILL = "rgba(255, 140, 50, 0.7)";
+const CONDENSER_RECT_STROKE = "#cc5500";
+const DEFAULT_RECT_FILL = "rgba(20, 205, 230, 0.7)";
+
 const parseToFeet = (val) => {
   if (!val) return 0;
   val = val.trim();
@@ -983,12 +987,28 @@ const Annotator = ({
     const ch = pdfSize.height;
     if (!cw || !ch) return;
     if (ann.rectangles?.length) {
+      const commentByRectId = new Map(
+        (ann.comments || []).map((c) => [String(c.rectId), c?.text || ""])
+      );
       setRectangles(ann.rectangles.map(r => ({
         ...r,
         x: r.xPercent * cw,
         y: r.yPercent * ch,
         width: r.widthPercent * cw,
         height: r.heightPercent * ch,
+        isCondenser:
+          typeof commentByRectId.get(String(r.id)) === "string" &&
+          /\bcondenser\b/i.test(commentByRectId.get(String(r.id))),
+        fill:
+          typeof commentByRectId.get(String(r.id)) === "string" &&
+          /\bcondenser\b/i.test(commentByRectId.get(String(r.id)))
+            ? CONDENSER_RECT_FILL
+            : (r.fill || DEFAULT_RECT_FILL),
+        stroke:
+          typeof commentByRectId.get(String(r.id)) === "string" &&
+          /\bcondenser\b/i.test(commentByRectId.get(String(r.id)))
+            ? CONDENSER_RECT_STROKE
+            : r.stroke,
       })));
     }
     if (ann.comments?.length) {
@@ -1757,8 +1777,9 @@ const Annotator = ({
       y: position.y,
       width: rectSize.width,
       height: rectSize.height,
-      fill: isCondenser ? 'rgba(255, 140, 50, 0.7)' : 'rgba(20, 205, 230, 0.7)',
-      stroke: isCondenser ? '#cc5500' : undefined,
+      isCondenser,
+      fill: isCondenser ? CONDENSER_RECT_FILL : DEFAULT_RECT_FILL,
+      stroke: isCondenser ? CONDENSER_RECT_STROKE : undefined,
       rotation: 0,
     };
     // snapshot BEFORE placing so it can be undone
@@ -1792,6 +1813,51 @@ const Annotator = ({
     };
     setLines((prevLines) => [...prevLines, newLine]);
   }, [computeCommentPos, pushHistory, lines]);
+
+  const isCondenserLabel = (text) => {
+    if (typeof text !== "string") return false;
+    const normalized = text.trim().toLowerCase();
+    return /\bcondenser\b/.test(normalized);
+  };
+
+  // Keep rectangle state colors synced with label edits/restores.
+  useEffect(() => {
+    if (!rectangles.length || !comments.length) return;
+
+    const commentByRectId = new Map(
+      comments.map((comment) => [String(comment.rectId), comment?.text || ""])
+    );
+
+    setRectangles((prevRects) => {
+      let changed = false;
+      const nextRects = prevRects.map((rect) => {
+        const label = commentByRectId.get(String(rect.id));
+        const shouldBeCondenser = isCondenserLabel(label);
+
+        const desiredFill = shouldBeCondenser
+          ? CONDENSER_RECT_FILL
+          : (rect.fill || DEFAULT_RECT_FILL);
+        const desiredStroke = shouldBeCondenser ? CONDENSER_RECT_STROKE : rect.stroke;
+
+        if (
+          rect.isCondenser !== shouldBeCondenser ||
+          rect.fill !== desiredFill ||
+          rect.stroke !== desiredStroke
+        ) {
+          changed = true;
+          return {
+            ...rect,
+            isCondenser: shouldBeCondenser,
+            fill: desiredFill,
+            stroke: desiredStroke,
+          };
+        }
+        return rect;
+      });
+
+      return changed ? nextRects : prevRects;
+    });
+  }, [comments, rectangles.length]);
 
   const handleStageClick = (event) => {
     // Small screens use handleStageTouchEnd (onTap) exclusively — skip here
@@ -3436,6 +3502,19 @@ const Annotator = ({
                   <Layer>
                     {rectangles.map((rect) => (
                       <React.Fragment key={rect.id}>
+                        {(() => {
+                          const linkedComment = comments.find((comment) =>
+                            idsMatch(comment.rectId, rect.id)
+                          );
+                          const condenserRect = isCondenserLabel(linkedComment?.text);
+                          const resolvedFill = condenserRect
+                            ? CONDENSER_RECT_FILL
+                            : rect.fill || DEFAULT_RECT_FILL;
+                          const resolvedStroke = condenserRect
+                            ? CONDENSER_RECT_STROKE
+                            : rect.stroke;
+
+                          return (
                         <Rect
                           key={rect.id}
                           id={rect.id}
@@ -3444,9 +3523,9 @@ const Annotator = ({
                           y={rect.y}
                           width={rect.width}
                           height={rect.height}
-                          fill={rect.fill}
-                          stroke={rect.stroke}
-                          strokeWidth={rect.stroke ? 2 : 0}
+                          fill={resolvedFill}
+                          stroke={resolvedStroke}
+                          strokeWidth={resolvedStroke ? 2 : 0}
                           hitStrokeWidth={24}
                           draggable={true}
                           rotation={rect.rotation}
@@ -3477,6 +3556,8 @@ const Annotator = ({
                             setTimeout(() => setIsRotating(false), 100);
                           }}
                         />
+                          );
+                        })()}
                       </React.Fragment>
                     ))}
                     {comments.map((comment) => {
