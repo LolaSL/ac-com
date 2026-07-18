@@ -91,6 +91,50 @@ const createDefaultRoom = () => ({
   unit: "meters",
 });
 
+const parseNumberish = (value) => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "string") return null;
+
+  const cleaned = value.replace(/[^\d.,-]/g, "").replace(",", ".");
+  const parsed = parseFloat(cleaned);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const resolveImportedRoomSizeSqM = (room) => {
+  // Prefer explicit sqm fields from OCR/table export so BTU stays consistent
+  // between PDF/Annotator mode and manual mode.
+  const sqmCandidates = [
+    room?.areaSqM,
+    room?.areaSqm,
+    room?.area_sqm,
+    room?.areaM2,
+    room?.area_m2,
+  ];
+
+  for (const candidate of sqmCandidates) {
+    const value = parseNumberish(candidate);
+    if (value && value > 0) return value;
+  }
+
+  const explicitSize = parseNumberish(room?.size);
+  if (explicitSize && explicitSize > 0) return explicitSize;
+
+  const sqFtCandidates = [room?.areaSqFt, room?.areaSqft, room?.area_sqft];
+  for (const candidate of sqFtCandidates) {
+    const value = parseNumberish(candidate);
+    if (value && value > 0) return value * 0.092903;
+  }
+
+  const width = parseNumberish(room?.width);
+  const length = parseNumberish(room?.length);
+  if (width && length && width > 0 && length > 0) {
+    return width * length * 0.092903;
+  }
+
+  return null;
+};
+
 function BtuCalculator({
   roomData,
   acAnnotations = [],
@@ -234,21 +278,36 @@ useEffect(() => {
 
   if (roomData?.length) {
     // Filter out invalid rooms and condenser entries
-    const validRooms = roomData.filter((room) => 
-      room.name && 
-      room.size && 
-      !room.name?.toLowerCase().includes('condenser') && 
-      room.size !== '—' &&
-      !room.product?.isCondenser
-    );
+    const validRooms = roomData.filter((room) => {
+      const roomLabel = (room.name || room.roomType || "").toLowerCase();
+      return (
+        roomLabel &&
+        !roomLabel.includes("condenser") &&
+        !room.product?.isCondenser
+      );
+    });
 
     if (validRooms.length > 0) {
-      const formattedRooms = validRooms.map((room) => ({
-        name: room.name,
-        size: room.size,
-        btu: 0,
-        unit: "meters",
-      }));
+      const formattedRooms = validRooms
+        .map((room) => {
+          const resolvedSize = resolveImportedRoomSizeSqM(room);
+          if (!resolvedSize || resolvedSize <= 0) return null;
+
+          return {
+            name: room.name || room.roomType || "Room",
+            size: Number(resolvedSize).toFixed(2),
+            btu: 0,
+            unit: "meters",
+          };
+        })
+        .filter(Boolean);
+
+      if (formattedRooms.length === 0) {
+        setRooms([createDefaultRoom()]);
+        setDetectedFlats([]);
+        setIsMultiFlatProperty(false);
+        return;
+      }
 
       // 1. Detect multi-flat from AC annotations
       let isMultiFlat = false;
