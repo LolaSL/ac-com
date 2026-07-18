@@ -138,6 +138,39 @@
   font-weight: bold;
 }
 
+/* Manual room entry layout */
+.manual-rooms-section {
+  background: #f8fbff;
+  border: 1px solid #d7e6ff;
+  border-radius: 10px;
+  padding: 0.85rem 0.9rem;
+}
+
+.manual-room-row {
+  border-bottom: 1px dashed #d7e6ff;
+  padding-bottom: 0.35rem;
+}
+
+.manual-room-row:last-of-type {
+  border-bottom: none;
+}
+
+.manual-room-action-col {
+  display: flex;
+  align-items: flex-end;
+}
+
+.manual-room-remove-btn {
+  min-height: 42px;
+}
+
+.manual-room-add-btn {
+  width: auto;
+  min-height: 44px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
 /* Responsive styles */
 @media (max-width: 767px) {
   .btu-calculator-container {
@@ -181,6 +214,30 @@
     width: 100%;
   }
 
+  .manual-rooms-section {
+    padding: 0.7rem 0.65rem;
+  }
+
+  .manual-room-row {
+    padding-bottom: 0.45rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .manual-room-col,
+  .manual-room-action-col {
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .manual-room-action-col {
+    align-items: stretch;
+  }
+
+  .manual-room-remove-btn,
+  .manual-room-add-btn {
+    width: 100%;
+  }
+
   .title {
     font-size: 1.5rem;
   }
@@ -215,6 +272,29 @@
 
   .btu-form .btn {
     padding: 0.6rem 0.75rem;
+  }
+
+  .manual-rooms-section {
+    padding: 0.6rem;
+  }
+
+  .manual-room-add-btn {
+    margin-top: 0.5rem !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .manual-room-row {
+    gap: 0.35rem;
+  }
+
+  .manual-room-action-col {
+    max-width: 120px;
+  }
+
+  .manual-room-remove-btn {
+    max-width: 110px;
+    margin-left: auto;
   }
 }
 

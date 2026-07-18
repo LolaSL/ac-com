@@ -42,9 +42,11 @@ const Measurement = () => {
   const [roomData, setRoomDataState] = useState([]);
   const [acAnnotations, setAcAnnotations] = useState([]);
   const [annotatorActive, setAnnotatorActive] = useState(false);
+  const [measurementMode, setMeasurementMode] = useState("withAnnotator");
   const [error, setError] = useState(null);
   const [showStoredCalculation, setShowStoredCalculation] = useState(false);
   const btuCalculatorRef = useRef(null);
+  const isWithAnnotator = measurementMode === "withAnnotator";
 
   // Check if there's stored BTU data from a previous calculation
   const storedBtuProject = state?.btuData?.currentProject;
@@ -147,23 +149,47 @@ const Measurement = () => {
     }
   };
 
-  // Derive current wizard step
-  const wizardStep = (() => {
-    const { btuData } = state;
-    if (btuData?.currentProject?.totalBTU) return 5; // BTU calculated
-    if (annotatorActive && roomData?.length > 0) return 3; // annotating after reviewing rooms
-    if (roomData?.length > 0) return 2;               // rooms reviewed
-    if (annotatorActive) return 2;                    // PDF loaded / reviewing
-    return 1;                                         // start
-  })();
+  const hasBtuResult = Boolean(state?.btuData?.currentProject?.totalBTU);
 
-  const WIZARD_STEPS = [
-    { label: 'Upload PDF',    icon: '📤' },
-    { label: 'Review Rooms',  icon: '📋' },
-    { label: 'Annotate',      icon: '📌' },
-    { label: 'Calculate BTU', icon: '🧮' },
-    { label: 'View Results',  icon: '✅' },
-  ];
+  const wizardState = useMemo(() => {
+    if (isWithAnnotator) {
+      const steps = [
+        { label: 'Upload PDF', icon: '📤' },
+        { label: 'Review Rooms', icon: '📋' },
+        { label: 'Annotate', icon: '📌' },
+        { label: 'Calculate BTU', icon: '🧮' },
+        { label: 'View Results', icon: '✅' },
+      ];
+
+      let currentStep = 1;
+      if (hasBtuResult) currentStep = 5;
+      else if (annotatorActive && roomData?.length > 0) currentStep = 3;
+      else if (roomData?.length > 0) currentStep = 2;
+      else if (annotatorActive) currentStep = 2;
+
+      return { steps, currentStep };
+    }
+
+    const steps = [
+      { label: 'Select Mode', icon: '⚙️' },
+      { label: 'Manual Rooms', icon: '📝' },
+      { label: 'View Results', icon: '✅' },
+    ];
+
+    return {
+      steps,
+      currentStep: hasBtuResult ? 3 : 2,
+    };
+  }, [isWithAnnotator, hasBtuResult, annotatorActive, roomData]);
+
+  const handleModeChange = (mode) => {
+    setMeasurementMode(mode);
+    if (mode === "withoutAnnotator") {
+      setRoomDataState([]);
+      setAcAnnotations([]);
+      setAnnotatorActive(false);
+    }
+  };
 
   return (
     <div className="ms-page">
@@ -179,11 +205,11 @@ const Measurement = () => {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             gap: 0, marginTop: '1.5rem',
           }}>
-            {WIZARD_STEPS.map((step, idx) => {
+            {wizardState.steps.map((step, idx) => {
               const stepNum = idx + 1;
-              const isDone    = wizardStep > stepNum;
-              const isActive  = wizardStep === stepNum;
-              const isViewResults = stepNum === 5;
+              const isDone    = wizardState.currentStep > stepNum;
+              const isActive  = wizardState.currentStep === stepNum;
+              const isViewResults = stepNum === wizardState.steps.length;
               const clickable = isViewResults && (isDone || isActive);
               return (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center' }}>
@@ -210,7 +236,7 @@ const Measurement = () => {
                       textDecoration: clickable ? 'underline' : 'none',
                     }}>{step.label}</span>
                   </div>
-                  {idx < WIZARD_STEPS.length - 1 && (
+                  {idx < wizardState.steps.length - 1 && (
                     <div className="ms-wizard__connector" style={{
                       width: '28px', height: '2px', marginBottom: '18px',
                       background: isDone ? '#10b981' : 'rgba(255,255,255,0.2)',
@@ -241,25 +267,81 @@ const Measurement = () => {
       <div className="ms-inner">
         {error && <div className="ms-alert">{error}</div>}
 
-        {/* Tool buttons grid */}
-        <div className="ms-tools-grid">
-          <GridItem><ModalLegend /></GridItem>
-          <GridItem><PdfHelpVideo /></GridItem>
-          <GridItem><ArchSymbolsModal /></GridItem>
-          <GridItem><Sidebar savedPdfs={savedPdfs} fetchSavedPdfs={fetchSavedPdfs} deepLinkAnnotationId={deepLinkAnnotationId} deepLinkEngineerReviewId={deepLinkEngineerReviewId} /></GridItem>
+        <div style={{ marginBottom: "1rem" }}>
+          <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>Calculation Mode</div>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => handleModeChange("withAnnotator")}
+              className="ms-clear-calc-btn"
+              style={{
+                background: isWithAnnotator ? "#667eea" : "#e9ecef",
+                border: "1px solid rgba(0,0,0,0.12)",
+                color: isWithAnnotator ? "#fff" : "#212529",
+                padding: "0.5rem 0.9rem",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: 600,
+                minHeight: "42px",
+              }}
+            >
+              With Annotator (PDF + Notations)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleModeChange("withoutAnnotator")}
+              className="ms-clear-calc-btn"
+              style={{
+                background: !isWithAnnotator ? "#667eea" : "#e9ecef",
+                border: "1px solid rgba(0,0,0,0.12)",
+                color: !isWithAnnotator ? "#fff" : "#212529",
+                padding: "0.5rem 0.9rem",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: 600,
+                minHeight: "42px",
+              }}
+            >
+              Without Annotator (Manual BTU)
+            </button>
+          </div>
         </div>
 
-        <AnnotatorErrorBoundary>
-          <Annotator
-            fetchSavedPdfs={fetchSavedPdfs}
-            setRoomData={setRoomData}
-            onExportToBtuCalculator={handleScrollToBtuCalculator}
-          />
-        </AnnotatorErrorBoundary>
+        {isWithAnnotator ? (
+          <>
+            {/* Tool buttons grid */}
+            <div className="ms-tools-grid">
+              <GridItem><ModalLegend /></GridItem>
+              <GridItem><PdfHelpVideo /></GridItem>
+              <GridItem><ArchSymbolsModal /></GridItem>
+              <GridItem><Sidebar savedPdfs={savedPdfs} fetchSavedPdfs={fetchSavedPdfs} deepLinkAnnotationId={deepLinkAnnotationId} deepLinkEngineerReviewId={deepLinkEngineerReviewId} /></GridItem>
+            </div>
 
-        {/* Show BTU Calculator if either fresh annotation data OR stored calculation exists */}
-        {(annotatorActive || (roomData && roomData.length > 0) || (showStoredCalculation && storedBtuProject)) && (
-          <div ref={btuCalculatorRef}>
+            <AnnotatorErrorBoundary>
+              <Annotator
+                fetchSavedPdfs={fetchSavedPdfs}
+                setRoomData={setRoomData}
+                onExportToBtuCalculator={handleScrollToBtuCalculator}
+              />
+            </AnnotatorErrorBoundary>
+          </>
+        ) : (
+          <div
+            style={{
+              background: "#f8f9fa",
+              border: "1px solid #dee2e6",
+              borderRadius: "10px",
+              padding: "0.85rem 1rem",
+              marginBottom: "1rem",
+              color: "#495057",
+            }}
+          >
+            Annotator is disabled in this mode. Use BTU Calculator manual room entry below.
+          </div>
+        )}
+
+        {/* Always show BTU Calculator: user can calculate from PDF rooms or manual room entry */}
+        <div ref={btuCalculatorRef}>
             {showStoredCalculation && storedBtuProject && !(roomData && roomData.length > 0) && (
               <div style={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -302,11 +384,14 @@ const Measurement = () => {
               </div>
             )}
             <BtuCalculator 
-              roomData={roomData && roomData.length > 0 ? roomData : storedBtuProject?.rooms || []} 
-              acAnnotations={acAnnotations} 
+              roomData={
+                isWithAnnotator
+                  ? (roomData && roomData.length > 0 ? roomData : storedBtuProject?.rooms || [])
+                  : (storedBtuProject?.rooms || [])
+              }
+              acAnnotations={isWithAnnotator ? acAnnotations : []} 
             />
-          </div>
-        )}
+        </div>
 
         <div className="ms-home-row">
           <Link to="/" className="home-btn">🏠 Home</Link>

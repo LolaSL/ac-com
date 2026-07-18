@@ -63,10 +63,40 @@ const DEFAULT_OUTDOOR_LOCATION = {
   HardGround: false,
 };
 
+const ROOM_TYPE_OPTIONS = [
+  "Bedroom 1",
+  "Bedroom 2",
+  "Bedroom 3",
+  "Bedroom 4",
+  "Bedroom 5",
+  "Living Room",
+  "Dining Room",
+  "Kitchen",
+  "Bathroom",
+  "Terrace",
+  "Loft",
+  "Single Storey",
+  "Double Storey",
+  "Split Level House",
+  "Entire First Floor",
+  "Entire Second Floor And Above",
+  "Open Office Area",
+];
+
+const createDefaultRoom = () => ({
+  name: ROOM_TYPE_OPTIONS[0],
+  size: "",
+  btu: 0,
+  unit: "meters",
+});
+
 function BtuCalculator({ roomData, acAnnotations = [] }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
   const prevProject = state?.btuData?.currentProject ?? null;
+  const [roomInputMode, setRoomInputMode] = useState(
+    roomData?.length ? "pdf" : "manual"
+  );
 
   // Parse AC annotations (e.g., "ac-1.1", "ac-1.2", "condenser-1", "Flat 1", etc.)
   const parseAcAnnotations = useCallback((annotations) => {
@@ -193,6 +223,10 @@ function BtuCalculator({ roomData, acAnnotations = [] }) {
   );
 
 useEffect(() => {
+  if (roomInputMode !== "pdf") {
+    return;
+  }
+
   if (roomData?.length) {
     // Filter out invalid rooms and condenser entries
     const validRooms = roomData.filter((room) => 
@@ -257,13 +291,21 @@ useEffect(() => {
         setDetectedFlats([]);
         setIsMultiFlatProperty(false);
       }
+    } else {
+      setRooms([createDefaultRoom()]);
+      setDetectedFlats([]);
+      setIsMultiFlatProperty(false);
     }
+  } else {
+    setRooms([createDefaultRoom()]);
+    setDetectedFlats([]);
+    setIsMultiFlatProperty(false);
   }
-}, [roomData, acAnnotations, groupFlatsByAnnotations]);
+}, [roomData, acAnnotations, groupFlatsByAnnotations, roomInputMode]);
   
   
   const [measurementSystem, setMeasurementSystem] = useState("meters");
-  const [rooms, setRooms] = useState([{ name: "", size: "", btu: 0, unit: "meters" }]);
+  const [rooms, setRooms] = useState([createDefaultRoom()]);
   const [ceilingHeight, setCeilingHeight] = useState("2.5");
   const [numPeople, setNumPeople] = useState(0);
   const [error, setError] = useState("");
@@ -435,6 +477,32 @@ useEffect(() => {
       ...prev,
       [category]: { ...prev[category], [name]: !prev[category][name] },
     }));
+  };
+
+  const handleRoomChange = (index, field, value) => {
+    setRooms((prevRooms) =>
+      prevRooms.map((room, i) =>
+        i === index
+          ? {
+              ...room,
+              [field]: field === "size" ? value : value,
+            }
+          : room
+      )
+    );
+  };
+
+  const addRoom = () => {
+    setRooms((prevRooms) => [...prevRooms, createDefaultRoom()]);
+  };
+
+  const removeRoom = (index) => {
+    setRooms((prevRooms) => {
+      if (prevRooms.length <= 1) {
+        return [createDefaultRoom()];
+      }
+      return prevRooms.filter((_, i) => i !== index);
+    });
   };
 
   const handleOutdoorUnitLocationChange = (e) =>
@@ -733,10 +801,19 @@ useEffect(() => {
 
     // Filter out condenser entries before processing
     const actualRooms = rooms.filter(room => 
+      room.name &&
+      room.size &&
+      parseFloat(room.size) > 0 &&
       !room.name?.toLowerCase().includes('condenser') && 
       room.size !== '—' &&
       !room.product?.isCondenser
     );
+
+    if (actualRooms.length === 0) {
+      setError("Please add at least one room with type and valid size.");
+      setIsCalculating(false);
+      return;
+    }
 
     const productRequests = actualRooms.map(async (room) => {
       // Resolve per-flat people count and per-flat appliances for multi-flat properties
@@ -1276,7 +1353,7 @@ useEffect(() => {
   };
 
   const handleClear = () => {
-    setRooms([{ name: "", size: "", btu: 0, unit: "meters" }]);
+    setRooms([createDefaultRoom()]);
     setCeilingHeight("2.5");
     setNumPeople(0);
     setFlatPeopleCount({});
@@ -1422,6 +1499,42 @@ useEffect(() => {
         </Form.Group>
 
         <Form.Group className="mb-4">
+          <Form.Label>Room Data Source</Form.Label>
+          <div>
+            <Form.Check
+              inline
+              type="radio"
+              id="room-source-pdf"
+              label="Use PDF Rooms"
+              name="roomSource"
+              checked={roomInputMode === "pdf"}
+              onChange={() => setRoomInputMode("pdf")}
+            />
+            <Form.Check
+              inline
+              type="radio"
+              id="room-source-manual"
+              label="Manual Room Entry"
+              name="roomSource"
+              checked={roomInputMode === "manual"}
+              onChange={() => {
+                setRoomInputMode("manual");
+                setDetectedFlats([]);
+                setIsMultiFlatProperty(false);
+                if (!rooms.length) {
+                  setRooms([createDefaultRoom()]);
+                }
+              }}
+            />
+          </div>
+          {roomInputMode === "pdf" && !roomData?.length && (
+            <small className="text-muted d-block mt-2">
+              No rooms detected from PDF yet. Switch to Manual Room Entry to continue.
+            </small>
+          )}
+        </Form.Group>
+
+        <Form.Group className="mb-4">
   <Form.Check
     type="checkbox"
     id="multiFlat"
@@ -1561,9 +1674,64 @@ useEffect(() => {
 
         </Row>
 {rooms.length > 0 && (
-  <div className="mb-4">
-    <h5>Room Measurements:</h5>
-    {(() => {
+  <div className="mb-4 manual-rooms-section">
+    <h5>{roomInputMode === "manual" ? "Manual Rooms:" : "Room Measurements:"}</h5>
+    {roomInputMode === "manual" ? (
+      <>
+        {rooms.map((room, index) => (
+          <Row key={index} className="my-2 align-items-end manual-room-row">
+            <Col xs={12} md={6} lg={4} className="my-2 manual-room-col">
+              <Form.Group controlId={`roomType-${index}`}>
+                <Form.Label>Room Type {index + 1}:</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={room.name}
+                  onChange={(e) => handleRoomChange(index, "name", e.target.value)}
+                >
+                  {ROOM_TYPE_OPTIONS.map((roomType) => (
+                    <option key={roomType} value={roomType}>
+                      {roomType}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={6} lg={4} className="my-2 manual-room-col">
+              <Form.Group controlId={`roomSize-${index}`}>
+                <Form.Label>Room Size ({measurementSystem}²):</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  placeholder={`Enter room size in ${
+                    measurementSystem === "meters" ? "m²" : "ft²"
+                  }`}
+                  value={room.size}
+                  onChange={(e) => handleRoomChange(index, "size", e.target.value)}
+                />
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={6} lg={2} className="my-2 manual-room-action-col">
+              <Button
+                variant="primary"
+                onClick={() => removeRoom(index)}
+                className="btn btn-sm w-100 manual-room-remove-btn"
+                disabled={rooms.length === 1}
+              >
+                <i className="fas fa-trash"></i>
+              </Button>
+            </Col>
+          </Row>
+        ))}
+
+        <Button variant="primary" onClick={addRoom} className="btn-add mb-3 mt-3 manual-room-add-btn">
+          Add Desired Room
+        </Button>
+      </>
+    ) : (
+      (() => {
       // Filter out condenser entries from room measurements display
       const actualRooms = rooms.filter(room => 
         !room.name?.toLowerCase().includes('condenser') && 
@@ -1616,7 +1784,8 @@ useEffect(() => {
             </div>
           );
         });
-    })()}
+      })()
+    )}
   </div>
 )}
         <hr className="ms-2 mt-1 mb-5 btu-hr" />
