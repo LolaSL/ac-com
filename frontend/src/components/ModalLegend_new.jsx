@@ -193,6 +193,8 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
 
                 <h6 className="mb-2 mt-3 text-primary">📐 BTU Calculator Buttons</h6>
                 <ul className="list-unstyled fs-6">
+                  <li><strong>With PDF Uploading + Notations:</strong> Opens the full Measurement workflow with PDF upload, OCR room detection, room-table editing, and annotation tools so you can place AC and condenser labels before exporting rooms to the BTU Calculator</li>
+                  <li><strong>Manual BTU Calculator (No PDF + Notations):</strong> Opens BTU Calculator only mode without the PDF Designer, so rooms are entered manually and calculations can be done without uploading a floor plan</li>
                   <li><strong>Calculate BTU:</strong> Runs the VRF BTU calculation for all rooms, saves results to the store, and navigates to the Recommendations page</li>
                   <li><strong>Clear:</strong> Resets all rooms, parameters, and environmental options back to defaults</li>
                 </ul>
@@ -364,6 +366,8 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                   <li>Each room shows its name and area (m² or ft²)</li>
                   <li>Multi-flat rooms arrive with a <em>"Flat N: "</em> prefix (e.g. "Flat 1: Kitchen")</li>
                   <li>Condenser labels from the PDF Designer are filtered out automatically — only habitable rooms are kept</li>
+                  <li><strong>Add Room:</strong> In manual mode, appends a new room row so you can enter another room type and area</li>
+                  <li><strong>Trash:</strong> Deletes the selected manual room row; the final remaining row is kept as a blank/default room so the form never becomes empty</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
@@ -372,6 +376,12 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
                     <strong>Measurement System:</strong> Meters (m²) or Feet (ft²)
+                  </li>
+                  <li>
+                    <strong>Use PDF Rooms:</strong> Uses the room list exported from the PDF Designer; this keeps OCR-detected room names and areas and is the default when PDF room data exists
+                  </li>
+                  <li>
+                    <strong>Manual Room Entry:</strong> Switches the calculator to manual mode so you can build the room list yourself without PDF-imported rooms
                   </li>
                   <li>
                     <strong>Ceiling Height (m):</strong> Default 2.5 m
@@ -416,7 +426,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                     <strong>Floor:</strong> Marble, Timber, Concrete, or Carpeted
                   </li>
                   <li>
-                    <strong>Apartment Orientation:</strong> North, East, South, or West
+                    <strong>Apartment Orientation:</strong> North, East, South, West, or Living Room. Use <em>Living Room</em> when the main living area has the dominant solar exposure and you want the calculator to weight that zone more heavily.
                   </li>
                   <li>
                     <strong>Output Unit:</strong> BTU, Watt, or kW

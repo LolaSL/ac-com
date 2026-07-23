@@ -3384,17 +3384,17 @@ const Annotator = ({
                 </Button>
                 <Button
                   variant="outline-info"
-                  onClick={() => setPdfZoom(1)}
+                  onClick={() => setPdfZoom(0.8)}
                   title="Reset zoom level"
-                  disabled={pdfZoom === 1}
+                  disabled={pdfZoom === 0.8}
                 >
-                  {(pdfZoom * 100).toFixed(0)}%
+                  {pdfZoom === 0.8 ? "80%" : `${(pdfZoom * 100).toFixed(0)}%`}
                 </Button>
                 <Button
                   variant="outline-info"
-                  onClick={() => setPdfZoom((prev) => Math.max(1, prev - 0.2))}
+                  onClick={() => setPdfZoom((prev) => Math.max(0.8, prev - 0.2))}
                   title="Zoom out"
-                  disabled={pdfZoom === 1}
+                  disabled={pdfZoom === 0.8}
                 >
                   🔍 −
                 </Button>

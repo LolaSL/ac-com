@@ -1798,7 +1798,7 @@ useEffect(() => {
         ))}
 
         <Button variant="primary" onClick={addRoom} className="btn-add mb-3 mt-3 manual-room-add-btn">
-          Add Desired Room
+          Add Room
         </Button>
       </>
     ) : (
