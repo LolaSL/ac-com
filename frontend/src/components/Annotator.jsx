@@ -221,6 +221,15 @@ const CONDENSER_LABEL_PATTERN = /\bcondens(?:e|o)r\b/i;
 const isCondenserText = (value) =>
   typeof value === "string" && CONDENSER_LABEL_PATTERN.test(value.trim());
 
+const isCondenserRectState = (rect, labelText) => {
+  if (isCondenserText(labelText)) return true;
+  if (rect?.isCondenser === true) return true;
+  if (rect?.annotationType === "condenser") return true;
+  if (rect?.stroke === CONDENSER_RECT_STROKE) return true;
+  if (typeof rect?.fill === "string" && rect.fill.includes("255, 140, 50")) return true;
+  return false;
+};
+
 const parseToFeet = (val) => {
   if (!val) return 0;
   val = val.trim();
@@ -1778,6 +1787,7 @@ const Annotator = ({
       width: rectSize.width,
       height: rectSize.height,
       isCondenser,
+      annotationType: isCondenser ? "condenser" : "ac",
       fill: isCondenser ? CONDENSER_RECT_FILL : DEFAULT_RECT_FILL,
       stroke: isCondenser ? CONDENSER_RECT_STROKE : undefined,
       rotation: 0,
@@ -1814,13 +1824,9 @@ const Annotator = ({
     setLines((prevLines) => [...prevLines, newLine]);
   }, [computeCommentPos, pushHistory, lines]);
 
-  const isCondenserLabel = (text) => {
-    return isCondenserText(text);
-  };
-
   // Keep rectangle state colors synced with label edits/restores.
   useEffect(() => {
-    if (!rectangles.length || !comments.length) return;
+    if (!rectangles.length) return;
 
     const commentByRectId = new Map(
       comments.map((comment) => [String(comment.rectId), comment?.text || ""])
@@ -1830,15 +1836,17 @@ const Annotator = ({
       let changed = false;
       const nextRects = prevRects.map((rect) => {
         const label = commentByRectId.get(String(rect.id));
-        const shouldBeCondenser = isCondenserLabel(label);
+        const shouldBeCondenser = isCondenserRectState(rect, label);
 
         const desiredFill = shouldBeCondenser
           ? CONDENSER_RECT_FILL
           : (rect.fill || DEFAULT_RECT_FILL);
         const desiredStroke = shouldBeCondenser ? CONDENSER_RECT_STROKE : rect.stroke;
+        const desiredType = shouldBeCondenser ? "condenser" : "ac";
 
         if (
           rect.isCondenser !== shouldBeCondenser ||
+          rect.annotationType !== desiredType ||
           rect.fill !== desiredFill ||
           rect.stroke !== desiredStroke
         ) {
@@ -1846,6 +1854,7 @@ const Annotator = ({
           return {
             ...rect,
             isCondenser: shouldBeCondenser,
+            annotationType: desiredType,
             fill: desiredFill,
             stroke: desiredStroke,
           };
@@ -3504,8 +3513,7 @@ const Annotator = ({
                           const linkedComment = comments.find((comment) =>
                             idsMatch(comment.rectId, rect.id)
                           );
-                          const condenserRect =
-                            Boolean(rect.isCondenser) || isCondenserLabel(linkedComment?.text);
+                          const condenserRect = isCondenserRectState(rect, linkedComment?.text);
                           const resolvedFill = condenserRect
                             ? CONDENSER_RECT_FILL
                             : rect.fill || DEFAULT_RECT_FILL;
