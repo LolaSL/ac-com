@@ -216,6 +216,10 @@ const normalizeRoomData = (room) => {
 const CONDENSER_RECT_FILL = "rgba(255, 140, 50, 0.7)";
 const CONDENSER_RECT_STROKE = "#cc5500";
 const DEFAULT_RECT_FILL = "rgba(20, 205, 230, 0.7)";
+const CONDENSER_LABEL_PATTERN = /\bcondens(?:e|o)r\b/i;
+
+const isCondenserText = (value) =>
+  typeof value === "string" && CONDENSER_LABEL_PATTERN.test(value.trim());
 
 const parseToFeet = (val) => {
   if (!val) return 0;
@@ -996,17 +1000,13 @@ const Annotator = ({
         y: r.yPercent * ch,
         width: r.widthPercent * cw,
         height: r.heightPercent * ch,
-        isCondenser:
-          typeof commentByRectId.get(String(r.id)) === "string" &&
-          /\bcondenser\b/i.test(commentByRectId.get(String(r.id))),
+        isCondenser: isCondenserText(commentByRectId.get(String(r.id))),
         fill:
-          typeof commentByRectId.get(String(r.id)) === "string" &&
-          /\bcondenser\b/i.test(commentByRectId.get(String(r.id)))
+          isCondenserText(commentByRectId.get(String(r.id)))
             ? CONDENSER_RECT_FILL
             : (r.fill || DEFAULT_RECT_FILL),
         stroke:
-          typeof commentByRectId.get(String(r.id)) === "string" &&
-          /\bcondenser\b/i.test(commentByRectId.get(String(r.id)))
+          isCondenserText(commentByRectId.get(String(r.id)))
             ? CONDENSER_RECT_STROKE
             : r.stroke,
       })));
@@ -1768,7 +1768,7 @@ const Annotator = ({
     
     const newRectId = Date.now();
     const trimmedText = normalizedCommentText;
-    const isCondenser = /^condenser/i.test(trimmedText) || trimmedText.includes('condenser');
+    const isCondenser = isCondenserText(trimmedText);
     const rectSize = getResponsiveRectSize();
     
     const newRect = {
@@ -1815,9 +1815,7 @@ const Annotator = ({
   }, [computeCommentPos, pushHistory, lines]);
 
   const isCondenserLabel = (text) => {
-    if (typeof text !== "string") return false;
-    const normalized = text.trim().toLowerCase();
-    return /\bcondenser\b/.test(normalized);
+    return isCondenserText(text);
   };
 
   // Keep rectangle state colors synced with label edits/restores.
@@ -3506,7 +3504,8 @@ const Annotator = ({
                           const linkedComment = comments.find((comment) =>
                             idsMatch(comment.rectId, rect.id)
                           );
-                          const condenserRect = isCondenserLabel(linkedComment?.text);
+                          const condenserRect =
+                            Boolean(rect.isCondenser) || isCondenserLabel(linkedComment?.text);
                           const resolvedFill = condenserRect
                             ? CONDENSER_RECT_FILL
                             : rect.fill || DEFAULT_RECT_FILL;
