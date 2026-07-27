@@ -516,6 +516,11 @@
 }
 
 .user-links-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
   width: 100%;
   padding-bottom: 0.1rem;
   -webkit-overflow-scrolling: touch;
@@ -539,18 +544,60 @@
 /* Mobile (≤767px) */
 @media (max-width: 767px) {
   .header-top-row {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    overflow: visible;
   }
 
   .header-top-row .search-wrapper {
-    min-width: 220px;
-    flex: 1 0 220px;
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 auto;
+    margin-right: 0 !important;
   }
 
   .header-top-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0 !important;
     margin-right: 0 !important;
     gap: 0.5rem !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
+  }
+
+  .header-top-actions > * {
+    flex-shrink: 0;
+  }
+
+  .user-links-row {
+    display: grid !important;
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    align-items: stretch !important;
+    gap: 0.4rem 0.5rem !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 0.25rem;
+  }
+
+  .user-links-row .user-dropdown-title,
+  .user-links-row .nav-link {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+  }
+
+  .user-links-row .nav-link {
+    padding: 0.45rem 0.55rem !important;
+    font-size: 0.82rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
   }
 
   .search-box {

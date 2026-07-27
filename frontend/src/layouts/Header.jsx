@@ -320,7 +320,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
 
               {userInfo ? (
                 <div
-                  className="user-links-row d-flex align-items-center gap-2 flex-nowrap overflow-auto"
+                  className="user-links-row d-flex align-items-center gap-2"
                   style={{ maxWidth: "100%", scrollbarWidth: "thin" }}
                 >
                   <span className="user-dropdown-title flex-shrink-0">
