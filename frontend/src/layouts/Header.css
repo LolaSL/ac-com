@@ -571,7 +571,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.15rem;
+    padding: 0.3rem 0.45rem 0.2rem 0.25rem;
   }
 
   .header-top-actions > * {
@@ -583,6 +583,10 @@
   .header-top-actions .cart-wrapper {
     width: auto !important;
     flex: 0 0 auto;
+  }
+
+  .header-top-actions .notification-bell {
+    margin-right: 0.2rem;
   }
 
   .user-links-row {
