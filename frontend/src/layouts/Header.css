@@ -559,6 +559,10 @@
   }
 
   .header-top-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
     width: 100%;
     justify-content: flex-start;
     margin-left: 0 !important;
@@ -572,6 +576,13 @@
 
   .header-top-actions > * {
     flex-shrink: 0;
+  }
+
+  .header-top-actions .nav-link,
+  .header-top-actions .notification-bell,
+  .header-top-actions .cart-wrapper {
+    width: auto !important;
+    flex: 0 0 auto;
   }
 
   .user-links-row {
