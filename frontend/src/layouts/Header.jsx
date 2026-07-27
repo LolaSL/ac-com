@@ -15,7 +15,6 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo, serviceProviderInfo, adminInfo } = state;
 
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -59,7 +58,6 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   useEffect(() => {
     const handleOutside = (e) => {
       if (navRef.current && !navRef.current.contains(e.target)) {
-        setUserDropdownOpen(false);
         setProviderDropdownOpen(false);
         setAdminDropdownOpen(false);
       }
@@ -170,79 +168,74 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                 )}
               </div>
               {userInfo ? (
-                <NavDropdown
-                  show={userDropdownOpen}
-                  onToggle={setUserDropdownOpen}
-                  onMouseLeave={() => setUserDropdownOpen(false)}
-                  align="end"
-                  title={
-                    <span className="user-dropdown-title">
-                      {userInfo.avatar ? (
-                        <img
-                          src={userInfo.avatar}
-                          alt={userInfo.name}
-                          className="user-avatar"
-                        />
-                      ) : (
-                        <i className="fas fa-user-circle user-icon"></i>
-                      )}
-                      <span className="user-name">{userInfo.name}</span>
-                    </span>
-                  }
-                  id="basic-nav-dropdown"
+                <div
+                  className="d-flex align-items-center gap-2 flex-nowrap overflow-auto"
+                  style={{ maxWidth: "100%", scrollbarWidth: "thin" }}
                 >
-                  <Link to="/profile" className="dropdown-item ">
+                  <span className="user-dropdown-title flex-shrink-0">
+                    {userInfo.avatar ? (
+                      <img
+                        src={userInfo.avatar}
+                        alt={userInfo.name}
+                        className="user-avatar"
+                      />
+                    ) : (
+                      <i className="fas fa-user-circle user-icon"></i>
+                    )}
+                    <span className="user-name">{userInfo.name}</span>
+                  </span>
+
+                  <Link to="/profile" className="nav-link text-nowrap px-2 py-1 rounded">
                     User Profile
                   </Link>
-                  <Link to="/measurement" className="dropdown-item d-flex align-items-center justify-content-between">
+                  <Link
+                    to="/measurement"
+                    className="nav-link text-nowrap px-2 py-1 rounded d-flex align-items-center"
+                  >
                     <span>Get A Quote</span>
                     <Badge bg="danger" className="quote-badge-pulse ms-2">NEW</Badge>
                   </Link>
-                  {/* <Link to="/roi-calculator" className="dropdown-item">
-                    ROI Calculator
-                  </Link> */}
-                  <Link to="/orderhistory" className="dropdown-item">
+                  <Link to="/orderhistory" className="nav-link text-nowrap px-2 py-1 rounded">
                     Order History
                   </Link>
-                  <Link to="/recommendations" className="dropdown-item">
+                  <Link to="/recommendations" className="nav-link text-nowrap px-2 py-1 rounded">
                     <i className="fas fa-thumbs-up me-2"></i>
                     Recommendations
                   </Link>
-                  <Link to="/wishlist" className="dropdown-item">
+                  <Link to="/wishlist" className="nav-link text-nowrap px-2 py-1 rounded">
                     <i className="fas fa-heart me-2 heart-icon"></i>
                     My Wishlist
                   </Link>
-                  <Link to="/order-messages" className="dropdown-item">
+                  <Link to="/order-messages" className="nav-link text-nowrap px-2 py-1 rounded">
                     Order Messages
                   </Link>
-                  <Link to="/offers" className="dropdown-item">
+                  <Link to="/offers" className="nav-link text-nowrap px-2 py-1 rounded">
                     <i className="fas fa-tag me-2"></i>
                     Special Offers
                   </Link>
-                  <Link to="/browsing-history" className="dropdown-item">
+                  <Link to="/browsing-history" className="nav-link text-nowrap px-2 py-1 rounded">
                     Browsing History
                   </Link>
-                  <Link to="/my-reviews" className="dropdown-item">
+                  <Link to="/my-reviews" className="nav-link text-nowrap px-2 py-1 rounded">
                     My Reviews
                   </Link>
                   {userInfo.referredBy && (
                     <Link
                       to={`/seller/dashboard/${userInfo.referredBy}`}
-                      className="dropdown-item"
+                      className="nav-link text-nowrap px-2 py-1 rounded"
                     >
                       <i className="fas fa-chart-line me-2"></i>
                       Referral Dashboard
                     </Link>
                   )}
-                  <NavDropdown.Divider />
                   <Link
-                    className="dropdown-item"
+                    className="nav-link text-nowrap px-2 py-1 rounded text-danger"
                     to="#signout"
                     onClick={userSignoutHandler}
                   >
                     Sign Out
                   </Link>
-                </NavDropdown>
+                </div>
               ) : null}
               {serviceProviderInfo ? (
                 <NavDropdown
