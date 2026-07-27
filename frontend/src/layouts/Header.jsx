@@ -115,61 +115,212 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             id="basic-navbar-nav"
             className="justify-content-start"
           >
-            <div className="flex-grow-1 me-3 search-wrapper">
-              <SearchBox />
-            </div>
-            <Nav className=" align-items-center gap-3 ms-auto me-4">
-              {authToken && (
-                <Link
-                  to={adminInfo ? "/admin/dashboard/notification" : "/notifications"}
-                  className={`notification-bell${
-                    location.pathname === "/notifications" ||
-                    location.pathname === "/admin/dashboard/notification"
-                      ? " active-link"
-                      : ""
-                  }`}
-                  title="Notifications"
-                  aria-label="Notifications"
-                >
-                  <i className="fas fa-bell"></i>
-                  {unreadCount > 0 && (
-                    <span className="notification-bell-badge">
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
+            <div className="header-nav-stack w-100">
+              <div className="header-top-row">
+                <div className="flex-grow-1 me-3 search-wrapper">
+                  <SearchBox />
+                </div>
+                <Nav className="header-top-actions align-items-center gap-3 ms-auto me-4">
+                  {authToken && (
+                    <Link
+                      to={adminInfo ? "/admin/dashboard/notification" : "/notifications"}
+                      className={`notification-bell${
+                        location.pathname === "/notifications" ||
+                        location.pathname === "/admin/dashboard/notification"
+                          ? " active-link"
+                          : ""
+                      }`}
+                      title="Notifications"
+                      aria-label="Notifications"
+                    >
+                      <i className="fas fa-bell"></i>
+                      {unreadCount > 0 && (
+                        <span className="notification-bell-badge">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      )}
+                    </Link>
                   )}
-                </Link>
-              )}
-              <div className="d-flex align-items-center gap-1 cart-wrapper">
-                <Link
-                  to="/cart"
-                  className={`text-decoration-none d-flex nav-link cart-link${location.pathname === '/cart' ? ' active-link' : ''}`}
-                >
-                  Cart
-                </Link>
-                {cart.cartItems.length > 0 ? (
-                  <Badge
-                    bg="danger"
-                    role="button"
-                    onClick={() =>
-                      (window.location.href = "/signin?redirect=/shipping")
-                    }
-                    className="cart-badge-checkout"
-                  >
-                    Checkout
-                  </Badge>
-                ) : (
-                  <Badge
-                    pill
-                    bg="secondary"
-                    className="cart-badge-empty"
-                  >
-                    Empty
-                  </Badge>
-                )}
+                  <div className="d-flex align-items-center gap-1 cart-wrapper">
+                    <Link
+                      to="/cart"
+                      className={`text-decoration-none d-flex nav-link cart-link${location.pathname === '/cart' ? ' active-link' : ''}`}
+                    >
+                      Cart
+                    </Link>
+                    {cart.cartItems.length > 0 ? (
+                      <Badge
+                        bg="danger"
+                        role="button"
+                        onClick={() =>
+                          (window.location.href = "/signin?redirect=/shipping")
+                        }
+                        className="cart-badge-checkout"
+                      >
+                        Checkout
+                      </Badge>
+                    ) : (
+                      <Badge
+                        pill
+                        bg="secondary"
+                        className="cart-badge-empty"
+                      >
+                        Empty
+                      </Badge>
+                    )}
+                  </div>
+                  {serviceProviderInfo ? (
+                    <NavDropdown
+                      show={providerDropdownOpen}
+                      onToggle={setProviderDropdownOpen}
+                      onMouseLeave={() => setProviderDropdownOpen(false)}
+                      align="end"
+                      title={serviceProviderInfo.name}
+                      id="provider-nav-dropdown"
+                    >
+                      <Link
+                        to="/serviceprovider/dashboard"
+                        className="dropdown-item"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
+                        className="dropdown-item"
+                      >
+                        My Profile
+                      </Link>
+                      <Link
+                        to="/serviceprovider/projects"
+                        className="dropdown-item"
+                      >
+                        Projects
+                      </Link>
+                      <Link to="/serviceprovider/hours" className="dropdown-item">
+                        Hours
+                      </Link>
+                      <Link
+                        to="/serviceprovider/earnings"
+                        className="dropdown-item"
+                      >
+                        Earnings
+                      </Link>
+                      <Link
+                        to="/serviceprovider/messages"
+                        className="dropdown-item"
+                      >
+                        Messages
+                      </Link>
+                      <NavDropdown.Divider />
+                      <Link
+                        className="dropdown-item"
+                        to="#signout"
+                        onClick={serviceProviderSignoutHandler}
+                      >
+                        Log Out
+                      </Link>
+                    </NavDropdown>
+                  ) : null}
+                  {adminInfo ? (
+                    <NavDropdown
+                      show={adminDropdownOpen}
+                      onToggle={setAdminDropdownOpen}
+                      onMouseLeave={() => setAdminDropdownOpen(false)}
+                      align="end"
+                      title="Admin"
+                      id="admin-nav-dropdown"
+                    >
+                      <Link to="/admin/dashboard" className="dropdown-item">
+                        Dashboard
+                      </Link>
+
+                      <Link to="/admin/products" className="dropdown-item">
+                        Products
+                      </Link>
+                      <Link to="/admin/orders" className="dropdown-item">
+                        Orders
+                      </Link>
+                      <Link to="/admin/users" className="dropdown-item">
+                        Users
+                      </Link>
+                      <Link
+                        to="/admin/manage-service-providers"
+                        className="dropdown-item"
+                      >
+                        Service Providers
+                      </Link>
+                      <Link to="/admin/payments" className="dropdown-item">
+                        <i className="fas fa-chart-bar me-2"></i>
+                        Service Providers Dashboard
+                      </Link>
+                      <Link to="/admin/sellers" className="dropdown-item">
+                        Sellers
+                      </Link>
+                      <Link
+                        to="/admin/sellers/total-dashboard"
+                        className="dropdown-item"
+                      >
+                        <i className="fas fa-chart-bar me-2"></i>
+                        Seller Referral Dashboard
+                      </Link>
+                      <Link to="/admin/blogs-list" className="dropdown-item">
+                        Blogs
+                      </Link>
+                      {/* <Link to="/admin/roi-calculations" className="dropdown-item">
+                    User ROI Calculations
+                  </Link> */}
+                      <Link to="/admin/all-annotations" className="dropdown-item">
+                        User Floor Plans
+                      </Link>
+                      <Link to="/admin/hvac-zone-designer" className="dropdown-item">
+                        <i className="fas fa-drafting-compass me-2"></i>
+                        HVAC Zone Designer
+                      </Link>
+                      <Link to="/admin/newsletter" className="dropdown-item">
+                        Newsletter
+                      </Link>
+                      <Link to="/admin/security" className="dropdown-item">
+                        <i className="fas fa-shield-alt me-2"></i>
+                        Security (MFA)
+                      </Link>
+                      <NavDropdown.Divider />
+                      <Link
+                        className="dropdown-item"
+                        to="#adminlogout"
+                        onClick={adminLogoutHandler}
+                      >
+                        Admin Log Out
+                      </Link>
+                    </NavDropdown>
+                  ) : null}
+                  {!userInfo && !serviceProviderInfo && !adminInfo && (
+                    <NavDropdown
+                      title="Login"
+                      id="login-nav-dropdown"
+                      align="end"
+                      className="login-dropdown"
+                    >
+                      <Link
+                        className="dropdown-item flex"
+                        to={`/signin?redirect=${encodeURIComponent(
+                          location.pathname + location.search
+                        )}`}
+                      >
+                        <i className="fas fa-user me-2"></i>
+                        User Login
+                      </Link>
+                      <Link className="dropdown-item" to="/serviceprovider/login">
+                        <i className="fas fa-hard-hat me-2"></i>
+                        Service Provider Login
+                      </Link>
+                    </NavDropdown>
+                  )}
+                </Nav>
               </div>
+
               {userInfo ? (
                 <div
-                  className="d-flex align-items-center gap-2 flex-nowrap overflow-auto"
+                  className="user-links-row d-flex align-items-center gap-2 flex-nowrap overflow-auto"
                   style={{ maxWidth: "100%", scrollbarWidth: "thin" }}
                 >
                   <span className="user-dropdown-title flex-shrink-0">
@@ -237,153 +388,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </Link>
                 </div>
               ) : null}
-              {serviceProviderInfo ? (
-                <NavDropdown
-                  show={providerDropdownOpen}
-                  onToggle={setProviderDropdownOpen}
-                  onMouseLeave={() => setProviderDropdownOpen(false)}
-                  align="end"
-                  title={serviceProviderInfo.name}
-                  id="provider-nav-dropdown"
-                >
-                  <Link
-                    to="/serviceprovider/dashboard"
-                    className="dropdown-item"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
-                    className="dropdown-item"
-                  >
-                    My Profile
-                  </Link>
-                  <Link
-                    to="/serviceprovider/projects"
-                    className="dropdown-item"
-                  >
-                    Projects
-                  </Link>
-                  <Link to="/serviceprovider/hours" className="dropdown-item">
-                    Hours
-                  </Link>
-                  <Link
-                    to="/serviceprovider/earnings"
-                    className="dropdown-item"
-                  >
-                    Earnings
-                  </Link>
-                  <Link
-                    to="/serviceprovider/messages"
-                    className="dropdown-item"
-                  >
-                    Messages
-                  </Link>
-                  <NavDropdown.Divider />
-                  <Link
-                    className="dropdown-item"
-                    to="#signout"
-                    onClick={serviceProviderSignoutHandler}
-                  >
-                    Log Out
-                  </Link>
-                </NavDropdown>
-              ) : null}
-              {adminInfo ? (
-                <NavDropdown
-                  show={adminDropdownOpen}
-                  onToggle={setAdminDropdownOpen}
-                  onMouseLeave={() => setAdminDropdownOpen(false)}
-                  align="end"
-                  title="Admin"
-                  id="admin-nav-dropdown"
-                >
-                  <Link to="/admin/dashboard" className="dropdown-item">
-                    Dashboard
-                  </Link>
-
-                  <Link to="/admin/products" className="dropdown-item">
-                    Products
-                  </Link>
-                  <Link to="/admin/orders" className="dropdown-item">
-                    Orders
-                  </Link>
-                  <Link to="/admin/users" className="dropdown-item">
-                    Users
-                  </Link>
-                  <Link
-                    to="/admin/manage-service-providers"
-                    className="dropdown-item"
-                  >
-                    Service Providers
-                  </Link>
-                  <Link to="/admin/payments" className="dropdown-item">
-                    <i className="fas fa-chart-bar me-2"></i>
-                    Service Providers Dashboard
-                  </Link>
-                  <Link to="/admin/sellers" className="dropdown-item">
-                    Sellers
-                  </Link>
-                  <Link
-                    to="/admin/sellers/total-dashboard"
-                    className="dropdown-item"
-                  >
-                    <i className="fas fa-chart-bar me-2"></i>
-                    Seller Referral Dashboard
-                  </Link>
-                  <Link to="/admin/blogs-list" className="dropdown-item">
-                    Blogs
-                  </Link>
-                  {/* <Link to="/admin/roi-calculations" className="dropdown-item">
-                    User ROI Calculations
-                  </Link> */}
-                  <Link to="/admin/all-annotations" className="dropdown-item">
-                    User Floor Plans
-                  </Link>
-                  <Link to="/admin/hvac-zone-designer" className="dropdown-item">
-                    <i className="fas fa-drafting-compass me-2"></i>
-                    HVAC Zone Designer
-                  </Link>
-                  <Link to="/admin/newsletter" className="dropdown-item">
-                    Newsletter
-                  </Link>
-                  <Link to="/admin/security" className="dropdown-item">
-                    <i className="fas fa-shield-alt me-2"></i>
-                    Security (MFA)
-                  </Link>
-                  <NavDropdown.Divider />
-                  <Link
-                    className="dropdown-item"
-                    to="#adminlogout"
-                    onClick={adminLogoutHandler}
-                  >
-                    Admin Log Out
-                  </Link>
-                </NavDropdown>
-              ) : null}
-              {!userInfo && !serviceProviderInfo && !adminInfo && (
-                <NavDropdown
-                  title="Login"
-                  id="login-nav-dropdown"
-                  align="end"
-                  className="login-dropdown"
-                >
-                  <Link
-                    className="dropdown-item flex"
-                    to={`/signin?redirect=${encodeURIComponent(
-                      location.pathname + location.search
-                    )}`}
-                  >
-                    <i className="fas fa-user me-2"></i>
-                    User Login
-                  </Link>
-                  <Link className="dropdown-item" to="/serviceprovider/login">
-                    <i className="fas fa-hard-hat me-2"></i>
-                    Service Provider Login
-                  </Link>
-                </NavDropdown>
-              )}
-            </Nav>
+            </div>
           </Navbar.Collapse>
         </Container>
       </Navbar>
