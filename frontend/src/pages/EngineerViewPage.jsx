@@ -4,7 +4,7 @@ import { Spinner, Alert, Button, Form, Dropdown } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { PDFDocument } from "pdf-lib";
-import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols, drawCanvasLegend, preloadSymbolImages, buildEditableRefrigerantLines } from "../utils/annotationUtils.js";
+import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols, drawCanvasLegend, preloadSymbolImages, buildEditableRefrigerantLines, normalizeLinePointCoordinates } from "../utils/annotationUtils.js";
 import * as pdfjsLib from "pdfjs-dist";
 import { FaDraftingCompass } from "react-icons/fa";
 import "./EngineerViewPage.css";
@@ -30,6 +30,7 @@ const EngineerViewPage = () => {
   const [selectedRefrigerantLineId, setSelectedRefrigerantLineId] = useState(null);
   const [draggingRefrigerantLineId, setDraggingRefrigerantLineId] = useState(null);
   const pdfContainerRef = useRef(null);
+  const refrigerantLineSnapshotRef = useRef(null);
 
   // Mobile responsive toolbar dropdown state
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
@@ -117,7 +118,13 @@ const EngineerViewPage = () => {
           mappedAcType = "vrf-ductless";
         }
         setAcType(mappedAcType);
-        setAnnotation(ensureEditableRefrigerantLines(data, mappedAcType));
+        const normalizedAnnotation = ensureEditableRefrigerantLines(data, mappedAcType);
+        const initialRefrigerantLines = normalizedAnnotation?.annotations?.hvac?.refrigerantLines || [];
+        refrigerantLineSnapshotRef.current = initialRefrigerantLines.map((line) => ({
+          ...line,
+          points: [...(line.points || [])],
+        }));
+        setAnnotation(normalizedAnnotation);
         // Fetch PDF file
         const pdfResponse = await fetch(`/api/annotated-pdf/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -2020,6 +2027,46 @@ const EngineerViewPage = () => {
     );
   };
 
+  const handleToggleEditRefrigerantMode = () => {
+    setEditRefrigerantMode((prev) => {
+      const nextValue = !prev;
+      if (nextValue) {
+        refrigerantLineSnapshotRef.current = (annotation?.annotations?.hvac?.refrigerantLines || []).map((line) => ({
+          ...line,
+          points: [...(line.points || [])],
+        }));
+      }
+      return nextValue;
+    });
+    setSelectedRefrigerantLineId(null);
+    setDraggingRefrigerantLineId(null);
+  };
+
+  const revertRefrigerantLinePositions = () => {
+    const snapshot = refrigerantLineSnapshotRef.current;
+    if (!snapshot?.length) {
+      toast.info("No pipe positions to restore yet.");
+      return;
+    }
+
+    setAnnotation((prev) => ({
+      ...prev,
+      annotations: {
+        ...(prev.annotations || {}),
+        hvac: {
+          ...(prev.annotations?.hvac || {}),
+          refrigerantLines: snapshot.map((line) => ({
+            ...line,
+            points: [...(line.points || [])],
+          })),
+        },
+      },
+    }));
+    setSelectedRefrigerantLineId(null);
+    setDraggingRefrigerantLineId(null);
+    toast.info("Refrigerant pipe positions restored.");
+  };
+
   // Save engineer annotations to MongoDB so they appear in Sidebar > Engineer Reviews
   const handleSaveToMongoDB = async () => {
     setSaveError(null);
@@ -2134,6 +2181,13 @@ const EngineerViewPage = () => {
 
       // Map percent-format annotations for the API
       const ann = annotation.annotations || {};
+      const normalizedHvac = {
+        ...(ann.hvac || {}),
+        refrigerantLines: (ann.hvac?.refrigerantLines || []).map((line) => ({
+          ...line,
+          points: normalizeLinePointCoordinates(line.points, cw, ch),
+        })),
+      };
       const rects = (ann.rectangles || []).map((r) => ({
         id: r.id, x: r.xPercent, y: r.yPercent,
         width: r.widthPercent, height: r.heightPercent,
@@ -2166,7 +2220,7 @@ const EngineerViewPage = () => {
       formData.append("rectangles", JSON.stringify(rects));
       formData.append("comments", JSON.stringify(comments));
       formData.append("lines", JSON.stringify(lines));
-      formData.append("hvac", JSON.stringify(ann.hvac || {}));
+      formData.append("hvac", JSON.stringify(normalizedHvac));
       formData.append("vrf", JSON.stringify(ann.vrf || {}));
       formData.append("refrigerantLinesAuto", "false");
       formData.append("engineerNotes", "");
@@ -2225,12 +2279,17 @@ const EngineerViewPage = () => {
             <Button
               variant={editRefrigerantMode ? "primary" : "outline-primary"}
               size="sm"
-              onClick={() => {
-                setEditRefrigerantMode((prev) => !prev);
-                setSelectedRefrigerantLineId(null);
-              }}
+              onClick={handleToggleEditRefrigerantMode}
             >
               {editRefrigerantMode ? "Stop Editing Pipes" : "Edit Refrigerant Pipes"}
+            </Button>
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={revertRefrigerantLinePositions}
+              disabled={!refrigerantLineSnapshotRef.current?.length}
+            >
+              Reset Pipe Positions
             </Button>
           </>
         )}

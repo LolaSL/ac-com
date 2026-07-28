@@ -154,6 +154,32 @@ const getRectCenterPercent = (rect) => ({
   y: (rect.yPercent || 0) + (rect.heightPercent || 0) / 2,
 });
 
+export const normalizeLinePointCoordinates = (points, width, height) => {
+  if (!Array.isArray(points)) return [];
+
+  const numericPoints = points.map((value) => {
+    const numericValue = typeof value === "string" ? parseFloat(value) : value;
+    return Number.isFinite(numericValue) ? numericValue : null;
+  });
+
+  if (numericPoints.every((value) => value === null)) return [];
+
+  const maxAbsPoint = numericPoints.reduce((max, value) => {
+    if (value === null) return max;
+    return Math.max(max, Math.abs(value));
+  }, 0);
+
+  const safeWidth = width > 0 ? width : 1;
+  const safeHeight = height > 0 ? height : 1;
+  const isPercent = maxAbsPoint <= 1.5;
+
+  return numericPoints.map((value, index) => {
+    if (value === null) return 0;
+    if (isPercent) return value;
+    return index % 2 === 0 ? value / safeWidth : value / safeHeight;
+  });
+};
+
 export const buildEditableRefrigerantLines = (annotations, acType) => {
   const rectangles = annotations?.rectangles || [];
   const comments = annotations?.comments || [];

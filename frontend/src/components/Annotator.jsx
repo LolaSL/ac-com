@@ -2820,11 +2820,12 @@ const Annotator = ({
           >
             <option value="eng">English</option>
             <option value="eng+spa">English + Spanish</option>
-            <option value="spa">Spanish</option>
             <option value="fra">French</option>
             <option value="deu">German</option>
+            <option value="heb">Hebrew</option>
             <option value="ita">Italian</option>
             <option value="por">Portuguese</option>
+            <option value="spa">Spanish</option>
           </Form.Select>
           <Form.Text className="text-muted">
             English remains the default, so current behavior stays intact.
