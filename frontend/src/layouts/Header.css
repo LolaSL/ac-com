@@ -528,6 +528,21 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.role-links-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.role-links-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+  width: 100%;
+}
+
 .user-links-row .user-dropdown-title,
 .user-links-row .nav-link {
   min-height: 38px;

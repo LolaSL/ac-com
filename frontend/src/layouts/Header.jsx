@@ -22,6 +22,31 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const authToken =
     userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
 
+  const adminLinks = [
+    { to: "/admin/dashboard", label: "Dashboard" },
+    { to: "/admin/products", label: "Products" },
+    { to: "/admin/orders", label: "Orders" },
+    { to: "/admin/users", label: "Users" },
+    { to: "/admin/manage-service-providers", label: "SP Management" },
+    { to: "/admin/payments", label: "SP Dashboard" },
+    { to: "/admin/sellers", label: "Sellers" },
+    { to: "/admin/sellers/total-dashboard", label: "Seller Referral Dashboard" },
+    { to: "/admin/blogs-list", label: "Blogs" },
+    { to: "/admin/all-annotations", label: "User Floor Plans" },
+    { to: "/admin/hvac-zone-designer", label: "HVAC Zone Designer" },
+    { to: "/admin/newsletter", label: "Newsletter" },
+    { to: "/admin/security", label: "Security (MFA)" },
+  ];
+
+  const serviceProviderLinks = [
+    { to: "/serviceprovider/dashboard", label: "Dashboard" },
+    { to: `/serviceprovider/profile/${serviceProviderInfo?._id || ""}`, label: "My Profile" },
+    { to: "/serviceprovider/projects", label: "Projects" },
+    { to: "/serviceprovider/hours", label: "Hours" },
+    { to: "/serviceprovider/earnings", label: "Earnings" },
+    { to: "/serviceprovider/messages", label: "Messages" },
+  ];
+
   // Fetch unread notifications count for the bell badge
   useEffect(() => {
     let cancelled = false;
@@ -167,93 +192,61 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     </div>
                   )}
                   {serviceProviderInfo ? (
-                    <div className="user-links-row d-flex align-items-center gap-2">
-                      <span className="user-dropdown-title flex-shrink-0">
-                        <i className="fas fa-hard-hat user-icon"></i>
-                        <span className="user-name">{serviceProviderInfo.name}</span>
-                      </span>
-                      <Link to="/serviceprovider/dashboard" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Dashboard
-                      </Link>
-                      <Link
-                        to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
-                        className="nav-link text-nowrap px-2 py-1 rounded"
-                      >
-                        My Profile
-                      </Link>
-                      <Link to="/serviceprovider/projects" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Projects
-                      </Link>
-                      <Link to="/serviceprovider/hours" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Hours
-                      </Link>
-                      <Link to="/serviceprovider/earnings" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Earnings
-                      </Link>
-                      <Link to="/serviceprovider/messages" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Messages
-                      </Link>
-                      <Link
-                        className="nav-link text-nowrap px-2 py-1 rounded text-danger"
-                        to="#signout"
-                        onClick={serviceProviderSignoutHandler}
-                      >
-                        Log Out
-                      </Link>
+                    <div className="role-links-shell">
+                      <div className="user-links-row role-links-row">
+                        <span className="user-dropdown-title flex-shrink-0">
+                          <i className="fas fa-hard-hat user-icon"></i>
+                          <span className="user-name">{serviceProviderInfo.name}</span>
+                        </span>
+                        {serviceProviderLinks.slice(0, 3).map((link) => (
+                          <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                      <div className="user-links-row role-links-row">
+                        {serviceProviderLinks.slice(3).map((link) => (
+                          <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
+                            {link.label}
+                          </Link>
+                        ))}
+                        <Link
+                          className="nav-link text-nowrap px-2 py-1 rounded text-danger"
+                          to="#signout"
+                          onClick={serviceProviderSignoutHandler}
+                        >
+                          Log Out
+                        </Link>
+                      </div>
                     </div>
                   ) : null}
                   {adminInfo ? (
-                    <div className="user-links-row d-flex align-items-center gap-2">
-                      <span className="user-dropdown-title flex-shrink-0">
-                        <i className="fas fa-user-shield user-icon"></i>
-                        <span className="user-name">Admin</span>
-                      </span>
-                      <Link to="/admin/dashboard" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Dashboard
-                      </Link>
-                      <Link to="/admin/products" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Products
-                      </Link>
-                      <Link to="/admin/orders" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Orders
-                      </Link>
-                      <Link to="/admin/users" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Users
-                      </Link>
-                      <Link to="/admin/manage-service-providers" className="nav-link text-nowrap px-2 py-1 rounded">
-                        SP Management
-                      </Link>
-                      <Link to="/admin/payments" className="nav-link text-nowrap px-2 py-1 rounded">
-                        SP Dashboard
-                      </Link>
-                      <Link to="/admin/sellers" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Sellers
-                      </Link>
-                      <Link to="/admin/sellers/total-dashboard" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Seller Referral Dashboard
-                      </Link>
-                      <Link to="/admin/blogs-list" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Blogs
-                      </Link>
-                      <Link to="/admin/all-annotations" className="nav-link text-nowrap px-2 py-1 rounded">
-                        User Floor Plans
-                      </Link>
-                      <Link to="/admin/hvac-zone-designer" className="nav-link text-nowrap px-2 py-1 rounded">
-                        HVAC Zone Designer
-                      </Link>
-                      <Link to="/admin/newsletter" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Newsletter
-                      </Link>
-                      <Link to="/admin/security" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Security (MFA)
-                      </Link>
-                      <Link
-                        className="nav-link text-nowrap px-2 py-1 rounded text-danger"
-                        to="#adminlogout"
-                        onClick={adminLogoutHandler}
-                      >
-                        Admin Log Out
-                      </Link>
+                    <div className="role-links-shell">
+                      <div className="user-links-row role-links-row">
+                        <span className="user-dropdown-title flex-shrink-0">
+                          <i className="fas fa-user-shield user-icon"></i>
+                          <span className="user-name">Admin</span>
+                        </span>
+                        {adminLinks.slice(0, 7).map((link) => (
+                          <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                      <div className="user-links-row role-links-row">
+                        {adminLinks.slice(7).map((link) => (
+                          <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
+                            {link.label}
+                          </Link>
+                        ))}
+                        <Link
+                          className="nav-link text-nowrap px-2 py-1 rounded text-danger"
+                          to="#adminlogout"
+                          onClick={adminLogoutHandler}
+                        >
+                          Admin Log Out
+                        </Link>
+                      </div>
                     </div>
                   ) : null}
                   {!userInfo && !serviceProviderInfo && !adminInfo && (

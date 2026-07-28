@@ -1102,6 +1102,25 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
   const canvasWidth = context.canvas.width;
   const canvasHeight = context.canvas.height;
 
+  const normalizeLinePoints = (line) => {
+    const rawPoints = Array.isArray(line.points) ? line.points : [];
+    if (rawPoints.length < 4) return [];
+
+    const isPercent = rawPoints.every((value) => {
+      const numericValue = typeof value === "string" ? parseFloat(value) : value;
+      return Number.isFinite(numericValue) && Math.abs(numericValue) <= 1.5;
+    });
+
+    return rawPoints.reduce((acc, value, index) => {
+      const numericValue = typeof value === "string" ? parseFloat(value) : value;
+      if (!Number.isFinite(numericValue)) return acc;
+      acc.push(index % 2 === 0
+        ? (isPercent ? numericValue * canvasWidth : numericValue)
+        : (isPercent ? numericValue * canvasHeight : numericValue));
+      return acc;
+    }, []);
+  };
+
   console.log('overlayAnnotations: Converting percentages with canvas dimensions:', { canvasWidth, canvasHeight });
   if (annotations?.rectangles?.length > 0) {
     console.log('Sample rectangle percent coords:', {
@@ -1314,15 +1333,7 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
 
   if (storedRefrigerantLines.length > 0) {
     storedRefrigerantLines.forEach((line) => {
-      const points = Array.isArray(line.points) ? line.points : [];
-      const normalizedPoints = points.map((value, index) => {
-        const numericValue = typeof value === "string" ? parseFloat(value) : value;
-        if (!Number.isFinite(numericValue)) return 0;
-        return index % 2 === 0
-          ? numericValue * canvasWidth
-          : numericValue * canvasHeight;
-      });
-
+      const normalizedPoints = normalizeLinePoints(line);
       if (normalizedPoints.length < 4) return;
 
       context.save();

@@ -13,6 +13,7 @@ const LANGUAGE_ALIASES = {
   italian: 'ita',
   por: 'por',
   portuguese: 'por',
+  hebrew: 'heb',
 };
 
 export const resolveOcrLanguageSelection = (selection) => {

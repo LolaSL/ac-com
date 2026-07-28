@@ -602,6 +602,23 @@ const EngineerViewPage = () => {
         };
       };
 
+      const getLineCanvasPoints = (line) => {
+        const rawPoints = Array.isArray(line.points) ? line.points : [];
+        if (rawPoints.length < 4) return [];
+        const isPercent = rawPoints.every((value) => {
+          const numericValue = typeof value === "string" ? parseFloat(value) : value;
+          return Number.isFinite(numericValue) && Math.abs(numericValue) <= 1.5;
+        });
+        return rawPoints.reduce((acc, value, index) => {
+          const numericValue = typeof value === "string" ? parseFloat(value) : value;
+          if (!Number.isFinite(numericValue)) return acc;
+          acc.push(index % 2 === 0
+            ? (isPercent ? numericValue * overlayCanvas.width : numericValue)
+            : (isPercent ? numericValue * overlayCanvas.height : numericValue));
+          return acc;
+        }, []);
+      };
+
       const updateRefrigerantLinePoint = (lineId, nextPercentX, nextPercentY) => {
         setAnnotation((prev) => {
           const existingLines = prev?.annotations?.hvac?.refrigerantLines || [];
@@ -631,23 +648,28 @@ const EngineerViewPage = () => {
         if (!editRefrigerantMode) return;
         const point = getCanvasPointFromEvent(e);
         const lines = annotation?.annotations?.hvac?.refrigerantLines || [];
-        const hitLine = lines.find((line) => {
-          const points = Array.isArray(line.points) ? line.points : [];
-          if (points.length < 4) return false;
+        const hitLine = lines.reduce((closestMatch, line) => {
+          const points = getLineCanvasPoints(line);
+          if (points.length < 4) return closestMatch;
           const bendX = points[2];
           const bendY = points[3];
-          const distance = Math.hypot(point.x - bendX, point.y - bendY);
-          return distance <= 0.03;
-        });
+          const px = point.x * overlayCanvas.width;
+          const py = point.y * overlayCanvas.height;
+          const distance = Math.hypot(px - bendX, py - bendY);
+          if (!closestMatch || distance < closestMatch.distance) {
+            return { line, distance };
+          }
+          return closestMatch;
+        }, null);
 
-        if (!hitLine) {
+        if (!hitLine?.line) {
           setSelectedRefrigerantLineId(null);
           setDraggingRefrigerantLineId(null);
           return;
         }
 
-        setSelectedRefrigerantLineId(hitLine.id);
-        setDraggingRefrigerantLineId(hitLine.id);
+        setSelectedRefrigerantLineId(hitLine.line.id);
+        setDraggingRefrigerantLineId(hitLine.line.id);
         e.stopPropagation();
         if (e.preventDefault) e.preventDefault();
       };
