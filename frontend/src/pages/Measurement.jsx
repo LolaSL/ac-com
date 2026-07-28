@@ -302,7 +302,7 @@ const Measurement = () => {
                 minHeight: "42px",
               }}
             >
-              Manual BTU Calculator (No PDF + Notations)
+              No PDF + Notations
             </button>
           </div>
         </div>

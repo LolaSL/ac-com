@@ -149,6 +149,147 @@ const drawSingleOrthogonalLine = (ctx, x1, y1, x2, y2, color = "#008B8B", dash =
   drawOrthogonalLine(ctx, x1, y1, x2, y2, { color, dash, lineWidth: 2.5 });
 };
 
+const getRectCenterPercent = (rect) => ({
+  x: (rect.xPercent || 0) + (rect.widthPercent || 0) / 2,
+  y: (rect.yPercent || 0) + (rect.heightPercent || 0) / 2,
+});
+
+export const buildEditableRefrigerantLines = (annotations, acType) => {
+  const rectangles = annotations?.rectangles || [];
+  const comments = annotations?.comments || [];
+
+  const getCommentForRect = (rectId) =>
+    comments.find((comment) => String(comment.rectId) === String(rectId));
+
+  const makeOrthogonalLine = (start, end, id, stroke, strokeWidth = 2, lineType = "liquid") => {
+    const elbowX = end.x;
+    const elbowY = start.y;
+    return {
+      id,
+      points: [start.x, start.y, elbowX, elbowY, end.x, end.y],
+      stroke,
+      strokeWidth,
+      lineType,
+    };
+  };
+
+  const createRouteForPair = (startRect, endRect, baseId) => {
+    const start = getRectCenterPercent(startRect);
+    const end = getRectCenterPercent(endRect);
+    return [
+      makeOrthogonalLine(start, end, `${baseId}-supply`, "#FF6B35", 2, "liquid"),
+      makeOrthogonalLine(start, end, `${baseId}-return`, "#0066FF", 2, "vapor"),
+    ];
+  };
+
+  if (acType === "vrf-ducted") {
+    let condensers = [];
+    if (comments.length > 0) {
+      condensers = comments
+        .filter((comment) => comment.text.toLowerCase().includes("condenser"))
+        .map((comment) => rectangles.find((rect) => String(rect.id) === String(comment.rectId)))
+        .filter(Boolean);
+    }
+
+    if (condensers.length === 0) {
+      let maxIdNum = -1;
+      let fallbackCondenser = null;
+      rectangles.forEach((rect) => {
+        const idNum = parseInt(rect.id, 10) || 0;
+        if (idNum > maxIdNum) {
+          maxIdNum = idNum;
+          fallbackCondenser = rect;
+        }
+      });
+      if (fallbackCondenser) condensers = [fallbackCondenser];
+    }
+
+    if (condensers.length > 0) {
+      const groups = condensers.map((condenser) => {
+        const condenserComment = getCommentForRect(condenser.id)?.text || "";
+        const match = condenserComment.match(/condenser-(\d+)/i);
+        const groupNum = match ? match[1] : null;
+
+        let indoorRects = [];
+        if (groupNum && comments.length > 0) {
+          indoorRects = rectangles
+            .filter((rect) => !rect.isCondenser && String(rect.id) !== String(condenser.id))
+            .filter((rect) => {
+              const comment = getCommentForRect(rect.id);
+              return comment && comment.text.match(new RegExp(`ac-${groupNum}(\\.\\d+)?`, "i"));
+            })
+            .sort((a, b) => {
+              const aComment = getCommentForRect(a.id)?.text || "";
+              const bComment = getCommentForRect(b.id)?.text || "";
+              const aMatch = aComment.match(/ac-\d+(\.(\d+))?/i);
+              const bMatch = bComment.match(/ac-\d+(\.(\d+))?/i);
+              const aSub = aMatch && aMatch[2] ? parseInt(aMatch[2], 10) : 0;
+              const bSub = bMatch && bMatch[2] ? parseInt(bMatch[2], 10) : 0;
+              return aSub - bSub;
+            });
+        }
+
+        return { condenser, indoorRects };
+      });
+
+      const lines = [];
+      groups.forEach(({ condenser, indoorRects }) => {
+        if (indoorRects.length === 0) return;
+        for (let i = 0; i < indoorRects.length - 1; i += 1) {
+          lines.push(...createRouteForPair(indoorRects[i], indoorRects[i + 1], `line-${indoorRects[i].id}-${indoorRects[i + 1].id}`));
+        }
+        lines.push(...createRouteForPair(indoorRects[indoorRects.length - 1], condenser, `line-${indoorRects[indoorRects.length - 1].id}-${condenser.id}`));
+      });
+
+      if (lines.length > 0) return lines;
+    }
+  }
+
+  if (acType === "vrf-ductless") {
+    let condensers = [];
+    if (comments.length > 0) {
+      condensers = comments
+        .filter((comment) => comment.text.toLowerCase().includes("condenser"))
+        .map((comment) => rectangles.find((rect) => String(rect.id) === String(comment.rectId)))
+        .filter(Boolean);
+    }
+
+    if (condensers.length === 0) {
+      rectangles.forEach((rect) => {
+        if (rect.isCondenser) condensers.push(rect);
+      });
+    }
+
+    if (condensers.length === 0 && rectangles.length > 0) {
+      condensers = [rectangles.reduce((largest, rect) => {
+        const area = (rect.widthPercent || 0) * (rect.heightPercent || 0);
+        return area > ((largest.widthPercent || 0) * (largest.heightPercent || 0)) ? rect : largest;
+      })];
+    }
+
+    if (condensers.length > 0) {
+      const linePairs = [];
+      rectangles.forEach((rect) => {
+        if (condensers.some((condenser) => String(condenser.id) === String(rect.id))) return;
+        const nearestCondenser = condensers.reduce((closest, condenser) => {
+          const currentCenter = getRectCenterPercent(rect);
+          const condenserCenter = getRectCenterPercent(condenser);
+          const currentDist = Math.hypot(currentCenter.x - condenserCenter.x, currentCenter.y - condenserCenter.y);
+          const closestDist = Math.hypot(
+            closest.x - condenserCenter.x,
+            closest.y - condenserCenter.y
+          );
+          return currentDist < closestDist ? currentCenter : closest;
+        }, getRectCenterPercent(condensers[0]));
+        linePairs.push(...createRouteForPair(rect, { ...rect, xPercent: nearestCondenser.x - (rect.widthPercent || 0) / 2, yPercent: nearestCondenser.y - (rect.heightPercent || 0) / 2, widthPercent: rect.widthPercent || 0, heightPercent: rect.heightPercent || 0 }, `line-${rect.id}-cond`));
+      });
+      return linePairs;
+    }
+  }
+
+  return [];
+};
+
 /**
  * Overlay VRF System on canvas
  * @param {CanvasRenderingContext2D} context - Canvas context
@@ -1169,9 +1310,37 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
     }
   }); // end callout lines (skipped for vrf-ducted)
 
-  // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
-  // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
-  // Skip for VRF systems which have their own topology logic
+  const storedRefrigerantLines = !skipRefrigerantLines ? (annotations?.hvac?.refrigerantLines || []) : [];
+
+  if (storedRefrigerantLines.length > 0) {
+    storedRefrigerantLines.forEach((line) => {
+      const points = Array.isArray(line.points) ? line.points : [];
+      const normalizedPoints = points.map((value, index) => {
+        const numericValue = typeof value === "string" ? parseFloat(value) : value;
+        if (!Number.isFinite(numericValue)) return 0;
+        return index % 2 === 0
+          ? numericValue * canvasWidth
+          : numericValue * canvasHeight;
+      });
+
+      if (normalizedPoints.length < 4) return;
+
+      context.save();
+      context.beginPath();
+      context.moveTo(normalizedPoints[0], normalizedPoints[1]);
+      for (let i = 2; i < normalizedPoints.length; i += 2) {
+        context.lineTo(normalizedPoints[i], normalizedPoints[i + 1]);
+      }
+      context.lineWidth = line.strokeWidth || 2;
+      context.strokeStyle = line.stroke || "#FF6B35";
+      context.setLineDash([6, 3]);
+      context.stroke();
+      context.restore();
+    });
+  } else {
+    // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
+    // Star topology: Condenser connects directly to each AC1, AC2, AC3, etc.
+    // Skip for VRF systems which have their own topology logic
 
 if (
   !skipRefrigerantLines &&
@@ -1765,6 +1934,7 @@ if (
     }
   }
 }
+  }
 };
 
 // ─── Canvas Legend ────────────────────────────────────────────────

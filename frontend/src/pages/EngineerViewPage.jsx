@@ -4,7 +4,7 @@ import { Spinner, Alert, Button, Form, Dropdown } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { PDFDocument } from "pdf-lib";
-import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols, drawCanvasLegend, preloadSymbolImages } from "../utils/annotationUtils.js";
+import { overlayVRFSystem, overlayHVAC, overlayAnnotations, hvacSymbols, drawCanvasLegend, preloadSymbolImages, buildEditableRefrigerantLines } from "../utils/annotationUtils.js";
 import * as pdfjsLib from "pdfjs-dist";
 import { FaDraftingCompass } from "react-icons/fa";
 import "./EngineerViewPage.css";
@@ -26,6 +26,9 @@ const EngineerViewPage = () => {
   const [saveError, setSaveError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [reviewStatus, setReviewStatus] = useState("reviewed");
+  const [editRefrigerantMode, setEditRefrigerantMode] = useState(false);
+  const [selectedRefrigerantLineId, setSelectedRefrigerantLineId] = useState(null);
+  const [draggingRefrigerantLineId, setDraggingRefrigerantLineId] = useState(null);
   const pdfContainerRef = useRef(null);
 
   // Mobile responsive toolbar dropdown state
@@ -105,16 +108,16 @@ const EngineerViewPage = () => {
           throw new Error(`Failed to fetch annotation: ${serverMsg}`);
         }
         const data = await response.json();
-        setAnnotation(data);
         // Engineer view always uses VRF modes; map basic acTypes to their VRF equivalents
         const fetchedAcType = data.acType || "ducted";
+        let mappedAcType = "vrf-ducted";
         if (fetchedAcType === "vrf-ducted" || fetchedAcType === "vrf-ductless") {
-          setAcType(fetchedAcType);
+          mappedAcType = fetchedAcType;
         } else if (fetchedAcType === "ductless") {
-          setAcType("vrf-ductless");
-        } else {
-          setAcType("vrf-ducted");
+          mappedAcType = "vrf-ductless";
         }
+        setAcType(mappedAcType);
+        setAnnotation(ensureEditableRefrigerantLines(data, mappedAcType));
         // Fetch PDF file
         const pdfResponse = await fetch(`/api/annotated-pdf/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -156,6 +159,26 @@ const EngineerViewPage = () => {
     };
     fetchData();
   }, [id, token]);
+
+  const ensureEditableRefrigerantLines = (nextAnnotation, mode) => {
+    if (!nextAnnotation?.annotations) return nextAnnotation;
+    const existingLines = nextAnnotation.annotations?.hvac?.refrigerantLines || [];
+    if (existingLines.length > 0) return nextAnnotation;
+
+    const generatedLines = buildEditableRefrigerantLines(nextAnnotation.annotations, mode);
+    if (!generatedLines.length) return nextAnnotation;
+
+    return {
+      ...nextAnnotation,
+      annotations: {
+        ...(nextAnnotation.annotations || {}),
+        hvac: {
+          ...(nextAnnotation.annotations?.hvac || {}),
+          refrigerantLines: generatedLines,
+        },
+      },
+    };
+  };
 
   // Helper: Convert screen coordinates to canvas percent coordinates (0-1)
   // (Same pattern as screenToCanvas in HvacZoneDesignerPage but returns percent)
@@ -430,6 +453,29 @@ const EngineerViewPage = () => {
     toast.success(`Zone ${newZone.zoneLabel} created`);
   };
 
+  useEffect(() => {
+    if (!annotation?.annotations) return;
+    setAnnotation((prev) => {
+      if (!prev?.annotations) return prev;
+      const existingLines = prev.annotations?.hvac?.refrigerantLines || [];
+      if (existingLines.length > 0) return prev;
+
+      const generatedLines = buildEditableRefrigerantLines(prev.annotations, acType);
+      if (!generatedLines.length) return prev;
+
+      return {
+        ...prev,
+        annotations: {
+          ...(prev.annotations || {}),
+          hvac: {
+            ...(prev.annotations?.hvac || {}),
+            refrigerantLines: generatedLines,
+          },
+        },
+      };
+    });
+  }, [annotation, acType]);
+
   // Redraw overlays whenever annotation, showHVAC, or addMode changes
   useEffect(() => {
     const renderOverlays = async () => {
@@ -461,7 +507,8 @@ const EngineerViewPage = () => {
       
       // Enable pointer events if: drawing zones, in addMode, or zones exist (for clicking)
       const hasZones = (annotation?.annotations?.hvac?.zones || []).length > 0;
-      overlayCanvas.style.pointerEvents = (addMode || isDrawingZone || hasZones) ? "auto" : "none";
+      const hasRefrigerantLines = (annotation?.annotations?.hvac?.refrigerantLines || []).length > 0;
+      overlayCanvas.style.pointerEvents = (addMode || isDrawingZone || hasZones || editRefrigerantMode || hasRefrigerantLines) ? "auto" : "none";
       overlayCanvas.style.touchAction = isDrawingZone ? "none" : "auto"; // Prevent PDF scroll when drawing
       container.style.position = "relative";
       if (isDrawingZone) {
@@ -536,6 +583,87 @@ const EngineerViewPage = () => {
       
       // Note: Zones are rendered by overlayHVAC() above, no need to render them again here
       
+      const getCanvasPointFromEvent = (e) => {
+        const rect = overlayCanvas.getBoundingClientRect();
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+          clientX = e.changedTouches[0].clientX;
+          clientY = e.changedTouches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+        return {
+          x: (clientX - rect.left) / overlayCanvas.width,
+          y: (clientY - rect.top) / overlayCanvas.height,
+        };
+      };
+
+      const updateRefrigerantLinePoint = (lineId, nextPercentX, nextPercentY) => {
+        setAnnotation((prev) => {
+          const existingLines = prev?.annotations?.hvac?.refrigerantLines || [];
+          if (!existingLines.length) return prev;
+          const nextLines = existingLines.map((line) => {
+            if (line.id !== lineId) return line;
+            const nextPoints = [...(line.points || [])];
+            if (nextPoints.length < 4) return line;
+            nextPoints[2] = nextPercentX;
+            nextPoints[3] = nextPercentY;
+            return { ...line, points: nextPoints };
+          });
+          return {
+            ...prev,
+            annotations: {
+              ...(prev.annotations || {}),
+              hvac: {
+                ...(prev.annotations?.hvac || {}),
+                refrigerantLines: nextLines,
+              },
+            },
+          };
+        });
+      };
+
+      const handleRefrigerantLinePointerDown = (e) => {
+        if (!editRefrigerantMode) return;
+        const point = getCanvasPointFromEvent(e);
+        const lines = annotation?.annotations?.hvac?.refrigerantLines || [];
+        const hitLine = lines.find((line) => {
+          const points = Array.isArray(line.points) ? line.points : [];
+          if (points.length < 4) return false;
+          const bendX = points[2];
+          const bendY = points[3];
+          const distance = Math.hypot(point.x - bendX, point.y - bendY);
+          return distance <= 0.03;
+        });
+
+        if (!hitLine) {
+          setSelectedRefrigerantLineId(null);
+          setDraggingRefrigerantLineId(null);
+          return;
+        }
+
+        setSelectedRefrigerantLineId(hitLine.id);
+        setDraggingRefrigerantLineId(hitLine.id);
+        e.stopPropagation();
+        if (e.preventDefault) e.preventDefault();
+      };
+
+      const handleRefrigerantLinePointerMove = (e) => {
+        if (!editRefrigerantMode || !draggingRefrigerantLineId) return;
+        const point = getCanvasPointFromEvent(e);
+        updateRefrigerantLinePoint(draggingRefrigerantLineId, point.x, point.y);
+        e.stopPropagation();
+        if (e.preventDefault) e.preventDefault();
+      };
+
+      const handleRefrigerantLinePointerUp = () => {
+        setDraggingRefrigerantLineId(null);
+      };
+
       // Add click handler for interactive placement
       // Unified handler for both click and touch on overlay canvas
       const handleOverlayInteraction = (e) => {
@@ -674,7 +802,16 @@ const EngineerViewPage = () => {
       overlayCanvasRef.current = overlayCanvas;
 
       // Attach event handlers based on mode
-      if (isDrawingZone) {
+      if (editRefrigerantMode) {
+        overlayCanvas.style.cursor = 'grab';
+        overlayCanvas.onmousedown = handleRefrigerantLinePointerDown;
+        overlayCanvas.onmousemove = handleRefrigerantLinePointerMove;
+        overlayCanvas.onmouseup = handleRefrigerantLinePointerUp;
+        overlayCanvas.ontouchstart = handleRefrigerantLinePointerDown;
+        overlayCanvas.ontouchmove = handleRefrigerantLinePointerMove;
+        overlayCanvas.ontouchend = handleRefrigerantLinePointerUp;
+        overlayCanvas.onclick = null;
+      } else if (isDrawingZone) {
         overlayCanvas.style.cursor = 'crosshair';
         overlayCanvas.onmousedown = handleCanvasMouseDown;
         overlayCanvas.onmousemove = handleCanvasMouseMove;
@@ -743,7 +880,7 @@ const EngineerViewPage = () => {
     
     renderOverlays();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfFile, annotation, showHVAC, addMode, acType, pdfScale, isDrawingZone]);
+  }, [pdfFile, annotation, showHVAC, addMode, acType, pdfScale, isDrawingZone, editRefrigerantMode, selectedRefrigerantLineId]);
 
   // Lightweight effect: update zone selection highlight without a full canvas rebuild.
   // Runs only when selectedZoneIndex or annotation changes.
@@ -2062,6 +2199,16 @@ const EngineerViewPage = () => {
               onClick={() => setShowHVAC((prev) => !prev)}
             >
               {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
+            </Button>
+            <Button
+              variant={editRefrigerantMode ? "primary" : "outline-primary"}
+              size="sm"
+              onClick={() => {
+                setEditRefrigerantMode((prev) => !prev);
+                setSelectedRefrigerantLineId(null);
+              }}
+            >
+              {editRefrigerantMode ? "Stop Editing Pipes" : "Edit Refrigerant Pipes"}
             </Button>
           </>
         )}

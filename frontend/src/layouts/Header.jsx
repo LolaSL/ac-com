@@ -15,8 +15,6 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo, serviceProviderInfo, adminInfo } = state;
 
-  const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
-  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const navRef = useRef(null);
   const location = useLocation();
@@ -56,11 +54,8 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
 
   // Close dropdowns on outside click/touch (mobile fix for onMouseLeave)
   useEffect(() => {
-    const handleOutside = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) {
-        setProviderDropdownOpen(false);
-        setAdminDropdownOpen(false);
-      }
+    const handleOutside = () => {
+      // No-op: dropdown state is no longer used after switching to visible button rows.
     };
     document.addEventListener('touchstart', handleOutside);
     document.addEventListener('mousedown', handleOutside);
@@ -141,34 +136,36 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                       )}
                     </Link>
                   )}
-                  <div className="d-flex align-items-center gap-1 cart-wrapper">
-                    <Link
-                      to="/cart"
-                      className={`text-decoration-none d-flex nav-link cart-link${location.pathname === '/cart' ? ' active-link' : ''}`}
-                    >
-                      Cart
-                    </Link>
-                    {cart.cartItems.length > 0 ? (
-                      <Badge
-                        bg="danger"
-                        role="button"
-                        onClick={() =>
-                          (window.location.href = "/signin?redirect=/shipping")
-                        }
-                        className="cart-badge-checkout"
+                  {!adminInfo && !serviceProviderInfo && (
+                    <div className="d-flex align-items-center gap-1 cart-wrapper">
+                      <Link
+                        to="/cart"
+                        className={`text-decoration-none d-flex nav-link cart-link${location.pathname === '/cart' ? ' active-link' : ''}`}
                       >
-                        Checkout
-                      </Badge>
-                    ) : (
-                      <Badge
-                        pill
-                        bg="secondary"
-                        className="cart-badge-empty"
-                      >
-                        Empty
-                      </Badge>
-                    )}
-                  </div>
+                        Cart
+                      </Link>
+                      {cart.cartItems.length > 0 ? (
+                        <Badge
+                          bg="danger"
+                          role="button"
+                          onClick={() =>
+                            (window.location.href = "/signin?redirect=/shipping")
+                          }
+                          className="cart-badge-checkout"
+                        >
+                          Checkout
+                        </Badge>
+                      ) : (
+                        <Badge
+                          pill
+                          bg="secondary"
+                          className="cart-badge-empty"
+                        >
+                          Empty
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                   {serviceProviderInfo ? (
                     <div className="user-links-row d-flex align-items-center gap-2">
                       <span className="user-dropdown-title flex-shrink-0">
@@ -224,10 +221,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                         Users
                       </Link>
                       <Link to="/admin/manage-service-providers" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Service Providers
+                        SP Management
                       </Link>
                       <Link to="/admin/payments" className="nav-link text-nowrap px-2 py-1 rounded">
-                        Service Providers Dashboard
+                        SP Dashboard
                       </Link>
                       <Link to="/admin/sellers" className="nav-link text-nowrap px-2 py-1 rounded">
                         Sellers
