@@ -467,7 +467,7 @@
   }
 
   .header-nav-stack {
-    padding-top: 0.25rem;
+    padding-top: 0;
     width: 100%;
   }
 
@@ -480,9 +480,16 @@
     max-width: 900px;
   }
 
-  /* Keep brand vertically centred with the search row height */
-  .header-nav .navbar-brand.d-lg-flex {
-    padding-top: 0.4rem;
+  /* Remove h3 padding so sandwich button and brand text sit on the same visual line */
+  .header-nav .navbar-brand h3 {
+    padding: 0;
+    margin: 0 0 2px 0;
+    line-height: 1.2;
+  }
+
+  /* Vertically align sandwich button with brand text */
+  .header-nav .btn-toggle {
+    margin-top: 2px;
   }
 }
 
