@@ -122,7 +122,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             <i className="fas fa-bars"></i>
           </Button>
 
-          <Link to="/" className="navbar-brand me-4">
+          <Link to="/" className="navbar-brand me-4 d-none d-lg-block">
             <h3>AC-Commerce</h3>
             <p className="handwritten">Cooling Solutions For Every Space</p>
           </Link>
@@ -137,6 +137,10 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
           >
             <div className="header-nav-stack w-100">
               <div className="header-top-row">
+                <Link to="/" className="navbar-brand me-3 d-lg-none">
+                  <h3>AC-Commerce</h3>
+                  <p className="handwritten">Cooling Solutions For Every Space</p>
+                </Link>
                 <div className="flex-grow-1 me-3 search-wrapper">
                   <SearchBox />
                 </div>

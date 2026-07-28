@@ -2827,9 +2827,6 @@ const Annotator = ({
             <option value="por">Portuguese</option>
             <option value="spa">Spanish</option>
           </Form.Select>
-          <Form.Text className="text-muted">
-            English remains the default, so current behavior stays intact.
-          </Form.Text>
         </Form.Group>
         <Form.Control
           className="my-4 form-control"
