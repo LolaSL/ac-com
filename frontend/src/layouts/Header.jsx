@@ -191,6 +191,33 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                       )}
                     </div>
                   )}
+                  {!userInfo && !serviceProviderInfo && !adminInfo && (
+                    <NavDropdown
+                      title="Login"
+                      id="login-nav-dropdown"
+                      align="end"
+                      className="login-dropdown"
+                    >
+                      <Link
+                        className="dropdown-item flex"
+                        to={`/signin?redirect=${encodeURIComponent(
+                          location.pathname + location.search
+                        )}`}
+                      >
+                        <i className="fas fa-user me-2"></i>
+                        User Login
+                      </Link>
+                      <Link className="dropdown-item" to="/serviceprovider/login">
+                        <i className="fas fa-hard-hat me-2"></i>
+                        Service Provider Login
+                      </Link>
+                    </NavDropdown>
+                  )}
+                </Nav>
+              </div>
+
+              {(serviceProviderInfo || adminInfo) && (
+                <div className="header-role-links-block">
                   {serviceProviderInfo ? (
                     <div className="role-links-shell">
                       <div className="user-links-row role-links-row">
@@ -249,30 +276,8 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                       </div>
                     </div>
                   ) : null}
-                  {!userInfo && !serviceProviderInfo && !adminInfo && (
-                    <NavDropdown
-                      title="Login"
-                      id="login-nav-dropdown"
-                      align="end"
-                      className="login-dropdown"
-                    >
-                      <Link
-                        className="dropdown-item flex"
-                        to={`/signin?redirect=${encodeURIComponent(
-                          location.pathname + location.search
-                        )}`}
-                      >
-                        <i className="fas fa-user me-2"></i>
-                        User Login
-                      </Link>
-                      <Link className="dropdown-item" to="/serviceprovider/login">
-                        <i className="fas fa-hard-hat me-2"></i>
-                        Service Provider Login
-                      </Link>
-                    </NavDropdown>
-                  )}
-                </Nav>
-              </div>
+                </div>
+              )}
 
               {userInfo ? (
                 <div

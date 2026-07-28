@@ -510,6 +510,14 @@
   min-width: 0;
 }
 
+.header-role-links-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+  margin-top: 0.3rem;
+}
+
 .header-top-actions {
   flex: 0 0 auto;
   flex-wrap: wrap;
@@ -587,6 +595,10 @@
     align-items: stretch;
     gap: 0.35rem;
     overflow: visible;
+  }
+
+  .header-role-links-block {
+    margin-top: 0.2rem;
   }
 
   .header-top-row .search-wrapper {

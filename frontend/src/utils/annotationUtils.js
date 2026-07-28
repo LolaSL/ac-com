@@ -149,6 +149,42 @@ const drawSingleOrthogonalLine = (ctx, x1, y1, x2, y2, color = "#008B8B", dash =
   drawOrthogonalLine(ctx, x1, y1, x2, y2, { color, dash, lineWidth: 2.5 });
 };
 
+const drawOrthogonalPipePair = (ctx, points, opts = {}) => {
+  if (!Array.isArray(points) || points.length < 6) return;
+
+  const {
+    lineWidth = 2,
+    dash = [6, 3],
+    offset = 3,
+    supplyColor = "#FF6B35",
+    returnColor = "#0066FF",
+  } = opts;
+
+  const startX = points[0];
+  const startY = points[1];
+  const bendX = points[2];
+  const bendY = points[3];
+  const endX = points[4];
+  const endY = points[5];
+
+  const drawPath = (color, xOffset) => {
+    ctx.save();
+    ctx.setLineDash(dash);
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(startX + xOffset, startY);
+    ctx.lineTo(bendX + xOffset, bendY);
+    ctx.lineTo(endX + xOffset, endY);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  drawPath(supplyColor, offset);
+  drawPath(returnColor, -offset);
+};
+
 const getRectCenterPercent = (rect) => ({
   x: (rect.xPercent || 0) + (rect.widthPercent || 0) / 2,
   y: (rect.yPercent || 0) + (rect.heightPercent || 0) / 2,
@@ -1360,19 +1396,12 @@ export const overlayAnnotations = (context, annotations, acType, options = {}) =
   if (storedRefrigerantLines.length > 0) {
     storedRefrigerantLines.forEach((line) => {
       const normalizedPoints = normalizeLinePoints(line);
-      if (normalizedPoints.length < 4) return;
+      if (normalizedPoints.length < 6) return;
 
-      context.save();
-      context.beginPath();
-      context.moveTo(normalizedPoints[0], normalizedPoints[1]);
-      for (let i = 2; i < normalizedPoints.length; i += 2) {
-        context.lineTo(normalizedPoints[i], normalizedPoints[i + 1]);
-      }
-      context.lineWidth = line.strokeWidth || 2;
-      context.strokeStyle = line.stroke || "#FF6B35";
-      context.setLineDash([6, 3]);
-      context.stroke();
-      context.restore();
+      drawOrthogonalPipePair(context, normalizedPoints, {
+        lineWidth: line.strokeWidth || 2,
+        dash: [6, 3],
+      });
     });
   } else {
     // For minisplit ducted systems, draw blue dashed refrigerant lines connecting AC units to condenser
