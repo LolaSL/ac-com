@@ -447,6 +447,17 @@
   .header-container {
     max-width: 1400px;
     margin: 0 auto;
+    align-items: flex-start !important;
+  }
+
+  /* The Bootstrap collapse fills remaining width and stacks its children vertically */
+  .navbar-collapse {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .header-nav-stack {
+    padding-top: 0.3rem;
   }
 
   .navbar-nav {
