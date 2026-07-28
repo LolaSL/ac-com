@@ -122,7 +122,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
             <i className="fas fa-bars"></i>
           </Button>
 
-          <Link to="/" className="navbar-brand me-3 flex-shrink-0 d-none d-lg-flex flex-column justify-content-center">
+          <Link to="/" className="navbar-brand me-3 flex-shrink-0 d-none d-lg-block">
             <h3>AC-Commerce</h3>
             <p className="handwritten">Cooling Solutions For Every Space</p>
           </Link>

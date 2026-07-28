@@ -487,9 +487,10 @@
     line-height: 1.2;
   }
 
-  /* Vertically align sandwich button with brand text */
-  .header-nav .btn-toggle {
-    margin-top: 2px;
+  /* Pin sandwich and brand to the top — prevent stretching to collapse height */
+  .header-nav .btn-toggle,
+  .header-nav .navbar-brand {
+    align-self: flex-start;
   }
 }
 
