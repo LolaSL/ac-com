@@ -170,128 +170,94 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     )}
                   </div>
                   {serviceProviderInfo ? (
-                    <NavDropdown
-                      show={providerDropdownOpen}
-                      onToggle={setProviderDropdownOpen}
-                      onMouseLeave={() => setProviderDropdownOpen(false)}
-                      align="end"
-                      title={serviceProviderInfo.name}
-                      id="provider-nav-dropdown"
-                    >
-                      <Link
-                        to="/serviceprovider/dashboard"
-                        className="dropdown-item"
-                      >
+                    <div className="user-links-row d-flex align-items-center gap-2">
+                      <span className="user-dropdown-title flex-shrink-0">
+                        <i className="fas fa-hard-hat user-icon"></i>
+                        <span className="user-name">{serviceProviderInfo.name}</span>
+                      </span>
+                      <Link to="/serviceprovider/dashboard" className="nav-link text-nowrap px-2 py-1 rounded">
                         Dashboard
                       </Link>
                       <Link
                         to={`/serviceprovider/profile/${serviceProviderInfo._id}`}
-                        className="dropdown-item"
+                        className="nav-link text-nowrap px-2 py-1 rounded"
                       >
                         My Profile
                       </Link>
-                      <Link
-                        to="/serviceprovider/projects"
-                        className="dropdown-item"
-                      >
+                      <Link to="/serviceprovider/projects" className="nav-link text-nowrap px-2 py-1 rounded">
                         Projects
                       </Link>
-                      <Link to="/serviceprovider/hours" className="dropdown-item">
+                      <Link to="/serviceprovider/hours" className="nav-link text-nowrap px-2 py-1 rounded">
                         Hours
                       </Link>
-                      <Link
-                        to="/serviceprovider/earnings"
-                        className="dropdown-item"
-                      >
+                      <Link to="/serviceprovider/earnings" className="nav-link text-nowrap px-2 py-1 rounded">
                         Earnings
                       </Link>
-                      <Link
-                        to="/serviceprovider/messages"
-                        className="dropdown-item"
-                      >
+                      <Link to="/serviceprovider/messages" className="nav-link text-nowrap px-2 py-1 rounded">
                         Messages
                       </Link>
-                      <NavDropdown.Divider />
                       <Link
-                        className="dropdown-item"
+                        className="nav-link text-nowrap px-2 py-1 rounded text-danger"
                         to="#signout"
                         onClick={serviceProviderSignoutHandler}
                       >
                         Log Out
                       </Link>
-                    </NavDropdown>
+                    </div>
                   ) : null}
                   {adminInfo ? (
-                    <NavDropdown
-                      show={adminDropdownOpen}
-                      onToggle={setAdminDropdownOpen}
-                      onMouseLeave={() => setAdminDropdownOpen(false)}
-                      align="end"
-                      title="Admin"
-                      id="admin-nav-dropdown"
-                    >
-                      <Link to="/admin/dashboard" className="dropdown-item">
+                    <div className="user-links-row d-flex align-items-center gap-2">
+                      <span className="user-dropdown-title flex-shrink-0">
+                        <i className="fas fa-user-shield user-icon"></i>
+                        <span className="user-name">Admin</span>
+                      </span>
+                      <Link to="/admin/dashboard" className="nav-link text-nowrap px-2 py-1 rounded">
                         Dashboard
                       </Link>
-
-                      <Link to="/admin/products" className="dropdown-item">
+                      <Link to="/admin/products" className="nav-link text-nowrap px-2 py-1 rounded">
                         Products
                       </Link>
-                      <Link to="/admin/orders" className="dropdown-item">
+                      <Link to="/admin/orders" className="nav-link text-nowrap px-2 py-1 rounded">
                         Orders
                       </Link>
-                      <Link to="/admin/users" className="dropdown-item">
+                      <Link to="/admin/users" className="nav-link text-nowrap px-2 py-1 rounded">
                         Users
                       </Link>
-                      <Link
-                        to="/admin/manage-service-providers"
-                        className="dropdown-item"
-                      >
+                      <Link to="/admin/manage-service-providers" className="nav-link text-nowrap px-2 py-1 rounded">
                         Service Providers
                       </Link>
-                      <Link to="/admin/payments" className="dropdown-item">
-                        <i className="fas fa-chart-bar me-2"></i>
+                      <Link to="/admin/payments" className="nav-link text-nowrap px-2 py-1 rounded">
                         Service Providers Dashboard
                       </Link>
-                      <Link to="/admin/sellers" className="dropdown-item">
+                      <Link to="/admin/sellers" className="nav-link text-nowrap px-2 py-1 rounded">
                         Sellers
                       </Link>
-                      <Link
-                        to="/admin/sellers/total-dashboard"
-                        className="dropdown-item"
-                      >
-                        <i className="fas fa-chart-bar me-2"></i>
+                      <Link to="/admin/sellers/total-dashboard" className="nav-link text-nowrap px-2 py-1 rounded">
                         Seller Referral Dashboard
                       </Link>
-                      <Link to="/admin/blogs-list" className="dropdown-item">
+                      <Link to="/admin/blogs-list" className="nav-link text-nowrap px-2 py-1 rounded">
                         Blogs
                       </Link>
-                      {/* <Link to="/admin/roi-calculations" className="dropdown-item">
-                    User ROI Calculations
-                  </Link> */}
-                      <Link to="/admin/all-annotations" className="dropdown-item">
+                      <Link to="/admin/all-annotations" className="nav-link text-nowrap px-2 py-1 rounded">
                         User Floor Plans
                       </Link>
-                      <Link to="/admin/hvac-zone-designer" className="dropdown-item">
-                        <i className="fas fa-drafting-compass me-2"></i>
+                      <Link to="/admin/hvac-zone-designer" className="nav-link text-nowrap px-2 py-1 rounded">
                         HVAC Zone Designer
                       </Link>
-                      <Link to="/admin/newsletter" className="dropdown-item">
+                      <Link to="/admin/newsletter" className="nav-link text-nowrap px-2 py-1 rounded">
                         Newsletter
                       </Link>
-                      <Link to="/admin/security" className="dropdown-item">
-                        <i className="fas fa-shield-alt me-2"></i>
+                      <Link to="/admin/security" className="nav-link text-nowrap px-2 py-1 rounded">
                         Security (MFA)
                       </Link>
-                      <NavDropdown.Divider />
                       <Link
-                        className="dropdown-item"
+                        className="nav-link text-nowrap px-2 py-1 rounded text-danger"
                         to="#adminlogout"
                         onClick={adminLogoutHandler}
                       >
                         Admin Log Out
                       </Link>
-                    </NavDropdown>
+                    </div>
                   ) : null}
                   {!userInfo && !serviceProviderInfo && !adminInfo && (
                     <NavDropdown

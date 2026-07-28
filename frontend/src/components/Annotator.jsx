@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
 import "./Annotator.css";
+import { resolveOcrLanguageSelection } from "../utils/ocrLanguageUtils";
 
 import * as pdfjsLib from "pdfjs-dist";
 import { FaFileExcel, FaFileCode, FaDownload, FaSpinner, FaTimes } from "react-icons/fa";
@@ -306,11 +307,12 @@ const extractImagesFromPdf = async (file) => {
  * @param {string[]} images - An array of image data URLs.
  * @returns {Promise<string>}
  */
-const runOcrOnImages = async (images, setRoomData) => {
+const runOcrOnImages = async (images, ocrLanguage = "eng", setRoomData) => {
   if (!Tesseract?.recognize) {
     throw new Error("Tesseract.js not available.");
   }
 
+  const selectedLanguage = resolveOcrLanguageSelection(ocrLanguage);
   let fullText = "";
   let allWords = [];
   let allParsedResults = [];
@@ -318,7 +320,7 @@ const runOcrOnImages = async (images, setRoomData) => {
   for (const image of images) {
     const {
       data: { text, words },
-    } = await Tesseract.recognize(image, "eng", {
+    } = await Tesseract.recognize(image, selectedLanguage, {
       // Pin paths explicitly: Tesseract.js otherwise tries to auto-derive a worker
       // URL (e.g. unpkg.com/tesseract.js@vX.Y.Z/...) which has historically been
       // broken on unpkg for some versions. Pinning avoids the
@@ -888,6 +890,7 @@ const Annotator = ({
   const [sortOrder, setSortOrder] = useState("asc");
   const [filterText, setFilterText] = useState("");
   const [pdfInfo, setPdfInfo] = useState(null);
+  const [ocrLanguage, setOcrLanguage] = useState("eng");
   const [editingRoomId, setEditingRoomId] = useState(null);
   const [editingRoomData, setEditingRoomData] = useState(null);
   const [editingFileIdx, setEditingFileIdx] = useState(null);
@@ -1351,7 +1354,7 @@ const Annotator = ({
         const extractedImages = await extractImagesFromPdf(file);
         setImages(extractedImages);
 
-        const { text, ocrWords } = await runOcrOnImages(extractedImages);
+        const { text, ocrWords } = await runOcrOnImages(extractedImages, ocrLanguage);
         const { apartmentType, totalSf, rooms } = parseRoomDataFromText(text);
         const normalizedRooms = rooms.map(normalizeRoomData);
         output.push({
@@ -2808,6 +2811,25 @@ const Annotator = ({
     <div style={{ maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
       <Form className="btu-calculation-measure mt-4">
         <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
+        <Form.Group className="mb-3">
+          <Form.Label className="fw-bold text-secondary">OCR language</Form.Label>
+          <Form.Select
+            value={ocrLanguage}
+            onChange={(e) => setOcrLanguage(e.target.value)}
+            disabled={!scriptsLoaded || loading}
+          >
+            <option value="eng">English</option>
+            <option value="eng+spa">English + Spanish</option>
+            <option value="spa">Spanish</option>
+            <option value="fra">French</option>
+            <option value="deu">German</option>
+            <option value="ita">Italian</option>
+            <option value="por">Portuguese</option>
+          </Form.Select>
+          <Form.Text className="text-muted">
+            English remains the default, so current behavior stays intact.
+          </Form.Text>
+        </Form.Group>
         <Form.Control
           className="my-4 form-control"
           id="file-upload"
