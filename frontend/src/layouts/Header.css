@@ -444,20 +444,31 @@
 
 /* ── Desktop layout ── */
 @media (min-width: 992px) {
-  .header-container {
-    max-width: 1400px;
-    margin: 0 auto;
+  /* Bootstrap sets flex-wrap: wrap on .navbar which causes the collapse
+     to drop to a new line. Override so sandwich + brand + collapse are
+     always on ONE horizontal row. */
+  .header-nav .navbar,
+  .header-nav .header-container {
+    flex-wrap: nowrap !important;
     align-items: flex-start !important;
   }
 
-  /* The Bootstrap collapse fills remaining width and stacks its children vertically */
+  .header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Collapse grows to fill remaining space; no forced full-width */
   .navbar-collapse {
+    width: auto !important;
+    flex: 1 1 0 !important;
     align-items: flex-start !important;
     flex-direction: column !important;
   }
 
   .header-nav-stack {
-    padding-top: 0.3rem;
+    padding-top: 0.25rem;
+    width: 100%;
   }
 
   .navbar-nav {
@@ -467,6 +478,11 @@
 
   .navbar-collapse .search-wrapper {
     max-width: 900px;
+  }
+
+  /* Keep brand vertically centred with the search row height */
+  .header-nav .navbar-brand.d-lg-flex {
+    padding-top: 0.4rem;
   }
 }
 
