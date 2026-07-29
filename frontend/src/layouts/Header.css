@@ -478,6 +478,55 @@
 
   .navbar-collapse .search-wrapper {
     max-width: 900px;
+    display: flex;
+    align-items: center;
+  }
+
+  .header-top-row {
+    min-height: 48px;
+    align-items: center;
+  }
+
+  .header-top-actions {
+    align-items: center !important;
+    min-height: 48px;
+    flex-wrap: nowrap;
+  }
+
+  .header-nav .search-form {
+    margin: 0 !important;
+    align-items: stretch;
+  }
+
+  .header-nav .search-box .form-control {
+    min-height: 48px;
+  }
+
+  .header-nav .search-box .btn-search {
+    min-height: 48px;
+    height: 48px;
+  }
+
+  .header-nav .btn-toggle {
+    height: 48px;
+    padding: 0 14px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-nav .navbar-brand {
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .header-nav .cart-wrapper,
+  .header-nav .cart-link,
+  .header-nav .login-dropdown > .nav-link {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
   }
 
   /* Remove h3 padding so sandwich button and brand text sit on the same visual line */
