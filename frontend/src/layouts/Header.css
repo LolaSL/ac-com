@@ -840,6 +840,23 @@
     right: 0 !important;
     left: 0 !important;
   }
+
+  /* Keep Cart from dropping when Login opens: make Login menu overlay only */
+  .header-top-actions .login-dropdown {
+    position: relative;
+  }
+
+  .header-top-actions .login-dropdown .dropdown-menu,
+  .header-top-actions .login-dropdown .dropdown-menu.dropdown-menu-end {
+    position: absolute !important;
+    top: calc(100% + 6px);
+    right: 0 !important;
+    left: auto !important;
+    width: max-content !important;
+    min-width: 220px;
+    max-width: min(92vw, 300px) !important;
+    z-index: 1060 !important;
+  }
 }
 
 /* Final desktop alignment pass (kept at file end to win cascade) */
