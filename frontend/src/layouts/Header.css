@@ -249,6 +249,8 @@
   color: #67e8f9;
   font-weight: 600;
   letter-spacing: 0.5px;
+  margin: 0;
+  line-height: 1.1;
 }
 
 .navbar-brand h3 {
@@ -450,7 +452,7 @@
   .header-nav .navbar,
   .header-nav .header-container {
     flex-wrap: nowrap !important;
-    align-items: flex-start !important;
+    align-items: center !important;
   }
 
   .header-container {
@@ -462,7 +464,7 @@
   .navbar-collapse {
     width: auto !important;
     flex: 1 1 0 !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     flex-direction: column !important;
   }
 
@@ -536,10 +538,10 @@
     line-height: 1.2;
   }
 
-  /* Pin sandwich and brand to the top — prevent stretching to collapse height */
+  /* Keep left controls vertically centered with the search/actions row */
   .header-nav .btn-toggle,
   .header-nav .navbar-brand {
-    align-self: flex-start;
+    align-self: center;
   }
 }
 
@@ -837,5 +839,43 @@
   .header-nav .dropdown-menu.dropdown-menu-end {
     right: 0 !important;
     left: 0 !important;
+  }
+}
+
+/* Final desktop alignment pass (kept at file end to win cascade) */
+@media (min-width: 992px) {
+  .header-nav .header-container,
+  .header-nav .navbar,
+  .header-nav .navbar-collapse,
+  .header-nav .header-top-row,
+  .header-nav .header-top-actions {
+    align-items: center !important;
+  }
+
+  .header-nav .header-top-actions {
+    flex-wrap: nowrap !important;
+    row-gap: 0 !important;
+    min-height: 48px;
+  }
+
+  .header-nav .search-form {
+    margin: 0 !important;
+    align-items: stretch;
+  }
+
+  .header-nav .search-box .form-control,
+  .header-nav .search-box .btn-search,
+  .header-nav .btn-toggle,
+  .header-nav .cart-wrapper,
+  .header-nav .cart-link,
+  .header-nav .login-dropdown > .dropdown-toggle {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .header-nav .search-box .btn-search,
+  .header-nav .btn-toggle {
+    height: 48px;
   }
 }
