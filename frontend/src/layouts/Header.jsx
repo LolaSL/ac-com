@@ -111,7 +111,11 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
   };
 
   return (
-    <header className="header-nav">
+    <header
+      className={`header-nav${
+        userInfo || serviceProviderInfo || adminInfo ? " has-auth-links" : ""
+      }`}
+    >
       <Navbar className="navbar" expand="lg" ref={navRef}>
         <Container fluid className="header-container">
           <Button

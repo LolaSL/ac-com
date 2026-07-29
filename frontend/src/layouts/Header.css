@@ -896,4 +896,17 @@
   .header-nav .btn-toggle {
     height: 48px;
   }
+
+  /* Authenticated headers render extra link rows; pin left controls to top row */
+  .header-nav.has-auth-links .header-container,
+  .header-nav.has-auth-links .navbar,
+  .header-nav.has-auth-links .navbar-collapse {
+    align-items: flex-start !important;
+  }
+
+  .header-nav.has-auth-links .btn-toggle,
+  .header-nav.has-auth-links .navbar-brand {
+    align-self: flex-start !important;
+    margin-top: 2px;
+  }
 }
