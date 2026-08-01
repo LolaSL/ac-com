@@ -1341,17 +1341,34 @@ const Annotator = ({
     const output = [];
     let previewSet = false; // Track if preview has been set for the first valid file
 
+    const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg"];
+
     for (const file of files) {
-      if (file.type !== "application/pdf") {
+      const isPdf = file.type === "application/pdf";
+      const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
+
+      if (!isPdf && !isImage) {
         output.push({
           fileName: file.name,
-          error: "Only PDF files are allowed.",
+          error: "Only PDF or JPG files are allowed.",
         });
         continue;
       }
 
       try {
-        const extractedImages = await extractImagesFromPdf(file);
+        let extractedImages;
+        if (isPdf) {
+          extractedImages = await extractImagesFromPdf(file);
+        } else {
+          // Convert image file directly to a data URL for OCR
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          extractedImages = [dataUrl];
+        }
         setImages(extractedImages);
 
         const { text, ocrWords } = await runOcrOnImages(extractedImages, ocrLanguage);
@@ -1385,7 +1402,7 @@ const Annotator = ({
     if (output.length === 0) {
       setFile(null);
       setPreviewUrl(null);
-      setError("No valid PDF files selected.");
+      setError("No valid PDF or JPG files selected.");
     }
   };
 
@@ -2835,7 +2852,7 @@ const Annotator = ({
           multiple
           ref={fileInputRef}
           onChange={handleChange}
-          accept="application/pdf"
+          accept="application/pdf,image/jpeg,image/jpg"
           disabled={!scriptsLoaded || loading}
         />
       </Form>

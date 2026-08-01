@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const annotationSchema = new Schema(
   {
     filename: { type: String, required: true },
+    fileType: { type: String, default: 'application/pdf' },
     pdfData: { type: Buffer, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     pdfId: { type: String, required: true },

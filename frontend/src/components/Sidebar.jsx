@@ -412,9 +412,11 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       });
       if (!pdfResponse.ok)
         throw new Error(`Failed to fetch PDF: ${pdfResponse.status}`);
+      const contentType = pdfResponse.headers.get('Content-Type') || 'application/pdf';
+      const isImageFile = contentType.startsWith('image/');
       const pdfBlob = await pdfResponse.blob();
       const pdfFile = new File([pdfBlob], pdf.filename || "untitled.pdf", {
-        type: "application/pdf",
+        type: isImageFile ? contentType : "application/pdf",
       });
       setSelectedPdfFile(pdfFile);
 
@@ -443,55 +445,22 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       const container = document.getElementById("pdf-container");
       if (!container) return;
       container.innerHTML = "";
+      container.style.position = "relative";
 
-      const loadingTask = pdfjsLib.getDocument(pdfUrl);
-      const pdfDoc = await loadingTask.promise;
-      const page = await pdfDoc.getPage(1);
-      // Use scale=1 to match Annotator's rendering scale
-      const scale = 1;
-      const viewport = page.getViewport({ scale });
-      const canvas = document.createElement("canvas");
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      canvas.style.width = viewport.width + "px";
-      canvas.style.height = viewport.height + "px";
-      const context = canvas.getContext("2d");
-      container.appendChild(canvas);
-
-      console.log('Sidebar rendering PDF with scale=1, dimensions:', { 
-        width: viewport.width, 
-        height: viewport.height 
-      });
-
-      await page.render({ canvasContext: context, viewport }).promise;
-
-      // overlay annotations (use normalizedAnnotations so we always pass
-      // the actual annotations object — not a wrapper returned by backend)
-      if (normalizedAnnotations) {
+      const renderOverlayCanvas = (width, height) => {
+        if (!normalizedAnnotations) return;
         const overlayCanvas = document.createElement("canvas");
-        overlayCanvas.width = viewport.width;
-        overlayCanvas.height = viewport.height;
+        overlayCanvas.width = width;
+        overlayCanvas.height = height;
         overlayCanvas.style.position = "absolute";
         overlayCanvas.style.top = "0";
         overlayCanvas.style.left = "0";
         overlayCanvas.style.pointerEvents = "none";
-        // Explicit CSS sizing to prevent responsive shrinking on small screens
-        overlayCanvas.style.width = viewport.width + "px";
-        overlayCanvas.style.height = viewport.height + "px";
-        container.style.position = "relative";
+        overlayCanvas.style.width = width + "px";
+        overlayCanvas.style.height = height + "px";
         container.appendChild(overlayCanvas);
-
         const overlayContext = overlayCanvas.getContext("2d");
-        
-        console.log('Sidebar overlaying annotations on canvas:', {
-          canvasWidth: overlayCanvas.width,
-          canvasHeight: overlayCanvas.height,
-          rectangles: normalizedAnnotations.rectangles
-        });
-        
-        // draw the normalized annotations immediately - use pdfScale: 1 to match PDF rendering scale
         overlayAnnotations(overlayContext, normalizedAnnotations, acType, { skipRefrigerantLines: true, pdfScale: 1 });
-        // HVAC overlay if enabled
         if (showHVAC) {
           overlayHVAC(
             overlayContext,
@@ -502,6 +471,50 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
             1
           );
         }
+      };
+
+      if (isImageFile) {
+        // Render JPG/image: draw into a canvas so annotation overlay aligns correctly
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            const width = img.naturalWidth;
+            const height = img.naturalHeight;
+            const baseCanvas = document.createElement("canvas");
+            baseCanvas.width = width;
+            baseCanvas.height = height;
+            baseCanvas.style.width = width + "px";
+            baseCanvas.style.height = height + "px";
+            const ctx = baseCanvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            container.appendChild(baseCanvas);
+            renderOverlayCanvas(width, height);
+            resolve();
+          };
+          img.src = pdfUrl;
+        });
+      } else {
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const pdfDoc = await loadingTask.promise;
+        const page = await pdfDoc.getPage(1);
+        // Use scale=1 to match Annotator's rendering scale
+        const scale = 1;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.width = viewport.width + "px";
+        canvas.style.height = viewport.height + "px";
+        const context = canvas.getContext("2d");
+        container.appendChild(canvas);
+
+        console.log('Sidebar rendering PDF with scale=1, dimensions:', {
+          width: viewport.width,
+          height: viewport.height
+        });
+
+        await page.render({ canvasContext: context, viewport }).promise;
+        renderOverlayCanvas(viewport.width, viewport.height);
       }
     } catch (err) {
       console.error(err);
@@ -538,14 +551,16 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       const hasHvac = normalizedAnnotations.hvac && (normalizedAnnotations.hvac.ducts?.length || normalizedAnnotations.hvac.diffusers?.length);
       if (hasHvac) setShowHVAC(true);
 
-      // Fetch the ORIGINAL base PDF (from user annotation) — clean, no baked overlays
+      // Fetch the ORIGINAL base file (from user annotation) — clean, no baked overlays
       const userAnnotationId = annotationsData.userAnnotationId;
       let pdfBlob;
+      let baseFileContentType = 'application/pdf';
       if (userAnnotationId) {
         const pdfResponse = await fetch(`/api/annotated-pdf/${userAnnotationId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (pdfResponse.ok) {
+          baseFileContentType = pdfResponse.headers.get('Content-Type') || 'application/pdf';
           pdfBlob = await pdfResponse.blob();
         }
       }
@@ -557,13 +572,15 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
         );
         if (!pdfResponse.ok)
           throw new Error(`Failed to fetch engineer PDF: ${pdfResponse.status}`);
+        baseFileContentType = pdfResponse.headers.get('Content-Type') || 'application/pdf';
         pdfBlob = await pdfResponse.blob();
       }
 
+      const isImageBase = baseFileContentType.startsWith('image/');
       const pdfFile = new File(
         [pdfBlob],
         engineerAnnotation.filename || "untitled.pdf",
-        { type: "application/pdf" }
+        { type: isImageBase ? baseFileContentType : "application/pdf" }
       );
       setSelectedPdfFile(pdfFile);
 
@@ -573,11 +590,24 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       container.innerHTML = "";
       container.style.position = "relative";
 
-      const loadingTask = pdfjsLib.getDocument(pdfUrl);
-      const pdfDoc = await loadingTask.promise;
-      const page = await pdfDoc.getPage(1);
-      const scale = 1;
-      const viewport = page.getViewport({ scale });
+      let canvasWidth, canvasHeight, page, viewport, baseImg;
+      if (isImageBase) {
+        baseImg = await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = pdfUrl;
+        });
+        canvasWidth = baseImg.naturalWidth;
+        canvasHeight = baseImg.naturalHeight;
+      } else {
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const pdfDoc = await loadingTask.promise;
+        page = await pdfDoc.getPage(1);
+        const scale = 1;
+        viewport = page.getViewport({ scale });
+        canvasWidth = viewport.width;
+        canvasHeight = viewport.height;
+      }
 
       // Helper: render one page with a given mode
       const renderPage = async (mode) => {
@@ -586,27 +616,31 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
         wrapper.style.marginBottom = "12px";
         container.appendChild(wrapper);
 
-        // Base PDF canvas
+        // Base canvas
         const canvas = document.createElement("canvas");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        canvas.style.width = viewport.width + "px";
-        canvas.style.height = viewport.height + "px";
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        canvas.style.width = canvasWidth + "px";
+        canvas.style.height = canvasHeight + "px";
         const ctx = canvas.getContext("2d");
         wrapper.appendChild(canvas);
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        if (isImageBase) {
+          ctx.drawImage(baseImg, 0, 0, canvasWidth, canvasHeight);
+        } else {
+          await page.render({ canvasContext: ctx, viewport }).promise;
+        }
 
         if (normalizedAnnotations) {
           const overlayCanvas = document.createElement("canvas");
-          overlayCanvas.width = viewport.width;
-          overlayCanvas.height = viewport.height;
+          overlayCanvas.width = canvasWidth;
+          overlayCanvas.height = canvasHeight;
           overlayCanvas.style.position = "absolute";
           overlayCanvas.style.top = "0";
           overlayCanvas.style.left = "0";
           overlayCanvas.style.pointerEvents = "none";
           // Explicit CSS sizing to prevent responsive shrinking on small screens
-          overlayCanvas.style.width = viewport.width + "px";
-          overlayCanvas.style.height = viewport.height + "px";
+          overlayCanvas.style.width = canvasWidth + "px";
+          overlayCanvas.style.height = canvasHeight + "px";
           wrapper.appendChild(overlayCanvas);
 
           const overlayCtx = overlayCanvas.getContext("2d");
@@ -652,7 +686,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
           const watermarkText = `AC-Commerce | ${userEmail} | Reviewed: ${reviewDate}`;
 
           overlayCtx.save();
-          overlayCtx.translate(viewport.width / 2, viewport.height / 2);
+          overlayCtx.translate(canvasWidth / 2, canvasHeight / 2);
           overlayCtx.rotate(-Math.PI / 6); // ~30 degrees
           overlayCtx.font = "10px Arial";
           overlayCtx.fillStyle = "rgba(100, 100, 100, 0.28)";
@@ -669,8 +703,8 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
             pending:   { label: 'PENDING',   iconColor: 'rgba(180, 120, 0, 0.75)',  ringColor: 'rgba(180, 120, 0, 0.7)',  textColor: 'rgba(180, 120, 0, 0.85)' },
           };
           const sc = stampConfig[stampStatus] || stampConfig.reviewed;
-          const cx = viewport.width - 80;
-          const cy = viewport.height - 80;
+          const cx = canvasWidth - 80;
+          const cy = canvasHeight - 80;
           const outerR = 52;
           const innerR = 44;
           const coreR = 28;

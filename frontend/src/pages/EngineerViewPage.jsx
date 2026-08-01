@@ -153,9 +153,10 @@ const EngineerViewPage = () => {
           console.error("Error reading PDF blob:", e);
           throw new Error("Failed to read PDF data from response");
         }
+        const fileContentType = pdfResponse.headers.get('Content-Type') || 'application/pdf';
         setPdfFile(
           new File([pdfBlob], data.filename || "untitled.pdf", {
-            type: "application/pdf",
+            type: fileContentType.startsWith('image/') ? fileContentType : "application/pdf",
           })
         );
       } catch (err) {
@@ -488,36 +489,60 @@ const EngineerViewPage = () => {
     const renderOverlays = async () => {
       if (!pdfFile || !annotation) return;
       const pdfUrl = window.URL.createObjectURL(pdfFile);
-      const loadingTask = pdfjsLib.getDocument(pdfUrl);
-      const pdfDoc = await loadingTask.promise;
-      URL.revokeObjectURL(pdfUrl); // Revoke immediately — pdf.js has loaded the document
-      const page = await pdfDoc.getPage(1);
-      const scale = pdfScale;
-      const viewport = page.getViewport({ scale });
       const container = pdfContainerRef.current;
       if (!container) return;
       container.innerHTML = "";
-      // Main PDF canvas
+      container.style.position = "relative";
+
+      let canvasWidth, canvasHeight;
+
+      // Main base canvas — PDF or image
       const canvas = document.createElement("canvas");
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
       const context = canvas.getContext("2d");
       container.appendChild(canvas);
-      await page.render({ canvasContext: context, viewport }).promise;
+
+      if (pdfFile.type.startsWith('image/')) {
+        // Render image file directly onto canvas
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            canvasWidth = img.naturalWidth * pdfScale;
+            canvasHeight = img.naturalHeight * pdfScale;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            context.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+            resolve();
+          };
+          img.src = pdfUrl;
+        });
+        URL.revokeObjectURL(pdfUrl);
+      } else {
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const pdfDoc = await loadingTask.promise;
+        URL.revokeObjectURL(pdfUrl); // Revoke immediately — pdf.js has loaded the document
+        const page = await pdfDoc.getPage(1);
+        const scale = pdfScale;
+        const viewport = page.getViewport({ scale });
+        canvasWidth = viewport.width;
+        canvasHeight = viewport.height;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        await page.render({ canvasContext: context, viewport }).promise;
+      }
+
       // Overlay canvas for annotations and HVAC
       const overlayCanvas = document.createElement("canvas");
-      overlayCanvas.width = viewport.width;
-      overlayCanvas.height = viewport.height;
+      overlayCanvas.width = canvasWidth;
+      overlayCanvas.height = canvasHeight;
       overlayCanvas.style.position = "absolute";
       overlayCanvas.style.top = "0";
       overlayCanvas.style.left = "0";
-      
+
       // Enable pointer events if: drawing zones, in addMode, or zones exist (for clicking)
       const hasZones = (annotation?.annotations?.hvac?.zones || []).length > 0;
       const hasRefrigerantLines = (annotation?.annotations?.hvac?.refrigerantLines || []).length > 0;
       overlayCanvas.style.pointerEvents = (addMode || isDrawingZone || hasZones || editRefrigerantMode || hasRefrigerantLines) ? "auto" : "none";
       overlayCanvas.style.touchAction = isDrawingZone ? "none" : "auto"; // Prevent PDF scroll when drawing
-      container.style.position = "relative";
       if (isDrawingZone) {
         container.style.overflow = "hidden"; // Prevent scroll while drawing zones
       }
@@ -2075,18 +2100,39 @@ const EngineerViewPage = () => {
     try {
       if (!pdfFile || !annotation) throw new Error("PDF not loaded yet. Please wait.");
 
-      // Render the base PDF page off-screen for both modes
-      const pdfArrayBuffer = await pdfFile.arrayBuffer();
-      const loadingTask = pdfjsLib.getDocument(pdfArrayBuffer);
-      const pdfJsDoc = await loadingTask.promise;
-      const page = await pdfJsDoc.getPage(1);
-      const scale = 1.5;
-      const viewport = page.getViewport({ scale });
-      const cw = viewport.width;
-      const ch = viewport.height;
-
       // Preload all SVG symbol images so they render synchronously on the baked canvas
       const preloadedSymbols = await preloadSymbolImages(hvacSymbols);
+
+      const scale = 1.5;
+      let cw, ch, renderBaseToCanvas;
+
+      if (pdfFile.type.startsWith('image/')) {
+        // Image file: load it and get dimensions
+        const imgUrl = URL.createObjectURL(pdfFile);
+        const img = await new Promise((resolve) => {
+          const el = new Image();
+          el.onload = () => resolve(el);
+          el.src = imgUrl;
+        });
+        URL.revokeObjectURL(imgUrl);
+        cw = Math.round(img.naturalWidth * scale);
+        ch = Math.round(img.naturalHeight * scale);
+        renderBaseToCanvas = async (ctx) => {
+          ctx.drawImage(img, 0, 0, cw, ch);
+        };
+      } else {
+        // PDF file: use pdf.js
+        const pdfArrayBuffer = await pdfFile.arrayBuffer();
+        const loadingTask = pdfjsLib.getDocument(pdfArrayBuffer);
+        const pdfJsDoc = await loadingTask.promise;
+        const page = await pdfJsDoc.getPage(1);
+        const viewport = page.getViewport({ scale });
+        cw = viewport.width;
+        ch = viewport.height;
+        renderBaseToCanvas = async (ctx) => {
+          await page.render({ canvasContext: ctx, viewport }).promise;
+        };
+      }
 
       // Helper: render base page + overlays to an off-screen canvas, return PNG dataURL
       const renderMode = async (mode) => {
@@ -2094,7 +2140,7 @@ const EngineerViewPage = () => {
         baseCanvas.width = cw;
         baseCanvas.height = ch;
         const baseCtx = baseCanvas.getContext("2d");
-        await page.render({ canvasContext: baseCtx, viewport }).promise;
+        await renderBaseToCanvas(baseCtx);
 
         const overlayCanvas = document.createElement("canvas");
         overlayCanvas.width = cw;

@@ -51,6 +51,7 @@ router.get('/user-annotations', isAuth, async (req, res) => {
     const data = annotations.map((a) => ({
       _id: a._id,
       filename: a.filename,
+      fileType: a.fileType || 'application/pdf',
       createdAt: a.createdAt,
       isPaid: a.isPaid,
     }));
@@ -206,6 +207,7 @@ router.post(
 
       const newAnnotation = new AnnotationModel({
         filename: req.file.originalname,
+        fileType: req.file.mimetype || 'application/pdf',
         pdfData: req.file.buffer,
         userId,
         pdfId,
@@ -258,6 +260,27 @@ router.get('/annotated-pdf/:id', isAuth, async (req, res) => {
     );
     console.log(`Annotation isPaid: ${annotation.isPaid}, paidAccess: ${hasPaidAccess}, User Email: ${email}`);
     console.log('Annotation object:', annotation);
+
+    // If the stored file is an image (e.g. JPG), return the raw bytes directly
+    const storedFileType = annotation.fileType || 'application/pdf';
+    if (storedFileType.startsWith('image/')) {
+      let imageBuffer = annotation.pdfData;
+      if (!Buffer.isBuffer(imageBuffer)) {
+        if (imageBuffer && imageBuffer.buffer) {
+          imageBuffer = Buffer.from(imageBuffer.buffer);
+        } else if (imageBuffer && imageBuffer._bsontype === 'Binary' && imageBuffer.value) {
+          imageBuffer = Buffer.from(imageBuffer.value());
+        } else {
+          imageBuffer = Buffer.from(imageBuffer);
+        }
+      }
+      res.set({
+        'Content-Type': storedFileType,
+        'Content-Disposition': `inline; filename="${annotation.filename || 'image.jpg'}"`,
+        'Content-Length': imageBuffer.length,
+      });
+      return res.send(imageBuffer);
+    }
 
     // Ensure pdf data is a Buffer/Uint8Array for pdf-lib
     let pdfDataForLoad = annotation.pdfData;
@@ -575,6 +598,7 @@ router.get('/annotations/:id', isAuth, async (req, res) => {
       annotations: annotation.annotations,
       isPaid: annotation.isPaid,
       acType: annotation.acType,
+      fileType: annotation.fileType || 'application/pdf',
       pdfRotation: annotation.pdfRotation || 0,
       offsetX: annotation.offsetX || 0,
       offsetY: annotation.offsetY || 0,
@@ -658,6 +682,7 @@ router.get('/user-annotations', isAuth, async (req, res) => {
     const data = annotations.map((a) => ({
       _id: a._id,
       filename: a.filename,
+      fileType: a.fileType || 'application/pdf',
       pdfId: a.pdfId,
       createdAt: a.createdAt,
       isPaid: a.isPaid,
