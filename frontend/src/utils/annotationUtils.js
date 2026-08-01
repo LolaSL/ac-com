@@ -145,7 +145,7 @@ const drawDualOrthogonalLines = (ctx, x1, y1, x2, y2) => {
 /**
  * Draw a single orthogonal refrigerant line (used for star topologies).
  */
-const drawSingleOrthogonalLine = (ctx, x1, y1, x2, y2, color = "#008B8B", dash = []) => {
+const drawSingleOrthogonalLine = (ctx, x1, y1, x2, y2, color = "#2563EB", dash = []) => {
   drawOrthogonalLine(ctx, x1, y1, x2, y2, { color, dash, lineWidth: 2.5 });
 };
 
@@ -232,6 +232,7 @@ export const buildEditableRefrigerantLines = (annotations, acType) => {
       stroke,
       strokeWidth,
       lineType,
+      generatedAcType: acType,
     };
   };
 
@@ -244,73 +245,83 @@ export const buildEditableRefrigerantLines = (annotations, acType) => {
     ];
   };
 
-  if (acType === "vrf-ducted") {
-    let condensers = [];
-    if (comments.length > 0) {
-      condensers = comments
-        .filter((comment) => comment.text.toLowerCase().includes("condenser"))
-        .map((comment) => rectangles.find((rect) => String(rect.id) === String(comment.rectId)))
-        .filter(Boolean);
-    }
+  const getCondenserRects = () => {
+    const explicitCondenserRects = rectangles.filter((rect) => rect.isCondenser);
+    if (explicitCondenserRects.length > 0) return explicitCondenserRects;
 
-    if (condensers.length === 0) {
-      let maxIdNum = -1;
-      let fallbackCondenser = null;
-      rectangles.forEach((rect) => {
-        const idNum = parseInt(rect.id, 10) || 0;
-        if (idNum > maxIdNum) {
-          maxIdNum = idNum;
-          fallbackCondenser = rect;
+    const commentMatches = comments
+      .filter((comment) => /condenser|outdoor|outdoor unit|compressor|heat pump/i.test(comment.text || ""))
+      .map((comment) => rectangles.find((rect) => String(rect.id) === String(comment.rectId)))
+      .filter(Boolean);
+    if (commentMatches.length > 0) return commentMatches;
+
+    if (rectangles.length > 0) {
+      const fallbackCondenser = rectangles.reduce((bestMatch, rect) => {
+        const rectId = parseInt(rect.id, 10);
+        const bestId = parseInt(bestMatch?.id, 10);
+        if (Number.isFinite(rectId) && (!Number.isFinite(bestId) || rectId > bestId)) {
+          return rect;
         }
-      });
-      if (fallbackCondenser) condensers = [fallbackCondenser];
+        return bestMatch;
+      }, null);
+      return fallbackCondenser ? [fallbackCondenser] : [];
     }
 
+    return [];
+  };
+
+  const sortIndoorRects = (rects) =>
+    [...rects].sort((a, b) => {
+      const aComment = getCommentForRect(a.id)?.text || "";
+      const bComment = getCommentForRect(b.id)?.text || "";
+      const aMain = aComment.match(/ac-(\d+)/i);
+      const bMain = bComment.match(/ac-(\d+)/i);
+      const aSub = aComment.match(/ac-\d+\.(\d+)/i);
+      const bSub = bComment.match(/ac-\d+\.(\d+)/i);
+      const aNum = aMain ? parseInt(aMain[1], 10) : 999;
+      const bNum = bMain ? parseInt(bMain[1], 10) : 999;
+      if (aNum !== bNum) return aNum - bNum;
+      return (aSub ? parseInt(aSub[1], 10) : 0) - (bSub ? parseInt(bSub[1], 10) : 0);
+    });
+
+  const getIndoorRectsForCondenser = (condenser, groupNum, totalCondenserCount) => {
+    const condenserId = String(condenser.id);
+    const candidateRects = rectangles.filter((rect) => !rect.isCondenser && String(rect.id) !== condenserId);
+    if (!candidateRects.length) return [];
+
+    if (totalCondenserCount <= 1) {
+      return sortIndoorRects(candidateRects);
+    }
+
+    if (groupNum && comments.length > 0) {
+      const matchedRects = candidateRects.filter((rect) => {
+        const comment = getCommentForRect(rect.id);
+        return comment && comment.text.match(new RegExp(`ac-${groupNum}(\\.\\d+)?`, "i"));
+      });
+      if (matchedRects.length > 0) {
+        return sortIndoorRects(matchedRects);
+      }
+    }
+
+    const fallbackRects = candidateRects.filter((rect) => {
+      const comment = getCommentForRect(rect.id);
+      return comment && /ac-\d+/i.test(comment.text || "");
+    });
+
+    return sortIndoorRects(fallbackRects.length > 0 ? fallbackRects : candidateRects);
+  };
+
+  if (acType === "vrf-ducted") {
+    const condensers = getCondenserRects();
     if (condensers.length > 0) {
       const groups = condensers.map((condenser) => {
         const condenserComment = getCommentForRect(condenser.id)?.text || "";
         const match = condenserComment.match(/condenser-(\d+)/i);
         const groupNum = match ? match[1] : null;
-
-        let indoorRects = [];
-        if (groupNum && comments.length > 0) {
-          // Numbered condenser (e.g. "condenser-1"): match only its own ac-N.x units
-          indoorRects = rectangles
-            .filter((rect) => !rect.isCondenser && String(rect.id) !== String(condenser.id))
-            .filter((rect) => {
-              const comment = getCommentForRect(rect.id);
-              return comment && comment.text.match(new RegExp(`ac-${groupNum}(\\.\\d+)?`, "i"));
-            })
-            .sort((a, b) => {
-              const aComment = getCommentForRect(a.id)?.text || "";
-              const bComment = getCommentForRect(b.id)?.text || "";
-              const aMatch = aComment.match(/ac-\d+(\.(\d+))?/i);
-              const bMatch = bComment.match(/ac-\d+(\.(\d+))?/i);
-              const aSub = aMatch && aMatch[2] ? parseInt(aMatch[2], 10) : 0;
-              const bSub = bMatch && bMatch[2] ? parseInt(bMatch[2], 10) : 0;
-              return aSub - bSub;
-            });
-        } else {
-          // Un-numbered condenser (e.g. just "condenser"): chain ALL non-condenser rects
-          const allCondensorIds = new Set(condensers.map((c) => String(c.id)));
-          indoorRects = rectangles
-            .filter((rect) => !allCondensorIds.has(String(rect.id)) && !rect.isCondenser)
-            .sort((a, b) => {
-              // Sort by ac unit number (ac-1 < ac-2 < ac-N) then by sub-unit (.1 < .2)
-              const aComment = getCommentForRect(a.id)?.text || "";
-              const bComment = getCommentForRect(b.id)?.text || "";
-              const aMain = aComment.match(/ac-(\d+)/i);
-              const bMain = bComment.match(/ac-(\d+)/i);
-              const aSub  = aComment.match(/ac-\d+\.(\d+)/i);
-              const bSub  = bComment.match(/ac-\d+\.(\d+)/i);
-              const aNum = aMain ? parseInt(aMain[1], 10) : 999;
-              const bNum = bMain ? parseInt(bMain[1], 10) : 999;
-              if (aNum !== bNum) return aNum - bNum;
-              return (aSub ? parseInt(aSub[1], 10) : 0) - (bSub ? parseInt(bSub[1], 10) : 0);
-            });
-        }
-
-        return { condenser, indoorRects };
+        return {
+          condenser,
+          indoorRects: getIndoorRectsForCondenser(condenser, groupNum, condensers.length),
+        };
       });
 
       const lines = [];
@@ -327,44 +338,26 @@ export const buildEditableRefrigerantLines = (annotations, acType) => {
   }
 
   if (acType === "vrf-ductless") {
-    let condensers = [];
-    if (comments.length > 0) {
-      condensers = comments
-        .filter((comment) => comment.text.toLowerCase().includes("condenser"))
-        .map((comment) => rectangles.find((rect) => String(rect.id) === String(comment.rectId)))
-        .filter(Boolean);
-    }
+    const condensers = getCondenserRects();
+    const indoorRects = rectangles.filter((rect) => !condensers.some((condenser) => String(condenser.id) === String(rect.id)) && !rect.isCondenser);
+    if (condensers.length > 0 && indoorRects.length > 0) {
+      const lines = [];
+      indoorRects.forEach((indoorRect) => {
+        const nearestCondenser = condensers.reduce((closestMatch, condenser) => {
+          const start = getRectCenterPercent(indoorRect);
+          const end = getRectCenterPercent(condenser);
+          const currentDistance = Math.hypot(start.x - end.x, start.y - end.y);
+          if (!closestMatch) return condenser;
+          const closestDistance = Math.hypot(getRectCenterPercent(indoorRect).x - getRectCenterPercent(closestMatch).x, getRectCenterPercent(indoorRect).y - getRectCenterPercent(closestMatch).y);
+          return currentDistance < closestDistance ? condenser : closestMatch;
+        }, null);
 
-    if (condensers.length === 0) {
-      rectangles.forEach((rect) => {
-        if (rect.isCondenser) condensers.push(rect);
+        if (nearestCondenser) {
+          lines.push(...createRouteForPair(indoorRect, nearestCondenser, `line-${indoorRect.id}-${nearestCondenser.id}`));
+        }
       });
-    }
 
-    if (condensers.length === 0 && rectangles.length > 0) {
-      condensers = [rectangles.reduce((largest, rect) => {
-        const area = (rect.widthPercent || 0) * (rect.heightPercent || 0);
-        return area > ((largest.widthPercent || 0) * (largest.heightPercent || 0)) ? rect : largest;
-      })];
-    }
-
-    if (condensers.length > 0) {
-      const linePairs = [];
-      rectangles.forEach((rect) => {
-        if (condensers.some((condenser) => String(condenser.id) === String(rect.id))) return;
-        const nearestCondenser = condensers.reduce((closest, condenser) => {
-          const currentCenter = getRectCenterPercent(rect);
-          const condenserCenter = getRectCenterPercent(condenser);
-          const currentDist = Math.hypot(currentCenter.x - condenserCenter.x, currentCenter.y - condenserCenter.y);
-          const closestDist = Math.hypot(
-            closest.x - condenserCenter.x,
-            closest.y - condenserCenter.y
-          );
-          return currentDist < closestDist ? currentCenter : closest;
-        }, getRectCenterPercent(condensers[0]));
-        linePairs.push(...createRouteForPair(rect, { ...rect, xPercent: nearestCondenser.x - (rect.widthPercent || 0) / 2, yPercent: nearestCondenser.y - (rect.heightPercent || 0) / 2, widthPercent: rect.widthPercent || 0, heightPercent: rect.heightPercent || 0 }, `line-${rect.id}-cond`));
-      });
-      return linePairs;
+      if (lines.length > 0) return lines;
     }
   }
 
@@ -380,7 +373,7 @@ export const buildEditableRefrigerantLines = (annotations, acType) => {
  *
  * Line Visualization:
  * - VRF-Ducted: Dual parallel lines (red supply + blue return, dashed) in chain
- * - VRF-Ductless: Single solid teal line (star topology - each indoor to nearest outdoor)
+ * - VRF-Ductless: Single solid blue line (star topology - each indoor to nearest outdoor)
  */
 export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) => {
   const canvasWidth = context.canvas.width;
@@ -460,32 +453,8 @@ export const overlayVRFSystem = (context, vrfAnnotations, symbolImages, acType) 
 
   // Draw refrigerant lines connecting outdoor to indoor units
   if (vrfAnnotations?.outdoorUnits && vrfAnnotations?.indoorUnits) {
-    if (acType === "vrf-ductless") {
-      // VRF-Ductless: Star topology - each indoor connects to nearest outdoor
-      vrfAnnotations.indoorUnits.forEach((indoor) => {
-        const inX = indoor.xPercent * canvasWidth;
-        const inY = indoor.yPercent * canvasHeight;
-        // Find nearest outdoor
-        let nearestOut = null;
-        let minDist = Infinity;
-        vrfAnnotations.outdoorUnits.forEach((outdoor) => {
-          const outX = outdoor.xPercent * canvasWidth;
-          const outY = outdoor.yPercent * canvasHeight;
-          const dist = Math.sqrt((inX - outX) ** 2 + (inY - outY) ** 2);
-          if (dist < minDist) {
-            minDist = dist;
-            nearestOut = { x: outX, y: outY };
-          }
-        });
-        if (nearestOut) {
-          drawSingleOrthogonalLine(context, inX, inY, nearestOut.x, nearestOut.y, "#008B8B", []);
-        }
-      });
-    } else if (acType === "vrf-ducted") {
-      // vrf-ducted chain is handled entirely by overlayAnnotations (rectangle-based).
-      // Nothing to draw here — avoids double chain lines.
-
-    }
+    // Both VRF modes use the rectangle-based chain topology from overlayAnnotations.
+    // Avoid drawing a separate star-style route here so the rendered view stays consistent.
   }
 };
 
@@ -1726,137 +1695,8 @@ if (
     });
   }
 
-  // For VRF ductless systems, draw teal refrigerant lines (star topology per flat)
-  // Multi-flat support: condenser-N connects to all ac-N.M units in that flat
-  if (!skipRefrigerantLines && acType === "vrf-ductless" && annotations?.rectangles && annotations.rectangles.length > 1) {
-    // Find all condensers by comments containing "condenser"
-    let condensers = [];
-    if (annotations.comments) {
-      condensers = annotations.comments
-        .filter((c) => c.text.toLowerCase().includes("condenser"))
-        .map((comment) => {
-          // Use String() for ID comparison to handle type mismatch (string vs number)
-          const rect = annotations.rectangles.find((r) => String(r.id) === String(comment.rectId));
-          return rect ? { ...rect, comment: comment.text } : null;
-        })
-        .filter(Boolean);
-    }
-
-    // Fallback: explicit isCondenser flag
-    if (condensers.length === 0) {
-      annotations.rectangles.forEach((rect) => {
-        if (rect.isCondenser) condensers.push(rect);
-      });
-    }
-
-    // Fallback: largest rectangle
-    if (condensers.length === 0) {
-      let maxArea = -Infinity;
-      let largestRect = null;
-      annotations.rectangles.forEach((rect) => {
-        const area = rect.widthPercent * rect.heightPercent;
-        if (area > maxArea) {
-          maxArea = area;
-          largestRect = rect;
-        }
-      });
-      if (largestRect) condensers.push(largestRect);
-    }
-
-    if (condensers.length > 0) {
-      // Group indoor units by condenser (based on comment: condenser-N → ac-N.M)
-      const groups = condensers.map((cond) => {
-        const condComment = cond.comment || "";
-        const match = condComment.match(/condenser-(\d+)/i);
-        const groupNum = match ? match[1] : null;
-
-        let indoorRects = [];
-        if (groupNum && annotations.comments) {
-          // Find indoor units with matching comments (e.g., "ac-1.1", "ac-1.2" for condenser-1)
-          indoorRects = annotations.rectangles
-            .filter((rect) => !rect.isCondenser && String(rect.id) !== String(cond.id))
-            .filter((rect) => {
-              const comment = annotations.comments.find((c) => String(c.rectId) === String(rect.id));
-              return comment && comment.text.match(new RegExp(`ac-${groupNum}(\\.\\d+)?`, "i"));
-            });
-        }
-        return { condenser: cond, indoorRects };
-      });
-
-      // Draw star topology lines for each group (condenser → each indoor unit)
-      groups.forEach(({ condenser, indoorRects }) => {
-        if (indoorRects.length === 0) return;
-
-        const condCenter = getRotatedCenter(
-          condenser.xPercent * canvasWidth,
-          condenser.yPercent * canvasHeight,
-          condenser.widthPercent * canvasWidth,
-          condenser.heightPercent * canvasHeight,
-          condenser.rotation
-        );
-
-        indoorRects.forEach((rect) => {
-          const rectCenter = getRotatedCenter(
-            rect.xPercent * canvasWidth,
-            rect.yPercent * canvasHeight,
-            rect.widthPercent * canvasWidth,
-            rect.heightPercent * canvasHeight,
-            rect.rotation
-          );
-          drawSingleOrthogonalLine(context, rectCenter.x, rectCenter.y, condCenter.x, condCenter.y, "#008B8B", []);
-        });
-      });
-
-      // Fallback: if no groups matched (no condenser-N naming), use nearest condenser logic
-      if (groups.every((g) => g.indoorRects.length === 0)) {
-        const condenserIds = new Set(condensers.map((c) => String(c.id)));
-        annotations.rectangles.forEach((rect) => {
-          if (condenserIds.has(String(rect.id))) return;
-
-          const rectCenter = getRotatedCenter(
-            rect.xPercent * canvasWidth,
-            rect.yPercent * canvasHeight,
-            rect.widthPercent * canvasWidth,
-            rect.heightPercent * canvasHeight,
-            rect.rotation
-          );
-          const rx = rectCenter.x;
-          const ry = rectCenter.y;
-
-          // Find nearest condenser
-          let nearestCondCenter = null;
-          let minDist = Infinity;
-          condensers.forEach((cond) => {
-            const condCenter = getRotatedCenter(
-              cond.xPercent * canvasWidth,
-              cond.yPercent * canvasHeight,
-              cond.widthPercent * canvasWidth,
-              cond.heightPercent * canvasHeight,
-              cond.rotation
-            );
-            const dist = Math.sqrt((rx - condCenter.x) ** 2 + (ry - condCenter.y) ** 2);
-            if (dist < minDist) {
-              minDist = dist;
-              nearestCondCenter = condCenter;
-            }
-          });
-
-          if (nearestCondCenter) {
-            drawSingleOrthogonalLine(context, rx, ry, nearestCondCenter.x, nearestCondCenter.y, "#008B8B", []);
-          }
-        });
-      }
-    }
-  }
-
-  // For VRF ducted systems, draw red/blue dashed supply/return lines between user rectangles
-  // Uses sequential chain topology: Rect1→Rect2→Rect3→...→Condenser (largest rectangle)
-if (
-  !skipRefrigerantLines &&
-  acType === "vrf-ducted" &&
-  annotations?.rectangles &&
-  annotations.rectangles.length > 1
-) {
+  // VRF-ducted uses a sequential chain topology: ac-1 → ac-2 → ... → condenser.
+  if (!skipRefrigerantLines && acType === "vrf-ducted" && annotations?.rectangles && annotations.rectangles.length > 1) {
   // Find all condensers by comments containing "condenser"
   let condensers = [];
   if (annotations.comments) {
@@ -2042,7 +1882,7 @@ export const drawCanvasLegend = (ctx, acType = "vrf-ducted", options = {}) => {
     entries.push({ type: "line", color: "red",      dash: [6, 3], label: "Refrigerant Supply (Liquid ⅜″)" });
     entries.push({ type: "line", color: "#0066FF",  dash: [6, 3], label: "Refrigerant Return (Suction ⅝″)" });
   } else if (acType === "vrf-ductless") {
-    entries.push({ type: "line", color: "#008B8B",  dash: [],     label: "Refrigerant Line (Star Topology)" });
+    entries.push({ type: "line", color: "#2563EB",  dash: [],     label: "Refrigerant Line (Star Topology)" });
   } else if (acType === "ducted") {
     entries.push({ type: "line", color: "blue",     dash: [5, 4], label: "Refrigerant Line" });
   } else if (acType === "ductless") {

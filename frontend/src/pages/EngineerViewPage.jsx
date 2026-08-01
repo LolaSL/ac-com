@@ -171,7 +171,8 @@ const EngineerViewPage = () => {
   const ensureEditableRefrigerantLines = (nextAnnotation, mode) => {
     if (!nextAnnotation?.annotations) return nextAnnotation;
     const existingLines = nextAnnotation.annotations?.hvac?.refrigerantLines || [];
-    if (existingLines.length > 0) return nextAnnotation;
+    const shouldGenerate = existingLines.length === 0 || existingLines.some((line) => line.generatedAcType !== mode);
+    if (!shouldGenerate) return nextAnnotation;
 
     const generatedLines = buildEditableRefrigerantLines(nextAnnotation.annotations, mode);
     if (!generatedLines.length) return nextAnnotation;
@@ -466,7 +467,8 @@ const EngineerViewPage = () => {
     setAnnotation((prev) => {
       if (!prev?.annotations) return prev;
       const existingLines = prev.annotations?.hvac?.refrigerantLines || [];
-      if (existingLines.length > 0) return prev;
+      const shouldGenerate = existingLines.length === 0 || existingLines.some((line) => line.generatedAcType !== acType);
+      if (!shouldGenerate) return prev;
 
       const generatedLines = buildEditableRefrigerantLines(prev.annotations, acType);
       if (!generatedLines.length) return prev;

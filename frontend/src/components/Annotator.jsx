@@ -986,6 +986,7 @@ const Annotator = ({
   const SESSION_KEY_ANN_ID   = 'annotator_annotation_id';
   const SESSION_KEY_PDF      = 'annotator_pdf_data';
   const SESSION_KEY_NAME     = 'annotator_pdf_name';
+  const SESSION_KEY_FILE_TYPE = 'annotator_file_type';
   const SESSION_KEY_RECTS    = 'annotator_rectangles';
   const SESSION_KEY_COMMENTS = 'annotator_comments';
   const SESSION_KEY_LINES    = 'annotator_lines';
@@ -1050,11 +1051,12 @@ const Annotator = ({
       const storedName = sessionStorage.getItem(SESSION_KEY_NAME);
       if (!storedPdf || !storedName) return;
       try {
+        const storedFileType = sessionStorage.getItem(SESSION_KEY_FILE_TYPE) || 'application/pdf';
         const binary = atob(storedPdf);
         const bytes  = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        const blob         = new Blob([bytes], { type: 'application/pdf' });
-        const restoredFile = new File([blob], storedName, { type: 'application/pdf' });
+        const blob         = new Blob([bytes], { type: storedFileType });
+        const restoredFile = new File([blob], storedName, { type: storedFileType });
         setFile(restoredFile);
         setPdfInfo({ fileName: storedName });
         setPreviewUrl(URL.createObjectURL(blob));
@@ -1090,7 +1092,9 @@ const Annotator = ({
           if (!pdfRes.ok) throw new Error(`PDF fetch ${pdfRes.status}`);
 
           const pdfBlob      = await pdfRes.blob();
-          const restoredFile = new File([pdfBlob], storedName, { type: 'application/pdf' });
+          const storedFileType = sessionStorage.getItem(SESSION_KEY_FILE_TYPE) || 'application/pdf';
+          const resolvedType   = pdfBlob.type && pdfBlob.type !== 'application/octet-stream' ? pdfBlob.type : storedFileType;
+          const restoredFile = new File([pdfBlob], storedName, { type: resolvedType });
           setFile(restoredFile);
           setPdfInfo({ fileName: storedName });
           setPreviewUrl(URL.createObjectURL(pdfBlob));
@@ -1335,7 +1339,7 @@ const Annotator = ({
     setTotalPages(1);
     pdfDocRef.current = null; // Invalidate cached PDF doc
     // Clear old session state so new file starts fresh
-    ['annotator_annotation_id', 'annotator_pdf_data', 'annotator_pdf_name',
+    ['annotator_annotation_id', 'annotator_pdf_data', 'annotator_pdf_name', 'annotator_file_type',
      'annotator_rectangles', 'annotator_comments', 'annotator_lines',
      'annotator_rooms', 'annotator_pdf_rotation'].forEach(k => sessionStorage.removeItem(k));
 
@@ -1369,6 +1373,13 @@ const Annotator = ({
             reader.readAsDataURL(file);
           });
           extractedImages = [dataUrl];
+          // Save JPG bytes to sessionStorage for navigation recovery
+          try {
+            const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+            sessionStorage.setItem(SESSION_KEY_PDF, base64);
+            sessionStorage.setItem(SESSION_KEY_NAME, file.name);
+            sessionStorage.setItem(SESSION_KEY_FILE_TYPE, file.type);
+          } catch (e) { /* quota exceeded – silent fail */ }
         }
         setImages(extractedImages);
 
@@ -2870,7 +2881,7 @@ const Annotator = ({
               className="d-flex align-items-center justify-content-center gap-2"
             >
               <FaFileCode />
-              PDF Floor Plan + Notations
+              PDF
             </Button>
             <Button
               variant={uploadMode === 'image' ? 'primary' : 'outline-secondary'}
@@ -2882,7 +2893,7 @@ const Annotator = ({
               className="d-flex align-items-center justify-content-center gap-2"
             >
               <i className="fas fa-image"></i>
-              JPG Image + Notations
+              JPG 
             </Button>
           </ButtonGroup>
         </Form.Group>
