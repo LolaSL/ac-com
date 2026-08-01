@@ -285,7 +285,7 @@ const Measurement = () => {
                 minHeight: "42px",
               }}
             >
-              With PDF Uploading + Notations
+              With PDF/JPG Uploading + Notations
             </button>
             <button
               type="button"
@@ -302,7 +302,7 @@ const Measurement = () => {
                 minHeight: "42px",
               }}
             >
-              No PDF + Notations
+              No Uploading — Manual BTU Entry
             </button>
           </div>
         </div>

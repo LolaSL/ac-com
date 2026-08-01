@@ -271,6 +271,13 @@ function BtuCalculator({
     [parseAcAnnotations]
   );
 
+// Auto-switch to "pdf" mode when the annotator pushes rooms (works for both PDF and JPG)
+useEffect(() => {
+  if (roomData?.length > 0 && roomInputMode !== 'pdf') {
+    setRoomInputMode('pdf');
+  }
+}, [roomData]); // eslint-disable-line react-hooks/exhaustive-deps
+
 useEffect(() => {
   if (roomInputMode !== "pdf") {
     return;

@@ -2394,7 +2394,8 @@ const Annotator = ({
 
       if (response.ok) {
         const data = await response.json();
-        toast.success("PDF and annotations saved successfully!", { autoClose: 3000 });
+        const savedLabel = file?.type?.startsWith('image/') ? 'Image' : 'PDF';
+        toast.success(`${savedLabel} and annotations saved successfully!`, { autoClose: 3000 });
         // Store annotation ID so iOS Safari can re-fetch on navigation restore.
         try { sessionStorage.setItem('annotator_annotation_id', data.id); } catch (e) { /* silent */ }
         setIsSaved(true);
