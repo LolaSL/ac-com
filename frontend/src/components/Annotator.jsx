@@ -891,6 +891,7 @@ const Annotator = ({
   const [filterText, setFilterText] = useState("");
   const [pdfInfo, setPdfInfo] = useState(null);
   const [ocrLanguage, setOcrLanguage] = useState("eng");
+  const [uploadMode, setUploadMode] = useState("pdf"); // 'pdf' | 'image'
   const [editingRoomId, setEditingRoomId] = useState(null);
   const [editingRoomData, setEditingRoomData] = useState(null);
   const [editingFileIdx, setEditingFileIdx] = useState(null);
@@ -2175,12 +2176,16 @@ const Annotator = ({
     if (!canvas || !file) return;
 
     const context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    if (previewUrl) {
+
+    if (file.type.startsWith('image/') && previewUrl) {
+      // Image file: size the canvas to the image's natural dimensions, then draw
       const img = new Image();
-      img.src = previewUrl;
       img.onload = () => {
-        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        setPdfSize({ width: img.naturalWidth, height: img.naturalHeight });
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(img, 0, 0);
         iconPositions.forEach((icon) => {
           const rectWidth = 85;
           const rectHeight = 20;
@@ -2194,6 +2199,9 @@ const Annotator = ({
           );
         });
       };
+      img.src = previewUrl;
+    } else {
+      context.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     if (file?.type === "application/pdf") {
@@ -2221,6 +2229,7 @@ const Annotator = ({
     iconPositions,
     previewUrl,
     renderPDFOnCanvas,
+    setPdfSize,
     // pdfZoom intentionally omitted: zoom is applied via CSS transform only,
     // re-rendering the PDF on every pinch event causes the
     // "multiple render() operations" canvas error.
@@ -2845,6 +2854,38 @@ const Annotator = ({
             <option value="spa">Spanish</option>
           </Form.Select>
         </Form.Group>
+
+        {/* Upload mode toggle */}
+        <Form.Group className="mb-3">
+          <Form.Label className="fw-bold text-secondary d-block mb-2">Upload type</Form.Label>
+          <ButtonGroup className="w-100">
+            <Button
+              variant={uploadMode === 'pdf' ? 'primary' : 'outline-secondary'}
+              onClick={() => {
+                setUploadMode('pdf');
+                if (fileInputRef.current) fileInputRef.current.value = '';
+              }}
+              disabled={!scriptsLoaded || loading}
+              className="d-flex align-items-center justify-content-center gap-2"
+            >
+              <FaFileCode />
+              PDF Floor Plan + Notations
+            </Button>
+            <Button
+              variant={uploadMode === 'image' ? 'primary' : 'outline-secondary'}
+              onClick={() => {
+                setUploadMode('image');
+                if (fileInputRef.current) fileInputRef.current.value = '';
+              }}
+              disabled={!scriptsLoaded || loading}
+              className="d-flex align-items-center justify-content-center gap-2"
+            >
+              <i className="fas fa-image"></i>
+              JPG Image + Notations
+            </Button>
+          </ButtonGroup>
+        </Form.Group>
+
         <Form.Control
           className="my-4 form-control"
           id="file-upload"
@@ -2852,7 +2893,7 @@ const Annotator = ({
           multiple
           ref={fileInputRef}
           onChange={handleChange}
-          accept="application/pdf,image/jpeg,image/jpg"
+          accept={uploadMode === 'pdf' ? 'application/pdf' : 'image/jpeg,image/jpg'}
           disabled={!scriptsLoaded || loading}
         />
       </Form>
@@ -3291,7 +3332,7 @@ const Annotator = ({
         className="mb-3 mt-3 button-toolbar-annotator px-2"
         aria-label="PDF controls"
       >
-        {file && file.type === "application/pdf" && (
+        {file && (
           <>
             <ButtonGroup size="sm" className="me-2">
               <Button
@@ -3417,7 +3458,7 @@ const Annotator = ({
               </ButtonGroup>
             )}
 
-            {file && file.type === "application/pdf" && (
+            {file && (
               <ButtonGroup size="sm">
                 <Button
                   variant="outline-info"
@@ -3450,7 +3491,7 @@ const Annotator = ({
       {error && <p className="error-message mt-4">{error}</p>}
 
       {/* ── Desktop annotation label input (≥768px only) ── */}
-      {file && file.type === 'application/pdf' && (
+      {file && (
         <div className="d-none d-md-flex align-items-center gap-2 mb-2 px-2">
           <span className="text-muted small" style={{ whiteSpace: 'nowrap' }}>Annotation label:</span>
           <input
@@ -3466,7 +3507,7 @@ const Annotator = ({
       )}
 
       {/* ── Mobile annotation label input + place mode toggle (<768px only) ── */}
-      {file && file.type === 'application/pdf' && (
+      {file && (
         <div className="mobile-annotation-bar d-flex d-md-none flex-column align-items-center gap-1 mb-2 px-1 text-center">
           <span className="text-muted small">
             {acUnitInput.trim()
