@@ -228,32 +228,26 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
               {(serviceProviderInfo || adminInfo) && (
                 <div className="header-role-links-block">
                   {serviceProviderInfo ? (
-                    <div className="role-links-shell">
-                      <div className="user-links-row role-links-row">
-                        <span className="user-dropdown-title flex-shrink-0">
-                          <i className="fas fa-hard-hat user-icon"></i>
-                          <span className="user-name">{serviceProviderInfo.name}</span>
-                        </span>
-                        {serviceProviderLinks.slice(0, 3).map((link) => (
-                          <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
-                            {link.label}
-                          </Link>
-                        ))}
-                      </div>
-                      <div className="user-links-row role-links-row">
-                        {serviceProviderLinks.slice(3).map((link) => (
-                          <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
-                            {link.label}
-                          </Link>
-                        ))}
-                        <Link
-                          className="nav-link text-nowrap px-2 py-1 rounded text-danger"
-                          to="#signout"
-                          onClick={serviceProviderSignoutHandler}
-                        >
-                          Log Out
+                    <div
+                      className="user-links-row d-flex align-items-center gap-2"
+                      style={{ maxWidth: "100%", scrollbarWidth: "thin" }}
+                    >
+                      <span className="user-dropdown-title flex-shrink-0">
+                        <i className="fas fa-hard-hat user-icon"></i>
+                        <span className="user-name">{serviceProviderInfo.name}</span>
+                      </span>
+                      {serviceProviderLinks.map((link) => (
+                        <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
+                          {link.label}
                         </Link>
-                      </div>
+                      ))}
+                      <Link
+                        className="nav-link text-nowrap px-2 py-1 rounded text-danger"
+                        to="#signout"
+                        onClick={serviceProviderSignoutHandler}
+                      >
+                        Log Out
+                      </Link>
                     </div>
                   ) : null}
                   {adminInfo ? (

@@ -2104,7 +2104,7 @@ const EngineerViewPage = () => {
       const preloadedSymbols = await preloadSymbolImages(hvacSymbols);
 
       const scale = 1.5;
-      let cw, ch, renderBaseToCanvas;
+      let cw, ch, renderBaseToCanvas, pdfArrayBuffer = null;
 
       if (pdfFile.type.startsWith('image/')) {
         // Image file: load it and get dimensions
@@ -2122,7 +2122,7 @@ const EngineerViewPage = () => {
         };
       } else {
         // PDF file: use pdf.js
-        const pdfArrayBuffer = await pdfFile.arrayBuffer();
+        pdfArrayBuffer = await pdfFile.arrayBuffer();
         const loadingTask = pdfjsLib.getDocument(pdfArrayBuffer);
         const pdfJsDoc = await loadingTask.promise;
         const page = await pdfJsDoc.getPage(1);
@@ -2209,20 +2209,26 @@ const EngineerViewPage = () => {
         throw new Error("Failed to render ductless canvas.");
 
       // Build a 2-page PDF: page 1 = ducted, page 2 = ductless
-      const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
+      const resolvedPdfDoc = pdfArrayBuffer
+        ? await PDFDocument.load(pdfArrayBuffer)
+        : await PDFDocument.create();
+      if (!pdfArrayBuffer) {
+        // No base PDF — add a blank first page sized to the canvas
+        resolvedPdfDoc.addPage([cw, ch]);
+      }
       const [pngDucted, pngDuctless] = await Promise.all([
-        pdfDoc.embedPng(ductedImage),
-        pdfDoc.embedPng(ductlessImage),
+        resolvedPdfDoc.embedPng(ductedImage),
+        resolvedPdfDoc.embedPng(ductlessImage),
       ]);
 
-      const firstPage = pdfDoc.getPages()[0];
+      const firstPage = resolvedPdfDoc.getPages()[0];
       const { width: pageW, height: pageH } = firstPage.getSize();
       firstPage.drawImage(pngDucted, { x: 0, y: 0, width: pageW, height: pageH });
 
-      const page2 = pdfDoc.addPage([pageW, pageH]);
+      const page2 = resolvedPdfDoc.addPage([pageW, pageH]);
       page2.drawImage(pngDuctless, { x: 0, y: 0, width: pageW, height: pageH });
 
-      const pdfBytes = await pdfDoc.save();
+      const pdfBytes = await resolvedPdfDoc.save();
       const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
 
       // Map percent-format annotations for the API
