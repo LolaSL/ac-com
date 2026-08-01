@@ -274,6 +274,7 @@ export const buildEditableRefrigerantLines = (annotations, acType) => {
 
         let indoorRects = [];
         if (groupNum && comments.length > 0) {
+          // Numbered condenser (e.g. "condenser-1"): match only its own ac-N.x units
           indoorRects = rectangles
             .filter((rect) => !rect.isCondenser && String(rect.id) !== String(condenser.id))
             .filter((rect) => {
@@ -288,6 +289,24 @@ export const buildEditableRefrigerantLines = (annotations, acType) => {
               const aSub = aMatch && aMatch[2] ? parseInt(aMatch[2], 10) : 0;
               const bSub = bMatch && bMatch[2] ? parseInt(bMatch[2], 10) : 0;
               return aSub - bSub;
+            });
+        } else {
+          // Un-numbered condenser (e.g. just "condenser"): chain ALL non-condenser rects
+          const allCondensorIds = new Set(condensers.map((c) => String(c.id)));
+          indoorRects = rectangles
+            .filter((rect) => !allCondensorIds.has(String(rect.id)) && !rect.isCondenser)
+            .sort((a, b) => {
+              // Sort by ac unit number (ac-1 < ac-2 < ac-N) then by sub-unit (.1 < .2)
+              const aComment = getCommentForRect(a.id)?.text || "";
+              const bComment = getCommentForRect(b.id)?.text || "";
+              const aMain = aComment.match(/ac-(\d+)/i);
+              const bMain = bComment.match(/ac-(\d+)/i);
+              const aSub  = aComment.match(/ac-\d+\.(\d+)/i);
+              const bSub  = bComment.match(/ac-\d+\.(\d+)/i);
+              const aNum = aMain ? parseInt(aMain[1], 10) : 999;
+              const bNum = bMain ? parseInt(bMain[1], 10) : 999;
+              if (aNum !== bNum) return aNum - bNum;
+              return (aSub ? parseInt(aSub[1], 10) : 0) - (bSub ? parseInt(bSub[1], 10) : 0);
             });
         }
 
