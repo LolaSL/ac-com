@@ -3560,8 +3560,6 @@ const Annotator = ({
                 <canvas
                   id="my-canvas"
                   ref={canvasRef}
-                  width={pdfSize.width}
-                  height={pdfSize.height}
                   onClick={handleCanvasEvent}
                 />
 
