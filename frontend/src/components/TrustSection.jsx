@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 import "./TrustSection.css";
 
 export default function TrustSection() {
+  const { t } = useTranslation();
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,17 +23,19 @@ export default function TrustSection() {
     fetchSellers();
   }, []);
 
+  const metricLabels = t("home.trust.metrics", { returnObjects: true });
   const metrics = [
-    { label: "Industry Partners", value: sellers.length || "8+", icon: "fas fa-handshake" },
-    { label: "Projects Completed", value: "10,000+", icon: "fas fa-project-diagram" },
-    { label: "Service Providers", value: "500+", icon: "fas fa-hard-hat" },
-    { label: "Active Users", value: "50,000+", icon: "fas fa-users" },
+    { label: metricLabels[0].label, value: sellers.length || "8+", icon: "fas fa-handshake" },
+    { label: metricLabels[1].label, value: "10,000+", icon: "fas fa-project-diagram" },
+    { label: metricLabels[2].label, value: "500+", icon: "fas fa-hard-hat" },
+    { label: metricLabels[3].label, value: "50,000+", icon: "fas fa-users" },
   ];
 
+  const certLabels = t("home.trust.certifications", { returnObjects: true });
   const certifications = [
-    { icon: "fas fa-lock", title: "Enterprise Security", description: "ISO 27001 Certified", color: "#67e8f9" },
-    { icon: "fas fa-certificate", title: "Industry Certified", description: "HVAC Standards Compliant", color: "#34d399" },
-    { icon: "fas fa-star", title: "Top Rated", description: "4.8/5 Average Rating", color: "#fbbf24" },
+    { icon: "fas fa-lock", title: certLabels[0].title, description: certLabels[0].description, color: "#67e8f9" },
+    { icon: "fas fa-certificate", title: certLabels[1].title, description: certLabels[1].description, color: "#34d399" },
+    { icon: "fas fa-star", title: certLabels[2].title, description: certLabels[2].description, color: "#fbbf24" },
   ];
 
   return (
@@ -51,9 +55,9 @@ export default function TrustSection() {
         {/* Partner Logos */}
         <div className="trs-partners">
           <div className="trs-partners-header">
-            <span className="trs-badge">Partners</span>
+            <span className="trs-badge">{t("home.trust.badge")}</span>
             <h3 className="trs-title">
-              Trusted By <span>Industry Leaders</span>
+              {t("home.trust.title")} <span>{t("home.trust.titleHighlight")}</span>
             </h3>
           </div>
 

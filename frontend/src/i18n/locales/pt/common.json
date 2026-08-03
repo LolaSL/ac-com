@@ -118,5 +118,83 @@
     "pwFair": "Razoável",
     "pwGood": "Boa",
     "pwStrong": "Forte"
+  },
+  "home": {
+    "hero": {
+      "title": "Bem-vindo à AC-Commerce",
+      "subtitle": "Design, planejamento, compra e instalação de HVAC mais inteligentes — impulsionados pela tecnologia, entregues com confiança.",
+      "cornerTag": "Qualquer espaço. Qualquer tamanho. Sempre fresco."
+    },
+    "banners": [
+      { "title": "Sobre Nós - AC-Commerce", "description": "Saiba mais sobre a AC-Commerce, nossa missão, valores e a equipe que impulsiona a inovação no setor de HVAC.", "linkText": "Saiba Mais" },
+      { "title": "Tecnologia de Marketplace AC-Commerce", "description": "Revolucionando a aquisição de HVAC com soluções abrangentes de marketplace.", "linkText": "Explorar Nossos Produtos" },
+      { "title": "Parcerias Líderes do Setor", "description": "Confiado pelos principais fabricantes de HVAC, incluindo Daikin, LG, Samsung e Mitsubishi, para soluções abrangentes de equipamentos.", "linkText": "Ver Nossos Fornecedores" },
+      { "title": "Tecnologia de Design Avançada", "description": "Envie plantas baixas e receba instantaneamente anotações profissionais de unidades de AC, cálculos de BTU e especificações de instalação.", "linkText": "Experimentar Ferramentas de Design" },
+      { "title": "✅ Veja os Resultados na Página de Recomendações", "description": "Veja seus cálculos de BTU, produtos de AC correspondentes, resumos do sistema e acessórios de instalação, tudo adaptado à sua planta baixa.", "linkText": "Ver Recomendações" },
+      { "title": "Ofertas especiais e descontos", "description": "Ofertas exclusivas nas melhores marcas de HVAC, disponíveis apenas através da AC-Commerce. Volte regularmente para novas promoções e oportunidades de economia.", "linkText": "Explorar Agora" }
+    ],
+    "trust": {
+      "badge": "Parceiros",
+      "title": "Confiado Por",
+      "titleHighlight": "Líderes do Setor",
+      "metrics": [
+        { "label": "Parceiros do Setor" },
+        { "label": "Projetos Concluídos" },
+        { "label": "Prestadores de Serviços" },
+        { "label": "Usuários Ativos" }
+      ],
+      "certifications": [
+        { "title": "Segurança Empresarial", "description": "Certificado ISO 27001" },
+        { "title": "Certificado no Setor", "description": "Compatível com Padrões HVAC" },
+        { "title": "Melhor Avaliado", "description": "Avaliação Média de 4.8/5" }
+      ]
+    },
+    "value": {
+      "badge": "Por Que Nós",
+      "title": "Por Que Escolher Nossa Plataforma?",
+      "subtitle": "Transformando a forma como os projetos de HVAC são projetados, orçados e executados",
+      "items": [
+        { "title": "Economize 40% nos Custos", "description": "Preços competitivos e design automatizado reduzem significativamente as despesas do projeto" },
+        { "title": "Orçamentos 10 Vezes Mais Rápidos", "description": "Cálculos instantâneos com apoio de engenheiros em comparação com processos manuais tradicionais" },
+        { "title": "Profissionais Verificados", "description": "Prestadores de serviços certificados e verificados com histórico comprovado" },
+        { "title": "Análises em Tempo Real", "description": "Insights do painel para acompanhamento de projetos e medição de ROI" },
+        { "title": "Cobertura Global", "description": "Acesso a milhares de fornecedores em todo o mundo" },
+        { "title": "Otimizado para Dispositivos Móveis", "description": "Funcionalidade completa em qualquer dispositivo para gerenciamento no local" }
+      ]
+    },
+    "testimonials": {
+      "badge": "Histórias de Sucesso de Clientes",
+      "title": "O Que Nossos Clientes Dizem",
+      "subtitle": "Resultados reais de profissionais do setor",
+      "items": [
+        { "role": "Empreiteiro de HVAC", "text": "Esta plataforma transformou a forma como orçamos projetos. Reduzimos nosso tempo de resposta pela metade e aumentamos nosso volume de projetos em 60%." },
+        { "role": "Gerente de Instalações", "text": "A ferramenta de design com apoio de engenharia é incrivelmente precisa. Nossa instalação correu bem graças às especificações detalhadas fornecidas." },
+        { "role": "Incorporador Imobiliário", "text": "Plataforma excepcional! Encontrar instaladores certificados nunca foi tão fácil. As ferramentas de gerenciamento de projetos nos economizaram milhares em custos de coordenação." }
+      ],
+      "stats": [
+        { "label": "Aumento no Volume de Projetos" },
+        { "label": "Orçamentos Mais Rápidos" },
+        { "label": "Avaliação Média dos Clientes" }
+      ]
+    },
+    "newsletter": {
+      "badge": "Newsletter",
+      "titleSubscribe": "Fique Atualizado",
+      "titleUnsubscribe": "Gerenciar Assinatura",
+      "descSubscribe": "Receba atualizações exclusivas sobre novos recursos, opções de preços e insights do setor diretamente na sua caixa de entrada",
+      "descUnsubscribe": "Digite seu endereço de e-mail para parar de receber atualizações da newsletter da AC-Commerce.",
+      "subscribeTab": "Assinar",
+      "unsubscribeTab": "Cancelar Assinatura",
+      "emailPlaceholder": "Digite seu endereço de e-mail",
+      "subscribing": "Assinando...",
+      "unsubscribing": "Cancelando assinatura...",
+      "subscribeBtn": "Assinar",
+      "unsubscribeBtn": "Cancelar Assinatura",
+      "note": "Respeitamos sua privacidade. Você pode se inscrever ou cancelar a inscrição a qualquer momento.",
+      "invalidEmail": "Por favor, insira um endereço de e-mail válido",
+      "subscribeSuccess": "Obrigado por se inscrever! Verifique seu e-mail para ofertas exclusivas.",
+      "unsubscribeSuccess": "Você foi removido da newsletter.",
+      "genericError": "Algo deu errado ao tentar {{mode}}. Por favor, tente novamente."
+    }
   }
 }

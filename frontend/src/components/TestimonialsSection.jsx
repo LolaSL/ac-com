@@ -1,47 +1,30 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "./TestimonialsSection.css";
 
 export default function TestimonialsSection() {
+  const { t } = useTranslation();
+  const items = t("home.testimonials.items", { returnObjects: true });
   const testimonials = [
-    {
-      name: "John Martinez",
-      role: "HVAC Contractor",
-      company: "Martinez Cooling Solutions",
-      text: "This platform has transformed how we quote projects. We've cut our turnaround time in half and increased our project volume by 60%.",
-      rating: 5,
-      image: "👨‍💼",
-    },
-    {
-      name: "Sarah Chen",
-      role: "Facility Manager",
-      company: "Tech Campus Inc.",
-      text: "The Engineering powered design tool is incredibly accurate. Our installation went smoothly thanks to the detailed specifications provided.",
-      rating: 5,
-      image: "👩‍💼",
-    },
-    {
-      name: "Mike Thompson",
-      role: "Real Estate Developer",
-      company: "Thompson Developments",
-      text: "Outstanding platform! Finding certified installers was never easier. The project management tools saved us thousands in coordination costs.",
-      rating: 5,
-      image: "👨‍🔧",
-    },
+    { name: "John Martinez", company: "Martinez Cooling Solutions", rating: 5, image: "👨‍💼", role: items[0].role, text: items[0].text },
+    { name: "Sarah Chen", company: "Tech Campus Inc.", rating: 5, image: "👩‍💼", role: items[1].role, text: items[1].text },
+    { name: "Mike Thompson", company: "Thompson Developments", rating: 5, image: "👨‍🔧", role: items[2].role, text: items[2].text },
   ];
 
+  const statLabels = t("home.testimonials.stats", { returnObjects: true });
   const stats = [
-    { value: "60%", label: "Increase in Project Volume", icon: "fas fa-chart-line" },
-    { value: "50%", label: "Faster Quote Turnaround", icon: "fas fa-bolt" },
-    { value: "4.8/5", label: "Average Customer Rating", icon: "fas fa-star" },
+    { value: "60%", label: statLabels[0].label, icon: "fas fa-chart-line" },
+    { value: "50%", label: statLabels[1].label, icon: "fas fa-bolt" },
+    { value: "4.8/5", label: statLabels[2].label, icon: "fas fa-star" },
   ];
 
   return (
     <section className="ts-section">
       <div className="ts-container">
         <div className="ts-header">
-          <span className="ts-badge">Client Success Stories</span>
-          <h2 className="ts-title">What Our Customers Say</h2>
-          <p className="ts-subtitle">Real results from industry professionals</p>
+          <span className="ts-badge">{t("home.testimonials.badge")}</span>
+          <h2 className="ts-title">{t("home.testimonials.title")}</h2>
+          <p className="ts-subtitle">{t("home.testimonials.subtitle")}</p>
         </div>
 
         <div className="ts-grid">

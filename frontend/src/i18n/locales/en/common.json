@@ -118,5 +118,83 @@
     "pwFair": "Fair",
     "pwGood": "Good",
     "pwStrong": "Strong"
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to AC-Commerce",
+      "subtitle": "Smarter HVAC design, planning, shopping, and installation — powered by technology, delivered with trust.",
+      "cornerTag": "Any space. Any size. Always cool."
+    },
+    "banners": [
+      { "title": "About Us - AC-Commerce", "description": "Learn more about AC-Commerce, our mission, values, and the team driving innovation in the HVAC industry.", "linkText": "Learn More" },
+      { "title": "AC-Commerce Marketplace Technology", "description": "Revolutionizing HVAC procurement with comprehensive marketplace solutions.", "linkText": "Explore Our Products" },
+      { "title": "Industry-Leading Partnerships", "description": "Trusted by leading HVAC manufacturers including Daikin, LG, Samsung, and Mitsubishi for comprehensive equipment solutions.", "linkText": "View Our Suppliers" },
+      { "title": "Advanced Design Technology", "description": "Upload floor plans and receive professional AC unit annotations, BTU calculations, and installation specifications instantly.", "linkText": "Try Design Tools" },
+      { "title": "✅ View Results on Recommendations Page", "description": "See your BTU calculations, matched AC products, system summaries, and installation accessories — all tailored to your floor plan.", "linkText": "View Recommendations" },
+      { "title": "Special offers and discounts", "description": "Exclusive deals on top HVAC brands, available only through AC-Commerce. Check back regularly for new promotions and savings opportunities.", "linkText": "Explore Now" }
+    ],
+    "trust": {
+      "badge": "Partners",
+      "title": "Trusted By",
+      "titleHighlight": "Industry Leaders",
+      "metrics": [
+        { "label": "Industry Partners" },
+        { "label": "Projects Completed" },
+        { "label": "Service Providers" },
+        { "label": "Active Users" }
+      ],
+      "certifications": [
+        { "title": "Enterprise Security", "description": "ISO 27001 Certified" },
+        { "title": "Industry Certified", "description": "HVAC Standards Compliant" },
+        { "title": "Top Rated", "description": "4.8/5 Average Rating" }
+      ]
+    },
+    "value": {
+      "badge": "Why Us",
+      "title": "Why Choose Our Platform?",
+      "subtitle": "Transforming how HVAC projects are designed, quoted, and executed",
+      "items": [
+        { "title": "Save 40% on Costs", "description": "Competitive pricing and automated design reduce project expenses significantly" },
+        { "title": "10x Faster Quotes", "description": "Engineer-powered instant calculations vs traditional manual processes" },
+        { "title": "Verified Professionals", "description": "Certified, vetted service providers with proven track records" },
+        { "title": "Real-Time Analytics", "description": "Dashboard insights for project tracking and ROI measurement" },
+        { "title": "Global Coverage", "description": "Access to thousands of providers across the World" },
+        { "title": "Mobile Optimized", "description": "Full functionality on any device for on-site management" }
+      ]
+    },
+    "testimonials": {
+      "badge": "Client Success Stories",
+      "title": "What Our Customers Say",
+      "subtitle": "Real results from industry professionals",
+      "items": [
+        { "role": "HVAC Contractor", "text": "This platform has transformed how we quote projects. We've cut our turnaround time in half and increased our project volume by 60%." },
+        { "role": "Facility Manager", "text": "The Engineering powered design tool is incredibly accurate. Our installation went smoothly thanks to the detailed specifications provided." },
+        { "role": "Real Estate Developer", "text": "Outstanding platform! Finding certified installers was never easier. The project management tools saved us thousands in coordination costs." }
+      ],
+      "stats": [
+        { "label": "Increase in Project Volume" },
+        { "label": "Faster Quote Turnaround" },
+        { "label": "Average Customer Rating" }
+      ]
+    },
+    "newsletter": {
+      "badge": "Newsletter",
+      "titleSubscribe": "Stay Updated",
+      "titleUnsubscribe": "Manage Subscription",
+      "descSubscribe": "Get exclusive updates on new features, pricing options, and industry insights delivered to your inbox",
+      "descUnsubscribe": "Enter your email address to stop receiving newsletter updates from AC-Commerce.",
+      "subscribeTab": "Subscribe",
+      "unsubscribeTab": "Unsubscribe",
+      "emailPlaceholder": "Enter your email address",
+      "subscribing": "Subscribing...",
+      "unsubscribing": "Unsubscribing...",
+      "subscribeBtn": "Subscribe",
+      "unsubscribeBtn": "Unsubscribe",
+      "note": "We respect your privacy. You can subscribe or unsubscribe at any time.",
+      "invalidEmail": "Please enter a valid email address",
+      "subscribeSuccess": "Thanks for subscribing! Check your email for exclusive offers.",
+      "unsubscribeSuccess": "You have been unsubscribed from the newsletter.",
+      "genericError": "Something went wrong while trying to {{mode}}. Please try again."
+    }
   }
 }

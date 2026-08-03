@@ -118,5 +118,83 @@
     "pwFair": "Ausreichend",
     "pwGood": "Gut",
     "pwStrong": "Stark"
+  },
+  "home": {
+    "hero": {
+      "title": "Willkommen bei AC-Commerce",
+      "subtitle": "Intelligentere HLK-Planung, -Gestaltung, -Einkauf und -Installation – angetrieben von Technologie, geliefert mit Vertrauen.",
+      "cornerTag": "Jeder Raum. Jede Größe. Immer kühl."
+    },
+    "banners": [
+      { "title": "Über Uns - AC-Commerce", "description": "Erfahren Sie mehr über AC-Commerce, unsere Mission, unsere Werte und das Team, das Innovationen in der HLK-Branche vorantreibt.", "linkText": "Mehr Erfahren" },
+      { "title": "AC-Commerce Marketplace-Technologie", "description": "Revolutionierung der HLK-Beschaffung mit umfassenden Marktplatzlösungen.", "linkText": "Unsere Produkte Entdecken" },
+      { "title": "Branchenführende Partnerschaften", "description": "Vertraut von führenden HLK-Herstellern wie Daikin, LG, Samsung und Mitsubishi für umfassende Gerätelösungen.", "linkText": "Unsere Lieferanten Ansehen" },
+      { "title": "Fortschrittliche Designtechnologie", "description": "Laden Sie Grundrisse hoch und erhalten Sie sofort professionelle Klimaanlagen-Anmerkungen, BTU-Berechnungen und Installationsspezifikationen.", "linkText": "Design-Tools Ausprobieren" },
+      { "title": "✅ Ergebnisse auf der Empfehlungsseite Ansehen", "description": "Sehen Sie Ihre BTU-Berechnungen, passende Klimaanlagen, Systemzusammenfassungen und Installationszubehör – alles auf Ihren Grundriss zugeschnitten.", "linkText": "Empfehlungen Ansehen" },
+      { "title": "Sonderangebote und Rabatte", "description": "Exklusive Angebote für Top-HLK-Marken, nur über AC-Commerce erhältlich. Schauen Sie regelmäßig vorbei für neue Aktionen und Sparmöglichkeiten.", "linkText": "Jetzt Entdecken" }
+    ],
+    "trust": {
+      "badge": "Partner",
+      "title": "Vertraut Von",
+      "titleHighlight": "Branchenführern",
+      "metrics": [
+        { "label": "Branchenpartner" },
+        { "label": "Abgeschlossene Projekte" },
+        { "label": "Dienstleister" },
+        { "label": "Aktive Nutzer" }
+      ],
+      "certifications": [
+        { "title": "Unternehmenssicherheit", "description": "ISO 27001 Zertifiziert" },
+        { "title": "Branchenzertifiziert", "description": "Konform mit HLK-Standards" },
+        { "title": "Bestbewertet", "description": "Durchschnittliche Bewertung von 4,8/5" }
+      ]
+    },
+    "value": {
+      "badge": "Warum Wir",
+      "title": "Warum Unsere Plattform Wählen?",
+      "subtitle": "Transformation der Art und Weise, wie HLK-Projekte entworfen, kalkuliert und ausgeführt werden",
+      "items": [
+        { "title": "40% der Kosten Sparen", "description": "Wettbewerbsfähige Preise und automatisiertes Design reduzieren die Projektkosten erheblich" },
+        { "title": "10-mal Schnellere Angebote", "description": "Sofortige, ingenieurgestützte Berechnungen im Vergleich zu herkömmlichen manuellen Prozessen" },
+        { "title": "Verifizierte Fachleute", "description": "Zertifizierte, geprüfte Dienstleister mit nachgewiesener Erfolgsbilanz" },
+        { "title": "Echtzeit-Analysen", "description": "Dashboard-Einblicke für Projektverfolgung und ROI-Messung" },
+        { "title": "Globale Abdeckung", "description": "Zugang zu Tausenden von Anbietern weltweit" },
+        { "title": "Für Mobilgeräte Optimiert", "description": "Volle Funktionalität auf jedem Gerät für die Verwaltung vor Ort" }
+      ]
+    },
+    "testimonials": {
+      "badge": "Erfolgsgeschichten von Kunden",
+      "title": "Was Unsere Kunden Sagen",
+      "subtitle": "Echte Ergebnisse von Branchenexperten",
+      "items": [
+        { "role": "HLK-Auftragnehmer", "text": "Diese Plattform hat verändert, wie wir Projekte kalkulieren. Wir haben unsere Bearbeitungszeit halbiert und unser Projektvolumen um 60 % gesteigert." },
+        { "role": "Facility Manager", "text": "Das ingenieurgestützte Design-Tool ist unglaublich präzise. Unsere Installation verlief dank der detaillierten Spezifikationen reibungslos." },
+        { "role": "Immobilienentwickler", "text": "Hervorragende Plattform! Zertifizierte Installateure zu finden war noch nie so einfach. Die Projektmanagement-Tools haben uns Tausende an Koordinationskosten gespart." }
+      ],
+      "stats": [
+        { "label": "Steigerung des Projektvolumens" },
+        { "label": "Schnellere Angebotserstellung" },
+        { "label": "Durchschnittliche Kundenbewertung" }
+      ]
+    },
+    "newsletter": {
+      "badge": "Newsletter",
+      "titleSubscribe": "Bleiben Sie Informiert",
+      "titleUnsubscribe": "Abonnement Verwalten",
+      "descSubscribe": "Erhalten Sie exklusive Updates zu neuen Funktionen, Preisoptionen und Brancheneinblicken direkt in Ihr Postfach",
+      "descUnsubscribe": "Geben Sie Ihre E-Mail-Adresse ein, um keine Newsletter-Updates mehr von AC-Commerce zu erhalten.",
+      "subscribeTab": "Abonnieren",
+      "unsubscribeTab": "Abbestellen",
+      "emailPlaceholder": "Geben Sie Ihre E-Mail-Adresse ein",
+      "subscribing": "Wird abonniert...",
+      "unsubscribing": "Wird abbestellt...",
+      "subscribeBtn": "Abonnieren",
+      "unsubscribeBtn": "Abbestellen",
+      "note": "Wir respektieren Ihre Privatsphäre. Sie können sich jederzeit an- oder abmelden.",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "subscribeSuccess": "Vielen Dank für Ihr Abonnement! Schauen Sie in Ihre E-Mails für exklusive Angebote.",
+      "unsubscribeSuccess": "Sie wurden vom Newsletter abgemeldet.",
+      "genericError": "Beim Versuch, {{mode}} auszuführen, ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    }
   }
 }

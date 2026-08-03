@@ -118,5 +118,83 @@
     "pwFair": "Moyen",
     "pwGood": "Bon",
     "pwStrong": "Fort"
+  },
+  "home": {
+    "hero": {
+      "title": "Bienvenue chez AC-Commerce",
+      "subtitle": "Une conception, une planification, un achat et une installation CVC plus intelligents — propulsés par la technologie, livrés en toute confiance.",
+      "cornerTag": "Tous les espaces. Toutes les tailles. Toujours frais."
+    },
+    "banners": [
+      { "title": "À Propos de Nous - AC-Commerce", "description": "Découvrez-en plus sur AC-Commerce, notre mission, nos valeurs et l'équipe qui stimule l'innovation dans l'industrie CVC.", "linkText": "En Savoir Plus" },
+      { "title": "Technologie de Marketplace AC-Commerce", "description": "Révolutionner l'approvisionnement CVC avec des solutions de marketplace complètes.", "linkText": "Découvrir Nos Produits" },
+      { "title": "Partenariats Leaders de l'Industrie", "description": "Approuvé par les principaux fabricants CVC, notamment Daikin, LG, Samsung et Mitsubishi, pour des solutions d'équipement complètes.", "linkText": "Voir Nos Fournisseurs" },
+      { "title": "Technologie de Conception Avancée", "description": "Téléchargez des plans d'étage et recevez instantanément des annotations professionnelles d'unités de climatisation, des calculs BTU et des spécifications d'installation.", "linkText": "Essayer les Outils de Conception" },
+      { "title": "✅ Voir les Résultats sur la Page des Recommandations", "description": "Consultez vos calculs BTU, les produits de climatisation correspondants, les résumés du système et les accessoires d'installation, tous adaptés à votre plan d'étage.", "linkText": "Voir les Recommandations" },
+      { "title": "Offres spéciales et réductions", "description": "Offres exclusives sur les meilleures marques CVC, disponibles uniquement via AC-Commerce. Revenez régulièrement pour découvrir de nouvelles promotions et opportunités d'économies.", "linkText": "Découvrir Maintenant" }
+    ],
+    "trust": {
+      "badge": "Partenaires",
+      "title": "Approuvé Par",
+      "titleHighlight": "Les Leaders de l'Industrie",
+      "metrics": [
+        { "label": "Partenaires de l'Industrie" },
+        { "label": "Projets Réalisés" },
+        { "label": "Prestataires de Services" },
+        { "label": "Utilisateurs Actifs" }
+      ],
+      "certifications": [
+        { "title": "Sécurité Entreprise", "description": "Certifié ISO 27001" },
+        { "title": "Certifié dans l'Industrie", "description": "Conforme aux Normes CVC" },
+        { "title": "Les Mieux Notés", "description": "Note Moyenne de 4,8/5" }
+      ]
+    },
+    "value": {
+      "badge": "Pourquoi Nous",
+      "title": "Pourquoi Choisir Notre Plateforme ?",
+      "subtitle": "Transformer la façon dont les projets CVC sont conçus, chiffrés et exécutés",
+      "items": [
+        { "title": "Économisez 40 % sur les Coûts", "description": "Des prix compétitifs et une conception automatisée réduisent considérablement les dépenses du projet" },
+        { "title": "Devis 10 Fois Plus Rapides", "description": "Calculs instantanés assistés par ingénieurs par rapport aux processus manuels traditionnels" },
+        { "title": "Professionnels Vérifiés", "description": "Prestataires de services certifiés et vérifiés avec des antécédents éprouvés" },
+        { "title": "Analyses en Temps Réel", "description": "Informations du tableau de bord pour le suivi des projets et la mesure du ROI" },
+        { "title": "Couverture Mondiale", "description": "Accès à des milliers de prestataires à travers le monde" },
+        { "title": "Optimisé pour Mobile", "description": "Fonctionnalité complète sur n'importe quel appareil pour la gestion sur site" }
+      ]
+    },
+    "testimonials": {
+      "badge": "Témoignages de Clients",
+      "title": "Ce Que Disent Nos Clients",
+      "subtitle": "Des résultats réels de professionnels de l'industrie",
+      "items": [
+        { "role": "Entrepreneur CVC", "text": "Cette plateforme a transformé notre façon de chiffrer les projets. Nous avons réduit de moitié notre délai de traitement et augmenté notre volume de projets de 60 %." },
+        { "role": "Gestionnaire d'Installations", "text": "L'outil de conception assisté par ingénierie est incroyablement précis. Notre installation s'est déroulée sans problème grâce aux spécifications détaillées fournies." },
+        { "role": "Promoteur Immobilier", "text": "Plateforme exceptionnelle ! Trouver des installateurs certifiés n'a jamais été aussi facile. Les outils de gestion de projet nous ont fait économiser des milliers en coûts de coordination." }
+      ],
+      "stats": [
+        { "label": "Augmentation du Volume de Projets" },
+        { "label": "Devis Plus Rapides" },
+        { "label": "Note Moyenne des Clients" }
+      ]
+    },
+    "newsletter": {
+      "badge": "Newsletter",
+      "titleSubscribe": "Restez Informé",
+      "titleUnsubscribe": "Gérer l'Abonnement",
+      "descSubscribe": "Recevez des mises à jour exclusives sur les nouvelles fonctionnalités, les options tarifaires et les analyses de l'industrie directement dans votre boîte de réception",
+      "descUnsubscribe": "Entrez votre adresse e-mail pour ne plus recevoir les mises à jour de la newsletter d'AC-Commerce.",
+      "subscribeTab": "S'abonner",
+      "unsubscribeTab": "Se désabonner",
+      "emailPlaceholder": "Entrez votre adresse e-mail",
+      "subscribing": "Abonnement en cours...",
+      "unsubscribing": "Désabonnement en cours...",
+      "subscribeBtn": "S'abonner",
+      "unsubscribeBtn": "Se désabonner",
+      "note": "Nous respectons votre vie privée. Vous pouvez vous abonner ou vous désabonner à tout moment.",
+      "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+      "subscribeSuccess": "Merci de vous être abonné ! Consultez votre e-mail pour des offres exclusives.",
+      "unsubscribeSuccess": "Vous avez été désabonné de la newsletter.",
+      "genericError": "Une erreur s'est produite lors de la tentative de {{mode}}. Veuillez réessayer."
+    }
   }
 }

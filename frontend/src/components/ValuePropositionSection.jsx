@@ -1,58 +1,34 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "./ValuePropositionSection.css";
 
 export default function ValuePropositionSection() {
-  const values = [
-    {
-      icon: "fas fa-dollar-sign",
-      title: "Save 40% on Costs",
-      description:
-        "Competitive pricing and automated design reduce project expenses significantly",
-      color: "#34d399",
-    },
-    {
-      icon: "fas fa-clock",
-      title: "10x Faster Quotes",
-      description:
-        "Engineer-powered instant calculations vs traditional manual processes",
-      color: "#67e8f9",
-    },
-    {
-      icon: "fas fa-check-circle",
-      title: "Verified Professionals",
-      description:
-        "Certified, vetted service providers with proven track records",
-      color: "#3b82f6",
-    },
-    {
-      icon: "fas fa-chart-line",
-      title: "Real-Time Analytics",
-      description:
-        "Dashboard insights for project tracking and ROI measurement",
-      color: "#fbbf24",
-    },
-    {
-      icon: "fas fa-globe",
-      title: "Global Coverage",
-      description: "Access to thousands of providers across the World",
-      color: "#f472b6",
-    },
-    {
-      icon: "fas fa-mobile-alt",
-      title: "Mobile Optimized",
-      description: "Full functionality on any device for on-site management",
-      color: "#a78bfa",
-    },
+  const { t } = useTranslation();
+  const items = t("home.value.items", { returnObjects: true });
+  const icons = [
+    "fas fa-dollar-sign",
+    "fas fa-clock",
+    "fas fa-check-circle",
+    "fas fa-chart-line",
+    "fas fa-globe",
+    "fas fa-mobile-alt",
   ];
+  const colors = ["#34d399", "#67e8f9", "#3b82f6", "#fbbf24", "#f472b6", "#a78bfa"];
+  const values = items.map((item, idx) => ({
+    icon: icons[idx],
+    title: item.title,
+    description: item.description,
+    color: colors[idx],
+  }));
 
   return (
     <section className="vp-section">
       <div className="vp-container">
         <div className="vp-header">
-          <span className="vp-badge">Why Us</span>
-          <h2 className="vp-title">Why Choose Our Platform?</h2>
+          <span className="vp-badge">{t("home.value.badge")}</span>
+          <h2 className="vp-title">{t("home.value.title")}</h2>
           <p className="vp-subtitle">
-            Transforming how HVAC projects are designed, quoted, and executed
+            {t("home.value.subtitle")}
           </p>
         </div>
 

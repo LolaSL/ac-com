@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./NewsletterSignup.css";
 
 export default function NewsletterSignup() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -13,7 +15,7 @@ export default function NewsletterSignup() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setStatus({ type: "error", message: "Please enter a valid email address" });
+      setStatus({ type: "error", message: t("home.newsletter.invalidEmail") });
       setLoading(false);
       return;
     }
@@ -46,8 +48,8 @@ export default function NewsletterSignup() {
           message:
             data.message ||
             (mode === "unsubscribe"
-              ? "You have been unsubscribed from the newsletter."
-              : "Thanks for subscribing! Check your email for exclusive offers."),
+              ? t("home.newsletter.unsubscribeSuccess")
+              : t("home.newsletter.subscribeSuccess")),
         });
         setEmail("");
         setTimeout(() => setStatus(null), 5000);
@@ -63,7 +65,7 @@ export default function NewsletterSignup() {
     } catch (error) {
       setStatus({
         type: "error",
-        message: `Something went wrong while trying to ${mode}. Please try again.`,
+        message: t("home.newsletter.genericError", { mode }),
       });
     } finally {
       setLoading(false);
@@ -80,12 +82,12 @@ export default function NewsletterSignup() {
       <div className="nl-container">
         <div className="nl-inner">
           <div className="nl-text">
-            <span className="nl-badge">Newsletter</span>
-            <h2 className="nl-title">{mode === "unsubscribe" ? "Manage Subscription" : "Stay Updated"}</h2>
+            <span className="nl-badge">{t("home.newsletter.badge")}</span>
+            <h2 className="nl-title">{mode === "unsubscribe" ? t("home.newsletter.titleUnsubscribe") : t("home.newsletter.titleSubscribe")}</h2>
             <p className="nl-desc">
               {mode === "unsubscribe"
-                ? "Enter your email address to stop receiving newsletter updates from AC-Commerce."
-                : "Get exclusive updates on new features, pricing options, and industry insights delivered to your inbox"}
+                ? t("home.newsletter.descUnsubscribe")
+                : t("home.newsletter.descSubscribe")}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="nl-form">
@@ -96,7 +98,7 @@ export default function NewsletterSignup() {
                 onClick={() => toggleMode("subscribe")}
                 disabled={loading}
               >
-                Subscribe
+                {t("home.newsletter.subscribeTab")}
               </button>
               <button
                 type="button"
@@ -104,20 +106,20 @@ export default function NewsletterSignup() {
                 onClick={() => toggleMode("unsubscribe")}
                 disabled={loading}
               >
-                Unsubscribe
+                {t("home.newsletter.unsubscribeTab")}
               </button>
             </div>
             <div className="nl-input-row">
               <input
                 type="email"
                 className="nl-input"
-                placeholder="Enter your email address"
+                placeholder={t("home.newsletter.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
               />
               <button type="submit" className="nl-btn" disabled={loading}>
-                {loading ? (mode === "unsubscribe" ? "Unsubscribing..." : "Subscribing...") : mode === "unsubscribe" ? "Unsubscribe" : "Subscribe"}
+                {loading ? (mode === "unsubscribe" ? t("home.newsletter.unsubscribing") : t("home.newsletter.subscribing")) : mode === "unsubscribe" ? t("home.newsletter.unsubscribeBtn") : t("home.newsletter.subscribeBtn")}
               </button>
             </div>
 
@@ -129,7 +131,7 @@ export default function NewsletterSignup() {
             )}
 
             <p className="nl-note">
-              We respect your privacy. You can subscribe or unsubscribe at any time.
+              {t("home.newsletter.note")}
             </p>
           </form>
         </div>
