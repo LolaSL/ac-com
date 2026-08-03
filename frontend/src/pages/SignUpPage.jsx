@@ -6,12 +6,14 @@ import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 import { useContext, useEffect, useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useTranslation } from "react-i18next";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
 import "./SignUpPage.css";
 
 export default function SignUpPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { search } = useLocation();
   const redirectInUrl = new URLSearchParams(search).get("redirect");
@@ -39,10 +41,10 @@ export default function SignUpPage() {
 
     const levels = [
       { strength: 0, label: "", color: "" },
-      { strength: 1, label: "Weak", color: "danger" },
-      { strength: 2, label: "Fair", color: "warning" },
-      { strength: 3, label: "Good", color: "info" },
-      { strength: 4, label: "Strong", color: "success" },
+      { strength: 1, label: t("auth.pwWeak"), color: "danger" },
+      { strength: 2, label: t("auth.pwFair"), color: "warning" },
+      { strength: 3, label: t("auth.pwGood"), color: "info" },
+      { strength: 4, label: t("auth.pwStrong"), color: "success" },
     ];
     return levels[strength];
   };
@@ -60,24 +62,24 @@ export default function SignUpPage() {
         });
         ctxDispatch({ type: "USER_SIGNIN", payload: data });
         localStorage.setItem("userInfo", JSON.stringify(data));
-        toast.success("Signed up with Google!");
+        toast.success(t("auth.signUpGoogleSuccess"));
         navigate(redirect || "/");
       } catch (err) {
         toast.error(getError(err));
       }
     },
-    onError: () => toast.error("Google sign-up failed"),
+    onError: () => toast.error(t("auth.signUpGoogleError")),
   });
 
   const submitHandler = async (e) => {
     e.preventDefault();
     setFormError("");
     if (password !== confirmPassword) {
-      setFormError("Passwords do not match");
+      setFormError(t("auth.passwordsNoMatch"));
       return;
     }
     if (password.length < 6) {
-      setFormError("Password must be at least 6 characters");
+      setFormError(t("auth.passwordTooShort"));
       return;
     }
     setLoading(true);
@@ -96,7 +98,7 @@ export default function SignUpPage() {
       if (ref) {
         localStorage.removeItem("referralCode");
       }
-      toast.success("Account created successfully!");
+      toast.success(t("auth.signUpSuccess"));
       navigate(redirect || "/");
     } catch (err) {
       setFormError(getError(err));
@@ -115,7 +117,7 @@ export default function SignUpPage() {
     <div className="signup-page">
       <Link to="/" className="auth-home-link">
         <i className="fas fa-home"></i>
-        <span>Home</span>
+        <span>{t("auth.home")}</span>
       </Link>
       <Container fluid className="signup-container">
         <div className="signup-wrapper">
@@ -125,30 +127,28 @@ export default function SignUpPage() {
               <div className="signup-logo-container">
                 <i className="fas fa-user-plus signup-logo-icon"></i>
               </div>
-              <h1 className="signup-brand-title">AC-Commerce</h1>
-              <h2 className="signup-brand-subtitle">Join Us Today</h2>
+              <h1 className="signup-brand-title">{t("appName")}</h1>
+              <h2 className="signup-brand-subtitle">{t("auth.joinUsToday")}</h2>
               <p className="signup-brand-description">
-                Create your free account and unlock the full HVAC experience —
-                smart design tools, personalized recommendations, and seamless
-                order management.
+                {t("auth.signUpDescription")}
               </p>
 
               <div className="signup-features">
                 <div className="signup-feature-item">
                   <i className="fas fa-bolt"></i>
-                  <span>Instant Quotes</span>
+                  <span>{t("auth.featureInstantQuotes")}</span>
                 </div>
                 <div className="signup-feature-item">
                   <i className="fas fa-chart-line"></i>
-                  <span>ROI Calculator</span>
+                  <span>{t("auth.featureRoiCalculator")}</span>
                 </div>
                 <div className="signup-feature-item">
                   <i className="fas fa-ruler-combined"></i>
-                  <span>BTU Sizing</span>
+                  <span>{t("auth.featureBtuSizing")}</span>
                 </div>
                 <div className="signup-feature-item">
                   <i className="fas fa-shield-alt"></i>
-                  <span>Secure Account</span>
+                  <span>{t("auth.featureSecureAccount")}</span>
                 </div>
               </div>
             </div>
@@ -159,9 +159,9 @@ export default function SignUpPage() {
             <div className="signup-form-container">
               <div className="signup-form-header">
                 <i className="fas fa-id-card signup-form-icon"></i>
-                <h2 className="signup-form-title">Create Account</h2>
+                <h2 className="signup-form-title">{t("auth.createAccountTitle")}</h2>
                 <p className="signup-form-subtitle">
-                  Fill in your details to get started
+                  {t("auth.signUpSubtitle")}
                 </p>
               </div>
 
@@ -185,7 +185,7 @@ export default function SignUpPage() {
                 <Form.Group controlId="name" className="signup-form-group">
                   <Form.Label className="signup-form-label">
                     <i className="fas fa-user me-2"></i>
-                    Full Name
+                    {t("auth.fullName")}
                   </Form.Label>
                   <Form.Control
                     type="text"
@@ -200,7 +200,7 @@ export default function SignUpPage() {
                 <Form.Group controlId="email" className="signup-form-group">
                   <Form.Label className="signup-form-label">
                     <i className="fas fa-envelope me-2"></i>
-                    Email Address
+                    {t("auth.emailAddress")}
                   </Form.Label>
                   <Form.Control
                     type="email"
@@ -215,7 +215,7 @@ export default function SignUpPage() {
                 <Form.Group controlId="password" className="signup-form-group">
                   <Form.Label className="signup-form-label">
                     <i className="fas fa-lock me-2"></i>
-                    Password
+                    {t("auth.password")}
                   </Form.Label>
                   <div className="signup-password-wrapper">
                     <Form.Control
@@ -263,7 +263,7 @@ export default function SignUpPage() {
                 <Form.Group controlId="confirmPassword" className="signup-form-group">
                   <Form.Label className="signup-form-label">
                     <i className="fas fa-lock me-2"></i>
-                    Confirm Password
+                    {t("auth.confirmPassword")}
                   </Form.Label>
                   <div className="signup-password-wrapper">
                     <Form.Control
@@ -285,19 +285,19 @@ export default function SignUpPage() {
                   </div>
                   {confirmPassword && password !== confirmPassword && (
                     <small className="text-danger d-block mt-1">
-                      Passwords do not match
+                      {t("auth.passwordsNoMatch")}
                     </small>
                   )}
                 </Form.Group>
 
                 <div className="signup-action-row">
                   <div className="signup-have-account">
-                    <span>Already have an account? </span>
+                    <span>{t("auth.alreadyHaveAccount")} </span>
                     <Link
                       to={`/signin?redirect=${redirect}`}
                       className="signup-signin-link"
                     >
-                      Sign In
+                      {t("auth.signIn")}
                     </Link>
                   </div>
                 </div>
@@ -314,12 +314,12 @@ export default function SignUpPage() {
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
                         ></span>
-                        Creating account...
+                        {t("auth.creatingAccount")}
                       </>
                     ) : (
                       <>
                         <i className="fas fa-rocket me-2"></i>
-                        Create Account
+                        {t("auth.createAccountButton")}
                       </>
                     )}
                   </Button>
@@ -327,7 +327,7 @@ export default function SignUpPage() {
               </Form>
 
               <div className="signin-divider">
-                <span>or continue with</span>
+                <span>{t("auth.orContinueWith")}</span>
               </div>
               <div className="signin-google-wrap">
                 <button className="google-icon-btn" onClick={() => googleSignUp()} title="Sign up with Google">

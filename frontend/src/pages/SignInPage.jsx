@@ -6,12 +6,14 @@ import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 import { useContext, useEffect, useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useTranslation } from "react-i18next";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
 import { getError } from "../utils.js";
 import "./SignInPage.css";
 
 export default function SignInPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { search } = useLocation();
   const redirectInUrl = new URLSearchParams(search).get("redirect");
@@ -38,12 +40,12 @@ export default function SignInPage() {
         ctxDispatch({ type: "USER_SIGNIN", payload: data });
         localStorage.setItem("userInfo", JSON.stringify(data));
         navigate(redirect || "/");
-        toast.success("Signed in with Google");
+        toast.success(t("auth.signInGoogleSuccess"));
       } catch (err) {
         toast.error(getError(err));
       }
     },
-    onError: () => toast.error("Google sign-in failed"),
+    onError: () => toast.error(t("auth.signInGoogleError")),
   });
 
   const submitHandler = async (e) => {
@@ -58,7 +60,7 @@ export default function SignInPage() {
       ctxDispatch({ type: "USER_SIGNIN", payload: data });
       localStorage.setItem("userInfo", JSON.stringify(data));
       navigate(redirect || "/");
-      toast.success("Signed in successfully");
+      toast.success(t("auth.signInSuccess"));
     } catch (err) {
       setError(getError(err));
     } finally {
@@ -76,7 +78,7 @@ export default function SignInPage() {
     <div className="signin-page">
       <Link to="/" className="auth-home-link">
         <i className="fas fa-home"></i>
-        <span>Home</span>
+        <span>{t("auth.home")}</span>
       </Link>
       <Container fluid className="signin-container">
         <div className="signin-wrapper">
@@ -86,29 +88,29 @@ export default function SignInPage() {
               <div className="signin-logo-container">
                 <i className="fas fa-snowflake signin-logo-icon"></i>
               </div>
-              <h1 className="signin-brand-title">AC-Commerce</h1>
-              <h2 className="signin-brand-subtitle">Welcome Back</h2>
+              <h1 className="signin-brand-title">{t("appName")}</h1>
+              <h2 className="signin-brand-subtitle">{t("auth.welcomeBack")}</h2>
               <p className="signin-brand-description">
-              The smarter way to shop for HVAC. Browse your apartment plan, design your system, calculate your needs, and get expert quote guidance — from planning to installation.
+              {t("auth.signInDescription")}
               </p>
    
               <div className="signin-features">
                   <div className="signin-feature-item">
                   <i className="fas fa-ruler-combined"></i>
-                  <span>Measurement System</span>
+                  <span>{t("auth.featureMeasurement")}</span>
                 </div>
                 <div className="signin-feature-item">
                   <i className="fas fa-shopping-cart"></i>
-                  <span>Smart Shopping</span>
+                  <span>{t("auth.featureSmartShopping")}</span>
                 </div>
                 <div className="signin-feature-item">
                   <i className="fas fa-truck"></i>
-                  <span>Fast Delivery</span>
+                  <span>{t("auth.featureFastDelivery")}</span>
                 </div>
            
                 <div className="signin-feature-item">
                   <i className="fas fa-headset"></i>
-                  <span>24/7 Support</span>
+                  <span>{t("auth.featureSupport")}</span>
                 </div>
               </div>
             </div>
@@ -119,9 +121,9 @@ export default function SignInPage() {
             <div className="signin-form-container">
               <div className="signin-form-header">
                 <i className="fas fa-user-circle signin-form-icon"></i>
-                <h2 className="signin-form-title">User Login</h2>
+                <h2 className="signin-form-title">{t("auth.userLoginTitle")}</h2>
                 <p className="signin-form-subtitle">
-                  Sign in to access your account
+                  {t("auth.signInSubtitle")}
                 </p>
               </div>
 
@@ -145,7 +147,7 @@ export default function SignInPage() {
                 <Form.Group controlId="email" className="signin-form-group">
                   <Form.Label className="signin-form-label">
                     <i className="fas fa-envelope me-2"></i>
-                    Email Address
+                    {t("auth.emailAddress")}
                   </Form.Label>
                   <Form.Control
                     type="email"
@@ -163,7 +165,7 @@ export default function SignInPage() {
                 <Form.Group controlId="password" className="signin-form-group">
                   <Form.Label className="signin-form-label">
                     <i className="fas fa-lock me-2"></i>
-                    Password
+                    {t("auth.password")}
                   </Form.Label>
                   <div className="signin-password-wrapper">
                     <Form.Control
@@ -194,16 +196,16 @@ export default function SignInPage() {
 
                 <div className="signin-forgot-row">
                   <div className="signin-new-customer">
-                    <span>New customer? </span>
+                    <span>{t("auth.newCustomer")} </span>
                     <Link
                       to={`/signup?redirect=${redirect}`}
                       className="signin-signup-link"
                     >
-                      Create your account
+                      {t("auth.createYourAccount")}
                     </Link>
                   </div>
                   <Link to="/forget-password" className="signin-forgot-link">
-                    Forgot password?
+                    {t("auth.forgotPassword")}
                   </Link>
                 </div>
 
@@ -219,12 +221,12 @@ export default function SignInPage() {
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
                         ></span>
-                        Signing in...
+                        {t("auth.signingIn")}
                       </>
                     ) : (
                       <>
                         <i className="fas fa-sign-in-alt me-2"></i>
-                        Sign In
+                        {t("auth.signIn")}
                       </>
                     )}
                   </Button>
@@ -232,7 +234,7 @@ export default function SignInPage() {
               </Form>
 
               <div className="signin-divider">
-                <span>or continue with</span>
+                <span>{t("auth.orContinueWith")}</span>
               </div>
               <div className="signin-google-wrap">
                 <button className="google-icon-btn" onClick={() => googleSignIn()} title="Sign in with Google">
