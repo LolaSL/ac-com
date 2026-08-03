@@ -196,5 +196,456 @@
       "unsubscribeSuccess": "Sei stato disiscritto dalla newsletter.",
       "genericError": "Qualcosa è andato storto durante il tentativo di {{mode}}. Riprova."
     }
+  },
+  "aboutUs": {
+    "hero": {
+      "title": "Informazioni su AC-Commerce",
+      "subtitle": "Il tuo marketplace HVAC completo — dalla prima misurazione all'approvazione finale."
+    },
+    "intro": {
+      "p1Bold": "AC-Commerce Home Supply",
+      "p1Rest": " è un marketplace HVAC che unisce il commercio di prodotti a strumenti di progettazione di livello professionale. Che tu stia acquistando un mini-split, progettando un sistema VRF per una proprietà multi-stanza o facendo revisionare la tua planimetria da un ingegnere certificato, tutto avviene su un'unica piattaforma.",
+      "p2": "Sostituiamo il processo frammentato di gestione di più fornitori, appaltatori e consulenti di progettazione con un flusso di lavoro unico e integrato — dalla prima misurazione all'approvazione finale."
+    },
+    "howItWorksTitle": "Come Funziona",
+    "steps": [
+      { "title": "Carica la Tua Planimetria", "text": "Carica qualsiasi file PDF/JPG architettonico — suite residenziale, ufficio o spazio commerciale. La planimetria viene visualizzata direttamente nel browser ad alta risoluzione." },
+      { "title": "Segna i Posizionamenti AC", "text": "Posiziona simboli etichettati di unità di climatizzazione sulla planimetria - aggiungi commenti (ac-1, ac-2... ecc.) e il posizionamento del condensatore (simbolo dell'unità esterna). Salva il tuo lavoro sul cloud." },
+      { "title": "Revisione dell'Ingegnere IA", "text": "Dopo aver effettuato l'invio dell'ordine, un ingegnere HVAC certificato IA apre il piano inviato, aggiunge linee del refrigerante VRF professionali e firma con una firma digitale, producendo un PDF di revisione verificato di 2 pagine. Supporta configurazioni di sistema Standard, VRF-Canalizzato e VRF-Non Canalizzato. Simboli di elementi/accessori HVAC canalizzati per entrambe le modalità VRF — in arrivo" },
+      { "title": "Salva e Scarica", "text": "Scarica la tua planimetria completa revisionata dall'ingegnere IA in formato PDF con tutti i simboli delle unità di climatizzazione, il simbolo dell'unità esterna-condensatore, i commenti, le linee del sistema e il timbro digitale dell'ingegnere IA integrati." },
+      { "title": "Calcolatore BTU", "text": "Rispondi a domande guidate sulla tua proprietà — dimensioni della stanza, isolamento, clima — e ricevi una valutazione BTU consigliata insieme a un elenco curato di unità interne e condensatori esterni corrispondenti." },
+      { "title": "Consigli - Preventivo del Sistema HVAC", "text": "Dopo aver completato il calcolo del BTU, esamina i consigli HVAC stanza per stanza con prodotti corrispondenti, totali del sistema, prezzi, output del preventivo pronto per la stampa e azioni rapide di aggiunta al carrello." }
+    ],
+    "whyTitle": "Perché AC-Commerce",
+    "features": [
+      { "title": "Marketplace HVAC Completo", "text": "Centinaia di condizionatori mini-split, condensatori VRF, unità interne e accessori dei principali produttori — con valutazioni, dimensioni, classi energetiche e sconti." },
+      { "title": "Strumenti di Annotazione Professionali", "text": "Annotazioni PDF basate su browser con simboli di climatizzazione colorati, commenti di testo, linee del refrigerante VRF (diffusori d'aria canalizzati — in arrivo)." },
+      { "title": "Approvazione dell'Ingegnere IA Certificato", "text": "Ogni planimetria inviata viene revisionata da un Ingegnere IA qualificato che aggiunge note specifiche del sistema e una firma digitale — fornendoti un documento adatto a permessi e appaltatori." },
+      { "title": "Rete di Servizi Affidabile", "text": "Connettiti direttamente con fornitori di servizi HVAC verificati per consulenze, installazione, manutenzione e riparazioni attraverso il nostro sistema integrato di messaggistica e prenotazione." },
+      { "title": "Ordini, Notifiche e Supporto", "text": "Monitora gli ordini dall'inizio alla fine, ricevi promemoria di pagamento e consegna, comunica con i venditori tramite messaggistica integrata e accedi a un supporto clienti dedicato in ogni fase." },
+      { "title": "Programma Commissioni Porta un Amico", "text": "Professionisti e aziende del settore possono elencare prodotti sul marketplace e guadagnare commissioni attraverso il nostro programma di referral" }
+    ],
+    "whoWeServeTitle": "Chi Serviamo",
+    "audiences": [
+      { "label": "Proprietari di Case", "desc": "Pianifica e acquista il sistema HVAC giusto per la tua proprietà." },
+      { "label": "Acquirenti Commerciali", "desc": "Attrezza uffici, spazi commerciali e strutture in modo efficiente, che tu sia uno sviluppatore, un promotore di progetti o un appaltatore edile." },
+      { "label": "Appaltatori HVAC", "desc": "Approvvigiona attrezzature e gestisci i piani di progetto in un unico posto." },
+      { "label": "Architetti e Designer", "desc": "Integra i layout HVAC direttamente nei flussi di lavoro architettonici." },
+      { "label": "Fornitori di Servizi", "desc": "Offri installazione, manutenzione e riparazione attraverso la piattaforma." },
+      { "label": "Venditori Affiliati", "desc": "Consulenti di fusione, designer architettonici, fornitori di accessori e altri professionisti del settore sono partner di AC-Commerce." }
+    ]
+  },
+  "ourNetwork": {
+    "hero": {
+      "title": "I Nostri Fornitori",
+      "subtitle": "Fornitori affidabili, fornitori di servizi e partnership con produttori che promuovono l'eccellenza HVAC in tutta la regione.",
+      "badgeCertified": "Partner Certificati",
+      "badgeGlobal": "Portata Globale",
+      "badgeQuality": "Qualità Garantita"
+    },
+    "stats": {
+      "industryPartners": "Partner del Settore",
+      "projectsCompleted": "Progetti Completati",
+      "serviceProviders": "Fornitori di Servizi",
+      "activeUsers": "Utenti Attivi"
+    },
+    "section": {
+      "title": "I Nostri Fornitori",
+      "subtitle": "Sfoglia i fornitori HVAC verificati nella nostra rete"
+    },
+    "card": {
+      "desc": "Fornitore HVAC e Fornitore di Servizi",
+      "viewSeller": "Visualizza Fornitore"
+    },
+    "empty": "Nessun fornitore disponibile al momento.",
+    "benefitsTitle": "Perché Scegliere la Nostra Rete?",
+    "benefits": [
+      { "title": "Sicurezza Aziendale", "text": "Certificato ISO 27001" },
+      { "title": "Certificato dal Settore", "text": "Conforme agli Standard HVAC" },
+      { "title": "Il Più Votato", "text": "Valutazione Media di 4,8/5" }
+    ]
+  },
+  "advancedAc": {
+    "hero": { "title": "Climatizzazione Avanzata 2026", "subtitle": "Scopri le più recenti tecnologie HVAC per comfort, efficienza e sostenibilità" },
+    "intro": "Il 2026 sta trasformando il comfort domestico in modi entusiasmanti. I sistemi HVAC di oggi fanno molto più che riscaldare e raffreddare: imparano le tue abitudini, riducono le bollette elettriche e creano un'aria interna più pulita per la tua famiglia. Dai controlli guidati dall'IA al recupero di calore ad alta efficienza e ai refrigeranti a basso impatto, le soluzioni moderne sono più intelligenti, più silenziose e progettate per il risparmio a lungo termine. Se stai pianificando un aggiornamento, questo è il momento perfetto per scoprire cosa può fare per la tua casa l'HVAC di nuova generazione.",
+    "heatPumps": { "title": "Pompe di Calore: La Soluzione per Ogni Clima", "text": "Le pompe di calore stanno diventando la soluzione preferita dai proprietari di casa che cercano comfort ed efficienza energetica tutto l'anno. Grazie ai progressi nella tecnologia delle pompe di calore per climi freddi, questi sistemi possono ora funzionare efficacemente anche a temperature estreme, rendendoli una scelta versatile per qualsiasi regione." },
+    "heatRecovery": {
+      "title": "Sistemi di Recupero del Calore: Massimizza il Risparmio Energetico",
+      "p1": "I sistemi di Ventilazione a Recupero di Calore (HRV) e Ventilazione a Recupero di Energia (ERV) rappresentano una svolta importante nella gestione dell'energia domestica. Questi sistemi avanzati catturano e riciclano l'aria riscaldata o raffreddata che altrimenti andrebbe persa durante la ventilazione, riducendo significativamente lo spreco energetico e abbassando le bollette. Che tu stia riscaldando in inverno o raffreddando in estate, i sistemi di recupero del calore mantengono il comfort risparmiando energia.",
+      "p2": "Nel 2026, i sistemi HRV ed ERV sono sempre più integrati con soluzioni HVAC intelligenti, permettendo ai proprietari di casa di ottimizzare il flusso d'aria in base alle condizioni interne in tempo reale. La tecnologia funziona estraendo l'aria viziata dalla tua casa e trasferendo la sua energia termica all'aria fresca in entrata, riducendo efficacemente il carico di riscaldamento o raffreddamento del tuo sistema principale. Questa sinergia tra recupero del calore e controllo climatico può generare risparmi energetici annuali del 15–25%.",
+      "p3": "I principali produttori offrono ora soluzioni complete di recupero del calore. <strong>Samsung</strong>, <strong>LG</strong>, <strong>Daikin</strong>, <strong>Mitsubishi</strong>, <strong>Fujitsu</strong> e <strong>Panasonic</strong> offrono tutti sistemi HRV/ERV avanzati integrati con le loro unità premium di climatizzazione e pompe di calore. Gli ultimi modelli di <strong>Samsung</strong> combinano il recupero del calore con la tecnologia WindFree per un raffreddamento senza correnti d'aria, mentre <strong>LG</strong> abbina i sistemi ERV all'ottimizzazione energetica basata sull'IA. <strong>Daikin</strong> offre unità modulari adattabili ai sistemi esistenti, mentre <strong>Mitsubishi</strong> e <strong>Fujitsu</strong> offrono soluzioni integrate VRF leader del settore. Questi sistemi compatti e silenziosissimi sono ideali per le case moderne che cercano una qualità dell'aria interna premium senza sacrificare l'efficienza energetica."
+    },
+    "energyEfficiency": {
+      "title": "Sistemi ad Alta Efficienza Energetica: Risparmia di Più, Consuma Meno",
+      "text": "L'efficienza energetica è una tendenza di primo piano nell'HVAC del 2026. I sistemi moderni utilizzano innovazioni come compressori a velocità variabile e sensori avanzati per massimizzare il comfort riducendo al minimo il consumo energetico e l'impatto ambientale. Nel 2026, l'efficienza energetica è un focus chiave nell'HVAC. I nuovi sistemi impiegano tecnologie come compressori a velocità variabile e scambiatori di calore migliorati per offrire un comfort ottimale con un minor consumo energetico e un'impronta di carbonio ridotta.",
+      "samsungTitle": "Climatizzatori Samsung BESPOKE AI WindFree",
+      "samsungText": "L'ultima collezione di climatizzatori presenta la tecnologia WindFree Cooling di <strong>Samsung</strong>, che disperde l'aria attraverso 23.000 microforellini per eliminare le correnti d'aria dirette. Inoltre, la funzione AI Fast & Comfort Cooling consente un rapido raffreddamento prima di passare a una modalità a risparmio energetico. La Modalità Energia IA è progettata per ottimizzare le impostazioni di raffreddamento, riducendo potenzialmente il consumo energetico fino al 30%."
+    },
+    "indoorAirQuality": {
+      "title": "Innovazioni nella Qualità dell'Aria Interna",
+      "p1": "Migliorare la qualità dell'aria interna (IAQ) è una priorità assoluta per il 2026. I sistemi HVAC ora integrano purificatori d'aria, tecnologia a luce UV-C e filtri per particolato ad alta efficienza (HEPA) per rimuovere allergeni, batteri e virus dall'aria della tua casa. Questi sistemi garantiscono un ambiente di vita più sano per te e la tua famiglia.",
+      "daikinText": "La nuova gamma di purificatori d'aria con Tecnologia Streamer di <strong>Daikin</strong> è progettata per catturare, sopprimere e scomporre inquinanti come muffa, polline, allergeni, odori, formaldeide, inquinamento da traffico e polvere. Perfetto per chi soffre di allergie!"
+    },
+    "whyUpgrade": {
+      "title": "Perché Aggiornare nel 2026?",
+      "text": "Il 2026 segna un anno cruciale per gli aggiornamenti HVAC, guidato da cambiamenti trasformativi del settore. I mandati normativi ora richiedono refrigeranti ecologici A2L, mentre i nuovi standard di efficienza garantiscono un consumo energetico drasticamente ridotto. I sistemi moderni offrono un risparmio energetico del 20–40% rispetto ai modelli più vecchi, mentre i controlli intelligenti avanzati offrono comfort e comodità senza precedenti. Oltre al risparmio sui costi, le unità odierne eccellono nella qualità dell'aria interna, funzionano più silenziosamente e offrono un controllo preciso della temperatura. Questa convergenza di responsabilità ambientale, tecnologia all'avanguardia e sostanziali risparmi a lungo termine rende l'aggiornamento del tuo sistema HVAC un investimento intelligente per qualsiasi casa."
+    },
+    "costPayback": {
+      "title": "Costo Tipico di Aggiornamento e Ritorno sull'Investimento",
+      "intro": "Il sistema giusto dipende dalla dimensione della tua proprietà, dalla qualità dell'isolamento e dalle abitudini d'uso. La guida seguente offre ai proprietari di casa un punto di partenza pratico prima di richiedere un preventivo formale.",
+      "table": {
+        "headers": { "propertyType": "Tipo di Proprietà", "installedCost": "Costo di Installazione Tipico", "annualSavings": "Risparmio Annuo Stimato", "payback": "Ritorno sull'Investimento Tipico" },
+        "rows": [
+          { "type": "Appartamento 1-2 Camere", "cost": "$4.000 - $8.500", "savings": "$450 - $1.000", "payback": "4-8 anni" },
+          { "type": "Casa Familiare Media", "cost": "$8.500 - $16.000", "savings": "$900 - $2.000", "payback": "4-7 anni" },
+          { "type": "Casa Grande / Multi-Zona", "cost": "$16.000 - $30.000+", "savings": "$1.800 - $4.000", "payback": "4-6 anni" }
+        ]
+      },
+      "note": "I valori sono puramente indicativi e possono variare in base al clima, alla tariffa elettrica, alle prestazioni dell'involucro edilizio e all'ambito dell'installatore."
+    },
+    "checklist": {
+      "title": "Prima di Aggiornare: Checklist Rapida",
+      "items": [
+        "Conferma il dimensionamento del carico stanza per stanza, non solo stime dell'intera casa.",
+        "Verifica la capacità del quadro elettrico e i requisiti dei circuiti dedicati.",
+        "Rivedi lo stato dei condotti o l'idoneità di una configurazione senza condotti per la tua planimetria.",
+        "Valuta isolamento, vetrate e infiltrazioni d'aria per evitare apparecchiature sovradimensionate.",
+        "Verifica l'idoneità a sconti locali, incentivi fiscali e conformità prima dell'acquisto.",
+        "Confronta i termini di garanzia dell'installatore, i tempi di risposta del servizio e i piani di manutenzione."
+      ]
+    },
+    "nextSteps": {
+      "title": "Pronto per il Prossimo Passo?",
+      "text": "Usa gli strumenti di AC-Commerce per passare dalla ricerca alla decisione con sicurezza.",
+      "startMeasurement": "Avvia Misurazione",
+      "browseProducts": "Sfoglia Prodotti",
+      "bookExpertHelp": "Prenota Aiuto da un Esperto"
+    }
+  },
+  "measurement": {
+    "page": {
+      "hero": { "title": "Sistema di Servizio di Misurazione", "subtitle": "Carica la tua planimetria, annota le stanze ed esporta al calcolatore BTU." },
+      "wizard": {
+        "uploadPdf": "Carica PDF",
+        "reviewRooms": "Rivedi Stanze",
+        "annotate": "Annota",
+        "calculateBtu": "Calcola BTU",
+        "viewResults": "Visualizza Risultati",
+        "selectMode": "Seleziona Modalità",
+        "manualRooms": "Stanze Manuali",
+        "viewResultsTooltip": "Visualizza i risultati nella pagina Raccomandazioni"
+      },
+      "storedCalcBanner": "📋 Il tuo calcolo BTU precedente è caricato qui sotto",
+      "calculationMode": {
+        "label": "Modalità di Calcolo",
+        "withAnnotator": "Con Caricamento PDF/JPG + Annotazioni",
+        "withoutAnnotator": "Senza Caricamento — Inserimento BTU Manuale"
+      },
+      "annotatorDisabled": "L'annotatore è disattivato in questa modalità. Usa l'inserimento manuale delle stanze del Calcolatore BTU qui sotto.",
+      "prevCalc": {
+        "title": "📊 Calcolo Precedente Caricato",
+        "text": "Visualizzazione dell'ultimo calcolo BTU. Avvia una nuova annotazione sopra per creare un nuovo calcolo.",
+        "clear": "Cancella"
+      }
+    },
+    "pdfHelpVideo": {
+      "trigger": "Tutorial Video",
+      "title": "Libreria di Tutorial Video",
+      "selected": "Selezionato",
+      "close": "Chiudi"
+    },
+    "archSymbols": {
+      "trigger": "📐 Visualizza Simboli Architettonici",
+      "title": "Simboli architettonici importanti",
+      "close": "Chiudi"
+    },
+    "btuCalculator": {
+      "prevSummary": {
+        "title": "Calcolo precedente",
+        "dismiss": "Ignora",
+        "room": "stanza",
+        "rooms": "stanze",
+        "total": "totale",
+        "viewBtn": "Visualizza Raccomandazioni →"
+      },
+      "title": "Calcolatore BTU",
+      "measurementSystem": { "label": "Sistema di Misurazione", "meters": "Metri (m²)", "feet": "Piedi (ft²)" },
+      "roomSource": { "label": "Fonte Dati Stanze", "pdf": "Usa Stanze dal PDF", "manual": "Inserimento Manuale Stanze", "noRoomsHint": "Nessuna stanza ancora rilevata dal PDF. Passa all'Inserimento Manuale delle Stanze per continuare." },
+      "multiFlat": {
+        "label": "Proprietà multi-appartamento/multi-unità (condensatore separato per ogni appartamento)",
+        "detected": "✓ Rilevato/i {{count}} appartamento/i:",
+        "eachFlatCondenser": "Ogni appartamento avrà il proprio condensatore dimensionato separatamente",
+        "detectedFromAnnotations": "✓ Multi-appartamento rilevato dalle annotazioni:",
+        "checkBoxHint": "Seleziona la casella sopra per abilitare condensatori separati per ogni appartamento.",
+        "acFound": "✓ Annotazioni AC trovate: {{count}} etichetta/e rilevata/e",
+        "flatsAutoDetected": "Appartamenti rilevati automaticamente dalle etichette del condensatore (es. condenser-1, condenser-2)"
+      },
+      "ceilingHeight": { "label": "Altezza del Soffitto (m):", "placeholder": "Inserisci l'altezza del soffitto in metri" },
+      "people": { "labelPerFlat": "Numero di Persone (per appartamento):", "label": "Numero di Persone:", "placeholder": "Inserisci il numero di persone" },
+      "humidity": { "label": "Livello di Umidità:", "low": "Basso (clima secco)", "average": "Medio", "high": "Alto (umido / costiero)" },
+      "infiltration": { "label": "Tenuta all'Aria dell'Edificio:", "tight": "Ermetico (costruzione nuova / sigillata)", "average": "Medio (abitazione tipica)", "leaky": "Con perdite (più vecchia / con correnti d'aria)" },
+      "systemMode": { "label": "Modalità del Sistema:", "heatpump": "Raffreddamento o Riscaldamento (pompa di calore)", "recovery": "Raffreddamento e Recupero di Calore" },
+      "manualRoomsTitle": "Stanze Manuali:",
+      "roomMeasurementsTitle": "Misure delle Stanze:",
+      "roomTypeLabel": "Tipo di Stanza {{n}}:",
+      "roomSizeLabel": "Dimensione della Stanza ({{unit}}²):",
+      "roomSizePlaceholder": "Inserisci la dimensione della stanza in {{unit}}",
+      "addRoom": "Aggiungi Stanza",
+      "calculate": "Calcola BTU",
+      "calculating": "⏳ Calcolo in corso…",
+      "clear": "Cancella",
+      "groups": {
+        "outdoorUnitLocation": "Posizione dell'Unità Esterna",
+        "outdoorUnitLocationPerFlat": "Posizione dell'Unità Esterna (per appartamento):",
+        "insulation": "Condizione dell'Isolamento",
+        "climate": "Clima",
+        "windowType": "Tipo di Finestra",
+        "apartmentOrientation": "Orientamento dell'Appartamento",
+        "apartmentOrientationPerFlat": "Orientamento dell'Appartamento (per appartamento):",
+        "typeOfWall": "Tipo di Parete",
+        "sunExposure": "Esposizione al Sole",
+        "appliances": "Uso della Stanza ed Elettrodomestici",
+        "appliancesPerFlat": "Uso della Stanza ed Elettrodomestici (per appartamento):",
+        "roofType": "Tipo di Tetto",
+        "floorType": "Pavimento",
+        "floorTypePerFlat": "Pavimento (per appartamento):"
+      },
+      "optionLabels": {
+        "Roof": "Tetto", "WallBrackets": "Staffe a Muro", "HardGround": "Terreno Duro",
+        "BrickVeneer": "Rivestimento in Mattoni", "DoubleBrick": "Doppio Mattone", "FoamCladding": "Rivestimento in Schiuma",
+        "Average": "Medio", "Good": "Buono", "Poor": "Scarso",
+        "FullSunlight": "Pieno Sole", "HeavilyShaded": "Molto Ombreggiato",
+        "SingleGlazed": "Vetro Singolo", "DoubleGlazed": "Doppio Vetro", "TripleGlazed": "Triplo Vetro", "Louvered": "Persiana",
+        "Flat": "Piatto", "Pitched": "Spiovente", "Gable": "A Capanna",
+        "Marble": "Marmo", "Timber": "Legno", "Concrete": "Cemento", "Carpeted": "Moquette",
+        "North": "Nord", "East": "Est", "South": "Sud", "West": "Ovest", "LivingRoom": "Soggiorno",
+        "BTU": "BTU", "Watt": "Watt", "kW": "kW",
+        "HotMiddleEast": "Medio Oriente Caldo", "TropicalSEAsia": "Tropicale (Sud-Est Asiatico)", "Subtropical": "Subtropicale (Australia/Sud Africa)",
+        "AverageEurope": "Europa Media", "Continental": "Continentale (Europa dell'Est)", "SubArctic": "Subartico (Scandinavia/Canada)", "ColdAlaska": "Alaska Fredda"
+      },
+      "applianceLabels": {
+        "Oven": "Forno", "ServerRoom": "Sala Server", "CommercialKitchen": "Cucina Commerciale", "Gym": "Palestra",
+        "HomeTheater": "Home Theater", "Workshop": "Officina", "OfficeRoom": "Ufficio", "HotelRoom": "Camera d'Hotel"
+      },
+      "applianceTooltips": {
+        "Oven": "+8% raffreddamento · −5% riscaldamento — Cucinare aggiunge calore; compensa parte del carico di riscaldamento",
+        "ServerRoom": "+35% raffreddamento · −15% riscaldamento — Server e apparecchiature IT generano calore elevato continuo",
+        "CommercialKitchen": "+45% raffreddamento · −20% riscaldamento — Più elettrodomestici da cucina generano calore intenso e prolungato",
+        "Gym": "+20% raffreddamento · −10% riscaldamento — Attrezzature per l'esercizio e alta attività metabolica degli occupanti",
+        "HomeTheater": "+6% raffreddamento · −3% riscaldamento — Ricevitori AV, proiettori e amplificatori aggiungono calore moderato",
+        "Workshop": "+12% raffreddamento · −6% riscaldamento — Utensili elettrici e compressori generano calore durante il funzionamento",
+        "OfficeRoom": "+18% raffreddamento · −8% riscaldamento — Le apparecchiature d'ufficio e gli occupanti aggiungono calore moderato in raffreddamento, riducono il fabbisogno di riscaldamento",
+        "HotelRoom": "+10% raffreddamento · −4% riscaldamento — Le camere d'hotel hanno alcuni guadagni interni da elettrodomestici e occupanti"
+      },
+      "roomTypeOptions": [
+        "Camera da Letto 1", "Camera da Letto 2", "Camera da Letto 3", "Camera da Letto 4", "Camera da Letto 5", "Soggiorno", "Sala da Pranzo", "Cucina", "Bagno", "Terrazza", "Mansarda", "Piano Unico", "Doppio Piano", "Casa a Livelli Sfalsati", "Intero Primo Piano", "Intero Secondo Piano e Superiore", "Area Ufficio Open Space"
+      ]
+    },
+    "sidebar": {
+      "trigger": { "open": "Apri PDF Salvati", "close": "Chiudi PDF Salvati" },
+      "header": { "title": "PDF Salvati", "close": "Chiudi" },
+      "tabs": { "myDrawings": "I Miei Disegni", "engineerReviews": "Revisioni dell'Ingegnere" },
+      "toolbar": {
+        "searchPlaceholder": "Cerca file…",
+        "sortNewest": "Più recente", "sortOldest": "Più vecchio", "sortName": "Nome",
+        "filterByStatus": "Filtra per stato",
+        "statusAll": "Tutti gli stati", "statusPending": "In attesa", "statusReviewed": "Revisionato",
+        "statusApproved": "Approvato", "statusRejected": "Rifiutato"
+      },
+      "list": {
+        "loadingDrawings": "Caricamento dei tuoi disegni…",
+        "loadingReviews": "Caricamento delle revisioni dell'ingegnere…",
+        "deleteAllDrawings": "Elimina tutti i disegni",
+        "deleteAllReviews": "Elimina tutte le revisioni dell'ingegnere",
+        "deleteAllBtn": "Elimina Tutto",
+        "noMatches": "Nessuna corrispondenza trovata.",
+        "noSavedDocuments": "Ancora nessun documento salvato.",
+        "noEngineerReviews": "Ancora nessuna revisione dell'ingegnere.",
+        "untitledDocument": "Documento Senza Titolo",
+        "deleteTitle": "Elimina",
+        "deleteReviewTitle": "Elimina Revisione dell'Ingegnere",
+        "shareTitle": "Copia link di condivisione",
+        "engineerLabel": "Ingegnere: {{name}}",
+        "unknownEngineer": "Sconosciuto",
+        "pageOf": "Pagina {{page}} di {{total}}"
+      },
+      "pdfView": {
+        "back": "← Indietro",
+        "deleteTitle": "Elimina",
+        "deleteReviewTitle": "Elimina Revisione dell'Ingegnere",
+        "shareTitle": "Copia link di condivisione",
+        "buyEquipment": "🛒 Acquista Attrezzatura",
+        "showHvac": "Mostra Livello HVAC",
+        "hideHvac": "Nascondi Livello HVAC",
+        "legendTitle": "Legenda:",
+        "legendDucts": "■ Condotti",
+        "legendDiffusers": "● Diffusori",
+        "legendRefrigerant": "— Linee del Refrigerante",
+        "zoomOut": "Rimpicciolisci",
+        "zoomIn": "Ingrandisci"
+      },
+      "footer": { "close": "Chiudi" },
+      "deleteModal": {
+        "deleteAllDrawingsTitle": "Elimina Tutti i Disegni",
+        "deleteAllReviewsTitle": "Elimina Tutte le Revisioni dell'Ingegnere",
+        "deleteReviewTitle": "Elimina Revisione dell'Ingegnere",
+        "deletePdfTitle": "Elimina PDF",
+        "confirmDeleteAllText": "Sei sicuro di voler eliminare definitivamente {{filename}}? Questa azione non può essere annullata.",
+        "confirmDeleteText": "Sei sicuro di voler eliminare \"{{filename}}\"?",
+        "cancel": "Annulla",
+        "deleteAllBtn": "Elimina Tutto",
+        "deleteBtn": "Elimina",
+        "allDrawingsFilename": "tutti i {{count}} disegni",
+        "allReviewsFilename": "tutte le {{count}} revisioni"
+      },
+      "toasts": {
+        "linkCopied": "Link copiato negli appunti!",
+        "deletedAllSuccess": "Eliminati con successo tutti i {{count}} {{type}}!",
+        "deletedAllPartial": "Eliminati {{count}} {{type}}. {{failCount}} falliti.",
+        "deleteAllFailed": "Impossibile eliminare {{type}}.",
+        "engineerReviewDeleted": "Revisione dell'ingegnere eliminata!",
+        "pdfDeleted": "PDF eliminato con successo!",
+        "noDrawingsToDelete": "Nessun disegno da eliminare.",
+        "noReviewsToDelete": "Nessuna revisione dell'ingegnere da eliminare.",
+        "typeDrawings": "disegni",
+        "typeReviews": "revisioni dell'ingegnere"
+      },
+      "errors": {
+        "notAuthenticated": "Utente non autenticato.",
+        "fetchPdfsFailed": "Errore nel recupero dei PDF salvati. Riprova.",
+        "loadPdfFailed": "Impossibile caricare il PDF. Vedi la console per i dettagli.",
+        "loadEngineerPdfFailed": "Impossibile caricare il PDF della revisione dell'ingegnere. Vedi la console per i dettagli.",
+        "deletePdfFailed": "Impossibile eliminare il PDF.",
+        "paymentRequired": "Devi pagare per visualizzare questo PDF con annotazioni."
+      }
+    },
+    "annotator": {
+      "ocrLanguage": {
+        "label": "Lingua OCR",
+        "eng": "Inglese",
+        "engSpa": "Inglese + Spagnolo",
+        "fra": "Francese",
+        "deu": "Tedesco",
+        "heb": "Ebraico",
+        "ita": "Italiano",
+        "por": "Portoghese",
+        "spa": "Spagnolo"
+      },
+      "uploadType": { "label": "Tipo di caricamento", "pdf": "PDF", "jpg": "JPG" },
+      "previewTitle": "Anteprima del file selezionato:",
+      "loading": { "processing": "Elaborazione in corso...", "loadingLibraries": "Caricamento delle librerie..." },
+      "errors": {
+        "noValidFiles": "Nessun file PDF o JPG valido selezionato.",
+        "commentExists": "Questo commento esiste già.",
+        "selectPdfToSave": "Seleziona un file PDF da salvare.",
+        "signInToSave": "Devi accedere per salvare.",
+        "saveFailed": "Salvataggio non riuscito: {{message}}",
+        "networkError": "Si è verificato un errore di rete durante il salvataggio.",
+        "noRoomsToExport": "Nessuna stanza da esportare",
+        "exportExcelFailed": "Impossibile esportare il file Excel.",
+        "exportJsonFailed": "Impossibile esportare il file JSON.",
+        "unknownError": "Errore sconosciuto"
+      },
+      "toasts": {
+        "savedSuccess": "{{type}} e annotazioni salvate con successo!"
+      },
+      "savedLabel": { "image": "Immagine", "pdf": "PDF" },
+      "roomTable": {
+        "fileNameLabel": "Nome file: {{name}}",
+        "errorLabel": "Errore: {{message}}",
+        "apartmentTypeLabel": "Tipo di appartamento:",
+        "classifiedRoomDataTitle": "Tabella dei dati delle stanze classificate",
+        "guidelinesTitle": "Linee guida generali per dimensione della stanza:",
+        "guidelineSmall": "Stanze piccole (90-250 sq. ft.)",
+        "guidelineMedium": "Stanze medie (250–350 sq. ft.)",
+        "guidelineLarge": "Stanze grandi (350-550 sq. ft.)",
+        "filterPlaceholder": "Filtra per tipo di stanza",
+        "sortRoomType": "Tipo di stanza",
+        "sortWidth": "Larghezza",
+        "sortLength": "Lunghezza",
+        "sortAreaSqft": "Area (sqft)",
+        "sortAreaSqm": "Area (m²)",
+        "sortToggleTitle": "Alterna ordine di ordinamento",
+        "sortLabel": "Ordina: {{order}}",
+        "sortAsc": "CRESC",
+        "sortDesc": "DECRESC",
+        "exportExcelTitle": "Esporta e scarica il file Excel",
+        "downloadStarted": "Download avviato!",
+        "exportJsonTitle": "Esporta JSON grezzo (stanze + annotazioni)",
+        "recentExportsTitle": "Esportazioni recenti (clicca per riscaricare)",
+        "noFilesExported": "Nessun file esportato in questa sessione.",
+        "downloadTitle": "Clicca per scaricare e aprire: {{name}}",
+        "removeFileTitle": "Rimuovi il collegamento dall'elenco (libera memoria)",
+        "roomTypePlaceholder": "Tipo di stanza",
+        "widthPlaceholder": "Inserisci la larghezza in piedi decimali, es. 10.5 per 10'6",
+        "lengthPlaceholder": "Inserisci la lunghezza in piedi decimali, es. 10.5 per 10'6",
+        "addRoomBtn": "Aggiungi stanza",
+        "headerRoomType": "Tipo di stanza",
+        "headerWidth": "Larghezza (ft)",
+        "headerLength": "Lunghezza (ft)",
+        "headerAreaSqft": "Area (sqft)",
+        "headerAreaSqm": "Area (m²)",
+        "headerActions": "Azioni",
+        "save": "Salva",
+        "cancel": "Annulla",
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "noRoomData": "Nessun dato di stanza classificata trovato. Aggiungi una stanza usando il modulo sopra.",
+        "total": "Totale: {{sqft}} sqft | {{sqm}} m²"
+      },
+      "toolbar": {
+        "ariaLabel": "Controlli PDF",
+        "exportBtuTitle": "Esporta stanze nel calcolatore BTU",
+        "exportBtuBtn": "Esporta in BTU ({{count}} stanze)",
+        "saveTitle": "Salva PDF e annotazioni",
+        "saving": "Salvataggio...",
+        "save": "Salva",
+        "clearTitle": "Cancella tela e dati",
+        "clear": "Cancella",
+        "undoTitle": "Annulla ultima azione di annotazione (Ctrl+Z)",
+        "undo": "↩ Annulla",
+        "redoTitle": "Ripeti (Ctrl+Y)",
+        "redo": "↪ Ripeti",
+        "prevPageTitle": "Pagina precedente",
+        "prevPage": "◀ Prec.",
+        "pageOf": "Pagina {{page}}/{{total}}",
+        "nextPageTitle": "Pagina successiva",
+        "nextPage": "Succ. ▶",
+        "rotateLeftTitle": "Ruota il PDF in senso antiorario",
+        "rotateLeft": "↶ Sinistra",
+        "rotateRightTitle": "Ruota il PDF in senso orario",
+        "rotateRight": "↷ Destra",
+        "resetRotationTitle": "Ripristina l'orientamento originale del PDF",
+        "resetRotation": "Ripristina ({{deg}}°)",
+        "zoomInTitle": "Zoom avanti",
+        "zoomResetTitle": "Ripristina livello di zoom",
+        "zoomOutTitle": "Zoom indietro"
+      },
+      "annotationLabel": {
+        "labelText": "Etichetta annotazione:",
+        "placeholder": "ac-1, ..., ac-1.1, condensatore…",
+        "hintClickToPlace": "Clicca sulla tela per posizionare",
+        "hintTypeLabel": "Scrivi l'etichetta, poi clicca sulla tela"
+      },
+      "mobileAnnotation": {
+        "hintTapToPlace": "Tocca la tela per posizionare l'annotazione",
+        "hintEnablePlaceMode": "Attiva la modalità posizionamento, poi tocca la tela",
+        "hintTypeLabelBelow": "Scrivi un'etichetta qui sotto, poi tocca la tela per posizionarla",
+        "placeholder": "ac-1, ..., ac-1.1, condensatore, condensatore-1...",
+        "tapToPlaceBtn": "✅ Tocca per posizionare",
+        "placeModeBtn": "📌 Modalità posizionamento"
+      },
+      "placedAnnotations": {
+        "title": "📌 Annotazioni posizionate ({{count}})",
+        "hint": "— oppure fai doppio clic su un'etichetta sulla tela per modificarla",
+        "editTitle": "Modifica etichetta annotazione",
+        "deleteTitle": "Elimina annotazione"
+      },
+      "editLabelModal": {
+        "title": "✏️ Modifica etichetta annotazione",
+        "save": "Salva",
+        "cancel": "Annulla"
+      }
+    }
   }
 }

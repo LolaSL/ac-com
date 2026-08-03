@@ -87,7 +87,7 @@ export default function Offers() {
     },
     {
       title: "Premium Systems",
-      description: "High-end HVAC systems $1,000+ — professional grade equipment.",
+      description: "High-end HVAC systems $1,000+  — professional grade equipment.",
       imageSrc: "/images/offer01.jpg",
       linkTo: "/search?category=all&query=all&price=1001-10000&discount=any&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Explore Now",

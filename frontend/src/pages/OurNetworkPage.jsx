@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 import { getError } from "../utils";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
@@ -20,13 +21,18 @@ const reducer = (state, action) => {
 };
 
 
-const benefits = [
-  { icon: "fas fa-lock", title: "Enterprise Security", text: "ISO 27001 Certified", color: "#67e8f9" },
-  { icon: "fas fa-certificate", title: "Industry Certified", text: "HVAC Standards Compliant", color: "#34d399" },
-  { icon: "fas fa-star", title: "Top Rated", text: "4.8/5 Average Rating", color: "#fbbf24" },
+const BENEFIT_ICONS = [
+  { icon: "fas fa-lock", color: "#67e8f9" },
+  { icon: "fas fa-certificate", color: "#34d399" },
+  { icon: "fas fa-star", color: "#fbbf24" },
 ];
 
 export default function OurNetworkPage() {
+  const { t } = useTranslation();
+  const benefits = t("ourNetwork.benefits", { returnObjects: true }).map((b, i) => ({
+    ...b,
+    ...BENEFIT_ICONS[i],
+  }));
   const [{ loading, error, sellers }, dispatch] = useReducer(reducer, {
     sellers: [],
     loading: true,
@@ -52,15 +58,14 @@ export default function OurNetworkPage() {
       <section className="on-hero">
         <div className="on-hero__inner">
           <i className="fas fa-network-wired on-hero__icon" />
-          <h1 className="on-hero__title">Our Suppliers</h1>
+          <h1 className="on-hero__title">{t("ourNetwork.hero.title")}</h1>
           <p className="on-hero__sub">
-            Trusted suppliers, service providers, and manufacturer partnerships
-            powering HVAC excellence across the region.
+            {t("ourNetwork.hero.subtitle")}
           </p>
           <div className="on-hero__badges">
-            <span className="on-hero__badge"><i className="fas fa-certificate" /> Certified Partners</span>
-            <span className="on-hero__badge"><i className="fas fa-globe-americas" /> Global Reach</span>
-            <span className="on-hero__badge"><i className="fas fa-shield-alt" /> Quality Assured</span>
+            <span className="on-hero__badge"><i className="fas fa-certificate" /> {t("ourNetwork.hero.badgeCertified")}</span>
+            <span className="on-hero__badge"><i className="fas fa-globe-americas" /> {t("ourNetwork.hero.badgeGlobal")}</span>
+            <span className="on-hero__badge"><i className="fas fa-shield-alt" /> {t("ourNetwork.hero.badgeQuality")}</span>
           </div>
         </div>
       </section>
@@ -69,22 +74,22 @@ export default function OurNetworkPage() {
       <div className="on-stats">
         <div className="on-stats__item">
           <span className="on-stats__number">{sellers.length || "8+"}</span>
-          <span className="on-stats__label">Industry Partners</span>
+          <span className="on-stats__label">{t("ourNetwork.stats.industryPartners")}</span>
         </div>
         <div className="on-stats__divider" />
         <div className="on-stats__item">
           <span className="on-stats__number">10,000+</span>
-          <span className="on-stats__label">Projects Completed</span>
+          <span className="on-stats__label">{t("ourNetwork.stats.projectsCompleted")}</span>
         </div>
         <div className="on-stats__divider" />
         <div className="on-stats__item">
           <span className="on-stats__number">500+</span>
-          <span className="on-stats__label">Service Providers</span>
+          <span className="on-stats__label">{t("ourNetwork.stats.serviceProviders")}</span>
         </div>
         <div className="on-stats__divider" />
         <div className="on-stats__item">
           <span className="on-stats__number">50,000+</span>
-          <span className="on-stats__label">Active Users</span>
+          <span className="on-stats__label">{t("ourNetwork.stats.activeUsers")}</span>
         </div>
       </div>
 
@@ -92,8 +97,8 @@ export default function OurNetworkPage() {
         {/* Sellers Section */}
         <section className="on-section">
           <div className="on-section-header">
-            <h2 className="on-section-header__title">Our Suppliers</h2>
-            <p className="on-section-header__sub">Browse verified HVAC suppliers in our network</p>
+            <h2 className="on-section-header__title">{t("ourNetwork.section.title")}</h2>
+            <p className="on-section-header__sub">{t("ourNetwork.section.subtitle")}</p>
           </div>
           {loading ? (
             <LoadingBox />
@@ -118,9 +123,9 @@ export default function OurNetworkPage() {
                   <Link to={`/sellers/${seller._id}`} className="on-card__name">
                     {seller.name}
                   </Link>
-                  <p className="on-card__desc">HVAC Supplier &amp; Service Provider</p>
+                  <p className="on-card__desc">{t("ourNetwork.card.desc")}</p>
                   <Link to={`/sellers/${seller._id}`} className="on-card__btn">
-                    View Seller <i className="fas fa-arrow-right" />
+                    {t("ourNetwork.card.viewSeller")} <i className="fas fa-arrow-right" />
                   </Link>
                 </div>
               ))}
@@ -128,13 +133,13 @@ export default function OurNetworkPage() {
           ) : (
             <div className="on-empty">
               <i className="fas fa-building on-empty__icon" />
-              <p>No suppliers available at the moment.</p>
+              <p>{t("ourNetwork.empty")}</p>
             </div>
           )}
         </section>
         {/* Benefits */}
         <section className="on-benefits">
-          <h3 className="on-benefits__title">Why Choose Our Network?</h3>
+          <h3 className="on-benefits__title">{t("ourNetwork.benefitsTitle")}</h3>
           <div className="on-benefits__grid">
             {benefits.map((b, i) => (
               <div className="on-benefits__card" key={i}>

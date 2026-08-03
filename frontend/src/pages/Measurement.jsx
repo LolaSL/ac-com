@@ -7,6 +7,7 @@ import React, {
   useContext,
 } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FaRulerCombined } from "react-icons/fa";
 import { Store } from "../Store";
 import AnnotatorErrorBoundary from "../components/AnnotatorErrorBoundary.js";
@@ -32,6 +33,7 @@ const GridItem = ({ children }) => (
 );
 
 const Measurement = () => {
+  const { t } = useTranslation();
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const location = useLocation();
   const navigate = useNavigate();
@@ -154,11 +156,11 @@ const Measurement = () => {
   const wizardState = useMemo(() => {
     if (isWithAnnotator) {
       const steps = [
-        { label: 'Upload PDF', icon: '📤' },
-        { label: 'Review Rooms', icon: '📋' },
-        { label: 'Annotate', icon: '📌' },
-        { label: 'Calculate BTU', icon: '🧮' },
-        { label: 'View Results', icon: '✅' },
+        { label: t("measurement.page.wizard.uploadPdf"), icon: '📤' },
+        { label: t("measurement.page.wizard.reviewRooms"), icon: '📋' },
+        { label: t("measurement.page.wizard.annotate"), icon: '📌' },
+        { label: t("measurement.page.wizard.calculateBtu"), icon: '🧮' },
+        { label: t("measurement.page.wizard.viewResults"), icon: '✅' },
       ];
 
       let currentStep = 1;
@@ -171,16 +173,16 @@ const Measurement = () => {
     }
 
     const steps = [
-      { label: 'Select Mode', icon: '⚙️' },
-      { label: 'Manual Rooms', icon: '📝' },
-      { label: 'View Results', icon: '✅' },
+      { label: t("measurement.page.wizard.selectMode"), icon: '⚙️' },
+      { label: t("measurement.page.wizard.manualRooms"), icon: '📝' },
+      { label: t("measurement.page.wizard.viewResults"), icon: '✅' },
     ];
 
     return {
       steps,
       currentStep: hasBtuResult ? 3 : 2,
     };
-  }, [isWithAnnotator, hasBtuResult, annotatorActive, roomData]);
+  }, [isWithAnnotator, hasBtuResult, annotatorActive, roomData, t]);
 
   const handleModeChange = (mode) => {
     setMeasurementMode(mode);
@@ -197,8 +199,8 @@ const Measurement = () => {
       <div className="ms-hero">
         <div className="ms-hero__inner">
           <div className="ms-hero__icon"><FaRulerCombined /></div>
-          <h1 className="ms-hero__title">Measurement Service System</h1>
-          <p className="ms-hero__sub">Upload your floor plan, notate rooms and export to BTU calculator.</p>
+          <h1 className="ms-hero__title">{t("measurement.page.hero.title")}</h1>
+          <p className="ms-hero__sub">{t("measurement.page.hero.subtitle")}</p>
 
           {/* Step-by-step progress wizard */}
           <div className="ms-wizard" style={{
@@ -218,7 +220,7 @@ const Measurement = () => {
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
                       gap: '4px', minWidth: '64px', cursor: clickable ? 'pointer' : 'default' }}
                     onClick={clickable ? () => navigate('/recommendations') : undefined}
-                    title={clickable ? 'View Results on Recommendations page' : undefined}
+                    title={clickable ? t("measurement.page.wizard.viewResultsTooltip") : undefined}
                   >
                     <div style={{
                       width: '36px', height: '36px', borderRadius: '50%',
@@ -258,7 +260,7 @@ const Measurement = () => {
               color: '#667eea',
               fontWeight: '600'
             }}>
-              📋 Your previous BTU calculation is loaded below
+              {t("measurement.page.storedCalcBanner")}
             </div>
           )}
         </div>
@@ -268,7 +270,7 @@ const Measurement = () => {
         {error && <div className="ms-alert">{error}</div>}
 
         <div style={{ marginBottom: "1rem" }}>
-          <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>Calculation Mode</div>
+          <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>{t("measurement.page.calculationMode.label")}</div>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             <button
               type="button"
@@ -285,7 +287,7 @@ const Measurement = () => {
                 minHeight: "42px",
               }}
             >
-              With PDF/JPG Uploading + Notations
+              {t("measurement.page.calculationMode.withAnnotator")}
             </button>
             <button
               type="button"
@@ -302,7 +304,7 @@ const Measurement = () => {
                 minHeight: "42px",
               }}
             >
-              No Uploading — Manual BTU Entry
+              {t("measurement.page.calculationMode.withoutAnnotator")}
             </button>
           </div>
         </div>
@@ -336,7 +338,7 @@ const Measurement = () => {
               color: "#495057",
             }}
           >
-            Annotator is disabled in this mode. Use BTU Calculator manual room entry below.
+            {t("measurement.page.annotatorDisabled")}
           </div>
         )}
 
@@ -355,9 +357,9 @@ const Measurement = () => {
                 boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
               }}>
                 <div>
-                  <strong>📊 Previous Calculation Loaded</strong>
+                  <strong>{t("measurement.page.prevCalc.title")}</strong>
                   <p style={{ margin: '0.25rem 0 0', opacity: 0.9, fontSize: '0.9rem' }}>
-                    Showing your last BTU calculation. Start a new notation above to create a fresh calculation.
+                    {t("measurement.page.prevCalc.text")}
                   </p>
                 </div>
                 <button
@@ -379,7 +381,7 @@ const Measurement = () => {
                     minHeight: '44px',
                   }}
                 >
-                  Clear
+                  {t("measurement.page.prevCalc.clear")}
                 </button>
               </div>
             )}
@@ -395,7 +397,7 @@ const Measurement = () => {
         </div>
 
         <div className="ms-home-row">
-          <Link to="/" className="home-btn">🏠 Home</Link>
+          <Link to="/" className="home-btn">🏠 {t("auth.home")}</Link>
         </div>
       </div>
     </div>

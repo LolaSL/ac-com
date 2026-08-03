@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "react-bootstrap";
 import { Modal } from "react-bootstrap";
 import { Carousel } from "react-bootstrap";
 import "./ArchSymbolsModal.css";
 
 const ArchSymbolsModal = () => {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -24,7 +26,7 @@ const ArchSymbolsModal = () => {
   return (
     <>
       <button className="phv-trigger arch-trigger" onClick={handleShow}>
-        📐 View Arch Symbols
+        {t("measurement.archSymbols.trigger")}
       </button>
       <Modal
         show={show}
@@ -34,7 +36,7 @@ const ArchSymbolsModal = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold  text-capitalize ">
-            Important architectural symbols
+            {t("measurement.archSymbols.title")}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -76,7 +78,7 @@ const ArchSymbolsModal = () => {
             variant="btn-outline"
             size="sm"
             onClick={handleClose}>
-            Close
+            {t("measurement.archSymbols.close")}
           </Button>
         </Modal.Footer>
       </Modal>

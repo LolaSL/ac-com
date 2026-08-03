@@ -1,84 +1,53 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FaInfoCircle } from "react-icons/fa";
 import "./AboutUs.css";
 
+const STEP_ICONS = [
+  "fas fa-file-upload",
+  "fas fa-drafting-compass",
+  "fas fa-hard-hat",
+  "fas fa-file-pdf",
+  "fas fa-calculator",
+  "fas fa-chart-line",
+];
+
+const FEATURE_ICONS = [
+  "fas fa-store",
+  "fas fa-pencil-ruler",
+  "fas fa-user-check",
+  "fas fa-tools",
+  "fas fa-bell",
+  "fas fa-hand-holding-usd",
+];
+
+const AUDIENCE_ICONS = [
+  "fas fa-home",
+  "fas fa-building",
+  "fas fa-wrench",
+  "fas fa-compass",
+  "fas fa-shield-alt",
+  "fas fa-tags",
+];
+
 const AboutUs = () => {
-  const steps = [
-    {
-      icon: "fas fa-file-upload",
-      title: "Upload Your Floor Plan",
-      text: "Upload any architectural PDF — residential suite, office, or commercial space. The plan is rendered directly in the browser at high resolution.",
-    },
-    {
-      icon: "fas fa-drafting-compass",
-      title: "Mark AC Placements",
-      text: "Place labelled AC unit air conditioner symbols on the plan - add comments (ac-1, ac-2...etc) and condenser (outdoor unit air conditioner symbol) placement. Save your work on the cloud.",
-    },
-    {
-      icon: "fas fa-hard-hat",
-      title: "AI-Engineer Review",
-      text: "After making an order submission, a certified AI-HVAC engineer opens your submitted plan, adds professional VRF refrigerant lines, and signs off with a digital signature — producing a verified 2-page review PDF. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations. Symbols of ducted HVAC elements/accessories for both ducted and ductless VRF modes — coming soon",
-    },
-    {
-      icon: "fas fa-file-pdf",
-      title: "Save & Download",
-      text: "Download your completed AI-engineer-reviewed plan as a PDF with all ac air conditioner symbols, outdoor unit -condenser air conditioner symbol, comments, system lines, and the AI-engineer's digital stamp baked in.",
-    },
-    {
-      icon: "fas fa-calculator",
-      title: "BTU Calculator",
-      text: "Answer guided questions about your property — room size, insulation, climate — and receive a recommended BTU rating along with a curated list of matching indoor units and outdoor condensers.",
-    },
-    {
-      icon: "fas fa-chart-line",
-      title: "Recommendations - HVAC System Quote",
-      text: "After completing the BTU calculation, review room-by-room HVAC recommendations with matched products, system totals, pricing, print-ready quote output, and quick add-to-cart actions.",
-    },
-  ];
+  const { t } = useTranslation();
 
-  const features = [
-    {
-      icon: "fas fa-store",
-      title: "Complete HVAC Marketplace",
-      text: "Hundreds of mini-split ACs, VRF condensers, indoor units, and accessories from leading manufacturers — with ratings, dimensions, energy ratings, and discounts.",
-    },
-    {
-      icon: "fas fa-pencil-ruler",
-      title: "Professional Notation Tools",
-      text: "Browser-based PDF annotations with coloured air conditioner symbols, text comments, VRF refrigerant lines, (ducted air diffusers — coming soon).",
-    },
-    {
-      icon: "fas fa-user-check",
-      title: "Certified AI-Engineer Sign-off",
-      text: "Every submitted plan is reviewed by a qualified AI-Engineer who adds system-specific notes and a digital signature — giving you a document suitable for permits and contractors.",
-    },
-    {
-      icon: "fas fa-tools",
-      title: "Trusted Service Network",
-      text: "Connect directly with verified HVAC  service providers for consultants, installation, maintenance, and  repairs through our integrated messaging and booking system.",
-    },
+  const steps = t("aboutUs.steps", { returnObjects: true }).map((s, i) => ({
+    ...s,
+    icon: STEP_ICONS[i],
+  }));
 
-    {
-      icon: "fas fa-bell",
-      title: "Orders, Notifications & Support",
-      text: "Track orders end-to-end, receive payment and delivery reminders, communicate with sellers via built-in messaging, and access dedicated customer support at every stage.",
-    },
-        {
-      icon: "fas fa-hand-holding-usd",
-      title: "Bring-a-Friend Commission Program",
-      text: "Industry professionals and businesses can list products on the marketplace, earn commission through our bring-a-friend referral programme",
-    }
-  ];
+  const features = t("aboutUs.features", { returnObjects: true }).map((f, i) => ({
+    ...f,
+    icon: FEATURE_ICONS[i],
+  }));
 
-  const audiences = [
-    { icon: "fas fa-home", label: "Homeowners", desc: "Plan and purchase the right HVAC system for your property." },
-    { icon: "fas fa-building", label: "Commercial Buyers", desc: "Outfit offices, retail spaces, and facilities efficiently, whether you're a developer, project initiator, or building contractor." },
-    { icon: "fas fa-wrench", label: "HVAC Contractors", desc: "Source equipment and manage project plans in one place." },
-    { icon: "fas fa-compass", label: "Architects & Designers", desc: "Integrate HVAC layouts directly into architectural workflows." },
-    { icon: "fas fa-shield-alt", label: "Service Providers", desc: "Offer installation, maintenance, and repair through the platform." },
-    { icon: "fas fa-tags", label: "Affiliate Sellers", desc: "Merger Consultants, Architectural Designers, Accessories Suppliers, and other industry professionals are partners with AC-Commerce." },
-  ];
+  const audiences = t("aboutUs.audiences", { returnObjects: true }).map((a, i) => ({
+    ...a,
+    icon: AUDIENCE_ICONS[i],
+  }));
 
   return (
     <div className="au-page">
@@ -86,8 +55,8 @@ const AboutUs = () => {
       <div className="au-hero">
         <div className="au-hero__inner">
           <div className="au-hero__icon"><FaInfoCircle /></div>
-          <h1 className="au-hero__title">About AC-Commerce</h1>
-          <p className="au-hero__sub">Your complete HVAC marketplace — from first measurement to final sign-off.</p>
+          <h1 className="au-hero__title">{t("aboutUs.hero.title")}</h1>
+          <p className="au-hero__sub">{t("aboutUs.hero.subtitle")}</p>
         </div>
       </div>
 
@@ -100,21 +69,16 @@ const AboutUs = () => {
         {/* Intro */}
         <div className="au-card au-intro">
           <p className="au-lead">
-            <strong>AC-Commerce Home Supply</strong> is an HVAC marketplace that combines product commerce with
-            professional-grade planning tools. Whether you're buying a mini-split, designing a
-            VRF system for a multi-room property, or getting a certified engineer to review your
-            floor plan — everything happens in one platform.
+            <strong>{t("aboutUs.intro.p1Bold")}</strong>{t("aboutUs.intro.p1Rest")}
           </p>
           <p className="au-lead au-lead--last">
-            We replace the fragmented process of juggling multiple vendors, contractors, and
-            design consultants with a single, integrated workflow — from first measurement to
-            final sign-off.
+            {t("aboutUs.intro.p2")}
           </p>
         </div>
 
         {/* How It Works */}
         <section className="au-section">
-          <h2 className="au-section__title">How It Works</h2>
+          <h2 className="au-section__title">{t("aboutUs.howItWorksTitle")}</h2>
           <div className="au-grid au-grid--3">
             {steps.map((s, i) => (
               <div key={i} className="au-card au-step-card">
@@ -129,7 +93,7 @@ const AboutUs = () => {
 
         {/* Why AC-Commerce */}
         <section className="au-section">
-          <h2 className="au-section__title">Why AC-Commerce</h2>
+          <h2 className="au-section__title">{t("aboutUs.whyTitle")}</h2>
           <div className="au-grid au-grid--3">
             {features.map((f, i) => (
               <div key={i} className="au-card au-feature-card">
@@ -143,7 +107,7 @@ const AboutUs = () => {
 
         {/* Who We Serve */}
         <section className="au-section">
-          <h2 className="au-section__title">Who We Serve</h2>
+          <h2 className="au-section__title">{t("aboutUs.whoWeServeTitle")}</h2>
           <div className="au-grid au-grid--6">
             {audiences.map((a, i) => (
               <div key={i} className="au-audience-tile">
@@ -156,7 +120,7 @@ const AboutUs = () => {
         </section>
 
         <div className="au-home-row">
-          <Link to="/" className="home-btn">🏠 Home</Link>
+          <Link to="/" className="home-btn">🏠 {t("auth.home")}</Link>
         </div>
       </div>
     </div>

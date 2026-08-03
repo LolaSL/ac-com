@@ -196,5 +196,456 @@
       "unsubscribeSuccess": "Sie wurden vom Newsletter abgemeldet.",
       "genericError": "Beim Versuch, {{mode}} auszuführen, ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
     }
+  },
+  "aboutUs": {
+    "hero": {
+      "title": "Über AC-Commerce",
+      "subtitle": "Ihr vollständiger HLK-Marktplatz — von der ersten Messung bis zur endgültigen Freigabe."
+    },
+    "intro": {
+      "p1Bold": "AC-Commerce Home Supply",
+      "p1Rest": " ist ein HLK-Marktplatz, der Produkthandel mit professionellen Planungstools kombiniert. Egal, ob Sie eine Mini-Split-Klimaanlage kaufen, ein VRF-System für eine Immobilie mit mehreren Räumen entwerfen oder Ihren Grundriss von einem zertifizierten Ingenieur prüfen lassen — alles findet auf einer Plattform statt.",
+      "p2": "Wir ersetzen den fragmentierten Prozess des Jonglierens mit mehreren Anbietern, Auftragnehmern und Designberatern durch einen einzigen, integrierten Arbeitsablauf — von der ersten Messung bis zur endgültigen Freigabe."
+    },
+    "howItWorksTitle": "So Funktioniert Es",
+    "steps": [
+      { "title": "Laden Sie Ihren Grundriss Hoch", "text": "Laden Sie eine beliebige architektonische PDF/JPG-Datei hoch — Wohnsuite, Büro oder Gewerbefläche. Der Plan wird direkt im Browser in hoher Auflösung dargestellt." },
+      { "title": "Markieren Sie AC-Platzierungen", "text": "Platzieren Sie beschriftete Klimaanlagen-Symbole auf dem Plan - fügen Sie Kommentare hinzu (ac-1, ac-2 ... usw.) und die Platzierung des Kondensators (Symbol der Außeneinheit). Speichern Sie Ihre Arbeit in der Cloud." },
+      { "title": "KI-Ingenieur-Überprüfung", "text": "Nach der Auftragsübermittlung öffnet ein zertifizierter KI-HLK-Ingenieur Ihren übermittelten Plan, fügt professionelle VRF-Kältemittelleitungen hinzu und unterschreibt mit einer digitalen Signatur — wodurch ein verifiziertes 2-seitiges Prüf-PDF entsteht. Unterstützt Standard-, VRF-Kanal- und VRF-Kanallose Systemkonfigurationen. Symbole für kanalgeführte HLK-Elemente/Zubehör für beide VRF-Modi — demnächst verfügbar" },
+      { "title": "Speichern und Herunterladen", "text": "Laden Sie Ihren fertigen, vom KI-Ingenieur geprüften Plan als PDF herunter, mit allen Klimaanlagen-Symbolen, dem Symbol der Außeneinheit-Kondensator, Kommentaren, Systemleitungen und dem digitalen Stempel des KI-Ingenieurs integriert." },
+      { "title": "BTU-Rechner", "text": "Beantworten Sie geführte Fragen zu Ihrer Immobilie — Raumgröße, Isolierung, Klima — und erhalten Sie eine empfohlene BTU-Bewertung zusammen mit einer kuratierten Liste passender Innen- und Außeneinheiten." },
+      { "title": "Empfehlungen - HLK-Systemangebot", "text": "Nach Abschluss der BTU-Berechnung überprüfen Sie raumweise HLK-Empfehlungen mit passenden Produkten, Systemgesamtsummen, Preisen, druckfertiger Angebotsausgabe und schnellen Aktionen zum Hinzufügen zum Warenkorb." }
+    ],
+    "whyTitle": "Warum AC-Commerce",
+    "features": [
+      { "title": "Vollständiger HLK-Marktplatz", "text": "Hunderte von Mini-Split-Klimaanlagen, VRF-Kondensatoren, Inneneinheiten und Zubehör von führenden Herstellern — mit Bewertungen, Abmessungen, Energieeffizienzklassen und Rabatten." },
+      { "title": "Professionelle Anmerkungstools", "text": "Browserbasierte PDF-Anmerkungen mit farbigen Klimaanlagen-Symbolen, Textkommentaren, VRF-Kältemittelleitungen (kanalgeführte Luftauslässe — demnächst verfügbar)." },
+      { "title": "Zertifizierte KI-Ingenieur-Freigabe", "text": "Jeder eingereichte Plan wird von einem qualifizierten KI-Ingenieur geprüft, der systemspezifische Hinweise und eine digitale Signatur hinzufügt — Sie erhalten ein für Genehmigungen und Auftragnehmer geeignetes Dokument." },
+      { "title": "Vertrauenswürdiges Dienstleistungsnetzwerk", "text": "Verbinden Sie sich direkt mit verifizierten HLK-Dienstleistern für Beratung, Installation, Wartung und Reparaturen über unser integriertes Nachrichten- und Buchungssystem." },
+      { "title": "Bestellungen, Benachrichtigungen und Support", "text": "Verfolgen Sie Bestellungen durchgehend, erhalten Sie Zahlungs- und Lieferhinweise, kommunizieren Sie mit Verkäufern über die integrierte Nachrichtenfunktion und erhalten Sie in jeder Phase engagierten Kundensupport." },
+      { "title": "Empfehlungsprovisionsprogramm", "text": "Branchenprofis und Unternehmen können Produkte auf dem Marktplatz listen und über unser Empfehlungsprogramm Provisionen verdienen" }
+    ],
+    "whoWeServeTitle": "Wen Wir Bedienen",
+    "audiences": [
+      { "label": "Hausbesitzer", "desc": "Planen und kaufen Sie das richtige HLK-System für Ihre Immobilie." },
+      { "label": "Gewerbliche Käufer", "desc": "Statten Sie Büros, Einzelhandelsflächen und Einrichtungen effizient aus, egal ob Sie Entwickler, Projektinitiator oder Bauunternehmer sind." },
+      { "label": "HLK-Auftragnehmer", "desc": "Beziehen Sie Ausrüstung und verwalten Sie Projektpläne an einem Ort." },
+      { "label": "Architekten und Designer", "desc": "Integrieren Sie HLK-Layouts direkt in architektonische Arbeitsabläufe." },
+      { "label": "Dienstleister", "desc": "Bieten Sie Installation, Wartung und Reparatur über die Plattform an." },
+      { "label": "Partnerverkäufer", "desc": "Fusionsberater, Architekturdesigner, Zubehörlieferanten und andere Branchenprofis sind Partner von AC-Commerce." }
+    ]
+  },
+  "ourNetwork": {
+    "hero": {
+      "title": "Unsere Lieferanten",
+      "subtitle": "Vertrauenswürdige Lieferanten, Dienstleister und Herstellerpartnerschaften, die HLK-Exzellenz in der gesamten Region vorantreiben.",
+      "badgeCertified": "Zertifizierte Partner",
+      "badgeGlobal": "Globale Reichweite",
+      "badgeQuality": "Qualität Gesichert"
+    },
+    "stats": {
+      "industryPartners": "Branchenpartner",
+      "projectsCompleted": "Abgeschlossene Projekte",
+      "serviceProviders": "Dienstleister",
+      "activeUsers": "Aktive Nutzer"
+    },
+    "section": {
+      "title": "Unsere Lieferanten",
+      "subtitle": "Durchsuchen Sie verifizierte HLK-Lieferanten in unserem Netzwerk"
+    },
+    "card": {
+      "desc": "HLK-Lieferant & Dienstleister",
+      "viewSeller": "Verkäufer Ansehen"
+    },
+    "empty": "Derzeit sind keine Lieferanten verfügbar.",
+    "benefitsTitle": "Warum Unser Netzwerk Wählen?",
+    "benefits": [
+      { "title": "Unternehmenssicherheit", "text": "ISO 27001 Zertifiziert" },
+      { "title": "Branchenzertifiziert", "text": "Erfüllt HLK-Standards" },
+      { "title": "Bestbewertet", "text": "4,8/5 Durchschnittliche Bewertung" }
+    ]
+  },
+  "advancedAc": {
+    "hero": { "title": "Fortschrittliche Klimatisierung 2026", "subtitle": "Entdecken Sie die neuesten HLK-Technologien für Komfort, Effizienz und Nachhaltigkeit" },
+    "intro": "2026 verändert den Wohnkomfort auf spannende Weise. Heutige HLK-Systeme tun weit mehr als heizen und kühlen - sie lernen Ihre Gewohnheiten, senken Stromrechnungen und sorgen für sauberere Innenraumluft für Ihre Familie. Von KI-gesteuerten Steuerungen bis hin zu hocheffizienter Wärmerückgewinnung und schadstoffarmen Kältemitteln sind moderne Lösungen intelligenter, leiser und für langfristige Einsparungen konzipiert. Wenn Sie eine Modernisierung planen, ist jetzt der perfekte Moment, um zu entdecken, was die HLK-Technologie der nächsten Generation für Ihr Zuhause leisten kann.",
+    "heatPumps": { "title": "Wärmepumpen: Die Allwetterlösung", "text": "Wärmepumpen werden für Hausbesitzer, die ganzjährigen Komfort und Energieeffizienz suchen, zur ersten Wahl. Dank Fortschritten bei der Kaltklima-Wärmepumpentechnologie können diese Systeme nun auch bei extremen Temperaturen effektiv arbeiten, was sie zu einer vielseitigen Wahl für jede Region macht." },
+    "heatRecovery": {
+      "title": "Wärmerückgewinnungssysteme: Maximale Energieeinsparung",
+      "p1": "Wärmerückgewinnungslüftung (WRL) und Energierückgewinnungslüftung (ERL) stellen einen bedeutenden Durchbruch im häuslichen Energiemanagement dar. Diese fortschrittlichen Systeme erfassen und recyceln erwärmte oder gekühlte Luft, die sonst bei der Lüftung verloren ginge, wodurch Energieverschwendung erheblich reduziert und die Nebenkosten gesenkt werden. Ob Sie im Winter heizen oder im Sommer kühlen - Wärmerückgewinnungssysteme erhalten den Komfort und sparen dabei Energie.",
+      "p2": "Im Jahr 2026 werden WRL- und ERL-Systeme zunehmend in intelligente HLK-Lösungen integriert, sodass Hausbesitzer den Luftstrom basierend auf den aktuellen Innenraumbedingungen optimieren können. Die Technologie funktioniert, indem sie verbrauchte Luft aus Ihrem Zuhause abzieht und deren Wärmeenergie auf frische einströmende Luft überträgt, wodurch die Heiz- oder Kühllast Ihres Hauptsystems effektiv reduziert wird. Diese Synergie zwischen Wärmerückgewinnung und Klimasteuerung kann jährliche Energieeinsparungen von 15–25 % erzielen.",
+      "p3": "Führende Hersteller bieten inzwischen umfassende Wärmerückgewinnungslösungen an. <strong>Samsung</strong>, <strong>LG</strong>, <strong>Daikin</strong>, <strong>Mitsubishi</strong>, <strong>Fujitsu</strong> und <strong>Panasonic</strong> liefern alle fortschrittliche WRL/ERL-Systeme, die in ihre Premium-Klima- und Wärmepumpengeräte integriert sind. Die neuesten Modelle von <strong>Samsung</strong> kombinieren Wärmerückgewinnung mit WindFree-Technologie für zugfreie Kühlung, während <strong>LG</strong> ERL-Systeme mit KI-gestützter Energieoptimierung kombiniert. <strong>Daikin</strong> bietet modulare Einheiten zur Nachrüstung in bestehende Systeme, und <strong>Mitsubishi</strong> sowie <strong>Fujitsu</strong> bieten branchenführende VRF-integrierte Lösungen. Diese kompakten, äußerst leisen Systeme eignen sich ideal für moderne Häuser, die eine erstklassige Innenraumluftqualität ohne Kompromisse bei der Energieeffizienz suchen."
+    },
+    "energyEfficiency": {
+      "title": "Energieeffiziente Systeme: Mehr Sparen, Weniger Verbrauchen",
+      "text": "Energieeffizienz ist 2026 ein führender Trend in der HLK-Branche. Moderne Systeme nutzen Innovationen wie Kompressoren mit variabler Drehzahl und fortschrittliche Sensoren, um den Komfort zu maximieren und gleichzeitig Energieverbrauch und Umweltbelastung zu minimieren. Im Jahr 2026 ist Energieeffizienz ein zentraler Schwerpunkt der HLK-Branche. Neue Systeme setzen Technologien wie Kompressoren mit variabler Drehzahl und verbesserte Wärmetauscher ein, um optimalen Komfort bei geringerem Energieverbrauch und einem kleineren CO2-Fußabdruck zu bieten.",
+      "samsungTitle": "Samsung BESPOKE AI WindFree Klimageräte",
+      "samsungText": "Die neueste Klimageräte-Kollektion verfügt über die WindFree-Kühltechnologie von <strong>Samsung</strong>, die Luft durch 23.000 Mikrolöcher verteilt, um direkte Zugluft zu vermeiden. Zusätzlich ermöglicht die Funktion AI Fast & Comfort Cooling schnelles Abkühlen, bevor in einen energieeffizienten Modus gewechselt wird. Der KI-Energiemodus ist darauf ausgelegt, die Kühleinstellungen zu optimieren und kann den Energieverbrauch um bis zu 30 % senken."
+    },
+    "indoorAirQuality": {
+      "title": "Innovationen bei der Innenraumluftqualität",
+      "p1": "Die Verbesserung der Innenraumluftqualität (IAQ) hat 2026 höchste Priorität. HLK-Systeme integrieren nun Luftreiniger, UV-C-Lichttechnologie und hocheffiziente Schwebstofffilter (HEPA), um Allergene, Bakterien und Viren aus der Luft Ihres Zuhauses zu entfernen. Diese Systeme sorgen für ein gesünderes Wohnumfeld für Sie und Ihre Familie.",
+      "daikinText": "Die neue Reihe von Luftreinigern mit Streamer-Technologie von <strong>Daikin</strong> wurde entwickelt, um Schadstoffe wie Schimmel, Pollen, Allergene, Gerüche, Formaldehyd, Verkehrsverschmutzung und Staub einzufangen, zu unterdrücken und abzubauen. Perfekt für Allergiker!"
+    },
+    "whyUpgrade": {
+      "title": "Warum 2026 Modernisieren?",
+      "text": "2026 markiert ein entscheidendes Jahr für HLK-Modernisierungen, angetrieben von transformativen Branchenveränderungen. Regulatorische Vorgaben erfordern nun umweltfreundliche A2L-Kältemittel, während neue Effizienzstandards eine drastisch reduzierten Energieverbrauch gewährleisten. Moderne Systeme liefern 20–40 % Energieeinsparungen im Vergleich zu älteren Modellen, während fortschrittliche intelligente Steuerungen beispiellosen Komfort und Bequemlichkeit bieten. Über die Kosteneinsparungen hinaus überzeugen heutige Geräte durch hervorragende Innenraumluftqualität, arbeiten leiser und bieten eine präzise Temperaturregelung. Diese Konvergenz aus ökologischer Verantwortung, Spitzentechnologie und erheblichen langfristigen Einsparungen macht die Modernisierung Ihres HLK-Systems zu einer klugen Investition für jedes Zuhause."
+    },
+    "costPayback": {
+      "title": "Typische Modernisierungskosten und Amortisation",
+      "intro": "Das richtige System hängt von der Größe Ihrer Immobilie, der Qualität der Isolierung und den Nutzungsgewohnheiten ab. Der folgende Leitfaden bietet Hausbesitzern einen praktischen Ausgangspunkt, bevor sie ein förmliches Angebot anfordern.",
+      "table": {
+        "headers": { "propertyType": "Immobilientyp", "installedCost": "Typische Installationskosten", "annualSavings": "Geschätzte Jährliche Einsparungen", "payback": "Typische Amortisationszeit" },
+        "rows": [
+          { "type": "1-2-Zimmer-Wohnung", "cost": "4.000 $ - 8.500 $", "savings": "450 $ - 1.000 $", "payback": "4-8 Jahre" },
+          { "type": "Mittleres Einfamilienhaus", "cost": "8.500 $ - 16.000 $", "savings": "900 $ - 2.000 $", "payback": "4-7 Jahre" },
+          { "type": "Großes Haus / Mehrzonensystem", "cost": "16.000 $ - 30.000 $+", "savings": "1.800 $ - 4.000 $", "payback": "4-6 Jahre" }
+        ]
+      },
+      "note": "Die Zahlen dienen nur zur Orientierung und können je nach Klima, Stromtarif, Gebäudehüllenleistung und Umfang der Installationsarbeiten variieren."
+    },
+    "checklist": {
+      "title": "Vor der Modernisierung: Kurze Checkliste",
+      "items": [
+        "Bestätigen Sie die raumweise Lastdimensionierung, nicht nur Schätzungen für das gesamte Haus.",
+        "Überprüfen Sie die Kapazität des Elektroverteilers und die Anforderungen an dedizierte Stromkreise.",
+        "Überprüfen Sie den Zustand der Kanäle oder die Eignung einer kanallosen Anordnung für Ihren Grundriss.",
+        "Bewerten Sie Isolierung, Verglasung und Luftundichtigkeiten, um überdimensionierte Geräte zu vermeiden.",
+        "Überprüfen Sie vor dem Kauf die Berechtigung für lokale Rabatte, Steueranreize und Vorschriften.",
+        "Vergleichen Sie Garantiebedingungen des Installateurs, Service-Reaktionszeiten und Wartungspläne."
+      ]
+    },
+    "nextSteps": {
+      "title": "Bereit für den Nächsten Schritt?",
+      "text": "Nutzen Sie die Tools von AC-Commerce, um selbstbewusst von der Recherche zur Entscheidung zu gelangen.",
+      "startMeasurement": "Messung Starten",
+      "browseProducts": "Produkte Durchsuchen",
+      "bookExpertHelp": "Expertenhilfe Buchen"
+    }
+  },
+  "measurement": {
+    "page": {
+      "hero": { "title": "Mess-Service-System", "subtitle": "Laden Sie Ihren Grundriss hoch, kennzeichnen Sie Räume und exportieren Sie zum BTU-Rechner." },
+      "wizard": {
+        "uploadPdf": "PDF Hochladen",
+        "reviewRooms": "Räume Überprüfen",
+        "annotate": "Kennzeichnen",
+        "calculateBtu": "BTU Berechnen",
+        "viewResults": "Ergebnisse Anzeigen",
+        "selectMode": "Modus Auswählen",
+        "manualRooms": "Manuelle Räume",
+        "viewResultsTooltip": "Ergebnisse auf der Empfehlungsseite anzeigen"
+      },
+      "storedCalcBanner": "📋 Ihre vorherige BTU-Berechnung ist unten geladen",
+      "calculationMode": {
+        "label": "Berechnungsmodus",
+        "withAnnotator": "Mit PDF/JPG-Upload + Notationen",
+        "withoutAnnotator": "Kein Upload — Manuelle BTU-Eingabe"
+      },
+      "annotatorDisabled": "Der Annotator ist in diesem Modus deaktiviert. Verwenden Sie unten die manuelle Raumeingabe des BTU-Rechners.",
+      "prevCalc": {
+        "title": "📊 Vorherige Berechnung Geladen",
+        "text": "Zeigt Ihre letzte BTU-Berechnung. Starten Sie oben eine neue Notation, um eine neue Berechnung zu erstellen.",
+        "clear": "Löschen"
+      }
+    },
+    "pdfHelpVideo": {
+      "trigger": "Video-Tutorials",
+      "title": "Video-Tutorial-Bibliothek",
+      "selected": "Ausgewählt",
+      "close": "Schließen"
+    },
+    "archSymbols": {
+      "trigger": "📐 Architektursymbole Anzeigen",
+      "title": "Wichtige architektonische Symbole",
+      "close": "Schließen"
+    },
+    "btuCalculator": {
+      "prevSummary": {
+        "title": "Vorherige Berechnung",
+        "dismiss": "Verwerfen",
+        "room": "Raum",
+        "rooms": "Räume",
+        "total": "gesamt",
+        "viewBtn": "Empfehlungen Ansehen →"
+      },
+      "title": "BTU-Rechner",
+      "measurementSystem": { "label": "Maßsystem", "meters": "Meter (m²)", "feet": "Fuß (ft²)" },
+      "roomSource": { "label": "Datenquelle für Räume", "pdf": "PDF-Räume Verwenden", "manual": "Manuelle Raumeingabe", "noRoomsHint": "Noch keine Räume aus dem PDF erkannt. Wechseln Sie zur manuellen Raumeingabe, um fortzufahren." },
+      "multiFlat": {
+        "label": "Mehrwohnungs-/Mehreinheiten-Immobilie (separater Kondensator für jede Wohnung)",
+        "detected": "✓ {{count}} Wohnung(en) erkannt:",
+        "eachFlatCondenser": "Jede Wohnung erhält einen eigenen, separat dimensionierten Kondensator",
+        "detectedFromAnnotations": "✓ Mehrwohnungs-Immobilie anhand von Anmerkungen erkannt:",
+        "checkBoxHint": "Aktivieren Sie das Kontrollkästchen oben, um separate Kondensatoren für jede Wohnung zu aktivieren.",
+        "acFound": "✓ Klimaanlagen-Anmerkungen gefunden: {{count}} Beschriftung(en) erkannt",
+        "flatsAutoDetected": "Wohnungen automatisch anhand von Kondensator-Beschriftungen erkannt (z. B. condenser-1, condenser-2)"
+      },
+      "ceilingHeight": { "label": "Deckenhöhe (m):", "placeholder": "Deckenhöhe in Metern eingeben" },
+      "people": { "labelPerFlat": "Anzahl der Personen (pro Wohnung):", "label": "Anzahl der Personen:", "placeholder": "Anzahl der Personen eingeben" },
+      "humidity": { "label": "Feuchtigkeitsgrad:", "low": "Niedrig (trockenes Klima)", "average": "Durchschnittlich", "high": "Hoch (feucht / küstennah)" },
+      "infiltration": { "label": "Luftdichtheit des Gebäudes:", "tight": "Dicht (Neubau / abgedichtet)", "average": "Durchschnittlich (typisches Wohnhaus)", "leaky": "Undicht (älter / zugig)" },
+      "systemMode": { "label": "Systemmodus:", "heatpump": "Kühlen oder Heizen (Wärmepumpe)", "recovery": "Kühlen & Wärmerückgewinnung" },
+      "manualRoomsTitle": "Manuelle Räume:",
+      "roomMeasurementsTitle": "Raummaße:",
+      "roomTypeLabel": "Raumtyp {{n}}:",
+      "roomSizeLabel": "Raumgröße ({{unit}}²):",
+      "roomSizePlaceholder": "Raumgröße in {{unit}} eingeben",
+      "addRoom": "Raum Hinzufügen",
+      "calculate": "BTU Berechnen",
+      "calculating": "⏳ Wird berechnet…",
+      "clear": "Löschen",
+      "groups": {
+        "outdoorUnitLocation": "Standort der Außeneinheit",
+        "outdoorUnitLocationPerFlat": "Standort der Außeneinheit (pro Wohnung):",
+        "insulation": "Dämmzustand",
+        "climate": "Klima",
+        "windowType": "Fenstertyp",
+        "apartmentOrientation": "Wohnungsausrichtung",
+        "apartmentOrientationPerFlat": "Wohnungsausrichtung (pro Wohnung):",
+        "typeOfWall": "Wandtyp",
+        "sunExposure": "Sonneneinstrahlung",
+        "appliances": "Raumnutzung & Geräte",
+        "appliancesPerFlat": "Raumnutzung & Geräte (pro Wohnung):",
+        "roofType": "Dachtyp",
+        "floorType": "Boden",
+        "floorTypePerFlat": "Boden (pro Wohnung):"
+      },
+      "optionLabels": {
+        "Roof": "Dach", "WallBrackets": "Wandhalterungen", "HardGround": "Fester Untergrund",
+        "BrickVeneer": "Backsteinverblendung", "DoubleBrick": "Doppelter Backstein", "FoamCladding": "Schaumstoffverkleidung",
+        "Average": "Durchschnittlich", "Good": "Gut", "Poor": "Schlecht",
+        "FullSunlight": "Volle Sonneneinstrahlung", "HeavilyShaded": "Stark Schattig",
+        "SingleGlazed": "Einfachverglasung", "DoubleGlazed": "Doppelverglasung", "TripleGlazed": "Dreifachverglasung", "Louvered": "Lamellen",
+        "Flat": "Flach", "Pitched": "Geneigt", "Gable": "Giebeldach",
+        "Marble": "Marmor", "Timber": "Holz", "Concrete": "Beton", "Carpeted": "Teppichboden",
+        "North": "Norden", "East": "Osten", "South": "Süden", "West": "Westen", "LivingRoom": "Wohnzimmer",
+        "BTU": "BTU", "Watt": "Watt", "kW": "kW",
+        "HotMiddleEast": "Heißer Naher Osten", "TropicalSEAsia": "Tropisch (Südostasien)", "Subtropical": "Subtropisch (Australien/Südafrika)",
+        "AverageEurope": "Durchschnittliches Europa", "Continental": "Kontinental (Osteuropa)", "SubArctic": "Subarktisch (Skandinavien/Kanada)", "ColdAlaska": "Kaltes Alaska"
+      },
+      "applianceLabels": {
+        "Oven": "Ofen", "ServerRoom": "Serverraum", "CommercialKitchen": "Gewerbeküche", "Gym": "Fitnessraum",
+        "HomeTheater": "Heimkino", "Workshop": "Werkstatt", "OfficeRoom": "Büroraum", "HotelRoom": "Hotelzimmer"
+      },
+      "applianceTooltips": {
+        "Oven": "+8% Kühlung · −5% Heizung — Kochen erzeugt Wärme; gleicht einen Teil der Heizlast aus",
+        "ServerRoom": "+35% Kühlung · −15% Heizung — Server und IT-Ausrüstung erzeugen kontinuierlich hohe Wärme",
+        "CommercialKitchen": "+45% Kühlung · −20% Heizung — Mehrere Kochgeräte erzeugen intensive, anhaltende Wärme",
+        "Gym": "+20% Kühlung · −10% Heizung — Trainingsgeräte und hohe Stoffwechselaktivität der Nutzer",
+        "HomeTheater": "+6% Kühlung · −3% Heizung — AV-Receiver, Projektoren und Verstärker erzeugen moderate Wärme",
+        "Workshop": "+12% Kühlung · −6% Heizung — Elektrowerkzeuge und Kompressoren erzeugen während des Betriebs Wärme",
+        "OfficeRoom": "+18% Kühlung · −8% Heizung — Bürogeräte und Nutzer erzeugen moderate Wärme bei Kühlung, verringern den Heizbedarf",
+        "HotelRoom": "+10% Kühlung · −4% Heizung — Hotelzimmer haben einige interne Wärmegewinne durch Geräte und Gäste"
+      },
+      "roomTypeOptions": [
+        "Schlafzimmer 1", "Schlafzimmer 2", "Schlafzimmer 3", "Schlafzimmer 4", "Schlafzimmer 5", "Wohnzimmer", "Esszimmer", "Küche", "Badezimmer", "Terrasse", "Dachboden", "Eingeschossig", "Zweigeschossig", "Split-Level-Haus", "Gesamtes Erdgeschoss", "Gesamtes Obergeschoss und Darüber", "Offener Bürobereich"
+      ]
+    },
+    "sidebar": {
+      "trigger": { "open": "Gespeicherte PDFs öffnen", "close": "Gespeicherte PDFs schließen" },
+      "header": { "title": "Gespeicherte PDFs", "close": "Schließen" },
+      "tabs": { "myDrawings": "Meine Zeichnungen", "engineerReviews": "Ingenieur-Prüfungen" },
+      "toolbar": {
+        "searchPlaceholder": "Dateien suchen…",
+        "sortNewest": "Neueste", "sortOldest": "Älteste", "sortName": "Name",
+        "filterByStatus": "Nach Status filtern",
+        "statusAll": "Alle Status", "statusPending": "Ausstehend", "statusReviewed": "Geprüft",
+        "statusApproved": "Genehmigt", "statusRejected": "Abgelehnt"
+      },
+      "list": {
+        "loadingDrawings": "Deine Zeichnungen werden geladen…",
+        "loadingReviews": "Ingenieur-Prüfungen werden geladen…",
+        "deleteAllDrawings": "Alle Zeichnungen löschen",
+        "deleteAllReviews": "Alle Ingenieur-Prüfungen löschen",
+        "deleteAllBtn": "Alle Löschen",
+        "noMatches": "Keine Übereinstimmungen gefunden.",
+        "noSavedDocuments": "Noch keine gespeicherten Dokumente.",
+        "noEngineerReviews": "Noch keine Ingenieur-Prüfungen.",
+        "untitledDocument": "Unbenanntes Dokument",
+        "deleteTitle": "Löschen",
+        "deleteReviewTitle": "Ingenieur-Prüfung löschen",
+        "shareTitle": "Freigabelink kopieren",
+        "engineerLabel": "Ingenieur: {{name}}",
+        "unknownEngineer": "Unbekannt",
+        "pageOf": "Seite {{page}} von {{total}}"
+      },
+      "pdfView": {
+        "back": "← Zurück",
+        "deleteTitle": "Löschen",
+        "deleteReviewTitle": "Ingenieur-Prüfung löschen",
+        "shareTitle": "Freigabelink kopieren",
+        "buyEquipment": "🛒 Ausrüstung Kaufen",
+        "showHvac": "HLK-Ebene Anzeigen",
+        "hideHvac": "HLK-Ebene Ausblenden",
+        "legendTitle": "Legende:",
+        "legendDucts": "■ Kanäle",
+        "legendDiffusers": "● Diffusoren",
+        "legendRefrigerant": "— Kältemittelleitungen",
+        "zoomOut": "Verkleinern",
+        "zoomIn": "Vergrößern"
+      },
+      "footer": { "close": "Schließen" },
+      "deleteModal": {
+        "deleteAllDrawingsTitle": "Alle Zeichnungen Löschen",
+        "deleteAllReviewsTitle": "Alle Ingenieur-Prüfungen Löschen",
+        "deleteReviewTitle": "Ingenieur-Prüfung Löschen",
+        "deletePdfTitle": "PDF Löschen",
+        "confirmDeleteAllText": "Möchtest du {{filename}} wirklich dauerhaft löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "confirmDeleteText": "Möchtest du „{{filename}}“ wirklich löschen?",
+        "cancel": "Abbrechen",
+        "deleteAllBtn": "Alle Löschen",
+        "deleteBtn": "Löschen",
+        "allDrawingsFilename": "alle {{count}} Zeichnungen",
+        "allReviewsFilename": "alle {{count}} Prüfungen"
+      },
+      "toasts": {
+        "linkCopied": "Link in die Zwischenablage kopiert!",
+        "deletedAllSuccess": "Alle {{count}} {{type}} erfolgreich gelöscht!",
+        "deletedAllPartial": "{{count}} {{type}} gelöscht. {{failCount}} fehlgeschlagen.",
+        "deleteAllFailed": "Löschen von {{type}} fehlgeschlagen.",
+        "engineerReviewDeleted": "Ingenieur-Prüfung gelöscht!",
+        "pdfDeleted": "PDF erfolgreich gelöscht!",
+        "noDrawingsToDelete": "Keine Zeichnungen zum Löschen.",
+        "noReviewsToDelete": "Keine Ingenieur-Prüfungen zum Löschen.",
+        "typeDrawings": "Zeichnungen",
+        "typeReviews": "Ingenieur-Prüfungen"
+      },
+      "errors": {
+        "notAuthenticated": "Benutzer nicht authentifiziert.",
+        "fetchPdfsFailed": "Fehler beim Abrufen der gespeicherten PDFs. Bitte versuche es erneut.",
+        "loadPdfFailed": "PDF konnte nicht geladen werden. Details in der Konsole.",
+        "loadEngineerPdfFailed": "PDF der Ingenieur-Prüfung konnte nicht geladen werden. Details in der Konsole.",
+        "deletePdfFailed": "PDF konnte nicht gelöscht werden.",
+        "paymentRequired": "Sie müssen bezahlen, um dieses PDF mit Anmerkungen anzuzeigen."
+      }
+    },
+    "annotator": {
+      "ocrLanguage": {
+        "label": "OCR-Sprache",
+        "eng": "Englisch",
+        "engSpa": "Englisch + Spanisch",
+        "fra": "Französisch",
+        "deu": "Deutsch",
+        "heb": "Hebräisch",
+        "ita": "Italienisch",
+        "por": "Portugiesisch",
+        "spa": "Spanisch"
+      },
+      "uploadType": { "label": "Upload-Typ", "pdf": "PDF", "jpg": "JPG" },
+      "previewTitle": "Vorschau der ausgewählten Datei:",
+      "loading": { "processing": "Verarbeitung...", "loadingLibraries": "Bibliotheken werden geladen..." },
+      "errors": {
+        "noValidFiles": "Keine gültigen PDF- oder JPG-Dateien ausgewählt.",
+        "commentExists": "Dieser Kommentar existiert bereits.",
+        "selectPdfToSave": "Bitte wähle eine PDF-Datei zum Speichern aus.",
+        "signInToSave": "Du musst angemeldet sein, um zu speichern.",
+        "saveFailed": "Speichern fehlgeschlagen: {{message}}",
+        "networkError": "Beim Speichern ist ein Netzwerkfehler aufgetreten.",
+        "noRoomsToExport": "Keine Räume zum Exportieren",
+        "exportExcelFailed": "Excel-Datei konnte nicht exportiert werden.",
+        "exportJsonFailed": "JSON-Datei konnte nicht exportiert werden.",
+        "unknownError": "Unbekannter Fehler"
+      },
+      "toasts": {
+        "savedSuccess": "{{type}} und Anmerkungen erfolgreich gespeichert!"
+      },
+      "savedLabel": { "image": "Bild", "pdf": "PDF" },
+      "roomTable": {
+        "fileNameLabel": "Dateiname: {{name}}",
+        "errorLabel": "Fehler: {{message}}",
+        "apartmentTypeLabel": "Wohnungstyp:",
+        "classifiedRoomDataTitle": "Tabelle der klassifizierten Raumdaten",
+        "guidelinesTitle": "Allgemeine Richtlinien nach Raumgröße:",
+        "guidelineSmall": "Kleine Räume (90-250 sq. ft.)",
+        "guidelineMedium": "Mittlere Räume (250–350 sq. ft.)",
+        "guidelineLarge": "Große Räume (350-550 sq. ft.)",
+        "filterPlaceholder": "Nach Raumtyp filtern",
+        "sortRoomType": "Raumtyp",
+        "sortWidth": "Breite",
+        "sortLength": "Länge",
+        "sortAreaSqft": "Fläche (sqft)",
+        "sortAreaSqm": "Fläche (m²)",
+        "sortToggleTitle": "Sortierreihenfolge umschalten",
+        "sortLabel": "Sortierung: {{order}}",
+        "sortAsc": "AUFSTEIGEND",
+        "sortDesc": "ABSTEIGEND",
+        "exportExcelTitle": "Excel-Datei exportieren und herunterladen",
+        "downloadStarted": "Download gestartet!",
+        "exportJsonTitle": "Rohes JSON exportieren (Räume + Anmerkungen)",
+        "recentExportsTitle": "Letzte Exporte (Klicken zum erneuten Herunterladen)",
+        "noFilesExported": "In dieser Sitzung wurden keine Dateien exportiert.",
+        "downloadTitle": "Klicken zum Herunterladen und Öffnen: {{name}}",
+        "removeFileTitle": "Link aus der Liste entfernen (gibt Speicher frei)",
+        "roomTypePlaceholder": "Raumtyp",
+        "widthPlaceholder": "Breite in Dezimalfuß eingeben, z. B. 10.5 für 10'6",
+        "lengthPlaceholder": "Länge in Dezimalfuß eingeben, z. B. 10.5 für 10'6",
+        "addRoomBtn": "Raum hinzufügen",
+        "headerRoomType": "Raumtyp",
+        "headerWidth": "Breite (ft)",
+        "headerLength": "Länge (ft)",
+        "headerAreaSqft": "Fläche (sqft)",
+        "headerAreaSqm": "Fläche (m²)",
+        "headerActions": "Aktionen",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "noRoomData": "Keine klassifizierten Raumdaten gefunden. Füge über das obige Formular einen Raum hinzu.",
+        "total": "Gesamt: {{sqft}} sqft | {{sqm}} m²"
+      },
+      "toolbar": {
+        "ariaLabel": "PDF-Steuerung",
+        "exportBtuTitle": "Räume zum BTU-Rechner exportieren",
+        "exportBtuBtn": "Zu BTU exportieren ({{count}} Räume)",
+        "saveTitle": "PDF und Anmerkungen speichern",
+        "saving": "Speichern...",
+        "save": "Speichern",
+        "clearTitle": "Leinwand und Daten löschen",
+        "clear": "Löschen",
+        "undoTitle": "Letzte Anmerkungsaktion rückgängig machen (Strg+Z)",
+        "undo": "↩ Rückgängig",
+        "redoTitle": "Wiederholen (Strg+Y)",
+        "redo": "↪ Wiederholen",
+        "prevPageTitle": "Vorherige Seite",
+        "prevPage": "◀ Zurück",
+        "pageOf": "Seite {{page}}/{{total}}",
+        "nextPageTitle": "Nächste Seite",
+        "nextPage": "Weiter ▶",
+        "rotateLeftTitle": "PDF gegen den Uhrzeigersinn drehen",
+        "rotateLeft": "↶ Links",
+        "rotateRightTitle": "PDF im Uhrzeigersinn drehen",
+        "rotateRight": "↷ Rechts",
+        "resetRotationTitle": "PDF auf ursprüngliche Ausrichtung zurücksetzen",
+        "resetRotation": "Zurücksetzen ({{deg}}°)",
+        "zoomInTitle": "Vergrößern",
+        "zoomResetTitle": "Zoomstufe zurücksetzen",
+        "zoomOutTitle": "Verkleinern"
+      },
+      "annotationLabel": {
+        "labelText": "Anmerkungsbezeichnung:",
+        "placeholder": "ac-1, ..., ac-1.1, Kondensator…",
+        "hintClickToPlace": "Auf die Leinwand klicken zum Platzieren",
+        "hintTypeLabel": "Bezeichnung eingeben, dann auf die Leinwand klicken"
+      },
+      "mobileAnnotation": {
+        "hintTapToPlace": "Auf die Leinwand tippen, um die Anmerkung zu platzieren",
+        "hintEnablePlaceMode": "Platzierungsmodus aktivieren, dann auf die Leinwand tippen",
+        "hintTypeLabelBelow": "Unten eine Bezeichnung eingeben, dann zum Platzieren auf die Leinwand tippen",
+        "placeholder": "ac-1, ..., ac-1.1, Kondensator, Kondensator-1...",
+        "tapToPlaceBtn": "✅ Zum Platzieren tippen",
+        "placeModeBtn": "📌 Platzierungsmodus"
+      },
+      "placedAnnotations": {
+        "title": "📌 Platzierte Anmerkungen ({{count}})",
+        "hint": "— oder doppelklicke auf eine Bezeichnung auf der Leinwand, um sie zu bearbeiten",
+        "editTitle": "Anmerkungsbezeichnung bearbeiten",
+        "deleteTitle": "Anmerkung löschen"
+      },
+      "editLabelModal": {
+        "title": "✏️ Anmerkungsbezeichnung bearbeiten",
+        "save": "Speichern",
+        "cancel": "Abbrechen"
+      }
+    }
   }
 }

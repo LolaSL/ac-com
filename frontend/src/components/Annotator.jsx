@@ -15,6 +15,7 @@ import {
 } from "react-bootstrap";
 import { Store } from "../Store.js";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import TableBody from "./TableBody";
 import ExcelJS from "exceljs";
 import "./Annotator.css";
@@ -860,6 +861,7 @@ const Annotator = ({
   setRoomData,
   onExportToBtuCalculator,
 }) => {
+  const { t } = useTranslation();
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
   const [iconPositions, setIconPositions] = useState([]);
@@ -1414,7 +1416,7 @@ const Annotator = ({
     if (output.length === 0) {
       setFile(null);
       setPreviewUrl(null);
-      setError("No valid PDF or JPG files selected.");
+      setError(t("measurement.annotator.errors.noValidFiles"));
     }
   };
 
@@ -1803,7 +1805,7 @@ const Annotator = ({
     });
 
     if (existingComment) {
-      toast.error('This comment already exists.');
+      toast.error(t("measurement.annotator.errors.commentExists"));
       return;
     }
     
@@ -2317,7 +2319,7 @@ const Annotator = ({
     if (!file) {
       isSavingRef.current = false;
       setIsSaving(false);
-      alert("Please select a PDF file to save.");
+      alert(t("measurement.annotator.errors.selectPdfToSave"));
       return;
     }
     setIsSaved(false);
@@ -2390,7 +2392,7 @@ const Annotator = ({
     if (!token) {
       isSavingRef.current = false;
       setIsSaving(false);
-      alert("You must be signed in to save.");
+      alert(t("measurement.annotator.errors.signInToSave"));
       return;
     }
 
@@ -2405,8 +2407,8 @@ const Annotator = ({
 
       if (response.ok) {
         const data = await response.json();
-        const savedLabel = file?.type?.startsWith('image/') ? 'Image' : 'PDF';
-        toast.success(`${savedLabel} and annotations saved successfully!`, { autoClose: 3000 });
+        const savedLabel = file?.type?.startsWith('image/') ? t("measurement.annotator.savedLabel.image") : t("measurement.annotator.savedLabel.pdf");
+        toast.success(t("measurement.annotator.toasts.savedSuccess", { type: savedLabel }), { autoClose: 3000 });
         // Store annotation ID so iOS Safari can re-fetch on navigation restore.
         try { sessionStorage.setItem('annotator_annotation_id', data.id); } catch (e) { /* silent */ }
         setIsSaved(true);
@@ -2415,11 +2417,11 @@ const Annotator = ({
       } else {
         const errorData = await response.json();
         console.error("Error saving data:", errorData);
-        toast.error(`Failed to save: ${errorData.message || "Unknown error"}`, { autoClose: 5000 });
+        toast.error(t("measurement.annotator.errors.saveFailed", { message: errorData.message || t("measurement.annotator.errors.unknownError") }), { autoClose: 5000 });
       }
     } catch (error) {
       console.error("Network error while saving:", error);
-        toast.error("Network error occurred while saving.", { autoClose: 5000 });
+        toast.error(t("measurement.annotator.errors.networkError"), { autoClose: 5000 });
     } finally {
       isSavingRef.current = false;
       setIsSaving(false);
@@ -2639,7 +2641,7 @@ const Annotator = ({
     const baseName = info?.fileName || "annotated_data";
 
     if (!data.length) {
-      alert("No rooms to export");
+      alert(t("measurement.annotator.errors.noRoomsToExport"));
       return;
     }
 
@@ -2738,7 +2740,7 @@ const Annotator = ({
     } catch (error) {
       console.error("Export failed:", error);
       setExportStatus("error");
-      alert("Failed to export Excel file.");
+      alert(t("measurement.annotator.errors.exportExcelFailed"));
       setTimeout(() => setExportStatus("idle"), 5000);
     }
   };
@@ -2797,7 +2799,7 @@ const Annotator = ({
       setTimeout(() => URL.revokeObjectURL(url), 10000);
     } catch (err) {
       console.error('JSON export failed:', err);
-      alert('Failed to export JSON file.');
+      alert(t("measurement.annotator.errors.exportJsonFailed"));
     }
   };
 
@@ -2850,26 +2852,26 @@ const Annotator = ({
       <Form className="btu-calculation-measure mt-4">
         <Form.Label className=" label-upload fw-bold text-secondary "></Form.Label>
         <Form.Group className="mb-3">
-          <Form.Label className="fw-bold text-secondary">OCR language</Form.Label>
+          <Form.Label className="fw-bold text-secondary">{t("measurement.annotator.ocrLanguage.label")}</Form.Label>
           <Form.Select
             value={ocrLanguage}
             onChange={(e) => setOcrLanguage(e.target.value)}
             disabled={!scriptsLoaded || loading}
           >
-            <option value="eng">English</option>
-            <option value="eng+spa">English + Spanish</option>
-            <option value="fra">French</option>
-            <option value="deu">German</option>
-            <option value="heb">Hebrew</option>
-            <option value="ita">Italian</option>
-            <option value="por">Portuguese</option>
-            <option value="spa">Spanish</option>
+            <option value="eng">{t("measurement.annotator.ocrLanguage.eng")}</option>
+            <option value="eng+spa">{t("measurement.annotator.ocrLanguage.engSpa")}</option>
+            <option value="fra">{t("measurement.annotator.ocrLanguage.fra")}</option>
+            <option value="deu">{t("measurement.annotator.ocrLanguage.deu")}</option>
+            <option value="heb">{t("measurement.annotator.ocrLanguage.heb")}</option>
+            <option value="ita">{t("measurement.annotator.ocrLanguage.ita")}</option>
+            <option value="por">{t("measurement.annotator.ocrLanguage.por")}</option>
+            <option value="spa">{t("measurement.annotator.ocrLanguage.spa")}</option>
           </Form.Select>
         </Form.Group>
 
         {/* Upload mode toggle */}
         <Form.Group className="mb-3">
-          <Form.Label className="fw-bold text-secondary d-block mb-2">Upload type</Form.Label>
+          <Form.Label className="fw-bold text-secondary d-block mb-2">{t("measurement.annotator.uploadType.label")}</Form.Label>
           <ButtonGroup className="w-100">
             <Button
               variant={uploadMode === 'pdf' ? 'primary' : 'outline-secondary'}
@@ -2881,7 +2883,7 @@ const Annotator = ({
               className="d-flex align-items-center justify-content-center gap-2"
             >
               <FaFileCode />
-              PDF
+              {t("measurement.annotator.uploadType.pdf")}
             </Button>
             <Button
               variant={uploadMode === 'image' ? 'primary' : 'outline-secondary'}
@@ -2893,7 +2895,7 @@ const Annotator = ({
               className="d-flex align-items-center justify-content-center gap-2"
             >
               <i className="fas fa-image"></i>
-              JPG 
+              {t("measurement.annotator.uploadType.jpg")}
             </Button>
           </ButtonGroup>
         </Form.Group>
@@ -2909,7 +2911,7 @@ const Annotator = ({
           disabled={!scriptsLoaded || loading}
         />
       </Form>
-      <h2 className="mt-4 mb-4 text-secondary">Preview of selected file:</h2>
+      <h2 className="mt-4 mb-4 text-secondary">{t("measurement.annotator.previewTitle")}</h2>
       {(loading || !scriptsLoaded) && (
         <div className="d-flex align-items-center justify-content-center text-primary my-3">
           <div
@@ -2917,7 +2919,7 @@ const Annotator = ({
             role="status"
             aria-hidden="true"
           ></div>
-          {scriptsLoaded ? "Processing..." : "Loading libraries..."}
+          {scriptsLoaded ? t("measurement.annotator.loading.processing") : t("measurement.annotator.loading.loadingLibraries")}
         </div>
       )}
       {scriptsLoaded &&
@@ -2973,38 +2975,38 @@ const Annotator = ({
               key={fileIdx}
               className="mt-4 p-4 bg-white rounded shadow-sm border"
             >
-              <h5 className="mb-3">File Name: {result.fileName}</h5>
+              <h5 className="mb-3">{t("measurement.annotator.roomTable.fileNameLabel", { name: result.fileName })}</h5>
 
               {result.error ? (
                 <div className="text-danger fw-semibold">
-                  Error: {result.error}
+                  {t("measurement.annotator.roomTable.errorLabel", { message: result.error })}
                 </div>
               ) : (
                 <>
                   {result.apartmentType && (
                     <p className="mt-3 fw-semibold">
-                      Apartment Type:{" "}
+                      {t("measurement.annotator.roomTable.apartmentTypeLabel")}{" "}
                       <span className="text-primary">
                         {result.apartmentType}
                       </span>
                     </p>
                   )}
                   <h6 className="fw-semibold fs-5 mt-4 mb-3">
-                    Classified Room Data Table
+                    {t("measurement.annotator.roomTable.classifiedRoomDataTitle")}
                   </h6>
                   <div>
-                    <p className="fs-5">General Guidelines by Room Size: </p>
+                    <p className="fs-5">{t("measurement.annotator.roomTable.guidelinesTitle")} </p>
                     <ol className="fs-6">
-                      <li>Small Rooms (90-250 sq. ft.)</li>
-                      <li>Medium Rooms (250–350 sq. ft.)</li>
-                      <li>Large Rooms (350-550 sq. ft.)</li>
+                      <li>{t("measurement.annotator.roomTable.guidelineSmall")}</li>
+                      <li>{t("measurement.annotator.roomTable.guidelineMedium")}</li>
+                      <li>{t("measurement.annotator.roomTable.guidelineLarge")}</li>
                     </ol>
                   </div>
                   <div className="mb-3 d-flex flex-column flex-md-row gap-3 align-items-start">
                     <div className="d-flex flex-column flex-sm-row gap-2">
                       <input
                         type="text"
-                        placeholder="Filter by room type"
+                        placeholder={t("measurement.annotator.roomTable.filterPlaceholder")}
                         value={filterText}
                         onChange={(e) => setFilterText(e.target.value)}
                         className="form-control flex-grow-1 my-2"
@@ -3015,11 +3017,11 @@ const Annotator = ({
                         onChange={(e) => setSortKey(e.target.value)}
                         className="form-select flex-grow-1 m-1"
                       >
-                        <option value="roomType">Room Type</option>
-                        <option value="width">Width</option>
-                        <option value="length">Length</option>
-                        <option value="areaSqft">Area (sqft)</option>
-                        <option value="areaSqm">Area (sqm)</option>
+                        <option value="roomType">{t("measurement.annotator.roomTable.sortRoomType")}</option>
+                        <option value="width">{t("measurement.annotator.roomTable.sortWidth")}</option>
+                        <option value="length">{t("measurement.annotator.roomTable.sortLength")}</option>
+                        <option value="areaSqft">{t("measurement.annotator.roomTable.sortAreaSqft")}</option>
+                        <option value="areaSqm">{t("measurement.annotator.roomTable.sortAreaSqm")}</option>
                       </select>
                     </div>
                     <div className="d-flex flex-column flex-sm-row gap-2 sort-export-btns">
@@ -3030,15 +3032,15 @@ const Annotator = ({
                         onClick={() =>
                           setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                         }
-                        title="Toggle sort order"
+                        title={t("measurement.annotator.roomTable.sortToggleTitle")}
                       >
-                        Sort: {sortOrder === "asc" ? "ASC" : "DESC"}
+                        {t("measurement.annotator.roomTable.sortLabel", { order: sortOrder === "asc" ? t("measurement.annotator.roomTable.sortAsc") : t("measurement.annotator.roomTable.sortDesc") })}
                       </Button>
 
                       <Button
                         variant="link"
                         className="excel-icon-button "
-                        title="Export and Download Excel File"
+                        title={t("measurement.annotator.roomTable.exportExcelTitle")}
                         onClick={() =>
                           handleExportExcelStyled(
                             filteredRoomsForTable,
@@ -3061,7 +3063,7 @@ const Annotator = ({
 
                       <Button
                         variant="link"
-                        title="Export raw JSON (rooms + annotations)"
+                        title={t("measurement.annotator.roomTable.exportJsonTitle")}
                         onClick={() => handleExportJSON(filteredRoomsForTable, pdfInfo)}
                         style={{ padding: 0, marginLeft: '4px' }}
                       >
@@ -3073,14 +3075,14 @@ const Annotator = ({
                       </Button>
                       {exportStatus === "success" && (
                         <span className="export-success">
-                          <FaDownload /> Download Started!
+                          <FaDownload /> {t("measurement.annotator.roomTable.downloadStarted")}
                         </span>
                       )}
                     </div>
                     <div className="recent-exports">
-                      <h5>Recent Exports (Click to Re-download)</h5>
+                      <h5>{t("measurement.annotator.roomTable.recentExportsTitle")}</h5>
                       {downloadedFiles.length === 0 ? (
-                        <p>No files exported in this session.</p>
+                        <p>{t("measurement.annotator.roomTable.noFilesExported")}</p>
                       ) : (
                         <ul>
                           {downloadedFiles.map((file) => (
@@ -3088,7 +3090,7 @@ const Annotator = ({
                               <a
                                 href={file.url}
                                 download={file.name}
-                                title={`Click to download and open: ${file.name}`}
+                                title={t("measurement.annotator.roomTable.downloadTitle", { name: file.name })}
                               >
                                 {file.fileType === 'json' ? (
                                   <FaFileCode
@@ -3107,7 +3109,7 @@ const Annotator = ({
                               </a>
                               <button
                                 onClick={() => handleRemoveFile(file)}
-                                title="Remove link from list (frees memory)"
+                                title={t("measurement.annotator.roomTable.removeFileTitle")}
                               >
                                 <FaTimes size={14} color="#dc3545" />
                               </button>
@@ -3121,7 +3123,7 @@ const Annotator = ({
                   <div className="mb-3 mt-2">
                     <input
                       type="text"
-                      placeholder="Room Type"
+                      placeholder={t("measurement.annotator.roomTable.roomTypePlaceholder")}
                       value={newRoom.roomType}
                       onChange={(e) =>
                         setNewRoom({ ...newRoom, roomType: e.target.value })
@@ -3130,7 +3132,7 @@ const Annotator = ({
                     />
                     <input
                       type="text"
-                      placeholder="Enter width in decimal ft e.g., 10.5 for 10'6 "
+                      placeholder={t("measurement.annotator.roomTable.widthPlaceholder")}
                       value={newRoom.width}
                       onChange={(e) =>
                         setNewRoom({ ...newRoom, width: e.target.value })
@@ -3139,7 +3141,7 @@ const Annotator = ({
                     />
                     <input
                       type="text"
-                      placeholder="Enter length in decimal ft e.g., 10.5 for 10'6"
+                      placeholder={t("measurement.annotator.roomTable.lengthPlaceholder")}
                       value={newRoom.length}
                       onChange={(e) =>
                         setNewRoom({ ...newRoom, length: e.target.value })
@@ -3152,7 +3154,7 @@ const Annotator = ({
                       className="go-to-btn btn-text w-auto"
                       onClick={() => handleAddRoom(fileIdx)}
                     >
-                      Add Room
+                      {t("measurement.annotator.roomTable.addRoomBtn")}
                     </Button>
                   </div>
                   {filteredRoomsForTable?.length > 0 ? (
@@ -3160,12 +3162,12 @@ const Annotator = ({
                       <Table striped bordered hover responsive size="sm">
                         <thead>
                           <tr>
-                            <th>Room Type</th>
-                            <th>Width (ft)</th>
-                            <th>Length (ft)</th>
-                            <th>Area (sqft)</th>
-                            <th>Area (sqm)</th>
-                            <th>Actions</th>
+                            <th>{t("measurement.annotator.roomTable.headerRoomType")}</th>
+                            <th>{t("measurement.annotator.roomTable.headerWidth")}</th>
+                            <th>{t("measurement.annotator.roomTable.headerLength")}</th>
+                            <th>{t("measurement.annotator.roomTable.headerAreaSqft")}</th>
+                            <th>{t("measurement.annotator.roomTable.headerAreaSqm")}</th>
+                            <th>{t("measurement.annotator.roomTable.headerActions")}</th>
                           </tr>
                         </thead>
                         <TableBody
@@ -3264,14 +3266,14 @@ const Annotator = ({
                                         variant="success"
                                         onClick={handleSaveEdit}
                                       >
-                                        Save
+                                        {t("measurement.annotator.roomTable.save")}
                                       </Button>
                                       <Button
                                         size="sm"
                                         variant="secondary"
                                         onClick={handleCancelEdit}
                                       >
-                                        Cancel
+                                        {t("measurement.annotator.roomTable.cancel")}
                                       </Button>
                                     </div>
                                   ) : (
@@ -3288,7 +3290,7 @@ const Annotator = ({
                                           )
                                         }
                                       >
-                                        Edit
+                                        {t("measurement.annotator.roomTable.edit")}
                                       </Button>
                                       <Button
                                         size="sm"
@@ -3301,7 +3303,7 @@ const Annotator = ({
                                           )
                                         }
                                       >
-                                        Delete
+                                        {t("measurement.annotator.roomTable.delete")}
                                       </Button>
                                     </div>
                                   )}
@@ -3312,27 +3314,25 @@ const Annotator = ({
                         />
                       </Table>
                       <p className="fw-bold text-center mt-3">
-                        Total:{" "}
-                        {filteredRoomsForTable
-                          .reduce(
-                            (sum, room) => sum + parseFloat(room.areaSqFt || 0),
-                            0
-                          )
-                          .toFixed(2)}{" "}
-                        sqft |{" "}
-                        {filteredRoomsForTable
-                          .reduce(
-                            (sum, room) => sum + parseFloat(room.areaSqM || 0),
-                            0
-                          )
-                          .toFixed(2)}{" "}
-                        sqm
+                        {t("measurement.annotator.roomTable.total", {
+                          sqft: filteredRoomsForTable
+                            .reduce(
+                              (sum, room) => sum + parseFloat(room.areaSqFt || 0),
+                              0
+                            )
+                            .toFixed(2),
+                          sqm: filteredRoomsForTable
+                            .reduce(
+                              (sum, room) => sum + parseFloat(room.areaSqM || 0),
+                              0
+                            )
+                            .toFixed(2),
+                        })}
                       </p>
                     </div>
                   ) : (
                     <p className="fst-italic text-secondary">
-                      No classified room data found. Add a room using the form
-                      above.
+                      {t("measurement.annotator.roomTable.noRoomData")}
                     </p>
                   )}
                 </>
@@ -3342,7 +3342,7 @@ const Annotator = ({
         })}
       <ButtonToolbar
         className="mb-3 mt-3 button-toolbar-annotator px-2"
-        aria-label="PDF controls"
+        aria-label={t("measurement.annotator.toolbar.ariaLabel")}
       >
         {file && (
           <>
@@ -3379,26 +3379,26 @@ const Annotator = ({
                 disabled={
                   filteredRoomsRef.current.flat().filter(Boolean).length === 0
                 }
-                title="Export rooms to BTU Calculator"
+                title={t("measurement.annotator.toolbar.exportBtuTitle")}
               >
-                Export to BTU ({filteredRoomsRef.current.flat().filter(Boolean).length} rooms)
+                {t("measurement.annotator.toolbar.exportBtuBtn", { count: filteredRoomsRef.current.flat().filter(Boolean).length })}
               </Button>
 
               <Button
                 variant="outline-primary"
                 onClick={saveToBackend}
                 disabled={isSaving}
-                title="Save PDF and annotations"
+                title={t("measurement.annotator.toolbar.saveTitle")}
               >
-                {isSaving ? "Saving..." : "Save"}
+                {isSaving ? t("measurement.annotator.toolbar.saving") : t("measurement.annotator.toolbar.save")}
               </Button>
 
               <Button
                 variant="outline-secondary"
                 onClick={clearCanvas}
-                title="Clear canvas and data"
+                title={t("measurement.annotator.toolbar.clearTitle")}
               >
-                Clear
+                {t("measurement.annotator.toolbar.clear")}
               </Button>
             </ButtonGroup>
 
@@ -3407,13 +3407,13 @@ const Annotator = ({
               <Button
                 variant="outline-dark"
                 onClick={undo}
-                title="Undo last annotation action (Ctrl+Z)"
-              >↩ Undo</Button>
+                title={t("measurement.annotator.toolbar.undoTitle")}
+              >{t("measurement.annotator.toolbar.undo")}</Button>
               <Button
                 variant="outline-dark"
                 onClick={redo}
-                title="Redo (Ctrl+Y)"
-              >↪ Redo</Button>
+                title={t("measurement.annotator.toolbar.redoTitle")}
+              >{t("measurement.annotator.toolbar.redo")}</Button>
             </ButtonGroup>
 
             {file && file.type === "application/pdf" && totalPages > 1 && (
@@ -3422,19 +3422,19 @@ const Annotator = ({
                   variant="outline-success"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage <= 1}
-                  title="Previous page"
-                >◀ Prev</Button>
+                  title={t("measurement.annotator.toolbar.prevPageTitle")}
+                >{t("measurement.annotator.toolbar.prevPage")}</Button>
                 <Button
                   variant="outline-success"
                   disabled
                   style={{ minWidth: '70px' }}
-                >Page {currentPage}/{totalPages}</Button>
+                >{t("measurement.annotator.toolbar.pageOf", { page: currentPage, total: totalPages })}</Button>
                 <Button
                   variant="outline-success"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage >= totalPages}
-                  title="Next page"
-                >Next ▶</Button>
+                  title={t("measurement.annotator.toolbar.nextPageTitle")}
+                >{t("measurement.annotator.toolbar.nextPage")}</Button>
               </ButtonGroup>
             )}
 
@@ -3445,26 +3445,26 @@ const Annotator = ({
                   onClick={() =>
                     setPdfRotation((prev) => (prev - 90 + 360) % 360)
                   }
-                  title="Rotate PDF counter-clockwise"
+                  title={t("measurement.annotator.toolbar.rotateLeftTitle")}
                 >
-                  ↶ Left
+                  {t("measurement.annotator.toolbar.rotateLeft")}
                 </Button>
 
                 <Button
                   variant="outline-secondary"
                   onClick={() => setPdfRotation((prev) => (prev + 90) % 360)}
-                  title="Rotate PDF clockwise"
+                  title={t("measurement.annotator.toolbar.rotateRightTitle")}
                 >
-                  ↷ Right
+                  {t("measurement.annotator.toolbar.rotateRight")}
                 </Button>
 
                 {pdfRotation !== 0 && (
                   <Button
                     variant="outline-warning"
                     onClick={() => setPdfRotation(0)}
-                    title="Reset PDF to original orientation"
+                    title={t("measurement.annotator.toolbar.resetRotationTitle")}
                   >
-                    Reset ({pdfRotation}°)
+                    {t("measurement.annotator.toolbar.resetRotation", { deg: pdfRotation })}
                   </Button>
                 )}
               </ButtonGroup>
@@ -3475,14 +3475,14 @@ const Annotator = ({
                 <Button
                   variant="outline-info"
                   onClick={() => setPdfZoom((prev) => Math.min(4, prev + 0.2))}
-                  title="Zoom in"
+                  title={t("measurement.annotator.toolbar.zoomInTitle")}
                 >
                   🔍 +
                 </Button>
                 <Button
                   variant="outline-info"
                   onClick={() => setPdfZoom(1.0)}
-                  title="Reset zoom level"
+                  title={t("measurement.annotator.toolbar.zoomResetTitle")}
                   disabled={pdfZoom === 1.0}
                 >
                   {pdfZoom === 1.0 ? "100%" : `${(pdfZoom * 100).toFixed(0)}%`}
@@ -3490,7 +3490,7 @@ const Annotator = ({
                 <Button
                   variant="outline-info"
                   onClick={() => setPdfZoom((prev) => Math.max(1.0, prev - 0.2))}
-                  title="Zoom out"
+                  title={t("measurement.annotator.toolbar.zoomOutTitle")}
                   disabled={pdfZoom === 1.0}
                 >
                   🔍 −
@@ -3505,16 +3505,16 @@ const Annotator = ({
       {/* ── Desktop annotation label input (≥768px only) ── */}
       {file && (
         <div className="d-none d-md-flex align-items-center gap-2 mb-2 px-2">
-          <span className="text-muted small" style={{ whiteSpace: 'nowrap' }}>Annotation label:</span>
+          <span className="text-muted small" style={{ whiteSpace: 'nowrap' }}>{t("measurement.annotator.annotationLabel.labelText")}</span>
           <input
             type="text"
             className="form-control form-control-sm"
             style={{ maxWidth: '200px' }}
-            placeholder="ac-1, ..., ac-1.1, condenser…"
+            placeholder={t("measurement.annotator.annotationLabel.placeholder")}
             value={acUnitInput}
             onChange={(e) => setAcUnitInput(e.target.value)}
           />
-          <span className="text-muted small">{acUnitInput.trim() ? 'Click canvas to place' : 'Type label, then click canvas'}</span>
+          <span className="text-muted small">{acUnitInput.trim() ? t("measurement.annotator.annotationLabel.hintClickToPlace") : t("measurement.annotator.annotationLabel.hintTypeLabel")}</span>
         </div>
       )}
 
@@ -3523,15 +3523,15 @@ const Annotator = ({
         <div className="mobile-annotation-bar d-flex d-md-none flex-column align-items-center gap-1 mb-2 px-1 text-center">
           <span className="text-muted small">
             {acUnitInput.trim()
-              ? mobileAnnotationActive ? 'Tap canvas to place annotation' : 'Enable place mode, then tap canvas'
-              : 'Type a label below, then tap the canvas to place'}
+              ? mobileAnnotationActive ? t("measurement.annotator.mobileAnnotation.hintTapToPlace") : t("measurement.annotator.mobileAnnotation.hintEnablePlaceMode")
+              : t("measurement.annotator.mobileAnnotation.hintTypeLabelBelow")}
           </span>
           <div className="d-flex align-items-center gap-2">
             <input
               type="text"
               className="form-control form-control-sm"
               style={{ maxWidth: '260px' }}
-              placeholder="ac-1, ..., ac-1.1, condenser, condenser-1..."
+              placeholder={t("measurement.annotator.mobileAnnotation.placeholder")}
               value={acUnitInput}
               onChange={(e) => setAcUnitInput(e.target.value)}
             />
@@ -3539,7 +3539,7 @@ const Annotator = ({
               className={`btn btn-sm ${mobileAnnotationActive ? 'btn-primary' : 'btn-outline-secondary'}`}
               onClick={() => setMobileAnnotationActive(prev => !prev)}
             >
-              {mobileAnnotationActive ? '✅ Tap to place' : '📌 Place mode'}
+              {mobileAnnotationActive ? t("measurement.annotator.mobileAnnotation.tapToPlaceBtn") : t("measurement.annotator.mobileAnnotation.placeModeBtn")}
             </button>
           </div>
         </div>
@@ -3722,9 +3722,9 @@ const Annotator = ({
       {comments.length > 0 && (
         <div style={{ margin: '12px 0 4px', padding: '10px 14px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
           <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '8px', color: '#495057' }}>
-            📌 Placed annotations ({comments.length})
+            {t("measurement.annotator.placedAnnotations.title", { count: comments.length })}
             <span style={{ fontWeight: 400, color: '#6c757d', marginLeft: '8px', fontSize: '12px' }}>
-              — or double-click a label on the canvas to edit
+              {t("measurement.annotator.placedAnnotations.hint")}
             </span>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -3741,7 +3741,7 @@ const Annotator = ({
                   {comment.text}
                 </span>
                 <button
-                  title="Edit annotation label"
+                  title={t("measurement.annotator.placedAnnotations.editTitle")}
                   onClick={() => {
                     setEditingLabelRectId(comment.rectId);
                     setEditingLabelValue(comment.text);
@@ -3753,7 +3753,7 @@ const Annotator = ({
                   }}
                 >✏️</button>
                 <button
-                  title="Delete annotation"
+                  title={t("measurement.annotator.placedAnnotations.deleteTitle")}
                   onClick={() => removeAnnotationByRectId(comment.rectId)}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
@@ -3783,7 +3783,7 @@ const Annotator = ({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h5 style={{ marginBottom: '12px' }}>✏️ Edit annotation label</h5>
+            <h5 style={{ marginBottom: '12px' }}>{t("measurement.annotator.editLabelModal.title")}</h5>
             <Form.Control
               type="text"
               value={editingLabelValue}
@@ -3816,8 +3816,8 @@ const Annotator = ({
                   setShowEditLabelModal(false);
                 }}
                 disabled={!editingLabelValue.trim()}
-              >Save</Button>
-              <Button variant="secondary" size="sm" onClick={() => setShowEditLabelModal(false)}>Cancel</Button>
+              >{t("measurement.annotator.editLabelModal.save")}</Button>
+              <Button variant="secondary" size="sm" onClick={() => setShowEditLabelModal(false)}>{t("measurement.annotator.editLabelModal.cancel")}</Button>
             </div>
           </div>
         </div>

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FaPlayCircle, FaTimes, FaVideo } from "react-icons/fa";
 import "./PdfHelpVideo.css";
 import { VIDEO_LIBRARY } from "../data/videoLibrary";
 
 const PdfHelpVideoModal = () => {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(VIDEO_LIBRARY[0]);
 
@@ -48,7 +50,7 @@ const PdfHelpVideoModal = () => {
       {/* Trigger button */}
       <button className="phv-trigger" onClick={() => setShow(true)}>
         <FaPlayCircle className="phv-trigger__icon" />
-        Video Tutorials ({VIDEO_LIBRARY.length})
+        {t("measurement.pdfHelpVideo.trigger")} ({VIDEO_LIBRARY.length})
       </button>
 
       {/* Modal overlay */}
@@ -60,9 +62,9 @@ const PdfHelpVideoModal = () => {
             <div className="phv-header">
               <div className="phv-header__left">
                 <FaVideo className="phv-header__icon" />
-                <h2 className="phv-header__title">Video Tutorial Library</h2>
+                <h2 className="phv-header__title">{t("measurement.pdfHelpVideo.title")}</h2>
               </div>
-              <button className="phv-close" onClick={handleClose} aria-label="Close">
+              <button className="phv-close" onClick={handleClose} aria-label={t("measurement.pdfHelpVideo.close")}>
                 <FaTimes />
               </button>
             </div>
@@ -85,7 +87,7 @@ const PdfHelpVideoModal = () => {
                       />
                       {selectedVideo.id === video.id && (
                         <div className="phv-video-card__playing-badge">
-                          <FaPlayCircle /> Selected
+                          <FaPlayCircle /> {t("measurement.pdfHelpVideo.selected")}
                         </div>
                       )}
                     </div>
@@ -129,7 +131,7 @@ const PdfHelpVideoModal = () => {
             {/* Footer */}
             <div className="phv-footer">
               <button className="phv-close-btn" onClick={handleClose}>
-                Close
+                {t("measurement.pdfHelpVideo.close")}
               </button>
             </div>
           </div>

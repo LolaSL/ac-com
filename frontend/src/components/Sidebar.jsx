@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 import { Store } from "../Store.js";
@@ -67,6 +68,7 @@ const statusConfig = {
 };
 
 const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { state } = useContext(Store);
   const token = state?.userInfo?.token || state?.adminInfo?.token;
@@ -138,7 +140,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       ? `${base}/measurement?engineerReview=${id}`
       : `${base}/measurement?annotation=${id}`;
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => toast.success('Link copied to clipboard!'));
+      navigator.clipboard.writeText(url).then(() => toast.success(t("measurement.sidebar.toasts.linkCopied")));
     } else {
       const ta = document.createElement('textarea');
       ta.value = url;
@@ -148,7 +150,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
-      toast.success('Link copied to clipboard!');
+      toast.success(t("measurement.sidebar.toasts.linkCopied"));
     }
   };
 
@@ -162,7 +164,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
 
   const fetchSavedPdfs = useCallback(async () => {
     if (!token) {
-      setError("User not authenticated.");
+      setError(t("measurement.sidebar.errors.notAuthenticated"));
       return;
     }
 
@@ -188,7 +190,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       setSavedPdfsLoading(false);
     } catch (err) {
       console.error("Error fetching PDFs:", err);
-      setError(err.message || "Error fetching saved PDFs. Please try again.");
+      setError(err.message || t("measurement.sidebar.errors.fetchPdfsFailed"));
       setSavedPdfsLoading(false);
     }
   }, [token]);
@@ -398,10 +400,10 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
 
   const viewPdfWithAnnotations = async (pdf) => {
     console.log("Viewing PDF:", pdf);
-    if (!token) return setError("User not authenticated.");
+    if (!token) return setError(t("measurement.sidebar.errors.notAuthenticated"));
     try {
       if (pdf.isPaid) {
-        alert("You need to pay to view this PDF with annotations.");
+        alert(t("measurement.sidebar.errors.paymentRequired"));
         return;
       }
 
@@ -518,13 +520,13 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
       }
     } catch (err) {
       console.error(err);
-      setError("Failed to load PDF. See console for details.");
+      setError(t("measurement.sidebar.errors.loadPdfFailed"));
     }
   };
 
   const viewEngineerAnnotationPdf = async (engineerAnnotation) => {
     console.log("Viewing engineer annotation:", engineerAnnotation);
-    if (!token) return setError("User not authenticated.");
+    if (!token) return setError(t("measurement.sidebar.errors.notAuthenticated"));
     try {
       setCurrentPdfType("engineer");
       setSelectedPdf(engineerAnnotation);
@@ -856,7 +858,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
     } catch (err) {
       console.error(err);
       setError(
-        "Failed to load engineer annotation PDF. See console for details."
+        t("measurement.sidebar.errors.loadEngineerPdfFailed")
       );
     }
   };
@@ -868,13 +870,13 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
 
   const handleDeleteAllMyDrawings = () => {
     if (savedPdfs.length === 0) {
-      toast.warning('No drawings to delete.');
+      toast.warning(t("measurement.sidebar.toasts.noDrawingsToDelete"));
       return;
     }
     setDeleteConfirm({ 
       show: true, 
       pdfId: null, 
-      filename: `all ${savedPdfs.length} drawings`,
+      filename: t("measurement.sidebar.deleteModal.allDrawingsFilename", { count: savedPdfs.length }),
       isEngineerReview: false, 
       deleteAll: true 
     });
@@ -882,13 +884,13 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
 
   const handleDeleteAllEngineerReviews = () => {
     if (engineerAnnotations.length === 0) {
-      toast.warning('No engineer reviews to delete.');
+      toast.warning(t("measurement.sidebar.toasts.noReviewsToDelete"));
       return;
     }
     setDeleteConfirm({ 
       show: true, 
       pdfId: null, 
-      filename: `all ${engineerAnnotations.length} reviews`,
+      filename: t("measurement.sidebar.deleteModal.allReviewsFilename", { count: engineerAnnotations.length }),
       isEngineerReview: true, 
       deleteAll: true 
     });
@@ -897,7 +899,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
   const confirmDeletePdf = async () => {
     const { pdfId, isEngineerReview, deleteAll } = deleteConfirm;
     setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false });
-    if (!token) return setError("User not authenticated.");
+    if (!token) return setError(t("measurement.sidebar.errors.notAuthenticated"));
 
     try {
       if (deleteAll) {
@@ -933,13 +935,13 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
         setSelectedPdfFile(null);
         setSelectedAnnotations(null);
 
-        const message = isEngineerReview ? "engineer reviews" : "drawings";
+        const message = isEngineerReview ? t("measurement.sidebar.toasts.typeReviews") : t("measurement.sidebar.toasts.typeDrawings");
         if (successCount > 0 && failureCount === 0) {
-          toast.success(`Successfully deleted all ${successCount} ${message}!`);
+          toast.success(t("measurement.sidebar.toasts.deletedAllSuccess", { count: successCount, type: message }));
         } else if (successCount > 0) {
-          toast.success(`Deleted ${successCount} ${message}. ${failureCount} failed.`);
+          toast.success(t("measurement.sidebar.toasts.deletedAllPartial", { count: successCount, failCount: failureCount, type: message }));
         } else {
-          toast.error(`Failed to delete ${message}.`);
+          toast.error(t("measurement.sidebar.toasts.deleteAllFailed", { type: message }));
         }
       } else {
         // Delete single PDF
@@ -953,9 +955,9 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
         });
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to delete PDF.");
+          throw new Error(errorData.message || t("measurement.sidebar.errors.deletePdfFailed"));
         }
-        toast.success(isEngineerReview ? "Engineer review deleted!" : "PDF deleted successfully!");
+        toast.success(isEngineerReview ? t("measurement.sidebar.toasts.engineerReviewDeleted") : t("measurement.sidebar.toasts.pdfDeleted"));
         
         if (isEngineerReview) {
           setEngineerAnnotations((prev) => prev.filter((a) => a._id !== pdfId));
@@ -972,14 +974,14 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
     } catch (err) {
       console.error(err);
       setError(err.message);
-      toast.error(err.message || "Failed to delete PDF.");
+      toast.error(err.message || t("measurement.sidebar.errors.deletePdfFailed"));
     }
   };
 
   return (
     <>
       <button className="phv-trigger" onClick={toggleSidebar}>
-        <FaFilePdf /> {isOpen ? "Close Saved PDFs" : "Open Saved PDFs"}
+        <FaFilePdf /> {isOpen ? t("measurement.sidebar.trigger.close") : t("measurement.sidebar.trigger.open")}
       </button>
 
       {isOpen && (
@@ -990,9 +992,9 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
             <div className="sb-header">
               <div className="sb-header__left">
                 <FaFilePdf />
-                <h2 className="sb-header__title">Saved PDFs</h2>
+                <h2 className="sb-header__title">{t("measurement.sidebar.header.title")}</h2>
               </div>
-              <button className="phv-close" onClick={toggleSidebar} aria-label="Close">
+              <button className="phv-close" onClick={toggleSidebar} aria-label={t("measurement.sidebar.header.close")}>
                 <FaTimes />
               </button>
             </div>
@@ -1015,7 +1017,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                     if (container) container.innerHTML = "";
                   }}
                 >
-                  My Drawings
+                  {t("measurement.sidebar.tabs.myDrawings")}
                 </button>
                 <button
                   className={`sb-tab${activeTab === "engineer-reviews" ? " sb-tab--active" : ""}`}
@@ -1029,7 +1031,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                     if (container) container.innerHTML = "";
                   }}
                 >
-                  Engineer Reviews
+                  {t("measurement.sidebar.tabs.engineerReviews")}
                 </button>
               </div>
 
@@ -1042,7 +1044,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                     <input
                       type="text"
                       className="sb-search"
-                      placeholder="Search files…"
+                      placeholder={t("measurement.sidebar.toolbar.searchPlaceholder")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -1051,22 +1053,22 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
                     >
-                      <option value="newest">Newest</option>
-                      <option value="oldest">Oldest</option>
-                      <option value="name">Name</option>
+                      <option value="newest">{t("measurement.sidebar.toolbar.sortNewest")}</option>
+                      <option value="oldest">{t("measurement.sidebar.toolbar.sortOldest")}</option>
+                      <option value="name">{t("measurement.sidebar.toolbar.sortName")}</option>
                     </select>
                     {activeTab === 'engineer-reviews' && (
                       <select
                         className="sb-sort"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        title="Filter by status"
+                        title={t("measurement.sidebar.toolbar.filterByStatus")}
                       >
-                        <option value="all">All statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="reviewed">Reviewed</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="all">{t("measurement.sidebar.toolbar.statusAll")}</option>
+                        <option value="pending">{t("measurement.sidebar.toolbar.statusPending")}</option>
+                        <option value="reviewed">{t("measurement.sidebar.toolbar.statusReviewed")}</option>
+                        <option value="approved">{t("measurement.sidebar.toolbar.statusApproved")}</option>
+                        <option value="rejected">{t("measurement.sidebar.toolbar.statusRejected")}</option>
                       </select>
                     )}
                   </div>
@@ -1077,7 +1079,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                   <>
                     {activeTab === "my-annotations" && (
                       savedPdfsLoading ? (
-                        <p className="sb-empty">Loading your drawings…</p>
+                        <p className="sb-empty">{t("measurement.sidebar.list.loadingDrawings")}</p>
                       ) : savedPdfs.length > 0 ? ((() => {
                         const filtered = filterAndSort(savedPdfs);
                         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -1089,9 +1091,9 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                             <button
                               className="btn btn-outline-danger btn-sm"
                               onClick={handleDeleteAllMyDrawings}
-                              title="Delete all drawings"
+                              title={t("measurement.sidebar.list.deleteAllDrawings")}
                             >
-                              <FaTrash /> Delete All
+                              <FaTrash /> {t("measurement.sidebar.list.deleteAllBtn")}
                             </button>
                           </div>
                           <ul className="sb-list">
@@ -1103,7 +1105,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                                 disabled={pdf.isPaid}
                               >
                                 <FaFilePdf />
-                                <span>{pdf.filename || "Untitled Document"}</span>
+                                <span>{pdf.filename || t("measurement.sidebar.list.untitledDocument")}</span>
                                 {pdf.isPaid && <FaLock />}
                               </button>
                               <small className="sb-item__date">
@@ -1112,14 +1114,14 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                               <button
                                 className="sb-item__delete"
                                 onClick={() => handleDeletePdf(pdf._id, pdf.filename)}
-                                title="Delete"
+                                title={t("measurement.sidebar.list.deleteTitle")}
                               >
                                 <FaTrash />
                               </button>
                               <button
                                 className="sb-item__share"
                                 onClick={() => handleShareLink(pdf._id, false)}
-                                title="Copy shareable link"
+                                title={t("measurement.sidebar.list.shareTitle")}
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#6c757d' }}
                               >
                                 🔗
@@ -1130,22 +1132,22 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                           {totalPages > 1 && (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '8px' }}>
                               <button className="btn btn-outline-secondary btn-sm" disabled={page <= 1} onClick={() => setMyDrawingsPage(p => Math.max(1, p - 1))}>◀</button>
-                              <span style={{ fontSize: '0.8rem' }}>Page {page} of {totalPages}</span>
+                              <span style={{ fontSize: '0.8rem' }}>{t("measurement.sidebar.list.pageOf", { page, total: totalPages })}</span>
                               <button className="btn btn-outline-secondary btn-sm" disabled={page >= totalPages} onClick={() => setMyDrawingsPage(p => Math.min(totalPages, p + 1))}>▶</button>
                             </div>
                           )}
                         </>
                         ) : (
-                          <p className="sb-empty">No matches found.</p>
+                          <p className="sb-empty">{t("measurement.sidebar.list.noMatches")}</p>
                         );
                       })()) : (
-                        <p className="sb-empty sb-empty--danger">No saved documents yet.</p>
+                        <p className="sb-empty sb-empty--danger">{t("measurement.sidebar.list.noSavedDocuments")}</p>
                       )
                     )}
 
                     {activeTab === "engineer-reviews" && (
                       engineerAnnotationsLoading ? (
-                        <p className="sb-empty">Loading engineer reviews…</p>
+                        <p className="sb-empty">{t("measurement.sidebar.list.loadingReviews")}</p>
                       ) : engineerAnnotations.length > 0 ? ((() => {
                         const filtered = filterAndSort(engineerAnnotations);
                         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -1157,9 +1159,9 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                             <button
                               className="btn btn-outline-danger btn-sm"
                               onClick={handleDeleteAllEngineerReviews}
-                              title="Delete all engineer reviews"
+                              title={t("measurement.sidebar.list.deleteAllReviews")}
                             >
-                              <FaTrash /> Delete All
+                              <FaTrash /> {t("measurement.sidebar.list.deleteAllBtn")}
                             </button>
                           </div>
                           <ul className="sb-list">
@@ -1170,10 +1172,10 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                                 onClick={() => viewEngineerAnnotationPdf(annotation)}
                               >
                                 <FaFilePdf />
-                                <span>{annotation.filename || "Untitled Document"}</span>
+                                <span>{annotation.filename || t("measurement.sidebar.list.untitledDocument")}</span>
                               </button>
                               <small className="sb-item__meta">
-                                Engineer: {annotation.engineerId?.name || "Unknown"} | {new Date(annotation.createdAt).toLocaleString()}
+                                {t("measurement.sidebar.list.engineerLabel", { name: annotation.engineerId?.name || t("measurement.sidebar.list.unknownEngineer") })} | {new Date(annotation.createdAt).toLocaleString()}
                                 {annotation.status && (
                                   <span
                                     className="sb-status-badge"
@@ -1182,21 +1184,21 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                                       background: (statusConfig[annotation.status] || statusConfig.pending).bg,
                                     }}
                                   >
-                                    {(statusConfig[annotation.status] || statusConfig.pending).label}
+                                    {t(`measurement.sidebar.toolbar.status${(annotation.status ? annotation.status.charAt(0).toUpperCase() + annotation.status.slice(1) : 'Pending')}`)}
                                   </span>
                                 )}
                               </small>
                               <button
                                 className="sb-item__delete"
                                 onClick={() => handleDeletePdf(annotation._id, annotation.filename, true)}
-                                title="Delete Engineer Review"
+                                title={t("measurement.sidebar.list.deleteReviewTitle")}
                               >
                                 <FaTrash />
                               </button>
                               <button
                                 className="sb-item__share"
                                 onClick={() => handleShareLink(annotation._id, true)}
-                                title="Copy shareable link"
+                                title={t("measurement.sidebar.list.shareTitle")}
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#6c757d' }}
                               >
                                 🔗
@@ -1207,16 +1209,16 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                           {totalPages > 1 && (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '8px' }}>
                               <button className="btn btn-outline-secondary btn-sm" disabled={page <= 1} onClick={() => setEngineerReviewsPage(p => Math.max(1, p - 1))}>◀</button>
-                              <span style={{ fontSize: '0.8rem' }}>Page {page} of {totalPages}</span>
+                              <span style={{ fontSize: '0.8rem' }}>{t("measurement.sidebar.list.pageOf", { page, total: totalPages })}</span>
                               <button className="btn btn-outline-secondary btn-sm" disabled={page >= totalPages} onClick={() => setEngineerReviewsPage(p => Math.min(totalPages, p + 1))}>▶</button>
                             </div>
                           )}
                         </>
                         ) : (
-                          <p className="sb-empty">No matches found.</p>
+                          <p className="sb-empty">{t("measurement.sidebar.list.noMatches")}</p>
                         );
                       })()) : (
-                        <p className="sb-empty sb-empty--info">No engineer reviews yet.</p>
+                        <p className="sb-empty sb-empty--info">{t("measurement.sidebar.list.noEngineerReviews")}</p>
                       )
                     )}
                   </>
@@ -1237,17 +1239,17 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                           if (container) container.innerHTML = "";
                         }}
                       >
-                        ← Back
+                        ← {t("measurement.sidebar.pdfView.back")}
                       </button>
                       <FaFilePdf />
                       <span className="sb-pdfbar__name">
-                        {selectedPdf.filename || "Untitled Document"}
+                        {selectedPdf.filename || t("measurement.sidebar.list.untitledDocument")}
                       </span>
                       {activeTab === "my-annotations" && currentPdfType === "user" && (
                         <button
                           className="sb-item__delete sb-pdfbar__delete"
                           onClick={() => handleDeletePdf(selectedPdf._id, selectedPdf.filename)}
-                          title="Delete"
+                          title={t("measurement.sidebar.pdfView.deleteTitle")}
                         >
                           <FaTrash />
                         </button>
@@ -1255,7 +1257,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                       {activeTab === "my-annotations" && currentPdfType === "user" && (
                         <button
                           onClick={() => handleShareLink(selectedPdf._id, false)}
-                          title="Copy shareable link"
+                          title={t("measurement.sidebar.pdfView.shareTitle")}
                           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', color: '#6c757d', fontSize: '1.1rem' }}
                         >🔗</button>
                       )}
@@ -1263,7 +1265,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                         <button
                           className="sb-item__delete sb-pdfbar__delete"
                           onClick={() => handleDeletePdf(selectedPdf._id, selectedPdf.filename, true)}
-                          title="Delete Engineer Review"
+                          title={t("measurement.sidebar.pdfView.deleteReviewTitle")}
                         >
                           <FaTrash />
                         </button>
@@ -1271,7 +1273,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                       {activeTab === "engineer-reviews" && currentPdfType === "engineer" && (
                         <button
                           onClick={() => handleShareLink(selectedPdf._id, true)}
-                          title="Copy shareable link"
+                          title={t("measurement.sidebar.pdfView.shareTitle")}
                           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', color: '#6c757d', fontSize: '1.1rem' }}
                         >🔗</button>
                       )}
@@ -1306,7 +1308,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                               navigate('/search?category=AC%20Products');
                             }}
                           >
-                            🛒 Buy Equipment
+                            🛒 {t("measurement.sidebar.pdfView.buyEquipment")}
                           </Button>
                         )}
                       </div>
@@ -1317,15 +1319,15 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                         className="sb-hvac-btn"
                         onClick={() => setShowHVAC((prev) => !prev)}
                       >
-                        {showHVAC ? "Hide HVAC Layer" : "Show HVAC Layer"}
+                        {showHVAC ? t("measurement.sidebar.pdfView.hideHvac") : t("measurement.sidebar.pdfView.showHvac")}
                       </button>
                     )}
                     {isAdmin && selectedPdfFile && (
                       <div className="sb-legend">
-                        <strong>Legend:</strong>
-                        <span className="sb-legend__ducts">■ Ducts</span>
-                        <span className="sb-legend__diff">● Diffusers</span>
-                        <span className="sb-legend__refrig">— Refrigerant Lines</span>
+                        <strong>{t("measurement.sidebar.pdfView.legendTitle")}</strong>
+                        <span className="sb-legend__ducts">{t("measurement.sidebar.pdfView.legendDucts")}</span>
+                        <span className="sb-legend__diff">{t("measurement.sidebar.pdfView.legendDiffusers")}</span>
+                        <span className="sb-legend__refrig">{t("measurement.sidebar.pdfView.legendRefrigerant")}</span>
                       </div>
                     )}
 
@@ -1334,7 +1336,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                         <button
                           className="sb-zoom-btn"
                           onClick={() => setPdfScale((s) => Math.max(0.5, +(s - 0.25).toFixed(2)))}
-                          title="Zoom out"
+                          title={t("measurement.sidebar.pdfView.zoomOut")}
                         >
                           −
                         </button>
@@ -1342,7 +1344,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                         <button
                           className="sb-zoom-btn"
                           onClick={() => setPdfScale((s) => Math.min(3, +(s + 0.25).toFixed(2)))}
-                          title="Zoom in"
+                          title={t("measurement.sidebar.pdfView.zoomIn")}
                         >
                           +
                         </button>
@@ -1357,7 +1359,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
 
             {/* Footer */}
             <div className="sb-footer">
-              <button className="phv-close-btn" onClick={toggleSidebar}>Close</button>
+              <button className="phv-close-btn" onClick={toggleSidebar}>{t("measurement.sidebar.footer.close")}</button>
             </div>
 
           </div>
@@ -1394,14 +1396,14 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
           >
             <h5 style={{ marginBottom: '12px' }}>
               {deleteConfirm.deleteAll 
-                ? (deleteConfirm.isEngineerReview ? 'Delete All Engineer Reviews' : 'Delete All Drawings')
-                : (deleteConfirm.isEngineerReview ? 'Delete Engineer Review' : 'Delete PDF')
+                ? (deleteConfirm.isEngineerReview ? t("measurement.sidebar.deleteModal.deleteAllReviewsTitle") : t("measurement.sidebar.deleteModal.deleteAllDrawingsTitle"))
+                : (deleteConfirm.isEngineerReview ? t("measurement.sidebar.deleteModal.deleteReviewTitle") : t("measurement.sidebar.deleteModal.deletePdfTitle"))
               }
             </h5>
             <p>
               {deleteConfirm.deleteAll 
-                ? `Are you sure you want to permanently delete ${deleteConfirm.filename}? This action cannot be undone.`
-                : `Are you sure you want to delete "${deleteConfirm.filename}"?`
+                ? t("measurement.sidebar.deleteModal.confirmDeleteAllText", { filename: deleteConfirm.filename })
+                : t("measurement.sidebar.deleteModal.confirmDeleteText", { filename: deleteConfirm.filename })
               }
             </p>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -1409,13 +1411,13 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
                 className="btn btn-secondary btn-sm"
                 onClick={() => setDeleteConfirm({ show: false, pdfId: null, filename: '', isEngineerReview: false, deleteAll: false })}
               >
-                Cancel
+                {t("measurement.sidebar.deleteModal.cancel")}
               </button>
               <button
                 className="btn btn-danger btn-sm"
                 onClick={confirmDeletePdf}
               >
-                {deleteConfirm.deleteAll ? 'Delete All' : 'Delete'}
+                {deleteConfirm.deleteAll ? t("measurement.sidebar.deleteModal.deleteAllBtn") : t("measurement.sidebar.deleteModal.deleteBtn")}
               </button>
             </div>
           </div>

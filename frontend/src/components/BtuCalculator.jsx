@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { Store } from "../Store";
 import { useNavigate } from "react-router-dom";
@@ -140,6 +141,7 @@ function BtuCalculator({
   acAnnotations = [],
   forceCondenserForRecommendations = false,
 }) {
+  const { t } = useTranslation();
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
   const prevProject = state?.btuData?.currentProject ?? null;
@@ -1514,6 +1516,36 @@ useEffect(() => {
     setError("");
   };
 
+  const optionLabels = {
+    Roof: t("measurement.btuCalculator.optionLabels.Roof"),
+    WallBrackets: t("measurement.btuCalculator.optionLabels.WallBrackets"),
+    HardGround: t("measurement.btuCalculator.optionLabels.HardGround"),
+    BrickVeneer: t("measurement.btuCalculator.optionLabels.BrickVeneer"),
+    DoubleBrick: t("measurement.btuCalculator.optionLabels.DoubleBrick"),
+    FoamCladding: t("measurement.btuCalculator.optionLabels.FoamCladding"),
+    Average: t("measurement.btuCalculator.optionLabels.Average"),
+    Good: t("measurement.btuCalculator.optionLabels.Good"),
+    Poor: t("measurement.btuCalculator.optionLabels.Poor"),
+    FullSunlight: t("measurement.btuCalculator.optionLabels.FullSunlight"),
+    HeavilyShaded: t("measurement.btuCalculator.optionLabels.HeavilyShaded"),
+    SingleGlazed: t("measurement.btuCalculator.optionLabels.SingleGlazed"),
+    DoubleGlazed: t("measurement.btuCalculator.optionLabels.DoubleGlazed"),
+    TripleGlazed: t("measurement.btuCalculator.optionLabels.TripleGlazed"),
+    Louvered: t("measurement.btuCalculator.optionLabels.Louvered"),
+    Flat: t("measurement.btuCalculator.optionLabels.Flat"),
+    Pitched: t("measurement.btuCalculator.optionLabels.Pitched"),
+    Gable: t("measurement.btuCalculator.optionLabels.Gable"),
+    Marble: t("measurement.btuCalculator.optionLabels.Marble"),
+    Timber: t("measurement.btuCalculator.optionLabels.Timber"),
+    Concrete: t("measurement.btuCalculator.optionLabels.Concrete"),
+    Carpeted: t("measurement.btuCalculator.optionLabels.Carpeted"),
+    North: t("measurement.btuCalculator.optionLabels.North"),
+    East: t("measurement.btuCalculator.optionLabels.East"),
+    South: t("measurement.btuCalculator.optionLabels.South"),
+    West: t("measurement.btuCalculator.optionLabels.West"),
+    LivingRoom: t("measurement.btuCalculator.optionLabels.LivingRoom"),
+  };
+
   return (
     <Container className="btu-calculator-container mt-4 mb-4 rounded">
       <Form className="btu-form">
@@ -1521,20 +1553,20 @@ useEffect(() => {
         {prevProject && showPrevSummary && (
           <div className="d-block d-md-none btu-prev-summary mb-3">
             <div className="btu-prev-summary__header">
-              <span className="btu-prev-summary__title">Previous calculation</span>
+              <span className="btu-prev-summary__title">{t("measurement.btuCalculator.prevSummary.title")}</span>
               <button
                 type="button"
                 className="btu-prev-summary__close"
-                aria-label="Dismiss"
+                aria-label={t("measurement.btuCalculator.prevSummary.dismiss")}
                 onClick={() => setShowPrevSummary(false)}
               >
                 ×
               </button>
             </div>
             <div className="btu-prev-summary__meta">
-              {prevProject.numberOfRooms} room{prevProject.numberOfRooms !== 1 ? 's' : ''}
+              {prevProject.numberOfRooms} {prevProject.numberOfRooms !== 1 ? t("measurement.btuCalculator.prevSummary.rooms") : t("measurement.btuCalculator.prevSummary.room")}
               {' · '}
-              <strong>{(prevProject.totalBTU || 0).toLocaleString()} BTU</strong> total
+              <strong>{(prevProject.totalBTU || 0).toLocaleString()} BTU</strong> {t("measurement.btuCalculator.prevSummary.total")}
               {prevProject.totalSquareFootage > 0 && (
                 <span> · {Math.round(prevProject.totalSquareFootage)} m²</span>
               )}
@@ -1558,32 +1590,32 @@ useEffect(() => {
               className="btu-prev-summary__view-btn"
               onClick={() => navigate('/recommendations')}
             >
-              View Recommendations →
+              {t("measurement.btuCalculator.prevSummary.viewBtn")}
             </button>
           </div>
         )}
-        <h3 className="mt-4 mb-4 text-center title">BTU Calculator</h3>
+        <h3 className="mt-4 mb-4 text-center title">{t("measurement.btuCalculator.title")}</h3>
         <Form.Group className="mb-4">
-          <Form.Label>Measurement System</Form.Label>
+          <Form.Label>{t("measurement.btuCalculator.measurementSystem.label")}</Form.Label>
           <Form.Control
             className="w-auto"
             as="select"
             value={measurementSystem}
             onChange={(e) => setMeasurementSystem(e.target.value)}
           >
-            <option value="meters">Meters (m²)</option>
-            <option value="feet">Feet (ft²)</option>
+            <option value="meters">{t("measurement.btuCalculator.measurementSystem.meters")}</option>
+            <option value="feet">{t("measurement.btuCalculator.measurementSystem.feet")}</option>
           </Form.Control>
         </Form.Group>
 
         <Form.Group className="mb-4">
-          <Form.Label>Room Data Source</Form.Label>
+          <Form.Label>{t("measurement.btuCalculator.roomSource.label")}</Form.Label>
           <div>
             <Form.Check
               inline
               type="radio"
               id="room-source-pdf"
-              label="Use PDF Rooms"
+              label={t("measurement.btuCalculator.roomSource.pdf")}
               name="roomSource"
               checked={roomInputMode === "pdf"}
               onChange={() => setRoomInputMode("pdf")}
@@ -1592,7 +1624,7 @@ useEffect(() => {
               inline
               type="radio"
               id="room-source-manual"
-              label="Manual Room Entry"
+              label={t("measurement.btuCalculator.roomSource.manual")}
               name="roomSource"
               checked={roomInputMode === "manual"}
               onChange={() => {
@@ -1607,7 +1639,7 @@ useEffect(() => {
           </div>
           {roomInputMode === "pdf" && !roomData?.length && (
             <small className="text-muted d-block mt-2">
-              No rooms detected from PDF yet. Switch to Manual Room Entry to continue.
+              {t("measurement.btuCalculator.roomSource.noRoomsHint")}
             </small>
           )}
         </Form.Group>
@@ -1616,7 +1648,7 @@ useEffect(() => {
   <Form.Check
     type="checkbox"
     id="multiFlat"
-    label="Multi-flat/Multi-unit property (separate condenser for each flat)"
+    label={t("measurement.btuCalculator.multiFlat.label")}
     checked={isMultiFlatProperty}
     onChange={(e) => {
       setIsMultiFlatProperty(e.target.checked);
@@ -1628,28 +1660,27 @@ useEffect(() => {
   />
   {isMultiFlatProperty && detectedFlats.length > 0 && (
     <small className="text-muted d-block mt-2">
-      ✓ Detected {detectedFlats.length} flat(s):{" "}
+      {t("measurement.btuCalculator.multiFlat.detected", { count: detectedFlats.length })}{" "}
       {detectedFlats.join(", ")}
       <br />
-      <em>Each flat will get its own condenser sized separately</em>
+      <em>{t("measurement.btuCalculator.multiFlat.eachFlatCondenser")}</em>
     </small>
   )}
   {detectedFlats.length > 1 && !isMultiFlatProperty && (
     <small className="text-info d-block mt-2">
-      ✓ Multi-flat detected from annotations: {detectedFlats.join(", ")}
+      {t("measurement.btuCalculator.multiFlat.detectedFromAnnotations")} {detectedFlats.join(", ")}
       <br />
-      <em>Check the box above to enable separate condensers for each flat.</em>
+      <em>{t("measurement.btuCalculator.multiFlat.checkBoxHint")}</em>
     </small>
   )}
   {acAnnotations?.length > 0 && (
     <small className="text-success d-block mt-2">
-      ✓ AC annotations found: {acAnnotations.length} label(s) detected
+      {t("measurement.btuCalculator.multiFlat.acFound", { count: acAnnotations.length })}
       {detectedFlats.length > 1 && (
         <>
           <br />
           <em>
-            Flats auto-detected from condenser labels (e.g., condenser-1,
-            condenser-2)
+            {t("measurement.btuCalculator.multiFlat.flatsAutoDetected")}
           </em>
         </>
       )}
@@ -1662,10 +1693,10 @@ useEffect(() => {
         <Row>
           <Col xs={12} md={6} lg={4} className="my-4">
             <Form.Group controlId="ceilingHeight">
-              <Form.Label>Ceiling Height (m):</Form.Label>
+              <Form.Label>{t("measurement.btuCalculator.ceilingHeight.label")}</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="Enter ceiling height in meters"
+                placeholder={t("measurement.btuCalculator.ceilingHeight.placeholder")}
                 value={ceilingHeight}
                 onChange={(e) => setCeilingHeight(e.target.value)}
               />
@@ -1675,7 +1706,7 @@ useEffect(() => {
             <Form.Group controlId="numberOfPeople">
               {isMultiFlatProperty && detectedFlats.length > 1 ? (
                 <>
-                  <Form.Label>Number of People (per flat):</Form.Label>
+                  <Form.Label>{t("measurement.btuCalculator.people.labelPerFlat")}</Form.Label>
                   {detectedFlats.map((flatName) => (
                     <div key={flatName} className="d-flex align-items-center gap-2 mb-1">
                       <span style={{ minWidth: 60, fontSize: '0.9rem' }}>{flatName}:</span>
@@ -1696,11 +1727,11 @@ useEffect(() => {
                 </>
               ) : (
                 <>
-                  <Form.Label>Number of People:</Form.Label>
+                  <Form.Label>{t("measurement.btuCalculator.people.label")}</Form.Label>
                   <Form.Control
                     type="number"
                     min={0}
-                    placeholder="Enter number of people"
+                    placeholder={t("measurement.btuCalculator.people.placeholder")}
                     value={numPeople}
                     onChange={(e) => setNumPeople(e.target.value)}
                   />
@@ -1712,11 +1743,11 @@ useEffect(() => {
           {/* Humidity selector */}
           <Col xs={12} md={6} lg={4} className="my-4">
             <Form.Group controlId="humidity">
-              <Form.Label>Humidity Level:</Form.Label>
+              <Form.Label>{t("measurement.btuCalculator.humidity.label")}</Form.Label>
               <Form.Select value={humidity} onChange={(e) => setHumidity(e.target.value)}>
-                <option value="low">Low (dry climate)</option>
-                <option value="average">Average</option>
-                <option value="high">High (humid / coastal)</option>
+                <option value="low">{t("measurement.btuCalculator.humidity.low")}</option>
+                <option value="average">{t("measurement.btuCalculator.humidity.average")}</option>
+                <option value="high">{t("measurement.btuCalculator.humidity.high")}</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -1724,14 +1755,14 @@ useEffect(() => {
           {/* Infiltration (envelope air-leakage) selector */}
           <Col xs={12} md={6} lg={4} className="my-4">
             <Form.Group controlId="infiltration">
-              <Form.Label>Building Air-Tightness:</Form.Label>
+              <Form.Label>{t("measurement.btuCalculator.infiltration.label")}</Form.Label>
               <Form.Select
                 value={infiltration}
                 onChange={(e) => setInfiltration(e.target.value)}
               >
-                <option value="tight">Tight (new / sealed build)</option>
-                <option value="average">Average (typical dwelling)</option>
-                <option value="leaky">Leaky (older / drafty)</option>
+                <option value="tight">{t("measurement.btuCalculator.infiltration.tight")}</option>
+                <option value="average">{t("measurement.btuCalculator.infiltration.average")}</option>
+                <option value="leaky">{t("measurement.btuCalculator.infiltration.leaky")}</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -1739,13 +1770,13 @@ useEffect(() => {
           {/* System mode selector – drives heating vs cooling sizing */}
           <Col xs={12} md={6} lg={4} className="my-4">
             <Form.Group controlId="systemMode">
-              <Form.Label>System Mode:</Form.Label>
+              <Form.Label>{t("measurement.btuCalculator.systemMode.label")}</Form.Label>
               <Form.Select
                 value={systemMode}
                 onChange={(e) => setSystemMode(e.target.value)}
               >
-                <option value="heatpump">Cooling or Heating (heat pump)</option>
-                <option value="recovery">Cooling &amp; Heat Recovery</option>
+                <option value="heatpump">{t("measurement.btuCalculator.systemMode.heatpump")}</option>
+                <option value="recovery">{t("measurement.btuCalculator.systemMode.recovery")}</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -1753,14 +1784,14 @@ useEffect(() => {
         </Row>
 {rooms.length > 0 && (
   <div className="mb-4 manual-rooms-section">
-    <h5>{roomInputMode === "manual" ? "Manual Rooms:" : "Room Measurements:"}</h5>
+    <h5>{roomInputMode === "manual" ? t("measurement.btuCalculator.manualRoomsTitle") : t("measurement.btuCalculator.roomMeasurementsTitle")}</h5>
     {roomInputMode === "manual" ? (
       <>
         {rooms.map((room, index) => (
           <Row key={index} className="my-2 align-items-end manual-room-row">
             <Col xs={12} md={6} lg={4} className="my-2 manual-room-col">
               <Form.Group controlId={`roomType-${index}`}>
-                <Form.Label>Room Type {index + 1}:</Form.Label>
+                <Form.Label>{t("measurement.btuCalculator.roomTypeLabel", { n: index + 1 })}</Form.Label>
                 <Form.Control
                   as="select"
                   value={room.name}
@@ -1777,14 +1808,14 @@ useEffect(() => {
 
             <Col xs={12} md={6} lg={4} className="my-2 manual-room-col">
               <Form.Group controlId={`roomSize-${index}`}>
-                <Form.Label>Room Size ({measurementSystem}²):</Form.Label>
+                <Form.Label>{t("measurement.btuCalculator.roomSizeLabel", { unit: measurementSystem === "meters" ? "m" : "ft" })}</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
                   step="0.1"
-                  placeholder={`Enter room size in ${
-                    measurementSystem === "meters" ? "m²" : "ft²"
-                  }`}
+                  placeholder={t("measurement.btuCalculator.roomSizePlaceholder", {
+                    unit: measurementSystem === "meters" ? "m²" : "ft²",
+                  })}
                   value={room.size}
                   onChange={(e) => handleRoomChange(index, "size", e.target.value)}
                 />
@@ -1805,7 +1836,7 @@ useEffect(() => {
         ))}
 
         <Button variant="primary" onClick={addRoom} className="btn-add mb-3 mt-3 manual-room-add-btn">
-          Add Room
+          {t("measurement.btuCalculator.addRoom")}
         </Button>
       </>
     ) : (
@@ -1871,7 +1902,7 @@ useEffect(() => {
           <Col md={6}>
             {isMultiFlatProperty && detectedFlats.length > 1 ? (
               <div className="mb-3">
-                <div className="checkbox-group-section-title">Outdoor Unit Location (per flat):</div>
+                <div className="checkbox-group-section-title">{t("measurement.btuCalculator.groups.outdoorUnitLocationPerFlat")}</div>
                 {detectedFlats.map(flatName => (
                   <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
@@ -1879,6 +1910,7 @@ useEffect(() => {
                       title=""
                       name={`OutdoorUnitLocation-${flatName}`}
                       options={flatOutdoorLocation[flatName] ?? DEFAULT_OUTDOOR_LOCATION}
+                      labels={optionLabels}
                       onChange={(e) => setFlatOutdoorLocation(prev => ({
                         ...prev,
                         [flatName]: {
@@ -1892,46 +1924,49 @@ useEffect(() => {
               </div>
             ) : (
             <CheckboxGroup
-              title="Outdoor Unit Location"
+              title={t("measurement.btuCalculator.groups.outdoorUnitLocation")}
               name="OutdoorUnitLocation"
               options={options.OutdoorUnitLocation}
+              labels={optionLabels}
               onChange={handleOutdoorUnitLocationChange}
             />
             )}
 
             <CheckboxGroup
-              title="Insulation Condition"
+              title={t("measurement.btuCalculator.groups.insulation")}
               name="insulation"
               options={options.insulation}
+              labels={optionLabels}
               onChange={handleInsulationChange}
             />
 
             <CheckboxGroup
-              title="Climate"
+              title={t("measurement.btuCalculator.groups.climate")}
               name="climate"
               options={options.climate}
               onChange={handleClimateChange}
               labels={{
-                HotMiddleEast: 'Hot Middle East',
-                TropicalSEAsia: 'Tropical (SE Asia)',
-                Subtropical: 'Subtropical (Australia/S. Africa)',
-                AverageEurope: 'Average Europe',
-                Continental: 'Continental (E. Europe)',
-                SubArctic: 'Sub-Arctic (Scandinavia/Canada)',
-                ColdAlaska: 'Cold Alaska',
+                HotMiddleEast: t("measurement.btuCalculator.optionLabels.HotMiddleEast"),
+                TropicalSEAsia: t("measurement.btuCalculator.optionLabels.TropicalSEAsia"),
+                Subtropical: t("measurement.btuCalculator.optionLabels.Subtropical"),
+                AverageEurope: t("measurement.btuCalculator.optionLabels.AverageEurope"),
+                Continental: t("measurement.btuCalculator.optionLabels.Continental"),
+                SubArctic: t("measurement.btuCalculator.optionLabels.SubArctic"),
+                ColdAlaska: t("measurement.btuCalculator.optionLabels.ColdAlaska"),
               }}
             />
 
             <CheckboxGroup
-              title="Window Type"
+              title={t("measurement.btuCalculator.groups.windowType")}
               name="windowType"
               options={options.windowType}
+              labels={optionLabels}
               onChange={handleWindowChange}
             />
 
             {isMultiFlatProperty && detectedFlats.length > 1 ? (
               <div className="mb-3">
-                <div className="checkbox-group-section-title">Apartment Orientation (per flat):</div>
+                <div className="checkbox-group-section-title">{t("measurement.btuCalculator.groups.apartmentOrientationPerFlat")}</div>
                 {detectedFlats.map(flatName => (
                   <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
@@ -1939,6 +1974,7 @@ useEffect(() => {
                       title=""
                       name={`orientation-${flatName}`}
                       options={flatOrientation[flatName] ?? DEFAULT_ORIENTATION}
+                      labels={optionLabels}
                       onChange={(e) => setFlatOrientation(prev => ({
                         ...prev,
                         [flatName]: {
@@ -1952,9 +1988,10 @@ useEffect(() => {
               </div>
             ) : (
             <CheckboxGroup
-              title="Apartment Orientation"
+              title={t("measurement.btuCalculator.groups.apartmentOrientation")}
               name="apartment"
               options={options.apartmentOrientation}
+              labels={optionLabels}
               onChange={handleApartmentChange}
             />
             )}
@@ -1962,22 +1999,24 @@ useEffect(() => {
 
           <Col md={6}>
             <CheckboxGroup
-              title="Type of Wall"
+              title={t("measurement.btuCalculator.groups.typeOfWall")}
               name="typeOfWall"
               options={options.typeOfWall}
+              labels={optionLabels}
               onChange={handleWallChange}
             />
 
             <CheckboxGroup
-              title="Sun Exposure"
+              title={t("measurement.btuCalculator.groups.sunExposure")}
               name="sunExposure"
               options={options.sunExposure}
+              labels={optionLabels}
               onChange={handleSunExposureChange}
             />
 
 {isMultiFlatProperty && detectedFlats.length > 1 ? (
               <div className="mb-3">
-                <div className="checkbox-group-section-title">Room Usage & Appliances (per flat):</div>
+                <div className="checkbox-group-section-title">{t("measurement.btuCalculator.groups.appliancesPerFlat")}</div>
                 {detectedFlats.map(flatName => (
                   <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
@@ -1993,14 +2032,24 @@ useEffect(() => {
                         },
                       }))}
                       tooltips={{
-                        Oven: '+8% cooling · −5% heating — Cooking adds heat; offsets some heating load',
-                        ServerRoom: '+35% cooling · −15% heating — Servers and IT equipment generate continuous high heat',
-                        CommercialKitchen: '+45% cooling · −20% heating — Multiple cooking appliances generate intense, sustained heat',
-                        Gym: '+20% cooling · −10% heating — Exercise equipment and high metabolic activity from occupants',
-                        HomeTheater: '+6% cooling · −3% heating — AV receivers, projectors and amplifiers add moderate heat',
-                        Workshop: '+12% cooling · −6% heating — Power tools and compressors generate heat during operation',
-                        OfficeRoom: '+18% cooling · −8% heating — Office equipment and occupants add moderate heat in cooling, reduce heating need',
-                        HotelRoom: '+10% cooling · −4% heating — Hotel rooms have some internal gains from appliances and occupants',
+                        Oven: t("measurement.btuCalculator.applianceTooltips.Oven"),
+                        ServerRoom: t("measurement.btuCalculator.applianceTooltips.ServerRoom"),
+                        CommercialKitchen: t("measurement.btuCalculator.applianceTooltips.CommercialKitchen"),
+                        Gym: t("measurement.btuCalculator.applianceTooltips.Gym"),
+                        HomeTheater: t("measurement.btuCalculator.applianceTooltips.HomeTheater"),
+                        Workshop: t("measurement.btuCalculator.applianceTooltips.Workshop"),
+                        OfficeRoom: t("measurement.btuCalculator.applianceTooltips.OfficeRoom"),
+                        HotelRoom: t("measurement.btuCalculator.applianceTooltips.HotelRoom"),
+                      }}
+                      labels={{
+                        Oven: t("measurement.btuCalculator.applianceLabels.Oven"),
+                        ServerRoom: t("measurement.btuCalculator.applianceLabels.ServerRoom"),
+                        CommercialKitchen: t("measurement.btuCalculator.applianceLabels.CommercialKitchen"),
+                        Gym: t("measurement.btuCalculator.applianceLabels.Gym"),
+                        HomeTheater: t("measurement.btuCalculator.applianceLabels.HomeTheater"),
+                        Workshop: t("measurement.btuCalculator.applianceLabels.Workshop"),
+                        OfficeRoom: t("measurement.btuCalculator.applianceLabels.OfficeRoom"),
+                        HotelRoom: t("measurement.btuCalculator.applianceLabels.HotelRoom"),
                       }}
                     />
                   </div>
@@ -2008,32 +2057,43 @@ useEffect(() => {
               </div>
             ) : (
             <CheckboxGroup
-              title="Room Usage & Appliances"
+              title={t("measurement.btuCalculator.groups.appliances")}
               name="appliances"
               options={options.appliances}
               onChange={handleAppliancesChange}
               tooltips={{
-                Oven: '+8% cooling · −5% heating — Cooking adds heat; offsets some heating load',
-                ServerRoom: '+35% cooling · −15% heating — Servers and IT equipment generate continuous high heat',
-                CommercialKitchen: '+45% cooling · −20% heating — Multiple cooking appliances generate intense, sustained heat',
-                Gym: '+20% cooling · −10% heating — Exercise equipment and high metabolic activity from occupants',
-                HomeTheater: '+6% cooling · −3% heating — AV receivers, projectors and amplifiers add moderate heat',
-                Workshop: '+12% cooling · −6% heating — Power tools and compressors generate heat during operation',
-                OfficeRoom: '+18% cooling · −8% heating — Office equipment and occupants add moderate heat in cooling, reduce heating need',
-                HotelRoom: '+10% cooling · −4% heating — Hotel rooms have some internal gains from appliances and occupants',
+                Oven: t("measurement.btuCalculator.applianceTooltips.Oven"),
+                ServerRoom: t("measurement.btuCalculator.applianceTooltips.ServerRoom"),
+                CommercialKitchen: t("measurement.btuCalculator.applianceTooltips.CommercialKitchen"),
+                Gym: t("measurement.btuCalculator.applianceTooltips.Gym"),
+                HomeTheater: t("measurement.btuCalculator.applianceTooltips.HomeTheater"),
+                Workshop: t("measurement.btuCalculator.applianceTooltips.Workshop"),
+                OfficeRoom: t("measurement.btuCalculator.applianceTooltips.OfficeRoom"),
+                HotelRoom: t("measurement.btuCalculator.applianceTooltips.HotelRoom"),
+              }}
+              labels={{
+                Oven: t("measurement.btuCalculator.applianceLabels.Oven"),
+                ServerRoom: t("measurement.btuCalculator.applianceLabels.ServerRoom"),
+                CommercialKitchen: t("measurement.btuCalculator.applianceLabels.CommercialKitchen"),
+                Gym: t("measurement.btuCalculator.applianceLabels.Gym"),
+                HomeTheater: t("measurement.btuCalculator.applianceLabels.HomeTheater"),
+                Workshop: t("measurement.btuCalculator.applianceLabels.Workshop"),
+                OfficeRoom: t("measurement.btuCalculator.applianceLabels.OfficeRoom"),
+                HotelRoom: t("measurement.btuCalculator.applianceLabels.HotelRoom"),
               }}
             />
             )}
 
             <CheckboxGroup
-              title="Roof Type"
+              title={t("measurement.btuCalculator.groups.roofType")}
               name="roofType"
               options={options.roofType}
+              labels={optionLabels}
               onChange={handleRoofChange}
             />
             {isMultiFlatProperty && detectedFlats.length > 1 ? (
               <div className="mb-3">
-                <div className="checkbox-group-section-title">Floor (per flat):</div>
+                <div className="checkbox-group-section-title">{t("measurement.btuCalculator.groups.floorTypePerFlat")}</div>
                 {detectedFlats.map(flatName => (
                   <div key={flatName} className="mb-2 ps-2" style={{ borderLeft: '3px solid rgba(102,126,234,0.4)' }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#495057' }}>{flatName}</div>
@@ -2041,6 +2101,7 @@ useEffect(() => {
                       title=""
                       name={`floorType-${flatName}`}
                       options={flatFloorType[flatName] ?? DEFAULT_FLOOR_TYPE}
+                      labels={optionLabels}
                       onChange={(e) => setFlatFloorType(prev => ({
                         ...prev,
                         [flatName]: {
@@ -2054,9 +2115,10 @@ useEffect(() => {
               </div>
             ) : (
             <CheckboxGroup
-              title="Floor"
+              title={t("measurement.btuCalculator.groups.floorType")}
               name="floorType"
               options={options.floorType}
+              labels={optionLabels}
               onChange={handleFloorChange}
             />
             )}
@@ -2068,11 +2130,11 @@ useEffect(() => {
           className="mt-4 me-3 mb-4"
           disabled={isCalculating}
         >
-          {isCalculating ? '⏳ Calculating…' : 'Calculate BTU'}
+          {isCalculating ? t("measurement.btuCalculator.calculating") : t("measurement.btuCalculator.calculate")}
         </Button>
 
         <Button variant="secondary" onClick={handleClear} className="mt-4 mb-4">
-          Clear
+          {t("measurement.btuCalculator.clear")}
         </Button>
 
 

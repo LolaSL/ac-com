@@ -196,5 +196,456 @@
       "unsubscribeSuccess": "You have been unsubscribed from the newsletter.",
       "genericError": "Something went wrong while trying to {{mode}}. Please try again."
     }
+  },
+  "aboutUs": {
+    "hero": {
+      "title": "About AC-Commerce",
+      "subtitle": "Your complete HVAC marketplace — from first measurement to final sign-off."
+    },
+    "intro": {
+      "p1Bold": "AC-Commerce Home Supply",
+      "p1Rest": " is an HVAC marketplace that combines product commerce with professional-grade planning tools. Whether you're buying a mini-split, designing a VRF system for a multi-room property, or getting a certified engineer to review your floor plan — everything happens in one platform.",
+      "p2": "We replace the fragmented process of juggling multiple vendors, contractors, and design consultants with a single, integrated workflow — from first measurement to final sign-off."
+    },
+    "howItWorksTitle": "How It Works",
+    "steps": [
+      { "title": "Upload Your Floor Plan", "text": "Upload any architectural PDF/JPG file — residential suite, office, or commercial space. The plan is rendered directly in the browser at high resolution." },
+      { "title": "Mark AC Placements", "text": "Place labelled AC unit air conditioner symbols on the plan - add comments (ac-1, ac-2...etc) and condenser (outdoor unit air conditioner symbol) placement. Save your work on the cloud." },
+      { "title": "AI-Engineer Review", "text": "After making an order submission, a certified AI-HVAC engineer opens your submitted plan, adds professional VRF refrigerant lines, and signs off with a digital signature — producing a verified 2-page review PDF. Supports Standard, VRF-Ducted, and VRF-Ductless system configurations. Symbols of ducted HVAC elements/accessories for both ducted and ductless VRF modes — coming soon" },
+      { "title": "Save & Download", "text": "Download your completed AI-engineer-reviewed plan as a PDF with all ac air conditioner symbols, outdoor unit -condenser air conditioner symbol, comments, system lines, and the AI-engineer's digital stamp baked in." },
+      { "title": "BTU Calculator", "text": "Answer guided questions about your property — room size, insulation, climate — and receive a recommended BTU rating along with a curated list of matching indoor units and outdoor condensers." },
+      { "title": "Recommendations - HVAC System Quote", "text": "After completing the BTU calculation, review room-by-room HVAC recommendations with matched products, system totals, pricing, print-ready quote output, and quick add-to-cart actions." }
+    ],
+    "whyTitle": "Why AC-Commerce",
+    "features": [
+      { "title": "Complete HVAC Marketplace", "text": "Hundreds of mini-split ACs, VRF condensers, indoor units, and accessories from leading manufacturers — with ratings, dimensions, energy ratings, and discounts." },
+      { "title": "Professional Notation Tools", "text": "Browser-based PDF annotations with coloured air conditioner symbols, text comments, VRF refrigerant lines, (ducted air diffusers — coming soon)." },
+      { "title": "Certified AI-Engineer Sign-off", "text": "Every submitted plan is reviewed by a qualified AI-Engineer who adds system-specific notes and a digital signature — giving you a document suitable for permits and contractors." },
+      { "title": "Trusted Service Network", "text": "Connect directly with verified HVAC service providers for consultants, installation, maintenance, and repairs through our integrated messaging and booking system." },
+      { "title": "Orders, Notifications & Support", "text": "Track orders end-to-end, receive payment and delivery reminders, communicate with sellers via built-in messaging, and access dedicated customer support at every stage." },
+      { "title": "Bring-a-Friend Commission Program", "text": "Industry professionals and businesses can list products on the marketplace, earn commission through our bring-a-friend referral programme" }
+    ],
+    "whoWeServeTitle": "Who We Serve",
+    "audiences": [
+      { "label": "Homeowners", "desc": "Plan and purchase the right HVAC system for your property." },
+      { "label": "Commercial Buyers", "desc": "Outfit offices, retail spaces, and facilities efficiently, whether you're a developer, project initiator, or building contractor." },
+      { "label": "HVAC Contractors", "desc": "Source equipment and manage project plans in one place." },
+      { "label": "Architects & Designers", "desc": "Integrate HVAC layouts directly into architectural workflows." },
+      { "label": "Service Providers", "desc": "Offer installation, maintenance, and repair through the platform." },
+      { "label": "Affiliate Sellers", "desc": "Merger Consultants, Architectural Designers, Accessories Suppliers, and other industry professionals are partners with AC-Commerce." }
+    ]
+  },
+  "ourNetwork": {
+    "hero": {
+      "title": "Our Suppliers",
+      "subtitle": "Trusted suppliers, service providers, and manufacturer partnerships powering HVAC excellence across the region.",
+      "badgeCertified": "Certified Partners",
+      "badgeGlobal": "Global Reach",
+      "badgeQuality": "Quality Assured"
+    },
+    "stats": {
+      "industryPartners": "Industry Partners",
+      "projectsCompleted": "Projects Completed",
+      "serviceProviders": "Service Providers",
+      "activeUsers": "Active Users"
+    },
+    "section": {
+      "title": "Our Suppliers",
+      "subtitle": "Browse verified HVAC suppliers in our network"
+    },
+    "card": {
+      "desc": "HVAC Supplier & Service Provider",
+      "viewSeller": "View Seller"
+    },
+    "empty": "No suppliers available at the moment.",
+    "benefitsTitle": "Why Choose Our Network?",
+    "benefits": [
+      { "title": "Enterprise Security", "text": "ISO 27001 Certified" },
+      { "title": "Industry Certified", "text": "HVAC Standards Compliant" },
+      { "title": "Top Rated", "text": "4.8/5 Average Rating" }
+    ]
+  },
+  "advancedAc": {
+    "hero": { "title": "Advanced Air Conditioning 2026", "subtitle": "Discover the latest HVAC technologies for comfort, efficiency, and sustainability" },
+    "intro": "2026 is reshaping home comfort in exciting ways. Today's HVAC systems do far more than heat and cool - they learn your habits, reduce power bills, and create cleaner indoor air for your family. From AI-driven controls to high-efficiency heat recovery and low-impact refrigerants, modern solutions are smarter, quieter, and built for long-term savings. If you're planning an upgrade, this is the perfect moment to discover what next-generation HVAC can do for your home.",
+    "heatPumps": { "title": "Heat Pumps: The All-Weather Solution", "text": "Heat pumps are becoming a go-to solution for homeowners seeking year-round comfort and energy efficiency. With advancements in cold-climate heat pump technology, these systems can now effectively operate in extreme temperatures, making them a versatile choice for any region." },
+    "heatRecovery": {
+      "title": "Heat Recovery Systems: Maximize Energy Savings",
+      "p1": "Heat Recovery Ventilation (HRV) and Energy Recovery Ventilation (ERV) systems represent a major breakthrough in home energy management. These advanced systems capture and recycle heated or cooled air that would otherwise be lost during ventilation, significantly reducing energy waste and lowering utility bills. Whether you're heating in winter or cooling in summer, heat recovery systems maintain comfort while conserving energy.",
+      "p2": "In 2026, HRV and ERV systems are increasingly integrated with smart HVAC solutions, allowing homeowners to optimize airflow based on real-time indoor conditions. The technology works by extracting stale air from your home and transferring its thermal energy to fresh incoming air, effectively reducing the heating or cooling load on your main system. This synergy between heat recovery and climate control can deliver energy savings of 15%–25% annually.",
+      "p3": "Leading manufacturers now offer comprehensive heat recovery solutions. <strong>Samsung</strong>, <strong>LG</strong>, <strong>Daikin</strong>, <strong>Mitsubishi</strong>, <strong>Fujitsu</strong>, and <strong>Panasonic</strong> all deliver advanced HRV/ERV systems integrated with their premium AC and heat pump units. <strong>Samsung's</strong> latest models combine heat recovery with WindFree technology for draft-free cooling, while <strong>LG</strong> pairs ERV systems with AI-powered energy optimization. <strong>Daikin</strong> offers modular units that retrofit into existing systems, and <strong>Mitsubishi</strong> and <strong>Fujitsu</strong> provide industry-leading VRF-integrated solutions. These compact, whisper-quiet systems are ideal for modern homes seeking premium indoor air quality without sacrificing energy efficiency."
+    },
+    "energyEfficiency": {
+      "title": "Energy-Efficient Systems: Saving More, Consuming Less",
+      "text": "Energy efficiency is a leading trend in 2026 HVAC. Modern systems utilize innovations like variable-speed compressors and advanced sensors to maximize comfort while minimizing energy consumption and environmental impact. In 2026, energy efficiency is a key focus in HVAC. New systems employ technologies such as variable-speed compressors and improved heat exchangers to deliver optimal comfort with lower energy use and a smaller carbon footprint.",
+      "samsungTitle": "Samsung BESPOKE AI WindFree ACs",
+      "samsungText": "The latest collection of air conditioners features <strong>Samsung's</strong> WindFree Cooling technology, which disperses air through 23,000 micro holes to eliminate direct drafts. Additionally, the AI Fast & Comfort Cooling function enables quick cooling before transitioning to an energy-efficient mode. The AI Energy Mode is designed to optimize cooling settings, potentially reducing energy consumption by up to 30%."
+    },
+    "indoorAirQuality": {
+      "title": "Indoor Air Quality Innovations",
+      "p1": "Improving indoor air quality (IAQ) is a top priority for 2026. HVAC systems are now integrating air purifiers, UV-C light technology, and high-efficiency particulate air (HEPA) filters to remove allergens, bacteria, and viruses from your home's air. These systems ensure a healthier living environment for you and your family.",
+      "daikinText": "<strong>Daikin's</strong> new range of Air Purifiers with Streamer Technology are designed to capture, suppress and break down pollutants such as mould, pollen, allergens, odours, formaldehyde, traffic pollution and dust. Perfect for allergy sufferers!"
+    },
+    "whyUpgrade": {
+      "title": "Why Upgrade in 2026?",
+      "text": "2026 marks a pivotal year for HVAC upgrades, driven by transformative industry changes. Regulatory mandates now require eco-friendly A2L refrigerants, while new efficiency standards ensure dramatically reduced energy consumption. Modern systems deliver 20%–40% energy savings compared to older models, while advanced smart controls provide unprecedented comfort and convenience. Beyond cost savings, today's units excel in indoor air quality, operate more quietly, and offer precision temperature control. This convergence of environmental responsibility, cutting-edge technology, and substantial long-term savings makes upgrading your HVAC system a smart investment for any home."
+    },
+    "costPayback": {
+      "title": "Typical Upgrade Cost and Payback",
+      "intro": "The right system depends on your property size, insulation quality, and usage habits. The guide below gives homeowners a practical starting point before requesting a formal quote.",
+      "table": {
+        "headers": { "propertyType": "Property Type", "installedCost": "Typical Installed Cost", "annualSavings": "Estimated Annual Savings", "payback": "Typical Payback" },
+        "rows": [
+          { "type": "1-2 Bedroom Apartment", "cost": "$4,000 - $8,500", "savings": "$450 - $1,000", "payback": "4-8 years" },
+          { "type": "Medium Family Home", "cost": "$8,500 - $16,000", "savings": "$900 - $2,000", "payback": "4-7 years" },
+          { "type": "Large Home / Multi-Zone", "cost": "$16,000 - $30,000+", "savings": "$1,800 - $4,000", "payback": "4-6 years" }
+        ]
+      },
+      "note": "Figures are indicative only and can vary by climate, electricity tariff, home envelope performance, and installer scope."
+    },
+    "checklist": {
+      "title": "Before You Upgrade: Quick Checklist",
+      "items": [
+        "Confirm room-by-room load sizing, not just whole-home estimates.",
+        "Check electrical panel capacity and dedicated circuit requirements.",
+        "Review duct condition or ductless layout suitability for your floor plan.",
+        "Assess insulation, glazing, and air leakage to avoid oversized equipment.",
+        "Verify local rebate, tax incentive, and compliance eligibility before purchase.",
+        "Compare installer warranty terms, service response times, and maintenance plans."
+      ]
+    },
+    "nextSteps": {
+      "title": "Ready to Take the Next Step?",
+      "text": "Use AC-Commerce tools to move from research to decision with confidence.",
+      "startMeasurement": "Start Measurement",
+      "browseProducts": "Browse Products",
+      "bookExpertHelp": "Book Expert Help"
+    }
+  },
+  "measurement": {
+    "page": {
+      "hero": { "title": "Measurement Service System", "subtitle": "Upload your floor plan, notate rooms and export to BTU calculator." },
+      "wizard": {
+        "uploadPdf": "Upload PDF",
+        "reviewRooms": "Review Rooms",
+        "annotate": "Annotate",
+        "calculateBtu": "Calculate BTU",
+        "viewResults": "View Results",
+        "selectMode": "Select Mode",
+        "manualRooms": "Manual Rooms",
+        "viewResultsTooltip": "View Results on Recommendations page"
+      },
+      "storedCalcBanner": "📋 Your previous BTU calculation is loaded below",
+      "calculationMode": {
+        "label": "Calculation Mode",
+        "withAnnotator": "With PDF/JPG Uploading + Notations",
+        "withoutAnnotator": "No Uploading — Manual BTU Entry"
+      },
+      "annotatorDisabled": "Annotator is disabled in this mode. Use BTU Calculator manual room entry below.",
+      "prevCalc": {
+        "title": "📊 Previous Calculation Loaded",
+        "text": "Showing your last BTU calculation. Start a new notation above to create a fresh calculation.",
+        "clear": "Clear"
+      }
+    },
+    "pdfHelpVideo": {
+      "trigger": "Video Tutorials",
+      "title": "Video Tutorial Library",
+      "selected": "Selected",
+      "close": "Close"
+    },
+    "archSymbols": {
+      "trigger": "📐 View Arch Symbols",
+      "title": "Important architectural symbols",
+      "close": "Close"
+    },
+    "btuCalculator": {
+      "prevSummary": {
+        "title": "Previous calculation",
+        "dismiss": "Dismiss",
+        "room": "room",
+        "rooms": "rooms",
+        "total": "total",
+        "viewBtn": "View Recommendations →"
+      },
+      "title": "BTU Calculator",
+      "measurementSystem": { "label": "Measurement System", "meters": "Meters (m²)", "feet": "Feet (ft²)" },
+      "roomSource": { "label": "Room Data Source", "pdf": "Use PDF Rooms", "manual": "Manual Room Entry", "noRoomsHint": "No rooms detected from PDF yet. Switch to Manual Room Entry to continue." },
+      "multiFlat": {
+        "label": "Multi-flat/Multi-unit property (separate condenser for each flat)",
+        "detected": "✓ Detected {{count}} flat(s):",
+        "eachFlatCondenser": "Each flat will get its own condenser sized separately",
+        "detectedFromAnnotations": "✓ Multi-flat detected from annotations:",
+        "checkBoxHint": "Check the box above to enable separate condensers for each flat.",
+        "acFound": "✓ AC annotations found: {{count}} label(s) detected",
+        "flatsAutoDetected": "Flats auto-detected from condenser labels (e.g., condenser-1, condenser-2)"
+      },
+      "ceilingHeight": { "label": "Ceiling Height (m):", "placeholder": "Enter ceiling height in meters" },
+      "people": { "labelPerFlat": "Number of People (per flat):", "label": "Number of People:", "placeholder": "Enter number of people" },
+      "humidity": { "label": "Humidity Level:", "low": "Low (dry climate)", "average": "Average", "high": "High (humid / coastal)" },
+      "infiltration": { "label": "Building Air-Tightness:", "tight": "Tight (new / sealed build)", "average": "Average (typical dwelling)", "leaky": "Leaky (older / drafty)" },
+      "systemMode": { "label": "System Mode:", "heatpump": "Cooling or Heating (heat pump)", "recovery": "Cooling & Heat Recovery" },
+      "manualRoomsTitle": "Manual Rooms:",
+      "roomMeasurementsTitle": "Room Measurements:",
+      "roomTypeLabel": "Room Type {{n}}:",
+      "roomSizeLabel": "Room Size ({{unit}}²):",
+      "roomSizePlaceholder": "Enter room size in {{unit}}",
+      "addRoom": "Add Room",
+      "calculate": "Calculate BTU",
+      "calculating": "⏳ Calculating…",
+      "clear": "Clear",
+      "groups": {
+        "outdoorUnitLocation": "Outdoor Unit Location",
+        "outdoorUnitLocationPerFlat": "Outdoor Unit Location (per flat):",
+        "insulation": "Insulation Condition",
+        "climate": "Climate",
+        "windowType": "Window Type",
+        "apartmentOrientation": "Apartment Orientation",
+        "apartmentOrientationPerFlat": "Apartment Orientation (per flat):",
+        "typeOfWall": "Type of Wall",
+        "sunExposure": "Sun Exposure",
+        "appliances": "Room Usage & Appliances",
+        "appliancesPerFlat": "Room Usage & Appliances (per flat):",
+        "roofType": "Roof Type",
+        "floorType": "Floor",
+        "floorTypePerFlat": "Floor (per flat):"
+      },
+      "optionLabels": {
+        "Roof": "Roof", "WallBrackets": "Wall Brackets", "HardGround": "Hard Ground",
+        "BrickVeneer": "Brick Veneer", "DoubleBrick": "Double Brick", "FoamCladding": "Foam Cladding",
+        "Average": "Average", "Good": "Good", "Poor": "Poor",
+        "FullSunlight": "Full Sunlight", "HeavilyShaded": "Heavily Shaded",
+        "SingleGlazed": "Single Glazed", "DoubleGlazed": "Double Glazed", "TripleGlazed": "Triple Glazed", "Louvered": "Louvered",
+        "Flat": "Flat", "Pitched": "Pitched", "Gable": "Gable",
+        "Marble": "Marble", "Timber": "Timber", "Concrete": "Concrete", "Carpeted": "Carpeted",
+        "North": "North", "East": "East", "South": "South", "West": "West", "LivingRoom": "Living Room",
+        "BTU": "BTU", "Watt": "Watt", "kW": "kW",
+        "HotMiddleEast": "Hot Middle East", "TropicalSEAsia": "Tropical (SE Asia)", "Subtropical": "Subtropical (Australia/S. Africa)",
+        "AverageEurope": "Average Europe", "Continental": "Continental (E. Europe)", "SubArctic": "Sub-Arctic (Scandinavia/Canada)", "ColdAlaska": "Cold Alaska"
+      },
+      "applianceLabels": {
+        "Oven": "Oven", "ServerRoom": "Server Room", "CommercialKitchen": "Commercial Kitchen", "Gym": "Gym",
+        "HomeTheater": "Home Theater", "Workshop": "Workshop", "OfficeRoom": "Office Room", "HotelRoom": "Hotel Room"
+      },
+      "applianceTooltips": {
+        "Oven": "+8% cooling · −5% heating — Cooking adds heat; offsets some heating load",
+        "ServerRoom": "+35% cooling · −15% heating — Servers and IT equipment generate continuous high heat",
+        "CommercialKitchen": "+45% cooling · −20% heating — Multiple cooking appliances generate intense, sustained heat",
+        "Gym": "+20% cooling · −10% heating — Exercise equipment and high metabolic activity from occupants",
+        "HomeTheater": "+6% cooling · −3% heating — AV receivers, projectors and amplifiers add moderate heat",
+        "Workshop": "+12% cooling · −6% heating — Power tools and compressors generate heat during operation",
+        "OfficeRoom": "+18% cooling · −8% heating — Office equipment and occupants add moderate heat in cooling, reduce heating need",
+        "HotelRoom": "+10% cooling · −4% heating — Hotel rooms have some internal gains from appliances and occupants"
+      },
+      "roomTypeOptions": [
+        "Bedroom 1", "Bedroom 2", "Bedroom 3", "Bedroom 4", "Bedroom 5", "Living Room", "Dining Room", "Kitchen", "Bathroom", "Terrace", "Loft", "Single Storey", "Double Storey", "Split Level House", "Entire First Floor", "Entire Second Floor And Above", "Open Office Area"
+      ]
+    },
+    "sidebar": {
+      "trigger": { "open": "Open Saved PDFs", "close": "Close Saved PDFs" },
+      "header": { "title": "Saved PDFs", "close": "Close" },
+      "tabs": { "myDrawings": "My Drawings", "engineerReviews": "Engineer Reviews" },
+      "toolbar": {
+        "searchPlaceholder": "Search files…",
+        "sortNewest": "Newest", "sortOldest": "Oldest", "sortName": "Name",
+        "filterByStatus": "Filter by status",
+        "statusAll": "All statuses", "statusPending": "Pending", "statusReviewed": "Reviewed",
+        "statusApproved": "Approved", "statusRejected": "Rejected"
+      },
+      "list": {
+        "loadingDrawings": "Loading your drawings…",
+        "loadingReviews": "Loading engineer reviews…",
+        "deleteAllDrawings": "Delete all drawings",
+        "deleteAllReviews": "Delete all engineer reviews",
+        "deleteAllBtn": "Delete All",
+        "noMatches": "No matches found.",
+        "noSavedDocuments": "No saved documents yet.",
+        "noEngineerReviews": "No engineer reviews yet.",
+        "untitledDocument": "Untitled Document",
+        "deleteTitle": "Delete",
+        "deleteReviewTitle": "Delete Engineer Review",
+        "shareTitle": "Copy shareable link",
+        "engineerLabel": "Engineer: {{name}}",
+        "unknownEngineer": "Unknown",
+        "pageOf": "Page {{page}} of {{total}}"
+      },
+      "pdfView": {
+        "back": "← Back",
+        "deleteTitle": "Delete",
+        "deleteReviewTitle": "Delete Engineer Review",
+        "shareTitle": "Copy shareable link",
+        "buyEquipment": "🛒 Buy Equipment",
+        "showHvac": "Show HVAC Layer",
+        "hideHvac": "Hide HVAC Layer",
+        "legendTitle": "Legend:",
+        "legendDucts": "■ Ducts",
+        "legendDiffusers": "● Diffusers",
+        "legendRefrigerant": "— Refrigerant Lines",
+        "zoomOut": "Zoom out",
+        "zoomIn": "Zoom in"
+      },
+      "footer": { "close": "Close" },
+      "deleteModal": {
+        "deleteAllDrawingsTitle": "Delete All Drawings",
+        "deleteAllReviewsTitle": "Delete All Engineer Reviews",
+        "deleteReviewTitle": "Delete Engineer Review",
+        "deletePdfTitle": "Delete PDF",
+        "confirmDeleteAllText": "Are you sure you want to permanently delete {{filename}}? This action cannot be undone.",
+        "confirmDeleteText": "Are you sure you want to delete \"{{filename}}\"?",
+        "cancel": "Cancel",
+        "deleteAllBtn": "Delete All",
+        "deleteBtn": "Delete",
+        "allDrawingsFilename": "all {{count}} drawings",
+        "allReviewsFilename": "all {{count}} reviews"
+      },
+      "toasts": {
+        "linkCopied": "Link copied to clipboard!",
+        "deletedAllSuccess": "Successfully deleted all {{count}} {{type}}!",
+        "deletedAllPartial": "Deleted {{count}} {{type}}. {{failCount}} failed.",
+        "deleteAllFailed": "Failed to delete {{type}}.",
+        "engineerReviewDeleted": "Engineer review deleted!",
+        "pdfDeleted": "PDF deleted successfully!",
+        "noDrawingsToDelete": "No drawings to delete.",
+        "noReviewsToDelete": "No engineer reviews to delete.",
+        "typeDrawings": "drawings",
+        "typeReviews": "engineer reviews"
+      },
+      "errors": {
+        "notAuthenticated": "User not authenticated.",
+        "fetchPdfsFailed": "Error fetching saved PDFs. Please try again.",
+        "loadPdfFailed": "Failed to load PDF. See console for details.",
+        "loadEngineerPdfFailed": "Failed to load engineer annotation PDF. See console for details.",
+        "deletePdfFailed": "Failed to delete PDF.",
+        "paymentRequired": "You need to pay to view this PDF with annotations."
+      }
+    },
+    "annotator": {
+      "ocrLanguage": {
+        "label": "OCR language",
+        "eng": "English",
+        "engSpa": "English + Spanish",
+        "fra": "French",
+        "deu": "German",
+        "heb": "Hebrew",
+        "ita": "Italian",
+        "por": "Portuguese",
+        "spa": "Spanish"
+      },
+      "uploadType": { "label": "Upload type", "pdf": "PDF", "jpg": "JPG" },
+      "previewTitle": "Preview of selected file:",
+      "loading": { "processing": "Processing...", "loadingLibraries": "Loading libraries..." },
+      "errors": {
+        "noValidFiles": "No valid PDF or JPG files selected.",
+        "commentExists": "This comment already exists.",
+        "selectPdfToSave": "Please select a PDF file to save.",
+        "signInToSave": "You must be signed in to save.",
+        "saveFailed": "Failed to save: {{message}}",
+        "networkError": "Network error occurred while saving.",
+        "noRoomsToExport": "No rooms to export",
+        "exportExcelFailed": "Failed to export Excel file.",
+        "exportJsonFailed": "Failed to export JSON file.",
+        "unknownError": "Unknown error"
+      },
+      "toasts": {
+        "savedSuccess": "{{type}} and annotations saved successfully!"
+      },
+      "savedLabel": { "image": "Image", "pdf": "PDF" },
+      "roomTable": {
+        "fileNameLabel": "File Name: {{name}}",
+        "errorLabel": "Error: {{message}}",
+        "apartmentTypeLabel": "Apartment Type:",
+        "classifiedRoomDataTitle": "Classified Room Data Table",
+        "guidelinesTitle": "General Guidelines by Room Size:",
+        "guidelineSmall": "Small Rooms (90-250 sq. ft.)",
+        "guidelineMedium": "Medium Rooms (250–350 sq. ft.)",
+        "guidelineLarge": "Large Rooms (350-550 sq. ft.)",
+        "filterPlaceholder": "Filter by room type",
+        "sortRoomType": "Room Type",
+        "sortWidth": "Width",
+        "sortLength": "Length",
+        "sortAreaSqft": "Area (sqft)",
+        "sortAreaSqm": "Area (sqm)",
+        "sortToggleTitle": "Toggle sort order",
+        "sortLabel": "Sort: {{order}}",
+        "sortAsc": "ASC",
+        "sortDesc": "DESC",
+        "exportExcelTitle": "Export and Download Excel File",
+        "downloadStarted": "Download Started!",
+        "exportJsonTitle": "Export raw JSON (rooms + annotations)",
+        "recentExportsTitle": "Recent Exports (Click to Re-download)",
+        "noFilesExported": "No files exported in this session.",
+        "downloadTitle": "Click to download and open: {{name}}",
+        "removeFileTitle": "Remove link from list (frees memory)",
+        "roomTypePlaceholder": "Room Type",
+        "widthPlaceholder": "Enter width in decimal ft e.g., 10.5 for 10'6 ",
+        "lengthPlaceholder": "Enter length in decimal ft e.g., 10.5 for 10'6",
+        "addRoomBtn": "Add Room",
+        "headerRoomType": "Room Type",
+        "headerWidth": "Width (ft)",
+        "headerLength": "Length (ft)",
+        "headerAreaSqft": "Area (sqft)",
+        "headerAreaSqm": "Area (sqm)",
+        "headerActions": "Actions",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "noRoomData": "No classified room data found. Add a room using the form above.",
+        "total": "Total: {{sqft}} sqft | {{sqm}} sqm"
+      },
+      "toolbar": {
+        "ariaLabel": "PDF controls",
+        "exportBtuTitle": "Export rooms to BTU Calculator",
+        "exportBtuBtn": "Export to BTU ({{count}} rooms)",
+        "saveTitle": "Save PDF and annotations",
+        "saving": "Saving...",
+        "save": "Save",
+        "clearTitle": "Clear canvas and data",
+        "clear": "Clear",
+        "undoTitle": "Undo last annotation action (Ctrl+Z)",
+        "undo": "↩ Undo",
+        "redoTitle": "Redo (Ctrl+Y)",
+        "redo": "↪ Redo",
+        "prevPageTitle": "Previous page",
+        "prevPage": "◀ Prev",
+        "pageOf": "Page {{page}}/{{total}}",
+        "nextPageTitle": "Next page",
+        "nextPage": "Next ▶",
+        "rotateLeftTitle": "Rotate PDF counter-clockwise",
+        "rotateLeft": "↶ Left",
+        "rotateRightTitle": "Rotate PDF clockwise",
+        "rotateRight": "↷ Right",
+        "resetRotationTitle": "Reset PDF to original orientation",
+        "resetRotation": "Reset ({{deg}}°)",
+        "zoomInTitle": "Zoom in",
+        "zoomResetTitle": "Reset zoom level",
+        "zoomOutTitle": "Zoom out"
+      },
+      "annotationLabel": {
+        "labelText": "Annotation label:",
+        "placeholder": "ac-1, ..., ac-1.1, condenser…",
+        "hintClickToPlace": "Click canvas to place",
+        "hintTypeLabel": "Type label, then click canvas"
+      },
+      "mobileAnnotation": {
+        "hintTapToPlace": "Tap canvas to place annotation",
+        "hintEnablePlaceMode": "Enable place mode, then tap canvas",
+        "hintTypeLabelBelow": "Type a label below, then tap the canvas to place",
+        "placeholder": "ac-1, ..., ac-1.1, condenser, condenser-1...",
+        "tapToPlaceBtn": "✅ Tap to place",
+        "placeModeBtn": "📌 Place mode"
+      },
+      "placedAnnotations": {
+        "title": "📌 Placed annotations ({{count}})",
+        "hint": "— or double-click a label on the canvas to edit",
+        "editTitle": "Edit annotation label",
+        "deleteTitle": "Delete annotation"
+      },
+      "editLabelModal": {
+        "title": "✏️ Edit annotation label",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    }
   }
 }

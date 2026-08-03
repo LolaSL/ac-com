@@ -196,5 +196,456 @@
       "unsubscribeSuccess": "Vous avez été désabonné de la newsletter.",
       "genericError": "Une erreur s'est produite lors de la tentative de {{mode}}. Veuillez réessayer."
     }
+  },
+  "aboutUs": {
+    "hero": {
+      "title": "À Propos d'AC-Commerce",
+      "subtitle": "Votre marketplace CVC complet — de la première mesure à l'approbation finale."
+    },
+    "intro": {
+      "p1Bold": "AC-Commerce Home Supply",
+      "p1Rest": " est un marketplace CVC qui combine le commerce de produits avec des outils de planification de niveau professionnel. Que vous achetiez un mini-split, conceviez un système VRF pour une propriété multi-pièces, ou fassiez examiner votre plan d'étage par un ingénieur certifié, tout se passe sur une seule plateforme.",
+      "p2": "Nous remplaçons le processus fragmenté de jonglage entre plusieurs fournisseurs, entrepreneurs et consultants en conception par un flux de travail unique et intégré — de la première mesure à l'approbation finale."
+    },
+    "howItWorksTitle": "Comment Ça Marche",
+    "steps": [
+      { "title": "Téléchargez Votre Plan d'Étage", "text": "Téléchargez n'importe quel fichier PDF/JPG architectural — suite résidentielle, bureau ou espace commercial. Le plan est affiché directement dans le navigateur en haute résolution." },
+      { "title": "Marquez les Emplacements de Climatisation", "text": "Placez des symboles étiquetés d'unités de climatisation sur le plan - ajoutez des commentaires (ac-1, ac-2... etc) et l'emplacement du condenseur (symbole de l'unité extérieure). Enregistrez votre travail sur le cloud." },
+      { "title": "Révision par Ingénieur IA", "text": "Après avoir soumis une commande, un ingénieur CVC certifié par IA ouvre votre plan soumis, ajoute des lignes de réfrigérant VRF professionnelles et appose une signature numérique — produisant un PDF de révision vérifié de 2 pages. Prend en charge les configurations de systèmes Standard, VRF-Gainable et VRF-Non Gainable. Symboles d'éléments/accessoires CVC gainables pour les modes VRF gainables et non gainables — bientôt disponible" },
+      { "title": "Enregistrer et Télécharger", "text": "Téléchargez votre plan complet révisé par l'ingénieur IA au format PDF avec tous les symboles d'unités de climatisation, le symbole de l'unité extérieure-condenseur, les commentaires, les lignes de système et le tampon numérique de l'ingénieur IA intégrés." },
+      { "title": "Calculateur BTU", "text": "Répondez à des questions guidées sur votre propriété — taille de la pièce, isolation, climat — et recevez une puissance BTU recommandée ainsi qu'une liste sélectionnée d'unités intérieures et de condenseurs extérieurs correspondants." },
+      { "title": "Recommandations - Devis du Système CVC", "text": "Après avoir terminé le calcul BTU, consultez les recommandations CVC pièce par pièce avec les produits correspondants, les totaux du système, les prix, un devis prêt à imprimer et des actions rapides d'ajout au panier." }
+    ],
+    "whyTitle": "Pourquoi AC-Commerce",
+    "features": [
+      { "title": "Marketplace CVC Complet", "text": "Des centaines de climatiseurs mini-split, condenseurs VRF, unités intérieures et accessoires des principaux fabricants — avec évaluations, dimensions, classes énergétiques et remises." },
+      { "title": "Outils d'Annotation Professionnels", "text": "Annotations PDF basées sur le navigateur avec des symboles de climatisation colorés, des commentaires textuels, des lignes de réfrigérant VRF (diffuseurs d'air gainables — bientôt disponible)." },
+      { "title": "Approbation par Ingénieur IA Certifié", "text": "Chaque plan soumis est examiné par un Ingénieur IA qualifié qui ajoute des notes spécifiques au système et une signature numérique — vous donnant un document adapté aux permis et aux entrepreneurs." },
+      { "title": "Réseau de Services de Confiance", "text": "Connectez-vous directement avec des prestataires de services CVC vérifiés pour les consultations, l'installation, la maintenance et les réparations grâce à notre système intégré de messagerie et de réservation." },
+      { "title": "Commandes, Notifications et Support", "text": "Suivez les commandes de bout en bout, recevez des rappels de paiement et de livraison, communiquez avec les vendeurs via la messagerie intégrée et accédez à un support client dédié à chaque étape." },
+      { "title": "Programme de Commission de Parrainage", "text": "Les professionnels et entreprises du secteur peuvent lister des produits sur le marketplace et gagner des commissions grâce à notre programme de parrainage" }
+    ],
+    "whoWeServeTitle": "Qui Nous Servons",
+    "audiences": [
+      { "label": "Propriétaires", "desc": "Planifiez et achetez le bon système CVC pour votre propriété." },
+      { "label": "Acheteurs Commerciaux", "desc": "Équipez efficacement des bureaux, des espaces de vente au détail et des installations, que vous soyez promoteur, initiateur de projet ou entrepreneur en bâtiment." },
+      { "label": "Entrepreneurs CVC", "desc": "Approvisionnez-vous en équipement et gérez les plans de projet en un seul endroit." },
+      { "label": "Architectes et Designers", "desc": "Intégrez les plans CVC directement dans les flux de travail architecturaux." },
+      { "label": "Prestataires de Services", "desc": "Proposez l'installation, la maintenance et la réparation via la plateforme." },
+      { "label": "Vendeurs Affiliés", "desc": "Les consultants en fusion, les concepteurs architecturaux, les fournisseurs d'accessoires et d'autres professionnels du secteur sont partenaires d'AC-Commerce." }
+    ]
+  },
+  "ourNetwork": {
+    "hero": {
+      "title": "Nos Fournisseurs",
+      "subtitle": "Des fournisseurs de confiance, des prestataires de services et des partenariats avec des fabricants qui font progresser l'excellence CVC dans toute la région.",
+      "badgeCertified": "Partenaires Certifiés",
+      "badgeGlobal": "Portée Mondiale",
+      "badgeQuality": "Qualité Garantie"
+    },
+    "stats": {
+      "industryPartners": "Partenaires du Secteur",
+      "projectsCompleted": "Projets Réalisés",
+      "serviceProviders": "Prestataires de Services",
+      "activeUsers": "Utilisateurs Actifs"
+    },
+    "section": {
+      "title": "Nos Fournisseurs",
+      "subtitle": "Parcourez les fournisseurs CVC vérifiés de notre réseau"
+    },
+    "card": {
+      "desc": "Fournisseur CVC et Prestataire de Services",
+      "viewSeller": "Voir le Fournisseur"
+    },
+    "empty": "Aucun fournisseur disponible pour le moment.",
+    "benefitsTitle": "Pourquoi Choisir Notre Réseau ?",
+    "benefits": [
+      { "title": "Sécurité d'Entreprise", "text": "Certifié ISO 27001" },
+      { "title": "Certifié par l'Industrie", "text": "Conforme aux Normes CVC" },
+      { "title": "Les Mieux Notés", "text": "Note Moyenne de 4,8/5" }
+    ]
+  },
+  "advancedAc": {
+    "hero": { "title": "Climatisation Avancée 2026", "subtitle": "Découvrez les dernières technologies CVC pour le confort, l'efficacité et la durabilité" },
+    "intro": "2026 transforme le confort domestique de manière passionnante. Les systèmes CVC d'aujourd'hui font bien plus que chauffer et refroidir : ils apprennent vos habitudes, réduisent vos factures d'électricité et créent un air intérieur plus sain pour votre famille. Des commandes pilotées par l'IA à la récupération de chaleur haute efficacité et aux réfrigérants à faible impact, les solutions modernes sont plus intelligentes, plus silencieuses et conçues pour des économies à long terme. Si vous prévoyez une mise à niveau, c'est le moment idéal pour découvrir ce que le CVC de nouvelle génération peut faire pour votre maison.",
+    "heatPumps": { "title": "Pompes à Chaleur : La Solution Toutes Saisons", "text": "Les pompes à chaleur deviennent une solution incontournable pour les propriétaires recherchant confort et efficacité énergétique toute l'année. Grâce aux avancées de la technologie des pompes à chaleur pour climats froids, ces systèmes peuvent désormais fonctionner efficacement dans des températures extrêmes, en faisant un choix polyvalent pour toutes les régions." },
+    "heatRecovery": {
+      "title": "Systèmes de Récupération de Chaleur : Maximisez les Économies d'Énergie",
+      "p1": "Les systèmes de Ventilation à Récupération de Chaleur (VRC) et de Ventilation à Récupération d'Énergie (VRE) représentent une avancée majeure dans la gestion énergétique domestique. Ces systèmes avancés capturent et recyclent l'air chauffé ou refroidi qui serait autrement perdu pendant la ventilation, réduisant considérablement le gaspillage d'énergie et les factures de services publics. Que vous chauffiez en hiver ou rafraîchissiez en été, les systèmes de récupération de chaleur maintiennent le confort tout en économisant l'énergie.",
+      "p2": "En 2026, les systèmes VRC et VRE sont de plus en plus intégrés aux solutions CVC intelligentes, permettant aux propriétaires d'optimiser le flux d'air en fonction des conditions intérieures en temps réel. La technologie fonctionne en extrayant l'air vicié de votre maison et en transférant son énergie thermique à l'air frais entrant, réduisant efficacement la charge de chauffage ou de refroidissement de votre système principal. Cette synergie entre récupération de chaleur et contrôle climatique peut générer des économies d'énergie de 15 % à 25 % par an.",
+      "p3": "Les principaux fabricants proposent désormais des solutions complètes de récupération de chaleur. <strong>Samsung</strong>, <strong>LG</strong>, <strong>Daikin</strong>, <strong>Mitsubishi</strong>, <strong>Fujitsu</strong> et <strong>Panasonic</strong> proposent tous des systèmes VRC/VRE avancés intégrés à leurs unités premium de climatisation et de pompes à chaleur. Les derniers modèles <strong>Samsung</strong> associent récupération de chaleur et technologie WindFree pour un refroidissement sans courant d'air, tandis que <strong>LG</strong> associe les systèmes VRE à une optimisation énergétique pilotée par IA. <strong>Daikin</strong> propose des unités modulaires qui s'adaptent aux systèmes existants, et <strong>Mitsubishi</strong> et <strong>Fujitsu</strong> proposent des solutions intégrées VRF de pointe. Ces systèmes compacts et silencieux sont idéaux pour les maisons modernes recherchant une qualité d'air intérieur premium sans sacrifier l'efficacité énergétique."
+    },
+    "energyEfficiency": {
+      "title": "Systèmes Écologiques : Économisez Plus, Consommez Moins",
+      "text": "L'efficacité énergétique est une tendance majeure du CVC en 2026. Les systèmes modernes utilisent des innovations telles que les compresseurs à vitesse variable et des capteurs avancés pour maximiser le confort tout en minimisant la consommation d'énergie et l'impact environnemental. En 2026, l'efficacité énergétique est un axe clé du CVC. Les nouveaux systèmes utilisent des technologies telles que les compresseurs à vitesse variable et des échangeurs de chaleur améliorés pour offrir un confort optimal avec une consommation d'énergie réduite et une empreinte carbone plus faible.",
+      "samsungTitle": "Climatiseurs Samsung BESPOKE AI WindFree",
+      "samsungText": "La dernière collection de climatiseurs intègre la technologie WindFree Cooling de <strong>Samsung</strong>, qui disperse l'air à travers 23 000 micro-trous pour éliminer les courants d'air directs. De plus, la fonction AI Fast & Comfort Cooling permet un refroidissement rapide avant de passer à un mode économe en énergie. Le Mode Énergie IA est conçu pour optimiser les réglages de refroidissement, réduisant potentiellement la consommation d'énergie jusqu'à 30 %."
+    },
+    "indoorAirQuality": {
+      "title": "Innovations en Qualité de l'Air Intérieur",
+      "p1": "L'amélioration de la qualité de l'air intérieur (QAI) est une priorité absolue pour 2026. Les systèmes CVC intègrent désormais des purificateurs d'air, la technologie de lumière UV-C et des filtres à air à particules haute efficacité (HEPA) pour éliminer les allergènes, bactéries et virus de l'air de votre maison. Ces systèmes garantissent un environnement de vie plus sain pour vous et votre famille.",
+      "daikinText": "La nouvelle gamme de purificateurs d'air avec Technologie Streamer de <strong>Daikin</strong> est conçue pour capturer, neutraliser et décomposer les polluants tels que la moisissure, le pollen, les allergènes, les odeurs, le formaldéhyde, la pollution routière et la poussière. Parfait pour les personnes allergiques !"
+    },
+    "whyUpgrade": {
+      "title": "Pourquoi Passer à Niveau en 2026 ?",
+      "text": "2026 marque une année charnière pour les mises à niveau CVC, portée par des changements transformateurs de l'industrie. Les mandats réglementaires exigent désormais des réfrigérants écologiques A2L, tandis que les nouvelles normes d'efficacité garantissent une réduction drastique de la consommation d'énergie. Les systèmes modernes offrent des économies d'énergie de 20 % à 40 % par rapport aux anciens modèles, tandis que les commandes intelligentes avancées offrent un confort et une commodité sans précédent. Au-delà des économies de coûts, les unités actuelles excellent en qualité de l'air intérieur, fonctionnent plus silencieusement et offrent un contrôle précis de la température. Cette convergence de responsabilité environnementale, de technologie de pointe et d'économies substantielles à long terme fait de la mise à niveau de votre système CVC un investissement judicieux pour toute maison."
+    },
+    "costPayback": {
+      "title": "Coût Typique de Mise à Niveau et Retour sur Investissement",
+      "intro": "Le bon système dépend de la taille de votre propriété, de la qualité de l'isolation et de vos habitudes d'utilisation. Le guide ci-dessous offre aux propriétaires un point de départ pratique avant de demander un devis formel.",
+      "table": {
+        "headers": { "propertyType": "Type de Propriété", "installedCost": "Coût d'Installation Typique", "annualSavings": "Économies Annuelles Estimées", "payback": "Retour sur Investissement Typique" },
+        "rows": [
+          { "type": "Appartement de 1 à 2 Chambres", "cost": "4 000 $ - 8 500 $", "savings": "450 $ - 1 000 $", "payback": "4-8 ans" },
+          { "type": "Maison Familiale Moyenne", "cost": "8 500 $ - 16 000 $", "savings": "900 $ - 2 000 $", "payback": "4-7 ans" },
+          { "type": "Grande Maison / Multi-Zones", "cost": "16 000 $ - 30 000 $+", "savings": "1 800 $ - 4 000 $", "payback": "4-6 ans" }
+        ]
+      },
+      "note": "Les chiffres sont indicatifs uniquement et peuvent varier selon le climat, le tarif d'électricité, la performance de l'enveloppe du bâtiment et le périmètre de l'installateur."
+    },
+    "checklist": {
+      "title": "Avant de Passer à Niveau : Liste de Vérification Rapide",
+      "items": [
+        "Confirmez le dimensionnement de charge pièce par pièce, pas seulement des estimations pour toute la maison.",
+        "Vérifiez la capacité du tableau électrique et les exigences de circuits dédiés.",
+        "Vérifiez l'état des conduits ou l'adéquation d'une configuration sans conduits à votre plan d'étage.",
+        "Évaluez l'isolation, le vitrage et les fuites d'air pour éviter un équipement surdimensionné.",
+        "Vérifiez l'éligibilité aux remises locales, aux incitations fiscales et à la conformité avant l'achat.",
+        "Comparez les conditions de garantie de l'installateur, les délais de réponse du service et les plans d'entretien."
+      ]
+    },
+    "nextSteps": {
+      "title": "Prêt à Passer à l'Étape Suivante ?",
+      "text": "Utilisez les outils AC-Commerce pour passer de la recherche à la décision en toute confiance.",
+      "startMeasurement": "Démarrer la Mesure",
+      "browseProducts": "Parcourir les Produits",
+      "bookExpertHelp": "Réserver l'Aide d'un Expert"
+    }
+  },
+  "measurement": {
+    "page": {
+      "hero": { "title": "Système de Service de Mesure", "subtitle": "Téléchargez votre plan, annotez les pièces et exportez vers le calculateur BTU." },
+      "wizard": {
+        "uploadPdf": "Télécharger PDF",
+        "reviewRooms": "Vérifier les Pièces",
+        "annotate": "Annoter",
+        "calculateBtu": "Calculer BTU",
+        "viewResults": "Voir les Résultats",
+        "selectMode": "Sélectionner le Mode",
+        "manualRooms": "Pièces Manuelles",
+        "viewResultsTooltip": "Voir les résultats sur la page Recommandations"
+      },
+      "storedCalcBanner": "📋 Votre calcul BTU précédent est chargé ci-dessous",
+      "calculationMode": {
+        "label": "Mode de Calcul",
+        "withAnnotator": "Avec Téléchargement PDF/JPG + Annotations",
+        "withoutAnnotator": "Sans Téléchargement — Saisie BTU Manuelle"
+      },
+      "annotatorDisabled": "L'annotateur est désactivé dans ce mode. Utilisez la saisie manuelle des pièces du Calculateur BTU ci-dessous.",
+      "prevCalc": {
+        "title": "📊 Calcul Précédent Chargé",
+        "text": "Affichage de votre dernier calcul BTU. Démarrez une nouvelle annotation ci-dessus pour créer un nouveau calcul.",
+        "clear": "Effacer"
+      }
+    },
+    "pdfHelpVideo": {
+      "trigger": "Tutoriels Vidéo",
+      "title": "Bibliothèque de Tutoriels Vidéo",
+      "selected": "Sélectionné",
+      "close": "Fermer"
+    },
+    "archSymbols": {
+      "trigger": "📐 Voir les Symboles Architecturaux",
+      "title": "Symboles architecturaux importants",
+      "close": "Fermer"
+    },
+    "btuCalculator": {
+      "prevSummary": {
+        "title": "Calcul précédent",
+        "dismiss": "Ignorer",
+        "room": "pièce",
+        "rooms": "pièces",
+        "total": "au total",
+        "viewBtn": "Voir les Recommandations →"
+      },
+      "title": "Calculateur BTU",
+      "measurementSystem": { "label": "Système de Mesure", "meters": "Mètres (m²)", "feet": "Pieds (ft²)" },
+      "roomSource": { "label": "Source des Données de Pièces", "pdf": "Utiliser les Pièces du PDF", "manual": "Saisie Manuelle des Pièces", "noRoomsHint": "Aucune pièce détectée depuis le PDF pour le moment. Passez à la Saisie Manuelle des Pièces pour continuer." },
+      "multiFlat": {
+        "label": "Propriété multi-appartements/multi-unités (condenseur séparé pour chaque appartement)",
+        "detected": "✓ {{count}} appartement(s) détecté(s) :",
+        "eachFlatCondenser": "Chaque appartement aura son propre condenseur dimensionné séparément",
+        "detectedFromAnnotations": "✓ Multi-appartements détecté à partir des annotations :",
+        "checkBoxHint": "Cochez la case ci-dessus pour activer des condenseurs séparés pour chaque appartement.",
+        "acFound": "✓ Annotations de climatisation trouvées : {{count}} étiquette(s) détectée(s)",
+        "flatsAutoDetected": "Appartements détectés automatiquement à partir des étiquettes de condenseur (par ex., condenser-1, condenser-2)"
+      },
+      "ceilingHeight": { "label": "Hauteur du Plafond (m) :", "placeholder": "Entrez la hauteur du plafond en mètres" },
+      "people": { "labelPerFlat": "Nombre de Personnes (par appartement) :", "label": "Nombre de Personnes :", "placeholder": "Entrez le nombre de personnes" },
+      "humidity": { "label": "Niveau d'Humidité :", "low": "Faible (climat sec)", "average": "Moyen", "high": "Élevé (humide / côtier)" },
+      "infiltration": { "label": "Étanchéité du Bâtiment :", "tight": "Étanche (construction neuve / scellée)", "average": "Moyenne (habitation typique)", "leaky": "Peu étanche (plus ancienne / avec courants d'air)" },
+      "systemMode": { "label": "Mode du Système :", "heatpump": "Refroidissement ou Chauffage (pompe à chaleur)", "recovery": "Refroidissement et Récupération de Chaleur" },
+      "manualRoomsTitle": "Pièces Manuelles :",
+      "roomMeasurementsTitle": "Mesures des Pièces :",
+      "roomTypeLabel": "Type de Pièce {{n}} :",
+      "roomSizeLabel": "Taille de la Pièce ({{unit}}²) :",
+      "roomSizePlaceholder": "Entrez la taille de la pièce en {{unit}}",
+      "addRoom": "Ajouter une Pièce",
+      "calculate": "Calculer BTU",
+      "calculating": "⏳ Calcul en cours…",
+      "clear": "Effacer",
+      "groups": {
+        "outdoorUnitLocation": "Emplacement de l'Unité Extérieure",
+        "outdoorUnitLocationPerFlat": "Emplacement de l'Unité Extérieure (par appartement) :",
+        "insulation": "État de l'Isolation",
+        "climate": "Climat",
+        "windowType": "Type de Fenêtre",
+        "apartmentOrientation": "Orientation de l'Appartement",
+        "apartmentOrientationPerFlat": "Orientation de l'Appartement (par appartement) :",
+        "typeOfWall": "Type de Mur",
+        "sunExposure": "Exposition au Soleil",
+        "appliances": "Usage de la Pièce et Appareils",
+        "appliancesPerFlat": "Usage de la Pièce et Appareils (par appartement) :",
+        "roofType": "Type de Toit",
+        "floorType": "Sol",
+        "floorTypePerFlat": "Sol (par appartement) :"
+      },
+      "optionLabels": {
+        "Roof": "Toit", "WallBrackets": "Supports Muraux", "HardGround": "Sol Dur",
+        "BrickVeneer": "Placage de Brique", "DoubleBrick": "Double Brique", "FoamCladding": "Bardage en Mousse",
+        "Average": "Moyen", "Good": "Bon", "Poor": "Faible",
+        "FullSunlight": "Plein Soleil", "HeavilyShaded": "Très Ombragé",
+        "SingleGlazed": "Simple Vitrage", "DoubleGlazed": "Double Vitrage", "TripleGlazed": "Triple Vitrage", "Louvered": "Persienne",
+        "Flat": "Plat", "Pitched": "En Pente", "Gable": "À Pignon",
+        "Marble": "Marbre", "Timber": "Bois", "Concrete": "Béton", "Carpeted": "Moquette",
+        "North": "Nord", "East": "Est", "South": "Sud", "West": "Ouest", "LivingRoom": "Salon",
+        "BTU": "BTU", "Watt": "Watt", "kW": "kW",
+        "HotMiddleEast": "Moyen-Orient Chaud", "TropicalSEAsia": "Tropical (Asie du Sud-Est)", "Subtropical": "Subtropical (Australie/Afrique du Sud)",
+        "AverageEurope": "Europe Moyenne", "Continental": "Continental (Europe de l'Est)", "SubArctic": "Subarctique (Scandinavie/Canada)", "ColdAlaska": "Alaska Froide"
+      },
+      "applianceLabels": {
+        "Oven": "Four", "ServerRoom": "Salle de Serveurs", "CommercialKitchen": "Cuisine Commerciale", "Gym": "Salle de Sport",
+        "HomeTheater": "Home Cinéma", "Workshop": "Atelier", "OfficeRoom": "Bureau", "HotelRoom": "Chambre d'Hôtel"
+      },
+      "applianceTooltips": {
+        "Oven": "+8% refroidissement · −5% chauffage — La cuisson ajoute de la chaleur ; compense une partie de la charge de chauffage",
+        "ServerRoom": "+35% refroidissement · −15% chauffage — Les serveurs et équipements informatiques génèrent une chaleur élevée continue",
+        "CommercialKitchen": "+45% refroidissement · −20% chauffage — Plusieurs appareils de cuisson génèrent une chaleur intense et soutenue",
+        "Gym": "+20% refroidissement · −10% chauffage — Équipement d'exercice et forte activité métabolique des occupants",
+        "HomeTheater": "+6% refroidissement · −3% chauffage — Récepteurs AV, projecteurs et amplificateurs ajoutent une chaleur modérée",
+        "Workshop": "+12% refroidissement · −6% chauffage — Les outils électriques et compresseurs génèrent de la chaleur pendant le fonctionnement",
+        "OfficeRoom": "+18% refroidissement · −8% chauffage — L'équipement de bureau et les occupants ajoutent une chaleur modérée en refroidissement, réduisent le besoin de chauffage",
+        "HotelRoom": "+10% refroidissement · −4% chauffage — Les chambres d'hôtel ont quelques gains internes provenant des appareils et occupants"
+      },
+      "roomTypeOptions": [
+        "Chambre 1", "Chambre 2", "Chambre 3", "Chambre 4", "Chambre 5", "Salon", "Salle à Manger", "Cuisine", "Salle de Bain", "Terrasse", "Grenier", "Plain-Pied", "Duplex", "Maison à Niveaux Split", "Tout le Premier Étage", "Tout le Deuxième Étage et Plus", "Espace Bureau Ouvert"
+      ]
+    },
+    "sidebar": {
+      "trigger": { "open": "Ouvrir les PDF enregistrés", "close": "Fermer les PDF enregistrés" },
+      "header": { "title": "PDF Enregistrés", "close": "Fermer" },
+      "tabs": { "myDrawings": "Mes Dessins", "engineerReviews": "Avis d'Ingénieur" },
+      "toolbar": {
+        "searchPlaceholder": "Rechercher des fichiers…",
+        "sortNewest": "Plus récent", "sortOldest": "Plus ancien", "sortName": "Nom",
+        "filterByStatus": "Filtrer par statut",
+        "statusAll": "Tous les statuts", "statusPending": "En attente", "statusReviewed": "Examiné",
+        "statusApproved": "Approuvé", "statusRejected": "Rejeté"
+      },
+      "list": {
+        "loadingDrawings": "Chargement de vos dessins…",
+        "loadingReviews": "Chargement des avis d'ingénieur…",
+        "deleteAllDrawings": "Supprimer tous les dessins",
+        "deleteAllReviews": "Supprimer tous les avis d'ingénieur",
+        "deleteAllBtn": "Tout Supprimer",
+        "noMatches": "Aucune correspondance trouvée.",
+        "noSavedDocuments": "Aucun document enregistré pour le moment.",
+        "noEngineerReviews": "Aucun avis d'ingénieur pour le moment.",
+        "untitledDocument": "Document Sans Titre",
+        "deleteTitle": "Supprimer",
+        "deleteReviewTitle": "Supprimer l'Avis d'Ingénieur",
+        "shareTitle": "Copier le lien de partage",
+        "engineerLabel": "Ingénieur : {{name}}",
+        "unknownEngineer": "Inconnu",
+        "pageOf": "Page {{page}} sur {{total}}"
+      },
+      "pdfView": {
+        "back": "← Retour",
+        "deleteTitle": "Supprimer",
+        "deleteReviewTitle": "Supprimer l'Avis d'Ingénieur",
+        "shareTitle": "Copier le lien de partage",
+        "buyEquipment": "🛒 Acheter l'Équipement",
+        "showHvac": "Afficher la Couche CVC",
+        "hideHvac": "Masquer la Couche CVC",
+        "legendTitle": "Légende :",
+        "legendDucts": "■ Conduits",
+        "legendDiffusers": "● Diffuseurs",
+        "legendRefrigerant": "— Lignes de Réfrigérant",
+        "zoomOut": "Zoom arrière",
+        "zoomIn": "Zoom avant"
+      },
+      "footer": { "close": "Fermer" },
+      "deleteModal": {
+        "deleteAllDrawingsTitle": "Supprimer Tous les Dessins",
+        "deleteAllReviewsTitle": "Supprimer Tous les Avis d'Ingénieur",
+        "deleteReviewTitle": "Supprimer l'Avis d'Ingénieur",
+        "deletePdfTitle": "Supprimer le PDF",
+        "confirmDeleteAllText": "Voulez-vous vraiment supprimer définitivement {{filename}} ? Cette action est irréversible.",
+        "confirmDeleteText": "Voulez-vous vraiment supprimer « {{filename}} » ?",
+        "cancel": "Annuler",
+        "deleteAllBtn": "Tout Supprimer",
+        "deleteBtn": "Supprimer",
+        "allDrawingsFilename": "les {{count}} dessins",
+        "allReviewsFilename": "les {{count}} avis"
+      },
+      "toasts": {
+        "linkCopied": "Lien copié dans le presse-papiers !",
+        "deletedAllSuccess": "{{count}} {{type}} supprimés avec succès !",
+        "deletedAllPartial": "{{count}} {{type}} supprimés. {{failCount}} ont échoué.",
+        "deleteAllFailed": "Échec de la suppression de {{type}}.",
+        "engineerReviewDeleted": "Avis d'ingénieur supprimé !",
+        "pdfDeleted": "PDF supprimé avec succès !",
+        "noDrawingsToDelete": "Aucun dessin à supprimer.",
+        "noReviewsToDelete": "Aucun avis d'ingénieur à supprimer.",
+        "typeDrawings": "dessins",
+        "typeReviews": "avis d'ingénieur"
+      },
+      "errors": {
+        "notAuthenticated": "Utilisateur non authentifié.",
+        "fetchPdfsFailed": "Erreur lors de la récupération des PDF enregistrés. Veuillez réessayer.",
+        "loadPdfFailed": "Échec du chargement du PDF. Consultez la console pour plus de détails.",
+        "loadEngineerPdfFailed": "Échec du chargement du PDF de l'avis d'ingénieur. Consultez la console pour plus de détails.",
+        "deletePdfFailed": "Échec de la suppression du PDF.",
+        "paymentRequired": "Vous devez payer pour voir ce PDF avec annotations."
+      }
+    },
+    "annotator": {
+      "ocrLanguage": {
+        "label": "Langue OCR",
+        "eng": "Anglais",
+        "engSpa": "Anglais + Espagnol",
+        "fra": "Français",
+        "deu": "Allemand",
+        "heb": "Hébreu",
+        "ita": "Italien",
+        "por": "Portugais",
+        "spa": "Espagnol"
+      },
+      "uploadType": { "label": "Type de téléchargement", "pdf": "PDF", "jpg": "JPG" },
+      "previewTitle": "Aperçu du fichier sélectionné :",
+      "loading": { "processing": "Traitement en cours...", "loadingLibraries": "Chargement des bibliothèques..." },
+      "errors": {
+        "noValidFiles": "Aucun fichier PDF ou JPG valide sélectionné.",
+        "commentExists": "Ce commentaire existe déjà.",
+        "selectPdfToSave": "Veuillez sélectionner un fichier PDF à enregistrer.",
+        "signInToSave": "Vous devez être connecté pour enregistrer.",
+        "saveFailed": "Échec de l'enregistrement : {{message}}",
+        "networkError": "Une erreur réseau s'est produite lors de l'enregistrement.",
+        "noRoomsToExport": "Aucune pièce à exporter",
+        "exportExcelFailed": "Échec de l'exportation du fichier Excel.",
+        "exportJsonFailed": "Échec de l'exportation du fichier JSON.",
+        "unknownError": "Erreur inconnue"
+      },
+      "toasts": {
+        "savedSuccess": "{{type}} et annotations enregistrés avec succès !"
+      },
+      "savedLabel": { "image": "Image", "pdf": "PDF" },
+      "roomTable": {
+        "fileNameLabel": "Nom du fichier : {{name}}",
+        "errorLabel": "Erreur : {{message}}",
+        "apartmentTypeLabel": "Type d'appartement :",
+        "classifiedRoomDataTitle": "Tableau des données de pièces classifiées",
+        "guidelinesTitle": "Directives générales par taille de pièce :",
+        "guidelineSmall": "Petites pièces (90-250 pi²)",
+        "guidelineMedium": "Pièces moyennes (250–350 pi²)",
+        "guidelineLarge": "Grandes pièces (350-550 pi²)",
+        "filterPlaceholder": "Filtrer par type de pièce",
+        "sortRoomType": "Type de pièce",
+        "sortWidth": "Largeur",
+        "sortLength": "Longueur",
+        "sortAreaSqft": "Surface (pi²)",
+        "sortAreaSqm": "Surface (m²)",
+        "sortToggleTitle": "Basculer l'ordre de tri",
+        "sortLabel": "Tri : {{order}}",
+        "sortAsc": "CROISS",
+        "sortDesc": "DÉCROISS",
+        "exportExcelTitle": "Exporter et télécharger le fichier Excel",
+        "downloadStarted": "Téléchargement démarré !",
+        "exportJsonTitle": "Exporter le JSON brut (pièces + annotations)",
+        "recentExportsTitle": "Exportations récentes (cliquez pour retélécharger)",
+        "noFilesExported": "Aucun fichier exporté durant cette session.",
+        "downloadTitle": "Cliquez pour télécharger et ouvrir : {{name}}",
+        "removeFileTitle": "Retirer le lien de la liste (libère de la mémoire)",
+        "roomTypePlaceholder": "Type de pièce",
+        "widthPlaceholder": "Entrez la largeur en pieds décimaux, ex. 10.5 pour 10'6",
+        "lengthPlaceholder": "Entrez la longueur en pieds décimaux, ex. 10.5 pour 10'6",
+        "addRoomBtn": "Ajouter une pièce",
+        "headerRoomType": "Type de pièce",
+        "headerWidth": "Largeur (pi)",
+        "headerLength": "Longueur (pi)",
+        "headerAreaSqft": "Surface (pi²)",
+        "headerAreaSqm": "Surface (m²)",
+        "headerActions": "Actions",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "noRoomData": "Aucune donnée de pièce classifiée trouvée. Ajoutez une pièce à l'aide du formulaire ci-dessus.",
+        "total": "Total : {{sqft}} pi² | {{sqm}} m²"
+      },
+      "toolbar": {
+        "ariaLabel": "Contrôles PDF",
+        "exportBtuTitle": "Exporter les pièces vers la calculatrice BTU",
+        "exportBtuBtn": "Exporter vers BTU ({{count}} pièces)",
+        "saveTitle": "Enregistrer le PDF et les annotations",
+        "saving": "Enregistrement...",
+        "save": "Enregistrer",
+        "clearTitle": "Effacer le canevas et les données",
+        "clear": "Effacer",
+        "undoTitle": "Annuler la dernière action d'annotation (Ctrl+Z)",
+        "undo": "↩ Annuler",
+        "redoTitle": "Rétablir (Ctrl+Y)",
+        "redo": "↪ Rétablir",
+        "prevPageTitle": "Page précédente",
+        "prevPage": "◀ Préc.",
+        "pageOf": "Page {{page}}/{{total}}",
+        "nextPageTitle": "Page suivante",
+        "nextPage": "Suivant ▶",
+        "rotateLeftTitle": "Faire pivoter le PDF dans le sens antihoraire",
+        "rotateLeft": "↶ Gauche",
+        "rotateRightTitle": "Faire pivoter le PDF dans le sens horaire",
+        "rotateRight": "↷ Droite",
+        "resetRotationTitle": "Réinitialiser l'orientation d'origine du PDF",
+        "resetRotation": "Réinitialiser ({{deg}}°)",
+        "zoomInTitle": "Zoomer",
+        "zoomResetTitle": "Réinitialiser le niveau de zoom",
+        "zoomOutTitle": "Dézoomer"
+      },
+      "annotationLabel": {
+        "labelText": "Étiquette d'annotation :",
+        "placeholder": "ac-1, ..., ac-1.1, condenseur…",
+        "hintClickToPlace": "Cliquez sur le canevas pour placer",
+        "hintTypeLabel": "Saisissez l'étiquette, puis cliquez sur le canevas"
+      },
+      "mobileAnnotation": {
+        "hintTapToPlace": "Touchez le canevas pour placer l'annotation",
+        "hintEnablePlaceMode": "Activez le mode placement, puis touchez le canevas",
+        "hintTypeLabelBelow": "Saisissez une étiquette ci-dessous, puis touchez le canevas pour la placer",
+        "placeholder": "ac-1, ..., ac-1.1, condenseur, condenseur-1...",
+        "tapToPlaceBtn": "✅ Toucher pour placer",
+        "placeModeBtn": "📌 Mode placement"
+      },
+      "placedAnnotations": {
+        "title": "📌 Annotations placées ({{count}})",
+        "hint": "— ou double-cliquez sur une étiquette du canevas pour la modifier",
+        "editTitle": "Modifier l'étiquette d'annotation",
+        "deleteTitle": "Supprimer l'annotation"
+      },
+      "editLabelModal": {
+        "title": "✏️ Modifier l'étiquette d'annotation",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      }
+    }
   }
 }
