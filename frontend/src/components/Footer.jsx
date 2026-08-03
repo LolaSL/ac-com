@@ -4,11 +4,13 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Badge from "react-bootstrap/Badge";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Store } from "../Store";
 import "./Footer.css";
 
 const Footer = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { state } = useContext(Store);
   const userInfo = state?.userInfo;
 
@@ -26,12 +28,12 @@ const Footer = () => {
       <footer className="container-fluid footer">
         <Row className="text-white p-4 g-4 justify-content-between">
           <Col xs={12} sm={6} lg={2} className="ft-1">
-            <h4>AC-Commerce</h4>
+            <h4>{t("appName")}</h4>
             <hr />
             <p>
-             We make spaces smarter through innovation.
+             {t("footer.about")}
             </p>
-            <h5 className="follow-us">Follow Us</h5>
+            <h5 className="follow-us">{t("footer.followUs")}</h5>
             <div className="footer-icons d-flex gap-2">
               <NavLink href="https://www.facebook.com" target="_blank">
                 <i className="fa-brands fa-facebook"></i>
@@ -48,23 +50,23 @@ const Footer = () => {
             </div>
           </Col>
           <Col xs={12} sm={6} lg={2} className="ft-2">
-            <h5>Quick Links</h5>
+            <h5>{t("footer.quickLinks")}</h5>
             <hr />
             <NavLink className="text-white d-block" href="/">
-              Home
+              {t("footer.home")}
             </NavLink>
             <NavLink className="text-white d-block" href="/products">
-              Products
+              {t("footer.products")}
             </NavLink>
             <NavLink className="text-white d-block" href="/search">
-              Categories
+              {t("footer.categories")}
             </NavLink>
             <NavLink
               className="text-white d-block"
               href="/measurement"
               onClick={(e) => handleNavigation(e, "/measurement")}
             >
-              Get A Quote <Badge bg="danger" className="quote-badge-pulse ms-1">NEW</Badge>
+              {t("footer.getQuote")} <Badge bg="danger" className="quote-badge-pulse ms-1">{t("footer.new")}</Badge>
             </NavLink>
             {/* <NavLink
               className="text-white d-block"
@@ -74,51 +76,51 @@ const Footer = () => {
               ROI Calculator
             </NavLink> */}
             <NavLink className="text-white d-block" href="/offers">
-              Special Offers
+              {t("footer.specialOffers")}
             </NavLink>
           </Col>
           <Col xs={12} sm={6} lg={2} className="ft-2">
-            <h5>Policies</h5>
+            <h5>{t("footer.policies")}</h5>
             <hr />
 
             <NavLink className="text-white d-block" href="/shipment">
-              Shipment & Delivery
+              {t("footer.shipmentDelivery")}
             </NavLink>
 
             <NavLink className="text-white d-block" href="/returns">
-              Returns
+              {t("footer.returns")}
             </NavLink>
             <NavLink className="text-white d-block" href="/privacy-policy">
-              Privacy Policy
+              {t("footer.privacyPolicy")}
             </NavLink>
             <NavLink className="text-white d-block" href="/terms-of-use">
-              Terms of Use
+              {t("footer.termsOfUse")}
             </NavLink>
             <NavLink className="text-white d-block" href="/cancellation-policy">
-              Cancellation Policy
+              {t("footer.cancellationPolicy")}
             </NavLink>
           </Col>
           <Col xs={12} sm={6} lg={2} className="ft-2">
-            <h5>Company Info</h5>
+            <h5>{t("footer.companyInfo")}</h5>
             <hr />
             <NavLink className="text-white d-block" href="/about-us">
-              About Us
+              {t("footer.aboutUs")}
             </NavLink>
             <NavLink className="text-white d-block" href="/sellers">
-             Our Suppliers
+             {t("footer.ourSuppliers")}
             </NavLink>
             <NavLink className="text-white d-block" href="/advanced-ac">
-              Advanced AC
+              {t("footer.advancedAc")}
             </NavLink>
             <NavLink className="text-white d-block" href="/blogs">
-              Blogs
+              {t("footer.blogs")}
             </NavLink>
             <NavLink className="text-white d-block" href="/contact">
-              Contact Us
+              {t("footer.contactUs")}
             </NavLink>
           </Col>
           <Col xs={12} sm={6} lg={2} className="ft-3">
-            <h5>Company Address</h5>
+            <h5>{t("footer.companyAddress")}</h5>
             <hr />
             <p className="contact-item">
               <i className="fa-solid fa-phone-volume"></i>
@@ -140,7 +142,7 @@ const Footer = () => {
                       window.open('https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request', '_blank', 'noopener,noreferrer');
                     }
                   }}
-                >Default Mail</a>
+                >{t("footer.defaultMail")}</a>
                 {" | "}
                 <a
                   href="https://mail.google.com/mail/?view=cm&fs=1&to=accomhomesupply.support@gmail.com&su=Support%20Request"
@@ -154,26 +156,26 @@ const Footer = () => {
                     }
                   }}
                 >
-                  Gmail
+                  {t("footer.gmail")}
                 </a>
               </span>
             </div>
 
             <p className="contact-item">
-              <i className="fa-solid fa-paper-plane"></i> 1234 Street Name
+              <i className="fa-solid fa-paper-plane"></i> {t("footer.addressLine1")}
             </p>
             <p className="contact-item">
-              <i className="fa-solid fa-paper-plane"></i> City, State, Zip Code
+              <i className="fa-solid fa-paper-plane"></i> {t("footer.addressLine2")}
             </p>
           </Col>
         </Row>
         <div className="text-center">
           <Row className="d-flex justify-content-center">
             <div className="last-footer text-center">
-              &copy; {new Date().getFullYear()} AC-Commerce. All rights reserved.
+              {t("footer.copyright", { year: new Date().getFullYear() })}
             </div>
             <div className="footer-disclaimer">
-              Brand names and logos are property of their respective owners. AC-Commerce is not affiliated with or endorsed by any brand displayed on this site.
+              {t("footer.disclaimer")}
             </div>
           </Row>
         </div>

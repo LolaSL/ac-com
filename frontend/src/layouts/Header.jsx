@@ -7,11 +7,14 @@ import Container from "react-bootstrap/Container";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 import { Store } from "../Store.js";
 import SearchBox from "../components/SearchBox.jsx";
+import LanguageSwitcher from "../components/LanguageSwitcher.jsx";
 import "./Header.css";
 
 function Header({ setSidebarIsOpen, sidebarIsOpen }) {
+  const { t } = useTranslation();
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo, serviceProviderInfo, adminInfo } = state;
 
@@ -23,28 +26,28 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
     userInfo?.token || adminInfo?.token || serviceProviderInfo?.token;
 
   const adminLinks = [
-    { to: "/admin/dashboard", label: "Dashboard" },
-    { to: "/admin/products", label: "Products" },
-    { to: "/admin/orders", label: "Orders" },
-    { to: "/admin/users", label: "Users" },
-    { to: "/admin/manage-service-providers", label: "SP Management" },
-    { to: "/admin/payments", label: "SP Dashboard" },
-    { to: "/admin/sellers", label: "Sellers" },
-    { to: "/admin/sellers/total-dashboard", label: "Seller Referral Dashboard" },
-    { to: "/admin/blogs-list", label: "Blogs" },
-    { to: "/admin/all-annotations", label: "User Floor Plans" },
-    { to: "/admin/hvac-zone-designer", label: "HVAC Zone Designer" },
-    { to: "/admin/newsletter", label: "Newsletter" },
-    { to: "/admin/security", label: "Security (MFA)" },
+    { to: "/admin/dashboard", label: t("header.dashboard") },
+    { to: "/admin/products", label: t("header.products") },
+    { to: "/admin/orders", label: t("header.orders") },
+    { to: "/admin/users", label: t("header.users") },
+    { to: "/admin/manage-service-providers", label: t("header.spManagement") },
+    { to: "/admin/payments", label: t("header.spDashboard") },
+    { to: "/admin/sellers", label: t("header.sellers") },
+    { to: "/admin/sellers/total-dashboard", label: t("header.sellerReferralDashboard") },
+    { to: "/admin/blogs-list", label: t("header.blogs") },
+    { to: "/admin/all-annotations", label: t("header.userFloorPlans") },
+    { to: "/admin/hvac-zone-designer", label: t("header.hvacZoneDesigner") },
+    { to: "/admin/newsletter", label: t("header.newsletter") },
+    { to: "/admin/security", label: t("header.security") },
   ];
 
   const serviceProviderLinks = [
-    { to: "/serviceprovider/dashboard", label: "Dashboard" },
-    { to: `/serviceprovider/profile/${serviceProviderInfo?._id || ""}`, label: "My Profile" },
-    { to: "/serviceprovider/projects", label: "Projects" },
-    { to: "/serviceprovider/hours", label: "Hours" },
-    { to: "/serviceprovider/earnings", label: "Earnings" },
-    { to: "/serviceprovider/messages", label: "Messages" },
+    { to: "/serviceprovider/dashboard", label: t("header.dashboard") },
+    { to: `/serviceprovider/profile/${serviceProviderInfo?._id || ""}`, label: t("header.myProfile") },
+    { to: "/serviceprovider/projects", label: t("header.projects") },
+    { to: "/serviceprovider/hours", label: t("header.hours") },
+    { to: "/serviceprovider/earnings", label: t("header.earnings") },
+    { to: "/serviceprovider/messages", label: t("header.messages") },
   ];
 
   // Fetch unread notifications count for the bell badge
@@ -127,13 +130,13 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
           </Button>
 
           <Link to="/" className="navbar-brand me-3 flex-shrink-1 d-lg-none">
-            <h3>AC-Commerce</h3>
-            <p className="handwritten">Cooling Solutions For Every Space</p>
+            <h3>{t("appName")}</h3>
+            <p className="handwritten">{t("tagline")}</p>
           </Link>
 
           <Link to="/" className="navbar-brand me-3 flex-shrink-0 d-none d-lg-block">
-            <h3>AC-Commerce</h3>
-            <p className="handwritten">Cooling Solutions For Every Space</p>
+            <h3>{t("appName")}</h3>
+            <p className="handwritten">{t("tagline")}</p>
           </Link>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" className="account-toggler">
@@ -159,8 +162,8 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                           ? " active-link"
                           : ""
                       }`}
-                      title="Notifications"
-                      aria-label="Notifications"
+                      title={t("header.notifications")}
+                      aria-label={t("header.notifications")}
                     >
                       <i className="fas fa-bell"></i>
                       {unreadCount > 0 && (
@@ -176,7 +179,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                         to="/cart"
                         className={`text-decoration-none d-flex nav-link cart-link${location.pathname === '/cart' ? ' active-link' : ''}`}
                       >
-                        Cart
+                        {t("header.cart")}
                       </Link>
                       {cart.cartItems.length > 0 ? (
                         <Badge
@@ -187,7 +190,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                           }
                           className="cart-badge-checkout"
                         >
-                          Checkout
+                          {t("header.checkout")}
                         </Badge>
                       ) : (
                         <Badge
@@ -195,14 +198,14 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                           bg="secondary"
                           className="cart-badge-empty"
                         >
-                          Empty
+                          {t("header.empty")}
                         </Badge>
                       )}
                     </div>
                   )}
                   {!userInfo && !serviceProviderInfo && !adminInfo && (
                     <NavDropdown
-                      title="Login"
+                      title={t("header.login")}
                       id="login-nav-dropdown"
                       align="end"
                       className="login-dropdown"
@@ -214,14 +217,15 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                         )}`}
                       >
                         <i className="fas fa-user me-2"></i>
-                        User Login
+                        {t("header.userLogin")}
                       </Link>
                       <Link className="dropdown-item" to="/serviceprovider/login">
                         <i className="fas fa-hard-hat me-2"></i>
-                        Service Provider Login
+                        {t("header.serviceProviderLogin")}
                       </Link>
                     </NavDropdown>
                   )}
+                  <LanguageSwitcher />
                 </Nav>
               </div>
 
@@ -246,7 +250,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                         to="#signout"
                         onClick={serviceProviderSignoutHandler}
                       >
-                        Log Out
+                        {t("header.logOut")}
                       </Link>
                     </div>
                   ) : null}
@@ -255,7 +259,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                       <div className="user-links-row role-links-row">
                         <span className="user-dropdown-title flex-shrink-0">
                           <i className="fas fa-user-shield user-icon"></i>
-                          <span className="user-name">Admin</span>
+                          <span className="user-name">{t("header.admin")}</span>
                         </span>
                         {adminLinks.slice(0, 7).map((link) => (
                           <Link key={link.to} to={link.to} className="nav-link text-nowrap px-2 py-1 rounded">
@@ -274,7 +278,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                           to="#adminlogout"
                           onClick={adminLogoutHandler}
                         >
-                          Admin Log Out
+                          {t("header.adminLogOut")}
                         </Link>
                       </div>
                     </div>
@@ -301,38 +305,38 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                   </span>
 
                   <Link to="/profile" className="nav-link text-nowrap px-2 py-1 rounded">
-                    User Profile
+                    {t("header.userProfile")}
                   </Link>
                   <Link
                     to="/measurement"
                     className="nav-link text-nowrap px-2 py-1 rounded d-flex align-items-center"
                   >
-                    <span>Get A Quote</span>
-                    <Badge bg="danger" className="quote-badge-pulse ms-2">NEW</Badge>
+                    <span>{t("header.getQuote")}</span>
+                    <Badge bg="danger" className="quote-badge-pulse ms-2">{t("footer.new")}</Badge>
                   </Link>
                   <Link to="/orderhistory" className="nav-link text-nowrap px-2 py-1 rounded">
-                    Order History
+                    {t("header.orderHistory")}
                   </Link>
                   <Link to="/recommendations" className="nav-link text-nowrap px-2 py-1 rounded">
                     <i className="fas fa-thumbs-up me-2"></i>
-                    Recommendations
+                    {t("header.recommendations")}
                   </Link>
                   <Link to="/wishlist" className="nav-link text-nowrap px-2 py-1 rounded">
                     <i className="fas fa-heart me-2 heart-icon"></i>
-                    My Wishlist
+                    {t("header.myWishlist")}
                   </Link>
                   <Link to="/order-messages" className="nav-link text-nowrap px-2 py-1 rounded">
-                    Order Messages
+                    {t("header.orderMessages")}
                   </Link>
                   <Link to="/offers" className="nav-link text-nowrap px-2 py-1 rounded">
                     <i className="fas fa-tag me-2"></i>
-                    Special Offers
+                    {t("header.specialOffers")}
                   </Link>
                   <Link to="/browsing-history" className="nav-link text-nowrap px-2 py-1 rounded">
-                    Browsing History
+                    {t("header.browsingHistory")}
                   </Link>
                   <Link to="/my-reviews" className="nav-link text-nowrap px-2 py-1 rounded">
-                    My Reviews
+                    {t("header.myReviews")}
                   </Link>
                   {userInfo.referredBy && (
                     <Link
@@ -340,7 +344,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                       className="nav-link text-nowrap px-2 py-1 rounded"
                     >
                       <i className="fas fa-chart-line me-2"></i>
-                      Referral Dashboard
+                      {t("header.referralDashboard")}
                     </Link>
                   )}
                   <Link
@@ -348,7 +352,7 @@ function Header({ setSidebarIsOpen, sidebarIsOpen }) {
                     to="#signout"
                     onClick={userSignoutHandler}
                   >
-                    Sign Out
+                    {t("header.signOut")}
                   </Link>
                 </div>
               ) : null}

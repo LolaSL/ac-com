@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import './i18n/index.js';
 import App from './App.jsx';
 import { StoreProvider } from "./Store.js";
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
