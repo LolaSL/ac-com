@@ -151,31 +151,31 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
             {/* BUTTON LEGEND TAB */}
             <Tab eventKey="buttons" title="🔘 Button Legend">
               <div className="mt-3">
-                <h6 className="mb-2 text-primary">🖼️ PDF Designer Buttons</h6>
+                <h6 className="mb-2 text-primary">🖼️ PDF/JPG Designer Buttons</h6>
                 <ul className="list-unstyled fs-6">
-                  <li><strong>📤 Upload PDF:</strong> Select and upload a floor plan PDF file (accepts .pdf only)</li>
-                  <li><strong>↶ Left / ↷ Right:</strong> Rotate the PDF drawing counter-clockwise or clockwise by 90° steps</li>
-                  <li><strong>Reset (°):</strong> Appears only when PDF is rotated — resets back to original 0° orientation</li>
-                  <li><strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF canvas (range: 100%–400%)</li>
+                  <li><strong>📤 Upload PDF/JPG:</strong> Select and upload a floor plan PDF/JPG file (accepts .pdf/.jpg only)</li>
+                  <li><strong>↶ Left / ↷ Right:</strong> Rotate the PDF/JPG drawing counter-clockwise or clockwise by 90° steps</li>
+                  <li><strong>Reset (°):</strong> Appears only when PDF/JPG is rotated — resets back to original 0° orientation</li>
+                  <li><strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF/JPG canvas (range: 100%–400%)</li>
                   <li><strong>100% (zoom%):</strong> Shows current zoom level; click to reset zoom back to 100%</li>
                   <li><strong>Notation label input:</strong> Text field above the canvas where you type the symbol label <strong>before</strong> clicking the canvas. The label is reused for each subsequent click — update it any time to change what the next placement will be called.
                     <ul className="mt-1">
                       <li><strong>Single-flat AC:</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li>
-                      <li><strong>Multi-flat AC (recommended for multi-apartment PDFs):</strong> <em>ac-N.M</em> where <em>N</em> = flat number and <em>M</em> = unit index inside that flat. Example for two flats with three indoor units each: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> in flat 1 and <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> in flat 2. The Auto-Place HVAC tool groups equipment per flat using this prefix.</li>
+                      <li><strong>Multi-flat AC (recommended for multi-apartment PDF/JPG files):</strong> <em>ac-N.M</em> where <em>N</em> = flat number and <em>M</em> = unit index inside that flat. Example for two flats with three indoor units each: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> in flat 1 and <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> in flat 2. The Auto-Place HVAC tool groups equipment per flat using this prefix.</li>
                       <li><strong>Condenser:</strong> <em>condenser</em> (single flat) or <em>condenser-1</em>, <em>condenser-2</em> (one per flat in multi-flat drawings).</li>
                       <li>If the input is empty, clicking the canvas places nothing.</li>
                     </ul>
                   </li>
                   <li><strong>Click on canvas:</strong> Places an AC / condenser symbol at that position using the current text in the <em>Notation label</em> input. If the input is empty nothing is placed.</li>
-                  <li><strong>🏢 Multi-flat workflow:</strong> For PDFs that contain two or more apartments on one drawing, always use the <em>ac-N.M</em> format so the BTU Calculator, Engineer View auto-placement, and thermostat labels (T1.1, T1.2 …) can separate equipment per flat. Use the matching <em>condenser-N</em> label per flat so each flat gets its own outdoor unit.</li>
-                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF is loaded. Type the label in the mobile input, then tap <em>📌 Place mode</em> to activate (turns blue and shows <em>"✅ Tap to place"</em>); only while active can you tap the canvas to place symbols. This prevents accidental placements while scrolling on touch screens.</li>
+                  <li><strong>🏢 Multi-flat workflow:</strong> For PDF/JPG files that contain two or more apartments on one drawing, always use the <em>ac-N.M</em> format so the BTU Calculator, Engineer View auto-placement, and thermostat labels (T1.1, T1.2 …) can separate equipment per flat. Use the matching <em>condenser-N</em> label per flat so each flat gets its own outdoor unit.</li>
+                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF/JPG is loaded. Type the label in the mobile input, then tap <em>📌 Place mode</em> to activate (turns blue and shows <em>"✅ Tap to place"</em>); only while active can you tap the canvas to place symbols. This prevents accidental placements while scrolling on touch screens.</li>
                   <li><strong>Drag air conditioner symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an AC symbol</li>
                   <li><strong>Click air conditioner symbol (desktop):</strong> Rotates the air conditioner symbol 90° in place</li>
                   <li><strong>📌 Placed notations panel:</strong> A list of every placed label appears below the canvas as pill-shaped chips (e.g. <em>ac-1 ✏️ 🗑️</em>). The header shows the total count — <em>"📌 Placed notations (n)"</em>. Use the chip buttons to edit or delete any notation without hunting for it on the canvas.</li>
                   <li><strong>✏️ Edit label:</strong> Click the pencil icon on the notation chip (works on desktop and mobile) <em>or</em> double-click the label directly on the canvas — a modal opens to rename it.</li>
                   <li><strong>🗑️ Delete air conditioner symbol:</strong> Click the trash icon on the notation chip in the <em>Placed notations</em> panel (works on desktop and mobile). On desktop you can also right-click the air conditioner symbol on the canvas.</li>
                   <li><strong>Export to BTU (n rooms):</strong> Sends all extracted rooms to the BTU Calculator; disabled when no rooms are available</li>
-                  <li><strong>Save:</strong> Saves the PDF with all AC symbols to the backend (shows "Saving..." while in progress)</li>
+                  <li><strong>Save:</strong> Saves the PDF/JPG with all AC symbols to the backend (shows "Saving..." while in progress)</li>
                   <li><strong>Clear:</strong> Removes all AC symbols, resets the canvas, and clears all session data</li>
                 </ul>
 
@@ -193,8 +193,8 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
 
                 <h6 className="mb-2 mt-3 text-primary">📐 BTU Calculator Buttons</h6>
                 <ul className="list-unstyled fs-6">
-                  <li><strong>With PDF Uploading + Notations:</strong> Opens the full Measurement workflow with PDF upload, OCR room detection, room-table editing, and annotation tools so you can place AC and condenser labels before exporting rooms to the BTU Calculator</li>
-                  <li><strong>Manual BTU Calculator (No PDF + Notations):</strong> Opens BTU Calculator only mode without the PDF Designer, so rooms are entered manually and calculations can be done without uploading a floor plan</li>
+                  <li><strong>With PDF/JPG Uploading + Notations:</strong> Opens the full Measurement workflow with PDF/JPG upload, OCR room detection, room-table editing, and annotation tools so you can place AC and condenser labels before exporting rooms to the BTU Calculator</li>
+                  <li><strong>Manual BTU Calculator (No PDF/JPG + Notations):</strong> Opens BTU Calculator only mode without the PDF/JPG Designer, so rooms are entered manually and calculations can be done without uploading a floor plan</li>
                   <li><strong>Calculate BTU:</strong> Runs the VRF BTU calculation for all rooms, saves results to the store, and navigates to the Recommendations page</li>
                   <li><strong>Clear:</strong> Resets all rooms, parameters, and environmental options back to defaults</li>
                 </ul>
@@ -206,7 +206,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
 
                 <h6 className="mb-2 mt-3 text-primary">🎯 Interaction Notes</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li><strong>Single Flat:</strong> Standard workflow — upload PDF, notate AC locations, export rooms, calculate BTU</li>
+                  <li><strong>Single Flat:</strong> Standard workflow — upload PDF/JPG, notate AC locations, export rooms, calculate BTU</li>
                   <li><strong>Multi-Flat:</strong> Label AC units with flat-specific numbers (ac-1.1, ac-2.1), rename rooms with flat numbers, system auto-detects separate units</li>
                   <li><strong>VRF System:</strong> All calculations use VRF technology with chain topology refrigerant connections</li>
                   <li><strong>Mobile:</strong> Pinch two fingers on the canvas to zoom in/out on small screens</li>
@@ -215,30 +215,30 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
             </Tab>
 
             {/* ANNOTATOR TAB */}
-            <Tab eventKey="annotator" title="🖼️ PDF Designer">
+            <Tab eventKey="annotator" title="🖼️ PDF/JPG Designer">
               <div className="mt-3">
-                <h6 className="mb-2 text-primary">📌 Step 1: Upload PDF</h6>
+                <h6 className="mb-2 text-primary">📌 Step 1: Upload PDF/JPG</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Supported: PDF files only (.pdf)</li>
+                  <li>Supported: PDF/JPG files only (.pdf/.jpg)</li>
                   <li>
-                    PDFs should be floor plan drawings of flats or apartments
+                    PDF/JPG files should be floor plan drawings of flats or apartments
                   </li>
                   <li>Works best with clear floor plans showing room labels and dimensions</li>
                   <li>On upload the system automatically extracts and classifies rooms via OCR</li>
                 </ul>
 
                 <h6 className="mb-2 mt-3 text-primary">
-                  🔄 Step 2: Rotate PDF Drawing (if needed)
+                  🔄 Step 2: Rotate PDF/JPG Drawing (if needed)
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>↶ Left:</strong> Rotate PDF counter-clockwise by 90°
+                    <strong>↶ Left:</strong> Rotate PDF/JPG counter-clockwise by 90°
                   </li>
                   <li>
-                    <strong>↷ Right:</strong> Rotate PDF clockwise by 90°
+                    <strong>↷ Right:</strong> Rotate PDF/JPG clockwise by 90°
                   </li>
                   <li>
-                    <strong>Reset (°):</strong> Appears when PDF is not at 0° — click to restore original orientation
+                    <strong>Reset (°):</strong> Appears when PDF/JPG is not at 0° — click to restore original orientation
                   </li>
                 </ul>
 
@@ -271,7 +271,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                     <strong>Then click on the canvas</strong> at the position where the AC unit or condenser should go. A symbol is placed immediately using the current label. The label stays in the input so you can keep clicking to place more of the same kind — just change the text whenever you need a new label.
                   </li>
                   <li>
-                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF is loaded. Type the label, tap the button to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas. Tap the button again to deactivate and return to scroll-only mode.
+                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF/JPG is loaded. Type the label, tap the button to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas. Tap the button again to deactivate and return to scroll-only mode.
                   </li>
                   <li>
                     <strong>Single Flat AC label:</strong> Type e.g. <em>ac-1</em>, <em>ac-2</em>
@@ -348,7 +348,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    Click <strong>"Save"</strong> to save the notated PDF and room data to the backend (button shows "Saving..." during operation)
+                    Click <strong>"Save"</strong> to save the notated PDF/JPG and room data to the backend (button shows "Saving..." during operation)
                   </li>
                   <li>
                     Click <strong>"Clear"</strong> to remove all AC symbols, reset the canvas, and clear all saved session data
@@ -362,10 +362,10 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
               <div className="mt-3">
                 <h6 className="mb-2 text-primary">📊 Step 1: Review Rooms</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Rooms are auto-populated when you export from <strong>PDF Designer</strong></li>
+                  <li>Rooms are auto-populated when you export from <strong>PDF/JPG Designer</strong></li>
                   <li>Each room shows its name and area (m² or ft²)</li>
                   <li>Multi-flat rooms arrive with a <em>"Flat N: "</em> prefix (e.g. "Flat 1: Kitchen")</li>
-                  <li>Condenser labels from the PDF Designer are filtered out automatically — only habitable rooms are kept</li>
+                  <li>Condenser labels from the PDF/JPG Designer are filtered out automatically — only habitable rooms are kept</li>
                   <li><strong>Add Room:</strong> In manual mode, appends a new room row so you can enter another room type and area</li>
                   <li><strong>Trash:</strong> Deletes the selected manual room row; the final remaining row is kept as a blank/default room so the form never becomes empty</li>
                 </ul>
@@ -378,10 +378,10 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                     <strong>Measurement System:</strong> Meters (m²) or Feet (ft²)
                   </li>
                   <li>
-                    <strong>Use PDF Rooms:</strong> Uses the room list exported from the PDF Designer; this keeps OCR-detected room names and areas and is the default when PDF room data exists
+                    <strong>Use PDF/JPG Rooms:</strong> Uses the room list exported from the PDF/JPG Designer; this keeps OCR-detected room names and areas and is the default when PDF/JPG room data exists
                   </li>
                   <li>
-                    <strong>Manual Room Entry:</strong> Switches the calculator to manual mode so you can build the room list yourself without PDF-imported rooms
+                    <strong>Manual Room Entry:</strong> Switches the calculator to manual mode so you can build the room list yourself without PDF/JPG-imported rooms
                   </li>
                   <li>
                     <strong>Ceiling Height (m):</strong> Default 2.5 m
@@ -530,7 +530,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
               <div className="mt-3">
                 <h6 className="mb-2 text-success">✅ For Accurate Results:</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Upload clear, high-resolution floor plan PDFs</li>
+                  <li>Upload clear, high-resolution floor plan PDF/JPG files</li>
                   <li>Mark all AC unit locations on the drawing</li>
                   <li>
                     For multi-flat: Clearly distinguish rooms by unit (rename
@@ -544,7 +544,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                   🎯 Multi-Flat Workflow (VRF):
                 </h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Upload PDF with both flats visible</li>
+                  <li>Upload PDF/JPG with both flats visible</li>
                   <li>
                     Mark AC units with labels like "ac-1", "ac-2" (system
                     auto-detects separate flats)
@@ -564,7 +564,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
                 <h6 className="mb-2 mt-3 text-success">🔍 Common Issues:</h6>
                 <ul className="list-disc ml-4 space-y-1 fs-6">
                   <li>
-                    <strong>Rooms not extracted:</strong> Check PDF is readable,
+                    <strong>Rooms not extracted:</strong> Check PDF/JPG is readable,
                     try higher quality
                   </li>
                   <li>

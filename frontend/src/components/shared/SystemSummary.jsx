@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from 'react-bootstrap';
 
 // Default: ~8 hours/day cooling, average US electricity rate
@@ -14,13 +15,14 @@ import { Card } from 'react-bootstrap';
 // }
 
 export default function SystemSummary({ btuProject, perRoomResults, recommendedUnits }) {
+  const { t } = useTranslation();
   // const [electricityRate, setElectricityRate] = useState(DEFAULT_RATE_PER_KWH);
   // const [hoursPerDay, setHoursPerDay] = useState(DEFAULT_HOURS_PER_DAY);
 
   if (!btuProject) return null;
 
   const measurementSystem = btuProject?.inputParams?.measurementSystem || "meters";
-  const areaUnitLabel = measurementSystem === "feet" ? "sq ft" : "sq m";
+  const areaUnitLabel = measurementSystem === "feet" ? t("recommendations.systemSummary.sqft") : t("recommendations.systemSummary.sqm");
   const areaConvert = measurementSystem === "feet" ? 10.764 : 1;
   const totalAreaBase = Number(btuProject?.totalSquareFootage || 0);
   const displayTotalArea = measurementSystem === "feet"
@@ -28,7 +30,7 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
     : totalAreaBase;
   const totalAreaText = Number.isFinite(displayTotalArea) && displayTotalArea > 0
     ? `${displayTotalArea.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${areaUnitLabel}`
-    : "N/A";
+    : t("recommendations.systemSummary.na");
 
   // Calculate total product sum from all rooms
   const totalProductSum = perRoomResults?.reduce((sum, room) => {
@@ -71,25 +73,25 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
     <Card className="recommendations-card" style={{ backgroundColor: '#f8f9fa', marginBottom: '2rem' }}>
       <Card.Body>
         <Card.Title className="card-title" style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem' }}>
-          🏗️ System Summary
+          {t("recommendations.systemSummary.title")}
         </Card.Title>
         {isMultiFlat ? (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #dee2e6', background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <th style={{ padding: '8px 10px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Flat</th>
-                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Rooms</th>
-                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Area ({areaUnitLabel})</th>
-                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>BTU Load</th>
-                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Units</th>
-                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Equipment Cost</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.systemSummary.flat")}</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.systemSummary.rooms")}</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.systemSummary.area")} ({areaUnitLabel})</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.systemSummary.btuLoad")}</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.systemSummary.units")}</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.systemSummary.equipmentCost")}</th>
                 </tr>
               </thead>
               <tbody>
                 {flatStats.map(f => (
                   <tr key={f.flatNum} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '7px 10px', fontWeight: '600' }}>Flat {f.flatNum}</td>
+                    <td style={{ padding: '7px 10px', fontWeight: '600' }}>{t("recommendations.systemSummary.flat")} {f.flatNum}</td>
                     <td style={{ padding: '7px 10px', textAlign: 'right' }}>{f.rooms}</td>
                     <td style={{ padding: '7px 10px', textAlign: 'right' }}>{f.area.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
                     <td style={{ padding: '7px 10px', textAlign: 'right' }}>{f.btu.toLocaleString()}</td>
@@ -100,9 +102,9 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
               </tbody>
               <tfoot>
                 <tr style={{ borderTop: '2px solid #1a1a2e', background: 'rgba(102, 126, 234, 0.08)', fontWeight: '700' }}>
-                  <td style={{ padding: '8px 10px' }}>All Flats</td>
+                  <td style={{ padding: '8px 10px' }}>{t("recommendations.systemSummary.allFlats")}</td>
                   <td style={{ padding: '8px 10px', textAlign: 'right' }}>{flatStats.reduce((s, f) => s + f.rooms, 0)}</td>
-                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{displayTotalArea > 0 ? displayTotalArea.toLocaleString(undefined, { maximumFractionDigits: 1 }) : 'N/A'}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{displayTotalArea > 0 ? displayTotalArea.toLocaleString(undefined, { maximumFractionDigits: 1 }) : t("recommendations.systemSummary.na")}</td>
                   <td style={{ padding: '8px 10px', textAlign: 'right' }}>{flatStats.reduce((s, f) => s + f.btu, 0).toLocaleString()}</td>
                   <td style={{ padding: '8px 10px', textAlign: 'right' }}>{flatStats.reduce((s, f) => s + f.units, 0)}</td>
                   <td style={{ padding: '8px 10px', textAlign: 'right', color: '#28a745' }}>${totalProductSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
@@ -114,15 +116,15 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
           <div className="row g-3">
             <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Rooms</div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>{t("recommendations.systemSummary.rooms")}</div>
               <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
-                {btuProject.numberOfRooms || 'N/A'}
+                {btuProject.numberOfRooms || t("recommendations.systemSummary.na")}
               </div>
             </div>
           </div>
             <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total Area</div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>{t("recommendations.systemSummary.totalArea")}</div>
               <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
                 {totalAreaText}
               </div>
@@ -130,23 +132,23 @@ export default function SystemSummary({ btuProject, perRoomResults, recommendedU
           </div>
           <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total BTU</div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>{t("recommendations.systemSummary.totalBtu")}</div>
               <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
-                {btuProject.totalBTU?.toLocaleString() || 'N/A'}
+                {btuProject.totalBTU?.toLocaleString() || t("recommendations.systemSummary.na")}
               </div>
             </div>
           </div>
           <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(102, 126, 234, 0.1)', border: '1px solid rgba(102, 126, 234, 0.2)' }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Units</div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>{t("recommendations.systemSummary.units")}</div>
               <div className="text-primary" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
-                {perRoomResults ? perRoomResults.length : (recommendedUnits?.length || 'N/A')}
+                {perRoomResults ? perRoomResults.length : (recommendedUnits?.length || t("recommendations.systemSummary.na"))}
               </div>
             </div>
           </div>
           <div className="col-xl col-lg-4 col-md-6">
             <div className="p-3 rounded" style={{ background: 'rgba(40, 199, 111, 0.1)', border: '1px solid rgba(40, 199, 111, 0.2)' }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Total Product Sum</div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>{t("recommendations.systemSummary.totalProductSum")}</div>
               <div className="text-success" style={{ fontSize: '1.75rem', fontWeight: '700' }}>
                 ${totalProductSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>

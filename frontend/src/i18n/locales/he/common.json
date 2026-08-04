@@ -326,7 +326,7 @@
     "page": {
       "hero": { "title": "מערכת שירות מדידה", "subtitle": "העלה את תוכנית הדירה שלך, סמן חדרים וייצא למחשבון BTU." },
       "wizard": {
-        "uploadPdf": "העלאת PDF",
+        "uploadPdf": "העלאת PDF/JPG",
         "reviewRooms": "סקירת חדרים",
         "annotate": "סימון",
         "calculateBtu": "חישוב BTU",
@@ -370,7 +370,7 @@
       },
       "title": "מחשבון BTU",
       "measurementSystem": { "label": "שיטת מדידה", "meters": "מטרים (מ״ר)", "feet": "רגל (רגל²)" },
-      "roomSource": { "label": "מקור נתוני חדרים", "pdf": "שימוש בחדרים מה-PDF", "manual": "הזנת חדרים ידנית", "noRoomsHint": "טרם זוהו חדרים מה-PDF. עברו להזנת חדרים ידנית כדי להמשיך." },
+      "roomSource": { "label": "מקור נתוני חדרים", "pdf": "שימוש בחדרים מה-PDF/JPG", "manual": "הזנת חדרים ידנית", "noRoomsHint": "טרם זוהו חדרים מה-PDF/JPG. עברו להזנת חדרים ידנית כדי להמשיך." },
       "multiFlat": {
         "label": "נכס רב-דירתי/רב-יחידתי (מעבה נפרד לכל דירה)",
         "detected": "✓ זוהו {{count}} דירות:",
@@ -442,8 +442,8 @@
       ]
     },
     "sidebar": {
-      "trigger": { "open": "פתח PDF שמורים", "close": "סגור PDF שמורים" },
-      "header": { "title": "PDF שמורים", "close": "סגור" },
+      "trigger": { "open": "פתח קבצי PDF/JPG שמורים", "close": "סגור קבצי PDF/JPG שמורים" },
+      "header": { "title": "קבצי PDF/JPG שמורים", "close": "סגור" },
       "tabs": { "myDrawings": "השרטוטים שלי", "engineerReviews": "בדיקות מהנדס" },
       "toolbar": {
         "searchPlaceholder": "חיפוש קבצים…",
@@ -489,7 +489,7 @@
         "deleteAllDrawingsTitle": "מחיקת כל השרטוטים",
         "deleteAllReviewsTitle": "מחיקת כל בדיקות המהנדס",
         "deleteReviewTitle": "מחיקת בדיקת מהנדס",
-        "deletePdfTitle": "מחיקת PDF",
+        "deletePdfTitle": "מחיקת PDF/JPG",
         "confirmDeleteAllText": "האם אתה בטוח שברצונך למחוק לצמיתות את {{filename}}? לא ניתן לבטל פעולה זו.",
         "confirmDeleteText": "האם אתה בטוח שברצונך למחוק את \"{{filename}}\"?",
         "cancel": "ביטול",
@@ -504,7 +504,7 @@
         "deletedAllPartial": "{{count}} {{type}} נמחקו. {{failCount}} נכשלו.",
         "deleteAllFailed": "מחיקת {{type}} נכשלה.",
         "engineerReviewDeleted": "בדיקת המהנדס נמחקה!",
-        "pdfDeleted": "ה-PDF נמחק בהצלחה!",
+        "pdfDeleted": "ה-PDF/JPG נמחק בהצלחה!",
         "noDrawingsToDelete": "אין שרטוטים למחיקה.",
         "noReviewsToDelete": "אין בדיקות מהנדס למחיקה.",
         "typeDrawings": "שרטוטים",
@@ -512,11 +512,11 @@
       },
       "errors": {
         "notAuthenticated": "המשתמש אינו מאומת.",
-        "fetchPdfsFailed": "שגיאה בטעינת ה-PDF השמורים. נסה שוב.",
-        "loadPdfFailed": "טעינת ה-PDF נכשלה. ראה פרטים בקונסולה.",
-        "loadEngineerPdfFailed": "טעינת ה-PDF של בדיקת המהנדס נכשלה. ראה פרטים בקונסולה.",
-        "deletePdfFailed": "מחיקת ה-PDF נכשלה.",
-        "paymentRequired": "עליך לשלם כדי לצפות ב-PDF זה עם ההערות."
+        "fetchPdfsFailed": "שגיאה בטעינת קבצי ה-PDF/JPG השמורים. נסה שוב.",
+        "loadPdfFailed": "טעינת ה-PDF/JPG נכשלה. ראה פרטים בקונסולה.",
+        "loadEngineerPdfFailed": "טעינת ה-PDF/JPG של בדיקת המהנדס נכשלה. ראה פרטים בקונסולה.",
+        "deletePdfFailed": "מחיקת ה-PDF/JPG נכשלה.",
+        "paymentRequired": "עליך לשלם כדי לצפות ב-PDF/JPG זה עם ההערות."
       }
     },
     "annotator": {
@@ -537,7 +537,7 @@
       "errors": {
         "noValidFiles": "לא נבחרו קבצי PDF או JPG תקינים.",
         "commentExists": "ההערה הזו כבר קיימת.",
-        "selectPdfToSave": "בחר קובץ PDF לשמירה.",
+        "selectPdfToSave": "בחר קובץ PDF/JPG לשמירה.",
         "signInToSave": "עליך להתחבר כדי לשמור.",
         "saveFailed": "השמירה נכשלה: {{message}}",
         "networkError": "אירעה שגיאת רשת בעת השמירה.",
@@ -594,10 +594,10 @@
         "total": "סה\"כ: {{sqft}} רגל² | {{sqm}} מ\"ר"
       },
       "toolbar": {
-        "ariaLabel": "פקדי PDF",
+        "ariaLabel": "פקדי PDF/JPG",
         "exportBtuTitle": "ייצוא חדרים למחשבון BTU",
         "exportBtuBtn": "ייצוא ל-BTU ({{count}} חדרים)",
-        "saveTitle": "שמירת PDF והערות",
+        "saveTitle": "שמירת PDF/JPG והערות",
         "saving": "שומר...",
         "save": "שמור",
         "clearTitle": "ניקוי הקנבס והנתונים",
@@ -611,11 +611,11 @@
         "pageOf": "עמוד {{page}}/{{total}}",
         "nextPageTitle": "עמוד הבא",
         "nextPage": "הבא ▶",
-        "rotateLeftTitle": "סיבוב ה-PDF נגד כיוון השעון",
+        "rotateLeftTitle": "סיבוב ה-PDF/JPG נגד כיוון השעון",
         "rotateLeft": "↶ שמאלה",
-        "rotateRightTitle": "סיבוב ה-PDF עם כיוון השעון",
+        "rotateRightTitle": "סיבוב ה-PDF/JPG עם כיוון השעון",
         "rotateRight": "↷ ימינה",
-        "resetRotationTitle": "איפוס הכיוון המקורי של ה-PDF",
+        "resetRotationTitle": "איפוס הכיוון המקורי של ה-PDF/JPG",
         "resetRotation": "איפוס ({{deg}}°)",
         "zoomInTitle": "התקרבות",
         "zoomResetTitle": "איפוס רמת התקריב",
@@ -646,6 +646,118 @@
         "save": "שמור",
         "cancel": "ביטול"
       }
+    }
+  },
+  "recommendations": {
+    "hero": {
+      "title": "הצעת מחיר למערכת מיזוג אוויר",
+      "subtitle": "מדריך התקנה מלא עם הצעת מחיר, המלצות מוצרים ואביזרים נדרשים"
+    },
+    "noData": {
+      "title": "עדיין אין תוצאות חישוב",
+      "description": "העלה תוכנית קומה, סמן את החדרים שלך והרץ חישוב BTU כדי לראות כאן המלצות מותאמות אישית למערכת מיזוג אוויר.",
+      "button": "← עבור לכלי המדידה"
+    },
+    "actions": {
+      "backLong": "← חזרה למדידה",
+      "backShort": "← חזרה",
+      "print": "הדפסה",
+      "printTitle": "הדפס המלצות",
+      "saveToCart": "שמור בעגלה",
+      "share": "שתף"
+    },
+    "systemMode": {
+      "recovery": "קירור והחזרת חום",
+      "heatpump": "קירור או חימום (משאבת חום)",
+      "cooling": "קירור",
+      "label": "מצב מערכת:",
+      "coolLoad": "עומס קירור:",
+      "heatLoad": "עומס חימום:",
+      "sizedNote": "(כל חדר מחושב לפי הערך הגדול מבין השניים)"
+    },
+    "cardTitle": {
+      "recovery": "❄️🔥 המלצות למערכת החזרת חום (קירור והחזרת חום)",
+      "heatpump": "❄️🔥 המלצות משאבת חום (קירור או חימום)"
+    },
+    "table": {
+      "room": "חדר",
+      "size": "גודל",
+      "roomLoadBoth": "עומס חדר (BTU קירור / חימום)",
+      "roomBtu": "BTU לחדר",
+      "optimalProduct": "מוצר אופטימלי",
+      "productBtu": "BTU למוצר",
+      "price": "מחיר ($)",
+      "model": "דגם",
+      "view": "צפייה",
+      "heatPrefix": "חימום:",
+      "name": "שם",
+      "btu": "BTU",
+      "quantity": "כמות"
+    },
+    "empty": {
+      "title": "אין המלצות זמינות",
+      "description": "יש להשלים תחילה חישוב BTU או ROI."
+    },
+    "shareModal": {
+      "title": "שתף המלצות",
+      "whatsapp": "שתף בוואטסאפ",
+      "telegram": "שתף בטלגרם",
+      "email": "שתף באימייל",
+      "copyLink": "העתק קישור"
+    },
+    "toasts": {
+      "printNoData": "אין נתוני המלצות זמינים להדפסה. יש להשלים תחילה חישוב BTU.",
+      "popupBlocked": "יש לאפשר חלונות קופצים כדי להדפיס עמוד זה.",
+      "noCartData": "אין מוצרים זמינים להוספה לעגלה. יש להשלים תחילה חישוב BTU.",
+      "noPurchasable": "לא נמצאו מוצרים לרכישה. ייתכן שהמוצרים עדיין אינם זמינים בחנות.",
+      "addedToCart": "{{count}} מוצר(ים) נוספו לעגלה!",
+      "linkCopied": "הקישור הועתק ללוח!",
+      "copyFailed": "לא ניתן היה להעתיק את הקישור."
+    },
+    "share": {
+      "pageTitle": "AC-Commerce - המלצות מערכת",
+      "fallbackSummary": "המלצות יחידות מיזוג אוויר",
+      "summary": "מערכת {{modeLabel}}: {{count}} יחידות, סה\"כ {{btu}} BTU"
+    },
+    "detectedSystems": {
+      "label": "🔍 מערכות שזוהו:",
+      "indoorUnits": "יחידות פנימיות",
+      "outdoorCondensers": "מעבים חיצוניים",
+      "vrfSystem": "מערכת VRF/מולטי-ספליט"
+    },
+    "systemSummary": {
+      "title": "🏗️ סיכום מערכת",
+      "flat": "דירה",
+      "rooms": "חדרים",
+      "area": "שטח",
+      "btuLoad": "עומס BTU",
+      "units": "יחידות",
+      "equipmentCost": "עלות ציוד",
+      "allFlats": "כל הדירות",
+      "totalArea": "שטח כולל",
+      "totalBtu": "BTU כולל",
+      "totalProductSum": "סכום מוצרים כולל",
+      "sqft": "רגל רבוע",
+      "sqm": "מ\"ר",
+      "na": "לא זמין"
+    },
+    "installationAccessories": {
+      "titleFiltered": "🛠️ חלקי התקנה ואביזרים מומלצים",
+      "titleDefault": "🛠️ התקנות מיזוג אוויר נפוצות וחלקי חילוף",
+      "filterHint": "📁 סנן לפי קטגוריה: לחץ על קטגוריה למטה כדי לראות המלצות ספציפיות.",
+      "allCategories": "כל הקטגוריות",
+      "showing": "✓ מוצגים {{count}} פריטים ב\"{{category}}\"",
+      "filters": "מסננים",
+      "filterDrawerTitle": "סינון קטגוריות",
+      "close": "סגור",
+      "table": {
+        "category": "קטגוריה",
+        "name": "שם",
+        "description": "תיאור",
+        "typicalUse": "שימוש טיפוסי",
+        "view": "צפייה"
+      },
+      "viewCategoryTitle": "צפה במוצרי {{category}}"
     }
   }
 }

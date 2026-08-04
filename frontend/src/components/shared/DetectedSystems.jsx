@@ -1,8 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from 'react-bootstrap';
 import { getName } from './productHelpers';
 
 export default function DetectedSystems({ btuProject, perRoomResults, recommendedUnits }) {
+  const { t } = useTranslation();
   if (!btuProject) return null;
 
   // Get detected system types for display
@@ -26,11 +28,11 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
       });
 
       if (indoorRooms.length > 0) {
-        systems.push({ name: 'Indoor Units', icon: '❄️', count: indoorRooms.length });
+        systems.push({ name: t("recommendations.detectedSystems.indoorUnits"), icon: '❄️', count: indoorRooms.length });
       }
       
       if (showCondensers && condenserRooms.length > 0) {
-        systems.push({ name: 'Outdoor Condensers', icon: '🔧', count: condenserRooms.length });
+        systems.push({ name: t("recommendations.detectedSystems.outdoorCondensers"), icon: '🔧', count: condenserRooms.length });
       }
     } else if (recommendedUnits) {
       // Fallback to recommendedUnits if perRoomResults not available
@@ -45,11 +47,11 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
       });
 
       if (indoorUnits.length > 0) {
-        systems.push({ name: 'Indoor Units', icon: '❄️', count: indoorUnits.length });
+        systems.push({ name: t("recommendations.detectedSystems.indoorUnits"), icon: '❄️', count: indoorUnits.length });
       }
       
       if (showCondensers && outdoorUnits.length > 0) {
-        systems.push({ name: 'Outdoor Condensers', icon: '🔧', count: outdoorUnits.length });
+        systems.push({ name: t("recommendations.detectedSystems.outdoorCondensers"), icon: '🔧', count: outdoorUnits.length });
       }
     }
     
@@ -60,7 +62,7 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
     })) || (perRoomResults && perRoomResults.length > 5);
     
     if (hasVRF) {
-      systems.push({ name: 'VRF/Multi-Split System', icon: '🏢', count: null });
+      systems.push({ name: t("recommendations.detectedSystems.vrfSystem"), icon: '🏢', count: null });
     }
     
     return systems;
@@ -74,7 +76,7 @@ export default function DetectedSystems({ btuProject, perRoomResults, recommende
     <Card className="recommendations-card" style={{ marginBottom: '2rem' }}>
       <Card.Body>
         <div style={{ fontSize: '0.95rem', marginBottom: '0.75rem', fontWeight: '600' }}>
-          🔍 Detected Systems:
+          {t("recommendations.detectedSystems.label")}
         </div>
         <div className="d-flex flex-wrap gap-2">
           {detectedSystems.map((sys, idx) => (

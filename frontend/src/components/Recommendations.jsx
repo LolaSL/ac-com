@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Store } from "../Store";
 import { Card, Table, Button, Modal } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
@@ -12,6 +13,7 @@ import InstallationAccessories from "./shared/InstallationAccessories";
 import { getName, getPrice } from "./shared/productHelpers";
 
 export default function Recommendations() {
+  const { t } = useTranslation();
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
   const [showShareModal, setShowShareModal] = useState(false);
@@ -35,7 +37,7 @@ export default function Recommendations() {
 
   const handlePrint = useCallback(() => {
     if (!visibleRoomResults || visibleRoomResults.length === 0) {
-      alert("No recommendation data available to print. Please complete a BTU calculation first.");
+      alert(t("recommendations.toasts.printNoData"));
       return;
     }
 
@@ -289,7 +291,7 @@ export default function Recommendations() {
     if (isIOS) {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        alert('Please allow pop-ups to print this page.');
+        alert(t("recommendations.toasts.popupBlocked"));
         return;
       }
       const doc = printWindow.document;
@@ -437,7 +439,7 @@ ${tableHtml}
     }
 
     if (!visibleRoomResults || visibleRoomResults.length === 0) {
-      toast.error("No products available to add to cart. Please complete a BTU calculation first.");
+      toast.error(t("recommendations.toasts.noCartData"));
       return;
     }
 
@@ -512,11 +514,11 @@ ${tableHtml}
     });
 
     if (addedCount === 0) {
-      toast.warn("No purchasable products found. Products may not be available in the store yet.");
+      toast.warn(t("recommendations.toasts.noPurchasable"));
       return;
     }
 
-    toast.success(`${addedCount} product(s) added to cart!`);
+    toast.success(t("recommendations.toasts.addedToCart", { count: addedCount }));
     navigate("/cart");
   };
 
@@ -647,19 +649,23 @@ ${tableHtml}
 
   const getSharePayload = useCallback(() => {
     const modeLabel =
-      btuProject?.systemMode === 'recovery' ? 'Cooling & Heat Recovery' :
-      btuProject?.systemMode === 'heatpump' ? 'Cooling or Heating (heat pump)' :
-      'Cooling';
+      btuProject?.systemMode === 'recovery' ? t("recommendations.systemMode.recovery") :
+      btuProject?.systemMode === 'heatpump' ? t("recommendations.systemMode.heatpump") :
+      t("recommendations.systemMode.cooling");
     const summary = visibleRoomResults
-      ? `${modeLabel} system: ${visibleRoomResults.length} units, ${btuProject?.totalBTU?.toLocaleString() || "-"} BTU total`
-      : "AC Unit Recommendations";
+      ? t("recommendations.share.summary", {
+          modeLabel,
+          count: visibleRoomResults.length,
+          btu: btuProject?.totalBTU?.toLocaleString() || "-",
+        })
+      : t("recommendations.share.fallbackSummary");
 
     return {
-      title: "AC-Commerce - System Recommendations",
+      title: t("recommendations.share.pageTitle"),
       text: summary,
       url: window.location.href,
     };
-  }, [visibleRoomResults, btuProject]);
+  }, [visibleRoomResults, btuProject, t]);
 
   const copyToClipboard = useCallback(async (value) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -702,9 +708,9 @@ ${tableHtml}
     if (type === "copy") {
       const copied = await copyToClipboard(payload.url);
       if (copied) {
-        toast.success("Link copied to clipboard!");
+        toast.success(t("recommendations.toasts.linkCopied"));
       } else {
-        toast.error("Could not copy link.");
+        toast.error(t("recommendations.toasts.copyFailed"));
       }
       setShowShareModal(false);
       return;
@@ -731,8 +737,8 @@ ${tableHtml}
       <div className="recommendations-header">
         <div className="rec-hero__inner">
           <div className="rec-hero__icon"><FaStar /></div>
-          <h1 className="rec-hero__title">HVAC System Quote</h1>
-          <p className="rec-hero__sub">Complete installation guide with quote, product recommendations and required accessories</p>
+          <h1 className="rec-hero__title">{t("recommendations.hero.title")}</h1>
+          <p className="rec-hero__sub">{t("recommendations.hero.subtitle")}</p>
         </div>
       </div>
 
@@ -745,12 +751,12 @@ ${tableHtml}
             borderRadius: '12px', border: '1px solid #dee2e6', margin: '2rem 0',
           }}>
             <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🧮</div>
-            <h4 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>No calculation results yet</h4>
+            <h4 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>{t("recommendations.noData.title")}</h4>
             <p style={{ color: '#6c757d', maxWidth: '420px', margin: '0 auto 1.5rem' }}>
-              Upload a floor plan, annotate your rooms, and run a BTU calculation to see your personalised AC system recommendations here.
+              {t("recommendations.noData.description")}
             </p>
             <Button variant="primary" onClick={() => navigate('/measurement')}>
-              ← Go to Measurement Tool
+              {t("recommendations.noData.button")}
             </Button>
           </div>
         )}
@@ -780,16 +786,16 @@ ${tableHtml}
               onClick={() => navigate('/measurement')}
               className="rec-action-btn"
             >
-              <span className="button-text-long">← Back to Measurement</span>
-              <span className="button-text-short">← Back</span>
+              <span className="button-text-long">{t("recommendations.actions.backLong")}</span>
+              <span className="button-text-short">{t("recommendations.actions.backShort")}</span>
             </Button>
             <Button 
               variant="primary"
               onClick={handlePrint}
               className="rec-action-btn rec-action-btn--print"
-              title="Print recommendations"
+              title={t("recommendations.actions.printTitle")}
             >
-              <FaPrint /> <span>Print</span>
+              <FaPrint /> <span>{t("recommendations.actions.print")}</span>
             </Button>
           </div>
         </div>
@@ -810,8 +816,8 @@ ${tableHtml}
         <Card.Body>
           <Card.Title className="card-title">
             {btuProject?.systemMode === 'recovery'
-              ? '❄️🔥 Heat-Recovery System Recommendations (Cooling & Heat Recovery)'
-              : '❄️🔥 Heat-Pump Recommendations (Cooling or Heating)'}
+              ? t("recommendations.cardTitle.recovery")
+              : t("recommendations.cardTitle.heatpump")}
           </Card.Title>
 
           {/* System-mode summary banner */}
@@ -829,20 +835,20 @@ ${tableHtml}
                 color: '#1a1a2e',
               }}
             >
-              <strong>System Mode:</strong>{' '}
+              <strong>{t("recommendations.systemMode.label")}</strong>{' '}
               {btuProject.systemMode === 'recovery'
-                ? 'Cooling & Heat Recovery'
-                : 'Cooling or Heating (heat pump)'}
+                ? t("recommendations.systemMode.recovery")
+                : t("recommendations.systemMode.heatpump")}
               {isBoth && (
                 <>
-                  {' · '}<strong>Cool load:</strong>{' '}
+                  {' · '}<strong>{t("recommendations.systemMode.coolLoad")}</strong>{' '}
                   {(btuProject.totalCoolingBTU || 0).toLocaleString()} BTU
-                  {' · '}<strong>Heat load:</strong>{' '}
+                  {' · '}<strong>{t("recommendations.systemMode.heatLoad")}</strong>{' '}
                   <span style={{ color: '#c0392b' }}>
                     {(btuProject.totalHeatingBTU || 0).toLocaleString()} BTU
                   </span>
                   {' '}<span style={{ color: '#666' }}>
-                    (each room sized on the larger of the two)
+                    {t("recommendations.systemMode.sizedNote")}
                   </span>
                 </>
               )}
@@ -855,16 +861,16 @@ ${tableHtml}
             <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #dee2e6', background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Room</th>
-                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Size</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.table.room")}</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.table.size")}</th>
                   <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>
-                    {isBoth ? 'Room Load (Cool / Heat BTU)' : 'Room BTU'}
+                    {isBoth ? t("recommendations.table.roomLoadBoth") : t("recommendations.table.roomBtu")}
                   </th>
-                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Optimal Product</th>
-                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Product BTU</th>
-                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>Price ($)</th>
-                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>Model</th>
-                  <th style={{ padding: '6px 8px', textAlign: 'center', color: '#1a1a2e', fontWeight: '700' }}>View</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.table.optimalProduct")}</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.table.productBtu")}</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.table.price")}</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.table.model")}</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'center', color: '#1a1a2e', fontWeight: '700' }}>{t("recommendations.table.view")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -909,7 +915,7 @@ ${tableHtml}
                           {(product.coolingBtu || product.btu)?.toLocaleString() || "—"}
                           {product.heatingBtu && isBoth ? (
                             <div style={{ fontSize: '0.75em', color: '#c0392b' }}>
-                              Heat: {product.heatingBtu.toLocaleString()}
+                              {t("recommendations.table.heatPrefix")} {product.heatingBtu.toLocaleString()}
                             </div>
                           ) : null}
                         </td>
@@ -934,7 +940,7 @@ ${tableHtml}
                             <Link
                               to={`/product/${product.slug}`}
                               style={{ fontSize: '1.2rem', color: '#0d6efd' }}
-                              title="View product details"
+                              title={t("recommendations.table.view")}
                             >
                               <FaEye />
                             </Link>
@@ -951,9 +957,9 @@ ${tableHtml}
             </div>
           ) : recommendedUnits.length === 0 ? (
             <div className="recommendations-empty">
-              <strong>No recommendations available</strong>
+              <strong>{t("recommendations.empty.title")}</strong>
               <p style={{ marginTop: '0.5rem', fontSize: '0.95rem' }}>
-                Please complete a BTU or ROI calculation first.
+                {t("recommendations.empty.description")}
               </p>
             </div>
           ) : (
@@ -967,10 +973,10 @@ ${tableHtml}
             >
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>BTU</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
+                  <th>{t("recommendations.table.name")}</th>
+                  <th>{t("recommendations.table.btu")}</th>
+                  <th>{t("recommendations.table.price")}</th>
+                  <th>{t("recommendations.table.quantity")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1025,7 +1031,7 @@ ${tableHtml}
                 }}
               >
                 <FaShoppingCart size={18} />
-                <span>Save to Cart</span>
+                <span>{t("recommendations.actions.saveToCart")}</span>
               </Button>
 
               {/* <Button
@@ -1104,7 +1110,7 @@ ${tableHtml}
                 }}
               >
                 <FaShareAlt size={16} />
-                <span>Share</span>
+                <span>{t("recommendations.actions.share")}</span>
               </Button>
             </div>
           )}
@@ -1121,14 +1127,14 @@ ${tableHtml}
 
       <Modal show={showShareModal} onHide={() => setShowShareModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Share Recommendations</Modal.Title>
+          <Modal.Title>{t("recommendations.shareModal.title")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="d-grid gap-2">
-            <Button variant="success" onClick={() => handleShareOption("whatsapp")}>Share via WhatsApp</Button>
-            <Button variant="info" onClick={() => handleShareOption("telegram")}>Share via Telegram</Button>
-            <Button variant="secondary" onClick={() => handleShareOption("email")}>Share via Email</Button>
-            <Button variant="outline-primary" onClick={() => handleShareOption("copy")}>Copy Link</Button>
+            <Button variant="success" onClick={() => handleShareOption("whatsapp")}>{t("recommendations.shareModal.whatsapp")}</Button>
+            <Button variant="info" onClick={() => handleShareOption("telegram")}>{t("recommendations.shareModal.telegram")}</Button>
+            <Button variant="secondary" onClick={() => handleShareOption("email")}>{t("recommendations.shareModal.email")}</Button>
+            <Button variant="outline-primary" onClick={() => handleShareOption("copy")}>{t("recommendations.shareModal.copyLink")}</Button>
           </div>
         </Modal.Body>
       </Modal>

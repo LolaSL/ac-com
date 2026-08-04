@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Button, ButtonGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
@@ -6,6 +7,7 @@ import { getName, getCategoryIcon } from './productHelpers';
 import { COMMON_AC_RECOMMENDATIONS } from '../acRecommendationData.js';
 
 export default function InstallationAccessories({ perRoomResults, recommendedUnits }) {
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
@@ -88,7 +90,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
         setShowMobileFilters(false);
       }}
     >
-      All Categories ({totalRelevantCount})
+      {t("recommendations.installationAccessories.allCategories")} ({totalRelevantCount})
     </Button>
   );
 
@@ -125,13 +127,13 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
             onClick={(e) => e.stopPropagation()}
           >
             <div className="insta-mobile-drawer__header">
-              <h2 className="insta-mobile-drawer__title">Filter Categories</h2>
+              <h2 className="insta-mobile-drawer__title">{t("recommendations.installationAccessories.filterDrawerTitle")}</h2>
               <button
                 type="button"
                 className="insta-mobile-drawer__close"
                 onClick={() => setShowMobileFilters(false)}
               >
-                Close
+                {t("recommendations.installationAccessories.close")}
               </button>
             </div>
             <div className="insta-mobile-drawer__body">
@@ -147,18 +149,18 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
       <Card.Body>
         <Card.Title className="card-title" style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem' }}>
           {relevantCategories.size > 0 
-            ? "🛠️ Recommended Installation Parts & Accessories" 
-            : "🛠️ Common AC Installations & Spare Parts"}
+            ? t("recommendations.installationAccessories.titleFiltered")
+            : t("recommendations.installationAccessories.titleDefault")}
         </Card.Title>
         {relevantCategories.size > 0 && (
           <div className="mb-4 category-filter-section">
             <p className="text-muted mb-3">
-              <strong>📁 Filter by category:</strong> Click on a category below to view specific recommendations.
+              <strong>{t("recommendations.installationAccessories.filterHint")}</strong>
             </p>
             <div className="insta-mobile-toolbar">
               <div className="insta-mobile-toolbar__summary">
                 {selectedCategory === 'All'
-                  ? `All Categories (${totalRelevantCount})`
+                  ? `${t("recommendations.installationAccessories.allCategories")} (${totalRelevantCount})`
                   : `${selectedCategory} (${filteredRecommendations.length})`}
               </div>
               <button
@@ -166,7 +168,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
                 className="insta-mobile-filter-btn"
                 onClick={() => setShowMobileFilters(true)}
               >
-                Filters
+                {t("recommendations.installationAccessories.filters")}
               </button>
             </div>
             <ButtonGroup className="flex-wrap gap-2 insta-desktop-button-group">
@@ -181,7 +183,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
                 border: '1px solid rgba(13, 110, 253, 0.2)'
               }}>
                 <small style={{ color: '#0d6efd', fontWeight: '600', fontSize: '0.9rem' }}>
-                  ✓ Showing {filteredRecommendations.length} items in "{selectedCategory}"
+                  {t("recommendations.installationAccessories.showing", { count: filteredRecommendations.length, category: selectedCategory })}
                 </small>
               </div>
             )}
@@ -198,11 +200,11 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
           >
           <thead>
             <tr>
-              <th>Category</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Typical Use</th>
-              <th>View</th>
+              <th>{t("recommendations.installationAccessories.table.category")}</th>
+              <th>{t("recommendations.installationAccessories.table.name")}</th>
+              <th>{t("recommendations.installationAccessories.table.description")}</th>
+              <th>{t("recommendations.installationAccessories.table.typicalUse")}</th>
+              <th>{t("recommendations.installationAccessories.table.view")}</th>
             </tr>
           </thead>
           <tbody>
@@ -218,7 +220,7 @@ export default function InstallationAccessories({ perRoomResults, recommendedUni
                 <td style={{ textAlign: 'center' }}>
                   <Link
                     to={`/search?category=${encodeURIComponent(item.category)}&query=all&price=all&rating=all&order=newest&page=1`}
-                    title={`View ${item.category} products`}
+                    title={t("recommendations.installationAccessories.viewCategoryTitle", { category: item.category })}
                     style={{ color: '#0d6efd', fontSize: '1.1rem' }}
                   >
                     <FaEye />

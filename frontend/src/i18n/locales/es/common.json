@@ -326,7 +326,7 @@
     "page": {
       "hero": { "title": "Sistema de Servicio de Medición", "subtitle": "Suba su plano de planta, anote las habitaciones y exporte a la calculadora de BTU." },
       "wizard": {
-        "uploadPdf": "Subir PDF",
+        "uploadPdf": "Subir PDF/JPG",
         "reviewRooms": "Revisar Habitaciones",
         "annotate": "Anotar",
         "calculateBtu": "Calcular BTU",
@@ -370,7 +370,7 @@
       },
       "title": "Calculadora BTU",
       "measurementSystem": { "label": "Sistema de Medición", "meters": "Metros (m²)", "feet": "Pies (ft²)" },
-      "roomSource": { "label": "Fuente de Datos de Habitaciones", "pdf": "Usar Habitaciones del PDF", "manual": "Entrada Manual de Habitaciones", "noRoomsHint": "Aún no se detectaron habitaciones del PDF. Cambie a Entrada Manual de Habitaciones para continuar." },
+      "roomSource": { "label": "Fuente de Datos de Habitaciones", "pdf": "Usar Habitaciones del PDF/JPG", "manual": "Entrada Manual de Habitaciones", "noRoomsHint": "Aún no se detectaron habitaciones del PDF/JPG. Cambie a Entrada Manual de Habitaciones para continuar." },
       "multiFlat": {
         "label": "Propiedad multi-piso/multi-unidad (condensador separado para cada piso)",
         "detected": "✓ Detectado(s) {{count}} piso(s):",
@@ -442,8 +442,8 @@
       ]
     },
     "sidebar": {
-      "trigger": { "open": "Abrir PDFs Guardados", "close": "Cerrar PDFs Guardados" },
-      "header": { "title": "PDFs Guardados", "close": "Cerrar" },
+      "trigger": { "open": "Abrir Archivos PDF/JPG Guardados", "close": "Cerrar Archivos PDF/JPG Guardados" },
+      "header": { "title": "Archivos PDF/JPG Guardados", "close": "Cerrar" },
       "tabs": { "myDrawings": "Mis Dibujos", "engineerReviews": "Revisiones de Ingeniero" },
       "toolbar": {
         "searchPlaceholder": "Buscar archivos…",
@@ -489,7 +489,7 @@
         "deleteAllDrawingsTitle": "Eliminar Todos los Dibujos",
         "deleteAllReviewsTitle": "Eliminar Todas las Revisiones de Ingeniero",
         "deleteReviewTitle": "Eliminar Revisión de Ingeniero",
-        "deletePdfTitle": "Eliminar PDF",
+        "deletePdfTitle": "Eliminar PDF/JPG",
         "confirmDeleteAllText": "¿Seguro que deseas eliminar permanentemente {{filename}}? Esta acción no se puede deshacer.",
         "confirmDeleteText": "¿Seguro que deseas eliminar \"{{filename}}\"?",
         "cancel": "Cancelar",
@@ -504,7 +504,7 @@
         "deletedAllPartial": "Se eliminaron {{count}} {{type}}. {{failCount}} fallaron.",
         "deleteAllFailed": "Error al eliminar {{type}}.",
         "engineerReviewDeleted": "¡Revisión de ingeniero eliminada!",
-        "pdfDeleted": "¡PDF eliminado correctamente!",
+        "pdfDeleted": "¡PDF/JPG eliminado correctamente!",
         "noDrawingsToDelete": "No hay dibujos para eliminar.",
         "noReviewsToDelete": "No hay revisiones de ingeniero para eliminar.",
         "typeDrawings": "dibujos",
@@ -512,11 +512,11 @@
       },
       "errors": {
         "notAuthenticated": "Usuario no autenticado.",
-        "fetchPdfsFailed": "Error al obtener los PDFs guardados. Por favor, inténtalo de nuevo.",
-        "loadPdfFailed": "Error al cargar el PDF. Consulta la consola para más detalles.",
-        "loadEngineerPdfFailed": "Error al cargar el PDF de revisión de ingeniero. Consulta la consola para más detalles.",
-        "deletePdfFailed": "Error al eliminar el PDF.",
-        "paymentRequired": "Debes pagar para ver este PDF con anotaciones."
+        "fetchPdfsFailed": "Error al obtener los archivos PDF/JPG guardados. Por favor, inténtalo de nuevo.",
+        "loadPdfFailed": "Error al cargar el PDF/JPG. Consulta la consola para más detalles.",
+        "loadEngineerPdfFailed": "Error al cargar el PDF/JPG de revisión de ingeniero. Consulta la consola para más detalles.",
+        "deletePdfFailed": "Error al eliminar el PDF/JPG.",
+        "paymentRequired": "Debes pagar para ver este PDF/JPG con anotaciones."
       }
     },
     "annotator": {
@@ -537,7 +537,7 @@
       "errors": {
         "noValidFiles": "No se seleccionaron archivos PDF o JPG válidos.",
         "commentExists": "Este comentario ya existe.",
-        "selectPdfToSave": "Selecciona un archivo PDF para guardar.",
+        "selectPdfToSave": "Selecciona un archivo PDF/JPG para guardar.",
         "signInToSave": "Debes iniciar sesión para guardar.",
         "saveFailed": "Error al guardar: {{message}}",
         "networkError": "Se produjo un error de red al guardar.",
@@ -594,10 +594,10 @@
         "total": "Total: {{sqft}} pies² | {{sqm}} m²"
       },
       "toolbar": {
-        "ariaLabel": "Controles del PDF",
+        "ariaLabel": "Controles del PDF/JPG",
         "exportBtuTitle": "Exportar habitaciones a la calculadora de BTU",
         "exportBtuBtn": "Exportar a BTU ({{count}} habitaciones)",
-        "saveTitle": "Guardar PDF y anotaciones",
+        "saveTitle": "Guardar PDF/JPG y anotaciones",
         "saving": "Guardando...",
         "save": "Guardar",
         "clearTitle": "Borrar lienzo y datos",
@@ -611,11 +611,11 @@
         "pageOf": "Página {{page}}/{{total}}",
         "nextPageTitle": "Página siguiente",
         "nextPage": "Siguiente ▶",
-        "rotateLeftTitle": "Girar PDF en sentido antihorario",
+        "rotateLeftTitle": "Girar PDF/JPG en sentido antihorario",
         "rotateLeft": "↶ Izquierda",
-        "rotateRightTitle": "Girar PDF en sentido horario",
+        "rotateRightTitle": "Girar PDF/JPG en sentido horario",
         "rotateRight": "↷ Derecha",
-        "resetRotationTitle": "Restablecer PDF a la orientación original",
+        "resetRotationTitle": "Restablecer PDF/JPG a la orientación original",
         "resetRotation": "Restablecer ({{deg}}°)",
         "zoomInTitle": "Acercar",
         "zoomResetTitle": "Restablecer nivel de zoom",
@@ -646,6 +646,118 @@
         "save": "Guardar",
         "cancel": "Cancelar"
       }
+    }
+  },
+  "recommendations": {
+    "hero": {
+      "title": "Presupuesto del sistema HVAC",
+      "subtitle": "Guía completa de instalación con presupuesto, recomendaciones de productos y accesorios necesarios"
+    },
+    "noData": {
+      "title": "Aún no hay resultados de cálculo",
+      "description": "Sube un plano, anota tus habitaciones y ejecuta un cálculo de BTU para ver aquí tus recomendaciones personalizadas de sistema de aire acondicionado.",
+      "button": "← Ir a la herramienta de medición"
+    },
+    "actions": {
+      "backLong": "← Volver a Medición",
+      "backShort": "← Volver",
+      "print": "Imprimir",
+      "printTitle": "Imprimir recomendaciones",
+      "saveToCart": "Guardar en el carrito",
+      "share": "Compartir"
+    },
+    "systemMode": {
+      "recovery": "Refrigeración y recuperación de calor",
+      "heatpump": "Refrigeración o calefacción (bomba de calor)",
+      "cooling": "Refrigeración",
+      "label": "Modo del sistema:",
+      "coolLoad": "Carga de refrigeración:",
+      "heatLoad": "Carga de calefacción:",
+      "sizedNote": "(cada habitación se dimensiona según el valor mayor de los dos)"
+    },
+    "cardTitle": {
+      "recovery": "❄️🔥 Recomendaciones del sistema de recuperación de calor (Refrigeración y recuperación de calor)",
+      "heatpump": "❄️🔥 Recomendaciones de bomba de calor (Refrigeración o calefacción)"
+    },
+    "table": {
+      "room": "Habitación",
+      "size": "Tamaño",
+      "roomLoadBoth": "Carga de la habitación (BTU refrigeración / calefacción)",
+      "roomBtu": "BTU de la habitación",
+      "optimalProduct": "Producto óptimo",
+      "productBtu": "BTU del producto",
+      "price": "Precio ($)",
+      "model": "Modelo",
+      "view": "Ver",
+      "heatPrefix": "Calefacción:",
+      "name": "Nombre",
+      "btu": "BTU",
+      "quantity": "Cantidad"
+    },
+    "empty": {
+      "title": "No hay recomendaciones disponibles",
+      "description": "Completa primero un cálculo de BTU o ROI."
+    },
+    "shareModal": {
+      "title": "Compartir recomendaciones",
+      "whatsapp": "Compartir por WhatsApp",
+      "telegram": "Compartir por Telegram",
+      "email": "Compartir por correo electrónico",
+      "copyLink": "Copiar enlace"
+    },
+    "toasts": {
+      "printNoData": "No hay datos de recomendación disponibles para imprimir. Completa primero un cálculo de BTU.",
+      "popupBlocked": "Permite las ventanas emergentes para imprimir esta página.",
+      "noCartData": "No hay productos disponibles para añadir al carrito. Completa primero un cálculo de BTU.",
+      "noPurchasable": "No se encontraron productos disponibles para comprar. Es posible que los productos aún no estén disponibles en la tienda.",
+      "addedToCart": "¡{{count}} producto(s) añadido(s) al carrito!",
+      "linkCopied": "¡Enlace copiado al portapapeles!",
+      "copyFailed": "No se pudo copiar el enlace."
+    },
+    "share": {
+      "pageTitle": "AC-Commerce - Recomendaciones del sistema",
+      "fallbackSummary": "Recomendaciones de unidades de aire acondicionado",
+      "summary": "Sistema {{modeLabel}}: {{count}} unidades, {{btu}} BTU en total"
+    },
+    "detectedSystems": {
+      "label": "🔍 Sistemas detectados:",
+      "indoorUnits": "Unidades interiores",
+      "outdoorCondensers": "Condensadores exteriores",
+      "vrfSystem": "Sistema VRF/Multi-Split"
+    },
+    "systemSummary": {
+      "title": "🏗️ Resumen del sistema",
+      "flat": "Piso",
+      "rooms": "Habitaciones",
+      "area": "Área",
+      "btuLoad": "Carga BTU",
+      "units": "Unidades",
+      "equipmentCost": "Costo del equipo",
+      "allFlats": "Todos los pisos",
+      "totalArea": "Área total",
+      "totalBtu": "BTU total",
+      "totalProductSum": "Suma total de productos",
+      "sqft": "pies²",
+      "sqm": "m²",
+      "na": "N/D"
+    },
+    "installationAccessories": {
+      "titleFiltered": "🛠️ Piezas y accesorios de instalación recomendados",
+      "titleDefault": "🛠️ Instalaciones comunes de AC y repuestos",
+      "filterHint": "📁 Filtrar por categoría: Haz clic en una categoría a continuación para ver recomendaciones específicas.",
+      "allCategories": "Todas las categorías",
+      "showing": "✓ Mostrando {{count}} artículos en \"{{category}}\"",
+      "filters": "Filtros",
+      "filterDrawerTitle": "Filtrar categorías",
+      "close": "Cerrar",
+      "table": {
+        "category": "Categoría",
+        "name": "Nombre",
+        "description": "Descripción",
+        "typicalUse": "Uso típico",
+        "view": "Ver"
+      },
+      "viewCategoryTitle": "Ver productos de {{category}}"
     }
   }
 }

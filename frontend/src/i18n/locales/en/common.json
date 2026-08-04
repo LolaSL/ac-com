@@ -326,7 +326,7 @@
     "page": {
       "hero": { "title": "Measurement Service System", "subtitle": "Upload your floor plan, notate rooms and export to BTU calculator." },
       "wizard": {
-        "uploadPdf": "Upload PDF",
+        "uploadPdf": "Upload PDF/JPG",
         "reviewRooms": "Review Rooms",
         "annotate": "Annotate",
         "calculateBtu": "Calculate BTU",
@@ -370,7 +370,7 @@
       },
       "title": "BTU Calculator",
       "measurementSystem": { "label": "Measurement System", "meters": "Meters (m²)", "feet": "Feet (ft²)" },
-      "roomSource": { "label": "Room Data Source", "pdf": "Use PDF Rooms", "manual": "Manual Room Entry", "noRoomsHint": "No rooms detected from PDF yet. Switch to Manual Room Entry to continue." },
+      "roomSource": { "label": "Room Data Source", "pdf": "Use PDF/JPG Rooms", "manual": "Manual Room Entry", "noRoomsHint": "No rooms detected from PDF/JPG yet. Switch to Manual Room Entry to continue." },
       "multiFlat": {
         "label": "Multi-flat/Multi-unit property (separate condenser for each flat)",
         "detected": "✓ Detected {{count}} flat(s):",
@@ -442,8 +442,8 @@
       ]
     },
     "sidebar": {
-      "trigger": { "open": "Open Saved PDFs", "close": "Close Saved PDFs" },
-      "header": { "title": "Saved PDFs", "close": "Close" },
+      "trigger": { "open": "Open Saved PDF/JPG Files", "close": "Close Saved PDF/JPG Files" },
+      "header": { "title": "Saved PDF/JPG Files", "close": "Close" },
       "tabs": { "myDrawings": "My Drawings", "engineerReviews": "Engineer Reviews" },
       "toolbar": {
         "searchPlaceholder": "Search files…",
@@ -489,7 +489,7 @@
         "deleteAllDrawingsTitle": "Delete All Drawings",
         "deleteAllReviewsTitle": "Delete All Engineer Reviews",
         "deleteReviewTitle": "Delete Engineer Review",
-        "deletePdfTitle": "Delete PDF",
+        "deletePdfTitle": "Delete PDF/JPG",
         "confirmDeleteAllText": "Are you sure you want to permanently delete {{filename}}? This action cannot be undone.",
         "confirmDeleteText": "Are you sure you want to delete \"{{filename}}\"?",
         "cancel": "Cancel",
@@ -504,7 +504,7 @@
         "deletedAllPartial": "Deleted {{count}} {{type}}. {{failCount}} failed.",
         "deleteAllFailed": "Failed to delete {{type}}.",
         "engineerReviewDeleted": "Engineer review deleted!",
-        "pdfDeleted": "PDF deleted successfully!",
+        "pdfDeleted": "PDF/JPG deleted successfully!",
         "noDrawingsToDelete": "No drawings to delete.",
         "noReviewsToDelete": "No engineer reviews to delete.",
         "typeDrawings": "drawings",
@@ -512,11 +512,11 @@
       },
       "errors": {
         "notAuthenticated": "User not authenticated.",
-        "fetchPdfsFailed": "Error fetching saved PDFs. Please try again.",
-        "loadPdfFailed": "Failed to load PDF. See console for details.",
-        "loadEngineerPdfFailed": "Failed to load engineer annotation PDF. See console for details.",
-        "deletePdfFailed": "Failed to delete PDF.",
-        "paymentRequired": "You need to pay to view this PDF with annotations."
+        "fetchPdfsFailed": "Error fetching saved PDF/JPG files. Please try again.",
+        "loadPdfFailed": "Failed to load PDF/JPG. See console for details.",
+        "loadEngineerPdfFailed": "Failed to load engineer annotation PDF/JPG. See console for details.",
+        "deletePdfFailed": "Failed to delete PDF/JPG.",
+        "paymentRequired": "You need to pay to view this PDF/JPG with annotations."
       }
     },
     "annotator": {
@@ -537,7 +537,7 @@
       "errors": {
         "noValidFiles": "No valid PDF or JPG files selected.",
         "commentExists": "This comment already exists.",
-        "selectPdfToSave": "Please select a PDF file to save.",
+        "selectPdfToSave": "Please select a PDF/JPG file to save.",
         "signInToSave": "You must be signed in to save.",
         "saveFailed": "Failed to save: {{message}}",
         "networkError": "Network error occurred while saving.",
@@ -594,10 +594,10 @@
         "total": "Total: {{sqft}} sqft | {{sqm}} sqm"
       },
       "toolbar": {
-        "ariaLabel": "PDF controls",
+        "ariaLabel": "PDF/JPG controls",
         "exportBtuTitle": "Export rooms to BTU Calculator",
         "exportBtuBtn": "Export to BTU ({{count}} rooms)",
-        "saveTitle": "Save PDF and annotations",
+        "saveTitle": "Save PDF/JPG and annotations",
         "saving": "Saving...",
         "save": "Save",
         "clearTitle": "Clear canvas and data",
@@ -611,11 +611,11 @@
         "pageOf": "Page {{page}}/{{total}}",
         "nextPageTitle": "Next page",
         "nextPage": "Next ▶",
-        "rotateLeftTitle": "Rotate PDF counter-clockwise",
+        "rotateLeftTitle": "Rotate PDF/JPG counter-clockwise",
         "rotateLeft": "↶ Left",
-        "rotateRightTitle": "Rotate PDF clockwise",
+        "rotateRightTitle": "Rotate PDF/JPG clockwise",
         "rotateRight": "↷ Right",
-        "resetRotationTitle": "Reset PDF to original orientation",
+        "resetRotationTitle": "Reset PDF/JPG to original orientation",
         "resetRotation": "Reset ({{deg}}°)",
         "zoomInTitle": "Zoom in",
         "zoomResetTitle": "Reset zoom level",
@@ -646,6 +646,118 @@
         "save": "Save",
         "cancel": "Cancel"
       }
+    }
+  },
+  "recommendations": {
+    "hero": {
+      "title": "HVAC System Quote",
+      "subtitle": "Complete installation guide with quote, product recommendations and required accessories"
+    },
+    "noData": {
+      "title": "No calculation results yet",
+      "description": "Upload a floor plan, annotate your rooms, and run a BTU calculation to see your personalised AC system recommendations here.",
+      "button": "← Go to Measurement Tool"
+    },
+    "actions": {
+      "backLong": "← Back to Measurement",
+      "backShort": "← Back",
+      "print": "Print",
+      "printTitle": "Print recommendations",
+      "saveToCart": "Save to Cart",
+      "share": "Share"
+    },
+    "systemMode": {
+      "recovery": "Cooling & Heat Recovery",
+      "heatpump": "Cooling or Heating (heat pump)",
+      "cooling": "Cooling",
+      "label": "System Mode:",
+      "coolLoad": "Cool load:",
+      "heatLoad": "Heat load:",
+      "sizedNote": "(each room sized on the larger of the two)"
+    },
+    "cardTitle": {
+      "recovery": "❄️🔥 Heat-Recovery System Recommendations (Cooling & Heat Recovery)",
+      "heatpump": "❄️🔥 Heat-Pump Recommendations (Cooling or Heating)"
+    },
+    "table": {
+      "room": "Room",
+      "size": "Size",
+      "roomLoadBoth": "Room Load (Cool / Heat BTU)",
+      "roomBtu": "Room BTU",
+      "optimalProduct": "Optimal Product",
+      "productBtu": "Product BTU",
+      "price": "Price ($)",
+      "model": "Model",
+      "view": "View",
+      "heatPrefix": "Heat:",
+      "name": "Name",
+      "btu": "BTU",
+      "quantity": "Quantity"
+    },
+    "empty": {
+      "title": "No recommendations available",
+      "description": "Please complete a BTU or ROI calculation first."
+    },
+    "shareModal": {
+      "title": "Share Recommendations",
+      "whatsapp": "Share via WhatsApp",
+      "telegram": "Share via Telegram",
+      "email": "Share via Email",
+      "copyLink": "Copy Link"
+    },
+    "toasts": {
+      "printNoData": "No recommendation data available to print. Please complete a BTU calculation first.",
+      "popupBlocked": "Please allow pop-ups to print this page.",
+      "noCartData": "No products available to add to cart. Please complete a BTU calculation first.",
+      "noPurchasable": "No purchasable products found. Products may not be available in the store yet.",
+      "addedToCart": "{{count}} product(s) added to cart!",
+      "linkCopied": "Link copied to clipboard!",
+      "copyFailed": "Could not copy link."
+    },
+    "share": {
+      "pageTitle": "AC-Commerce - System Recommendations",
+      "fallbackSummary": "AC Unit Recommendations",
+      "summary": "{{modeLabel}} system: {{count}} units, {{btu}} BTU total"
+    },
+    "detectedSystems": {
+      "label": "🔍 Detected Systems:",
+      "indoorUnits": "Indoor Units",
+      "outdoorCondensers": "Outdoor Condensers",
+      "vrfSystem": "VRF/Multi-Split System"
+    },
+    "systemSummary": {
+      "title": "🏗️ System Summary",
+      "flat": "Flat",
+      "rooms": "Rooms",
+      "area": "Area",
+      "btuLoad": "BTU Load",
+      "units": "Units",
+      "equipmentCost": "Equipment Cost",
+      "allFlats": "All Flats",
+      "totalArea": "Total Area",
+      "totalBtu": "Total BTU",
+      "totalProductSum": "Total Product Sum",
+      "sqft": "sq ft",
+      "sqm": "sq m",
+      "na": "N/A"
+    },
+    "installationAccessories": {
+      "titleFiltered": "🛠️ Recommended Installation Parts & Accessories",
+      "titleDefault": "🛠️ Common AC Installations & Spare Parts",
+      "filterHint": "📁 Filter by category: Click on a category below to view specific recommendations.",
+      "allCategories": "All Categories",
+      "showing": "✓ Showing {{count}} items in \"{{category}}\"",
+      "filters": "Filters",
+      "filterDrawerTitle": "Filter Categories",
+      "close": "Close",
+      "table": {
+        "category": "Category",
+        "name": "Name",
+        "description": "Description",
+        "typicalUse": "Typical Use",
+        "view": "View"
+      },
+      "viewCategoryTitle": "View {{category}} products"
     }
   }
 }
