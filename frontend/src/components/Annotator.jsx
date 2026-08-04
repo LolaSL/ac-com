@@ -1856,7 +1856,7 @@ const Annotator = ({
       strokeWidth: 1,
     };
     setLines((prevLines) => [...prevLines, newLine]);
-  }, [computeCommentPos, pushHistory, lines]);
+  }, [pushHistory, lines, computeCommentPos, t]);
 
   // Keep rectangle state colors synced with label edits/restores.
   useEffect(() => {
@@ -2426,7 +2426,7 @@ const Annotator = ({
       isSavingRef.current = false;
       setIsSaving(false);
     }
-  }, [file, formatRoomsWithFlatPrefixes, rectangles, comments, lines, pdfId, selectedAcTypeForSave, token]);
+  }, [file, formatRoomsWithFlatPrefixes, rectangles, comments, lines, pdfId, selectedAcTypeForSave, token, t]);
 
   useEffect(() => {
     if (!results.length || !images.length) return;
@@ -2858,14 +2858,14 @@ const Annotator = ({
             onChange={(e) => setOcrLanguage(e.target.value)}
             disabled={!scriptsLoaded || loading}
           >
-            <option value="eng">{t("measurement.annotator.ocrLanguage.eng")}</option>
-            <option value="eng+spa">{t("measurement.annotator.ocrLanguage.engSpa")}</option>
-            <option value="fra">{t("measurement.annotator.ocrLanguage.fra")}</option>
-            <option value="deu">{t("measurement.annotator.ocrLanguage.deu")}</option>
-            <option value="heb">{t("measurement.annotator.ocrLanguage.heb")}</option>
-            <option value="ita">{t("measurement.annotator.ocrLanguage.ita")}</option>
-            <option value="por">{t("measurement.annotator.ocrLanguage.por")}</option>
-            <option value="spa">{t("measurement.annotator.ocrLanguage.spa")}</option>
+            <option value="en">{t("measurement.annotator.ocrLanguage.en")}</option>
+            <option value="es">{t("measurement.annotator.ocrLanguage.es")}</option>
+            <option value="fr">{t("measurement.annotator.ocrLanguage.fr")}</option>
+            <option value="de">{t("measurement.annotator.ocrLanguage.de")}</option>
+            <option value="it">{t("measurement.annotator.ocrLanguage.it")}</option>
+            <option value="pt">{t("measurement.annotator.ocrLanguage.pt")}</option>
+            <option value="he">{t("measurement.annotator.ocrLanguage.he")}</option>
+            <option value="ru">{t("measurement.annotator.ocrLanguage.ru")}</option>
           </Form.Select>
         </Form.Group>
 

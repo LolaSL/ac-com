@@ -694,6 +694,21 @@
       "btu": "BTU",
       "quantity": "Количество"
     },
+    "print": {
+      "generated": "Создано:",
+      "totalRooms": "Всего комнат:",
+      "totalBtu": "Всего BTU:",
+      "totalArea": "Общая площадь:",
+      "coolingLoad": "Нагрузка охлаждения:",
+      "heatingLoad": "Нагрузка обогрева:",
+      "productPrice": "Цена продукта ($)",
+      "total": "Итого",
+      "condenserDefault": "Конденсатор",
+      "roomDefault": "Комната {{n}}",
+      "footer": "AC-Commerce - Профессиональные решения ОВК | www.ac-commerce.com",
+      "backToApp": "Вернуться в приложение",
+      "printAgain": "Печать снова"
+    },
     "empty": {
       "title": "Рекомендации недоступны",
       "description": "Пожалуйста, сначала выполните расчёт BTU или ROI."

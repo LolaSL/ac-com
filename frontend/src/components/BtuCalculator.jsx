@@ -1803,6 +1803,10 @@ useEffect(() => {
                   value={room.name}
                   onChange={(e) => handleRoomChange(index, "name", e.target.value)}
                 >
+                  {/* Preserve imported room names (e.g. from PDF/Annotator) that don't match a preset type */}
+                  {room.name && !ROOM_TYPE_OPTIONS.includes(room.name) && (
+                    <option value={room.name}>{room.name}</option>
+                  )}
                   {ROOM_TYPE_OPTIONS.map((roomType, i) => (
                     <option key={roomType} value={roomType}>
                       {translatedRoomTypes?.[i] || roomType}

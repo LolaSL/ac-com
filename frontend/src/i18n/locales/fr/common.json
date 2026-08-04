@@ -694,6 +694,21 @@
       "btu": "BTU",
       "quantity": "Quantité"
     },
+    "print": {
+      "generated": "Généré le :",
+      "totalRooms": "Total des pièces :",
+      "totalBtu": "BTU total :",
+      "totalArea": "Surface totale :",
+      "coolingLoad": "Charge de refroidissement :",
+      "heatingLoad": "Charge de chauffage :",
+      "productPrice": "Prix du produit ($)",
+      "total": "Total",
+      "condenserDefault": "Condenseur",
+      "roomDefault": "Pièce {{n}}",
+      "footer": "AC-Commerce - Solutions CVC professionnelles | www.ac-commerce.com",
+      "backToApp": "Retour à l'application",
+      "printAgain": "Imprimer à nouveau"
+    },
     "empty": {
       "title": "Aucune recommandation disponible",
       "description": "Veuillez d'abord effectuer un calcul BTU ou ROI."

@@ -13,8 +13,8 @@ const LANGUAGE_ALIASES = {
   portuguese: 'pt',
   he: 'he',
   hebrew: 'he',
-  russian: 'ru',
   ru: 'ru',
+  russian: 'ru',
 };
 
 export const resolveOcrLanguageSelection = (selection) => {

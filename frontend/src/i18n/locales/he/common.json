@@ -694,6 +694,21 @@
       "btu": "BTU",
       "quantity": "כמות"
     },
+    "print": {
+      "generated": "נוצר בתאריך:",
+      "totalRooms": "סך החדרים:",
+      "totalBtu": "סך BTU:",
+      "totalArea": "שטח כולל:",
+      "coolingLoad": "עומס קירור:",
+      "heatingLoad": "עומס חימום:",
+      "productPrice": "מחיר המוצר ($)",
+      "total": "סה\"כ",
+      "condenserDefault": "מעבה",
+      "roomDefault": "חדר {{n}}",
+      "footer": "AC-Commerce - פתרונות מיזוג אוויר מקצועיים | www.ac-commerce.com",
+      "backToApp": "חזרה לאפליקציה",
+      "printAgain": "הדפס שוב"
+    },
     "empty": {
       "title": "אין המלצות זמינות",
       "description": "יש להשלים תחילה חישוב BTU או ROI."

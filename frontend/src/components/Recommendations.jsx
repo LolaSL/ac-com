@@ -13,7 +13,7 @@ import InstallationAccessories from "./shared/InstallationAccessories";
 import { getName, getPrice } from "./shared/productHelpers";
 
 export default function Recommendations() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const navigate = useNavigate();
   const [showShareModal, setShowShareModal] = useState(false);
@@ -41,7 +41,7 @@ export default function Recommendations() {
       return;
     }
 
-    const printDate = new Date().toLocaleString('en-US', { 
+    const printDate = new Date().toLocaleString(i18n.language, { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric', 
@@ -54,8 +54,8 @@ export default function Recommendations() {
     // room BTU / product BTU to avoid double-counting the outdoor unit.
     const nonCondenserRows = visibleRoomResults.filter(r => !r.product?.isCondenser);
     const roomBtuLabel = isBoth
-      ? 'Room Load (Cool / Heat BTU)'
-      : 'Room BTU';
+      ? t("recommendations.table.roomLoadBoth")
+      : t("recommendations.table.roomBtu");
     const roomRowsHtml = visibleRoomResults.map((room, i) => {
       const product = room.product || {};
       const isCondenserRow = !!product.isCondenser;
@@ -79,8 +79,8 @@ export default function Recommendations() {
       }
 
       const rowLabel = isCondenserRow
-        ? (room.name || 'Condenser')
-        : (room.name || `Room ${i + 1}`);
+        ? (room.name || t("recommendations.print.condenserDefault"))
+        : (room.name || t("recommendations.print.roomDefault", { n: i + 1 }));
 
       return `
         <tr${isCondenserRow ? ' class="condenser-row"' : ''}>
@@ -88,7 +88,7 @@ export default function Recommendations() {
           <td>${roomBtuCell}</td>
           <td>${product.name || product.model || '—'}</td>
           <td>${product.model || 'N/A'}</td>
-          <td>${(product.coolingBtu || product.btu)?.toLocaleString() || '—'}${product.heatingBtu && isBoth ? ` (Heat: ${product.heatingBtu.toLocaleString()})` : ''}</td>
+          <td>${(product.coolingBtu || product.btu)?.toLocaleString() || '—'}${product.heatingBtu && isBoth ? ` (${t("recommendations.table.heatPrefix")} ${product.heatingBtu.toLocaleString()})` : ''}</td>
           <td>$${productPrice}</td>
         </tr>
       `;
@@ -110,28 +110,28 @@ export default function Recommendations() {
       return sum;
     }, 0);
 
+    const systemModeLabel = btuProject?.systemMode === 'recovery'
+      ? t("recommendations.systemMode.recovery")
+      : btuProject?.systemMode === 'heatpump'
+      ? t("recommendations.systemMode.heatpump")
+      : t("recommendations.systemMode.cooling");
+
     const tableHtml = `
       <div class="print-container">
-        <h1>HVAC System Quote</h1>
+        <h1>${t("recommendations.hero.title")}</h1>
         <div class="print-meta">
-          <p><strong>Generated:</strong> ${printDate}</p>
+          <p><strong>${t("recommendations.print.generated")}</strong> ${printDate}</p>
           <p>
-            <strong>System Mode:</strong> ${
-              btuProject?.systemMode === 'recovery'
-                ? 'Cooling & Heat Recovery'
-                : btuProject?.systemMode === 'heatpump'
-                ? 'Cooling or Heating (heat pump)'
-                : 'Cooling'
-            } |
-            <strong>Total Rooms:</strong> ${visibleRoomResults.length} |
-            <strong>Total BTU:</strong> ${totalBTU.toLocaleString()} |
-            <strong>Total Area:</strong> ${btuProject?.totalSquareFootage || 'N/A'} m²
+            <strong>${t("recommendations.systemMode.label")}</strong> ${systemModeLabel} |
+            <strong>${t("recommendations.print.totalRooms")}</strong> ${visibleRoomResults.length} |
+            <strong>${t("recommendations.print.totalBtu")}</strong> ${totalBTU.toLocaleString()} |
+            <strong>${t("recommendations.print.totalArea")}</strong> ${btuProject?.totalSquareFootage || t("recommendations.systemSummary.na")} m²
           </p>
           ${
             isBoth
-              ? `<p><strong>Cooling Load:</strong> ${(btuProject?.totalCoolingBTU || 0).toLocaleString()} BTU |
-                    <strong>Heating Load:</strong> ${(btuProject?.totalHeatingBTU || 0).toLocaleString()} BTU
-                    <span style="color:#666; font-size:0.85em"> (system sized on the larger of the two per room)</span></p>`
+              ? `<p><strong>${t("recommendations.print.coolingLoad")}</strong> ${(btuProject?.totalCoolingBTU || 0).toLocaleString()} BTU |
+                    <strong>${t("recommendations.print.heatingLoad")}</strong> ${(btuProject?.totalHeatingBTU || 0).toLocaleString()} BTU
+                    <span style="color:#666; font-size:0.85em"> ${t("recommendations.systemMode.sizedNote")}</span></p>`
               : ''
           }
         </div>
@@ -146,18 +146,18 @@ export default function Recommendations() {
           </colgroup>
           <thead>
             <tr>
-              <th>Room</th>
+              <th>${t("recommendations.table.room")}</th>
               <th>${roomBtuLabel}</th>
-              <th>Optimal Product</th>
-              <th>Model</th>
-              <th>Product BTU</th>
-              <th>Product Price ($)</th>
+              <th>${t("recommendations.table.optimalProduct")}</th>
+              <th>${t("recommendations.table.model")}</th>
+              <th>${t("recommendations.table.productBtu")}</th>
+              <th>${t("recommendations.print.productPrice")}</th>
             </tr>
           </thead>
           <tbody>
             ${roomRowsHtml}
             <tr class="total-row">
-              <td><strong>Total</strong></td>
+              <td><strong>${t("recommendations.print.total")}</strong></td>
               <td><strong>${totalBTU.toLocaleString()}</strong></td>
               <td><strong>${nonCondenserRows.length}</strong></td>
               <td><strong>—</strong></td>
@@ -167,7 +167,7 @@ export default function Recommendations() {
           </tbody>
         </table>
         <div class="print-footer">
-          <p>AC-Commerce - Professional HVAC Solutions | www.ac-commerce.com</p>
+          <p>${t("recommendations.print.footer")}</p>
         </div>
       </div>
     `;
@@ -305,7 +305,7 @@ export default function Recommendations() {
      phone's 428px width and the last two columns (Product BTU / Price)
      get clipped off the printed page. -->
 <meta name="viewport" content="width=1024, initial-scale=1" />
-<title>HVAC System Quote</title>
+<title>${t("recommendations.hero.title")}</title>
 <style>${printStyle}
 @page { size: A4 landscape; margin: 8mm; }
 /* Screen-only "Back" bar so iOS users can return to the app after
@@ -359,9 +359,9 @@ export default function Recommendations() {
 </head>
 <body>
 <div class="ios-print-topbar" role="toolbar" aria-label="Print controls">
-  <button type="button" id="ios-print-back" aria-label="Back to app">&larr; Back to app</button>
-  <span class="title">HVAC System Quote</span>
-  <button type="button" id="ios-print-again" style="margin-left:auto;">Print again</button>
+  <button type="button" id="ios-print-back" aria-label="${t("recommendations.print.backToApp")}">&larr; ${t("recommendations.print.backToApp")}</button>
+  <span class="title">${t("recommendations.hero.title")}</span>
+  <button type="button" id="ios-print-again" style="margin-left:auto;">${t("recommendations.print.printAgain")}</button>
 </div>
 ${tableHtml}
 <script>

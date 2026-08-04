@@ -694,6 +694,21 @@
       "btu": "BTU",
       "quantity": "Quantidade"
     },
+    "print": {
+      "generated": "Gerado em:",
+      "totalRooms": "Total de cômodos:",
+      "totalBtu": "BTU total:",
+      "totalArea": "Área total:",
+      "coolingLoad": "Carga de refrigeração:",
+      "heatingLoad": "Carga de aquecimento:",
+      "productPrice": "Preço do produto ($)",
+      "total": "Total",
+      "condenserDefault": "Condensador",
+      "roomDefault": "Cômodo {{n}}",
+      "footer": "AC-Commerce - Soluções HVAC profissionais | www.ac-commerce.com",
+      "backToApp": "Voltar ao aplicativo",
+      "printAgain": "Imprimir novamente"
+    },
     "empty": {
       "title": "Nenhuma recomendação disponível",
       "description": "Conclua primeiro um cálculo de BTU ou ROI."

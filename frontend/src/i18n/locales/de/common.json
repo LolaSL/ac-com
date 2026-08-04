@@ -694,6 +694,21 @@
       "btu": "BTU",
       "quantity": "Menge"
     },
+    "print": {
+      "generated": "Erstellt am:",
+      "totalRooms": "Räume gesamt:",
+      "totalBtu": "BTU gesamt:",
+      "totalArea": "Gesamtfläche:",
+      "coolingLoad": "Kühllast:",
+      "heatingLoad": "Heizlast:",
+      "productPrice": "Produktpreis ($)",
+      "total": "Gesamt",
+      "condenserDefault": "Kondensator",
+      "roomDefault": "Raum {{n}}",
+      "footer": "AC-Commerce - Professionelle HLK-Lösungen | www.ac-commerce.com",
+      "backToApp": "Zurück zur App",
+      "printAgain": "Erneut drucken"
+    },
     "empty": {
       "title": "Keine Empfehlungen verfügbar",
       "description": "Bitte führen Sie zuerst eine BTU- oder ROI-Berechnung durch."
