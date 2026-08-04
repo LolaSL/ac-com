@@ -1516,6 +1516,12 @@ useEffect(() => {
     setError("");
   };
 
+  // Values stay in English (used for matching logic like room.name === "Kitchen");
+  // only the displayed label is translated.
+  const translatedRoomTypes = t("measurement.btuCalculator.roomTypeOptions", {
+    returnObjects: true,
+  });
+
   const optionLabels = {
     Roof: t("measurement.btuCalculator.optionLabels.Roof"),
     WallBrackets: t("measurement.btuCalculator.optionLabels.WallBrackets"),
@@ -1797,9 +1803,9 @@ useEffect(() => {
                   value={room.name}
                   onChange={(e) => handleRoomChange(index, "name", e.target.value)}
                 >
-                  {ROOM_TYPE_OPTIONS.map((roomType) => (
+                  {ROOM_TYPE_OPTIONS.map((roomType, i) => (
                     <option key={roomType} value={roomType}>
-                      {roomType}
+                      {translatedRoomTypes?.[i] || roomType}
                     </option>
                   ))}
                 </Form.Control>
