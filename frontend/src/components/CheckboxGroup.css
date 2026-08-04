@@ -43,3 +43,19 @@
     margin-left: 0;
   }
 }
+
+/* Bootstrap's .form-check relies on float + negative margin, which is a physical
+   (not logical) layout. Toggling html[dir] to "rtl" at runtime (i18n language
+   switch) doesn't always force browsers to relayout that float correctly, causing
+   the checkbox to render on top of/overlapped by its own label until a full page
+   reload. Pin the row to a fixed ltr layout so it never depends on the live dir
+   attribute, while keeping the label text itself rtl for correct Hebrew shaping. */
+[dir="rtl"] .checkbox-group .form-check {
+  direction: ltr;
+  text-align: right;
+}
+
+[dir="rtl"] .checkbox-group .form-check-label {
+  direction: rtl;
+  display: inline-block;
+}
