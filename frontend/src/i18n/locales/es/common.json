@@ -522,14 +522,14 @@
     "annotator": {
       "ocrLanguage": {
         "label": "Idioma OCR",
-        "eng": "Inglés",
-        "engSpa": "Inglés + Español",
-        "fra": "Francés",
-        "deu": "Alemán",
-        "heb": "Hebreo",
-        "ita": "Italiano",
-        "por": "Portugués",
-        "spa": "Español"
+        "en": "Inglés",
+        "es": "Español",
+        "fr": "Francés",
+        "de": "Alemán",
+        "it": "Italiano",
+        "pt": "Portugués",
+        "he": "Hebreo",
+        "ru": "Ruso"
       },
       "uploadType": { "label": "Tipo de carga", "pdf": "PDF", "jpg": "JPG" },
       "previewTitle": "Vista previa del archivo seleccionado:",
