@@ -746,7 +746,7 @@
       "titleDefault": "🛠️ Gängige Klimaanlagen-Installationen & Ersatzteile",
       "filterHint": "📁 Nach Kategorie filtern: Klicken Sie unten auf eine Kategorie, um spezifische Empfehlungen zu sehen.",
       "allCategories": "Alle Kategorien",
-      "showing": "✓ {{count}} Artikel in „{{category}}" werden angezeigt",
+      "showing": "✓ {{count}} Artikel in „{{category}}\" werden angezeigt",
       "filters": "Filter",
       "filterDrawerTitle": "Kategorien filtern",
       "close": "Schließen",
