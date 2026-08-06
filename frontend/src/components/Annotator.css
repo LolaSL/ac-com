@@ -287,7 +287,10 @@
     white-space: normal;
     overflow-wrap: break-word;
     word-break: break-word;
-    flex: 1 1 auto;
+    /* Basis 0 (not auto) so every button in a row shares width equally,
+       regardless of its label length — otherwise longer labels (e.g.
+       "Clear", "Redo", "-") grow wider than their siblings after wrapping. */
+    flex: 1 1 0;
     min-width: 0;
     text-align: center;
   }
