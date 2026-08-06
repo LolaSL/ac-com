@@ -3427,7 +3427,7 @@ const Annotator = ({
                 <Button
                   variant="outline-success"
                   disabled
-                  style={{ minWidth: '70px' }}
+                  style={{ minWidth: 'fit-content', whiteSpace: 'nowrap' }}
                 >{t("measurement.annotator.toolbar.pageOf", { page: currentPage, total: totalPages })}</Button>
                 <Button
                   variant="outline-success"

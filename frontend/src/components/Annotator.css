@@ -7,6 +7,19 @@
   flex-wrap: wrap;
 }
 
+/* Prevent translated labels (longer in some languages) from overflowing a
+   button's box and visually overlapping the next button in the group. */
+.button-toolbar-annotator .btn-group {
+  flex-wrap: wrap;
+}
+
+.button-toolbar-annotator .btn {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
+
 @media (max-width: 575.98px) {
   .sort-export-btns {
     flex-direction: row !important;
@@ -260,14 +273,23 @@
 
   .button-toolbar-annotator .btn-group {
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .button-toolbar-annotator .btn {
     font-size: 0.85rem;
-    padding: 8px 18px;
+    padding: 8px 10px;
     /* Ensure 44px minimum touch target */
     min-height: 44px;
-    white-space: nowrap;
+    /* Longer translated labels wrap inside the button instead of
+       overflowing and overlapping the next button in the group. */
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
   }
 }
 

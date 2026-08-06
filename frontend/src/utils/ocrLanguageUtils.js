@@ -1,20 +1,23 @@
+// Values are Tesseract.js traineddata codes (ISO 639-2/B), not the 2-letter
+// dropdown option values — Tesseract fetches "<code>.traineddata.gz" from
+// tessdata.projectnaptha.com, which only hosts 3-letter codes (e.g. "heb", not "he").
 const LANGUAGE_ALIASES = {
-  en: 'en',
-  english: 'en',
-    es: 'es',
-  spanish: 'es',
-  fr: 'fr',
-  french: 'fr',
-  de: 'de',
-  german: 'de',
-  it: 'it',
-  italian: 'it',
-  pt: 'pt',
-  portuguese: 'pt',
-  he: 'he',
-  hebrew: 'he',
-  ru: 'ru',
-  russian: 'ru',
+  en: 'eng',
+  english: 'eng',
+  es: 'spa',
+  spanish: 'spa',
+  fr: 'fra',
+  french: 'fra',
+  de: 'deu',
+  german: 'deu',
+  it: 'ita',
+  italian: 'ita',
+  pt: 'por',
+  portuguese: 'por',
+  he: 'heb',
+  hebrew: 'heb',
+  ru: 'rus',
+  russian: 'rus',
 };
 
 export const resolveOcrLanguageSelection = (selection) => {
