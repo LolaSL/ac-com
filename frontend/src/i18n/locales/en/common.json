@@ -359,6 +359,232 @@
       "title": "Important architectural symbols",
       "close": "Close"
     },
+    "legend": {
+      "trigger": "📋 Legend / Instructions",
+      "title": "📋 Measurement System: How to Use",
+      "searchPlaceholder": "🔍 Search instructions…",
+      "clearSearchTitle": "Clear search",
+      "printBtnTitle": "Print / Download instructions as reference",
+      "printBtn": "🖨️ Print",
+      "printDocTitle": "AC-Commerce: Measurement System Instructions",
+      "printHeading": "📋 AC-Commerce: Measurement System Instructions",
+      "printGenerated": "Generated: {{date}}",
+      "printFooter": "AC-Commerce — Professional HVAC Solutions — www.ac-commerce.com",
+      "tabs": {
+        "buttons": "🔘 Button Legend",
+        "annotator": "🖼️ PDF/JPG Designer",
+        "btu": "📐 BTU Calculator",
+        "tips": "💡 Tips & Best Practices"
+      },
+      "buttonsTab": {
+        "designerHeading": "🖼️ PDF/JPG Designer Buttons",
+        "designerItems": [
+          "<strong>📤 Upload PDF/JPG:</strong> Select and upload a floor plan PDF/JPG file (accepts .pdf/.jpg only)",
+          "<strong>↶ Left / ↷ Right:</strong> Rotate the PDF/JPG drawing counter-clockwise or clockwise by 90° steps",
+          "<strong>Reset (°):</strong> Appears only when PDF/JPG is rotated — resets back to original 0° orientation",
+          "<strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF/JPG canvas (range: 100%–400%)",
+          "<strong>100% (zoom%):</strong> Shows current zoom level; click to reset zoom back to 100%",
+          "<strong>Notation label input:</strong> Text field above the canvas where you type the symbol label <strong>before</strong> clicking the canvas. The label is reused for each subsequent click — update it any time to change what the next placement will be called.<ul class=\"mt-1\"><li><strong>Single-flat AC:</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li><li><strong>Multi-flat AC (recommended for multi-apartment PDF/JPG files):</strong> <em>ac-N.M</em> where <em>N</em> = flat number and <em>M</em> = unit index inside that flat. Example for two flats with three indoor units each: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> in flat 1 and <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> in flat 2. The Auto-Place HVAC tool groups equipment per flat using this prefix.</li><li><strong>Condenser:</strong> <em>condenser</em> (single flat) or <em>condenser-1</em>, <em>condenser-2</em> (one per flat in multi-flat drawings).</li><li>If the input is empty, clicking the canvas places nothing.</li></ul>",
+          "<strong>Click on canvas:</strong> Places an AC / condenser symbol at that position using the current text in the <em>Notation label</em> input. If the input is empty nothing is placed.",
+          "<strong>🏢 Multi-flat workflow:</strong> For PDF/JPG files that contain two or more apartments on one drawing, always use the <em>ac-N.M</em> format so the BTU Calculator, Engineer View auto-placement, and thermostat labels (T1.1, T1.2 …) can separate equipment per flat. Use the matching <em>condenser-N</em> label per flat so each flat gets its own outdoor unit.",
+          "<strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF/JPG is loaded. Type the label in the mobile input, then tap <em>📌 Place mode</em> to activate (turns blue and shows <em>\"✅ Tap to place\"</em>); only while active can you tap the canvas to place symbols. This prevents accidental placements while scrolling on touch screens.",
+          "<strong>Drag air conditioner symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an AC symbol",
+          "<strong>Click air conditioner symbol (desktop):</strong> Rotates the air conditioner symbol 90° in place",
+          "<strong>📌 Placed notations panel:</strong> A list of every placed label appears below the canvas as pill-shaped chips (e.g. <em>ac-1 ✏️ 🗑️</em>). The header shows the total count — <em>\"📌 Placed notations (n)\"</em>. Use the chip buttons to edit or delete any notation without hunting for it on the canvas.",
+          "<strong>✏️ Edit label:</strong> Click the pencil icon on the notation chip (works on desktop and mobile) <em>or</em> double-click the label directly on the canvas — a modal opens to rename it.",
+          "<strong>🗑️ Delete air conditioner symbol:</strong> Click the trash icon on the notation chip in the <em>Placed notations</em> panel (works on desktop and mobile). On desktop you can also right-click the air conditioner symbol on the canvas.",
+          "<strong>Export to BTU (n rooms):</strong> Sends all extracted rooms to the BTU Calculator; disabled when no rooms are available",
+          "<strong>Save:</strong> Saves the PDF/JPG with all AC symbols to the backend (shows \"Saving...\" while in progress)",
+          "<strong>Clear:</strong> Removes all AC symbols, resets the canvas, and clears all session data"
+        ],
+        "roomTableHeading": "📋 Room Table Controls",
+        "roomTableItems": [
+          "<strong>Filter by room type:</strong> Text input to filter the room table by room name",
+          "<strong>Sort dropdown:</strong> Sort table by Room Type, Width, Height, Area (sqft), or Area (sqm)",
+          "<strong>Sort ASC/DESC:</strong> Toggle sort direction for the selected column",
+          "<strong>Excel icon:</strong> Export the current filtered room table as a styled .xlsx file",
+          "<strong>+ Add Room:</strong> Manually add a new room row to the table for a given file",
+          "<strong>✏️ Edit / ✔ Save / ✖ Cancel:</strong> Inline edit controls for each room row",
+          "<strong>↑ Move Up / ↓ Move Down:</strong> Reorder room rows within the table",
+          "<strong>🗑️ Delete row:</strong> Remove a room entry from the table"
+        ],
+        "btuHeading": "📐 BTU Calculator Buttons",
+        "btuItems": [
+          "<strong>With PDF/JPG Uploading + Notations:</strong> Opens the full Measurement workflow with PDF/JPG upload, OCR room detection, room-table editing, and annotation tools so you can place AC and condenser labels before exporting rooms to the BTU Calculator",
+          "<strong>Manual BTU Calculator (No PDF/JPG + Notations):</strong> Opens BTU Calculator only mode without the PDF/JPG Designer, so rooms are entered manually and calculations can be done without uploading a floor plan",
+          "<strong>Calculate BTU:</strong> Runs the VRF BTU calculation for all rooms, saves results to the store, and navigates to the Recommendations page",
+          "<strong>Clear:</strong> Resets all rooms, parameters, and environmental options back to defaults"
+        ],
+        "paramWarningHeading": "⚠️ Important: Parameter Selection",
+        "paramWarningText": "<strong>Should be checked only one checkbox</strong> of needed parameter such as <em>Outdoor Unit Location</em>, <em>Insulation Condition</em>, and etc.",
+        "interactionHeading": "🎯 Interaction Notes",
+        "interactionItems": [
+          "<strong>Single Flat:</strong> Standard workflow — upload PDF/JPG, notate AC locations, export rooms, calculate BTU",
+          "<strong>Multi-Flat:</strong> Label AC units with flat-specific numbers (ac-1.1, ac-2.1), rename rooms with flat numbers, system auto-detects separate units",
+          "<strong>VRF System:</strong> All calculations use VRF technology with chain topology refrigerant connections",
+          "<strong>Mobile:</strong> Pinch two fingers on the canvas to zoom in/out on small screens"
+        ]
+      },
+      "annotatorTab": {
+        "step1Heading": "📌 Step 1: Upload PDF/JPG",
+        "step1Items": [
+          "Supported: PDF/JPG files only (.pdf/.jpg)",
+          "PDF/JPG files should be floor plan drawings of flats or apartments",
+          "Works best with clear floor plans showing room labels and dimensions",
+          "On upload the system automatically extracts and classifies rooms via OCR"
+        ],
+        "step2Heading": "🔄 Step 2: Rotate PDF/JPG Drawing (if needed)",
+        "step2Items": [
+          "<strong>↶ Left:</strong> Rotate PDF/JPG counter-clockwise by 90°",
+          "<strong>↷ Right:</strong> Rotate PDF/JPG clockwise by 90°",
+          "<strong>Reset (°):</strong> Appears when PDF/JPG is not at 0° — click to restore original orientation"
+        ],
+        "step3Heading": "🔍 Step 3: Zoom the Canvas (if needed)",
+        "step3Items": [
+          "<strong>🔍 +:</strong> Zoom in up to 400%",
+          "<strong>🔍 −:</strong> Zoom out (minimum 100%)",
+          "<strong>Zoom %:</strong> Shows current zoom; click to reset to 100%",
+          "<strong>Mobile pinch:</strong> Pinch two fingers on the canvas to zoom on small screens"
+        ],
+        "step4Heading": "🎯 Step 4: Mark AC Unit & Condenser Locations",
+        "step4Items": [
+          "<strong>Type the label first</strong> in the <em>Notation label</em> input above the canvas (desktop) or in the mobile notation bar below the toolbar (mobile). The input replaces the old pop-up prompt — no modal will appear when you click.",
+          "<strong>Then click on the canvas</strong> at the position where the AC unit or condenser should go. A symbol is placed immediately using the current label. The label stays in the input so you can keep clicking to place more of the same kind — just change the text whenever you need a new label.",
+          "<strong>📌 Place mode (mobile only):</strong> On small screens a <em>\"📌 Place mode\"</em> toggle bar appears below the toolbar after a PDF/JPG is loaded. Type the label, tap the button to activate (turns blue / shows <em>\"✅ Tap to place\"</em>), then tap the canvas. Tap the button again to deactivate and return to scroll-only mode.",
+          "<strong>Single Flat AC label:</strong> Type e.g. <em>ac-1</em>, <em>ac-2</em>",
+          "<strong>Multi-Flat AC label:</strong> Type e.g. <em>ac-1.1</em>, <em>ac-1.2</em> for flat 1; <em>ac-2.1</em>, <em>ac-2.2</em> for flat 2",
+          "<strong>Single Flat Condenser label:</strong> Type e.g. <em>condenser</em> or <em>condenser-1</em>",
+          "<strong>Multi-Flat Condenser label:</strong> Type <em>condenser-1</em> for flat 1, <em>condenser-2</em> for flat 2, etc.",
+          "Recommended: Place AC symbols above each room door; place the Condenser symbol near the flat entrance or on the balcony/roof location.",
+          "Tip: To switch from placing AC units to placing a condenser, just clear the input and type <em>condenser</em> — the next canvas click will create the condenser symbol."
+        ],
+        "step5Heading": "🔧 Step 5: Edit Shapes",
+        "step5Items": [
+          "<strong>🔄 Rotate Air Conditioner Symbol:</strong> Click on an existing air conditioner symbol to rotate it 90°",
+          "<strong>📌 Drag Air Conditioner Symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition",
+          "<strong>📌 Placed notations panel:</strong> Below the canvas you'll see a chip list <em>\"📌 Placed notations (n)\"</em> containing every label you've placed (e.g. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Each chip has a ✏️ edit button and a 🗑️ delete button — this is the recommended way to manage notations, especially on mobile.",
+          "<strong>✏️ Edit Notation Label:</strong> Click the pencil icon on a chip in the panel, or double-click the label directly on the canvas. A modal opens where you can rename the notation.",
+          "<strong>🗑️ Delete Notation:</strong> Click the trash icon on the chip in the <em>Placed notations</em> panel. On desktop you can also right-click the air conditioner symbol on the canvas as a shortcut."
+        ],
+        "step6Heading": "✅ Step 6: Review & Edit Room Data",
+        "step6Items": [
+          "The room data table below the canvas is auto-filled by OCR on upload",
+          "Use the <strong>Filter</strong> input to find rooms by type",
+          "Use the <strong>Sort</strong> dropdown and ASC/DESC button to reorder the table",
+          "Click <strong>✏️ Edit</strong> on any row to rename a room or change its area; click ✔ to save or ✖ to cancel",
+          "Use <strong>↑ / ↓</strong> to reorder rows",
+          "Use <strong>🗑️</strong> to delete unwanted or duplicate rooms",
+          "Click <strong>+ Add Room</strong> to manually insert a new room entry",
+          "Click the <strong>Excel icon</strong> to download the room table as an .xlsx file",
+          "For multi-flat: rename rooms to distinguish flats (e.g., \"Kitchen 1\", \"Kitchen 2\")"
+        ],
+        "step7Heading": "🚀 Step 7: Export to BTU Calculator",
+        "step7Items": [
+          "Click <strong>\"Export to BTU (n rooms)\"</strong> to send all filtered rooms to the BTU Calculator; the button is disabled when no valid rooms exist",
+          "Multi-flat properties are automatically detected and prefixed (Flat 1, Flat 2)",
+          "Page will scroll to VRF BTU Calculator automatically"
+        ],
+        "step8Heading": "💾 Optional: Save & Clear",
+        "step8Items": [
+          "Click <strong>\"Save\"</strong> to save the notated PDF/JPG and room data to the backend (button shows \"Saving...\" during operation)",
+          "Click <strong>\"Clear\"</strong> to remove all AC symbols, reset the canvas, and clear all saved session data"
+        ]
+      },
+      "btuTab": {
+        "step1Heading": "📊 Step 1: Review Rooms",
+        "step1Items": [
+          "Rooms are auto-populated when you export from <strong>PDF/JPG Designer</strong>",
+          "Each room shows its name and area (m² or ft²)",
+          "Multi-flat rooms arrive with a <em>\"Flat N: \"</em> prefix (e.g. \"Flat 1: Kitchen\")",
+          "Condenser labels from the PDF/JPG Designer are filtered out automatically — only habitable rooms are kept",
+          "<strong>Add Room:</strong> In manual mode, appends a new room row so you can enter another room type and area",
+          "<strong>Trash:</strong> Deletes the selected manual room row; the final remaining row is kept as a blank/default room so the form never becomes empty"
+        ],
+        "step2Heading": "⚙️ Step 2: Set Calculation Parameters",
+        "step2Items": [
+          "<strong>Measurement System:</strong> Meters (m²) or Feet (ft²)",
+          "<strong>Use PDF/JPG Rooms:</strong> Uses the room list exported from the PDF/JPG Designer; this keeps OCR-detected room names and areas and is the default when PDF/JPG room data exists",
+          "<strong>Manual Room Entry:</strong> Switches the calculator to manual mode so you can build the room list yourself without PDF/JPG-imported rooms",
+          "<strong>Ceiling Height (m):</strong> Default 2.5 m",
+          "<strong>Number of People:</strong> Occupancy level (each person adds ~600 BTU)",
+          "<strong>Multi-flat/Multi-unit property:</strong> Check this box to give each flat its own separate condenser. Auto-checked when multi-flat is detected from room-name prefixes or AC symbol labels"
+        ],
+        "step3Heading": "🌡️ Step 3: Select Environmental Conditions",
+        "step3Items": [
+          "<strong>Outdoor Unit Location:</strong> Roof, Wall Brackets, or Hard Ground",
+          "<strong>Wall Type:</strong> Brick Veneer, Double Brick, or Foam Cladding",
+          "<strong>Insulation:</strong> Poor, Average, or Good",
+          "<strong>Sun Exposure:</strong> Full Sunlight, Average, or Heavily Shaded",
+          "<strong>Climate:</strong> Average Europe, Hot Middle East, or Cold Alaska",
+          "<strong>Room Usage & Appliances:</strong> Oven, Server Room (adds heat load), Gym, Home Theater and etc., (see BTU calculation details below)",
+          "<strong>Window Type:</strong> Single Glazed, Double Glazed, Triple Glazed, or Louvered",
+          "<strong>Roof Type:</strong> Flat, Pitched, or Gable",
+          "<strong>Floor:</strong> Marble, Timber, Concrete, or Carpeted",
+          "<strong>Apartment Orientation:</strong> North, East, South, West, or Living Room. Use <em>Living Room</em> when the main living area has the dominant solar exposure and you want the calculator to weight that zone more heavily.",
+          "<strong>Output Unit:</strong> BTU, Watt, or kW"
+        ],
+        "step4Heading": "🧮 Step 4: Calculate & Navigate",
+        "step4Items": [
+          "Click <strong>\"Calculate BTU\"</strong> — calculates BTU for each room, matches VRF products, saves results to the store, and navigates to the <strong>Recommendations</strong> page",
+          "For multi-flat: sizes a separate VRF condenser for each flat",
+          "Click <strong>\"Clear\"</strong> to reset all rooms, parameters, and environmental options back to defaults"
+        ],
+        "multiFlatHeading": "⚡ Multi-Flat Auto-Detection",
+        "multiFlatItems": [
+          "Multi-flat is detected automatically from <em>room-name prefixes</em> (\"Flat 1: Kitchen\", \"Flat 2: Kitchen\") or from <em>AC symbol labels</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)",
+          "Duplicate room names alone do <strong>not</strong> indicate multi-flat — use the explicit labels above",
+          "Each flat gets <strong>separate VRF condenser sizing</strong> with chain topology",
+          "Refrigerant lines connect in chain: Condenser → AC1 → AC2 → ... per flat"
+        ],
+        "understandingHeading": "📖 Understanding BTU Calculations",
+        "understandingIntro": "BTU (British Thermal Unit) is a measure of heat. This calculator provides an estimation based on common factors:",
+        "understandingItems": [
+          "<strong>Base Calculation:</strong> 600 BTU/m² used as a base rule.",
+          "<strong>Outdoor Unit (Condenser) Location:</strong> Desired location of outdoor unit.",
+          "<strong>Number of People:</strong> Each person adds ~600 BTU.",
+          "<strong>Wall Type:</strong> Materials and thickness affect BTU.",
+          "<strong>Insulation Quality:</strong> Poor insulation increases BTU needs.",
+          "<strong>Sun Exposure:</strong> More windows or south/west-facing rooms need more cooling.",
+          "<strong>Window Type:</strong> Single-glazed windows allow more heat than triple-glazed.",
+          "<strong>Apartment Orientation:</strong> South and west orientations receive more sunlight.",
+          "<strong>Floor Type:</strong> Materials like marble or tile can retain or reflect heat differently.",
+          "<strong>Roof Type:</strong> Flat roofs may increase heat load compared to pitched or insulated ones.",
+          "<strong>Appliances:</strong> Kitchen and electronic devices contribute additional heat load.",
+          "<strong>Climate Zone:</strong> BTU needs vary by temperature and humidity region."
+        ],
+        "importantNote": "<strong>Important:</strong> This is a general estimate. Consult a licensed HVAC expert for precise system sizing."
+      },
+      "tipsTab": {
+        "accurateHeading": "✅ For Accurate Results:",
+        "accurateItems": [
+          "Upload clear, high-resolution floor plan PDF/JPG files",
+          "Mark all AC unit locations on the drawing",
+          "For multi-flat: Clearly distinguish rooms by unit (rename them with numbers)",
+          "Enter accurate ceiling heights and room sizes",
+          "Select accurate climate and environmental conditions"
+        ],
+        "multiFlatHeading": "🎯 Multi-Flat Workflow (VRF):",
+        "multiFlatItems": [
+          "Upload PDF/JPG with both flats visible",
+          "Mark AC units with labels like \"ac-1\", \"ac-2\" (system auto-detects separate flats)",
+          "Rename rooms: \"Kitchen 1\"/\"Kitchen 2\", \"LivingRoom 1\"/\"LivingRoom 2\"",
+          "Export to BTU Calculator (shows Flat 1, Flat 2 prefixes)",
+          "Each flat gets separate VRF equipment and chain-connected refrigerant lines"
+        ],
+        "issuesHeading": "🔍 Common Issues:",
+        "issuesItems": [
+          "<strong>Rooms not extracted:</strong> Check PDF/JPG is readable, try higher quality",
+          "<strong>Duplicate rooms:</strong> Edit room names to distinguish between flats",
+          "<strong>Wrong flat assignment:</strong> Rename rooms with sequential numbers",
+          "<strong>No products matched:</strong> Check room area and BTU calculations"
+        ]
+      },
+      "footer": {
+        "printBtn": "🖨️ Print / Save",
+        "printBtnTitle": "Print / Download instructions",
+        "closeBtn": "Close"
+      }
+    },
     "btuCalculator": {
       "prevSummary": {
         "title": "Previous calculation",

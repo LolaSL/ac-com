@@ -359,6 +359,232 @@
       "title": "Símbolos arquitetônicos importantes",
       "close": "Fechar"
     },
+    "legend": {
+      "trigger": "📋 Legenda / Instruções",
+      "title": "📋 Sistema de Medição: Como Usar",
+      "searchPlaceholder": "🔍 Pesquisar instruções…",
+      "clearSearchTitle": "Limpar pesquisa",
+      "printBtnTitle": "Imprimir / Baixar instruções como referência",
+      "printBtn": "🖨️ Imprimir",
+      "printDocTitle": "AC-Commerce: Instruções do Sistema de Medição",
+      "printHeading": "📋 AC-Commerce: Instruções do Sistema de Medição",
+      "printGenerated": "Gerado em: {{date}}",
+      "printFooter": "AC-Commerce — Soluções HVAC Profissionais — www.ac-commerce.com",
+      "tabs": {
+        "buttons": "🔘 Legenda de Botões",
+        "annotator": "🖼️ Designer de PDF/JPG",
+        "btu": "📐 Calculadora BTU",
+        "tips": "💡 Dicas e Boas Práticas"
+      },
+      "buttonsTab": {
+        "designerHeading": "🖼️ Botões do Designer de PDF/JPG",
+        "designerItems": [
+          "<strong>📤 Carregar PDF/JPG:</strong> Selecione e envie um arquivo PDF/JPG da planta baixa (aceita apenas .pdf/.jpg)",
+          "<strong>↶ Esquerda / ↷ Direita:</strong> Gira o desenho PDF/JPG no sentido anti-horário ou horário em passos de 90°",
+          "<strong>Redefinir (°):</strong> Aparece apenas quando o PDF/JPG está rotacionado — retorna à orientação original de 0°",
+          "<strong>🔍 + / 🔍 −:</strong> Aumenta ou diminui o zoom na tela do PDF/JPG (intervalo: 100%–400%)",
+          "<strong>100% (zoom%):</strong> Mostra o nível de zoom atual; clique para redefinir o zoom para 100%",
+          "<strong>Campo de etiqueta de notação:</strong> Campo de texto acima da tela onde você digita a etiqueta do símbolo <strong>antes</strong> de clicar na tela. A etiqueta é reutilizada em cada clique seguinte — atualize-a a qualquer momento para mudar o nome da próxima colocação.<ul class=\"mt-1\"><li><strong>AC de andar único:</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li><li><strong>AC multi-andar (recomendado para arquivos PDF/JPG com vários apartamentos):</strong> <em>ac-N.M</em> onde <em>N</em> = número do andar e <em>M</em> = índice da unidade dentro daquele andar. Exemplo para dois andares com três unidades internas cada: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> no andar 1 e <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> no andar 2. A ferramenta de Posicionamento Automático HVAC agrupa os equipamentos por andar usando esse prefixo.</li><li><strong>Condensadora:</strong> <em>condenser</em> (andar único) ou <em>condenser-1</em>, <em>condenser-2</em> (uma por andar em desenhos multi-andar).</li><li>Se o campo estiver vazio, clicar na tela não posiciona nada.</li></ul>",
+          "<strong>Clique na tela:</strong> Posiciona um símbolo de AC / condensadora naquela posição usando o texto atual no campo <em>Etiqueta de notação</em>. Se o campo estiver vazio, nada é posicionado.",
+          "<strong>🏢 Fluxo multi-andar:</strong> Para arquivos PDF/JPG que contêm dois ou mais apartamentos em um único desenho, use sempre o formato <em>ac-N.M</em> para que a Calculadora BTU, o posicionamento automático da Vista de Engenheiro e as etiquetas do termostato (T1.1, T1.2 …) possam separar os equipamentos por andar. Use a etiqueta <em>condenser-N</em> correspondente por andar para que cada andar tenha sua própria unidade externa.",
+          "<strong>📌 Modo de posicionamento (somente móvel):</strong> Aparece abaixo da barra de ferramentas em telas pequenas quando um PDF/JPG é carregado. Digite a etiqueta no campo móvel, depois toque em <em>📌 Modo de posicionamento</em> para ativá-lo (fica azul e mostra <em>\"✅ Toque para posicionar\"</em>); somente enquanto estiver ativo você pode tocar na tela para posicionar símbolos. Isso evita posicionamentos acidentais ao rolar em telas sensíveis ao toque.",
+          "<strong>Arrastar símbolo do ar-condicionado:</strong> Clique e arraste (desktop) ou toque e arraste (móvel) para reposicionar um símbolo de AC",
+          "<strong>Clicar no símbolo do ar-condicionado (desktop):</strong> Gira o símbolo do ar-condicionado 90° no lugar",
+          "<strong>📌 Painel de notações posicionadas:</strong> Uma lista de cada etiqueta posicionada aparece abaixo da tela como chips em forma de pílula (ex. <em>ac-1 ✏️ 🗑️</em>). O cabeçalho mostra a contagem total — <em>\"📌 Notações posicionadas (n)\"</em>. Use os botões do chip para editar ou excluir qualquer notação sem precisar procurá-la na tela.",
+          "<strong>✏️ Editar etiqueta:</strong> Clique no ícone de lápis no chip de notação (funciona em desktop e móvel) <em>ou</em> clique duas vezes na etiqueta diretamente na tela — um modal se abre para renomeá-la.",
+          "<strong>🗑️ Excluir símbolo do ar-condicionado:</strong> Clique no ícone de lixeira no chip de notação no painel <em>Notações posicionadas</em> (funciona em desktop e móvel). No desktop você também pode clicar com o botão direito no símbolo do ar-condicionado na tela.",
+          "<strong>Exportar para BTU (n cômodos):</strong> Envia todos os cômodos extraídos para a Calculadora BTU; desativado quando não há cômodos disponíveis",
+          "<strong>Salvar:</strong> Salva o PDF/JPG com todos os símbolos de AC no servidor (mostra \"Salvando...\" durante o processo)",
+          "<strong>Limpar:</strong> Remove todos os símbolos de AC, redefine a tela e apaga todos os dados da sessão"
+        ],
+        "roomTableHeading": "📋 Controles da Tabela de Cômodos",
+        "roomTableItems": [
+          "<strong>Filtrar por tipo de cômodo:</strong> Campo de texto para filtrar a tabela de cômodos por nome",
+          "<strong>Menu de ordenação:</strong> Ordena a tabela por Tipo de Cômodo, Largura, Altura, Área (pés²) ou Área (m²)",
+          "<strong>Ordem ASC/DESC:</strong> Alterna a direção de ordenação da coluna selecionada",
+          "<strong>Ícone do Excel:</strong> Exporta a tabela de cômodos filtrada atual como um arquivo .xlsx estilizado",
+          "<strong>+ Adicionar Cômodo:</strong> Adiciona manualmente uma nova linha de cômodo à tabela de um determinado arquivo",
+          "<strong>✏️ Editar / ✔ Salvar / ✖ Cancelar:</strong> Controles de edição em linha para cada linha de cômodo",
+          "<strong>↑ Mover Para Cima / ↓ Mover Para Baixo:</strong> Reordena as linhas de cômodos dentro da tabela",
+          "<strong>🗑️ Excluir linha:</strong> Remove uma entrada de cômodo da tabela"
+        ],
+        "btuHeading": "📐 Botões da Calculadora BTU",
+        "btuItems": [
+          "<strong>Com Upload de PDF/JPG + Notações:</strong> Abre o fluxo completo de Medição com upload de PDF/JPG, detecção de cômodos por OCR, edição da tabela de cômodos e ferramentas de anotação para posicionar etiquetas de AC e condensadora antes de exportar cômodos para a Calculadora BTU",
+          "<strong>Calculadora BTU Manual (Sem PDF/JPG + Notações):</strong> Abre apenas o modo Calculadora BTU sem o Designer de PDF/JPG, para que os cômodos sejam inseridos manualmente e os cálculos possam ser feitos sem enviar uma planta baixa",
+          "<strong>Calcular BTU:</strong> Executa o cálculo BTU VRF para todos os cômodos, salva os resultados no store e navega para a página de Recomendações",
+          "<strong>Limpar:</strong> Redefine todos os cômodos, parâmetros e opções ambientais para os padrões"
+        ],
+        "paramWarningHeading": "⚠️ Importante: Seleção de Parâmetros",
+        "paramWarningText": "<strong>Apenas uma caixa de seleção deve ser marcada</strong> do parâmetro necessário, como <em>Localização da Unidade Externa</em>, <em>Condição de Isolamento</em>, etc.",
+        "interactionHeading": "🎯 Notas de Interação",
+        "interactionItems": [
+          "<strong>Andar Único:</strong> Fluxo padrão — carregar PDF/JPG, anotar localizações de AC, exportar cômodos, calcular BTU",
+          "<strong>Multi-Andar:</strong> Etiquete as unidades de AC com números específicos do andar (ac-1.1, ac-2.1), renomeie os cômodos com números de andar, o sistema detecta automaticamente unidades separadas",
+          "<strong>Sistema VRF:</strong> Todos os cálculos usam tecnologia VRF com conexões de refrigerante em topologia em cadeia",
+          "<strong>Móvel:</strong> Belisque com dois dedos na tela para aumentar/diminuir o zoom em telas pequenas"
+        ]
+      },
+      "annotatorTab": {
+        "step1Heading": "📌 Passo 1: Carregar PDF/JPG",
+        "step1Items": [
+          "Suportado: apenas arquivos PDF/JPG (.pdf/.jpg)",
+          "Os arquivos PDF/JPG devem ser desenhos de plantas baixas de apartamentos",
+          "Funciona melhor com plantas claras que mostrem etiquetas e dimensões dos cômodos",
+          "No upload, o sistema extrai e classifica automaticamente os cômodos via OCR"
+        ],
+        "step2Heading": "🔄 Passo 2: Girar o Desenho PDF/JPG (se necessário)",
+        "step2Items": [
+          "<strong>↶ Esquerda:</strong> Gira o PDF/JPG no sentido anti-horário em 90°",
+          "<strong>↷ Direita:</strong> Gira o PDF/JPG no sentido horário em 90°",
+          "<strong>Redefinir (°):</strong> Aparece quando o PDF/JPG não está a 0° — clique para restaurar a orientação original"
+        ],
+        "step3Heading": "🔍 Passo 3: Aplicar Zoom na Tela (se necessário)",
+        "step3Items": [
+          "<strong>🔍 +:</strong> Aumenta o zoom até 400%",
+          "<strong>🔍 −:</strong> Diminui o zoom (mínimo 100%)",
+          "<strong>Zoom %:</strong> Mostra o zoom atual; clique para redefinir para 100%",
+          "<strong>Beliscão móvel:</strong> Belisque com dois dedos na tela para aplicar zoom em telas pequenas"
+        ],
+        "step4Heading": "🎯 Passo 4: Marcar Localizações de AC e Condensadora",
+        "step4Items": [
+          "<strong>Digite a etiqueta primeiro</strong> no campo <em>Etiqueta de notação</em> acima da tela (desktop) ou na barra de notação móvel abaixo da barra de ferramentas (móvel). O campo substitui o antigo pop-up — nenhum modal aparecerá ao clicar.",
+          "<strong>Depois clique na tela</strong> na posição onde a unidade de AC ou a condensadora deve ficar. Um símbolo é posicionado imediatamente usando a etiqueta atual. A etiqueta permanece no campo para que você possa continuar clicando para posicionar mais do mesmo tipo — apenas altere o texto sempre que precisar de uma nova etiqueta.",
+          "<strong>📌 Modo de posicionamento (somente móvel):</strong> Em telas pequenas, uma barra de alternância <em>\"📌 Modo de posicionamento\"</em> aparece abaixo da barra de ferramentas depois que um PDF/JPG é carregado. Digite a etiqueta, toque no botão para ativá-la (fica azul / mostra <em>\"✅ Toque para posicionar\"</em>), depois toque na tela. Toque no botão novamente para desativá-lo e voltar ao modo apenas rolagem.",
+          "<strong>Etiqueta de AC andar único:</strong> Digite ex. <em>ac-1</em>, <em>ac-2</em>",
+          "<strong>Etiqueta de AC multi-andar:</strong> Digite ex. <em>ac-1.1</em>, <em>ac-1.2</em> para o andar 1; <em>ac-2.1</em>, <em>ac-2.2</em> para o andar 2",
+          "<strong>Etiqueta de condensadora andar único:</strong> Digite ex. <em>condenser</em> ou <em>condenser-1</em>",
+          "<strong>Etiqueta de condensadora multi-andar:</strong> Digite <em>condenser-1</em> para o andar 1, <em>condenser-2</em> para o andar 2, etc.",
+          "Recomendado: posicione os símbolos de AC acima de cada porta de cômodo; posicione o símbolo da condensadora perto da entrada do andar ou na varanda/telhado.",
+          "Dica: para mudar de posicionar unidades de AC para posicionar uma condensadora, apenas limpe o campo e digite <em>condenser</em> — o próximo clique na tela criará o símbolo da condensadora."
+        ],
+        "step5Heading": "🔧 Passo 5: Editar Formas",
+        "step5Items": [
+          "<strong>🔄 Girar Símbolo do Ar-Condicionado:</strong> Clique em um símbolo de ar-condicionado existente para girá-lo 90°",
+          "<strong>📌 Arrastar Símbolo do Ar-Condicionado:</strong> Clique e arraste (desktop) ou toque e arraste (móvel) para reposicionar",
+          "<strong>📌 Painel de notações posicionadas:</strong> Abaixo da tela você verá uma lista de chips <em>\"📌 Notações posicionadas (n)\"</em> contendo cada etiqueta que você posicionou (ex. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Cada chip tem um botão ✏️ de editar e um 🗑️ de excluir — esta é a forma recomendada de gerenciar notações, especialmente em dispositivos móveis.",
+          "<strong>✏️ Editar Etiqueta de Notação:</strong> Clique no ícone de lápis de um chip no painel, ou clique duas vezes na etiqueta diretamente na tela. Um modal se abre onde você pode renomear a notação.",
+          "<strong>🗑️ Excluir Notação:</strong> Clique no ícone de lixeira do chip no painel <em>Notações posicionadas</em>. No desktop você também pode clicar com o botão direito no símbolo do ar-condicionado na tela como atalho."
+        ],
+        "step6Heading": "✅ Passo 6: Revisar e Editar Dados dos Cômodos",
+        "step6Items": [
+          "A tabela de dados dos cômodos abaixo da tela é preenchida automaticamente por OCR no upload",
+          "Use o campo <strong>Filtrar</strong> para encontrar cômodos por tipo",
+          "Use o menu <strong>Ordenar</strong> e o botão ASC/DESC para reordenar a tabela",
+          "Clique em <strong>✏️ Editar</strong> em qualquer linha para renomear um cômodo ou alterar sua área; clique em ✔ para salvar ou em ✖ para cancelar",
+          "Use <strong>↑ / ↓</strong> para reordenar linhas",
+          "Use <strong>🗑️</strong> para excluir cômodos indesejados ou duplicados",
+          "Clique em <strong>+ Adicionar Cômodo</strong> para inserir manualmente uma nova entrada de cômodo",
+          "Clique no <strong>ícone do Excel</strong> para baixar a tabela de cômodos como arquivo .xlsx",
+          "Para multi-andar: renomeie os cômodos para distinguir andares (ex., \"Cozinha 1\", \"Cozinha 2\")"
+        ],
+        "step7Heading": "🚀 Passo 7: Exportar para a Calculadora BTU",
+        "step7Items": [
+          "Clique em <strong>\"Exportar para BTU (n cômodos)\"</strong> para enviar todos os cômodos filtrados para a Calculadora BTU; o botão fica desativado quando não há cômodos válidos",
+          "Propriedades multi-andar são detectadas e prefixadas automaticamente (Andar 1, Andar 2)",
+          "A página rolará automaticamente até a Calculadora BTU VRF"
+        ],
+        "step8Heading": "💾 Opcional: Salvar e Limpar",
+        "step8Items": [
+          "Clique em <strong>\"Salvar\"</strong> para salvar o PDF/JPG anotado e os dados dos cômodos no servidor (o botão mostra \"Salvando...\" durante a operação)",
+          "Clique em <strong>\"Limpar\"</strong> para remover todos os símbolos de AC, redefinir a tela e apagar todos os dados de sessão salvos"
+        ]
+      },
+      "btuTab": {
+        "step1Heading": "📊 Passo 1: Revisar Cômodos",
+        "step1Items": [
+          "Os cômodos são preenchidos automaticamente quando você exporta do <strong>Designer de PDF/JPG</strong>",
+          "Cada cômodo mostra seu nome e área (m² ou pés²)",
+          "Cômodos multi-andar chegam com um prefixo <em>\"Andar N: \"</em> (ex. \"Andar 1: Cozinha\")",
+          "Etiquetas de condensadora do Designer de PDF/JPG são filtradas automaticamente — apenas cômodos habitáveis são mantidos",
+          "<strong>Adicionar Cômodo:</strong> No modo manual, adiciona uma nova linha de cômodo para que você possa inserir outro tipo de cômodo e área",
+          "<strong>Lixeira:</strong> Exclui a linha de cômodo manual selecionada; a última linha restante é mantida como um cômodo em branco/padrão para que o formulário nunca fique vazio"
+        ],
+        "step2Heading": "⚙️ Passo 2: Definir Parâmetros de Cálculo",
+        "step2Items": [
+          "<strong>Sistema de Medição:</strong> Metros (m²) ou Pés (pés²)",
+          "<strong>Usar Cômodos do PDF/JPG:</strong> Usa a lista de cômodos exportada do Designer de PDF/JPG; mantém os nomes e áreas dos cômodos detectados por OCR e é o padrão quando existem dados de cômodos do PDF/JPG",
+          "<strong>Entrada Manual de Cômodos:</strong> Muda a calculadora para o modo manual para que você possa construir a lista de cômodos você mesmo, sem cômodos importados do PDF/JPG",
+          "<strong>Altura do Teto (m):</strong> Padrão 2,5 m",
+          "<strong>Número de Pessoas:</strong> Nível de ocupação (cada pessoa adiciona ~600 BTU)",
+          "<strong>Propriedade multi-andar/multi-unidade:</strong> Marque esta caixa para dar a cada andar sua própria condensadora separada. Marcado automaticamente quando o multi-andar é detectado a partir de prefixos de nome de cômodo ou etiquetas de símbolo de AC"
+        ],
+        "step3Heading": "🌡️ Passo 3: Selecionar Condições Ambientais",
+        "step3Items": [
+          "<strong>Localização da Unidade Externa:</strong> Telhado, Suportes de Parede ou Solo Firme",
+          "<strong>Tipo de Parede:</strong> Revestimento de Tijolo, Tijolo Duplo ou Revestimento de Espuma",
+          "<strong>Isolamento:</strong> Ruim, Médio ou Bom",
+          "<strong>Exposição ao Sol:</strong> Sol Pleno, Médio ou Muito Sombreado",
+          "<strong>Clima:</strong> Europa Média, Oriente Médio Quente ou Alasca Frio",
+          "<strong>Uso do Cômodo e Eletrodomésticos:</strong> Forno, Sala de Servidores (adiciona carga térmica), Academia, Home Theater etc., (veja detalhes do cálculo de BTU abaixo)",
+          "<strong>Tipo de Janela:</strong> Vidro Simples, Vidro Duplo, Vidro Triplo ou Persiana",
+          "<strong>Tipo de Telhado:</strong> Plano, Inclinado ou de Duas Águas",
+          "<strong>Piso:</strong> Mármore, Madeira, Concreto ou Carpete",
+          "<strong>Orientação do Apartamento:</strong> Norte, Leste, Sul, Oeste ou Sala de Estar. Use <em>Sala de Estar</em> quando a área principal tiver a exposição solar dominante e você quiser que a calculadora dê mais peso a essa zona.",
+          "<strong>Unidade de Saída:</strong> BTU, Watt ou kW"
+        ],
+        "step4Heading": "🧮 Passo 4: Calcular e Navegar",
+        "step4Items": [
+          "Clique em <strong>\"Calcular BTU\"</strong> — calcula o BTU de cada cômodo, associa produtos VRF, salva os resultados no store e navega para a página de <strong>Recomendações</strong>",
+          "Para multi-andar: dimensiona uma condensadora VRF separada para cada andar",
+          "Clique em <strong>\"Limpar\"</strong> para redefinir todos os cômodos, parâmetros e opções ambientais para os padrões"
+        ],
+        "multiFlatHeading": "⚡ Detecção Automática de Multi-Andar",
+        "multiFlatItems": [
+          "O multi-andar é detectado automaticamente a partir de <em>prefixos de nome de cômodo</em> (\"Andar 1: Cozinha\", \"Andar 2: Cozinha\") ou de <em>etiquetas de símbolo de AC</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)",
+          "Nomes de cômodo duplicados por si só <strong>não</strong> indicam multi-andar — use as etiquetas explícitas acima",
+          "Cada andar recebe um <strong>dimensionamento separado de condensadora VRF</strong> com topologia em cadeia",
+          "As linhas de refrigerante se conectam em cadeia: Condensadora → AC1 → AC2 → ... por andar"
+        ],
+        "understandingHeading": "📖 Entendendo os Cálculos de BTU",
+        "understandingIntro": "BTU (British Thermal Unit) é uma medida de calor. Esta calculadora fornece uma estimativa baseada em fatores comuns:",
+        "understandingItems": [
+          "<strong>Cálculo Base:</strong> 600 BTU/m² usado como regra base.",
+          "<strong>Localização da Unidade Externa (Condensadora):</strong> Localização desejada da unidade externa.",
+          "<strong>Número de Pessoas:</strong> Cada pessoa adiciona ~600 BTU.",
+          "<strong>Tipo de Parede:</strong> Materiais e espessura afetam o BTU.",
+          "<strong>Qualidade do Isolamento:</strong> Isolamento ruim aumenta as necessidades de BTU.",
+          "<strong>Exposição ao Sol:</strong> Mais janelas ou cômodos voltados para sul/oeste precisam de mais resfriamento.",
+          "<strong>Tipo de Janela:</strong> Janelas de vidro simples deixam passar mais calor que as de vidro triplo.",
+          "<strong>Orientação do Apartamento:</strong> As orientações sul e oeste recebem mais sol.",
+          "<strong>Tipo de Piso:</strong> Materiais como mármore ou azulejo podem reter ou refletir calor de forma diferente.",
+          "<strong>Tipo de Telhado:</strong> Telhados planos podem aumentar a carga térmica em comparação com os inclinados ou isolados.",
+          "<strong>Eletrodomésticos:</strong> Aparelhos de cozinha e eletrônicos contribuem com carga térmica adicional.",
+          "<strong>Zona Climática:</strong> As necessidades de BTU variam de acordo com a região de temperatura e umidade."
+        ],
+        "importantNote": "<strong>Importante:</strong> Esta é uma estimativa geral. Consulte um especialista em HVAC licenciado para um dimensionamento preciso do sistema."
+      },
+      "tipsTab": {
+        "accurateHeading": "✅ Para Resultados Precisos:",
+        "accurateItems": [
+          "Envie arquivos PDF/JPG de plantas baixas claros e de alta resolução",
+          "Marque todas as localizações das unidades de AC no desenho",
+          "Para multi-andar: distinga claramente os cômodos por unidade (renomeie-os com números)",
+          "Insira alturas de teto e tamanhos de cômodos precisos",
+          "Selecione condições climáticas e ambientais precisas"
+        ],
+        "multiFlatHeading": "🎯 Fluxo de Trabalho Multi-Andar (VRF):",
+        "multiFlatItems": [
+          "Envie o PDF/JPG com ambos os andares visíveis",
+          "Marque as unidades de AC com etiquetas como \"ac-1\", \"ac-2\" (o sistema detecta automaticamente andares separados)",
+          "Renomeie os cômodos: \"Cozinha 1\"/\"Cozinha 2\", \"Sala 1\"/\"Sala 2\"",
+          "Exporte para a Calculadora BTU (mostra os prefixos Andar 1, Andar 2)",
+          "Cada andar recebe equipamentos VRF separados e linhas de refrigerante conectadas em cadeia"
+        ],
+        "issuesHeading": "🔍 Problemas Comuns:",
+        "issuesItems": [
+          "<strong>Cômodos não extraídos:</strong> Verifique se o PDF/JPG está legível, tente uma qualidade maior",
+          "<strong>Cômodos duplicados:</strong> Edite os nomes dos cômodos para distinguir entre andares",
+          "<strong>Atribuição de andar incorreta:</strong> Renomeie os cômodos com números sequenciais",
+          "<strong>Nenhum produto correspondente:</strong> Verifique a área do cômodo e os cálculos de BTU"
+        ]
+      },
+      "footer": {
+        "printBtn": "🖨️ Imprimir / Salvar",
+        "printBtnTitle": "Imprimir / Baixar instruções",
+        "closeBtn": "Fechar"
+      }
+    },
     "btuCalculator": {
       "prevSummary": {
         "title": "Cálculo anterior",

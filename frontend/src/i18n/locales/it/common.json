@@ -359,6 +359,232 @@
       "title": "Simboli architettonici importanti",
       "close": "Chiudi"
     },
+    "legend": {
+      "trigger": "📋 Legenda / Istruzioni",
+      "title": "📋 Sistema di Misurazione: Come Usarlo",
+      "searchPlaceholder": "🔍 Cerca istruzioni…",
+      "clearSearchTitle": "Cancella ricerca",
+      "printBtnTitle": "Stampa / Scarica le istruzioni come riferimento",
+      "printBtn": "🖨️ Stampa",
+      "printDocTitle": "AC-Commerce: Istruzioni del Sistema di Misurazione",
+      "printHeading": "📋 AC-Commerce: Istruzioni del Sistema di Misurazione",
+      "printGenerated": "Generato il: {{date}}",
+      "printFooter": "AC-Commerce — Soluzioni HVAC Professionali — www.ac-commerce.com",
+      "tabs": {
+        "buttons": "🔘 Legenda dei Pulsanti",
+        "annotator": "🖼️ Designer PDF/JPG",
+        "btu": "📐 Calcolatore BTU",
+        "tips": "💡 Consigli e Buone Pratiche"
+      },
+      "buttonsTab": {
+        "designerHeading": "🖼️ Pulsanti del Designer PDF/JPG",
+        "designerItems": [
+          "<strong>📤 Carica PDF/JPG:</strong> Seleziona e carica un file PDF/JPG della planimetria (accetta solo .pdf/.jpg)",
+          "<strong>↶ Sinistra / ↷ Destra:</strong> Ruota il disegno PDF/JPG in senso antiorario o orario a passi di 90°",
+          "<strong>Reimposta (°):</strong> Appare solo quando il PDF/JPG è ruotato — ripristina l'orientamento originale di 0°",
+          "<strong>🔍 + / 🔍 −:</strong> Zoom avanti o indietro sulla tela PDF/JPG (intervallo: 100%–400%)",
+          "<strong>100% (zoom%):</strong> Mostra il livello di zoom attuale; clicca per ripristinare lo zoom al 100%",
+          "<strong>Campo etichetta notazione:</strong> Campo di testo sopra la tela dove digiti l'etichetta del simbolo <strong>prima</strong> di cliccare sulla tela. L'etichetta viene riutilizzata per ogni clic successivo — aggiornala in qualsiasi momento per cambiare il nome del prossimo posizionamento.<ul class=\"mt-1\"><li><strong>AC monopiano:</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li><li><strong>AC multi-piano (consigliato per file PDF/JPG con più appartamenti):</strong> <em>ac-N.M</em> dove <em>N</em> = numero del piano e <em>M</em> = indice dell'unità all'interno di quel piano. Esempio per due piani con tre unità interne ciascuno: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> nel piano 1 e <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> nel piano 2. Lo strumento di Posizionamento Automatico HVAC raggruppa le apparecchiature per piano usando questo prefisso.</li><li><strong>Unità esterna:</strong> <em>condenser</em> (piano singolo) o <em>condenser-1</em>, <em>condenser-2</em> (una per piano nei disegni multi-piano).</li><li>Se il campo è vuoto, cliccare sulla tela non posiziona nulla.</li></ul>",
+          "<strong>Clic sulla tela:</strong> Posiziona un simbolo AC / unità esterna in quella posizione usando il testo attuale nel campo <em>Etichetta notazione</em>. Se il campo è vuoto non viene posizionato nulla.",
+          "<strong>🏢 Flusso multi-piano:</strong> Per i file PDF/JPG che contengono due o più appartamenti in un unico disegno, usa sempre il formato <em>ac-N.M</em> in modo che il Calcolatore BTU, il posizionamento automatico della Vista Ingegnere e le etichette del termostato (T1.1, T1.2 …) possano separare le apparecchiature per piano. Usa l'etichetta <em>condenser-N</em> corrispondente per piano in modo che ogni piano abbia la propria unità esterna.",
+          "<strong>📌 Modalità posizionamento (solo mobile):</strong> Appare sotto la barra degli strumenti su schermi piccoli quando è caricato un PDF/JPG. Digita l'etichetta nel campo mobile, poi tocca <em>📌 Modalità posizionamento</em> per attivarla (diventa blu e mostra <em>\"✅ Tocca per posizionare\"</em>); solo mentre è attiva puoi toccare la tela per posizionare simboli. Questo previene posizionamenti accidentali durante lo scorrimento su schermi touch.",
+          "<strong>Trascina il simbolo del climatizzatore:</strong> Clicca e trascina (desktop) o tocca e trascina (mobile) per riposizionare un simbolo AC",
+          "<strong>Clic sul simbolo del climatizzatore (desktop):</strong> Ruota il simbolo del climatizzatore di 90° sul posto",
+          "<strong>📌 Pannello delle notazioni posizionate:</strong> Un elenco di ogni etichetta posizionata appare sotto la tela come chip a forma di pillola (es. <em>ac-1 ✏️ 🗑️</em>). L'intestazione mostra il conteggio totale — <em>\"📌 Notazioni posizionate (n)\"</em>. Usa i pulsanti del chip per modificare o eliminare qualsiasi notazione senza doverla cercare sulla tela.",
+          "<strong>✏️ Modifica etichetta:</strong> Clicca sull'icona della matita sul chip di notazione (funziona su desktop e mobile) <em>oppure</em> fai doppio clic sull'etichetta direttamente sulla tela — si apre un modale per rinominarla.",
+          "<strong>🗑️ Elimina simbolo del climatizzatore:</strong> Clicca sull'icona del cestino sul chip di notazione nel pannello <em>Notazioni posizionate</em> (funziona su desktop e mobile). Su desktop puoi anche fare clic destro sul simbolo del climatizzatore sulla tela.",
+          "<strong>Esporta a BTU (n stanze):</strong> Invia tutte le stanze estratte al Calcolatore BTU; disabilitato quando non ci sono stanze disponibili",
+          "<strong>Salva:</strong> Salva il PDF/JPG con tutti i simboli AC sul server (mostra \"Salvataggio in corso...\" durante l'operazione)",
+          "<strong>Cancella:</strong> Rimuove tutti i simboli AC, reimposta la tela e cancella tutti i dati di sessione"
+        ],
+        "roomTableHeading": "📋 Controlli della Tabella Stanze",
+        "roomTableItems": [
+          "<strong>Filtra per tipo di stanza:</strong> Campo di testo per filtrare la tabella delle stanze per nome",
+          "<strong>Menu di ordinamento:</strong> Ordina la tabella per Tipo di Stanza, Larghezza, Altezza, Area (sqft) o Area (sqm)",
+          "<strong>Ordine ASC/DESC:</strong> Alterna la direzione di ordinamento della colonna selezionata",
+          "<strong>Icona Excel:</strong> Esporta la tabella delle stanze filtrata attuale come file .xlsx formattato",
+          "<strong>+ Aggiungi Stanza:</strong> Aggiunge manualmente una nuova riga stanza alla tabella per un determinato file",
+          "<strong>✏️ Modifica / ✔ Salva / ✖ Annulla:</strong> Controlli di modifica in linea per ogni riga stanza",
+          "<strong>↑ Sposta Su / ↓ Sposta Giù:</strong> Riordina le righe delle stanze nella tabella",
+          "<strong>🗑️ Elimina riga:</strong> Rimuove una voce stanza dalla tabella"
+        ],
+        "btuHeading": "📐 Pulsanti del Calcolatore BTU",
+        "btuItems": [
+          "<strong>Con Caricamento PDF/JPG + Notazioni:</strong> Apre il flusso completo di Misurazione con caricamento PDF/JPG, rilevamento OCR delle stanze, modifica della tabella stanze e strumenti di annotazione per posizionare etichette AC e unità esterna prima di esportare le stanze al Calcolatore BTU",
+          "<strong>Calcolatore BTU Manuale (Senza PDF/JPG + Notazioni):</strong> Apre solo la modalità Calcolatore BTU senza il Designer PDF/JPG, così le stanze vengono inserite manualmente e i calcoli possono essere effettuati senza caricare una planimetria",
+          "<strong>Calcola BTU:</strong> Esegue il calcolo BTU VRF per tutte le stanze, salva i risultati nello store e naviga alla pagina Raccomandazioni",
+          "<strong>Cancella:</strong> Reimposta tutte le stanze, i parametri e le opzioni ambientali ai valori predefiniti"
+        ],
+        "paramWarningHeading": "⚠️ Importante: Selezione dei Parametri",
+        "paramWarningText": "<strong>Deve essere selezionata una sola casella</strong> del parametro necessario, come <em>Posizione dell'Unità Esterna</em>, <em>Condizione di Isolamento</em>, ecc.",
+        "interactionHeading": "🎯 Note sull'Interazione",
+        "interactionItems": [
+          "<strong>Piano Singolo:</strong> Flusso standard — carica il PDF/JPG, annota le posizioni AC, esporta le stanze, calcola il BTU",
+          "<strong>Multi-Piano:</strong> Etichetta le unità AC con numeri specifici del piano (ac-1.1, ac-2.1), rinomina le stanze con numeri di piano, il sistema rileva automaticamente le unità separate",
+          "<strong>Sistema VRF:</strong> Tutti i calcoli usano la tecnologia VRF con connessioni del refrigerante in topologia a catena",
+          "<strong>Mobile:</strong> Pizzica con due dita sulla tela per zoomare avanti/indietro su schermi piccoli"
+        ]
+      },
+      "annotatorTab": {
+        "step1Heading": "📌 Passo 1: Carica PDF/JPG",
+        "step1Items": [
+          "Supportato: solo file PDF/JPG (.pdf/.jpg)",
+          "I file PDF/JPG dovrebbero essere disegni di planimetrie di appartamenti",
+          "Funziona meglio con planimetrie chiare che mostrano etichette e dimensioni delle stanze",
+          "Al caricamento il sistema estrae e classifica automaticamente le stanze tramite OCR"
+        ],
+        "step2Heading": "🔄 Passo 2: Ruota il Disegno PDF/JPG (se necessario)",
+        "step2Items": [
+          "<strong>↶ Sinistra:</strong> Ruota il PDF/JPG in senso antiorario di 90°",
+          "<strong>↷ Destra:</strong> Ruota il PDF/JPG in senso orario di 90°",
+          "<strong>Reimposta (°):</strong> Appare quando il PDF/JPG non è a 0° — clicca per ripristinare l'orientamento originale"
+        ],
+        "step3Heading": "🔍 Passo 3: Zoom sulla Tela (se necessario)",
+        "step3Items": [
+          "<strong>🔍 +:</strong> Zoom avanti fino al 400%",
+          "<strong>🔍 −:</strong> Zoom indietro (minimo 100%)",
+          "<strong>Zoom %:</strong> Mostra lo zoom attuale; clicca per ripristinare al 100%",
+          "<strong>Pizzico mobile:</strong> Pizzica con due dita sulla tela per zoomare su schermi piccoli"
+        ],
+        "step4Heading": "🎯 Passo 4: Segna le Posizioni di Unità AC e Unità Esterna",
+        "step4Items": [
+          "<strong>Digita prima l'etichetta</strong> nel campo <em>Etichetta notazione</em> sopra la tela (desktop) o nella barra di notazione mobile sotto la barra degli strumenti (mobile). Il campo sostituisce il vecchio prompt a comparsa — non apparirà alcun modale al clic.",
+          "<strong>Poi clicca sulla tela</strong> nella posizione in cui deve andare l'unità AC o l'unità esterna. Un simbolo viene posizionato immediatamente usando l'etichetta attuale. L'etichetta rimane nel campo così puoi continuare a cliccare per posizionarne altri dello stesso tipo — cambia semplicemente il testo quando serve una nuova etichetta.",
+          "<strong>📌 Modalità posizionamento (solo mobile):</strong> Su schermi piccoli appare una barra di attivazione <em>\"📌 Modalità posizionamento\"</em> sotto la barra degli strumenti dopo il caricamento di un PDF/JPG. Digita l'etichetta, tocca il pulsante per attivarla (diventa blu / mostra <em>\"✅ Tocca per posizionare\"</em>), poi tocca la tela. Tocca di nuovo il pulsante per disattivarla e tornare alla modalità solo scorrimento.",
+          "<strong>Etichetta AC piano singolo:</strong> Digita ad es. <em>ac-1</em>, <em>ac-2</em>",
+          "<strong>Etichetta AC multi-piano:</strong> Digita ad es. <em>ac-1.1</em>, <em>ac-1.2</em> per il piano 1; <em>ac-2.1</em>, <em>ac-2.2</em> per il piano 2",
+          "<strong>Etichetta unità esterna piano singolo:</strong> Digita ad es. <em>condenser</em> o <em>condenser-1</em>",
+          "<strong>Etichetta unità esterna multi-piano:</strong> Digita <em>condenser-1</em> per il piano 1, <em>condenser-2</em> per il piano 2, ecc.",
+          "Consigliato: posiziona i simboli AC sopra ogni porta della stanza; posiziona il simbolo dell'unità esterna vicino all'ingresso del piano o sul balcone/tetto.",
+          "Suggerimento: per passare dal posizionamento di unità AC al posizionamento di un'unità esterna, svuota semplicemente il campo e digita <em>condenser</em> — il prossimo clic sulla tela creerà il simbolo dell'unità esterna."
+        ],
+        "step5Heading": "🔧 Passo 5: Modifica le Forme",
+        "step5Items": [
+          "<strong>🔄 Ruota Simbolo del Climatizzatore:</strong> Clicca su un simbolo del climatizzatore esistente per ruotarlo di 90°",
+          "<strong>📌 Trascina Simbolo del Climatizzatore:</strong> Clicca e trascina (desktop) o tocca e trascina (mobile) per riposizionarlo",
+          "<strong>📌 Pannello delle notazioni posizionate:</strong> Sotto la tela vedrai un elenco di chip <em>\"📌 Notazioni posizionate (n)\"</em> contenente ogni etichetta che hai posizionato (es. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Ogni chip ha un pulsante ✏️ di modifica e uno 🗑️ di eliminazione — questo è il modo consigliato per gestire le notazioni, specialmente su mobile.",
+          "<strong>✏️ Modifica Etichetta Notazione:</strong> Clicca sull'icona della matita di un chip nel pannello, oppure fai doppio clic sull'etichetta direttamente sulla tela. Si apre un modale dove puoi rinominare la notazione.",
+          "<strong>🗑️ Elimina Notazione:</strong> Clicca sull'icona del cestino del chip nel pannello <em>Notazioni posizionate</em>. Su desktop puoi anche fare clic destro sul simbolo del climatizzatore sulla tela come scorciatoia."
+        ],
+        "step6Heading": "✅ Passo 6: Rivedi e Modifica i Dati delle Stanze",
+        "step6Items": [
+          "La tabella dati delle stanze sotto la tela viene compilata automaticamente tramite OCR al caricamento",
+          "Usa il campo <strong>Filtra</strong> per trovare stanze per tipo",
+          "Usa il menu <strong>Ordina</strong> e il pulsante ASC/DESC per riordinare la tabella",
+          "Clicca su <strong>✏️ Modifica</strong> su qualsiasi riga per rinominare una stanza o cambiare la sua area; clicca su ✔ per salvare o su ✖ per annullare",
+          "Usa <strong>↑ / ↓</strong> per riordinare le righe",
+          "Usa <strong>🗑️</strong> per eliminare stanze indesiderate o duplicate",
+          "Clicca su <strong>+ Aggiungi Stanza</strong> per inserire manualmente una nuova voce stanza",
+          "Clicca sull'<strong>icona Excel</strong> per scaricare la tabella delle stanze come file .xlsx",
+          "Per multi-piano: rinomina le stanze per distinguere i piani (es., \"Cucina 1\", \"Cucina 2\")"
+        ],
+        "step7Heading": "🚀 Passo 7: Esporta al Calcolatore BTU",
+        "step7Items": [
+          "Clicca su <strong>\"Esporta a BTU (n stanze)\"</strong> per inviare tutte le stanze filtrate al Calcolatore BTU; il pulsante è disabilitato quando non ci sono stanze valide",
+          "Le proprietà multi-piano vengono rilevate e prefissate automaticamente (Piano 1, Piano 2)",
+          "La pagina scorrerà automaticamente fino al Calcolatore BTU VRF"
+        ],
+        "step8Heading": "💾 Opzionale: Salva e Cancella",
+        "step8Items": [
+          "Clicca su <strong>\"Salva\"</strong> per salvare il PDF/JPG annotato e i dati delle stanze sul server (il pulsante mostra \"Salvataggio in corso...\" durante l'operazione)",
+          "Clicca su <strong>\"Cancella\"</strong> per rimuovere tutti i simboli AC, reimpostare la tela e cancellare tutti i dati di sessione salvati"
+        ]
+      },
+      "btuTab": {
+        "step1Heading": "📊 Passo 1: Rivedi le Stanze",
+        "step1Items": [
+          "Le stanze vengono popolate automaticamente quando esporti dal <strong>Designer PDF/JPG</strong>",
+          "Ogni stanza mostra il suo nome e la sua area (m² o ft²)",
+          "Le stanze multi-piano arrivano con un prefisso <em>\"Piano N: \"</em> (es. \"Piano 1: Cucina\")",
+          "Le etichette dell'unità esterna dal Designer PDF/JPG vengono filtrate automaticamente — vengono mantenute solo le stanze abitabili",
+          "<strong>Aggiungi Stanza:</strong> In modalità manuale, aggiunge una nuova riga stanza così puoi inserire un altro tipo di stanza e area",
+          "<strong>Cestino:</strong> Elimina la riga stanza manuale selezionata; l'ultima riga rimanente viene mantenuta come stanza vuota/predefinita così il modulo non diventa mai vuoto"
+        ],
+        "step2Heading": "⚙️ Passo 2: Imposta i Parametri di Calcolo",
+        "step2Items": [
+          "<strong>Sistema di Misurazione:</strong> Metri (m²) o Piedi (ft²)",
+          "<strong>Usa le Stanze dal PDF/JPG:</strong> Usa l'elenco delle stanze esportato dal Designer PDF/JPG; mantiene i nomi e le aree delle stanze rilevati tramite OCR ed è l'opzione predefinita quando esistono dati delle stanze dal PDF/JPG",
+          "<strong>Inserimento Manuale delle Stanze:</strong> Passa il calcolatore alla modalità manuale così puoi costruire tu stesso l'elenco delle stanze senza stanze importate dal PDF/JPG",
+          "<strong>Altezza del Soffitto (m):</strong> Predefinito 2,5 m",
+          "<strong>Numero di Persone:</strong> Livello di occupazione (ogni persona aggiunge ~600 BTU)",
+          "<strong>Proprietà multi-piano/multi-unità:</strong> Seleziona questa casella per dare a ogni piano la propria unità esterna separata. Selezionata automaticamente quando il multi-piano viene rilevato da prefissi del nome della stanza o etichette del simbolo AC"
+        ],
+        "step3Heading": "🌡️ Passo 3: Seleziona le Condizioni Ambientali",
+        "step3Items": [
+          "<strong>Posizione dell'Unità Esterna:</strong> Tetto, Staffe a Parete o Terreno Solido",
+          "<strong>Tipo di Parete:</strong> Rivestimento in Mattoni, Doppio Mattone o Rivestimento in Schiuma",
+          "<strong>Isolamento:</strong> Scarso, Medio o Buono",
+          "<strong>Esposizione al Sole:</strong> Pieno Sole, Medio o Fortemente Ombreggiato",
+          "<strong>Clima:</strong> Europa Media, Medio Oriente Caldo o Alaska Fredda",
+          "<strong>Uso della Stanza e Elettrodomestici:</strong> Forno, Sala Server (aggiunge carico termico), Palestra, Home Theater ecc., (vedi dettagli del calcolo BTU sotto)",
+          "<strong>Tipo di Finestra:</strong> Vetro Singolo, Vetro Doppio, Vetro Triplo o Persiana",
+          "<strong>Tipo di Tetto:</strong> Piatto, Inclinato o a Capanna",
+          "<strong>Pavimento:</strong> Marmo, Legno, Cemento o Moquette",
+          "<strong>Orientamento dell'Appartamento:</strong> Nord, Est, Sud, Ovest o Soggiorno. Usa <em>Soggiorno</em> quando l'area principale ha l'esposizione solare dominante e vuoi che il calcolatore pesi maggiormente quella zona.",
+          "<strong>Unità di Uscita:</strong> BTU, Watt o kW"
+        ],
+        "step4Heading": "🧮 Passo 4: Calcola e Naviga",
+        "step4Items": [
+          "Clicca su <strong>\"Calcola BTU\"</strong> — calcola il BTU per ogni stanza, abbina i prodotti VRF, salva i risultati nello store e naviga alla pagina <strong>Raccomandazioni</strong>",
+          "Per multi-piano: dimensiona un'unità esterna VRF separata per ogni piano",
+          "Clicca su <strong>\"Cancella\"</strong> per reimpostare tutte le stanze, i parametri e le opzioni ambientali ai valori predefiniti"
+        ],
+        "multiFlatHeading": "⚡ Rilevamento Automatico Multi-Piano",
+        "multiFlatItems": [
+          "Il multi-piano viene rilevato automaticamente da <em>prefissi del nome della stanza</em> (\"Piano 1: Cucina\", \"Piano 2: Cucina\") o da <em>etichette del simbolo AC</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)",
+          "Nomi di stanza duplicati da soli <strong>non</strong> indicano multi-piano — usa le etichette esplicite sopra",
+          "Ogni piano riceve un <strong>dimensionamento separato dell'unità esterna VRF</strong> con topologia a catena",
+          "Le linee del refrigerante si collegano a catena: Unità Esterna → AC1 → AC2 → ... per piano"
+        ],
+        "understandingHeading": "📖 Comprendere i Calcoli BTU",
+        "understandingIntro": "Il BTU (British Thermal Unit) è una misura di calore. Questo calcolatore fornisce una stima basata su fattori comuni:",
+        "understandingItems": [
+          "<strong>Calcolo Base:</strong> 600 BTU/m² usato come regola base.",
+          "<strong>Posizione dell'Unità Esterna:</strong> Posizione desiderata dell'unità esterna.",
+          "<strong>Numero di Persone:</strong> Ogni persona aggiunge ~600 BTU.",
+          "<strong>Tipo di Parete:</strong> Materiali e spessore influiscono sul BTU.",
+          "<strong>Qualità dell'Isolamento:</strong> Un isolamento scarso aumenta le esigenze di BTU.",
+          "<strong>Esposizione al Sole:</strong> Più finestre o stanze orientate a sud/ovest necessitano di più raffreddamento.",
+          "<strong>Tipo di Finestra:</strong> Le finestre a vetro singolo lasciano passare più calore rispetto a quelle a vetro triplo.",
+          "<strong>Orientamento dell'Appartamento:</strong> Gli orientamenti sud e ovest ricevono più sole.",
+          "<strong>Tipo di Pavimento:</strong> Materiali come marmo o piastrelle possono trattenere o riflettere il calore in modo diverso.",
+          "<strong>Tipo di Tetto:</strong> I tetti piatti possono aumentare il carico termico rispetto a quelli inclinati o isolati.",
+          "<strong>Elettrodomestici:</strong> Gli elettrodomestici da cucina ed elettronici contribuiscono a un carico termico aggiuntivo.",
+          "<strong>Zona Climatica:</strong> Le esigenze di BTU variano in base alla regione di temperatura e umidità."
+        ],
+        "importantNote": "<strong>Importante:</strong> Questa è una stima generale. Consulta un esperto HVAC autorizzato per un dimensionamento preciso del sistema."
+      },
+      "tipsTab": {
+        "accurateHeading": "✅ Per Risultati Accurati:",
+        "accurateItems": [
+          "Carica file PDF/JPG di planimetrie chiari e ad alta risoluzione",
+          "Segna tutte le posizioni delle unità AC sul disegno",
+          "Per multi-piano: distingui chiaramente le stanze per unità (rinominale con numeri)",
+          "Inserisci altezze del soffitto e dimensioni delle stanze accurate",
+          "Seleziona condizioni climatiche e ambientali accurate"
+        ],
+        "multiFlatHeading": "🎯 Flusso di Lavoro Multi-Piano (VRF):",
+        "multiFlatItems": [
+          "Carica il PDF/JPG con entrambi i piani visibili",
+          "Segna le unità AC con etichette come \"ac-1\", \"ac-2\" (il sistema rileva automaticamente i piani separati)",
+          "Rinomina le stanze: \"Cucina 1\"/\"Cucina 2\", \"Soggiorno 1\"/\"Soggiorno 2\"",
+          "Esporta al Calcolatore BTU (mostra i prefissi Piano 1, Piano 2)",
+          "Ogni piano riceve apparecchiature VRF separate e linee del refrigerante collegate a catena"
+        ],
+        "issuesHeading": "🔍 Problemi Comuni:",
+        "issuesItems": [
+          "<strong>Stanze non estratte:</strong> Verifica che il PDF/JPG sia leggibile, prova con qualità superiore",
+          "<strong>Stanze duplicate:</strong> Modifica i nomi delle stanze per distinguere i piani",
+          "<strong>Assegnazione errata del piano:</strong> Rinomina le stanze con numeri sequenziali",
+          "<strong>Nessun prodotto corrispondente:</strong> Verifica l'area della stanza e i calcoli BTU"
+        ]
+      },
+      "footer": {
+        "printBtn": "🖨️ Stampa / Salva",
+        "printBtnTitle": "Stampa / Scarica le istruzioni",
+        "closeBtn": "Chiudi"
+      }
+    },
     "btuCalculator": {
       "prevSummary": {
         "title": "Calcolo precedente",

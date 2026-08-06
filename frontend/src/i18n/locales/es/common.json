@@ -359,6 +359,232 @@
       "title": "Símbolos arquitectónicos importantes",
       "close": "Cerrar"
     },
+    "legend": {
+      "trigger": "📋 Leyenda / Instrucciones",
+      "title": "📋 Sistema de Medición: Cómo Usarlo",
+      "searchPlaceholder": "🔍 Buscar instrucciones…",
+      "clearSearchTitle": "Borrar búsqueda",
+      "printBtnTitle": "Imprimir / Descargar instrucciones como referencia",
+      "printBtn": "🖨️ Imprimir",
+      "printDocTitle": "AC-Commerce: Instrucciones del Sistema de Medición",
+      "printHeading": "📋 AC-Commerce: Instrucciones del Sistema de Medición",
+      "printGenerated": "Generado: {{date}}",
+      "printFooter": "AC-Commerce — Soluciones HVAC Profesionales — www.ac-commerce.com",
+      "tabs": {
+        "buttons": "🔘 Leyenda de Botones",
+        "annotator": "🖼️ Diseñador PDF/JPG",
+        "btu": "📐 Calculadora BTU",
+        "tips": "💡 Consejos y Buenas Prácticas"
+      },
+      "buttonsTab": {
+        "designerHeading": "🖼️ Botones del Diseñador PDF/JPG",
+        "designerItems": [
+          "<strong>📤 Subir PDF/JPG:</strong> Selecciona y sube un archivo PDF/JPG del plano (solo acepta .pdf/.jpg)",
+          "<strong>↶ Izquierda / ↷ Derecha:</strong> Gira el plano PDF/JPG en sentido antihorario u horario en pasos de 90°",
+          "<strong>Restablecer (°):</strong> Aparece solo cuando el PDF/JPG está rotado — vuelve a la orientación original de 0°",
+          "<strong>🔍 + / 🔍 −:</strong> Acerca o aleja el zoom del lienzo PDF/JPG (rango: 100%–400%)",
+          "<strong>100% (zoom%):</strong> Muestra el nivel de zoom actual; haz clic para restablecerlo al 100%",
+          "<strong>Campo de etiqueta de notación:</strong> Campo de texto sobre el lienzo donde escribes la etiqueta del símbolo <strong>antes</strong> de hacer clic en el lienzo. La etiqueta se reutiliza en cada clic siguiente — actualízala cuando quieras cambiar el nombre de la próxima colocación.<ul class=\"mt-1\"><li><strong>AC de un solo piso:</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li><li><strong>AC multi-piso (recomendado para archivos PDF/JPG de varios apartamentos):</strong> <em>ac-N.M</em> donde <em>N</em> = número de piso y <em>M</em> = índice de unidad dentro de ese piso. Ejemplo para dos pisos con tres unidades interiores cada uno: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> en el piso 1 y <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> en el piso 2. La herramienta de Auto-Colocación HVAC agrupa el equipo por piso usando este prefijo.</li><li><strong>Condensadora:</strong> <em>condenser</em> (un solo piso) o <em>condenser-1</em>, <em>condenser-2</em> (uno por piso en planos multi-piso).</li><li>Si el campo está vacío, hacer clic en el lienzo no coloca nada.</li></ul>",
+          "<strong>Clic en el lienzo:</strong> Coloca un símbolo de AC / condensadora en esa posición usando el texto actual del campo <em>Etiqueta de notación</em>. Si el campo está vacío no se coloca nada.",
+          "<strong>🏢 Flujo multi-piso:</strong> Para archivos PDF/JPG que contienen dos o más apartamentos en un mismo plano, usa siempre el formato <em>ac-N.M</em> para que la Calculadora BTU, la auto-colocación de la Vista de Ingeniero y las etiquetas del termostato (T1.1, T1.2 …) puedan separar el equipo por piso. Usa la etiqueta <em>condenser-N</em> correspondiente por piso para que cada piso tenga su propia unidad exterior.",
+          "<strong>📌 Modo de colocación (solo móvil):</strong> Aparece debajo de la barra de herramientas en pantallas pequeñas cuando se carga un PDF/JPG. Escribe la etiqueta en el campo móvil y toca <em>📌 Modo de colocación</em> para activarlo (se pone azul y muestra <em>\"✅ Toca para colocar\"</em>); solo mientras está activo puedes tocar el lienzo para colocar símbolos. Esto evita colocaciones accidentales al desplazarte en pantallas táctiles.",
+          "<strong>Arrastrar símbolo de aire acondicionado:</strong> Haz clic y arrastra (escritorio) o toca y arrastra (móvil) para reposicionar un símbolo de AC",
+          "<strong>Clic en el símbolo de aire acondicionado (escritorio):</strong> Gira el símbolo de aire acondicionado 90° en su lugar",
+          "<strong>📌 Panel de notaciones colocadas:</strong> Aparece una lista de cada etiqueta colocada debajo del lienzo como chips en forma de píldora (ej. <em>ac-1 ✏️ 🗑️</em>). El encabezado muestra el total — <em>\"📌 Notaciones colocadas (n)\"</em>. Usa los botones del chip para editar o eliminar cualquier notación sin buscarla en el lienzo.",
+          "<strong>✏️ Editar etiqueta:</strong> Haz clic en el icono de lápiz del chip de notación (funciona en escritorio y móvil) <em>o</em> haz doble clic en la etiqueta directamente en el lienzo — se abre un modal para renombrarla.",
+          "<strong>🗑️ Eliminar símbolo de aire acondicionado:</strong> Haz clic en el icono de papelera del chip de notación en el panel de <em>Notaciones colocadas</em> (funciona en escritorio y móvil). En escritorio también puedes hacer clic derecho sobre el símbolo de aire acondicionado en el lienzo.",
+          "<strong>Exportar a BTU (n habitaciones):</strong> Envía todas las habitaciones extraídas a la Calculadora BTU; está deshabilitado cuando no hay habitaciones disponibles",
+          "<strong>Guardar:</strong> Guarda el PDF/JPG con todos los símbolos de AC en el servidor (muestra \"Guardando...\" mientras se procesa)",
+          "<strong>Limpiar:</strong> Elimina todos los símbolos de AC, restablece el lienzo y borra todos los datos de la sesión"
+        ],
+        "roomTableHeading": "📋 Controles de la Tabla de Habitaciones",
+        "roomTableItems": [
+          "<strong>Filtrar por tipo de habitación:</strong> Campo de texto para filtrar la tabla de habitaciones por nombre",
+          "<strong>Menú de ordenar:</strong> Ordena la tabla por Tipo de Habitación, Ancho, Alto, Área (pies²) o Área (m²)",
+          "<strong>Orden ASC/DESC:</strong> Alterna la dirección de orden de la columna seleccionada",
+          "<strong>Icono de Excel:</strong> Exporta la tabla de habitaciones filtrada actual como un archivo .xlsx con estilo",
+          "<strong>+ Añadir Habitación:</strong> Añade manualmente una nueva fila de habitación a la tabla de un archivo dado",
+          "<strong>✏️ Editar / ✔ Guardar / ✖ Cancelar:</strong> Controles de edición en línea para cada fila de habitación",
+          "<strong>↑ Subir / ↓ Bajar:</strong> Reordena las filas de habitaciones dentro de la tabla",
+          "<strong>🗑️ Eliminar fila:</strong> Quita una entrada de habitación de la tabla"
+        ],
+        "btuHeading": "📐 Botones de la Calculadora BTU",
+        "btuItems": [
+          "<strong>Con Carga de PDF/JPG + Notaciones:</strong> Abre el flujo completo de Medición con carga de PDF/JPG, detección OCR de habitaciones, edición de la tabla de habitaciones y herramientas de anotación para colocar etiquetas de AC y condensadora antes de exportar habitaciones a la Calculadora BTU",
+          "<strong>Calculadora BTU Manual (Sin PDF/JPG + Notaciones):</strong> Abre solo el modo de Calculadora BTU sin el Diseñador PDF/JPG, para que las habitaciones se ingresen manualmente y los cálculos puedan hacerse sin subir un plano",
+          "<strong>Calcular BTU:</strong> Ejecuta el cálculo BTU VRF para todas las habitaciones, guarda los resultados en el store y navega a la página de Recomendaciones",
+          "<strong>Limpiar:</strong> Restablece todas las habitaciones, parámetros y opciones ambientales a sus valores predeterminados"
+        ],
+        "paramWarningHeading": "⚠️ Importante: Selección de Parámetros",
+        "paramWarningText": "<strong>Solo se debe marcar una casilla</strong> del parámetro necesario, como <em>Ubicación de la Unidad Exterior</em>, <em>Condición de Aislamiento</em>, etc.",
+        "interactionHeading": "🎯 Notas de Interacción",
+        "interactionItems": [
+          "<strong>Un solo piso:</strong> Flujo estándar — subir PDF/JPG, marcar ubicaciones de AC, exportar habitaciones, calcular BTU",
+          "<strong>Multi-piso:</strong> Etiqueta las unidades de AC con números específicos de piso (ac-1.1, ac-2.1), renombra habitaciones con números de piso, el sistema detecta automáticamente unidades separadas",
+          "<strong>Sistema VRF:</strong> Todos los cálculos usan tecnología VRF con conexiones de refrigerante en topología de cadena",
+          "<strong>Móvil:</strong> Pellizca con dos dedos en el lienzo para acercar/alejar el zoom en pantallas pequeñas"
+        ]
+      },
+      "annotatorTab": {
+        "step1Heading": "📌 Paso 1: Subir PDF/JPG",
+        "step1Items": [
+          "Compatible: solo archivos PDF/JPG (.pdf/.jpg)",
+          "Los archivos PDF/JPG deben ser planos de pisos o apartamentos",
+          "Funciona mejor con planos claros que muestren etiquetas y dimensiones de las habitaciones",
+          "Al subir, el sistema extrae y clasifica automáticamente las habitaciones mediante OCR"
+        ],
+        "step2Heading": "🔄 Paso 2: Girar el Plano PDF/JPG (si es necesario)",
+        "step2Items": [
+          "<strong>↶ Izquierda:</strong> Gira el PDF/JPG en sentido antihorario 90°",
+          "<strong>↷ Derecha:</strong> Gira el PDF/JPG en sentido horario 90°",
+          "<strong>Restablecer (°):</strong> Aparece cuando el PDF/JPG no está a 0° — haz clic para restaurar la orientación original"
+        ],
+        "step3Heading": "🔍 Paso 3: Acercar/Alejar el Lienzo (si es necesario)",
+        "step3Items": [
+          "<strong>🔍 +:</strong> Acerca hasta 400%",
+          "<strong>🔍 −:</strong> Aleja (mínimo 100%)",
+          "<strong>Zoom %:</strong> Muestra el zoom actual; haz clic para restablecer a 100%",
+          "<strong>Pellizco en móvil:</strong> Pellizca con dos dedos en el lienzo para hacer zoom en pantallas pequeñas"
+        ],
+        "step4Heading": "🎯 Paso 4: Marcar Ubicaciones de AC y Condensadora",
+        "step4Items": [
+          "<strong>Escribe primero la etiqueta</strong> en el campo <em>Etiqueta de notación</em> sobre el lienzo (escritorio) o en la barra de notación móvil debajo de la barra de herramientas (móvil). El campo reemplaza el antiguo aviso emergente — no aparecerá ningún modal al hacer clic.",
+          "<strong>Luego haz clic en el lienzo</strong> en la posición donde debe ir la unidad de AC o la condensadora. Se coloca un símbolo de inmediato usando la etiqueta actual. La etiqueta permanece en el campo para que puedas seguir haciendo clic y colocar más del mismo tipo — solo cambia el texto cuando necesites una nueva etiqueta.",
+          "<strong>📌 Modo de colocación (solo móvil):</strong> En pantallas pequeñas aparece una barra de alternancia <em>\"📌 Modo de colocación\"</em> debajo de la barra de herramientas después de cargar un PDF/JPG. Escribe la etiqueta, toca el botón para activarlo (se pone azul / muestra <em>\"✅ Toca para colocar\"</em>), luego toca el lienzo. Vuelve a tocar el botón para desactivarlo y volver al modo de solo desplazamiento.",
+          "<strong>Etiqueta de AC de un solo piso:</strong> Escribe p. ej. <em>ac-1</em>, <em>ac-2</em>",
+          "<strong>Etiqueta de AC multi-piso:</strong> Escribe p. ej. <em>ac-1.1</em>, <em>ac-1.2</em> para el piso 1; <em>ac-2.1</em>, <em>ac-2.2</em> para el piso 2",
+          "<strong>Etiqueta de condensadora de un solo piso:</strong> Escribe p. ej. <em>condenser</em> o <em>condenser-1</em>",
+          "<strong>Etiqueta de condensadora multi-piso:</strong> Escribe <em>condenser-1</em> para el piso 1, <em>condenser-2</em> para el piso 2, etc.",
+          "Recomendado: Coloca los símbolos de AC sobre cada puerta de habitación; coloca el símbolo de la condensadora cerca de la entrada del piso o en el balcón/techo.",
+          "Consejo: Para cambiar de colocar unidades de AC a colocar una condensadora, simplemente borra el campo y escribe <em>condenser</em> — el próximo clic en el lienzo creará el símbolo de la condensadora."
+        ],
+        "step5Heading": "🔧 Paso 5: Editar Formas",
+        "step5Items": [
+          "<strong>🔄 Girar Símbolo de Aire Acondicionado:</strong> Haz clic en un símbolo de aire acondicionado existente para girarlo 90°",
+          "<strong>📌 Arrastrar Símbolo de Aire Acondicionado:</strong> Haz clic y arrastra (escritorio) o toca y arrastra (móvil) para reposicionar",
+          "<strong>📌 Panel de notaciones colocadas:</strong> Debajo del lienzo verás una lista de chips <em>\"📌 Notaciones colocadas (n)\"</em> con cada etiqueta que has colocado (ej. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Cada chip tiene un botón ✏️ de editar y uno 🗑️ de eliminar — esta es la forma recomendada de gestionar notaciones, especialmente en móvil.",
+          "<strong>✏️ Editar Etiqueta de Notación:</strong> Haz clic en el icono de lápiz de un chip en el panel, o haz doble clic en la etiqueta directamente en el lienzo. Se abre un modal donde puedes renombrar la notación.",
+          "<strong>🗑️ Eliminar Notación:</strong> Haz clic en el icono de papelera del chip en el panel de <em>Notaciones colocadas</em>. En escritorio también puedes hacer clic derecho sobre el símbolo de aire acondicionado en el lienzo como atajo."
+        ],
+        "step6Heading": "✅ Paso 6: Revisar y Editar Datos de Habitaciones",
+        "step6Items": [
+          "La tabla de datos de habitaciones debajo del lienzo se rellena automáticamente por OCR al subir el archivo",
+          "Usa el campo <strong>Filtrar</strong> para encontrar habitaciones por tipo",
+          "Usa el menú <strong>Ordenar</strong> y el botón ASC/DESC para reordenar la tabla",
+          "Haz clic en <strong>✏️ Editar</strong> en cualquier fila para renombrar una habitación o cambiar su área; haz clic en ✔ para guardar o en ✖ para cancelar",
+          "Usa <strong>↑ / ↓</strong> para reordenar filas",
+          "Usa <strong>🗑️</strong> para eliminar habitaciones no deseadas o duplicadas",
+          "Haz clic en <strong>+ Añadir Habitación</strong> para insertar manualmente una nueva entrada de habitación",
+          "Haz clic en el <strong>icono de Excel</strong> para descargar la tabla de habitaciones como archivo .xlsx",
+          "Para multi-piso: renombra las habitaciones para distinguir los pisos (ej., \"Cocina 1\", \"Cocina 2\")"
+        ],
+        "step7Heading": "🚀 Paso 7: Exportar a la Calculadora BTU",
+        "step7Items": [
+          "Haz clic en <strong>\"Exportar a BTU (n habitaciones)\"</strong> para enviar todas las habitaciones filtradas a la Calculadora BTU; el botón se deshabilita cuando no hay habitaciones válidas",
+          "Las propiedades multi-piso se detectan y prefijan automáticamente (Piso 1, Piso 2)",
+          "La página se desplazará automáticamente hasta la Calculadora BTU VRF"
+        ],
+        "step8Heading": "💾 Opcional: Guardar y Limpiar",
+        "step8Items": [
+          "Haz clic en <strong>\"Guardar\"</strong> para guardar el PDF/JPG anotado y los datos de habitaciones en el servidor (el botón muestra \"Guardando...\" durante la operación)",
+          "Haz clic en <strong>\"Limpiar\"</strong> para eliminar todos los símbolos de AC, restablecer el lienzo y borrar todos los datos de sesión guardados"
+        ]
+      },
+      "btuTab": {
+        "step1Heading": "📊 Paso 1: Revisar Habitaciones",
+        "step1Items": [
+          "Las habitaciones se rellenan automáticamente al exportar desde el <strong>Diseñador PDF/JPG</strong>",
+          "Cada habitación muestra su nombre y área (m² o pies²)",
+          "Las habitaciones multi-piso llegan con un prefijo <em>\"Piso N: \"</em> (ej. \"Piso 1: Cocina\")",
+          "Las etiquetas de condensadora del Diseñador PDF/JPG se filtran automáticamente — solo se conservan las habitaciones habitables",
+          "<strong>Añadir Habitación:</strong> En modo manual, agrega una nueva fila de habitación para que puedas ingresar otro tipo de habitación y área",
+          "<strong>Papelera:</strong> Elimina la fila de habitación manual seleccionada; la última fila restante se conserva como habitación en blanco/predeterminada para que el formulario nunca quede vacío"
+        ],
+        "step2Heading": "⚙️ Paso 2: Establecer Parámetros de Cálculo",
+        "step2Items": [
+          "<strong>Sistema de Medición:</strong> Metros (m²) o Pies (pies²)",
+          "<strong>Usar Habitaciones del PDF/JPG:</strong> Usa la lista de habitaciones exportada desde el Diseñador PDF/JPG; conserva los nombres y áreas detectados por OCR y es el predeterminado cuando existen datos de habitaciones del PDF/JPG",
+          "<strong>Ingreso Manual de Habitaciones:</strong> Cambia la calculadora a modo manual para que puedas construir la lista de habitaciones tú mismo sin habitaciones importadas del PDF/JPG",
+          "<strong>Altura del Techo (m):</strong> Predeterminado 2.5 m",
+          "<strong>Número de Personas:</strong> Nivel de ocupación (cada persona añade ~600 BTU)",
+          "<strong>Propiedad multi-piso/multi-unidad:</strong> Marca esta casilla para dar a cada piso su propia condensadora separada. Se marca automáticamente cuando se detecta multi-piso a partir de prefijos de nombre de habitación o etiquetas de símbolo de AC"
+        ],
+        "step3Heading": "🌡️ Paso 3: Seleccionar Condiciones Ambientales",
+        "step3Items": [
+          "<strong>Ubicación de la Unidad Exterior:</strong> Techo, Soportes de Pared o Suelo Firme",
+          "<strong>Tipo de Pared:</strong> Revestimiento de Ladrillo, Ladrillo Doble o Revestimiento de Espuma",
+          "<strong>Aislamiento:</strong> Deficiente, Promedio o Bueno",
+          "<strong>Exposición al Sol:</strong> Sol Pleno, Promedio o Muy Sombreado",
+          "<strong>Clima:</strong> Europa Promedio, Medio Oriente Cálido o Alaska Frío",
+          "<strong>Uso de la Habitación y Electrodomésticos:</strong> Horno, Sala de Servidores (añade carga de calor), Gimnasio, Sala de Cine y etc., (ver detalles de cálculo BTU abajo)",
+          "<strong>Tipo de Ventana:</strong> Vidrio Simple, Doble, Triple o Persiana",
+          "<strong>Tipo de Techo:</strong> Plano, Inclinado o a Dos Aguas",
+          "<strong>Piso:</strong> Mármol, Madera, Concreto o Alfombrado",
+          "<strong>Orientación del Apartamento:</strong> Norte, Este, Sur, Oeste o Sala de Estar. Usa <em>Sala de Estar</em> cuando el área principal tenga la exposición solar dominante y quieras que la calculadora dé más peso a esa zona.",
+          "<strong>Unidad de Salida:</strong> BTU, Watt o kW"
+        ],
+        "step4Heading": "🧮 Paso 4: Calcular y Navegar",
+        "step4Items": [
+          "Haz clic en <strong>\"Calcular BTU\"</strong> — calcula el BTU de cada habitación, empareja productos VRF, guarda los resultados en el store y navega a la página de <strong>Recomendaciones</strong>",
+          "Para multi-piso: dimensiona una condensadora VRF separada para cada piso",
+          "Haz clic en <strong>\"Limpiar\"</strong> para restablecer todas las habitaciones, parámetros y opciones ambientales a sus valores predeterminados"
+        ],
+        "multiFlatHeading": "⚡ Detección Automática de Multi-Piso",
+        "multiFlatItems": [
+          "El multi-piso se detecta automáticamente a partir de <em>prefijos de nombre de habitación</em> (\"Piso 1: Cocina\", \"Piso 2: Cocina\") o de <em>etiquetas de símbolo de AC</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)",
+          "Los nombres de habitación duplicados por sí solos <strong>no</strong> indican multi-piso — usa las etiquetas explícitas mencionadas arriba",
+          "Cada piso recibe un <strong>dimensionamiento de condensadora VRF separado</strong> con topología en cadena",
+          "Las líneas de refrigerante se conectan en cadena: Condensadora → AC1 → AC2 → ... por piso"
+        ],
+        "understandingHeading": "📖 Entendiendo los Cálculos de BTU",
+        "understandingIntro": "BTU (Unidad Térmica Británica) es una medida de calor. Esta calculadora ofrece una estimación basada en factores comunes:",
+        "understandingItems": [
+          "<strong>Cálculo Base:</strong> Se usa 600 BTU/m² como regla base.",
+          "<strong>Ubicación de la Unidad Exterior (Condensadora):</strong> Ubicación deseada de la unidad exterior.",
+          "<strong>Número de Personas:</strong> Cada persona añade ~600 BTU.",
+          "<strong>Tipo de Pared:</strong> Los materiales y el espesor afectan el BTU.",
+          "<strong>Calidad del Aislamiento:</strong> Un aislamiento deficiente aumenta las necesidades de BTU.",
+          "<strong>Exposición al Sol:</strong> Más ventanas o habitaciones orientadas al sur/oeste necesitan más enfriamiento.",
+          "<strong>Tipo de Ventana:</strong> Las ventanas de vidrio simple dejan pasar más calor que las de triple vidrio.",
+          "<strong>Orientación del Apartamento:</strong> Las orientaciones sur y oeste reciben más sol.",
+          "<strong>Tipo de Piso:</strong> Materiales como mármol o baldosa pueden retener o reflejar el calor de forma diferente.",
+          "<strong>Tipo de Techo:</strong> Los techos planos pueden aumentar la carga de calor en comparación con los inclinados o aislados.",
+          "<strong>Electrodomésticos:</strong> Los aparatos de cocina y electrónicos aportan carga de calor adicional.",
+          "<strong>Zona Climática:</strong> Las necesidades de BTU varían según la región de temperatura y humedad."
+        ],
+        "importantNote": "<strong>Importante:</strong> Esta es una estimación general. Consulta a un experto certificado en HVAC para un dimensionamiento preciso del sistema."
+      },
+      "tipsTab": {
+        "accurateHeading": "✅ Para Resultados Precisos:",
+        "accurateItems": [
+          "Sube archivos PDF/JPG de planos de alta resolución y claros",
+          "Marca todas las ubicaciones de unidades de AC en el plano",
+          "Para multi-piso: distingue claramente las habitaciones por unidad (renómbralas con números)",
+          "Ingresa alturas de techo y tamaños de habitación precisos",
+          "Selecciona condiciones climáticas y ambientales precisas"
+        ],
+        "multiFlatHeading": "🎯 Flujo de Trabajo Multi-Piso (VRF):",
+        "multiFlatItems": [
+          "Sube el PDF/JPG con ambos pisos visibles",
+          "Marca las unidades de AC con etiquetas como \"ac-1\", \"ac-2\" (el sistema detecta automáticamente pisos separados)",
+          "Renombra las habitaciones: \"Cocina 1\"/\"Cocina 2\", \"Sala 1\"/\"Sala 2\"",
+          "Exporta a la Calculadora BTU (muestra los prefijos Piso 1, Piso 2)",
+          "Cada piso recibe equipo VRF separado y líneas de refrigerante conectadas en cadena"
+        ],
+        "issuesHeading": "🔍 Problemas Comunes:",
+        "issuesItems": [
+          "<strong>No se extraen habitaciones:</strong> Verifica que el PDF/JPG sea legible, prueba con mayor calidad",
+          "<strong>Habitaciones duplicadas:</strong> Edita los nombres de las habitaciones para distinguir entre pisos",
+          "<strong>Asignación de piso incorrecta:</strong> Renombra las habitaciones con números secuenciales",
+          "<strong>No hay productos coincidentes:</strong> Verifica el área de la habitación y los cálculos de BTU"
+        ]
+      },
+      "footer": {
+        "printBtn": "🖨️ Imprimir / Guardar",
+        "printBtnTitle": "Imprimir / Descargar instrucciones",
+        "closeBtn": "Cerrar"
+      }
+    },
     "btuCalculator": {
       "prevSummary": {
         "title": "Cálculo anterior",

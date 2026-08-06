@@ -1,8 +1,24 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Button, Tabs, Tab } from "react-bootstrap";
 import "./ModalLegend_new.css";
 
-import "./ModalLegend_new.css";const ModalLegend = () => {
+// Renders a translated string that may contain inline HTML formatting
+// (<strong>, <em>, nested <ul>/<li>) produced by translators in the locale
+// JSON files. Content originates only from our own static locale files
+// (never from user input), so dangerouslySetInnerHTML is safe here.
+const HtmlLi = ({ html }) => <li dangerouslySetInnerHTML={{ __html: html }} />;
+
+const HtmlList = ({ items, className = "list-disc ml-4 space-y-1 fs-6" }) => (
+  <ul className={className}>
+    {items.map((html, i) => (
+      <HtmlLi key={i} html={html} />
+    ))}
+  </ul>
+);
+
+const ModalLegend = () => {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const printRef = useRef(null);
@@ -19,7 +35,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>AC-Commerce: Measurement System Instructions</title>
+          <title>${t("measurement.legend.printDocTitle")}</title>
           <style>
             body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a1a; padding: 24px; }
             h5 { color: #0d6efd; margin-top: 18px; margin-bottom: 6px; }
@@ -33,17 +49,17 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
           </style>
         </head>
         <body>
-          <h3 style="color:#dc3545">📋 AC-Commerce: Measurement System Instructions</h3>
-          <p style="color:#6c757d;font-size:12px">Generated: ${new Date().toLocaleString()}</p>
+          <h3 style="color:#dc3545">${t("measurement.legend.printHeading")}</h3>
+          <p style="color:#6c757d;font-size:12px">${t("measurement.legend.printGenerated", { date: new Date().toLocaleString() })}</p>
           ${content.innerHTML}
-          <div class="footer">AC-Commerce &mdash; Professional HVAC Solutions &mdash; www.ac-commerce.com</div>
+          <div class="footer">${t("measurement.legend.printFooter")}</div>
         </body>
       </html>
     `);
     win.document.close();
     win.focus();
     setTimeout(() => { win.print(); }, 400);
-  }, []);
+  }, [t]);
 
   // DOM-based search: runs after every render, filters <li> items and highlights matches
   useEffect(() => {
@@ -105,7 +121,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
   return (
     <>
       <button className="phv-trigger" onClick={handleShow}>
-        📋 Legend / Instructions
+        {t("measurement.legend.trigger")}
       </button>
       <Modal
         show={show}
@@ -117,7 +133,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title className="text-danger text-bold">
-            📋 Measurement System: How to Use
+            {t("measurement.legend.title")}
           </Modal.Title>
         </Modal.Header>
 
@@ -126,7 +142,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
           <input
             type="text"
             className="form-control form-control-sm legend-search-input"
-            placeholder="🔍 Search instructions…"
+            placeholder={t("measurement.legend.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -134,14 +150,14 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
             <button
               className="btn btn-outline-secondary btn-sm legend-search-clear"
               onClick={() => setSearchQuery('')}
-              title="Clear search"
+              title={t("measurement.legend.clearSearchTitle")}
             >✕</button>
           )}
           <button
             className="btn btn-outline-primary btn-sm legend-print-btn"
             onClick={handlePrint}
-            title="Print / Download instructions as reference"
-          >🖨️ Print</button>
+            title={t("measurement.legend.printBtnTitle")}
+          >{t("measurement.legend.printBtn")}</button>
         </div>
 
         <Modal.Body>
@@ -149,437 +165,98 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
           <div ref={printRef}>
           <Tabs defaultActiveKey="annotator" id="legend-tabs" className="mb-3">
             {/* BUTTON LEGEND TAB */}
-            <Tab eventKey="buttons" title="🔘 Button Legend">
+            <Tab eventKey="buttons" title={t("measurement.legend.tabs.buttons")}>
               <div className="mt-3">
-                <h6 className="mb-2 text-primary">🖼️ PDF/JPG Designer Buttons</h6>
-                <ul className="list-unstyled fs-6">
-                  <li><strong>📤 Upload PDF/JPG:</strong> Select and upload a floor plan PDF/JPG file (accepts .pdf/.jpg only)</li>
-                  <li><strong>↶ Left / ↷ Right:</strong> Rotate the PDF/JPG drawing counter-clockwise or clockwise by 90° steps</li>
-                  <li><strong>Reset (°):</strong> Appears only when PDF/JPG is rotated — resets back to original 0° orientation</li>
-                  <li><strong>🔍 + / 🔍 −:</strong> Zoom in or out on the PDF/JPG canvas (range: 100%–400%)</li>
-                  <li><strong>100% (zoom%):</strong> Shows current zoom level; click to reset zoom back to 100%</li>
-                  <li><strong>Notation label input:</strong> Text field above the canvas where you type the symbol label <strong>before</strong> clicking the canvas. The label is reused for each subsequent click — update it any time to change what the next placement will be called.
-                    <ul className="mt-1">
-                      <li><strong>Single-flat AC:</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li>
-                      <li><strong>Multi-flat AC (recommended for multi-apartment PDF/JPG files):</strong> <em>ac-N.M</em> where <em>N</em> = flat number and <em>M</em> = unit index inside that flat. Example for two flats with three indoor units each: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> in flat 1 and <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> in flat 2. The Auto-Place HVAC tool groups equipment per flat using this prefix.</li>
-                      <li><strong>Condenser:</strong> <em>condenser</em> (single flat) or <em>condenser-1</em>, <em>condenser-2</em> (one per flat in multi-flat drawings).</li>
-                      <li>If the input is empty, clicking the canvas places nothing.</li>
-                    </ul>
-                  </li>
-                  <li><strong>Click on canvas:</strong> Places an AC / condenser symbol at that position using the current text in the <em>Notation label</em> input. If the input is empty nothing is placed.</li>
-                  <li><strong>🏢 Multi-flat workflow:</strong> For PDF/JPG files that contain two or more apartments on one drawing, always use the <em>ac-N.M</em> format so the BTU Calculator, Engineer View auto-placement, and thermostat labels (T1.1, T1.2 …) can separate equipment per flat. Use the matching <em>condenser-N</em> label per flat so each flat gets its own outdoor unit.</li>
-                  <li><strong>📌 Place mode (mobile only):</strong> Appears below the toolbar on small screens when a PDF/JPG is loaded. Type the label in the mobile input, then tap <em>📌 Place mode</em> to activate (turns blue and shows <em>"✅ Tap to place"</em>); only while active can you tap the canvas to place symbols. This prevents accidental placements while scrolling on touch screens.</li>
-                  <li><strong>Drag air conditioner symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition an AC symbol</li>
-                  <li><strong>Click air conditioner symbol (desktop):</strong> Rotates the air conditioner symbol 90° in place</li>
-                  <li><strong>📌 Placed notations panel:</strong> A list of every placed label appears below the canvas as pill-shaped chips (e.g. <em>ac-1 ✏️ 🗑️</em>). The header shows the total count — <em>"📌 Placed notations (n)"</em>. Use the chip buttons to edit or delete any notation without hunting for it on the canvas.</li>
-                  <li><strong>✏️ Edit label:</strong> Click the pencil icon on the notation chip (works on desktop and mobile) <em>or</em> double-click the label directly on the canvas — a modal opens to rename it.</li>
-                  <li><strong>🗑️ Delete air conditioner symbol:</strong> Click the trash icon on the notation chip in the <em>Placed notations</em> panel (works on desktop and mobile). On desktop you can also right-click the air conditioner symbol on the canvas.</li>
-                  <li><strong>Export to BTU (n rooms):</strong> Sends all extracted rooms to the BTU Calculator; disabled when no rooms are available</li>
-                  <li><strong>Save:</strong> Saves the PDF/JPG with all AC symbols to the backend (shows "Saving..." while in progress)</li>
-                  <li><strong>Clear:</strong> Removes all AC symbols, resets the canvas, and clears all session data</li>
-                </ul>
+                <h6 className="mb-2 text-primary">{t("measurement.legend.buttonsTab.designerHeading")}</h6>
+                <HtmlList className="list-unstyled fs-6" items={t("measurement.legend.buttonsTab.designerItems", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">📋 Room Table Controls</h6>
-                <ul className="list-unstyled fs-6">
-                  <li><strong>Filter by room type:</strong> Text input to filter the room table by room name</li>
-                  <li><strong>Sort dropdown:</strong> Sort table by Room Type, Width, Height, Area (sqft), or Area (sqm)</li>
-                  <li><strong>Sort ASC/DESC:</strong> Toggle sort direction for the selected column</li>
-                  <li><strong>Excel icon:</strong> Export the current filtered room table as a styled .xlsx file</li>
-                  <li><strong>+ Add Room:</strong> Manually add a new room row to the table for a given file</li>
-                  <li><strong>✏️ Edit / ✔ Save / ✖ Cancel:</strong> Inline edit controls for each room row</li>
-                  <li><strong>↑ Move Up / ↓ Move Down:</strong> Reorder room rows within the table</li>
-                  <li><strong>🗑️ Delete row:</strong> Remove a room entry from the table</li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.buttonsTab.roomTableHeading")}</h6>
+                <HtmlList className="list-unstyled fs-6" items={t("measurement.legend.buttonsTab.roomTableItems", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">📐 BTU Calculator Buttons</h6>
-                <ul className="list-unstyled fs-6">
-                  <li><strong>With PDF/JPG Uploading + Notations:</strong> Opens the full Measurement workflow with PDF/JPG upload, OCR room detection, room-table editing, and annotation tools so you can place AC and condenser labels before exporting rooms to the BTU Calculator</li>
-                  <li><strong>Manual BTU Calculator (No PDF/JPG + Notations):</strong> Opens BTU Calculator only mode without the PDF/JPG Designer, so rooms are entered manually and calculations can be done without uploading a floor plan</li>
-                  <li><strong>Calculate BTU:</strong> Runs the VRF BTU calculation for all rooms, saves results to the store, and navigates to the Recommendations page</li>
-                  <li><strong>Clear:</strong> Resets all rooms, parameters, and environmental options back to defaults</li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.buttonsTab.btuHeading")}</h6>
+                <HtmlList className="list-unstyled fs-6" items={t("measurement.legend.buttonsTab.btuItems", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-warning">⚠️ Important: Parameter Selection</h6>
-                <p className="fs-6 mb-2">
-                  <strong>Should be checked only one checkbox</strong> of needed parameter such as <em>Outdoor Unit Location</em>, <em>Insulation Condition</em>, and etc.
-                </p>
+                <h6 className="mb-2 mt-3 text-warning">{t("measurement.legend.buttonsTab.paramWarningHeading")}</h6>
+                <p
+                  className="fs-6 mb-2"
+                  dangerouslySetInnerHTML={{ __html: t("measurement.legend.buttonsTab.paramWarningText") }}
+                />
 
-                <h6 className="mb-2 mt-3 text-primary">🎯 Interaction Notes</h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li><strong>Single Flat:</strong> Standard workflow — upload PDF/JPG, notate AC locations, export rooms, calculate BTU</li>
-                  <li><strong>Multi-Flat:</strong> Label AC units with flat-specific numbers (ac-1.1, ac-2.1), rename rooms with flat numbers, system auto-detects separate units</li>
-                  <li><strong>VRF System:</strong> All calculations use VRF technology with chain topology refrigerant connections</li>
-                  <li><strong>Mobile:</strong> Pinch two fingers on the canvas to zoom in/out on small screens</li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.buttonsTab.interactionHeading")}</h6>
+                <HtmlList items={t("measurement.legend.buttonsTab.interactionItems", { returnObjects: true })} />
               </div>
             </Tab>
 
             {/* ANNOTATOR TAB */}
-            <Tab eventKey="annotator" title="🖼️ PDF/JPG Designer">
+            <Tab eventKey="annotator" title={t("measurement.legend.tabs.annotator")}>
               <div className="mt-3">
-                <h6 className="mb-2 text-primary">📌 Step 1: Upload PDF/JPG</h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Supported: PDF/JPG files only (.pdf/.jpg)</li>
-                  <li>
-                    PDF/JPG files should be floor plan drawings of flats or apartments
-                  </li>
-                  <li>Works best with clear floor plans showing room labels and dimensions</li>
-                  <li>On upload the system automatically extracts and classifies rooms via OCR</li>
-                </ul>
+                <h6 className="mb-2 text-primary">{t("measurement.legend.annotatorTab.step1Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step1Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  🔄 Step 2: Rotate PDF/JPG Drawing (if needed)
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>↶ Left:</strong> Rotate PDF/JPG counter-clockwise by 90°
-                  </li>
-                  <li>
-                    <strong>↷ Right:</strong> Rotate PDF/JPG clockwise by 90°
-                  </li>
-                  <li>
-                    <strong>Reset (°):</strong> Appears when PDF/JPG is not at 0° — click to restore original orientation
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step2Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step2Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  🔍 Step 3: Zoom the Canvas (if needed)
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>🔍 +:</strong> Zoom in up to 400%
-                  </li>
-                  <li>
-                    <strong>🔍 −:</strong> Zoom out (minimum 100%)
-                  </li>
-                  <li>
-                    <strong>Zoom %:</strong> Shows current zoom; click to reset to 100%
-                  </li>
-                  <li>
-                    <strong>Mobile pinch:</strong> Pinch two fingers on the canvas to zoom on small screens
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step3Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step3Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  🎯 Step 4: Mark AC Unit & Condenser Locations
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>Type the label first</strong> in the <em>Notation label</em> input above the canvas (desktop) or in the mobile notation bar below the toolbar (mobile). The input replaces the old pop-up prompt — no modal will appear when you click.
-                  </li>
-                  <li>
-                    <strong>Then click on the canvas</strong> at the position where the AC unit or condenser should go. A symbol is placed immediately using the current label. The label stays in the input so you can keep clicking to place more of the same kind — just change the text whenever you need a new label.
-                  </li>
-                  <li>
-                    <strong>📌 Place mode (mobile only):</strong> On small screens a <em>"📌 Place mode"</em> toggle bar appears below the toolbar after a PDF/JPG is loaded. Type the label, tap the button to activate (turns blue / shows <em>"✅ Tap to place"</em>), then tap the canvas. Tap the button again to deactivate and return to scroll-only mode.
-                  </li>
-                  <li>
-                    <strong>Single Flat AC label:</strong> Type e.g. <em>ac-1</em>, <em>ac-2</em>
-                  </li>
-                  <li>
-                    <strong>Multi-Flat AC label:</strong> Type e.g. <em>ac-1.1</em>, <em>ac-1.2</em> for flat 1; <em>ac-2.1</em>, <em>ac-2.2</em> for flat 2
-                  </li>
-                  <li>
-                    <strong>Single Flat Condenser label:</strong> Type e.g. <em>condenser</em> or <em>condenser-1</em>
-                  </li>
-                  <li>
-                    <strong>Multi-Flat Condenser label:</strong> Type <em>condenser-1</em> for flat 1, <em>condenser-2</em> for flat 2, etc.
-                  </li>
-                  <li>
-                    Recommended: Place AC symbols above each room door; place the Condenser symbol near the flat entrance or on the balcony/roof location.
-                  </li>
-                  <li>
-                    Tip: To switch from placing AC units to placing a condenser, just clear the input and type <em>condenser</em> — the next canvas click will create the condenser symbol.
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step4Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step4Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  🔧 Step 5: Edit Shapes
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>🔄 Rotate Air Conditioner Symbol:</strong> Click on an existing air conditioner symbol to rotate it 90°
-                  </li>
-                  <li>
-                    <strong>📌 Drag Air Conditioner Symbol:</strong> Click and drag (desktop) or touch and drag (mobile) to reposition
-                  </li>
-                  <li>
-                    <strong>📌 Placed notations panel:</strong> Below the canvas you'll see a chip list <em>"📌 Placed notations (n)"</em> containing every label you've placed (e.g. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Each chip has a ✏️ edit button and a 🗑️ delete button — this is the recommended way to manage notations, especially on mobile.
-                  </li>
-                  <li>
-                    <strong>✏️ Edit Notation Label:</strong> Click the pencil icon on a chip in the panel, or double-click the label directly on the canvas. A modal opens where you can rename the notation.
-                  </li>
-                  <li>
-                    <strong>🗑️ Delete Notation:</strong> Click the trash icon on the chip in the <em>Placed notations</em> panel. On desktop you can also right-click the air conditioner symbol on the canvas as a shortcut.
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step5Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step5Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  ✅ Step 6: Review & Edit Room Data
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>The room data table below the canvas is auto-filled by OCR on upload</li>
-                  <li>Use the <strong>Filter</strong> input to find rooms by type</li>
-                  <li>Use the <strong>Sort</strong> dropdown and ASC/DESC button to reorder the table</li>
-                  <li>Click <strong>✏️ Edit</strong> on any row to rename a room or change its area; click ✔ to save or ✖ to cancel</li>
-                  <li>Use <strong>↑ / ↓</strong> to reorder rows</li>
-                  <li>Use <strong>🗑️</strong> to delete unwanted or duplicate rooms</li>
-                  <li>Click <strong>+ Add Room</strong> to manually insert a new room entry</li>
-                  <li>Click the <strong>Excel icon</strong> to download the room table as an .xlsx file</li>
-                  <li>For multi-flat: rename rooms to distinguish flats (e.g., "Kitchen 1", "Kitchen 2")</li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step6Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step6Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  🚀 Step 7: Export to BTU Calculator
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    Click <strong>"Export to BTU (n rooms)"</strong> to send all filtered rooms to the BTU Calculator; the button is disabled when no valid rooms exist
-                  </li>
-                  <li>
-                    Multi-flat properties are automatically detected and
-                    prefixed (Flat 1, Flat 2)
-                  </li>
-                  <li>Page will scroll to VRF BTU Calculator automatically</li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step7Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step7Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  💾 Optional: Save & Clear
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    Click <strong>"Save"</strong> to save the notated PDF/JPG and room data to the backend (button shows "Saving..." during operation)
-                  </li>
-                  <li>
-                    Click <strong>"Clear"</strong> to remove all AC symbols, reset the canvas, and clear all saved session data
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step8Heading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.step8Items", { returnObjects: true })} />
               </div>
             </Tab>
 
             {/* BTU CALCULATOR TAB */}
-            <Tab eventKey="btu" title="📐 BTU Calculator">
+            <Tab eventKey="btu" title={t("measurement.legend.tabs.btu")}>
               <div className="mt-3">
-                <h6 className="mb-2 text-primary">📊 Step 1: Review Rooms</h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Rooms are auto-populated when you export from <strong>PDF/JPG Designer</strong></li>
-                  <li>Each room shows its name and area (m² or ft²)</li>
-                  <li>Multi-flat rooms arrive with a <em>"Flat N: "</em> prefix (e.g. "Flat 1: Kitchen")</li>
-                  <li>Condenser labels from the PDF/JPG Designer are filtered out automatically — only habitable rooms are kept</li>
-                  <li><strong>Add Room:</strong> In manual mode, appends a new room row so you can enter another room type and area</li>
-                  <li><strong>Trash:</strong> Deletes the selected manual room row; the final remaining row is kept as a blank/default room so the form never becomes empty</li>
-                </ul>
+                <h6 className="mb-2 text-primary">{t("measurement.legend.btuTab.step1Heading")}</h6>
+                <HtmlList items={t("measurement.legend.btuTab.step1Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  ⚙️ Step 2: Set Calculation Parameters
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>Measurement System:</strong> Meters (m²) or Feet (ft²)
-                  </li>
-                  <li>
-                    <strong>Use PDF/JPG Rooms:</strong> Uses the room list exported from the PDF/JPG Designer; this keeps OCR-detected room names and areas and is the default when PDF/JPG room data exists
-                  </li>
-                  <li>
-                    <strong>Manual Room Entry:</strong> Switches the calculator to manual mode so you can build the room list yourself without PDF/JPG-imported rooms
-                  </li>
-                  <li>
-                    <strong>Ceiling Height (m):</strong> Default 2.5 m
-                  </li>
-                  <li>
-                    <strong>Number of People:</strong> Occupancy level (each person adds ~600 BTU)
-                  </li>
-                  <li>
-                    <strong>Multi-flat/Multi-unit property:</strong> Check this box to give each flat its own separate condenser. Auto-checked when multi-flat is detected from room-name prefixes or AC symbol labels
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.btuTab.step2Heading")}</h6>
+                <HtmlList items={t("measurement.legend.btuTab.step2Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  🌡️ Step 3: Select Environmental Conditions
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>Outdoor Unit Location:</strong> Roof, Wall Brackets, or Hard Ground
-                  </li>
-                  <li>
-                    <strong>Wall Type:</strong> Brick Veneer, Double Brick, or Foam Cladding
-                  </li>
-                  <li>
-                    <strong>Insulation:</strong> Poor, Average, or Good
-                  </li>
-                  <li>
-                    <strong>Sun Exposure:</strong> Full Sunlight, Average, or Heavily Shaded
-                  </li>
-                  <li>
-                    <strong>Climate:</strong> Average Europe, Hot Middle East, or Cold Alaska
-                  </li>
-                  <li>
-                    <strong>Room Usage & Appliances:</strong> Oven, Server Room (adds heat load), Gym, Home Theater and etc., (see BTU calculation details below)
-                  </li>
-                  <li>
-                    <strong>Window Type:</strong> Single Glazed, Double Glazed, Triple Glazed, or Louvered
-                  </li>
-                  <li>
-                    <strong>Roof Type:</strong> Flat, Pitched, or Gable
-                  </li>
-                  <li>
-                    <strong>Floor:</strong> Marble, Timber, Concrete, or Carpeted
-                  </li>
-                  <li>
-                    <strong>Apartment Orientation:</strong> North, East, South, West, or Living Room. Use <em>Living Room</em> when the main living area has the dominant solar exposure and you want the calculator to weight that zone more heavily.
-                  </li>
-                  <li>
-                    <strong>Output Unit:</strong> BTU, Watt, or kW
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.btuTab.step3Heading")}</h6>
+                <HtmlList items={t("measurement.legend.btuTab.step3Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  🧮 Step 4: Calculate &amp; Navigate
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    Click <strong>"Calculate BTU"</strong> — calculates BTU for each room, matches VRF products, saves results to the store, and navigates to the <strong>Recommendations</strong> page
-                  </li>
-                  <li>For multi-flat: sizes a separate VRF condenser for each flat</li>
-                  <li>
-                    Click <strong>"Clear"</strong> to reset all rooms, parameters, and environmental options back to defaults
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.btuTab.step4Heading")}</h6>
+                <HtmlList items={t("measurement.legend.btuTab.step4Items", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  ⚡ Multi-Flat Auto-Detection
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    Multi-flat is detected automatically from <em>room-name prefixes</em> ("Flat 1: Kitchen", "Flat 2: Kitchen") or from <em>AC symbol labels</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)
-                  </li>
-                  <li>Duplicate room names alone do <strong>not</strong> indicate multi-flat — use the explicit labels above</li>
-                  <li>
-                    Each flat gets <strong>separate VRF condenser sizing</strong> with chain topology
-                  </li>
-                  <li>Refrigerant lines connect in chain: Condenser → AC1 → AC2 → ... per flat</li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.btuTab.multiFlatHeading")}</h6>
+                <HtmlList items={t("measurement.legend.btuTab.multiFlatItems", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-primary">
-                  📖 Understanding BTU Calculations
-                </h6>
+                <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.btuTab.understandingHeading")}</h6>
                 <p className="text-gray-700 mb-3 fs-6">
-                  BTU (British Thermal Unit) is a measure of heat. This
-                  calculator provides an estimation based on common factors:
+                  {t("measurement.legend.btuTab.understandingIntro")}
                 </p>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>Base Calculation:</strong> 600 BTU/m² used as a base
-                    rule.
-                  </li>
-                  <li>
-                    <strong>Outdoor Unit (Condenser) Location:</strong>
-                    Desired location of outdoor unit.
-                  </li>
-                  <li>
-                    <strong>Number of People:</strong> Each person adds ~600
-                    BTU.
-                  </li>
-                  <li>
-                    <strong>Wall Type:</strong> Materials and thickness affect
-                    BTU.
-                  </li>
-                  <li>
-                    <strong>Insulation Quality:</strong> Poor insulation
-                    increases BTU needs.
-                  </li>
-                  <li>
-                    <strong>Sun Exposure:</strong> More windows or
-                    south/west-facing rooms need more cooling.
-                  </li>
-                  <li>
-                    <strong>Window Type:</strong> Single-glazed windows allow
-                    more heat than triple-glazed.
-                  </li>
-                  <li>
-                    <strong>Apartment Orientation:</strong> South and west
-                    orientations receive more sunlight.
-                  </li>
-                  <li>
-                    <strong>Floor Type:</strong> Materials like marble or tile
-                    can retain or reflect heat differently.
-                  </li>
-                  <li>
-                    <strong>Roof Type:</strong> Flat roofs may increase heat
-                    load compared to pitched or insulated ones.
-                  </li>
-                  <li>
-                    <strong>Appliances:</strong> Kitchen and electronic devices
-                    contribute additional heat load.
-                  </li>
-                  <li>
-                    <strong>Climate Zone:</strong> BTU needs vary by temperature
-                    and humidity region.
-                  </li>
-                </ul>
-                <p className="fs-6 mt-3">
-                  <strong className="text-red-600">Important:</strong> This is a
-                  general estimate. Consult a licensed HVAC expert for precise
-                  system sizing.
-                </p>
+                <HtmlList items={t("measurement.legend.btuTab.understandingItems", { returnObjects: true })} />
+                <p
+                  className="fs-6 mt-3"
+                  dangerouslySetInnerHTML={{ __html: t("measurement.legend.btuTab.importantNote") }}
+                />
               </div>
             </Tab>
 
             {/* TIPS TAB */}
-            <Tab eventKey="tips" title="💡 Tips & Best Practices">
+            <Tab eventKey="tips" title={t("measurement.legend.tabs.tips")}>
               <div className="mt-3">
-                <h6 className="mb-2 text-success">✅ For Accurate Results:</h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Upload clear, high-resolution floor plan PDF/JPG files</li>
-                  <li>Mark all AC unit locations on the drawing</li>
-                  <li>
-                    For multi-flat: Clearly distinguish rooms by unit (rename
-                    them with numbers)
-                  </li>
-                  <li>Enter accurate ceiling heights and room sizes</li>
-                  <li>Select accurate climate and environmental conditions</li>
-                </ul>
+                <h6 className="mb-2 text-success">{t("measurement.legend.tipsTab.accurateHeading")}</h6>
+                <HtmlList items={t("measurement.legend.tipsTab.accurateItems", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-success">
-                  🎯 Multi-Flat Workflow (VRF):
-                </h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>Upload PDF/JPG with both flats visible</li>
-                  <li>
-                    Mark AC units with labels like "ac-1", "ac-2" (system
-                    auto-detects separate flats)
-                  </li>
-                  <li>
-                    Rename rooms: "Kitchen 1"/"Kitchen 2", "LivingRoom
-                    1"/"LivingRoom 2"
-                  </li>
-                  <li>
-                    Export to BTU Calculator (shows Flat 1, Flat 2 prefixes)
-                  </li>
-                  <li>
-                    Each flat gets separate VRF equipment and chain-connected refrigerant lines
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-success">{t("measurement.legend.tipsTab.multiFlatHeading")}</h6>
+                <HtmlList items={t("measurement.legend.tipsTab.multiFlatItems", { returnObjects: true })} />
 
-                <h6 className="mb-2 mt-3 text-success">🔍 Common Issues:</h6>
-                <ul className="list-disc ml-4 space-y-1 fs-6">
-                  <li>
-                    <strong>Rooms not extracted:</strong> Check PDF/JPG is readable,
-                    try higher quality
-                  </li>
-                  <li>
-                    <strong>Duplicate rooms:</strong> Edit room names to
-                    distinguish between flats
-                  </li>
-                  <li>
-                    <strong>Wrong flat assignment:</strong> Rename rooms with
-                    sequential numbers
-                  </li>
-                  <li>
-                    <strong>No products matched:</strong> Check room area and
-                    BTU calculations
-                  </li>
-                </ul>
+                <h6 className="mb-2 mt-3 text-success">{t("measurement.legend.tipsTab.issuesHeading")}</h6>
+                <HtmlList items={t("measurement.legend.tipsTab.issuesItems", { returnObjects: true })} />
               </div>
             </Tab>
           </Tabs>
@@ -589,9 +266,9 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
           <Button
             className="btn btn-outline-primary btn-sm"
             onClick={handlePrint}
-            title="Print / Download instructions"
+            title={t("measurement.legend.footer.printBtnTitle")}
           >
-            🖨️ Print / Save
+            {t("measurement.legend.footer.printBtn")}
           </Button>
           <Button
             className="go-to-btn btn-text w-auto"
@@ -599,7 +276,7 @@ import "./ModalLegend_new.css";const ModalLegend = () => {
             size="sm"
             onClick={() => setShow(false)}
           >
-            Close
+            {t("measurement.legend.footer.closeBtn")}
           </Button>
         </Modal.Footer>
       </Modal>

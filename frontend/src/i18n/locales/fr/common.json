@@ -359,6 +359,232 @@
       "title": "Symboles architecturaux importants",
       "close": "Fermer"
     },
+    "legend": {
+      "trigger": "📋 Légende / Instructions",
+      "title": "📋 Système de Mesure : Mode d'Emploi",
+      "searchPlaceholder": "🔍 Rechercher des instructions…",
+      "clearSearchTitle": "Effacer la recherche",
+      "printBtnTitle": "Imprimer / Télécharger les instructions pour référence",
+      "printBtn": "🖨️ Imprimer",
+      "printDocTitle": "AC-Commerce : Instructions du Système de Mesure",
+      "printHeading": "📋 AC-Commerce : Instructions du Système de Mesure",
+      "printGenerated": "Généré le : {{date}}",
+      "printFooter": "AC-Commerce — Solutions HVAC Professionnelles — www.ac-commerce.com",
+      "tabs": {
+        "buttons": "🔘 Légende des Boutons",
+        "annotator": "🖼️ Concepteur PDF/JPG",
+        "btu": "📐 Calculatrice BTU",
+        "tips": "💡 Astuces et Bonnes Pratiques"
+      },
+      "buttonsTab": {
+        "designerHeading": "🖼️ Boutons du Concepteur PDF/JPG",
+        "designerItems": [
+          "<strong>📤 Téléverser PDF/JPG :</strong> Sélectionnez et téléversez un fichier PDF/JPG de plan (accepte uniquement .pdf/.jpg)",
+          "<strong>↶ Gauche / ↷ Droite :</strong> Fait pivoter le plan PDF/JPG dans le sens antihoraire ou horaire par pas de 90°",
+          "<strong>Réinitialiser (°) :</strong> Apparaît uniquement lorsque le PDF/JPG est pivoté — revient à l'orientation d'origine de 0°",
+          "<strong>🔍 + / 🔍 − :</strong> Zoome ou dézoome sur le plan PDF/JPG (plage : 100 %–400 %)",
+          "<strong>100 % (zoom%) :</strong> Affiche le niveau de zoom actuel ; cliquez pour revenir à 100 %",
+          "<strong>Champ d'étiquette de notation :</strong> Champ de texte au-dessus du plan où vous saisissez l'étiquette du symbole <strong>avant</strong> de cliquer sur le plan. L'étiquette est réutilisée à chaque clic suivant — modifiez-la à tout moment pour changer le nom du prochain placement.<ul class=\"mt-1\"><li><strong>AC à étage unique :</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li><li><strong>AC multi-étages (recommandé pour les fichiers PDF/JPG de plusieurs appartements) :</strong> <em>ac-N.M</em> où <em>N</em> = numéro d'étage et <em>M</em> = index de l'unité au sein de cet étage. Exemple pour deux étages avec trois unités intérieures chacun : <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> à l'étage 1 et <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> à l'étage 2. L'outil de Placement Automatique HVAC regroupe l'équipement par étage grâce à ce préfixe.</li><li><strong>Condenseur :</strong> <em>condenser</em> (étage unique) ou <em>condenser-1</em>, <em>condenser-2</em> (un par étage dans les plans multi-étages).</li><li>Si le champ est vide, cliquer sur le plan ne place rien.</li></ul>",
+          "<strong>Clic sur le plan :</strong> Place un symbole AC / condenseur à cette position en utilisant le texte actuel du champ <em>Étiquette de notation</em>. Si le champ est vide, rien n'est placé.",
+          "<strong>🏢 Flux multi-étages :</strong> Pour les fichiers PDF/JPG contenant deux appartements ou plus sur un même plan, utilisez toujours le format <em>ac-N.M</em> afin que la Calculatrice BTU, le placement automatique de la Vue Ingénieur et les étiquettes de thermostat (T1.1, T1.2 …) puissent séparer l'équipement par étage. Utilisez l'étiquette <em>condenser-N</em> correspondante par étage pour que chaque étage ait sa propre unité extérieure.",
+          "<strong>📌 Mode placement (mobile uniquement) :</strong> Apparaît sous la barre d'outils sur petits écrans lorsqu'un PDF/JPG est chargé. Saisissez l'étiquette dans le champ mobile, puis appuyez sur <em>📌 Mode placement</em> pour l'activer (devient bleu et affiche <em>« ✅ Toucher pour placer »</em>) ; ce n'est que lorsqu'il est actif que vous pouvez toucher le plan pour placer des symboles. Cela évite les placements accidentels lors du défilement sur écrans tactiles.",
+          "<strong>Faire glisser le symbole de climatiseur :</strong> Cliquez et faites glisser (bureau) ou touchez et faites glisser (mobile) pour repositionner un symbole AC",
+          "<strong>Cliquer sur le symbole de climatiseur (bureau) :</strong> Fait pivoter le symbole de climatiseur de 90° sur place",
+          "<strong>📌 Panneau des notations placées :</strong> Une liste de chaque étiquette placée apparaît sous le plan sous forme de puces en forme de pilule (ex. <em>ac-1 ✏️ 🗑️</em>). L'en-tête affiche le nombre total — <em>« 📌 Notations placées (n) »</em>. Utilisez les boutons de la puce pour modifier ou supprimer une notation sans avoir à la chercher sur le plan.",
+          "<strong>✏️ Modifier l'étiquette :</strong> Cliquez sur l'icône crayon de la puce de notation (fonctionne sur bureau et mobile) <em>ou</em> double-cliquez directement sur l'étiquette sur le plan — un modal s'ouvre pour la renommer.",
+          "<strong>🗑️ Supprimer le symbole de climatiseur :</strong> Cliquez sur l'icône corbeille de la puce de notation dans le panneau <em>Notations placées</em> (fonctionne sur bureau et mobile). Sur bureau, vous pouvez aussi faire un clic droit sur le symbole de climatiseur sur le plan.",
+          "<strong>Exporter vers BTU (n pièces) :</strong> Envoie toutes les pièces extraites vers la Calculatrice BTU ; désactivé lorsqu'aucune pièce n'est disponible",
+          "<strong>Enregistrer :</strong> Enregistre le PDF/JPG avec tous les symboles AC sur le serveur (affiche « Enregistrement... » pendant l'opération)",
+          "<strong>Effacer :</strong> Supprime tous les symboles AC, réinitialise le plan et efface toutes les données de session"
+        ],
+        "roomTableHeading": "📋 Contrôles du Tableau des Pièces",
+        "roomTableItems": [
+          "<strong>Filtrer par type de pièce :</strong> Champ de texte pour filtrer le tableau des pièces par nom",
+          "<strong>Menu de tri :</strong> Trie le tableau par Type de Pièce, Largeur, Hauteur, Surface (pi²) ou Surface (m²)",
+          "<strong>Tri ASC/DESC :</strong> Bascule le sens de tri de la colonne sélectionnée",
+          "<strong>Icône Excel :</strong> Exporte le tableau des pièces filtré actuel sous forme de fichier .xlsx stylisé",
+          "<strong>+ Ajouter une Pièce :</strong> Ajoute manuellement une nouvelle ligne de pièce au tableau pour un fichier donné",
+          "<strong>✏️ Modifier / ✔ Enregistrer / ✖ Annuler :</strong> Contrôles d'édition en ligne pour chaque ligne de pièce",
+          "<strong>↑ Monter / ↓ Descendre :</strong> Réorganise les lignes de pièces dans le tableau",
+          "<strong>🗑️ Supprimer la ligne :</strong> Retire une entrée de pièce du tableau"
+        ],
+        "btuHeading": "📐 Boutons de la Calculatrice BTU",
+        "btuItems": [
+          "<strong>Avec Téléversement PDF/JPG + Notations :</strong> Ouvre le flux complet de Mesure avec téléversement PDF/JPG, détection OCR des pièces, édition du tableau des pièces et outils d'annotation pour placer les étiquettes AC et condenseur avant d'exporter les pièces vers la Calculatrice BTU",
+          "<strong>Calculatrice BTU Manuelle (Sans PDF/JPG + Notations) :</strong> Ouvre le mode Calculatrice BTU seul sans le Concepteur PDF/JPG, afin que les pièces soient saisies manuellement et que les calculs puissent être effectués sans téléverser de plan",
+          "<strong>Calculer BTU :</strong> Exécute le calcul BTU VRF pour toutes les pièces, enregistre les résultats dans le store et navigue vers la page Recommandations",
+          "<strong>Effacer :</strong> Réinitialise toutes les pièces, paramètres et options environnementales aux valeurs par défaut"
+        ],
+        "paramWarningHeading": "⚠️ Important : Sélection des Paramètres",
+        "paramWarningText": "<strong>Une seule case doit être cochée</strong> pour le paramètre requis, comme <em>Emplacement de l'Unité Extérieure</em>, <em>État de l'Isolation</em>, etc.",
+        "interactionHeading": "🎯 Notes d'Interaction",
+        "interactionItems": [
+          "<strong>Étage unique :</strong> Flux standard — téléverser le PDF/JPG, noter les emplacements AC, exporter les pièces, calculer le BTU",
+          "<strong>Multi-étages :</strong> Étiquetez les unités AC avec des numéros spécifiques à l'étage (ac-1.1, ac-2.1), renommez les pièces avec des numéros d'étage, le système détecte automatiquement les unités séparées",
+          "<strong>Système VRF :</strong> Tous les calculs utilisent la technologie VRF avec des connexions de réfrigérant en topologie de chaîne",
+          "<strong>Mobile :</strong> Pincez avec deux doigts sur le plan pour zoomer/dézoomer sur petits écrans"
+        ]
+      },
+      "annotatorTab": {
+        "step1Heading": "📌 Étape 1 : Téléverser un PDF/JPG",
+        "step1Items": [
+          "Pris en charge : fichiers PDF/JPG uniquement (.pdf/.jpg)",
+          "Les fichiers PDF/JPG doivent être des plans de logements ou d'appartements",
+          "Fonctionne mieux avec des plans clairs montrant les étiquettes et dimensions des pièces",
+          "Lors du téléversement, le système extrait et classe automatiquement les pièces via OCR"
+        ],
+        "step2Heading": "🔄 Étape 2 : Faire pivoter le plan PDF/JPG (si nécessaire)",
+        "step2Items": [
+          "<strong>↶ Gauche :</strong> Fait pivoter le PDF/JPG de 90° dans le sens antihoraire",
+          "<strong>↷ Droite :</strong> Fait pivoter le PDF/JPG de 90° dans le sens horaire",
+          "<strong>Réinitialiser (°) :</strong> Apparaît lorsque le PDF/JPG n'est pas à 0° — cliquez pour restaurer l'orientation d'origine"
+        ],
+        "step3Heading": "🔍 Étape 3 : Zoomer sur le plan (si nécessaire)",
+        "step3Items": [
+          "<strong>🔍 + :</strong> Zoome jusqu'à 400 %",
+          "<strong>🔍 − :</strong> Dézoome (minimum 100 %)",
+          "<strong>Zoom % :</strong> Affiche le zoom actuel ; cliquez pour revenir à 100 %",
+          "<strong>Pincement mobile :</strong> Pincez avec deux doigts sur le plan pour zoomer sur petits écrans"
+        ],
+        "step4Heading": "🎯 Étape 4 : Marquer les Emplacements des Unités AC et du Condenseur",
+        "step4Items": [
+          "<strong>Saisissez d'abord l'étiquette</strong> dans le champ <em>Étiquette de notation</em> au-dessus du plan (bureau) ou dans la barre de notation mobile sous la barre d'outils (mobile). Le champ remplace l'ancienne invite contextuelle — aucun modal n'apparaîtra lors du clic.",
+          "<strong>Puis cliquez sur le plan</strong> à l'endroit où l'unité AC ou le condenseur doit être placé. Un symbole est placé immédiatement en utilisant l'étiquette actuelle. L'étiquette reste dans le champ afin que vous puissiez continuer à cliquer pour placer d'autres éléments du même type — changez simplement le texte lorsque vous avez besoin d'une nouvelle étiquette.",
+          "<strong>📌 Mode placement (mobile uniquement) :</strong> Sur petits écrans, une barre de bascule <em>« 📌 Mode placement »</em> apparaît sous la barre d'outils après le chargement d'un PDF/JPG. Saisissez l'étiquette, appuyez sur le bouton pour l'activer (devient bleu / affiche <em>« ✅ Toucher pour placer »</em>), puis touchez le plan. Appuyez à nouveau sur le bouton pour le désactiver et revenir au mode défilement uniquement.",
+          "<strong>Étiquette AC étage unique :</strong> Saisissez par ex. <em>ac-1</em>, <em>ac-2</em>",
+          "<strong>Étiquette AC multi-étages :</strong> Saisissez par ex. <em>ac-1.1</em>, <em>ac-1.2</em> pour l'étage 1 ; <em>ac-2.1</em>, <em>ac-2.2</em> pour l'étage 2",
+          "<strong>Étiquette condenseur étage unique :</strong> Saisissez par ex. <em>condenser</em> ou <em>condenser-1</em>",
+          "<strong>Étiquette condenseur multi-étages :</strong> Saisissez <em>condenser-1</em> pour l'étage 1, <em>condenser-2</em> pour l'étage 2, etc.",
+          "Recommandé : placez les symboles AC au-dessus de chaque porte de pièce ; placez le symbole du condenseur près de l'entrée de l'étage ou sur le balcon/toit.",
+          "Astuce : pour passer du placement d'unités AC au placement d'un condenseur, videz simplement le champ et saisissez <em>condenser</em> — le prochain clic sur le plan créera le symbole du condenseur."
+        ],
+        "step5Heading": "🔧 Étape 5 : Modifier les Formes",
+        "step5Items": [
+          "<strong>🔄 Faire pivoter le symbole du climatiseur :</strong> Cliquez sur un symbole de climatiseur existant pour le faire pivoter de 90°",
+          "<strong>📌 Faire glisser le symbole du climatiseur :</strong> Cliquez et faites glisser (bureau) ou touchez et faites glisser (mobile) pour repositionner",
+          "<strong>📌 Panneau des notations placées :</strong> Sous le plan, vous verrez une liste de puces <em>« 📌 Notations placées (n) »</em> contenant chaque étiquette que vous avez placée (ex. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Chaque puce dispose d'un bouton d'édition ✏️ et d'un bouton de suppression 🗑️ — c'est la méthode recommandée pour gérer les notations, surtout sur mobile.",
+          "<strong>✏️ Modifier l'étiquette de notation :</strong> Cliquez sur l'icône crayon d'une puce dans le panneau, ou double-cliquez directement sur l'étiquette sur le plan. Un modal s'ouvre pour renommer la notation.",
+          "<strong>🗑️ Supprimer la notation :</strong> Cliquez sur l'icône corbeille de la puce dans le panneau <em>Notations placées</em>. Sur bureau, vous pouvez aussi faire un clic droit sur le symbole de climatiseur sur le plan comme raccourci."
+        ],
+        "step6Heading": "✅ Étape 6 : Vérifier et Modifier les Données des Pièces",
+        "step6Items": [
+          "Le tableau de données des pièces sous le plan est rempli automatiquement par OCR lors du téléversement",
+          "Utilisez le champ <strong>Filtrer</strong> pour trouver des pièces par type",
+          "Utilisez le menu <strong>Trier</strong> et le bouton ASC/DESC pour réorganiser le tableau",
+          "Cliquez sur <strong>✏️ Modifier</strong> sur une ligne pour renommer une pièce ou changer sa surface ; cliquez sur ✔ pour enregistrer ou sur ✖ pour annuler",
+          "Utilisez <strong>↑ / ↓</strong> pour réorganiser les lignes",
+          "Utilisez <strong>🗑️</strong> pour supprimer les pièces indésirables ou en double",
+          "Cliquez sur <strong>+ Ajouter une Pièce</strong> pour insérer manuellement une nouvelle entrée de pièce",
+          "Cliquez sur l'<strong>icône Excel</strong> pour télécharger le tableau des pièces au format .xlsx",
+          "Pour le multi-étages : renommez les pièces pour distinguer les étages (ex., « Cuisine 1 », « Cuisine 2 »)"
+        ],
+        "step7Heading": "🚀 Étape 7 : Exporter vers la Calculatrice BTU",
+        "step7Items": [
+          "Cliquez sur <strong>« Exporter vers BTU (n pièces) »</strong> pour envoyer toutes les pièces filtrées vers la Calculatrice BTU ; le bouton est désactivé lorsqu'aucune pièce valide n'existe",
+          "Les propriétés multi-étages sont détectées et préfixées automatiquement (Étage 1, Étage 2)",
+          "La page défilera automatiquement jusqu'à la Calculatrice BTU VRF"
+        ],
+        "step8Heading": "💾 Optionnel : Enregistrer et Effacer",
+        "step8Items": [
+          "Cliquez sur <strong>« Enregistrer »</strong> pour enregistrer le PDF/JPG annoté et les données des pièces sur le serveur (le bouton affiche « Enregistrement... » pendant l'opération)",
+          "Cliquez sur <strong>« Effacer »</strong> pour supprimer tous les symboles AC, réinitialiser le plan et effacer toutes les données de session enregistrées"
+        ]
+      },
+      "btuTab": {
+        "step1Heading": "📊 Étape 1 : Vérifier les Pièces",
+        "step1Items": [
+          "Les pièces sont automatiquement renseignées lorsque vous exportez depuis le <strong>Concepteur PDF/JPG</strong>",
+          "Chaque pièce affiche son nom et sa surface (m² ou pi²)",
+          "Les pièces multi-étages arrivent avec un préfixe <em>« Étage N : »</em> (ex. « Étage 1 : Cuisine »)",
+          "Les étiquettes de condenseur du Concepteur PDF/JPG sont filtrées automatiquement — seules les pièces habitables sont conservées",
+          "<strong>Ajouter une Pièce :</strong> En mode manuel, ajoute une nouvelle ligne de pièce afin que vous puissiez saisir un autre type de pièce et sa surface",
+          "<strong>Corbeille :</strong> Supprime la ligne de pièce manuelle sélectionnée ; la dernière ligne restante est conservée comme pièce vierge/par défaut afin que le formulaire ne soit jamais vide"
+        ],
+        "step2Heading": "⚙️ Étape 2 : Définir les Paramètres de Calcul",
+        "step2Items": [
+          "<strong>Système de Mesure :</strong> Mètres (m²) ou Pieds (pi²)",
+          "<strong>Utiliser les Pièces du PDF/JPG :</strong> Utilise la liste des pièces exportée depuis le Concepteur PDF/JPG ; conserve les noms et surfaces détectés par OCR et est utilisé par défaut lorsque des données de pièces PDF/JPG existent",
+          "<strong>Saisie Manuelle des Pièces :</strong> Bascule la calculatrice en mode manuel afin que vous puissiez construire vous-même la liste des pièces sans pièces importées du PDF/JPG",
+          "<strong>Hauteur sous Plafond (m) :</strong> Par défaut 2,5 m",
+          "<strong>Nombre de Personnes :</strong> Niveau d'occupation (chaque personne ajoute ~600 BTU)",
+          "<strong>Propriété multi-étages/multi-unités :</strong> Cochez cette case pour attribuer à chaque étage son propre condenseur séparé. Coché automatiquement lorsque le multi-étages est détecté à partir des préfixes de nom de pièce ou des étiquettes de symbole AC"
+        ],
+        "step3Heading": "🌡️ Étape 3 : Sélectionner les Conditions Environnementales",
+        "step3Items": [
+          "<strong>Emplacement de l'Unité Extérieure :</strong> Toit, Supports Muraux ou Sol Dur",
+          "<strong>Type de Mur :</strong> Parement de Brique, Double Brique ou Bardage en Mousse",
+          "<strong>Isolation :</strong> Faible, Moyenne ou Bonne",
+          "<strong>Exposition au Soleil :</strong> Plein Soleil, Moyenne ou Fortement Ombragée",
+          "<strong>Climat :</strong> Europe Moyenne, Moyen-Orient Chaud ou Alaska Froid",
+          "<strong>Utilisation de la Pièce et Appareils :</strong> Four, Salle Serveur (ajoute une charge thermique), Salle de Sport, Home Cinéma etc., (voir les détails du calcul BTU ci-dessous)",
+          "<strong>Type de Fenêtre :</strong> Simple Vitrage, Double Vitrage, Triple Vitrage ou Persienne",
+          "<strong>Type de Toit :</strong> Plat, Incliné ou à Pignon",
+          "<strong>Sol :</strong> Marbre, Bois, Béton ou Moquette",
+          "<strong>Orientation de l'Appartement :</strong> Nord, Est, Sud, Ouest ou Salon. Utilisez <em>Salon</em> lorsque la pièce à vivre principale a l'exposition solaire dominante et que vous voulez que la calculatrice pondère davantage cette zone.",
+          "<strong>Unité de Sortie :</strong> BTU, Watt ou kW"
+        ],
+        "step4Heading": "🧮 Étape 4 : Calculer et Naviguer",
+        "step4Items": [
+          "Cliquez sur <strong>« Calculer BTU »</strong> — calcule le BTU pour chaque pièce, associe les produits VRF, enregistre les résultats dans le store et navigue vers la page <strong>Recommandations</strong>",
+          "Pour le multi-étages : dimensionne un condenseur VRF séparé pour chaque étage",
+          "Cliquez sur <strong>« Effacer »</strong> pour réinitialiser toutes les pièces, paramètres et options environnementales aux valeurs par défaut"
+        ],
+        "multiFlatHeading": "⚡ Détection Automatique Multi-Étages",
+        "multiFlatItems": [
+          "Le multi-étages est détecté automatiquement à partir des <em>préfixes de nom de pièce</em> (« Étage 1 : Cuisine », « Étage 2 : Cuisine ») ou des <em>étiquettes de symbole AC</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1)",
+          "Des noms de pièce en double seuls <strong>n'indiquent pas</strong> le multi-étages — utilisez les étiquettes explicites ci-dessus",
+          "Chaque étage bénéficie d'un <strong>dimensionnement de condenseur VRF séparé</strong> avec une topologie en chaîne",
+          "Les lignes de réfrigérant se connectent en chaîne : Condenseur → AC1 → AC2 → ... par étage"
+        ],
+        "understandingHeading": "📖 Comprendre les Calculs BTU",
+        "understandingIntro": "Le BTU (British Thermal Unit) est une mesure de la chaleur. Cette calculatrice fournit une estimation basée sur des facteurs communs :",
+        "understandingItems": [
+          "<strong>Calcul de Base :</strong> 600 BTU/m² utilisé comme règle de base.",
+          "<strong>Emplacement de l'Unité Extérieure (Condenseur) :</strong> Emplacement souhaité de l'unité extérieure.",
+          "<strong>Nombre de Personnes :</strong> Chaque personne ajoute ~600 BTU.",
+          "<strong>Type de Mur :</strong> Les matériaux et l'épaisseur affectent le BTU.",
+          "<strong>Qualité de l'Isolation :</strong> Une mauvaise isolation augmente les besoins en BTU.",
+          "<strong>Exposition au Soleil :</strong> Plus de fenêtres ou des pièces orientées sud/ouest nécessitent plus de refroidissement.",
+          "<strong>Type de Fenêtre :</strong> Les fenêtres à simple vitrage laissent passer plus de chaleur que le triple vitrage.",
+          "<strong>Orientation de l'Appartement :</strong> Les orientations sud et ouest reçoivent plus de soleil.",
+          "<strong>Type de Sol :</strong> Des matériaux comme le marbre ou le carrelage peuvent retenir ou refléter la chaleur différemment.",
+          "<strong>Type de Toit :</strong> Les toits plats peuvent augmenter la charge thermique par rapport aux toits inclinés ou isolés.",
+          "<strong>Appareils :</strong> Les appareils de cuisine et électroniques contribuent à une charge thermique supplémentaire.",
+          "<strong>Zone Climatique :</strong> Les besoins en BTU varient selon la région de température et d'humidité."
+        ],
+        "importantNote": "<strong>Important :</strong> Il s'agit d'une estimation générale. Consultez un expert HVAC agréé pour un dimensionnement précis du système."
+      },
+      "tipsTab": {
+        "accurateHeading": "✅ Pour des Résultats Précis :",
+        "accurateItems": [
+          "Téléversez des fichiers PDF/JPG de plans clairs et haute résolution",
+          "Marquez tous les emplacements des unités AC sur le plan",
+          "Pour le multi-étages : distinguez clairement les pièces par unité (renommez-les avec des numéros)",
+          "Saisissez des hauteurs de plafond et tailles de pièces précises",
+          "Sélectionnez des conditions climatiques et environnementales précises"
+        ],
+        "multiFlatHeading": "🎯 Flux de Travail Multi-Étages (VRF) :",
+        "multiFlatItems": [
+          "Téléversez le PDF/JPG avec les deux étages visibles",
+          "Marquez les unités AC avec des étiquettes comme « ac-1 », « ac-2 » (le système détecte automatiquement les étages séparés)",
+          "Renommez les pièces : « Cuisine 1 »/« Cuisine 2 », « Salon 1 »/« Salon 2 »",
+          "Exportez vers la Calculatrice BTU (affiche les préfixes Étage 1, Étage 2)",
+          "Chaque étage reçoit un équipement VRF séparé et des lignes de réfrigérant connectées en chaîne"
+        ],
+        "issuesHeading": "🔍 Problèmes Courants :",
+        "issuesItems": [
+          "<strong>Pièces non extraites :</strong> Vérifiez que le PDF/JPG est lisible, essayez une meilleure qualité",
+          "<strong>Pièces en double :</strong> Modifiez les noms des pièces pour distinguer les étages",
+          "<strong>Attribution d'étage incorrecte :</strong> Renommez les pièces avec des numéros séquentiels",
+          "<strong>Aucun produit correspondant :</strong> Vérifiez la surface de la pièce et les calculs BTU"
+        ]
+      },
+      "footer": {
+        "printBtn": "🖨️ Imprimer / Enregistrer",
+        "printBtnTitle": "Imprimer / Télécharger les instructions",
+        "closeBtn": "Fermer"
+      }
+    },
     "btuCalculator": {
       "prevSummary": {
         "title": "Calcul précédent",

@@ -359,6 +359,232 @@
       "title": "Wichtige architektonische Symbole",
       "close": "Schließen"
     },
+    "legend": {
+      "trigger": "📋 Legende / Anleitung",
+      "title": "📋 Messsystem: Bedienungsanleitung",
+      "searchPlaceholder": "🔍 Anleitungen durchsuchen…",
+      "clearSearchTitle": "Suche löschen",
+      "printBtnTitle": "Anleitung drucken / als Referenz herunterladen",
+      "printBtn": "🖨️ Drucken",
+      "printDocTitle": "AC-Commerce: Anleitung zum Messsystem",
+      "printHeading": "📋 AC-Commerce: Anleitung zum Messsystem",
+      "printGenerated": "Erstellt: {{date}}",
+      "printFooter": "AC-Commerce — Professionelle HVAC-Lösungen — www.ac-commerce.com",
+      "tabs": {
+        "buttons": "🔘 Schaltflächen-Legende",
+        "annotator": "🖼️ PDF/JPG-Designer",
+        "btu": "📐 BTU-Rechner",
+        "tips": "💡 Tipps & Best Practices"
+      },
+      "buttonsTab": {
+        "designerHeading": "🖼️ Schaltflächen des PDF/JPG-Designers",
+        "designerItems": [
+          "<strong>📤 PDF/JPG hochladen:</strong> Wählen und laden Sie eine Grundriss-PDF/JPG-Datei hoch (nur .pdf/.jpg)",
+          "<strong>↶ Links / ↷ Rechts:</strong> Dreht die PDF/JPG-Zeichnung gegen den oder im Uhrzeigersinn in 90°-Schritten",
+          "<strong>Zurücksetzen (°):</strong> Erscheint nur, wenn das PDF/JPG gedreht ist — setzt auf die ursprüngliche 0°-Ausrichtung zurück",
+          "<strong>🔍 + / 🔍 −:</strong> Zoomt auf der PDF/JPG-Zeichenfläche hinein oder heraus (Bereich: 100 %–400 %)",
+          "<strong>100 % (Zoom%):</strong> Zeigt die aktuelle Zoomstufe; Klick setzt den Zoom auf 100 % zurück",
+          "<strong>Beschriftungsfeld:</strong> Textfeld über der Zeichenfläche, in dem Sie die Symbolbeschriftung eingeben, <strong>bevor</strong> Sie auf die Zeichenfläche klicken. Die Beschriftung wird für jeden weiteren Klick wiederverwendet — ändern Sie sie jederzeit, um die nächste Platzierung anders zu benennen.<ul class=\"mt-1\"><li><strong>Klimaanlage Einzelwohnung:</strong> <em>ac-1</em>, <em>ac-2</em>, <em>ac-3</em> …</li><li><strong>Klimaanlage Mehrwohnungen (empfohlen für PDF/JPG-Dateien mit mehreren Wohnungen):</strong> <em>ac-N.M</em>, wobei <em>N</em> = Wohnungsnummer und <em>M</em> = Geräteindex innerhalb dieser Wohnung. Beispiel für zwei Wohnungen mit je drei Innengeräten: <em>ac-1.1</em>, <em>ac-1.2</em>, <em>ac-1.3</em> in Wohnung 1 und <em>ac-2.1</em>, <em>ac-2.2</em>, <em>ac-2.3</em> in Wohnung 2. Das Auto-Platzierungswerkzeug gruppiert die Geräte anhand dieses Präfixes pro Wohnung.</li><li><strong>Außeneinheit:</strong> <em>condenser</em> (Einzelwohnung) oder <em>condenser-1</em>, <em>condenser-2</em> (eine pro Wohnung bei Mehrwohnungszeichnungen).</li><li>Ist das Feld leer, wird beim Klick auf die Zeichenfläche nichts platziert.</li></ul>",
+          "<strong>Klick auf die Zeichenfläche:</strong> Platziert an dieser Position ein Klimaanlagen-/Außeneinheit-Symbol mit dem aktuellen Text im Feld <em>Beschriftung</em>. Ist das Feld leer, wird nichts platziert.",
+          "<strong>🏢 Mehrwohnungs-Workflow:</strong> Verwenden Sie bei PDF/JPG-Dateien mit zwei oder mehr Wohnungen auf einer Zeichnung immer das Format <em>ac-N.M</em>, damit der BTU-Rechner, die automatische Platzierung in der Ingenieuransicht und die Thermostat-Beschriftungen (T1.1, T1.2 …) die Geräte pro Wohnung trennen können. Verwenden Sie die passende <em>condenser-N</em>-Beschriftung pro Wohnung, damit jede Wohnung ihre eigene Außeneinheit erhält.",
+          "<strong>📌 Platzierungsmodus (nur mobil):</strong> Erscheint auf kleinen Bildschirmen unterhalb der Symbolleiste, wenn ein PDF/JPG geladen ist. Geben Sie die Beschriftung im mobilen Eingabefeld ein und tippen Sie auf <em>📌 Platzierungsmodus</em>, um ihn zu aktivieren (wird blau und zeigt <em>„✅ Zum Platzieren tippen“</em>); nur bei aktivem Modus können Sie durch Tippen auf die Zeichenfläche Symbole platzieren. Dies verhindert versehentliche Platzierungen beim Scrollen auf Touchscreens.",
+          "<strong>Klimaanlagen-Symbol ziehen:</strong> Klicken und ziehen (Desktop) oder berühren und ziehen (mobil), um ein Klimaanlagen-Symbol neu zu positionieren",
+          "<strong>Klick auf Klimaanlagen-Symbol (Desktop):</strong> Dreht das Klimaanlagen-Symbol an Ort und Stelle um 90°",
+          "<strong>📌 Panel platzierter Beschriftungen:</strong> Unterhalb der Zeichenfläche erscheint eine Liste jeder platzierten Beschriftung als pillenförmige Chips (z. B. <em>ac-1 ✏️ 🗑️</em>). Die Überschrift zeigt die Gesamtanzahl — <em>„📌 Platzierte Beschriftungen (n)“</em>. Verwenden Sie die Chip-Schaltflächen, um jede Beschriftung zu bearbeiten oder zu löschen, ohne sie auf der Zeichenfläche suchen zu müssen.",
+          "<strong>✏️ Beschriftung bearbeiten:</strong> Klicken Sie auf das Stift-Symbol am Beschriftungs-Chip (funktioniert auf Desktop und mobil) <em>oder</em> doppelklicken Sie direkt auf die Beschriftung in der Zeichenfläche — ein Modal zum Umbenennen öffnet sich.",
+          "<strong>🗑️ Klimaanlagen-Symbol löschen:</strong> Klicken Sie auf das Papierkorb-Symbol am Beschriftungs-Chip im Panel <em>Platzierte Beschriftungen</em> (funktioniert auf Desktop und mobil). Auf Desktop können Sie auch mit der rechten Maustaste auf das Klimaanlagen-Symbol in der Zeichenfläche klicken.",
+          "<strong>Export zu BTU (n Räume):</strong> Sendet alle extrahierten Räume an den BTU-Rechner; deaktiviert, wenn keine Räume verfügbar sind",
+          "<strong>Speichern:</strong> Speichert das PDF/JPG mit allen Klimaanlagen-Symbolen auf dem Server (zeigt während des Vorgangs „Wird gespeichert...“ an)",
+          "<strong>Löschen:</strong> Entfernt alle Klimaanlagen-Symbole, setzt die Zeichenfläche zurück und löscht alle Sitzungsdaten"
+        ],
+        "roomTableHeading": "📋 Steuerelemente der Raumtabelle",
+        "roomTableItems": [
+          "<strong>Nach Raumtyp filtern:</strong> Texteingabe zum Filtern der Raumtabelle nach Raumname",
+          "<strong>Sortier-Dropdown:</strong> Sortiert die Tabelle nach Raumtyp, Breite, Höhe, Fläche (sqft) oder Fläche (sqm)",
+          "<strong>Sortierung AUF/AB:</strong> Wechselt die Sortierrichtung der ausgewählten Spalte",
+          "<strong>Excel-Symbol:</strong> Exportiert die aktuell gefilterte Raumtabelle als formatierte .xlsx-Datei",
+          "<strong>+ Raum hinzufügen:</strong> Fügt der Tabelle einer bestimmten Datei manuell eine neue Raumzeile hinzu",
+          "<strong>✏️ Bearbeiten / ✔ Speichern / ✖ Abbrechen:</strong> Inline-Bearbeitungssteuerung für jede Raumzeile",
+          "<strong>↑ Nach oben / ↓ Nach unten:</strong> Ordnet Raumzeilen innerhalb der Tabelle neu an",
+          "<strong>🗑️ Zeile löschen:</strong> Entfernt einen Raumeintrag aus der Tabelle"
+        ],
+        "btuHeading": "📐 Schaltflächen des BTU-Rechners",
+        "btuItems": [
+          "<strong>Mit PDF/JPG-Upload + Beschriftungen:</strong> Öffnet den vollständigen Messworkflow mit PDF/JPG-Upload, OCR-Raumerkennung, Bearbeitung der Raumtabelle und Beschriftungswerkzeugen, um Klimaanlagen- und Außeneinheit-Beschriftungen zu platzieren, bevor Räume an den BTU-Rechner exportiert werden",
+          "<strong>Manueller BTU-Rechner (ohne PDF/JPG + Beschriftungen):</strong> Öffnet nur den BTU-Rechner-Modus ohne den PDF/JPG-Designer, sodass Räume manuell eingegeben und Berechnungen ohne Hochladen eines Grundrisses durchgeführt werden können",
+          "<strong>BTU berechnen:</strong> Führt die VRF-BTU-Berechnung für alle Räume aus, speichert die Ergebnisse im Store und navigiert zur Empfehlungsseite",
+          "<strong>Löschen:</strong> Setzt alle Räume, Parameter und Umgebungsoptionen auf die Standardwerte zurück"
+        ],
+        "paramWarningHeading": "⚠️ Wichtig: Parameterauswahl",
+        "paramWarningText": "<strong>Es sollte nur ein Kontrollkästchen</strong> des benötigten Parameters angekreuzt werden, z. B. <em>Standort der Außeneinheit</em>, <em>Isolationszustand</em> usw.",
+        "interactionHeading": "🎯 Hinweise zur Interaktion",
+        "interactionItems": [
+          "<strong>Einzelwohnung:</strong> Standard-Workflow — PDF/JPG hochladen, Klimaanlagen-Standorte markieren, Räume exportieren, BTU berechnen",
+          "<strong>Mehrwohnungen:</strong> Klimaanlagen mit wohnungsspezifischen Nummern beschriften (ac-1.1, ac-2.1), Räume mit Wohnungsnummern umbenennen, System erkennt separate Einheiten automatisch",
+          "<strong>VRF-System:</strong> Alle Berechnungen verwenden VRF-Technologie mit Kältemittelverbindungen in Kettentopologie",
+          "<strong>Mobil:</strong> Zwei Finger auf der Zeichenfläche zusammenziehen, um auf kleinen Bildschirmen zu zoomen"
+        ]
+      },
+      "annotatorTab": {
+        "step1Heading": "📌 Schritt 1: PDF/JPG Hochladen",
+        "step1Items": [
+          "Unterstützt: nur PDF/JPG-Dateien (.pdf/.jpg)",
+          "PDF/JPG-Dateien sollten Grundrisszeichnungen von Wohnungen oder Apartments sein",
+          "Funktioniert am besten mit klaren Grundrissen, die Raumbeschriftungen und Abmessungen zeigen",
+          "Beim Hochladen extrahiert und klassifiziert das System die Räume automatisch per OCR"
+        ],
+        "step2Heading": "🔄 Schritt 2: PDF/JPG-Zeichnung Drehen (falls nötig)",
+        "step2Items": [
+          "<strong>↶ Links:</strong> Dreht das PDF/JPG um 90° gegen den Uhrzeigersinn",
+          "<strong>↷ Rechts:</strong> Dreht das PDF/JPG um 90° im Uhrzeigersinn",
+          "<strong>Zurücksetzen (°):</strong> Erscheint, wenn das PDF/JPG nicht bei 0° ist — Klick stellt die ursprüngliche Ausrichtung wieder her"
+        ],
+        "step3Heading": "🔍 Schritt 3: Zeichenfläche Zoomen (falls nötig)",
+        "step3Items": [
+          "<strong>🔍 +:</strong> Zoomt bis zu 400 % hinein",
+          "<strong>🔍 −:</strong> Zoomt heraus (mindestens 100 %)",
+          "<strong>Zoom %:</strong> Zeigt den aktuellen Zoom; Klick setzt auf 100 % zurück",
+          "<strong>Mobiles Zusammenziehen:</strong> Zwei Finger auf der Zeichenfläche zusammenziehen, um auf kleinen Bildschirmen zu zoomen"
+        ],
+        "step4Heading": "🎯 Schritt 4: Standorte der Klimaanlage & Außeneinheit Markieren",
+        "step4Items": [
+          "<strong>Geben Sie zuerst die Beschriftung ein</strong> im Feld <em>Beschriftung</em> über der Zeichenfläche (Desktop) oder in der mobilen Beschriftungsleiste unter der Symbolleiste (mobil). Das Feld ersetzt die alte Popup-Abfrage — beim Klicken erscheint kein Modal.",
+          "<strong>Klicken Sie dann auf die Zeichenfläche</strong> an der Position, an der die Klimaanlage oder Außeneinheit platziert werden soll. Ein Symbol wird sofort mit der aktuellen Beschriftung platziert. Die Beschriftung bleibt im Feld erhalten, sodass Sie weiterklicken können, um weitere gleichartige Elemente zu platzieren — ändern Sie den Text einfach, wenn Sie eine neue Beschriftung benötigen.",
+          "<strong>📌 Platzierungsmodus (nur mobil):</strong> Auf kleinen Bildschirmen erscheint eine <em>„📌 Platzierungsmodus“</em>-Schaltleiste unter der Symbolleiste, nachdem ein PDF/JPG geladen wurde. Geben Sie die Beschriftung ein, tippen Sie auf die Schaltfläche zum Aktivieren (wird blau / zeigt <em>„✅ Zum Platzieren tippen“</em>), dann tippen Sie auf die Zeichenfläche. Tippen Sie erneut auf die Schaltfläche, um sie zu deaktivieren und zum reinen Scroll-Modus zurückzukehren.",
+          "<strong>Beschriftung Klimaanlage Einzelwohnung:</strong> Geben Sie z. B. <em>ac-1</em>, <em>ac-2</em> ein",
+          "<strong>Beschriftung Klimaanlage Mehrwohnungen:</strong> Geben Sie z. B. <em>ac-1.1</em>, <em>ac-1.2</em> für Wohnung 1 ein; <em>ac-2.1</em>, <em>ac-2.2</em> für Wohnung 2",
+          "<strong>Beschriftung Außeneinheit Einzelwohnung:</strong> Geben Sie z. B. <em>condenser</em> oder <em>condenser-1</em> ein",
+          "<strong>Beschriftung Außeneinheit Mehrwohnungen:</strong> Geben Sie <em>condenser-1</em> für Wohnung 1 ein, <em>condenser-2</em> für Wohnung 2 usw.",
+          "Empfohlen: Platzieren Sie Klimaanlagen-Symbole über jeder Zimmertür; platzieren Sie das Außeneinheit-Symbol nahe dem Wohnungseingang oder auf dem Balkon/Dach.",
+          "Tipp: Um von der Platzierung von Klimaanlagen zur Platzierung einer Außeneinheit zu wechseln, leeren Sie einfach das Feld und geben Sie <em>condenser</em> ein — der nächste Klick auf die Zeichenfläche erstellt das Außeneinheit-Symbol."
+        ],
+        "step5Heading": "🔧 Schritt 5: Formen Bearbeiten",
+        "step5Items": [
+          "<strong>🔄 Klimaanlagen-Symbol Drehen:</strong> Klicken Sie auf ein vorhandenes Klimaanlagen-Symbol, um es um 90° zu drehen",
+          "<strong>📌 Klimaanlagen-Symbol Ziehen:</strong> Klicken und ziehen (Desktop) oder berühren und ziehen (mobil), um es neu zu positionieren",
+          "<strong>📌 Panel platzierter Beschriftungen:</strong> Unterhalb der Zeichenfläche sehen Sie eine Chip-Liste <em>„📌 Platzierte Beschriftungen (n)“</em> mit jeder von Ihnen platzierten Beschriftung (z. B. <em>ac-1</em>, <em>ac-2</em>, <em>condenser</em>). Jeder Chip verfügt über eine ✏️-Bearbeiten- und eine 🗑️-Lösch-Schaltfläche — dies ist die empfohlene Methode zur Verwaltung von Beschriftungen, besonders auf mobilen Geräten.",
+          "<strong>✏️ Beschriftung Bearbeiten:</strong> Klicken Sie auf das Stift-Symbol eines Chips im Panel oder doppelklicken Sie direkt auf die Beschriftung in der Zeichenfläche. Ein Modal zum Umbenennen der Beschriftung öffnet sich.",
+          "<strong>🗑️ Beschriftung Löschen:</strong> Klicken Sie auf das Papierkorb-Symbol des Chips im Panel <em>Platzierte Beschriftungen</em>. Auf Desktop können Sie als Abkürzung auch mit der rechten Maustaste auf das Klimaanlagen-Symbol in der Zeichenfläche klicken."
+        ],
+        "step6Heading": "✅ Schritt 6: Raumdaten Überprüfen & Bearbeiten",
+        "step6Items": [
+          "Die Raumdatentabelle unterhalb der Zeichenfläche wird beim Hochladen automatisch per OCR ausgefüllt",
+          "Verwenden Sie das Feld <strong>Filtern</strong>, um Räume nach Typ zu finden",
+          "Verwenden Sie das Dropdown <strong>Sortieren</strong> und die AUF/AB-Schaltfläche, um die Tabelle neu zu ordnen",
+          "Klicken Sie auf <strong>✏️ Bearbeiten</strong> in einer Zeile, um einen Raum umzubenennen oder seine Fläche zu ändern; klicken Sie auf ✔ zum Speichern oder ✖ zum Abbrechen",
+          "Verwenden Sie <strong>↑ / ↓</strong>, um Zeilen neu anzuordnen",
+          "Verwenden Sie <strong>🗑️</strong>, um unerwünschte oder doppelte Räume zu löschen",
+          "Klicken Sie auf <strong>+ Raum hinzufügen</strong>, um manuell einen neuen Raumeintrag einzufügen",
+          "Klicken Sie auf das <strong>Excel-Symbol</strong>, um die Raumtabelle als .xlsx-Datei herunterzuladen",
+          "Bei Mehrwohnungen: Benennen Sie Räume um, um Wohnungen zu unterscheiden (z. B. „Küche 1“, „Küche 2“)"
+        ],
+        "step7Heading": "🚀 Schritt 7: Zum BTU-Rechner Exportieren",
+        "step7Items": [
+          "Klicken Sie auf <strong>„Export zu BTU (n Räume)“</strong>, um alle gefilterten Räume an den BTU-Rechner zu senden; die Schaltfläche ist deaktiviert, wenn keine gültigen Räume vorhanden sind",
+          "Mehrwohnungs-Immobilien werden automatisch erkannt und mit Präfixen versehen (Wohnung 1, Wohnung 2)",
+          "Die Seite scrollt automatisch zum VRF-BTU-Rechner"
+        ],
+        "step8Heading": "💾 Optional: Speichern & Löschen",
+        "step8Items": [
+          "Klicken Sie auf <strong>„Speichern“</strong>, um das beschriftete PDF/JPG und die Raumdaten auf dem Server zu speichern (die Schaltfläche zeigt während des Vorgangs „Wird gespeichert...“ an)",
+          "Klicken Sie auf <strong>„Löschen“</strong>, um alle Klimaanlagen-Symbole zu entfernen, die Zeichenfläche zurückzusetzen und alle gespeicherten Sitzungsdaten zu löschen"
+        ]
+      },
+      "btuTab": {
+        "step1Heading": "📊 Schritt 1: Räume Überprüfen",
+        "step1Items": [
+          "Räume werden automatisch übernommen, wenn Sie aus dem <strong>PDF/JPG-Designer</strong> exportieren",
+          "Jeder Raum zeigt seinen Namen und seine Fläche (m² oder ft²)",
+          "Mehrwohnungs-Räume erhalten ein Präfix <em>„Wohnung N: “</em> (z. B. „Wohnung 1: Küche“)",
+          "Außeneinheit-Beschriftungen aus dem PDF/JPG-Designer werden automatisch herausgefiltert — nur bewohnbare Räume bleiben erhalten",
+          "<strong>Raum Hinzufügen:</strong> Im manuellen Modus wird eine neue Raumzeile angehängt, damit Sie einen weiteren Raumtyp und eine weitere Fläche eingeben können",
+          "<strong>Papierkorb:</strong> Löscht die ausgewählte manuelle Raumzeile; die letzte verbleibende Zeile bleibt als leerer/Standardraum erhalten, damit das Formular nie leer wird"
+        ],
+        "step2Heading": "⚙️ Schritt 2: Berechnungsparameter Festlegen",
+        "step2Items": [
+          "<strong>Maßsystem:</strong> Meter (m²) oder Fuß (ft²)",
+          "<strong>PDF/JPG-Räume Verwenden:</strong> Verwendet die aus dem PDF/JPG-Designer exportierte Raumliste; behält die per OCR erkannten Raumnamen und -flächen bei und ist die Standardeinstellung, wenn PDF/JPG-Raumdaten vorhanden sind",
+          "<strong>Manuelle Raumeingabe:</strong> Schaltet den Rechner in den manuellen Modus, damit Sie die Raumliste selbst ohne aus dem PDF/JPG importierte Räume erstellen können",
+          "<strong>Deckenhöhe (m):</strong> Standard 2,5 m",
+          "<strong>Anzahl der Personen:</strong> Belegungsgrad (jede Person fügt ~600 BTU hinzu)",
+          "<strong>Mehrwohnungs-/Mehreinheiten-Immobilie:</strong> Aktivieren Sie dieses Kästchen, damit jede Wohnung eine eigene separate Außeneinheit erhält. Wird automatisch aktiviert, wenn Mehrwohnungen anhand von Raumnamen-Präfixen oder Klimaanlagen-Symbolbeschriftungen erkannt werden"
+        ],
+        "step3Heading": "🌡️ Schritt 3: Umgebungsbedingungen Auswählen",
+        "step3Items": [
+          "<strong>Standort der Außeneinheit:</strong> Dach, Wandhalterungen oder Fester Boden",
+          "<strong>Wandtyp:</strong> Klinkerfassade, Doppelmauerwerk oder Schaumverkleidung",
+          "<strong>Isolierung:</strong> Schlecht, Durchschnittlich oder Gut",
+          "<strong>Sonneneinstrahlung:</strong> Volles Sonnenlicht, Durchschnittlich oder Stark Beschattet",
+          "<strong>Klima:</strong> Durchschnittliches Europa, Heißer Nahost oder Kaltes Alaska",
+          "<strong>Raumnutzung & Geräte:</strong> Ofen, Serverraum (fügt Wärmelast hinzu), Fitnessraum, Heimkino usw. (siehe BTU-Berechnungsdetails unten)",
+          "<strong>Fenstertyp:</strong> Einfachverglasung, Doppelverglasung, Dreifachverglasung oder Lamellen",
+          "<strong>Dachtyp:</strong> Flach, Geneigt oder Giebeldach",
+          "<strong>Boden:</strong> Marmor, Holz, Beton oder Teppich",
+          "<strong>Wohnungsausrichtung:</strong> Norden, Osten, Süden, Westen oder Wohnzimmer. Verwenden Sie <em>Wohnzimmer</em>, wenn der Hauptwohnbereich die dominante Sonneneinstrahlung hat und der Rechner diese Zone stärker gewichten soll.",
+          "<strong>Ausgabeeinheit:</strong> BTU, Watt oder kW"
+        ],
+        "step4Heading": "🧮 Schritt 4: Berechnen & Navigieren",
+        "step4Items": [
+          "Klicken Sie auf <strong>„BTU Berechnen“</strong> — berechnet den BTU-Wert für jeden Raum, gleicht VRF-Produkte ab, speichert die Ergebnisse im Store und navigiert zur Seite <strong>Empfehlungen</strong>",
+          "Bei Mehrwohnungen: dimensioniert eine separate VRF-Außeneinheit für jede Wohnung",
+          "Klicken Sie auf <strong>„Löschen“</strong>, um alle Räume, Parameter und Umgebungsoptionen auf die Standardwerte zurückzusetzen"
+        ],
+        "multiFlatHeading": "⚡ Automatische Mehrwohnungs-Erkennung",
+        "multiFlatItems": [
+          "Mehrwohnungen werden automatisch anhand von <em>Raumnamen-Präfixen</em> („Wohnung 1: Küche“, „Wohnung 2: Küche“) oder <em>Klimaanlagen-Symbolbeschriftungen</em> (condenser-1 / condenser-2, ac-1.1 / ac-2.1) erkannt",
+          "Doppelte Raumnamen allein weisen <strong>nicht</strong> auf Mehrwohnungen hin — verwenden Sie die oben genannten expliziten Beschriftungen",
+          "Jede Wohnung erhält eine <strong>separate VRF-Außeneinheiten-Dimensionierung</strong> mit Kettentopologie",
+          "Kältemittelleitungen werden in Ketten verbunden: Außeneinheit → AC1 → AC2 → ... pro Wohnung"
+        ],
+        "understandingHeading": "📖 BTU-Berechnungen Verstehen",
+        "understandingIntro": "BTU (British Thermal Unit) ist ein Maß für Wärme. Dieser Rechner liefert eine Schätzung basierend auf gängigen Faktoren:",
+        "understandingItems": [
+          "<strong>Basisberechnung:</strong> 600 BTU/m² wird als Grundregel verwendet.",
+          "<strong>Standort der Außeneinheit:</strong> Gewünschter Standort der Außeneinheit.",
+          "<strong>Anzahl der Personen:</strong> Jede Person fügt ~600 BTU hinzu.",
+          "<strong>Wandtyp:</strong> Materialien und Dicke beeinflussen den BTU-Wert.",
+          "<strong>Isolierqualität:</strong> Schlechte Isolierung erhöht den BTU-Bedarf.",
+          "<strong>Sonneneinstrahlung:</strong> Mehr Fenster oder süd-/westorientierte Räume benötigen mehr Kühlung.",
+          "<strong>Fenstertyp:</strong> Einfachverglaste Fenster lassen mehr Wärme durch als Dreifachverglasung.",
+          "<strong>Wohnungsausrichtung:</strong> Süd- und Westausrichtungen erhalten mehr Sonneneinstrahlung.",
+          "<strong>Bodentyp:</strong> Materialien wie Marmor oder Fliesen können Wärme unterschiedlich speichern oder reflektieren.",
+          "<strong>Dachtyp:</strong> Flachdächer können im Vergleich zu geneigten oder isolierten Dächern die Wärmelast erhöhen.",
+          "<strong>Geräte:</strong> Küchen- und elektronische Geräte tragen zu zusätzlicher Wärmelast bei.",
+          "<strong>Klimazone:</strong> Der BTU-Bedarf variiert je nach Temperatur- und Feuchtigkeitsregion."
+        ],
+        "importantNote": "<strong>Wichtig:</strong> Dies ist eine allgemeine Schätzung. Konsultieren Sie einen lizenzierten HVAC-Experten für eine präzise Systemdimensionierung."
+      },
+      "tipsTab": {
+        "accurateHeading": "✅ Für Genaue Ergebnisse:",
+        "accurateItems": [
+          "Laden Sie klare, hochauflösende Grundriss-PDF/JPG-Dateien hoch",
+          "Markieren Sie alle Klimaanlagen-Standorte auf der Zeichnung",
+          "Bei Mehrwohnungen: Unterscheiden Sie Räume klar nach Einheit (benennen Sie sie mit Nummern um)",
+          "Geben Sie genaue Deckenhöhen und Raumgrößen ein",
+          "Wählen Sie genaue Klima- und Umgebungsbedingungen aus"
+        ],
+        "multiFlatHeading": "🎯 Mehrwohnungs-Workflow (VRF):",
+        "multiFlatItems": [
+          "Laden Sie das PDF/JPG mit beiden sichtbaren Wohnungen hoch",
+          "Markieren Sie Klimaanlagen mit Beschriftungen wie „ac-1“, „ac-2“ (System erkennt getrennte Wohnungen automatisch)",
+          "Benennen Sie Räume um: „Küche 1“/„Küche 2“, „Wohnzimmer 1“/„Wohnzimmer 2“",
+          "Exportieren Sie zum BTU-Rechner (zeigt Präfixe Wohnung 1, Wohnung 2)",
+          "Jede Wohnung erhält separate VRF-Geräte und kettenverbundene Kältemittelleitungen"
+        ],
+        "issuesHeading": "🔍 Häufige Probleme:",
+        "issuesItems": [
+          "<strong>Räume nicht extrahiert:</strong> Prüfen Sie, ob das PDF/JPG lesbar ist, versuchen Sie höhere Qualität",
+          "<strong>Doppelte Räume:</strong> Bearbeiten Sie Raumnamen, um zwischen Wohnungen zu unterscheiden",
+          "<strong>Falsche Wohnungszuordnung:</strong> Benennen Sie Räume mit fortlaufenden Nummern um",
+          "<strong>Keine passenden Produkte:</strong> Überprüfen Sie die Raumfläche und die BTU-Berechnungen"
+        ]
+      },
+      "footer": {
+        "printBtn": "🖨️ Drucken / Speichern",
+        "printBtnTitle": "Anleitung drucken / herunterladen",
+        "closeBtn": "Schließen"
+      }
+    },
     "btuCalculator": {
       "prevSummary": {
         "title": "Vorherige Berechnung",

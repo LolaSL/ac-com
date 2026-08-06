@@ -20,6 +20,22 @@
   min-width: 0;
 }
 
+/* Bootstrap's .btn-group relies on physical (not logical) CSS — negative
+   margin-left to seamlessly join buttons and border-radius pinned to the
+   first/last DOM child. When html[dir] flips to "rtl" (Hebrew), the browser
+   mirrors flex layout visually but those physical rules still target the
+   original DOM first/last child, so joined buttons end up with visible gaps
+   and rounded corners on the wrong side. Pin the group to ltr so Bootstrap's
+   layout math stays correct, and re-apply rtl only on the button text so
+   Hebrew labels still shape/align correctly. */
+[dir="rtl"] .button-toolbar-annotator .btn-group {
+  direction: ltr;
+}
+
+[dir="rtl"] .button-toolbar-annotator .btn {
+  direction: rtl;
+}
+
 @media (max-width: 575.98px) {
   .sort-export-btns {
     flex-direction: row !important;
