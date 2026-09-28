@@ -895,12 +895,12 @@ ${tableHtml}
                     const ps = product.powerSupply;
                     const mca = product.electrical?.minCircuitAmpacity;
                     const needsThreePhase = Number(ps?.phase) === 3;
-                    // Most homes are only wired with 16-20A dedicated circuits unless upgraded for larger loads
-                    const STANDARD_HOUSE_CIRCUIT_AMPS = 20;
-                    const exceedsStandardCircuit = mca > STANDARD_HOUSE_CIRCUIT_AMPS;
+                    // Israeli homes: 230V/50Hz single-phase; standard socket/AC MCB is 16A (villas may have 400V 3-phase)
+                    const STANDARD_HOUSE_CIRCUIT_AMPS = 16;
+                    const exceedsStandardCircuit = mca >= STANDARD_HOUSE_CIRCUIT_AMPS;
                     const propertySupplyLabel = needsThreePhase
-                      ? "380-415V, 3-Phase, 50Hz (villas/commercial — most apartments only supply single-phase)"
-                      : `220-240V, 1-Phase, 50Hz, ~${STANDARD_HOUSE_CIRCUIT_AMPS}A dedicated circuit (typical apartment/villa supply)`;
+                      ? "400V, 3-Phase, 50Hz (villas/commercial — most apartments only supply single-phase)"
+                      : `230V, 1-Phase, 50Hz, ~${STANDARD_HOUSE_CIRCUIT_AMPS}A dedicated circuit (typical Israeli apartment/villa supply)`;
 
                     return (
                       <React.Fragment key={idx}>
