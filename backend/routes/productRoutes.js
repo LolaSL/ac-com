@@ -88,6 +88,19 @@ productRouter.post(
         height: 0,
         depth: 0,
       },
+      powerSupply: {
+        V: '',
+        phase: 1,
+        Hz: '',
+      },
+      electrical: {
+        operatingCurrent: 0,
+        minCircuitAmpacity: 0,
+        maxOverCurrentProtection: 0,
+        recommendedCableSize: '',
+        cableResistance: 0,
+        maxCableLength: 0,
+      },
     });
     const product = await newProduct.save();
 
@@ -169,6 +182,8 @@ productRouter.put(
         height: 0,
         depth: 0,
       };
+      product.powerSupply = req.body.powerSupply || product.powerSupply;
+      product.electrical = req.body.electrical || product.electrical;
       await product.save();
 
       // Invalidate cache after updating product

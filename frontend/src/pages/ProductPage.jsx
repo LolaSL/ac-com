@@ -578,6 +578,31 @@ function ProductPage() {
                         {product.energyEfficiency}
                       </ListGroup.Item>
                     )}
+                    {product.powerSupply && (product.powerSupply.V || product.powerSupply.Hz) && (
+                      <ListGroup.Item>
+                        <strong>Power Supply:</strong>{" "}
+                        {product.powerSupply.V}V, {product.powerSupply.phase}-Phase, {product.powerSupply.Hz}Hz
+                      </ListGroup.Item>
+                    )}
+                    {product.electrical && (
+                      <ListGroup.Item>
+                        <strong>Circuit & Cable Requirements:</strong>
+                        <ul className="mb-0 ps-3">
+                          {product.electrical.minCircuitAmpacity > 0 && (
+                            <li>Min. Circuit Ampacity: {product.electrical.minCircuitAmpacity}A</li>
+                          )}
+                          {product.electrical.maxOverCurrentProtection > 0 && (
+                            <li>Max. Breaker/Fuse: {product.electrical.maxOverCurrentProtection}A</li>
+                          )}
+                          {product.electrical.recommendedCableSize && (
+                            <li>Recommended Cable: {product.electrical.recommendedCableSize}</li>
+                          )}
+                          {product.electrical.maxCableLength > 0 && (
+                            <li>Max. Cable Run: {product.electrical.maxCableLength}m (at 3% voltage drop)</li>
+                          )}
+                        </ul>
+                      </ListGroup.Item>
+                    )}
                   </>
                 );
               } else {

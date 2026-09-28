@@ -49,6 +49,21 @@ const productSchema = new mongoose.Schema(
     areaCoverage: { type: Number },
     energyEfficiency: { type: Number },
     numberOfMaximumIndoorUnits:{ type: Number },
+    // Unit's own supply requirement (from datasheet)
+    powerSupply: {
+      V: { type: String },
+      phase: { type: Number },
+      Hz: { type: String },
+    },
+    // Circuit/cable sizing so the unit's required supply can be checked against a property's wiring
+    electrical: {
+      operatingCurrent: { type: Number }, // rated load amps (A)
+      minCircuitAmpacity: { type: Number }, // MCA, min cable ampacity (A)
+      maxOverCurrentProtection: { type: Number }, // MOCP, max breaker/fuse size (A)
+      recommendedCableSize: { type: String }, // e.g. "10 mm² (8 AWG)"
+      cableResistance: { type: Number }, // copper resistance of recommended cable (Ω/km)
+      maxCableLength: { type: Number }, // max run before voltage drop exceeds 3% (m)
+    },
     documents: [documentSchema],
     dimension: {
       width: { type: Number, required: true },
