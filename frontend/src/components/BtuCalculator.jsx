@@ -1394,6 +1394,8 @@ useEffect(() => {
                     image: cond.image || "/images/p1.jpg",
                     isCondenser: true,
                     flatName: cond.flatName || undefined,
+                    powerSupply: cond.powerSupply,
+                    electrical: cond.electrical,
                   },
                 };
               })
