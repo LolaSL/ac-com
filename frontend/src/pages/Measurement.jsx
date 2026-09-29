@@ -135,11 +135,6 @@ const Measurement = () => {
     }
   }, [fetchSavedPdfs, token]); // Removed fetchSavedPdfs from dependencies to prevent re-fetching
 
-  useEffect(() => {
-    console.log("ROOM DATA UPDATED:", roomData);
-    console.log("AC ANNOTATIONS:", acAnnotations);
-  }, [roomData, acAnnotations]);
-
   const handleScrollToBtuCalculator = () => {
     if (btuCalculatorRef.current) {
       setTimeout(() => {

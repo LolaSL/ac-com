@@ -403,7 +403,7 @@ const Sidebar = ({ deepLinkAnnotationId, deepLinkEngineerReviewId } = {}) => {
     if (!token) return setError(t("measurement.sidebar.errors.notAuthenticated"));
     try {
       if (pdf.isPaid) {
-        alert(t("measurement.sidebar.errors.paymentRequired"));
+        toast.info(t("measurement.sidebar.errors.paymentRequired"));
         return;
       }
 

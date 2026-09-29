@@ -667,7 +667,7 @@ useEffect(() => {
       : Math.max(0, parseInt(numPeople, 10) || 0);
 
     if (isNaN(area) || isNaN(height)) {
-      return { btu: null, error: "Enter valid room size & ceiling height." };
+      return { btu: null, error: t("measurement.btuCalculator.errors.invalidRoomSize", "Enter valid room size & ceiling height.") };
     }
 
     const isHeating = mode === 'heating';
@@ -1021,7 +1021,7 @@ useEffect(() => {
     // VRF capacity validation (show warning but continue calculations)
     if (totalBTU > MAX_VRF_TOTAL_CAPACITY) {
       setError(
-        `⚠️ Warning: VRF system total capacity (${totalBTU.toLocaleString()} BTU) exceeds recommended ${MAX_VRF_TOTAL_CAPACITY.toLocaleString()} BTU limit. Consider splitting into multiple systems for optimal performance.`
+        t("measurement.btuCalculator.errors.vrfCapacityExceeded", "⚠️ Warning: VRF system total capacity ({{total}} BTU) exceeds recommended {{limit}} BTU limit. Consider splitting into multiple systems for optimal performance.", { total: totalBTU.toLocaleString(), limit: MAX_VRF_TOTAL_CAPACITY.toLocaleString() })
       );
       // Continue with calculations despite warning
     }
@@ -1429,7 +1429,7 @@ useEffect(() => {
     });
 
     setIsCalculating(false);
-    toast.success(`✅ Calculation complete — ${actualRooms.length} room${actualRooms.length !== 1 ? 's' : ''}, ${totalBTU.toLocaleString()} BTU total`);
+    toast.success(t("measurement.btuCalculator.calcComplete", "✅ Calculation complete — {{count}} room(s), {{btu}} BTU total", { count: actualRooms.length, btu: totalBTU.toLocaleString() }));
     navigate("/recommendations");
   };
 

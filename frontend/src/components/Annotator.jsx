@@ -2319,7 +2319,7 @@ const Annotator = ({
     if (!file) {
       isSavingRef.current = false;
       setIsSaving(false);
-      alert(t("measurement.annotator.errors.selectPdfToSave"));
+      toast.warn(t("measurement.annotator.errors.selectPdfToSave"));
       return;
     }
     setIsSaved(false);
@@ -2392,7 +2392,7 @@ const Annotator = ({
     if (!token) {
       isSavingRef.current = false;
       setIsSaving(false);
-      alert(t("measurement.annotator.errors.signInToSave"));
+      toast.warn(t("measurement.annotator.errors.signInToSave"));
       return;
     }
 
@@ -2641,7 +2641,7 @@ const Annotator = ({
     const baseName = info?.fileName || "annotated_data";
 
     if (!data.length) {
-      alert(t("measurement.annotator.errors.noRoomsToExport"));
+      toast.warn(t("measurement.annotator.errors.noRoomsToExport"));
       return;
     }
 
@@ -2740,7 +2740,7 @@ const Annotator = ({
     } catch (error) {
       console.error("Export failed:", error);
       setExportStatus("error");
-      alert(t("measurement.annotator.errors.exportExcelFailed"));
+      toast.error(t("measurement.annotator.errors.exportExcelFailed"));
       setTimeout(() => setExportStatus("idle"), 5000);
     }
   };
@@ -2799,7 +2799,7 @@ const Annotator = ({
       setTimeout(() => URL.revokeObjectURL(url), 10000);
     } catch (err) {
       console.error('JSON export failed:', err);
-      alert(t("measurement.annotator.errors.exportJsonFailed"));
+      toast.error(t("measurement.annotator.errors.exportJsonFailed"));
     }
   };
 
@@ -2920,6 +2920,32 @@ const Annotator = ({
             aria-hidden="true"
           ></div>
           {scriptsLoaded ? t("measurement.annotator.loading.processing") : t("measurement.annotator.loading.loadingLibraries")}
+        </div>
+      )}
+      {scriptsLoaded && !loading && (!results || results.length === 0) && (
+        <div
+          className="text-secondary my-4 p-4"
+          style={{
+            background: '#f8f9fa',
+            border: '1px dashed #ced4da',
+            borderRadius: '12px',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📐</div>
+          <h5 className="fw-bold mb-2">{t("measurement.annotator.emptyState.title", "Start by uploading a floor plan")}</h5>
+          <p className="mb-3" style={{ fontSize: '0.9rem' }}>
+            {t("measurement.annotator.emptyState.subtitle", "Choose PDF or image above, then upload your plan. We'll detect rooms automatically so you can measure and place AC units.")}
+          </p>
+          <ol
+            className="text-start d-inline-block mb-0"
+            style={{ fontSize: '0.85rem', maxWidth: '420px' }}
+          >
+            <li>{t("measurement.annotator.emptyState.step1", "Pick your file type (PDF or JPG) and upload the plan.")}</li>
+            <li>{t("measurement.annotator.emptyState.step2", "Review the auto-detected rooms in the table.")}</li>
+            <li>{t("measurement.annotator.emptyState.step3", "Click on the plan to draw rooms and place AC unit labels.")}</li>
+            <li>{t("measurement.annotator.emptyState.step4", "Export to the BTU Calculator below to size your system.")}</li>
+          </ol>
         </div>
       )}
       {scriptsLoaded &&
