@@ -48,23 +48,23 @@ export default function Offers() {
     {
       title: "Half Price Sale",
       description: "Premium units at 50% off — limited time only.",
-      imageSrc: "/images/offer-summer02.png",
+      imageSrc: "/images/offer2.jpg",
       linkTo: "/search?category=all&query=all&price=all&discount=50&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Shop Now",
       discount: "50% OFF",
       soldPct: 78,
-      label: "🌸 Summer Deal",
+      label: "🍂 Autumn Deal",
       hot: true,
     },
     {
       title: "Up to 40% Off",
       description: "Save big on select HVAC units — 31-40% discount on top brands.",
-      imageSrc: "/images/offer-summer01.png",
+      imageSrc: "/images/offer1.jpg",
       linkTo: "/search?category=all&query=all&price=all&discount=31-40&rating=all&btu=all&brand=all&order=newest&page=1",
       linkText: "Shop Now",
       discount: "40% OFF",
       soldPct: 55,
-      label: "🌼 Summer Flash",
+      label: "🍁 Autumn Flash",
     },
     {
       title: "Smart Savings",
@@ -78,7 +78,7 @@ export default function Offers() {
     {
       title: "Top-Rated Picks",
       description: "5-star rated units with 10-20% off — comfort guaranteed.",
-      imageSrc: "/images/offer-summer03.png",
+      imageSrc: "/images/offer05.jpg",
       linkTo: "/search?category=all&query=all&price=all&discount=10-20&rating=5&btu=all&brand=all&order=newest&page=1",
       linkText: "Shop Now",
       discount: "20% OFF",
@@ -135,16 +135,19 @@ export default function Offers() {
     const acEl = acTextRef.current;
     if (!el) return;
     let raf;
-    const duration = 3000;
     const acDuration = 1200; // faster independent pulse for AC text
     const start = performance.now();
+    const TWO_PI = Math.PI * 2;
     const tick = (now) => {
-      const t = ((now - start) % duration) / duration;
-      const ease = 0.5 - 0.5 * Math.cos(2 * Math.PI * t);
-      const scale = 0.94 + ease * 0.1;
-      const opacity = 0.55 + ease * 0.4;
-      el.style.transform = `scale(${scale.toFixed(4)})`;
-      el.style.opacity = opacity.toFixed(4);
+      const elapsed = (now - start) / 1000; // seconds
+      // Temu-style lively mascot: bouncy bob + side drift + playful wiggle
+      const bounce = Math.abs(Math.sin(TWO_PI * elapsed * 0.55)) * 18; // hops upward
+      const drift = Math.sin(TWO_PI * elapsed * 0.18) * 22;            // slow left-right
+      const wiggle = Math.sin(TWO_PI * elapsed * 0.9) * 7;             // rotation wiggle
+      const breathe = 1 + Math.sin(TWO_PI * elapsed * 0.7) * 0.04;     // subtle scale pop
+      el.style.transform =
+        `translate(${drift.toFixed(2)}px, ${(-bounce).toFixed(2)}px) rotate(${wiggle.toFixed(2)}deg) scale(${breathe.toFixed(4)})`;
+      el.style.opacity = "1";
       // AC text: faster pulse, opposite phase
       if (acEl) {
         const tAc = ((now - start) % acDuration) / acDuration;
@@ -221,8 +224,10 @@ export default function Offers() {
             <rect x="84" y="82" width="18" height="10" rx="5" fill="#0d9488" transform="rotate(20 84 82)" />
             <circle cx="106" cy="96" r="7" fill="#0d9488" />
             {/* Tag in right hand */}
-            <rect x="108" y="88" width="16" height="12" rx="3" fill="#0f766e" />
-            <text x="116" y="98" textAnchor="middle" fontSize="6" fill="#ccfbf1" fontWeight="bold">%</text>
+            <g className="of-astro__tag">
+              <rect x="108" y="88" width="16" height="12" rx="3" fill="#0f766e" />
+              <text x="116" y="98" textAnchor="middle" fontSize="6" fill="#ccfbf1" fontWeight="bold">%</text>
+            </g>
             {/* Legs */}
             <rect x="44" y="118" width="13" height="22" rx="6" fill="#0d9488" />
             <rect x="63" y="118" width="13" height="22" rx="6" fill="#0d9488" />
@@ -255,7 +260,7 @@ export default function Offers() {
         ))}
         <div className="of-hero__inner">
           <div className="of-hero__icon"><FaTag /></div>
-          <h1 className="of-hero__title">🌞 Summer Sale 2026 — June, July & August</h1>
+          <h1 className="of-hero__title">🌞 Autumn Sale 2026 — September, October & November</h1>
           <p className="of-hero__sub">Cool savings on top HVAC units — beat the heat and the price.</p>
           <div className="of-timer">
             <FaClock className="of-timer__clock" />
@@ -268,6 +273,47 @@ export default function Offers() {
           </div>
         </div>
       </div>
+
+      {/* Autumn "Premium Comfort" banner */}
+      <section className="of-banner" aria-label="Premium Comfort Offer">
+        {/* Falling autumn leaves */}
+        <span className="of-banner__leaf of-banner__leaf--1" aria-hidden="true">🍁</span>
+        <span className="of-banner__leaf of-banner__leaf--2" aria-hidden="true">🍂</span>
+        <span className="of-banner__leaf of-banner__leaf--3" aria-hidden="true">🍁</span>
+        <span className="of-banner__leaf of-banner__leaf--4" aria-hidden="true">🍂</span>
+        <span className="of-banner__leaf of-banner__leaf--5" aria-hidden="true">🍁</span>
+
+        <div className="of-banner__media">
+          {/* Replace src with the Samsung AC / condenser image when available */}
+          <img
+            className="of-banner__img"
+            src="/images/offer-banner.jpg"
+            alt="Air conditioner and outdoor condenser surrounded by autumn leaves under a blue sky"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              e.currentTarget.parentElement.classList.add("of-banner__media--placeholder");
+            }}
+          />
+          {/* <span className="of-banner__placeholder-text" aria-hidden="true">
+            ❄️ AC image
+          </span> */}
+
+          {/* Slogan overlay */}
+          <div className="of-banner__overlay">
+            <span className="of-banner__eyebrow">🍂 Autumn Season</span>
+            <h2 className="of-banner__slogan">Premium Comfort Offer</h2>
+            <p className="of-banner__tagline">
+              Samsung climate systems — cozy warmth, crisp air, all season long.
+            </p>
+            <Link
+              className="of-banner__btn"
+              to="/search?category=all&query=all&price=all&discount=any&rating=all&btu=all&brand=Samsung&order=newest&page=1"
+            >
+              Explore Offer
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <div className="of-inner">
         {loading ? (
