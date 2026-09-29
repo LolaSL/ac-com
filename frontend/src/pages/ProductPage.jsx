@@ -25,6 +25,7 @@ import Rating from "../components/Rating";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
 import { getError } from "../utils";
+import { getCopperWireGauge } from "../components/shared/productHelpers";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import Image from "react-bootstrap/Image";
@@ -596,6 +597,9 @@ function ProductPage() {
                           )}
                           {product.electrical.recommendedCableSize && (
                             <li>Recommended Cable: {product.electrical.recommendedCableSize}</li>
+                          )}
+                          {product.electrical.minCircuitAmpacity > 0 && getCopperWireGauge(product.electrical.minCircuitAmpacity) && (
+                            <li>Min. Copper Wire Gauge: {getCopperWireGauge(product.electrical.minCircuitAmpacity).awg}</li>
                           )}
                           {product.electrical.maxCableLength > 0 && (
                             <li>Max. Cable Run: {product.electrical.maxCableLength}m (at 3% voltage drop)</li>

@@ -10,7 +10,7 @@ import "./Recommendations.css";
 import SystemSummary from "./shared/SystemSummary";
 import DetectedSystems from "./shared/DetectedSystems";
 import InstallationAccessories from "./shared/InstallationAccessories";
-import { getName, getPrice } from "./shared/productHelpers";
+import { getName, getPrice, getCopperWireGauge, getMiniSplitElectricalGuide } from "./shared/productHelpers";
 
 export default function Recommendations() {
   const { t, i18n } = useTranslation();
@@ -894,6 +894,9 @@ ${tableHtml}
                     const isCondenserRow = !!product.isCondenser;
                     const ps = product.powerSupply;
                     const mca = product.electrical?.minCircuitAmpacity;
+                    const mop = product.electrical?.maxOverCurrentProtection;
+                    const wireGauge = getCopperWireGauge(mca);
+                    const miniSplitGuide = getMiniSplitElectricalGuide(product.coolingBtu || product.btu);
                     const needsThreePhase = Number(ps?.phase) === 3;
                     // Israeli homes: 230V/50Hz single-phase; standard socket/AC MCB is 16A (villas may have 400V 3-phase)
                     const STANDARD_HOUSE_CIRCUIT_AMPS = 16;
@@ -961,13 +964,35 @@ ${tableHtml}
                           )}
                         </td>
                       </tr>
+                      {isCondenserRow && !(ps && (ps.V || ps.Hz)) && miniSplitGuide && (
+                        <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
+                          <td colSpan={8} style={{ padding: '3px 8px 5px 24px', fontSize: '0.78rem' }}>
+                            <strong>{t("recommendations.table.typicalElectrical", "Typical mini-split electrical (by capacity):")}</strong>{' '}
+                            {miniSplitGuide.capacity} — {miniSplitGuide.voltage}, {t("recommendations.table.runningAmps", "running")} {miniSplitGuide.runningAmps}, {t("recommendations.table.breaker", "breaker")} (MOCP) {miniSplitGuide.mocp}
+                            <span style={{ display: 'block', color: '#555', fontStyle: 'italic', marginTop: 2 }}>
+                              {t("recommendations.table.nameplateNote", "Reference only — always confirm on the nameplate: MCA sizes the wire, MOCP caps the breaker.")}
+                            </span>
+                          </td>
+                        </tr>
+                      )}
                       {isCondenserRow && ps && (ps.V || ps.Hz) && (
                         <>
                           <tr style={{ background: '#f8f9fa' }}>
                             <td colSpan={8} style={{ padding: '3px 8px 3px 24px', fontSize: '0.78rem' }}>
                               <strong>{t("recommendations.table.condenserPowerSupply", "Condenser power supply:")}</strong>{' '}
                               {ps.V}V, {ps.phase}-Phase, {ps.Hz}Hz
-                              {mca > 0 && <> — {t("recommendations.table.requiresAmps", "requires")} {mca}A {t("recommendations.table.dedicatedCircuit", "dedicated circuit")}</>}
+                              {mca > 0 && <> — {t("recommendations.table.requiresAmps", "requires")} {mca}A {t("recommendations.table.dedicatedCircuit", "dedicated circuit")} ({t("recommendations.table.mca", "MCA")})</>}
+                              {mop > 0 && <> · {t("recommendations.table.maxBreaker", "breaker/fuse must not exceed")} {mop}A ({t("recommendations.table.mop", "MOP")})</>}
+                              {wireGauge && (
+                                <span style={{ display: 'block', color: '#1a1a2e', marginTop: 2 }}>
+                                  {t("recommendations.table.recommendedWire", "Recommended copper wire:")}{' '}
+                                  <strong>{wireGauge.awg}</strong>
+                                  {product.electrical?.recommendedCableSize ? <> ({product.electrical.recommendedCableSize})</> : null}
+                                </span>
+                              )}
+                              <span style={{ display: 'block', color: '#555', fontStyle: 'italic', marginTop: 2 }}>
+                                {t("recommendations.table.dataPlateNote", "Always confirm these values against the unit's data plate before wiring.")}
+                              </span>
                             </td>
                           </tr>
                           <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
@@ -981,7 +1006,8 @@ ${tableHtml}
                               )}
                               {!needsThreePhase && exceedsStandardCircuit && (
                                 <span style={{ color: '#c0392b', marginLeft: 6 }}>
-                                  ⚠ {t("recommendations.table.ampsMismatchWarning", `This condenser needs a ${mca}A circuit — most homes only have ~${STANDARD_HOUSE_CIRCUIT_AMPS}A. Verify your breaker/panel capacity before installation.`)}
+                                  ⚠ {t("recommendations.table.ampsMismatchWarning", `This condenser needs a ${mca}A circuit — most homes only have ~${STANDARD_HOUSE_CIRCUIT_AMPS}A. Verify your breaker/panel capacity before installation.`)}{' '}
+                                  {t("recommendations.table.apartmentPanelWarning", "If you are in an apartment or condo, confirm with building management that the main panel can supply this higher amperage load before upgrading.")}
                                 </span>
                               )}
                             </td>
