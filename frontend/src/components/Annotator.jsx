@@ -1916,7 +1916,19 @@ const Annotator = ({
       ? flatNums.map((fn) => `condenser-${fn}`)
       : ["condenser"];
 
+    // Labels already on the canvas (attached to an active rectangle). Skipping these
+    // makes the button incremental: after adding an extra room, a repeat click places
+    // only the missing unit instead of re-creating (and erroring on) existing ones.
+    const activeRectIds = new Set(rectanglesRef.current.map((r) => String(r.id)));
+    const existingLabels = new Set(
+      commentsRef.current
+        .filter((c) => activeRectIds.has(String(c.rectId)) && typeof c.text === "string")
+        .map((c) => c.text.trim().toLowerCase())
+    );
+
     // Grid-layout AC units in a central margin; condensers along the bottom edge.
+    // Positions derive from each label's index in the FULL list so a label keeps a
+    // stable cell whether placed now or on a later incremental run.
     const marginX = cw * 0.1;
     const marginTop = ch * 0.15;
     const acAreaW = cw * 0.8;
@@ -1926,10 +1938,24 @@ const Annotator = ({
     const cellW = acAreaW / cols;
     const cellH = acAreaH / rows;
 
+    const acToPlace = acLabels
+      .map((label, i) => ({ label, i }))
+      .filter(({ label }) => !existingLabels.has(label.toLowerCase()));
+    const condToPlace = condenserLabels.filter(
+      (label) => !existingLabels.has(label.toLowerCase())
+    );
+
+    if (!acToPlace.length && !condToPlace.length) {
+      toast.info(
+        t("measurement.annotator.autoPlace.allPlaced", "All detected rooms already have AC units.")
+      );
+      return;
+    }
+
     // Single snapshot up-front so the whole batch undoes in one step.
     pushHistory(rectanglesRef.current, commentsRef.current, linesRef.current);
 
-    acLabels.forEach((label, i) => {
+    acToPlace.forEach(({ label, i }) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const x = marginX + col * cellW + cellW / 2;
@@ -1939,16 +1965,17 @@ const Annotator = ({
 
     const condenserY = ch * 0.9;
     const gap = cw / (condenserLabels.length + 1);
-    condenserLabels.forEach((label, i) => {
-      confirmAcUnitAnnotation(label, { x: gap * (i + 1), y: condenserY }, { skipHistory: true });
+    condToPlace.forEach((label) => {
+      const idx = condenserLabels.indexOf(label);
+      confirmAcUnitAnnotation(label, { x: gap * (idx + 1), y: condenserY }, { skipHistory: true });
     });
 
     toast.success(
       t("measurement.annotator.autoPlace.done", {
         defaultValue:
           "Placed {{ac}} AC unit(s) and {{cond}} condenser(s). Drag to adjust.",
-        ac: acLabels.length,
-        cond: condenserLabels.length,
+        ac: acToPlace.length,
+        cond: condToPlace.length,
       })
     );
   }, [file, pdfSize, allRooms, pushHistory, confirmAcUnitAnnotation, t]);
@@ -3543,7 +3570,7 @@ const Annotator = ({
                 variant="outline-success"
                 onClick={autoPlaceAcUnits}
                 disabled={loading}
-                title={t("measurement.annotator.autoPlace.title", "Automatically place AC units and condensers for every detected room (you can drag, rotate or delete them afterward)")}
+                title={t("measurement.annotator.autoPlace.title", "Automatically place AC units and condensers for every detected room (drag, rotate or delete them afterward). Add a room, then click again to place just the new unit.")}
               >
                 {t("measurement.annotator.autoPlace.btn", "Auto-place AC")}
               </Button>
