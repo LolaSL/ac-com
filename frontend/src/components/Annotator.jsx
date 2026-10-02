@@ -1949,19 +1949,34 @@ const Annotator = ({
       ? flatNumsSorted.map((fn) => `condenser-${fn}`)
       : ["condenser"];
 
-    // Labels already on the canvas (attached to an active rectangle). Skipping these
-    // makes the button incremental: after adding an extra room, a repeat click places
-    // only the missing unit instead of re-creating (and erroring on) existing ones.
-    const activeRectIds = new Set(rectanglesRef.current.map((r) => String(r.id)));
-    const existingLabels = new Set(
-      commentsRef.current
-        .filter((c) => activeRectIds.has(String(c.rectId)) && typeof c.text === "string")
-        .map((c) => c.text.trim().toLowerCase())
+    // Desired labels for the current rooms. Auto-managed labels not in this set are
+    // surplus (their room was deleted) and get removed; missing ones get placed — so
+    // the button reconciles the canvas to the current room table.
+    const desiredSet = new Set(
+      [...acLabels, ...condenserLabels].map((l) => l.toLowerCase())
     );
+    // Only ac-N / ac-N.M / condenser / condenser-N labels are reconciled; custom
+    // labels the user typed are never auto-removed.
+    const AUTO_LABEL = /^(ac-\d+(\.\d+)?|condenser(-\d+)?)$/i;
+
+    const activeRectIds = new Set(rectanglesRef.current.map((r) => String(r.id)));
+    const labelByRectId = new Map();
+    commentsRef.current.forEach((c) => {
+      if (activeRectIds.has(String(c.rectId)) && typeof c.text === "string") {
+        labelByRectId.set(String(c.rectId), c.text.trim().toLowerCase());
+      }
+    });
+    const existingLabels = new Set(labelByRectId.values());
+
+    // Surplus auto-labelled rects (their room was removed) → delete.
+    const rectIdsToRemove = [];
+    labelByRectId.forEach((label, rectId) => {
+      if (AUTO_LABEL.test(label) && !desiredSet.has(label)) rectIdsToRemove.push(rectId);
+    });
 
     // Grid-layout AC units in a central margin; condensers along the bottom edge.
     // Positions derive from each label's index in the FULL list so a label keeps a
-    // stable cell whether placed now or on a later incremental run.
+    // stable cell whether placed now or on a later run.
     const marginX = cw * 0.1;
     const marginTop = ch * 0.15;
     const acAreaW = cw * 0.8;
@@ -1978,15 +1993,28 @@ const Annotator = ({
       (label) => !existingLabels.has(label.toLowerCase())
     );
 
-    if (!acToPlace.length && !condToPlace.length) {
+    if (!rectIdsToRemove.length && !acToPlace.length && !condToPlace.length) {
       toast.info(
         t("measurement.annotator.autoPlace.allPlaced", "All detected rooms already have AC units.")
       );
       return;
     }
 
-    // Single snapshot up-front so the whole batch undoes in one step.
+    // Single snapshot up-front so the whole reconcile undoes in one step.
     pushHistory(rectanglesRef.current, commentsRef.current, linesRef.current);
+
+    // Remove surplus first, updating ref mirrors synchronously so the additions below
+    // see the post-removal state.
+    if (rectIdsToRemove.length) {
+      const removeSet = new Set(rectIdsToRemove.map(String));
+      const nextRects = rectanglesRef.current.filter((r) => !removeSet.has(String(r.id)));
+      const nextComments = commentsRef.current.filter((c) => !removeSet.has(String(c.rectId)));
+      rectanglesRef.current = nextRects;
+      commentsRef.current = nextComments;
+      setRectangles(nextRects);
+      setComments(nextComments);
+      setLines((prev) => prev.filter((l) => !removeSet.has(String(l.rectId))));
+    }
 
     acToPlace.forEach(({ label, i }) => {
       const col = i % cols;
@@ -2003,12 +2031,14 @@ const Annotator = ({
       confirmAcUnitAnnotation(label, { x: gap * (idx + 1), y: condenserY }, { skipHistory: true });
     });
 
+    const summaryParts = [];
+    if (acToPlace.length) summaryParts.push(`+${acToPlace.length} AC`);
+    if (condToPlace.length) summaryParts.push(`+${condToPlace.length} condenser`);
+    if (rectIdsToRemove.length) summaryParts.push(`−${rectIdsToRemove.length} surplus`);
     toast.success(
-      t("measurement.annotator.autoPlace.done", {
-        defaultValue:
-          "Placed {{ac}} AC unit(s) and {{cond}} condenser(s). Drag to adjust.",
-        ac: acToPlace.length,
-        cond: condToPlace.length,
+      t("measurement.annotator.autoPlace.reconciled", {
+        defaultValue: "Auto-place updated ({{summary}}). Drag to adjust.",
+        summary: summaryParts.join(", "),
       })
     );
   }, [file, pdfSize, allRooms, normalizeForGrouping, pushHistory, confirmAcUnitAnnotation, t]);
