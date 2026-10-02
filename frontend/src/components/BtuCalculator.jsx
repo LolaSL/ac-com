@@ -57,6 +57,7 @@ const DEFAULT_ORIENTATION = {
   East: false,
   South: false,
   West: false,
+  LivingRoom: false,
 };
 
 const DEFAULT_OUTDOOR_LOCATION = {
