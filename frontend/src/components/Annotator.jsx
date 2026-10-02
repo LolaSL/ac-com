@@ -1452,7 +1452,7 @@ const Annotator = ({
   // flat assignment. This ensures OCR variants of the same room (e.g.
   // "LivingDiningRoom" vs "LivingRoom") are counted together so the first
   // occurrence goes to Flat 1 and the second to Flat 2, etc.
-  const normalizeForGrouping = (roomType) => {
+  const normalizeForGrouping = useCallback((roomType) => {
     const t = (roomType || '').toLowerCase();
     if (/living|lounge|dining|sitting/.test(t)) return 'living';
     if (/bed|bedroom|bdrm|borm/.test(t)) return 'bedroom';
@@ -1463,7 +1463,7 @@ const Annotator = ({
     if (/laundry/.test(t)) return 'laundry';
     if (/foyer|entry|hall/.test(t)) return 'entry';
     return t; // unknown types fall back to exact name
-  };
+  }, []);
 
   // Helper function to format rooms with flat prefixes
   const formatRoomsWithFlatPrefixes = useCallback((validRooms, acAnnotations) => {
@@ -1570,7 +1570,7 @@ const Annotator = ({
     }
 
     return { formattedRooms, isMultiFlat, annotations };
-  }, [comments]);
+  }, [comments, normalizeForGrouping]);
 
   // Auto-update BTU Calculator whenever filtered rooms change
   useEffect(() => {
@@ -1895,25 +1895,58 @@ const Annotator = ({
       const m = String(rt || "").match(/^flat\s*(\d+)/i);
       return m ? parseInt(m[1], 10) : null;
     };
-    const flatNums = [
-      ...new Set(sourceRooms.map((r) => flatOf(r.roomType)).filter(Boolean)),
-    ].sort((a, b) => a - b);
-    const isMultiFlat = flatNums.length > 1;
+    const stripFlatPrefix = (rt) =>
+      String(rt || "").replace(/^flat\s*\d+\s*[:\s-]+/i, "").trim();
 
-    // One AC label per room, following the agreed naming scheme.
+    // Determine each room's flat. An explicit "Flat N:" prefix wins; otherwise infer
+    // from room-type occurrence (the Nth kitchen/living/bedroom belongs to flat N),
+    // mirroring the occurrence-based grouping BtuCalculator uses for one drawing that
+    // contains several flats side by side.
+    const categorySeen = {};
+    const roomFlatInfo = sourceRooms.map((r) => {
+      const explicit = flatOf(r.roomType);
+      if (explicit) return { flat: explicit, explicit: true };
+      const key = normalizeForGrouping(stripFlatPrefix(r.roomType));
+      categorySeen[key] = (categorySeen[key] || 0) + 1;
+      return { flat: categorySeen[key], explicit: false, key };
+    });
+
+    // Flat count = max explicit flat, or max occurrence among one-per-flat room
+    // categories. Bedrooms/bathrooms are excluded so a single flat with several of
+    // them is not mistaken for several flats.
+    const ONE_PER_FLAT = new Set(["kitchen", "living", "laundry", "entry", "garage"]);
+    let numFlats = 1;
+    const anchorCounts = {};
+    roomFlatInfo.forEach((info) => {
+      if (info.explicit) {
+        numFlats = Math.max(numFlats, info.flat);
+      } else if (ONE_PER_FLAT.has(info.key)) {
+        anchorCounts[info.key] = (anchorCounts[info.key] || 0) + 1;
+        numFlats = Math.max(numFlats, anchorCounts[info.key]);
+      }
+    });
+    const isMultiFlat = numFlats > 1;
+
+    // Resolve each room to a flat (inferred flats wrap across the detected count).
+    const roomFlats = roomFlatInfo.map(({ flat, explicit }) =>
+      explicit ? flat : ((flat - 1) % numFlats) + 1
+    );
+
+    // One AC label per room, following the agreed naming scheme
+    // (single flat: ac-N / condenser; multi-flat: ac-N.M / condenser-N).
     const acLabels = [];
     if (isMultiFlat) {
-      const perFlat = {};
-      sourceRooms.forEach((r) => {
-        const fn = flatOf(r.roomType) || flatNums[0];
-        perFlat[fn] = (perFlat[fn] || 0) + 1;
-        acLabels.push(`ac-${fn}.${perFlat[fn]}`);
+      const perFlatUnit = {};
+      roomFlats.forEach((fn) => {
+        perFlatUnit[fn] = (perFlatUnit[fn] || 0) + 1;
+        acLabels.push(`ac-${fn}.${perFlatUnit[fn]}`);
       });
     } else {
       sourceRooms.forEach((_, i) => acLabels.push(`ac-${i + 1}`));
     }
+    const flatNumsSorted = [...new Set(roomFlats)].sort((a, b) => a - b);
     const condenserLabels = isMultiFlat
-      ? flatNums.map((fn) => `condenser-${fn}`)
+      ? flatNumsSorted.map((fn) => `condenser-${fn}`)
       : ["condenser"];
 
     // Labels already on the canvas (attached to an active rectangle). Skipping these
@@ -1978,7 +2011,7 @@ const Annotator = ({
         cond: condToPlace.length,
       })
     );
-  }, [file, pdfSize, allRooms, pushHistory, confirmAcUnitAnnotation, t]);
+  }, [file, pdfSize, allRooms, normalizeForGrouping, pushHistory, confirmAcUnitAnnotation, t]);
 
   // Keep rectangle state colors synced with label edits/restores.
   useEffect(() => {
