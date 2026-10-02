@@ -1187,6 +1187,7 @@ const Annotator = ({
   const isDraggingRef = useRef(false);
   
   const isSavingRef = useRef(false); // Synchronous flag to prevent duplicate saves
+  const annotationSeqRef = useRef(0); // Monotonic suffix so rapid auto-placements get unique ids
   
   // Track pinch zoom on small screens
   const pinchStartDistanceRef = useRef(0);
@@ -1780,8 +1781,9 @@ const Annotator = ({
     return () => window.removeEventListener('keydown', handler);
   }, [undo, redo]);
 
-  const confirmAcUnitAnnotation = useCallback((commentText, position) => {
-    
+  const confirmAcUnitAnnotation = useCallback((commentText, position, options = {}) => {
+    const { skipHistory = false } = options;
+
     if (!commentText) {
       return;
     }
@@ -1809,7 +1811,9 @@ const Annotator = ({
       return;
     }
     
-    const newRectId = Date.now();
+    // Unique per call so a synchronous batch (auto-place) never collides on Date.now().
+    const uid = `${Date.now()}-${annotationSeqRef.current++}`;
+    const newRectId = uid;
     const trimmedText = normalizedCommentText;
     const isCondenser = isCondenserText(trimmedText);
     const rectSize = getResponsiveRectSize();
@@ -1826,10 +1830,11 @@ const Annotator = ({
       stroke: isCondenser ? CONDENSER_RECT_STROKE : undefined,
       rotation: 0,
     };
-    // snapshot BEFORE placing so it can be undone
-    pushHistory(rectanglesRef.current, commentsRef.current, lines);
+    // snapshot BEFORE placing so it can be undone (skipped during batch auto-place,
+    // which pushes a single snapshot up-front so the whole batch is one undo step)
+    if (!skipHistory) pushHistory(rectanglesRef.current, commentsRef.current, lines);
     setRectangles((prevRects) => [...prevRects, newRect]);
-    const newCommentId = `comment-${Date.now()}`;
+    const newCommentId = `comment-${uid}`;
 
     const commentPos = computeCommentPos(
       newRect.x, newRect.y, newRect.width, newRect.height, commentText
@@ -1845,7 +1850,7 @@ const Annotator = ({
     };
     setComments((prevComments) => [...prevComments, newComment]);
     const newLine = {
-      id: `line-${Date.now()}`,
+      id: `line-${uid}`,
       rectId: newRectId,
       commentId: newCommentId,
       points: getLinePoints(
@@ -1857,6 +1862,96 @@ const Annotator = ({
     };
     setLines((prevLines) => [...prevLines, newLine]);
   }, [pushHistory, lines, computeCommentPos, t]);
+
+  // Auto-place AC + condenser rectangles for every detected room in the displayed
+  // drawing, labelled per the naming spec (single flat: ac-N / condenser;
+  // multi-flat: ac-N.M / condenser-N). Units are spread over the canvas so they are
+  // visible and non-overlapping; the user then drags/rotates/deletes them as usual.
+  const autoPlaceAcUnits = useCallback(() => {
+    if (!file) {
+      toast.warn(t("measurement.annotator.autoPlace.needFile", "Upload a floor plan first."));
+      return;
+    }
+    const cw = pdfSize.width;
+    const ch = pdfSize.height;
+    if (!cw || !ch) {
+      toast.warn(t("measurement.annotator.autoPlace.notReady", "Preview is still loading — try again in a moment."));
+      return;
+    }
+
+    // Rooms for the displayed drawing (first file); fall back to allRooms[0].
+    const sourceRooms = (
+      (filteredRoomsRef.current?.[0]?.length
+        ? filteredRoomsRef.current[0]
+        : allRooms[0] || []) || []
+    ).filter((r) => r && r.roomType);
+
+    if (!sourceRooms.length) {
+      toast.warn(t("measurement.annotator.autoPlace.noRooms", "No detected rooms to place AC units for."));
+      return;
+    }
+
+    const flatOf = (rt) => {
+      const m = String(rt || "").match(/^flat\s*(\d+)/i);
+      return m ? parseInt(m[1], 10) : null;
+    };
+    const flatNums = [
+      ...new Set(sourceRooms.map((r) => flatOf(r.roomType)).filter(Boolean)),
+    ].sort((a, b) => a - b);
+    const isMultiFlat = flatNums.length > 1;
+
+    // One AC label per room, following the agreed naming scheme.
+    const acLabels = [];
+    if (isMultiFlat) {
+      const perFlat = {};
+      sourceRooms.forEach((r) => {
+        const fn = flatOf(r.roomType) || flatNums[0];
+        perFlat[fn] = (perFlat[fn] || 0) + 1;
+        acLabels.push(`ac-${fn}.${perFlat[fn]}`);
+      });
+    } else {
+      sourceRooms.forEach((_, i) => acLabels.push(`ac-${i + 1}`));
+    }
+    const condenserLabels = isMultiFlat
+      ? flatNums.map((fn) => `condenser-${fn}`)
+      : ["condenser"];
+
+    // Grid-layout AC units in a central margin; condensers along the bottom edge.
+    const marginX = cw * 0.1;
+    const marginTop = ch * 0.15;
+    const acAreaW = cw * 0.8;
+    const acAreaH = ch * 0.6;
+    const cols = Math.max(1, Math.ceil(Math.sqrt(acLabels.length)));
+    const rows = Math.max(1, Math.ceil(acLabels.length / cols));
+    const cellW = acAreaW / cols;
+    const cellH = acAreaH / rows;
+
+    // Single snapshot up-front so the whole batch undoes in one step.
+    pushHistory(rectanglesRef.current, commentsRef.current, linesRef.current);
+
+    acLabels.forEach((label, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = marginX + col * cellW + cellW / 2;
+      const y = marginTop + row * cellH + cellH / 2;
+      confirmAcUnitAnnotation(label, { x, y }, { skipHistory: true });
+    });
+
+    const condenserY = ch * 0.9;
+    const gap = cw / (condenserLabels.length + 1);
+    condenserLabels.forEach((label, i) => {
+      confirmAcUnitAnnotation(label, { x: gap * (i + 1), y: condenserY }, { skipHistory: true });
+    });
+
+    toast.success(
+      t("measurement.annotator.autoPlace.done", {
+        defaultValue:
+          "Placed {{ac}} AC unit(s) and {{cond}} condenser(s). Drag to adjust.",
+        ac: acLabels.length,
+        cond: condenserLabels.length,
+      })
+    );
+  }, [file, pdfSize, allRooms, pushHistory, confirmAcUnitAnnotation, t]);
 
   // Keep rectangle state colors synced with label edits/restores.
   useEffect(() => {
@@ -3440,6 +3535,18 @@ const Annotator = ({
                 onClick={redo}
                 title={t("measurement.annotator.toolbar.redoTitle")}
               >{t("measurement.annotator.toolbar.redo")}</Button>
+            </ButtonGroup>
+
+            {/* Auto-place AC units + condensers for detected rooms */}
+            <ButtonGroup size="sm" className="me-2">
+              <Button
+                variant="outline-success"
+                onClick={autoPlaceAcUnits}
+                disabled={loading}
+                title={t("measurement.annotator.autoPlace.title", "Automatically place AC units and condensers for every detected room (you can drag, rotate or delete them afterward)")}
+              >
+                {t("measurement.annotator.autoPlace.btn", "Auto-place AC")}
+              </Button>
             </ButtonGroup>
 
             {file && file.type === "application/pdf" && totalPages > 1 && (
