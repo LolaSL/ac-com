@@ -202,6 +202,9 @@ const ModalLegend = () => {
                 <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step4Heading")}</h6>
                 <HtmlList items={t("measurement.legend.annotatorTab.step4Items", { returnObjects: true })} />
 
+                <h6 className="mb-2 mt-3 text-success">{t("measurement.legend.annotatorTab.autoPlaceHeading")}</h6>
+                <HtmlList items={t("measurement.legend.annotatorTab.autoPlaceItems", { returnObjects: true })} />
+
                 <h6 className="mb-2 mt-3 text-primary">{t("measurement.legend.annotatorTab.step5Heading")}</h6>
                 <HtmlList items={t("measurement.legend.annotatorTab.step5Items", { returnObjects: true })} />
 

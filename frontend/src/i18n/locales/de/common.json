@@ -458,6 +458,15 @@
           "Empfohlen: Platzieren Sie Klimaanlagen-Symbole über jeder Zimmertür; platzieren Sie das Außeneinheit-Symbol nahe dem Wohnungseingang oder auf dem Balkon/Dach.",
           "Tipp: Um von der Platzierung von Klimaanlagen zur Platzierung einer Außeneinheit zu wechseln, leeren Sie einfach das Feld und geben Sie <em>condenser</em> ein — der nächste Klick auf die Zeichenfläche erstellt das Außeneinheit-Symbol."
         ],
+        "autoPlaceHeading": "⚡ Verknüpfung: Klimaanlage automatisch platzieren",
+        "autoPlaceItems": [
+          "<strong>Klimaanlage automatisch platzieren</strong> (grüne Schaltfläche in der Symbolleiste, neben Rückgängig/Wiederholen) setzt sofort eine Klimaanlage in jeden erkannten Raum plus die passende(n) Außeneinheit(en) — eine Ein-Klick-Alternative zum manuellen Markieren jedes Standorts in Schritt 4.",
+          "<strong>Zuerst hochladen:</strong> Laden Sie einen Grundriss und lassen Sie die Vorschau fertig rendern; die Schaltfläche warnt Sie, wenn noch keine Zeichnung oder keine erkannten Räume vorhanden sind.",
+          "<strong>Automatische Beschriftungen:</strong> Einzelwohnungs-Pläne erhalten <em>ac-1, ac-2, …</em> und eine <em>condenser</em>; Mehrwohnungs-Pläne erhalten <em>ac-1.1, ac-1.2, …</em> pro Wohnung sowie eine <em>condenser-1, condenser-2, …</em> für jede Wohnung.",
+          "<strong>Intelligentes Layout:</strong> Klimaanlagen werden in einem Raster über der Zeichnung angeordnet und Außeneinheiten entlang der unteren Kante aufgereiht; jede Beschriftung behält eine stabile Position, wenn Sie es erneut ausführen.",
+          "<strong>Inkrementell:</strong> Fügen Sie einen Raum hinzu (oder löschen Sie einen) und klicken Sie erneut — nur die neue Einheit wird platziert, und automatische Beschriftungen, deren Raum entfernt wurde, werden gelöscht. Selbst eingegebene benutzerdefinierte Beschriftungen werden nie verändert.",
+          "<strong>Vollständig bearbeitbar:</strong> Nach dem Platzieren können Sie jedes Symbol ziehen, drehen (Klick) oder löschen — genau wie manuell platzierte."
+        ],
         "step5Heading": "🔧 Schritt 5: Formen Bearbeiten",
         "step5Items": [
           "<strong>🔄 Klimaanlagen-Symbol Drehen:</strong> Klicken Sie auf ein vorhandenes Klimaanlagen-Symbol, um es um 90° zu drehen",

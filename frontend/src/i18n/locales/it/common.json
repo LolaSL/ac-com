@@ -458,6 +458,15 @@
           "Consigliato: posiziona i simboli AC sopra ogni porta della stanza; posiziona il simbolo dell'unità esterna vicino all'ingresso del piano o sul balcone/tetto.",
           "Suggerimento: per passare dal posizionamento di unità AC al posizionamento di un'unità esterna, svuota semplicemente il campo e digita <em>condenser</em> — il prossimo clic sulla tela creerà il simbolo dell'unità esterna."
         ],
+        "autoPlaceHeading": "⚡ Scorciatoia: Posiziona AC automaticamente",
+        "autoPlaceItems": [
+          "<strong>Posiziona AC automaticamente</strong> (pulsante verde nella barra degli strumenti, accanto a Annulla/Ripeti) colloca immediatamente un'unità AC su ogni stanza rilevata più l'unità esterna corrispondente — un'alternativa con un clic alla marcatura manuale di ogni posizione nel Passo 4.",
+          "<strong>Carica prima:</strong> carica una planimetria e lascia che l'anteprima finisca il rendering; il pulsante ti avvisa se non c'è ancora alcun disegno o nessuna stanza rilevata.",
+          "<strong>Etichette automatiche:</strong> le planimetrie a piano singolo ottengono <em>ac-1, ac-2, …</em> e una <em>condenser</em>; le planimetrie multi-piano ottengono <em>ac-1.1, ac-1.2, …</em> per piano più una <em>condenser-1, condenser-2, …</em> per ogni piano.",
+          "<strong>Layout intelligente:</strong> le unità AC sono disposte su una griglia sul disegno e le unità esterne sono allineate lungo il bordo inferiore; ogni etichetta mantiene una posizione stabile quando lo esegui di nuovo.",
+          "<strong>Incrementale:</strong> aggiungi una stanza (o eliminane una) e clicca di nuovo — viene posizionata solo la nuova unità e le etichette automatiche la cui stanza è stata rimossa vengono cancellate. Le etichette personalizzate che hai digitato non vengono mai toccate.",
+          "<strong>Completamente modificabile:</strong> dopo il posizionamento, trascina, ruota (clic) o elimina qualsiasi simbolo proprio come quelli posizionati manualmente."
+        ],
         "step5Heading": "🔧 Passo 5: Modifica le Forme",
         "step5Items": [
           "<strong>🔄 Ruota Simbolo del Climatizzatore:</strong> Clicca su un simbolo del climatizzatore esistente per ruotarlo di 90°",

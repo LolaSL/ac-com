@@ -458,6 +458,15 @@
           "Recomendado: posicione os símbolos de AC acima de cada porta de cômodo; posicione o símbolo da condensadora perto da entrada do andar ou na varanda/telhado.",
           "Dica: para mudar de posicionar unidades de AC para posicionar uma condensadora, apenas limpe o campo e digite <em>condenser</em> — o próximo clique na tela criará o símbolo da condensadora."
         ],
+        "autoPlaceHeading": "⚡ Atalho: Posicionar AC automaticamente",
+        "autoPlaceItems": [
+          "<strong>Posicionar AC automaticamente</strong> (botão verde na barra de ferramentas, ao lado de Desfazer/Refazer) coloca instantaneamente uma unidade de AC em cada cômodo detectado mais a(s) condensadora(s) correspondente(s) — uma alternativa de um clique a marcar cada localização manualmente no Passo 4.",
+          "<strong>Carregue primeiro:</strong> carregue uma planta e deixe a pré-visualização terminar a renderização; o botão avisa se ainda não há desenho ou nenhum cômodo detectado.",
+          "<strong>Etiquetas automáticas:</strong> plantas de andar único recebem <em>ac-1, ac-2, …</em> e uma <em>condenser</em>; plantas multi-andar recebem <em>ac-1.1, ac-1.2, …</em> por andar mais uma <em>condenser-1, condenser-2, …</em> para cada andar.",
+          "<strong>Layout inteligente:</strong> as unidades de AC são organizadas em uma grade sobre o desenho e as condensadoras são alinhadas ao longo da borda inferior; cada etiqueta mantém uma posição estável quando você executa novamente.",
+          "<strong>Incremental:</strong> adicione um cômodo (ou exclua um) e clique novamente — apenas a nova unidade é posicionada e as etiquetas automáticas cujo cômodo foi removido são limpas. As etiquetas personalizadas que você digitou nunca são alteradas.",
+          "<strong>Totalmente editável:</strong> depois de posicionar, arraste, gire (clique) ou exclua qualquer símbolo como os posicionados manualmente."
+        ],
         "step5Heading": "🔧 Passo 5: Editar Formas",
         "step5Items": [
           "<strong>🔄 Girar Símbolo do Ar-Condicionado:</strong> Clique em um símbolo de ar-condicionado existente para girá-lo 90°",

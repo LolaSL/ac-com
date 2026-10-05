@@ -458,6 +458,15 @@
           "Recommended: Place AC symbols above each room door; place the Condenser symbol near the flat entrance or on the balcony/roof location.",
           "Tip: To switch from placing AC units to placing a condenser, just clear the input and type <em>condenser</em> — the next canvas click will create the condenser symbol."
         ],
+        "autoPlaceHeading": "⚡ Shortcut: Auto-place AC",
+        "autoPlaceItems": [
+          "<strong>Auto-place AC</strong> (green button in the toolbar, next to Undo/Redo) instantly drops one AC unit on every detected room plus the matching condenser(s) — a one-click alternative to marking each location by hand in Step 4.",
+          "<strong>Upload first:</strong> load a floor plan and let the preview finish rendering; the button warns you if no drawing or no detected rooms are available yet.",
+          "<strong>Automatic labels:</strong> single-flat plans get <em>ac-1, ac-2, …</em> and one <em>condenser</em>; multi-flat plans get <em>ac-1.1, ac-1.2, …</em> per flat plus a <em>condenser-1, condenser-2, …</em> for each flat.",
+          "<strong>Smart layout:</strong> AC units are arranged on a grid across the drawing and condensers are lined up along the bottom edge; every label keeps a stable position when you run it again.",
+          "<strong>Incremental:</strong> add a room (or delete one) and click again — only the new unit is placed, and auto labels whose room was removed are cleared. Custom labels you typed yourself are never touched.",
+          "<strong>Fully editable:</strong> after placing, drag, rotate (click) or delete any symbol just like manually-placed ones."
+        ],
         "step5Heading": "🔧 Step 5: Edit Shapes",
         "step5Items": [
           "<strong>🔄 Rotate Air Conditioner Symbol:</strong> Click on an existing air conditioner symbol to rotate it 90°",

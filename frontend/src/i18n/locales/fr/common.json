@@ -458,6 +458,15 @@
           "Recommandé : placez les symboles AC au-dessus de chaque porte de pièce ; placez le symbole du condenseur près de l'entrée de l'étage ou sur le balcon/toit.",
           "Astuce : pour passer du placement d'unités AC au placement d'un condenseur, videz simplement le champ et saisissez <em>condenser</em> — le prochain clic sur le plan créera le symbole du condenseur."
         ],
+        "autoPlaceHeading": "⚡ Raccourci : Placement auto AC",
+        "autoPlaceItems": [
+          "<strong>Placement auto AC</strong> (bouton vert dans la barre d'outils, à côté de Annuler/Rétablir) place instantanément une unité AC sur chaque pièce détectée ainsi que le(s) condenseur(s) correspondant(s) — une alternative en un clic au marquage manuel de chaque emplacement à l'Étape 4.",
+          "<strong>Chargez d'abord :</strong> importez un plan et laissez l'aperçu terminer son rendu ; le bouton vous avertit si aucun dessin ou aucune pièce détectée n'est encore disponible.",
+          "<strong>Étiquettes automatiques :</strong> les plans à étage unique reçoivent <em>ac-1, ac-2, …</em> et un <em>condenser</em> ; les plans multi-étages reçoivent <em>ac-1.1, ac-1.2, …</em> par étage ainsi qu'un <em>condenser-1, condenser-2, …</em> pour chaque étage.",
+          "<strong>Disposition intelligente :</strong> les unités AC sont disposées sur une grille sur le dessin et les condenseurs sont alignés le long du bord inférieur ; chaque étiquette conserve une position stable lorsque vous relancez.",
+          "<strong>Incrémental :</strong> ajoutez une pièce (ou supprimez-en une) et cliquez à nouveau — seule la nouvelle unité est placée, et les étiquettes automatiques dont la pièce a été supprimée sont effacées. Les étiquettes personnalisées que vous avez saisies ne sont jamais modifiées.",
+          "<strong>Entièrement modifiable :</strong> après le placement, faites glisser, pivotez (clic) ou supprimez n'importe quel symbole comme ceux placés manuellement."
+        ],
         "step5Heading": "🔧 Étape 5 : Modifier les Formes",
         "step5Items": [
           "<strong>🔄 Faire pivoter le symbole du climatiseur :</strong> Cliquez sur un symbole de climatiseur existant pour le faire pivoter de 90°",
