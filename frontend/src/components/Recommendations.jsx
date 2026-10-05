@@ -101,29 +101,38 @@ export default function Recommendations() {
           : `230V, 1-Phase, 50Hz, ~${STANDARD_HOUSE_CIRCUIT_AMPS}A dedicated circuit (typical Israeli apartment/villa supply)`;
 
         if (ps && (ps.V || ps.Hz)) {
-          const supplyParts = [`${ps.V}V, ${ps.phase}-Phase, ${ps.Hz}Hz`];
-          if (operatingCurrent > 0) supplyParts.push(`${t("recommendations.table.operatingCurrent", "rated load")} ${operatingCurrent}A (${t("recommendations.table.fla", "FLA")})`);
-          if (mca > 0) supplyParts.push(`${t("recommendations.table.requiresAmps", "requires")} ${mca}A ${t("recommendations.table.dedicatedCircuit", "dedicated circuit")} (${t("recommendations.table.mca", "MCA")})`);
-          if (mop > 0) supplyParts.push(`${t("recommendations.table.maxBreaker", "breaker/fuse must not exceed")} ${mop}A (${t("recommendations.table.mop", "MOP")})`);
-          let wireHtml = '';
-          if (wireGauge) {
-            const wireParts = [`<strong>${wireGauge.awg}</strong>${product.electrical?.recommendedCableSize ? ` (${product.electrical.recommendedCableSize})` : ''}`];
-            if (maxCableLength > 0) wireParts.push(`${t("recommendations.table.maxCableRun", "max run")} ${maxCableLength}m`);
-            if (cableResistance > 0) wireParts.push(`${t("recommendations.table.cableResistance", "resistance")} ${cableResistance} Ω/km`);
-            wireHtml = `<div>${t("recommendations.table.recommendedWire", "Recommended copper wire:")} ${wireParts.join(' · ')}</div>`;
-          }
+          const phaseNum = Number(ps?.phase) || 0;
+          const amperageDisplay = operatingCurrent > 0
+            ? (phaseNum >= 2
+                ? `${operatingCurrent} A × ${phaseNum} ${t("recommendations.table.phases", "phases")}`
+                : `${operatingCurrent} A`)
+            : null;
+          // Prefer the datasheet cable size; fall back to the MCA-derived AWG gauge
+          const wireDisplay = product.electrical?.recommendedCableSize || (wireGauge ? wireGauge.awg : null);
+          let wireExtra = '';
+          if (maxCableLength > 0) wireExtra += ` · ${t("recommendations.table.maxCableRun", "max run")} ${maxCableLength} m`;
+          if (cableResistance > 0) wireExtra += ` · ${t("recommendations.table.cableResistance", "resistance")} ${cableResistance} Ω/km`;
+
           let propertyWarning = '';
           if (needsThreePhase) {
-            propertyWarning = ` ⚠ ${t("recommendations.table.phaseMismatchWarning", "Verify 3-phase supply is available before purchase.")}`;
+            propertyWarning = ` <span style="color:#c0392b">⚠ ${t("recommendations.table.phaseMismatchWarning", "Verify 3-phase supply is available before purchase.")}</span>`;
           } else if (exceedsStandardCircuit) {
-            propertyWarning = ` ⚠ ${t("recommendations.table.ampsMismatchWarning", `This condenser needs a ${mca}A circuit — most homes only have ~${STANDARD_HOUSE_CIRCUIT_AMPS}A. Verify your breaker/panel capacity before installation.`)}`;
+            propertyWarning = ` <span style="color:#c0392b">⚠ ${t("recommendations.table.ampsMismatchWarning", `This condenser needs a ${mca}A circuit — most homes only have ~${STANDARD_HOUSE_CIRCUIT_AMPS}A. Verify your breaker/panel capacity before installation.`)}</span>`;
           }
+
+          const detailRows = [
+            `<div><strong>${t("recommendations.table.labelPowerSupply", "Power supply:")}</strong> ${ps.V} V · ${ps.phase}-Phase · ${ps.Hz} Hz</div>`,
+          ];
+          if (amperageDisplay) detailRows.push(`<div><strong>${t("recommendations.table.labelAmperage", "Amperage:")}</strong> ${amperageDisplay} <span style="color:#555">(${t("recommendations.table.runningCurrent", "running current")})</span></div>`);
+          if (mca > 0) detailRows.push(`<div><strong>${t("recommendations.table.labelCircuit", "Circuit:")}</strong> ${mca} A ${t("recommendations.table.dedicated", "dedicated")} <span style="color:#555">(${t("recommendations.table.mca", "MCA")})</span></div>`);
+          if (mop > 0) detailRows.push(`<div><strong>${t("recommendations.table.labelBreaker", "Breaker / fuse:")}</strong> ${t("recommendations.table.max", "max")} ${mop} A <span style="color:#555">(${t("recommendations.table.mop", "MOP")})</span></div>`);
+          if (wireDisplay) detailRows.push(`<div><strong>${t("recommendations.table.labelWire", "Copper wire:")}</strong> ${wireDisplay}<span style="color:#555">${wireExtra}</span></div>`);
+          detailRows.push(`<div><strong>${t("recommendations.table.labelHomeNeeds", "Your home needs:")}</strong> ${propertySupplyLabel}${propertyWarning}</div>`);
+
           condenserElectricalHtml = `
             <tr class="condenser-detail-row">
               <td colspan="6">
-                <strong>${t("recommendations.table.condenserPowerSupply", "Condenser power supply:")}</strong> ${supplyParts.join(' · ')}
-                ${wireHtml}
-                <div><strong>${t("recommendations.table.propertyPowerSupply", "Apartment/house power supply for condenser:")}</strong> ${propertySupplyLabel}${propertyWarning}</div>
+                ${detailRows.join('\n                ')}
                 <div style="font-style: italic; color: #555;">${t("recommendations.table.dataPlateNote", "Always confirm these values against the unit's data plate before wiring.")}</div>
               </td>
             </tr>
@@ -970,6 +979,14 @@ ${tableHtml}
                     const cableResistance = product.electrical?.cableResistance;
                     const maxCableLength = product.electrical?.maxCableLength;
                     const wireGauge = getCopperWireGauge(mca);
+                    const phaseNum = Number(ps?.phase) || 0;
+                    const amperageDisplay = operatingCurrent > 0
+                      ? (phaseNum >= 2
+                          ? `${operatingCurrent} A × ${phaseNum} ${t("recommendations.table.phases", "phases")}`
+                          : `${operatingCurrent} A`)
+                      : null;
+                    // Prefer the datasheet cable size; fall back to the MCA-derived AWG gauge
+                    const wireDisplay = product.electrical?.recommendedCableSize || (wireGauge ? wireGauge.awg : null);
                     const miniSplitGuide = getMiniSplitElectricalGuide(product.coolingBtu || product.btu);
                     const needsThreePhase = Number(ps?.phase) === 3;
                     // Israeli homes: 230V/50Hz single-phase; standard socket/AC MCB is 16A (villas may have 400V 3-phase)
@@ -1050,46 +1067,65 @@ ${tableHtml}
                         </tr>
                       )}
                       {isCondenserRow && ps && (ps.V || ps.Hz) && (
-                        <>
-                          <tr style={{ background: '#f8f9fa' }}>
-                            <td colSpan={8} style={{ padding: '3px 8px 3px 24px', fontSize: '0.78rem' }}>
-                              <strong>{t("recommendations.table.condenserPowerSupply", "Condenser power supply:")}</strong>{' '}
-                              {ps.V}V, {ps.phase}-Phase, {ps.Hz}Hz
-                              {operatingCurrent > 0 && <> — {t("recommendations.table.operatingCurrent", "rated load")} {operatingCurrent}A ({t("recommendations.table.fla", "FLA")})</>}
-                              {mca > 0 && <> · {t("recommendations.table.requiresAmps", "requires")} {mca}A {t("recommendations.table.dedicatedCircuit", "dedicated circuit")} ({t("recommendations.table.mca", "MCA")})</>}
-                              {mop > 0 && <> · {t("recommendations.table.maxBreaker", "breaker/fuse must not exceed")} {mop}A ({t("recommendations.table.mop", "MOP")})</>}
-                              {wireGauge && (
-                                <span style={{ display: 'block', color: '#1a1a2e', marginTop: 2 }}>
-                                  {t("recommendations.table.recommendedWire", "Recommended copper wire:")}{' '}
-                                  <strong>{wireGauge.awg}</strong>
-                                  {product.electrical?.recommendedCableSize ? <> ({product.electrical.recommendedCableSize})</> : null}
-                                  {maxCableLength > 0 && <> · {t("recommendations.table.maxCableRun", "max run")} {maxCableLength}m</>}
-                                  {cableResistance > 0 && <> · {t("recommendations.table.cableResistance", "resistance")} {cableResistance} Ω/km</>}
-                                </span>
-                              )}
-                              <span style={{ display: 'block', color: '#555', fontStyle: 'italic', marginTop: 2 }}>
-                                {t("recommendations.table.dataPlateNote", "Always confirm these values against the unit's data plate before wiring.")}
-                              </span>
-                            </td>
-                          </tr>
-                          <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
-                            <td colSpan={8} style={{ padding: '3px 8px 5px 24px', fontSize: '0.78rem' }}>
-                              <strong>{t("recommendations.table.propertyPowerSupply", "Apartment/house power supply for condenser:")}</strong>{' '}
+                        <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
+                          <td colSpan={8} style={{ padding: '6px 8px 6px 24px', fontSize: '0.78rem', lineHeight: 1.5 }}>
+                            <div>
+                              <strong>{t("recommendations.table.labelPowerSupply", "Power supply:")}</strong>{' '}
+                              {ps.V} V · {ps.phase}-Phase · {ps.Hz} Hz
+                            </div>
+                            {amperageDisplay && (
+                              <div>
+                                <strong>{t("recommendations.table.labelAmperage", "Amperage:")}</strong>{' '}
+                                {amperageDisplay}{' '}
+                                <span style={{ color: '#555' }}>({t("recommendations.table.runningCurrent", "running current")})</span>
+                              </div>
+                            )}
+                            {mca > 0 && (
+                              <div>
+                                <strong>{t("recommendations.table.labelCircuit", "Circuit:")}</strong>{' '}
+                                {mca} A {t("recommendations.table.dedicated", "dedicated")}{' '}
+                                <span style={{ color: '#555' }}>({t("recommendations.table.mca", "MCA")})</span>
+                              </div>
+                            )}
+                            {mop > 0 && (
+                              <div>
+                                <strong>{t("recommendations.table.labelBreaker", "Breaker / fuse:")}</strong>{' '}
+                                {t("recommendations.table.max", "max")} {mop} A{' '}
+                                <span style={{ color: '#555' }}>({t("recommendations.table.mop", "MOP")})</span>
+                              </div>
+                            )}
+                            {wireDisplay && (
+                              <div>
+                                <strong>{t("recommendations.table.labelWire", "Copper wire:")}</strong>{' '}
+                                {wireDisplay}
+                                {(maxCableLength > 0 || cableResistance > 0) && (
+                                  <span style={{ color: '#555' }}>
+                                    {maxCableLength > 0 && <> · {t("recommendations.table.maxCableRun", "max run")} {maxCableLength} m</>}
+                                    {cableResistance > 0 && <> · {t("recommendations.table.cableResistance", "resistance")} {cableResistance} Ω/km</>}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            <div>
+                              <strong>{t("recommendations.table.labelHomeNeeds", "Your home needs:")}</strong>{' '}
                               {propertySupplyLabel}
                               {needsThreePhase && (
-                                <span style={{ color: '#c0392b', marginLeft: 6 }}>
-                                  ⚠ {t("recommendations.table.phaseMismatchWarning", "Verify 3-phase supply is available before purchase.")}
+                                <span style={{ color: '#c0392b' }}>
+                                  {' '}⚠ {t("recommendations.table.phaseMismatchWarning", "Verify 3-phase supply is available before purchase.")}
                                 </span>
                               )}
                               {!needsThreePhase && exceedsStandardCircuit && (
-                                <span style={{ color: '#c0392b', marginLeft: 6 }}>
-                                  ⚠ {t("recommendations.table.ampsMismatchWarning", `This condenser needs a ${mca}A circuit — most homes only have ~${STANDARD_HOUSE_CIRCUIT_AMPS}A. Verify your breaker/panel capacity before installation.`)}{' '}
+                                <span style={{ color: '#c0392b' }}>
+                                  {' '}⚠ {t("recommendations.table.ampsMismatchWarning", `This condenser needs a ${mca}A circuit — most homes only have ~${STANDARD_HOUSE_CIRCUIT_AMPS}A. Verify your breaker/panel capacity before installation.`)}{' '}
                                   {t("recommendations.table.apartmentPanelWarning", "If you are in an apartment or condo, confirm with building management that the main panel can supply this higher amperage load before upgrading.")}
                                 </span>
                               )}
-                            </td>
-                          </tr>
-                        </>
+                            </div>
+                            <div style={{ color: '#555', fontStyle: 'italic', marginTop: 3 }}>
+                              {t("recommendations.table.dataPlateNote", "Always confirm these values against the unit's data plate before wiring.")}
+                            </div>
+                          </td>
+                        </tr>
                       )}
                       </React.Fragment>
                     );
